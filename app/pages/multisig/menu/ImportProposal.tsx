@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import clsx from 'clsx';
+// import clsx from 'clsx';
 import { useDispatch } from 'react-redux';
 import { max } from '~/utils/basicHelpers';
 import { parse } from '~/utils/JSONHelper';
+import Card from '~/cross-app-components/Card';
 import {
-    Fraction,
     MultiSignatureTransaction,
     instanceOfAccountTransaction,
     instanceOfUpdateInstruction,
@@ -25,22 +25,21 @@ import {
 } from '~/database/MultiSignatureProposalDao';
 import { getAccount } from '~/database/AccountDao';
 import { getNextAccountNonce, getAccountInfo } from '~/node/nodeRequests';
-import { getlastFinalizedBlockHash } from '~/node/nodeHelpers';
+import {
+    getlastFinalizedBlockHash,
+    getEnergyToMicroGtuRate,
+} from '~/node/nodeHelpers';
 import { saveMultipleFiles } from '~/utils/FileHelper';
 import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 import { TransactionExportType } from '~/utils/transactionTypes';
 import getTransactionCost, {
     getTransactionEnergyCost,
 } from '~/utils/transactionCosts';
-import Loading from '~/cross-app-components/Loading';
-import Card from '~/cross-app-components/Card';
-import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 
 async function loadTransactionFile(
     file: File,
     nonceTracker: Record<string, bigint>,
     fileName: string,
-    exchangeRate: Fraction,
     blockHash: string
 ): Promise<[string, Partial<MultiSignatureTransaction>] | ModalErrorInput> {
     const ab = await file.arrayBuffer();
@@ -125,6 +124,7 @@ async function loadTransactionFile(
     transactionObject.energyAmount = energyAmount.toString();
 
     // Set the estimatedFee
+    const exchangeRate = await getEnergyToMicroGtuRate();
     const estimatedFee = getTransactionCost(
         transactionObject,
         exchangeRate,
@@ -162,16 +162,12 @@ async function loadTransactionFile(
     return [exportName, proposal];
 }
 
-interface Props {
-    exchangeRate: Fraction;
-}
-
 /**
  * Component that displays a drag and drop field where proposal files can
  * be dropped to import the proposal. A button can also be used
  * over the drag and drop field.
  */
-function ImportProposal({ exchangeRate }: Props) {
+export default function ImportProposal() {
     const [showError, setShowError] = useState<ModalErrorInput>({
         show: false,
     });
@@ -186,7 +182,6 @@ function ImportProposal({ exchangeRate }: Props) {
                 file,
                 nonceTracker,
                 file.name,
-                exchangeRate,
                 blockHash
             );
 
@@ -230,34 +225,23 @@ function ImportProposal({ exchangeRate }: Props) {
     }, [files]);
 
     return (
-        <>
+        <Card className="pH40 pV30">
             <SimpleErrorModal
                 show={showError.show}
                 header={showError.header}
                 content={showError.content}
                 onClick={() => setShowError({ show: false })}
             />
-            <h1 className="textCenter">Import Proposals</h1>
+            <h1 className="textCenter mB40">Import Proposals</h1>
             <FileInput
                 className={styles.input}
-                placeholder="Drag and drop file here"
+                placeholder="Drag and drop proposal files here"
                 buttonTitle="Or browse to file"
                 multiple
                 value={files}
                 onChange={setFiles}
                 disableFileNames
             />
-        </>
+        </Card>
     );
 }
-
-const loadingComponent = () => (
-    <>
-        <h1 className="textCenter">Import Proposals</h1>
-        <Card className={clsx(styles.input, 'relative')}>
-            <Loading text="Fetching information from the node" />
-        </Card>
-    </>
-);
-
-export default ensureExchangeRate(ImportProposal, loadingComponent);
