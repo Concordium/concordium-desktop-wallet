@@ -83,8 +83,8 @@ export default function BrowseTransactionFile() {
                 ?.arrayBuffer()
                 .then((ab) => Buffer.from(ab))
                 .then(loadTransactionFile);
-            // eslint-disable-next-line react-hooks/exhaustive-deps
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [files]);
 
     return (
