@@ -1,4 +1,6 @@
 import React from 'react';
+import { useRouteMatch } from 'react-router';
+import routes from '~/constants/routes.json';
 import {
     TransferToEncrypted,
     TransferToPublic,
@@ -36,6 +38,7 @@ export default function DisplayInternalTransfer({
     fromName,
 }: Props) {
     const transactionDetails = getDetails(transaction);
+    const singleSigTransfer = useRouteMatch(routes.SUBMITTRANSFER);
     return (
         <>
             <h2>{transactionDetails.title}</h2>
@@ -50,9 +53,11 @@ export default function DisplayInternalTransfer({
                 className={styles.fee}
                 estimatedFee={transaction.estimatedFee}
             />
-            <DisplayTransactionExpiryTime
-                expiryTime={dateFromTimeStamp(transaction.expiry)}
-            />
+            {Boolean(singleSigTransfer) || (
+                <DisplayTransactionExpiryTime
+                    expiryTime={dateFromTimeStamp(transaction.expiry)}
+                />
+            )}
         </>
     );
 }
