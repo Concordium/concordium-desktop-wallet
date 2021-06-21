@@ -436,6 +436,11 @@ export interface PublicInformationForIp {
     publicKeys: CredentialPublicKeys;
 }
 
+export interface IdObjectRequest {
+    pubInfoForIp: PublicInformationForIp;
+    // TODO: add remaining fields
+}
+
 // Statuses that a transaction can have.
 export enum TransactionStatus {
     Finalized = 'finalized',
@@ -1291,8 +1296,7 @@ export interface PublicKeyExportFormat {
 }
 
 export interface SignedIdRequest {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    idObjectRequest: any;
+    idObjectRequest: Versioned<IdObjectRequest>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     randomness: Hex;
 }
