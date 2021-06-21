@@ -16,12 +16,12 @@ import {
     externalCredentialsSelector,
     updateExternalCredential,
 } from '~/features/CredentialSlice';
-
-import styles from './CredentialInformation.module.scss';
 import InputModal from '~/components/InputModal';
 import Button from '~/cross-app-components/Button';
 import { CREDENTIAL_NOTE_MAX_LENGTH } from '~/utils/credentialHelper';
 import { identitiesSelector } from '~/features/IdentitySlice';
+
+import styles from './CredentialInformation.module.scss';
 
 interface CredentialOfAccount
     extends Omit<CredentialDeploymentInformation, 'regId'> {
@@ -125,7 +125,7 @@ export default function CredentialInformation({
                                 }
                             />
                             <SidedRow
-                                className={styles.listElementRow}
+                                className={styles.noteRow}
                                 left="Note:"
                                 right={
                                     <>
