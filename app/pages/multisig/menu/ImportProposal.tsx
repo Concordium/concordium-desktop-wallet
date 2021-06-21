@@ -25,7 +25,7 @@ import {
 } from '~/database/MultiSignatureProposalDao';
 import { getAccount } from '~/database/AccountDao';
 import { getNextAccountNonce, getAccountInfo } from '~/node/nodeRequests';
-import { getLastestBlockHash } from '~/node/nodeHelpers';
+import { getlastFinalizedBlockHash } from '~/node/nodeHelpers';
 import { saveMultipleFiles } from '~/utils/FileHelper';
 import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 import { TransactionExportType } from '~/utils/transactionTypes';
@@ -59,11 +59,10 @@ async function loadTransactionFile(
 
     let threshold;
     if (instanceOfUpdateInstruction(transactionObject)) {
-        // TODO get the treshold on the updateType, instead of giving an error.
         return {
             show: true,
             header: 'Update Instruction not supported',
-            content: `The transaction within "${fileName}" is an update instruction, which is not supported yet.`,
+            content: `The transaction within "${fileName}" is an update instruction, which is not supported for import.`,
         };
     }
     if (instanceOfAccountTransaction(transactionObject)) {
@@ -163,7 +162,7 @@ function ImportProposal({ exchangeRate }: Props) {
         const proposals: [string, Partial<MultiSignatureTransaction>][] = [];
         const index: Record<string, bigint> = {};
         let result;
-        const blockHash = await getLastestBlockHash();
+        const blockHash = await getlastFinalizedBlockHash();
         for (const file of files) {
             result = await loadTransactionFile(
                 file,

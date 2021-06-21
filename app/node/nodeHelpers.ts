@@ -11,7 +11,7 @@ export interface AccountInfoPair {
     accountInfo: AccountInfo;
 }
 
-export async function getLastestBlockHash(): Promise<string> {
+export async function getlastFinalizedBlockHash(): Promise<string> {
     const consensusStatus = await getConsensusStatus();
     return consensusStatus.lastFinalizedBlock;
 }
@@ -21,7 +21,7 @@ export async function getLastestBlockHash(): Promise<string> {
 export async function getAccountInfos(
     accounts: Account[]
 ): Promise<AccountInfoPair[]> {
-    const blockHash = await getLastestBlockHash();
+    const blockHash = await getlastFinalizedBlockHash();
     const accountInfos: AccountInfoPair[] = await Promise.all(
         accounts.map(async (account) => {
             const accountInfo = await getAccountInfo(
@@ -38,7 +38,7 @@ export async function getAccountInfos(
 export async function getAccountInfoOfAddress(
     address: string
 ): Promise<AccountInfo> {
-    const blockHash = await getLastestBlockHash();
+    const blockHash = await getlastFinalizedBlockHash();
     return getAccountInfo(address, blockHash);
 }
 
