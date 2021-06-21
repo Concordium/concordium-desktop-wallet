@@ -34,7 +34,10 @@ export default function DisplayIdentityAttributes(): JSX.Element | null {
                 if (attributeKeys.length === 0) {
                     return (
                         <h3
-                            key={credential.value.contents.credId}
+                            key={
+                                credential.value.contents.credId ||
+                                credential.value.contents.regId
+                            }
                             className={clsx(
                                 styles.identityAttributesOfCredential,
                                 'flex justifyCenter pB20'
