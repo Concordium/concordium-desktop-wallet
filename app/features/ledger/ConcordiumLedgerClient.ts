@@ -1,4 +1,3 @@
-/* eslint no-console: off */
 import { Buffer } from 'buffer/';
 import {
     AccountTransaction,

@@ -261,8 +261,7 @@ export function serializeUtf8String(input: string): SerializedString {
     }
 
     const encoded = Buffer.from(new TextEncoder().encode(input));
-    const serializedLength = Buffer.alloc(8);
-    serializedLength.writeBigUInt64BE(encoded.length, 0);
+    const serializedLength = encodeWord64(BigInt(encoded.length));
     return { length: serializedLength, message: encoded };
 }
 

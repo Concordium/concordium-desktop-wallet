@@ -93,9 +93,7 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
 
     const handleAccept = useCallback(() => {
         storeTerms()
-            .then(() => {
-                return dispatch(acceptTerms());
-            })
+            .then(() => dispatch(acceptTerms()))
             .catch(() => {});
     }, [dispatch]);
 

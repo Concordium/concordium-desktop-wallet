@@ -8,14 +8,14 @@ import SelectPassword from './SelectPassword';
 import NewUserInit from './NewUserInit';
 import PasswordHasBeenSet from './PasswordHasBeenSet';
 import Unlock from './Unlock';
-import databaseExists from './util';
 import ipcCommands from '~/constants/ipcCommands.json';
 
 export default function HomePage() {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        databaseExists()
+        window.ipcRenderer
+            .invoke(ipcCommands.databaseExists)
             .then(async (exists) => {
                 // Determine which page to show, based on whether we have database
                 // access or not.

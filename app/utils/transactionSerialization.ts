@@ -162,9 +162,12 @@ export function serializeEncryptedTransferData(
         'hex'
     );
     const transferAmount = Buffer.from(payload.transferAmount, 'hex');
+    const serializedAddress: Buffer = Buffer.from(
+        base58ToBuffer(payload.toAddress)
+    );
 
     return Buffer.concat([
-        base58ToBuffer(payload.toAddress),
+        serializedAddress,
         remainingEncryptedAmount,
         transferAmount,
         encodeWord64(BigInt(payload.index)),

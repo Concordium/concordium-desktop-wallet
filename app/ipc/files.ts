@@ -4,6 +4,12 @@ import fs from 'fs';
 import ipcCommands from '~/constants/ipcCommands.json';
 import { getDatabaseFilename } from '~/database/knexfile';
 
+/**
+ * Checks whether the database has already been created or not.
+ * We cannot just check whether the file exists, as the knex configuration
+ * will have created an empty file, therefore the check actually checks
+ * whether the file has a non-empty size.
+ */
 async function databaseExists() {
     const databaseFilename = await getDatabaseFilename();
     if (!fs.existsSync(databaseFilename)) {
