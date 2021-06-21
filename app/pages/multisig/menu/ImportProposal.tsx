@@ -202,11 +202,12 @@ function ImportProposal({ exchangeRate }: Props) {
     const [files, setFiles] = useState<FileInputValue>(null);
 
     useEffect(() => {
-        if (!files) return;
-        const sortedFiles = fileListToFileArray(files).sort((a, b) =>
-            a.name.localeCompare(b.name)
-        );
-        handleFiles(sortedFiles);
+        if (files) {
+            const sortedFiles = fileListToFileArray(files).sort((a, b) =>
+                a.name.localeCompare(b.name)
+            );
+            handleFiles(sortedFiles);
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [files]);
 

@@ -77,14 +77,14 @@ export default function BrowseTransactionFile() {
     }
 
     useEffect(() => {
-        if (!files) return;
-
-        files
-            .item(0)
-            ?.arrayBuffer()
-            .then((ab) => Buffer.from(ab))
-            .then(loadTransactionFile);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        if (files) {
+            files
+                .item(0)
+                ?.arrayBuffer()
+                .then((ab) => Buffer.from(ab))
+                .then(loadTransactionFile);
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        }
     }, [files]);
 
     return (
