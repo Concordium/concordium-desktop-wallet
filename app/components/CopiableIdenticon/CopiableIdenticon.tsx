@@ -3,13 +3,11 @@ import Identicon from 'react-identicons';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { useScreenshot } from 'use-react-screenshot';
-// import { clipboard, nativeImage } from 'electron';
 import clsx from 'clsx';
-
 import CheckmarkIcon from '@resources/svg/checkmark-blue.svg';
 import { useTimeoutState } from '~/utils/hooks';
-
 import styles from './CopiableIdenticon.module.scss';
+import ipcCommands from '~/constants/ipcCommands.json';
 
 const imageWidth = 128;
 
@@ -37,14 +35,12 @@ export default function CopiableIdenticon({ data, setScreenshot }: Props) {
         }
     }, [image, takeScreenshot, setScreenshot]);
 
-    // TODO Fix this to use ipc.
-    function copyIdenticonToClipboard(dataUrl: string) {
-        setShowCopied(true);
-        if (!dataUrl) {
-            throw new Error('Temp');
-        }
-        // const img = nativeImage.createFromDataURL(dataUrl);
-        // return clipboard.writeImage(img);
+    async function copyIdenticonToClipboard(dataUrl: string) {
+        await window.ipcRenderer.invoke(
+            ipcCommands.writeImageToClipboard,
+            dataUrl
+        );
+        return setShowCopied(true);
     }
 
     return (

@@ -31,6 +31,7 @@ import initializeDatabaseTransactionsIpcHandlers from './ipc/database/transactio
 import initializeDatabaseWalletIpcHandlers from './ipc/database/walletDao';
 import initializeFilesIpcHandlers from './ipc/files';
 import initializeGrpcIpcHandlers from './ipc/grpc';
+import initializeClipboardIpcHandlers from './ipc/clipboard';
 
 export default class AppUpdater {
     constructor() {
@@ -165,6 +166,7 @@ const createWindow = async () => {
     initializeDatabaseSettingsIpcHandlers(ipcMain);
     initializeDatabaseTransactionsIpcHandlers(ipcMain);
     initializeDatabaseWalletIpcHandlers(ipcMain);
+    initializeClipboardIpcHandlers(ipcMain);
 };
 
 enum PrintErrorTypes {

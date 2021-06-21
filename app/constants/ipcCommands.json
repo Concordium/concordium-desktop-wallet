@@ -5,6 +5,7 @@
     "saveFileDialog": "SAVE_FILE_DIALOG",
     "saveZipFileDialog": "SAVE_ZIP_FILE_DIALOG",
     "saveFile": "SAVE_FILE",
+    "writeImageToClipboard": "CLIPBOARD_WRITE_IMAGE",
     "grpcSetLocation": "GRPC_SET_LOCATION",
     "grpcCall": "GRPC_CALL",
     "grpcNodeConsensusAndGlobal": "GRPC_NODE_CONSENSUS_GLOBAL",
