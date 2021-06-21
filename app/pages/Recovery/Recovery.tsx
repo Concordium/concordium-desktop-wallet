@@ -57,13 +57,15 @@ export default function DefaultPage() {
 
     async function performRecovery(
         ledger: ConcordiumLedgerClient,
-        setMessage: (message: string) => void
+        setLedgerMessage: (message: string) => void
     ) {
         if (!global) {
             setError(errorMessages.missingGlobal);
             return;
         }
         setMessages([]);
+        const addMessage = (message: string) =>
+            setMessages((ms) => [...ms, message]);
 
         const consensusStatus = await getConsensusStatus();
         const blockHash = consensusStatus.lastFinalizedBlock;
@@ -75,7 +77,7 @@ export default function DefaultPage() {
             if (identity.walletId === walletId) {
                 const prfKeySeed = await getPrfKeySeed(
                     ledger,
-                    setMessage,
+                    setLedgerMessage,
                     identity.identityNumber
                 );
                 const added = await recoverIdentity(
@@ -85,24 +87,22 @@ export default function DefaultPage() {
                     global,
                     await getNextCredentialNumber(identity.id)
                 );
-                setMessages((ms) => [
-                    ...ms,
-                    addedMessage(identity.name, added),
-                ]);
+                addMessage(addedMessage(identity.name, added));
             }
         }
 
         // Check next identities
-        let recovered = true;
-        while (recovered) {
-            const identityNumber = await getNextIdentityNumber(walletId);
+        const skipsAllowed = 2;
+        let skipsRemaining = skipsAllowed;
+        let identityNumber = await getNextIdentityNumber(walletId);
+        while (skipsRemaining >= 0) {
             const identityId = await createLostIdentity(
                 walletId,
                 identityNumber
             );
             const prfKeySeed = await getPrfKeySeed(
                 ledger,
-                setMessage,
+                setLedgerMessage,
                 identityNumber
             );
             const addedCount = await recoverIdentity(
@@ -111,22 +111,21 @@ export default function DefaultPage() {
                 blockHash,
                 global
             );
+            identityNumber += 1;
             if (addedCount) {
-                setMessages((ms) => [
-                    ...ms,
-                    newIdentityMessage(identityNumber, addedCount),
-                ]);
+                addMessage(newIdentityMessage(identityNumber, addedCount));
+                skipsRemaining = skipsAllowed;
             } else {
-                setMessages((ms) => [...ms, noIdentityMessage(identityNumber)]);
+                addMessage(noIdentityMessage(identityNumber));
+                skipsRemaining -= 1;
             }
-            recovered = Boolean(addedCount);
         }
 
         loadAccounts(dispatch);
         loadCredentials(dispatch);
         loadIdentities(dispatch);
 
-        setMessages((ms) => [...ms, finishedMessage]);
+        addMessage(finishedMessage);
     }
 
     return (
