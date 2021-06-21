@@ -110,7 +110,7 @@ export async function importCredentials(credentials: Credential[]) {
 export async function importExternalCredentials(
     credentials: ExternalCredential[]
 ) {
-    return Promise.all(credentials.map(upsertExternalCredential));
+    return upsertMultipleExternalCredentials(credentials);
 }
 
 export async function insertNewCredential(

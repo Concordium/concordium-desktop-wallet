@@ -71,14 +71,14 @@ export default function CredentialInformation({
             const existingOwnCredential = ownCredentials.find(
                 (c) => c.credId === enrichedCred.credId
             );
-            const isOwn = !!existingOwnCredential;
-            const note = isOwn
-                ? getNoteForOwnCredential(identities, existingOwnCredential)
-                : externalCredentials.find(
-                      (c) => c.credId === enrichedCred.credId
-                  )?.note;
 
-            return { ...enrichedCred, isOwn, note };
+            const note =
+                externalCredentials.find(
+                    (c) => c.credId === enrichedCred.credId
+                )?.note ??
+                getNoteForOwnCredential(identities, existingOwnCredential);
+
+            return { ...enrichedCred, isOwn: !!existingOwnCredential, note };
         });
 
     const submitNote = (credId: string) => (note: string) => {

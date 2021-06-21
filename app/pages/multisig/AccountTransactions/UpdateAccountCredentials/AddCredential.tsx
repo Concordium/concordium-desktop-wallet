@@ -167,7 +167,7 @@ export default function AddCredential({
                         rules={{
                             maxLength: {
                                 value: CREDENTIAL_NOTE_MAX_LENGTH,
-                                message: 'Cannot be longer than 30 characters',
+                                message: `Cannot be longer than ${CREDENTIAL_NOTE_MAX_LENGTH} characters`,
                             },
                         }}
                     />
