@@ -1,6 +1,7 @@
 import {
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
+    AccountTransaction,
 } from '../utils/types';
 import { parse } from '../utils/JSONHelper';
 import { max } from '../utils/basicHelpers';
@@ -38,12 +39,15 @@ export async function getAll(): Promise<MultiSignatureTransaction[]> {
 export async function getMaxOpenNonceOnAccount(
     address: string
 ): Promise<bigint> {
-    const openProposals = await (await knex())
+    const openProposals: MultiSignatureTransaction[] = await (await knex())
         .select()
         .table(multiSignatureProposalTable)
         .where({ status: MultiSignatureTransactionStatus.Open });
-    const transactions = openProposals
+    const transactionsOnAccount: AccountTransaction[] = openProposals
         .map((prop) => parse(prop.transaction))
         .filter((transaction) => transaction.sender === address);
-    return transactions.reduce((acc, x) => max(acc, BigInt(x.nonce)), 0n);
+    return transactionsOnAccount.reduce(
+        (acc, x) => max(acc, BigInt(x.nonce)),
+        0n
+    );
 }
