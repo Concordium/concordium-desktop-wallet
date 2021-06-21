@@ -140,7 +140,7 @@ export default function AccountReport({ location }: Props) {
                 });
             }
 
-            // Let the main thread zip stuff
+            // Send to main thread for saving the files as a single zip file.
             return window.ipcRenderer.invoke(
                 ipcCommands.saveZipFileDialog,
                 filesToZip

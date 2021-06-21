@@ -1,5 +1,5 @@
 import { Credential, CredentialWithIdentityNumber } from '../utils/types';
-import ipcCommands from '~/constants/ipcCommands.json';
+import ipcCommands from '../constants/ipcCommands.json';
 
 export async function insertCredential(credential: Credential) {
     return window.ipcRenderer.invoke(

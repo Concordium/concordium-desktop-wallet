@@ -22,14 +22,14 @@ async function insertWallet(identifier: Hex, type: WalletType) {
 
 export default function initializeIpcHandlers(ipcMain: IpcMain) {
     ipcMain.handle(
-        ipcCommands.dbGetWalletId,
+        ipcCommands.database.dbGetWalletId,
         async (_event, identifier: Hex) => {
             return getWalletId(identifier);
         }
     );
 
     ipcMain.handle(
-        ipcCommands.dbInsertWallet,
+        ipcCommands.database.dbInsertWallet,
         async (_event, identifier: Hex, type: WalletType) => {
             return insertWallet(identifier, type);
         }

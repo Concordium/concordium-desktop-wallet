@@ -18,10 +18,10 @@
     "databaseExists": "DATABASE_EXISTS",
     "encrypt": "ENCRYPT",
     "decrypt": "DECRYPT",
-    "dbSelectAll": "DB_SELECT_ALL",
-    "dbGetWalletId": "DB_GET_WALLET_ID",
-    "dbInsertWallet": "DB_INSERT_WALLET",
     "database": {
+        "dbSelectAll": "DB_SELECT_ALL",
+        "dbGetWalletId": "DB_GET_WALLET_ID",
+        "dbInsertWallet": "DB_INSERT_WALLET",
         "migrate": "DB_MIGRATE",
         "rekeyDatabase": "DB_REKEY_DATABASE",
         "checkAccess": "DB_CHECK_ACCESS",

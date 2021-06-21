@@ -30,7 +30,7 @@ export async function updateEntry(
  */
 export async function getAll(): Promise<MultiSignatureTransaction[]> {
     return window.ipcRenderer.invoke(
-        ipcCommands.dbSelectAll,
+        ipcCommands.database.dbSelectAll,
         multiSignatureProposalTable
     );
 }

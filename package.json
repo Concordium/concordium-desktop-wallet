@@ -7,7 +7,7 @@
     "build-dll": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.renderer.dev.dll.js --colors",
     "build-e2e": "cross-env E2E_BUILD=true yarn build",
     "build-main": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.main.prod.js --colors",
-    "build-main-dev": "cross-env TARGET_NET=stagenet NODE_ENV=development webpack --config ./configs/webpack.config.main.dev.js --colors --progress",
+    "build-main-dev": "cross-env TARGET_NET=stagenet NODE_ENV=development webpack --config ./configs/webpack.config.main.dev.js --colors --progress && NODE_ENV=development webpack --config ./configs/webpack.config.preload.dev.js --colors --progress",
     "build-preload": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.preload.prod.js --colors",
     "build-proto": "sh ./internals/scripts/build_protos.sh",
     "build-renderer": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.renderer.prod.js --colors",
@@ -94,6 +94,8 @@
     "linux": {
       "artifactName": "${name}-${version}.${ext}",
       "target": [
+        "deb",
+        "rpm",
         "AppImage"
       ],
       "category": "Development"

@@ -1,5 +1,4 @@
 /* eslint no-console: off, @typescript-eslint/no-var-requires: off */
-
 /**
  * This module executes inside of electron's main process. You can start
  * electron renderer process from here and communicate with the other processes
@@ -90,16 +89,16 @@ const createWindow = async () => {
         webPreferences:
             process.env.NODE_ENV === 'development'
                 ? {
-                      preload: path.join(__dirname, 'dist/preload.prod.js'),
+                      preload: path.join(__dirname, 'preload.dev.js'),
                       nodeIntegration: false,
                       webviewTag: true,
                       devTools: true,
                   }
                 : {
                       preload: path.join(__dirname, 'dist/preload.prod.js'),
-                      webviewTag: true,
                       nodeIntegration: false,
-                      devTools: true,
+                      webviewTag: true,
+                      devTools: false,
                   },
     });
 

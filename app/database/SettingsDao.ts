@@ -9,7 +9,10 @@ import {
  * A select all from the setting table.
  */
 export async function getAllSettings(): Promise<Setting[]> {
-    return window.ipcRenderer.invoke(ipcCommands.dbSelectAll, settingsTable);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.dbSelectAll,
+        settingsTable
+    );
 }
 
 /**
@@ -17,7 +20,7 @@ export async function getAllSettings(): Promise<Setting[]> {
  */
 export async function getSettingGroups(): Promise<SettingGroup[]> {
     return window.ipcRenderer.invoke(
-        ipcCommands.dbSelectAll,
+        ipcCommands.database.dbSelectAll,
         settingsGroupTable
     );
 }

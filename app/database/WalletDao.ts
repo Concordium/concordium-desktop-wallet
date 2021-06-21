@@ -7,7 +7,10 @@ import ipcCommands from '../constants/ipcCommands.json';
  * @returns all rows in the wallet table
  */
 export async function getAllWallets(): Promise<WalletEntry[]> {
-    return window.ipcRenderer.invoke(ipcCommands.dbSelectAll, walletTable);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.dbSelectAll,
+        walletTable
+    );
 }
 
 /**
@@ -16,7 +19,10 @@ export async function getAllWallets(): Promise<WalletEntry[]> {
  * @returns primary key for the wallet entry
  */
 export async function getId(identifier: Hex): Promise<number | undefined> {
-    return window.ipcRenderer.invoke(ipcCommands.dbGetWalletId, identifier);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.dbGetWalletId,
+        identifier
+    );
 }
 
 /**
@@ -30,7 +36,7 @@ export async function insertWallet(
     type: WalletType
 ): Promise<number> {
     return window.ipcRenderer.invoke(
-        ipcCommands.dbInsertWallet,
+        ipcCommands.database.dbInsertWallet,
         identifier,
         type
     );

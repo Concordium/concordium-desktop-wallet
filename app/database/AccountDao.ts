@@ -1,5 +1,5 @@
 import { Account } from '../utils/types';
-import ipcCommands from '~/constants/ipcCommands.json';
+import ipcCommands from '../constants/ipcCommands.json';
 
 /**
  * Returns all stored accounts from the database. Attaches the identityName

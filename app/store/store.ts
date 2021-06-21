@@ -36,12 +36,12 @@ export const configuredStore = (initialState?: RootState) => {
         preloadedState: initialState,
     });
 
-    // if (process.env.NODE_ENV === 'development' && module.hot) {
-    //     module.hot.accept('./rootReducer', () =>
-    //         // eslint-disable-next-line @typescript-eslint/no-var-requires
-    //         store.replaceReducer(require('./rootReducer').default)
-    //     );
-    // }
+    if (process.env.NODE_ENV === 'development' && module.hot) {
+        module.hot.accept('./rootReducer', () =>
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            store.replaceReducer(require('./rootReducer').default)
+        );
+    }
     return store;
 };
 export type Store = ReturnType<typeof configuredStore>;

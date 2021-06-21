@@ -16,7 +16,10 @@ export async function getNextIdentityNumber(walletId: number): Promise<number> {
 }
 
 export async function getAllIdentities(): Promise<Identity[]> {
-    return window.ipcRenderer.invoke(ipcCommands.dbSelectAll, identitiesTable);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.dbSelectAll,
+        identitiesTable
+    );
 }
 
 export async function insertIdentity(identity: Partial<Identity> | Identity[]) {

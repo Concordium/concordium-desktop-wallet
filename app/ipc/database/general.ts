@@ -86,7 +86,7 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
     );
 
     ipcMain.handle(
-        ipcCommands.dbSelectAll,
+        ipcCommands.database.dbSelectAll,
         async (_event, tableName: string) => {
             const table = (await knex())(tableName);
             return table.select();

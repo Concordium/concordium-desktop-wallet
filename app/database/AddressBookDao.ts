@@ -1,5 +1,5 @@
 import { AddressBookEntry } from '../utils/types';
-import ipcCommands from '~/constants/ipcCommands.json';
+import ipcCommands from '../constants/ipcCommands.json';
 
 /**
  * Get all entries of the address book from the database, ordered

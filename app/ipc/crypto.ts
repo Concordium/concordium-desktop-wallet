@@ -60,7 +60,7 @@ function getKeyDerivationAlgorithmExport(algorithm: string) {
  * AES-256 in CBC mode. The cipher text is returned along with the parameters
  * required to decrypt the file.
  */
-function encrypt(data: string, password: string): EncryptedData {
+export function encrypt(data: string, password: string): EncryptedData {
     const keyLen = 32;
     const iterations = 10000;
     const salt = crypto.randomBytes(16);
@@ -99,7 +99,7 @@ function encrypt(data: string, password: string): EncryptedData {
  * Decrypts the data using the metadata in the file that was given as input
  * and the provided password.
  */
-function decrypt(
+export function decrypt(
     { cipherText, metadata }: EncryptedData,
     password: string
 ): string {
