@@ -43,7 +43,7 @@ baseCsvName = os.path.splitext(os.path.basename(csvFileName))[0]
 def parse_and_validate_amount(amountString: str, rowNumber: int):
 	amountSplit = amountString.split(".")
 	if (len(amountSplit) > 1 and (len(amountSplit) > 2 or len(amountSplit[1]) > 6)):
-		print("An amount had more than 6 decimals, which cannot be resolved into a valid µGTU, was given: " + amountString + " at row " + str(rowNumber))
+		print("An amount with more than 6 decimals, which cannot be resolved into a valid µGTU, was given: " + amountString + " at row " + str(rowNumber))
 		sys.exit(2)
 
 	amount = int(Decimal(amountString) * 1000000)
