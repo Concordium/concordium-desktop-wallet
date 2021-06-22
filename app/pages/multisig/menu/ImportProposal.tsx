@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-// import clsx from 'clsx';
 import { useDispatch } from 'react-redux';
 import { max } from '~/utils/basicHelpers';
 import { parse } from '~/utils/JSONHelper';
+import Loading from '~/cross-app-components/Loading';
 import Card from '~/cross-app-components/Card';
 import {
     MultiSignatureTransaction,
@@ -35,6 +35,7 @@ import { TransactionExportType } from '~/utils/transactionTypes';
 import getTransactionCost, {
     getTransactionEnergyCost,
 } from '~/utils/transactionCosts';
+import errorMessages from '~/constants/errorMessages.json';
 
 async function loadTransactionFile(
     file: File,
@@ -124,7 +125,17 @@ async function loadTransactionFile(
     transactionObject.energyAmount = energyAmount.toString();
 
     // Set the estimatedFee
-    const exchangeRate = await getEnergyToMicroGtuRate();
+    let exchangeRate;
+    try {
+        exchangeRate = await getEnergyToMicroGtuRate();
+    } catch {
+        return {
+            show: true,
+            header: 'Unable to load exchangeRate',
+            content: errorMessages.unableToReachNode,
+        };
+    }
+
     const estimatedFee = getTransactionCost(
         transactionObject,
         exchangeRate,
@@ -171,12 +182,26 @@ export default function ImportProposal() {
     const [showError, setShowError] = useState<ModalErrorInput>({
         show: false,
     });
+    const [processing, setProcessing] = useState(false);
     const dispatch = useDispatch();
 
     async function handleFiles(files: File[]) {
+        setProcessing(true);
         const proposals: [string, Partial<MultiSignatureTransaction>][] = [];
         const nonceTracker: Record<string, bigint> = {};
-        const blockHash = await getlastFinalizedBlockHash();
+
+        let blockHash;
+        try {
+            blockHash = await getlastFinalizedBlockHash();
+        } catch {
+            setShowError({
+                show: true,
+                header: 'Unable to load blockHash',
+                content: errorMessages.unableToReachNode,
+            });
+            return;
+        }
+
         for (const file of files) {
             const result = await loadTransactionFile(
                 file,
@@ -205,6 +230,7 @@ export default function ImportProposal() {
             'Choose Directory to save updated versions of proposals'
         );
 
+        setProcessing(false);
         setShowError({
             show: true,
             header: 'Importing Completed',
@@ -225,23 +251,26 @@ export default function ImportProposal() {
     }, [files]);
 
     return (
-        <Card className="pH40 pV30">
+        <Card className="pH40 pV30 relative textCenter">
             <SimpleErrorModal
                 show={showError.show}
                 header={showError.header}
                 content={showError.content}
                 onClick={() => setShowError({ show: false })}
             />
-            <h1 className="textCenter mB40">Import Proposals</h1>
-            <FileInput
-                className={styles.input}
-                placeholder="Drag and drop proposal files here"
-                buttonTitle="Or browse to file"
-                multiple
-                value={files}
-                onChange={setFiles}
-                disableFileNames
-            />
+            <h2 className="textCenter mB40">Import Proposals</h2>
+            {processing || (
+                <FileInput
+                    className={styles.input}
+                    placeholder="Drag and drop proposal files here"
+                    buttonTitle="Or browse to file"
+                    multiple
+                    value={files}
+                    onChange={setFiles}
+                    disableFileNames
+                />
+            )}
+            {processing && <Loading inline text="Processing proposals" />}
         </Card>
     );
 }
