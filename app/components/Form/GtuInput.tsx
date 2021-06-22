@@ -9,6 +9,7 @@ export type GtuInputProps = Omit<
     | 'fallbackOnInvalid'
     | 'trimLeadingZeros'
     | 'customFormatter'
+    | 'clearOnClick'
 >;
 
 export default function GtuInput(props: GtuInputProps): JSX.Element {
@@ -18,6 +19,7 @@ export default function GtuInput(props: GtuInputProps): JSX.Element {
             ensureDigits={2}
             allowFractions
             trimLeadingZeros
+            clearOnClick
         />
     );
 }

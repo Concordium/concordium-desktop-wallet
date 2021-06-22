@@ -71,6 +71,10 @@ export interface InlineNumberProps
      * Trims leading zeros from value ("01" => "1").
      */
     trimLeadingZeros?: boolean;
+    /**
+     * If set, clears input when user clicks the field. Defautls to false.
+     */
+    clearOnClick?: boolean;
     customFormatter?(v?: string): string;
     onChange?(v?: string): void;
     /**
@@ -100,6 +104,7 @@ export default function InlineNumber({
     className,
     isInvalid = false,
     trimLeadingZeros = false,
+    clearOnClick = false,
     ...inputProps
 }: InlineNumberProps): JSX.Element {
     const format = useMemo(() => {
@@ -196,6 +201,12 @@ export default function InlineNumber({
             onChange={(e) => setInnerValue(e.target.value)}
             onBlur={handleBlur}
             onFocus={handleFocus}
+            onClick={(e) => {
+                if (clearOnClick) {
+                    setInnerValue('');
+                    e.currentTarget.style.width = '6px';
+                }
+            }}
             ref={ref}
             {...inputProps}
             style={{ width: 5 }} // To prevent initial UI jitter.
