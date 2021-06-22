@@ -8,7 +8,9 @@
 # The fourth column contains total amount of remaining releases in GTU (formatted as second column)
 # The release schedules are hard-coded in this script.
 #
-# Note: The script uses dateutil, which can be installed using "pip install python-dateutil"
+# Note: The script uses dateutil and base58, which can be installed using 
+# "pip install python-dateutil"
+# "pip install base58"
 
 import sys
 import json
@@ -17,6 +19,7 @@ import os
 from decimal import *
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from base58 import b58decode_check
 
 numReleases = 10
 initialReleaseTime = datetime.fromisoformat("2021-07-26T14:00:00+01:00")
@@ -34,6 +37,24 @@ csvFileName = sys.argv[1]
 # Extract base name of csv file without extension and path. Outpul files will contain this name.
 baseCsvName = os.path.splitext(os.path.basename(csvFileName))[0]
 
+# Parses and validates the the amount.
+# Validates that it has at most 6 decimals, is a positive number and 
+# that it fits within a uint64. Parses the amount into its µGTU representation.
+def parse_and_validate_amount(amountString: str, rowNumber: int):
+	amountSplit = amountString.split(".")
+	if (len(amountSplit) > 1 and (len(amountSplit) > 2 or len(amountSplit[1]) > 6)):
+		print("An amount had more than 6 decimals, which cannot be resolved into a valid µGTU, was given: " + amountString + " at row " + str(rowNumber))
+		sys.exit(2)
+
+	amount = int(Decimal(amountString) * 1000000)
+	if (amount > 18446744073709551615):
+		print("An amount that is greater than the maximum GTU possible for one release (" + str(18446744073709551615/1000000) + ") was given: " + amountString + " at row " + str(rowNumber))
+		sys.exit(2)
+	if (amount <= 0):
+		print("An amount that is zero or less, which is not allowed in a release schedule, was given: " + amountString + " at row " + str(rowNumber))
+		sys.exit(2)
+	return amount
+
 # read csv file
 try:
 	with open(csvFileName, newline='', encoding='utf-8-sig') as csvfile:
@@ -49,11 +70,24 @@ try:
 				sys.exit(2)
 
 			senderAddress = row[0]
+			try:
+				b58decode_check(senderAddress)
+			except:
+				print("Encountered an invalid sender address: \"" + senderAddress + "\" at row " + str(rowNumber))
+				sys.exit(2)
+
 			receiverAddress = row[1]
-			initialAmount = Decimal(row[2].replace(thousandsSep, '')) # remove thousands separator used in Excel
-			initialAmount = int(initialAmount * 1000000) # convert from GTU to microGTU
-			remAmount = Decimal(row[3].replace(thousandsSep, ''))
-			remAmount = int(remAmount * 1000000)
+			try:
+				b58decode_check(receiverAddress)
+			except:
+				print("Encountered an invalid receiver address: \"" + receiverAddress + "\" at row " + str(rowNumber))
+				sys.exit(2)
+
+			# Remove thousands separator if any
+			initialAmountInput = row[2].replace(thousandsSep, '')
+			initialAmount = parse_and_validate_amount(initialAmountInput, rowNumber)
+			remAmountRawInput = row[3].replace(thousandsSep, '')
+			remAmount = parse_and_validate_amount(remAmountRawInput, rowNumber)
 
 			proposal = {
 				"sender": senderAddress,
