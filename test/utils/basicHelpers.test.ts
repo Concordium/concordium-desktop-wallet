@@ -163,7 +163,11 @@ test('It is possible to chunk a generic array', () => {
 });
 
 test('It is possible to chunk a buffer array', () => {
-    const buffers = [Buffer.of(1), Buffer.of(2), Buffer.of(3)];
+    const buffers: Buffer[] = [
+        Buffer.from(Buffer.of(1)),
+        Buffer.from(Buffer.of(2)),
+        Buffer.from(Buffer.of(3)),
+    ];
     const chunkedBuffers = chunkArray(buffers, 2);
     expect(Buffer.concat(chunkedBuffers[0])).toHaveLength(2);
     expect(Buffer.concat(chunkedBuffers[1])).toHaveLength(1);
