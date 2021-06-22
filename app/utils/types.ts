@@ -1319,3 +1319,9 @@ export interface CreationKeys {
     idCredSec: string;
     publicKey: string;
 }
+
+export enum PrintErrorTypes {
+    Cancelled = 'cancelled',
+    Failed = 'failed',
+    NoPrinters = 'no valid printers available',
+}
