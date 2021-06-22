@@ -162,15 +162,11 @@ export default function SubmitTransfer({ location }: Props) {
      * then beings monitoring its status before redirecting the user to the
      * final page.
      */
-    async function ledgerSignTransfer(
-        ledger: ConcordiumLedgerClient,
-        setMessage: (message: string) => void
-    ) {
+    async function ledgerSignTransfer(ledger: ConcordiumLedgerClient) {
         const signatureIndex = 0;
 
         if (!global) {
-            setMessage(errorMessages.missingGlobal);
-            return;
+            throw new Error(errorMessages.missingGlobal);
         }
 
         const credential = await findLocalDeployedCredentialWithWallet(
