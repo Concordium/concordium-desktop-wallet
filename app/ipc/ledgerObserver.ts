@@ -7,9 +7,9 @@ import type {
     Subscription,
 } from '@ledgerhq/hw-transport';
 import { BrowserWindow } from 'electron';
-import ConcordiumLedgerClientMain from './features/ledger/ConcordiumLedgerClientMain';
-import { isConcordiumApp } from './components/ledger/util';
-import { LedgerSubscriptionAction } from './components/ledger/useLedger';
+import ConcordiumLedgerClientMain from '../features/ledger/ConcordiumLedgerClientMain';
+import { isConcordiumApp } from '../components/ledger/util';
+import { LedgerSubscriptionAction } from '../components/ledger/useLedger';
 import ledgerIpcCommands from '~/constants/ledgerIpcCommands.json';
 
 let ledgerSubscription: Subscription | undefined;

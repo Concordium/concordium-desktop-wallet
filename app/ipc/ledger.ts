@@ -6,7 +6,7 @@ import {
     closeTransport,
     getLedgerClient,
     subscribeLedger,
-} from '~/ledgerObserver';
+} from './ledgerObserver';
 import { AccountPathInput } from '~/features/ledger/Path';
 import {
     AccountTransaction,
