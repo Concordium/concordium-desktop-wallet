@@ -3,6 +3,7 @@ import { SubmitHandler } from 'react-hook-form';
 import Form from '~/components/Form/Form';
 import Card from '~/cross-app-components/Card/Card';
 import ipcCommands from '../../../constants/ipcCommands.json';
+import { passwordValidators } from '~/utils/passwordHelpers';
 import styles from './PasswordSettingElement.module.scss';
 
 interface Props {
@@ -74,6 +75,7 @@ export default function PasswordSettingElement({ displayText }: Props) {
                     type="password"
                     className={styles.input}
                     name="password"
+                    rules={passwordValidators}
                     placeholder="Enter new password"
                 />
                 <Form.Input

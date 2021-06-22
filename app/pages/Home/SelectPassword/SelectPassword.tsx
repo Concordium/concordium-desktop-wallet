@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import Form from '~/components/Form';
 import PageLayout from '~/components/PageLayout';
 import initApplication from '~/utils/initialize';
+import { passwordValidators } from '~/utils/passwordHelpers';
 import routes from '~/constants/routes.json';
 import ipcCommands from '~/constants/ipcCommands.json';
 import homeStyles from '../Home.module.scss';
@@ -66,14 +67,7 @@ export default function SelectPassword() {
                             type="password"
                             className={styles.field}
                             name="password"
-                            rules={{
-                                required: 'Password is required',
-                                minLength: {
-                                    value: 6,
-                                    message:
-                                        'Password has to be at least 6 characters',
-                                },
-                            }}
+                            rules={passwordValidators}
                             placeholder="Enter password"
                             autoFocus
                         />
