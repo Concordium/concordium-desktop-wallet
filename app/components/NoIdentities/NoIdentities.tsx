@@ -43,7 +43,7 @@ export default function NoIdentities() {
                     className={styles.button}
                     onClick={() => dispatch(push(routes.RECOVERY))}
                 >
-                    Recover old
+                    Recover existing
                 </Button>
             </footer>
         </Card>

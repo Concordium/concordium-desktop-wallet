@@ -111,7 +111,6 @@ export default function DefaultPage() {
                 blockHash,
                 global
             );
-            identityNumber += 1;
             if (addedCount) {
                 addMessage(newIdentityMessage(identityNumber, addedCount));
                 skipsRemaining = allowedSpacesIdentities;
@@ -119,6 +118,7 @@ export default function DefaultPage() {
                 addMessage(noIdentityMessage(identityNumber));
                 skipsRemaining -= 1;
             }
+            identityNumber += 1;
         }
 
         loadAccounts(dispatch);
@@ -156,7 +156,11 @@ export default function DefaultPage() {
                     </Columns.Column>
                     <Columns.Column>
                         <div className={styles.messages}>
-                            <h2 className={styles.messagesTitle}>Messages:</h2>
+                            {Boolean(messages.length) && (
+                                <h2 className={styles.messagesTitle}>
+                                    Recovery status:
+                                </h2>
+                            )}
                             {messages.map((m) => (
                                 <p key={m}>{m}</p>
                             ))}

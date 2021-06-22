@@ -124,7 +124,7 @@ async function recoverCredential(
     const account = createAccount(
         identityId,
         address,
-        address.substr(0, 8),
+        undefined,
         accountInfo.accountThreshold,
         AccountStatus.Confirmed,
         credentialNumber === 0
