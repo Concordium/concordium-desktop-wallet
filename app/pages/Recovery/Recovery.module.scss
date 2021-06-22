@@ -25,3 +25,15 @@
     align-items: center;
     justify-content: center;
 }
+
+.buttonDiv {
+    display: flex;
+    flex-direction: column;
+    margin-top: auto;
+    margin-bottom: 20%;
+    flex: 1;
+}
+
+.button {
+    margin: 20px;
+}

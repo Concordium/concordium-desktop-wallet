@@ -23,6 +23,7 @@ import {
     recoverIdentity,
 } from './util';
 import { allowedSpacesIdentities } from '~/constants/recoveryConstants.json';
+import Button from '~/cross-app-components/Button';
 
 const addedMessage = (identityName: string, count: number) =>
     `Recovered ${count} credentials on ${identityName}.`;
@@ -54,6 +55,7 @@ export default function DefaultPage() {
     const identities = useSelector(identitiesSelector);
     const global = useSelector(globalSelector);
     const [error, setError] = useState<string>();
+    const [recoveryComplete, setCompleted] = useState<boolean>(false);
     const [messages, setMessages] = useState<string[]>([]);
 
     async function performRecovery(
@@ -126,6 +128,7 @@ export default function DefaultPage() {
         loadIdentities(dispatch);
 
         addMessage(finishedMessage);
+        setCompleted(true);
     }
 
     return (
@@ -148,10 +151,33 @@ export default function DefaultPage() {
                 <Columns className="flexChildFill">
                     <Columns.Column>
                         <div className={styles.ledgerDiv}>
-                            <SimpleLedger
-                                className={styles.card}
-                                ledgerCall={performRecovery}
-                            />
+                            {recoveryComplete || (
+                                <SimpleLedger
+                                    className={styles.card}
+                                    ledgerCall={performRecovery}
+                                />
+                            )}
+                            {recoveryComplete && (
+                                <div className={styles.buttonDiv}>
+                                    <Button
+                                        className={styles.button}
+                                        onClick={() =>
+                                            dispatch(push(routes.ACCOUNTS))
+                                        }
+                                    >
+                                        Go to accounts
+                                    </Button>
+                                    <Button
+                                        className={styles.button}
+                                        onClick={() => {
+                                            setCompleted(false);
+                                            setMessages([]);
+                                        }}
+                                    >
+                                        Recover again
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     </Columns.Column>
                     <Columns.Column>
