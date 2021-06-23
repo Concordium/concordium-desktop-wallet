@@ -194,6 +194,7 @@ export default function ImportProposal() {
         try {
             blockHash = await getlastFinalizedBlockHash();
         } catch {
+            setProcessing(false);
             setShowError({
                 show: true,
                 header: 'Unable to load blockHash',
@@ -211,6 +212,7 @@ export default function ImportProposal() {
             );
 
             if ('show' in result) {
+                setProcessing(false);
                 setShowError(result);
                 return;
             }
