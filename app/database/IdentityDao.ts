@@ -1,6 +1,6 @@
 import { Identity } from '../utils/types';
-import { knex } from './knex';
 import { identitiesTable } from '../constants/databaseNames.json';
+import ipcCommands from '../constants/ipcCommands.json';
 
 /**
  * Get the identity number to be used to create the next identity with
@@ -9,26 +9,35 @@ import { identitiesTable } from '../constants/databaseNames.json';
  * @returns the id for the next identity to be created by the given wallet
  */
 export async function getNextIdentityNumber(walletId: number): Promise<number> {
-    const model = (await knex())
-        .table(identitiesTable)
-        .where('walletId', walletId);
-    const totalCount = await model.clone().count();
-    return parseInt(totalCount[0]['count(*)'].toString(), 10);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.identity.getNextIdentityNumber,
+        walletId
+    );
 }
 
 export async function getAllIdentities(): Promise<Identity[]> {
-    return (await knex()).select().table(identitiesTable);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.dbSelectAll,
+        identitiesTable
+    );
 }
 
 export async function insertIdentity(identity: Partial<Identity> | Identity[]) {
-    return (await knex())(identitiesTable).insert(identity);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.identity.insert,
+        identity
+    );
 }
 
 export async function updateIdentity(
     id: number,
     updatedValues: Record<string, unknown>
 ) {
-    return (await knex())(identitiesTable).where({ id }).update(updatedValues);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.identity.update,
+        id,
+        updatedValues
+    );
 }
 
 /**
@@ -38,5 +47,8 @@ export async function updateIdentity(
 export async function getIdentitiesForWallet(
     walletId: number
 ): Promise<Identity[]> {
-    return (await knex()).select().table(identitiesTable).where({ walletId });
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.identity.getIdentitiesForWallet,
+        walletId
+    );
 }

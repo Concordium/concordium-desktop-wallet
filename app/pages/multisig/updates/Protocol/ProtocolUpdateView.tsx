@@ -1,6 +1,6 @@
-import React from 'react';
-import { hashSha256 } from '~/utils/serializationHelpers';
+import React, { useEffect, useState } from 'react';
 import { ProtocolUpdate } from '~/utils/types';
+import ipcCommands from '~/constants/ipcCommands.json';
 
 interface Props {
     protocolUpdate: ProtocolUpdate;
@@ -10,10 +10,20 @@ interface Props {
  * Displays an overview of a protocol update transaction payload.
  */
 export default function ProtocolUpdateView({ protocolUpdate }: Props) {
+    const [auxiliaryDataHash, setAuxiliaryDataHash] = useState<string>();
     const auxiliaryData = Buffer.from(
         protocolUpdate.specificationAuxiliaryData,
         'base64'
     );
+
+    useEffect(() => {
+        window.ipcRenderer
+            .invoke(ipcCommands.sha256, [auxiliaryData])
+            .then((hash: Uint8Array) =>
+                setAuxiliaryDataHash(Buffer.from(hash).toString('hex'))
+            )
+            .catch(() => {});
+    }, [auxiliaryData]);
 
     return (
         <>
@@ -31,7 +41,7 @@ export default function ProtocolUpdateView({ protocolUpdate }: Props) {
             </div>
             <div className="body2">
                 <h5 className="mB0">Specification auxiliary data hash</h5>
-                {hashSha256(auxiliaryData).toString('hex')}
+                {auxiliaryDataHash}
             </div>
         </>
     );

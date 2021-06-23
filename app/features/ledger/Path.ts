@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer/';
+
 const validSubtrees = [0, 1, 2];
 
 const concordiumPurpose = 1105;

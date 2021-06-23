@@ -1,9 +1,10 @@
+import { Buffer } from 'buffer/';
+import { BrowserWindow } from 'electron';
 import { Transport } from './Transport';
 import {
     UpdateAccountCredentials,
     TransactionKindId,
     CredentialDeploymentInformation,
-    Hex,
 } from '~/utils/types';
 import pathAsBuffer from './Path';
 import {
@@ -21,8 +22,7 @@ export default async function signUpdateCredentials(
     transport: Transport,
     path: number[],
     transaction: UpdateAccountCredentials,
-    onAwaitVerificationKeyConfirmation: (key: Hex) => void,
-    onVerificationKeysConfirmed: () => void
+    window: BrowserWindow
 ): Promise<Buffer> {
     const pathPrefix = pathAsBuffer(path);
     const ins = INS_UPDATE_CREDENTIALS;
@@ -76,8 +76,9 @@ export default async function signUpdateCredentials(
             credentialInformation,
             ins,
             p2,
-            onAwaitVerificationKeyConfirmation,
-            onVerificationKeysConfirmed
+            true,
+            true,
+            window
         );
         // eslint-disable-next-line  no-await-in-loop
         await signCredentialProofs(
