@@ -1,5 +1,5 @@
-import bs58check from 'bs58check';
 import { RegisterOptions, Validate } from 'react-hook-form';
+import bs58check from 'bs58check';
 import { Account, AccountInfo } from './types';
 
 /**
@@ -13,12 +13,10 @@ export function isValidAddress(address: string): boolean {
     }
 
     try {
-        // This call throws an error if the input is not a valid
         bs58check.decode(address);
-    } catch (e) {
+    } catch {
         return false;
     }
-
     return true;
 }
 

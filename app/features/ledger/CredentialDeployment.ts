@@ -1,25 +1,29 @@
+import { Buffer } from 'buffer/';
+import { BrowserWindow } from 'electron';
 import { Transport } from './Transport';
 import {
     UnsignedCredentialDeploymentInformation,
     IdOwnershipProofs,
     CredentialDeploymentValues,
     ChosenAttributesKeys,
-    Hex,
 } from '~/utils/types';
 import {
+    encodeWord64,
     putBase58Check,
     serializeVerifyKey,
     serializeYearMonth,
 } from '~/utils/serializationHelpers';
 import pathAsBuffer from './Path';
+import ledgerIpcCommands from '~/constants/ledgerIpcCommands.json';
 
 export async function signCredentialValues(
     transport: Transport,
     credentialDeployment: CredentialDeploymentValues,
     ins: number,
     p2: number,
-    onAwaitVerificationKeyConfirmation?: (key: Hex) => void,
-    onVerificationKeysConfirmed?: () => void
+    onAwaitVerificationKeyConfirmation: boolean,
+    onVerificationKeysConfirmed: boolean,
+    mainWindow?: BrowserWindow
 ) {
     let p1 = 0x0a;
 
@@ -39,29 +43,36 @@ export async function signCredentialValues(
         const index = keyIndices[i];
         const verificationKey = publicKeys.keys[index];
         data = Buffer.concat([
-            Uint8Array.of(index),
+            Buffer.from(Uint8Array.of(index)),
             serializeVerifyKey(verificationKey),
         ]);
 
-        if (onAwaitVerificationKeyConfirmation) {
-            onAwaitVerificationKeyConfirmation(verificationKey.verifyKey);
+        if (onAwaitVerificationKeyConfirmation && mainWindow) {
+            mainWindow.webContents.send(
+                ledgerIpcCommands.onAwaitVerificationKey,
+                verificationKey.verifyKey
+            );
         }
 
         // eslint-disable-next-line  no-await-in-loop
         await transport.send(0xe0, ins, p1, p2, data);
     }
 
-    if (onVerificationKeysConfirmed) {
-        onVerificationKeysConfirmed();
+    if (onVerificationKeysConfirmed && mainWindow) {
+        mainWindow.webContents.send(
+            ledgerIpcCommands.onVerificationKeysConfirmed
+        );
     }
 
-    const signatureThreshold = Uint8Array.of(publicKeys.threshold);
+    const signatureThreshold = Buffer.from(Uint8Array.of(publicKeys.threshold));
     const credId = Buffer.from(credentialDeployment.credId, 'hex');
 
     const identityProviderIdentity = Buffer.alloc(4);
     identityProviderIdentity.writeUInt32BE(credentialDeployment.ipIdentity, 0);
 
-    const arThreshold = Uint8Array.of(credentialDeployment.revocationThreshold);
+    const arThreshold = Buffer.from(
+        Uint8Array.of(credentialDeployment.revocationThreshold)
+    );
     const arListLength = Object.entries(credentialDeployment.arData).length;
     const arListLengthAsBytes = Buffer.alloc(2);
     arListLengthAsBytes.writeUInt16BE(arListLength, 0);
@@ -205,7 +216,14 @@ async function signCredentialDeployment(
 
     await transport.send(0xe0, ins, p1, p2, pathPrefix);
 
-    await signCredentialValues(transport, credentialDeployment, ins, p2);
+    await signCredentialValues(
+        transport,
+        credentialDeployment,
+        ins,
+        p2,
+        false,
+        false
+    );
 
     const proofs = serializeIdOwnerShipProofs(credentialDeployment.proofs);
 
@@ -224,9 +242,10 @@ export async function signCredentialDeploymentOnNewAccount(
     expiry: bigint,
     path: number[]
 ): Promise<Buffer> {
-    const expiryBuffer = Buffer.alloc(1 + 8);
+    let expiryBuffer = Buffer.alloc(1);
     expiryBuffer.writeUInt8(0, 0);
-    expiryBuffer.writeBigUInt64BE(expiry, 1);
+    const serializedExpiry = encodeWord64(expiry);
+    expiryBuffer = Buffer.concat([expiryBuffer, serializedExpiry]);
     return signCredentialDeployment(
         transport,
         credentialDeployment,
