@@ -29,6 +29,7 @@ import {
     getlastFinalizedBlockHash,
     getEnergyToMicroGtuRate,
 } from '~/node/nodeHelpers';
+import { isValidAddress } from '~/utils/accountHelpers';
 import { saveMultipleFiles } from '~/utils/FileHelper';
 import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 import { TransactionExportType } from '~/utils/transactionTypes';
@@ -81,7 +82,26 @@ async function loadTransactionFile(
             content: `In "${fileName}", the sender of the transaction is not an account in this wallet.`,
         };
     }
-    const threshold = account.signatureThreshold;
+
+    if ('toAddress' in transactionObject.payload) {
+        const recipient = transactionObject.payload.toAddress;
+        if (!isValidAddress(recipient)) {
+            return {
+                show: true,
+                header: 'Invalid file',
+                content: `The transaction within "${fileName}" contains an invalid recipient address.`,
+            };
+        }
+        // Check that the recipient exists.
+        const receiverAccountInfo = await getAccountInfo(recipient, blockHash);
+        if (!receiverAccountInfo) {
+            return {
+                show: true,
+                header: 'Invalid file',
+                content: `The transaction within "${fileName}" contains a recipient address, which does not exist on the blockchain.`,
+            };
+        }
+    }
 
     if (transactionObject.nonce) {
         return {
@@ -105,6 +125,8 @@ async function loadTransactionFile(
             content: `In "${fileName}", the estimatedFee was present.`,
         };
     }
+
+    const threshold = account.signatureThreshold;
 
     // Set the nonce
     if (address in nonceTracker) {
@@ -142,21 +164,6 @@ async function loadTransactionFile(
         threshold
     );
     transactionObject.estimatedFee = estimatedFee;
-
-    if ('toAddress' in transactionObject.payload) {
-        // Check that the recipient exists.
-        const receiverAccountInfo = await getAccountInfo(
-            transactionObject.payload.toAddress,
-            blockHash
-        );
-        if (!receiverAccountInfo) {
-            return {
-                show: true,
-                header: 'Invalid file',
-                content: `The transaction within "${fileName}" contains a recipient address, which does not exist on the blockchain.`,
-            };
-        }
-    }
 
     const proposal = createMultiSignatureTransaction(
         transactionObject,
