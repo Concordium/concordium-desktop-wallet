@@ -1,40 +1,31 @@
 import { Credential, CredentialWithIdentityNumber } from '../utils/types';
-import { knex } from './knex';
-import {
-    credentialsTable,
-    identitiesTable,
-    walletTable,
-} from '../constants/databaseNames.json';
+import ipcCommands from '../constants/ipcCommands.json';
 
 export async function insertCredential(credential: Credential) {
-    return (await knex())(credentialsTable).insert(credential);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.credentials.insert,
+        credential
+    );
 }
 
 export async function removeCredential(credential: Partial<Credential>) {
-    return (await knex())(credentialsTable).where(credential).del();
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.credentials.delete,
+        credential
+    );
 }
 
 export async function removeCredentialsOfAccount(accountAddress: string) {
-    return (await knex())(credentialsTable).where({ accountAddress }).del();
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.credentials.deleteForAccount,
+        accountAddress
+    );
 }
 
 export async function getCredentials(): Promise<
     CredentialWithIdentityNumber[]
 > {
-    const credentials = await (await knex())
-        .select()
-        .table(credentialsTable)
-        .join(
-            identitiesTable,
-            `${credentialsTable}.identityId`,
-            '=',
-            `${identitiesTable}.id`
-        )
-        .select(
-            `${credentialsTable}.*`,
-            `${identitiesTable}.identityNumber as identityNumber`
-        );
-    return credentials;
+    return window.ipcRenderer.invoke(ipcCommands.database.credentials.getAll);
 }
 
 /**
@@ -44,10 +35,10 @@ export async function getCredentials(): Promise<
 export async function getCredentialsForIdentity(
     identityId: number
 ): Promise<Credential[]> {
-    return (await knex())
-        .select()
-        .table(credentialsTable)
-        .where({ identityId });
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.credentials.getForIdentity,
+        identityId
+    );
 }
 
 /**
@@ -60,66 +51,39 @@ export async function getCredentialsForIdentity(
 export async function getCredentialsOfAccount(
     accountAddress: string
 ): Promise<CredentialWithIdentityNumber[]> {
-    const credentials = await (await knex())
-        .select()
-        .table(credentialsTable)
-        .join(
-            identitiesTable,
-            `${credentialsTable}.identityId`,
-            '=',
-            `${identitiesTable}.id`
-        )
-        .join(
-            walletTable,
-            `${identitiesTable}.walletId`,
-            '=',
-            `${walletTable}.id`
-        )
-        .where({ accountAddress })
-        .select(
-            `${credentialsTable}.*`,
-            `${identitiesTable}.identityNumber as identityNumber`,
-            `${walletTable}.id as walletId`
-        );
-    return credentials;
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.credentials.getForAccount,
+        accountAddress
+    );
 }
 
 export async function getNextCredentialNumber(identityId: number) {
-    const credentials = await (await knex())
-        .select()
-        .table(credentialsTable)
-        .where({ identityId });
-    if (credentials.length === 0) {
-        return 0;
-    }
-    const currentNumber = credentials.reduce(
-        (num, cred) => Math.max(num, cred.credentialNumber),
-        0
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.credentials.getNextNumber,
+        identityId
     );
-    return currentNumber + 1;
 }
 
 export async function updateCredentialIndex(
     credId: string,
     credentialIndex: number | undefined
 ) {
-    if (credentialIndex === undefined) {
-        return (await knex())(credentialsTable)
-            .where({ credId })
-            .update({ credentialIndex: null });
-    }
-    return (await knex())(credentialsTable)
-        .where({ credId })
-        .update({ credentialIndex });
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.credentials.updateIndex,
+        credId,
+        credentialIndex
+    );
 }
 
 export async function updateCredential(
     credId: string,
     updatedValues: Partial<Credential>
 ) {
-    return (await knex())(credentialsTable)
-        .where({ credId })
-        .update(updatedValues);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.credentials.update,
+        credId,
+        updatedValues
+    );
 }
 
 export async function hasDuplicateWalletId(
@@ -127,22 +91,22 @@ export async function hasDuplicateWalletId(
     credId: string,
     otherCredIds: string[]
 ) {
-    const credentials = await getCredentialsOfAccount(accountAddress);
-    const credential = credentials.find((cred) => cred.credId === credId);
-    if (!credential) {
-        return false;
-    }
-    const { walletId } = credential;
-    const otherWalletIds = credentials
-        .filter((cred) => otherCredIds.includes(cred.credId))
-        .map((cred) => cred.walletId);
-    return otherWalletIds.includes(walletId);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.credentials.hasDuplicateWalletId,
+        accountAddress,
+        credId,
+        otherCredIds
+    );
 }
 
 export async function hasExistingCredential(
     accountAddress: string,
     currentWalletId: number
 ) {
-    const credentials = await getCredentialsOfAccount(accountAddress);
-    return credentials.some((cred) => cred.walletId === currentWalletId);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.credentials.hasExistingCredential,
+        accountAddress,
+        accountAddress,
+        currentWalletId
+    );
 }

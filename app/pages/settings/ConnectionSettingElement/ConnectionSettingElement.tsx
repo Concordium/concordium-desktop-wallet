@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { ipcRenderer } from 'electron';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateSettingEntry } from '~/features/SettingsSlice';
 import { globalSelector } from '~/features/GlobalSlice';
@@ -13,12 +12,11 @@ import ConnectionStatusComponent, {
 import ipcCommands from '~/constants/ipcCommands.json';
 import { JsonResponse } from '~/proto/concordium_p2p_rpc_pb';
 import { ConsensusStatus } from '~/node/NodeApiTypes';
-import { getGenesis } from '~/database/GenesisDao';
+import getGenesis from '~/database/GenesisDao';
 import setGenesisAndGlobal from '~/database/DatabaseHelpers';
-
-import styles from './ConnectionSettingElement.module.scss';
 import { displayTargetNet, getTargetNet, Net } from '~/utils/ConfigHelper';
 import genesisBlocks from '~/constants/genesis.json';
+import styles from './ConnectionSettingElement.module.scss';
 
 interface Props {
     displayText: string;
@@ -49,7 +47,7 @@ function isMatchingGenesisBlock(genesisBlockHash: string, targetNet: Net) {
  * node with the given address and port.
  */
 async function getConsensusAndGlobalFromNode(address: string, port: string) {
-    const result = await ipcRenderer.invoke(
+    const result = await window.ipcRenderer.invoke(
         ipcCommands.grpcNodeConsensusAndGlobal,
         address,
         port

@@ -30,10 +30,8 @@ import { serializeForSubmission } from '~/utils/UpdateSerialization';
 import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
-
 import { serializeTransaction } from '~/utils/transactionSerialization';
 import { attachKeyIndex } from '~/utils/updates/AuthorizationHelper';
-
 import withChainData, { ChainData } from '../common/withChainData';
 import TransactionHashView from '~/components/TransactionHash';
 

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <style>
+            #root {
+                opacity: 0;
+                transition: opacity ease-out 0.2s;
+            }
+        </style>
+        <script>
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = './dist/style.css';
+            // HACK: Writing the script path should be done with webpack
+            document.getElementsByTagName('head')[0].appendChild(link);
+        </script>
+    </head>
+    <body>
+        <div id="root"></div>
+        <script>
+            const scripts = [];
+            // Dynamically insert the DLL script in development env in the
+            // renderer process
+            scripts.push('../dll/renderer.dev.dll.js');
+            // Dynamically insert the bundled app script in the renderer process
+            const port = 1212;
+            scripts.push(`http://localhost:${port}/dist/renderer.dev.js`);
+            if (scripts.length) {
+                document.write(
+                    scripts
+                        .map(
+                            (script) =>
+                                `<script defer src="${script}"><\/script>`
+                        )
+                        .join('')
+                );
+            }
+        </script>
+    </body>
+</html>

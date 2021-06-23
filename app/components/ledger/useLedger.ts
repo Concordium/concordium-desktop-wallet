@@ -1,22 +1,6 @@
-import {
-    useState,
-    useEffect,
-    useCallback,
-    useMemo,
-    useReducer,
-    Dispatch,
-} from 'react';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import TransportNodeHid from '@ledgerhq/hw-transport-node-hid-singleton';
-import type {
-    Observer,
-    DescriptorEvent,
-    Subscription,
-} from '@ledgerhq/hw-transport';
+import { useEffect, useCallback, useReducer, Dispatch, useState } from 'react';
 
 import { singletonHook } from 'react-singleton-hook';
-import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import getErrorDescription from '~/features/ledger/ErrorCodes';
 import ledgerReducer, {
     cleanupAction,
@@ -30,14 +14,22 @@ import ledgerReducer, {
 } from './ledgerReducer';
 import {
     LedgerStatusType,
-    isConcordiumApp,
     instanceOfTransportStatusError,
     LedgerSubmitHandler,
     LedgerCallback,
 } from './util';
 import { instanceOfClosedWhileSendingError } from '~/features/ledger/ClosedWhileSendingError';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import ledgerIpcCommands from '~/constants/ledgerIpcCommands.json';
 
 const { CONNECTED, ERROR, OPEN_APP, AWAITING_USER_INPUT } = LedgerStatusType;
+
+export enum LedgerSubscriptionAction {
+    CONNECTED_SUBSCRIPTION,
+    PENDING,
+    RESET,
+    ERROR_SUBSCRIPTION,
+}
 
 function useLedger(): {
     isReady: boolean;
@@ -52,79 +44,57 @@ function useLedger(): {
         getInitialState()
     );
 
-    const [ledgerSubscription, setLedgerSubscription] = useState<
-        Subscription | undefined
-    >(undefined);
+    const [subscribed, setSubscribed] = useState<boolean>();
 
-    const ledgerObserver: Observer<DescriptorEvent<string>> = useMemo(
-        () => {
-            return {
-                complete: () => {
-                    // This is expected to never trigger.
-                },
-                error: () => {
-                    dispatch(errorAction());
-                },
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                next: async (event: any) => {
-                    if (event.type === 'add') {
-                        const deviceName = event.deviceModel.productName;
-                        const transport = await TransportNodeHid.open();
-                        const concordiumClient = new ConcordiumLedgerClient(
-                            transport
-                        );
-                        const appAndVersion = await concordiumClient.getAppAndVersion();
-
-                        if (isConcordiumApp(appAndVersion)) {
-                            dispatch(
-                                connectedAction(deviceName, concordiumClient)
-                            );
-                        } else {
-                            // The device has been connected, but the Concordium application has not
-                            // been opened yet.
-                            dispatch(pendingAction(OPEN_APP, deviceName));
-                        }
-                    } else if (event.type === 'remove') {
-                        if (client) {
-                            client.closeTransport();
-                        }
+    useEffect(() => {
+        window.ipcRenderer.on(
+            ledgerIpcCommands.listenChannel,
+            (_event, action: LedgerSubscriptionAction, deviceName: string) => {
+                switch (action) {
+                    case LedgerSubscriptionAction.ERROR_SUBSCRIPTION:
+                        dispatch(errorAction());
+                        return;
+                    case LedgerSubscriptionAction.PENDING:
+                        dispatch(pendingAction(OPEN_APP, deviceName));
+                        return;
+                    case LedgerSubscriptionAction.RESET:
                         dispatch(resetAction());
-                    }
-                },
-            };
-        },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        []
-    );
+                        return;
+                    case LedgerSubscriptionAction.CONNECTED_SUBSCRIPTION:
+                        dispatch(
+                            connectedAction(
+                                deviceName,
+                                new ConcordiumLedgerClient()
+                            )
+                        );
+                        return;
+                    default:
+                        throw new Error(`Received an unknown action ${action}`);
+                }
+            }
+        );
+        return () => {
+            window.ipcRenderer.removeAllListeners(
+                ledgerIpcCommands.listenChannel
+            );
+        };
+    }, []);
 
     useEffect(() => {
-        if (!ledgerSubscription) {
-            const subscription = TransportNodeHid.listen(ledgerObserver);
-            setLedgerSubscription(subscription);
+        if (!subscribed) {
+            window.ipcRenderer
+                .invoke(ledgerIpcCommands.subscribe)
+                .then(() => setSubscribed(true))
+                .catch(() => {});
         }
-        return function cleanup() {
-            if (ledgerSubscription !== undefined) {
-                ledgerSubscription.unsubscribe();
-                setLedgerSubscription(undefined);
-            }
-        };
-    }, [ledgerSubscription, ledgerObserver]);
-
-    useEffect(() => {
-        return function cleanup() {
-            if (client) {
-                client.closeTransport();
-                dispatch(resetAction());
-            }
-        };
-    }, [client]);
+    }, [subscribed]);
 
     return {
         isReady: (status === CONNECTED || status === ERROR) && Boolean(client),
         status,
         statusText: text,
-        client,
         dispatch,
+        client,
     };
 }
 
@@ -134,8 +104,8 @@ const init = () => {
         isReady: false,
         status,
         statusText: text,
-        client,
         dispatch: () => {},
+        client,
     };
 };
 
@@ -155,8 +125,10 @@ export default function ExternalHook(
     useEffect(() => {
         return function cleanup() {
             if (client) {
-                client.closeTransport();
-                dispatch(cleanupAction());
+                window.ipcRenderer
+                    .invoke(ledgerIpcCommands.closeTransport)
+                    .then(() => dispatch(cleanupAction()))
+                    .catch(() => {});
             }
         };
     }, [client, dispatch]);
@@ -169,9 +141,8 @@ export default function ExternalHook(
                 await ledgerCallback(client, (t) =>
                     dispatch(setStatusTextAction(t))
                 );
-
-                dispatch(finishedAction());
             }
+            dispatch(finishedAction());
         } catch (e) {
             if (instanceOfClosedWhileSendingError(e)) {
                 dispatch(finishedAction());
@@ -187,7 +158,7 @@ export default function ExternalHook(
             onSignError(e);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [client, ledgerCallback, onSignError]);
+    }, [ledgerCallback, onSignError]);
 
     return {
         isReady,
