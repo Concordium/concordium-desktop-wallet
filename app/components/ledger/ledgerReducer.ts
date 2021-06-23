@@ -13,7 +13,8 @@ enum LedgerActionType {
     PENDING,
     CONNECTED,
     ERROR,
-    RESET,
+    LOADING,
+    DISCONNECT,
     SET_STATUS_TEXT,
     FINISHED,
     CLEANUP,
@@ -47,10 +48,16 @@ export const connectedAction = (
     client,
 });
 
-type ResetAction = Action<LedgerActionType.RESET>;
+type LoadingAction = Action<LedgerActionType.LOADING>;
 
-export const resetAction = (): ResetAction => ({
-    type: LedgerActionType.RESET,
+export const loadingAction = (): LoadingAction => ({
+    type: LedgerActionType.LOADING,
+});
+
+type DisconnectAction = Action<LedgerActionType.DISCONNECT>;
+
+export const disconnectAction = (): DisconnectAction => ({
+    type: LedgerActionType.DISCONNECT,
 });
 
 type CleanupAction = Action<LedgerActionType.CLEANUP>;
@@ -88,7 +95,8 @@ export const finishedAction = (): FinishedAction => ({
 type LedgerAction =
     | PendingAction
     | ConnectedAction
-    | ResetAction
+    | LoadingAction
+    | DisconnectAction
     | ErrorAction
     | SetStatusTextAction
     | CleanupAction
@@ -141,7 +149,13 @@ const ledgerReducer: Reducer<LedgerReducerState, LedgerAction> = (
                 client: a.client,
                 text: getStatusMessage(LedgerStatusType.CONNECTED, deviceName),
             };
-        case LedgerActionType.RESET:
+        case LedgerActionType.LOADING:
+            return {
+                ...s,
+                status: LedgerStatusType.LOADING,
+                text: '',
+            };
+        case LedgerActionType.DISCONNECT:
             return getInitialState();
         case LedgerActionType.SET_STATUS_TEXT:
             return { ...s, text: a.text };
