@@ -490,13 +490,6 @@ export async function addExternalAccount(
         rewardFilter: '[]',
     };
     await insertAccount(account);
-    addToAddressBook(dispatch, {
-        readOnly: true,
-        name: accountName,
-        address: accountAddress,
-        note: 'Shared account',
-    });
-
     return loadAccounts(dispatch);
 }
 
