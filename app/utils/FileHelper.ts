@@ -7,10 +7,12 @@ import ipcCommands from '../constants/ipcCommands.json';
  * file path for the chosen file is returned.
  * @param title title of the prompt window
  */
-export async function openFileDestination(title: string): Promise<string> {
+export async function openFileDestination(
+    opts: Electron.OpenDialogOptions
+): Promise<string> {
     const openDialogValue: Electron.OpenDialogReturnValue = await ipcRenderer.invoke(
         ipcCommands.openFileDialog,
-        title
+        opts
     );
 
     if (openDialogValue.canceled) {
@@ -30,7 +32,7 @@ export async function openFileDestination(title: string): Promise<string> {
  * @param title title of the prompt window
  */
 export async function openFileRaw(title: string): Promise<Buffer> {
-    const fileLocation = await openFileDestination(title);
+    const fileLocation = await openFileDestination({ title });
     return fs.readFileSync(fileLocation);
 }
 
@@ -41,6 +43,26 @@ export async function openFileRaw(title: string): Promise<Buffer> {
  */
 export async function openFile(title: string): Promise<string> {
     return (await openFileRaw(title)).toString('utf-8');
+}
+
+/**
+ * Saves the given data to the given filepath
+ * @param data the string or buffer to save to a file
+ * @param title the path to save the file
+ * @return the promise resolves if the data has been written to file.
+ */
+function saveFileDirect(
+    data: Buffer | string,
+    filePath: string
+): Promise<void> {
+    return new Promise((resolve, reject) => {
+        fs.writeFile(filePath, data, (err) => {
+            if (err) {
+                reject(new Error(`Unable to save file: ${err}`));
+            }
+            resolve();
+        });
+    });
 }
 
 /**
@@ -64,16 +86,36 @@ export async function saveFile(
         return false;
     }
 
-    return new Promise<boolean>((resolve, reject) => {
-        if (!saveFileDialog.filePath) {
-            reject(new Error('No file path was selected by the user.'));
-        } else {
-            fs.writeFile(saveFileDialog.filePath, data, (err) => {
-                if (err) {
-                    reject(new Error(`Unable to save file: ${err}`));
-                }
-                resolve(true);
-            });
-        }
-    });
+    if (!saveFileDialog.filePath) {
+        return Promise.reject(
+            new Error('No file path was selected by the user.')
+        );
+    }
+
+    await saveFileDirect(data, saveFileDialog.filePath);
+    return true;
+}
+
+/**
+ * Saves the given data to the given filepath
+ * @param data the string or buffer to save to a file
+ * @param title the path to save the file
+ * @return the promise resolves if the data has been written to file.
+ */
+export async function saveMultipleFiles(
+    datas: [string, Buffer | string][],
+    title = 'Choose directory'
+): Promise<void> {
+    let fileLocation;
+    try {
+        fileLocation = await openFileDestination({
+            title,
+            properties: ['openDirectory'],
+        });
+    } catch (e) {
+        return;
+    }
+    for (const [fileName, data] of datas) {
+        await saveFileDirect(data, `${fileLocation}/${fileName}`);
+    }
 }
