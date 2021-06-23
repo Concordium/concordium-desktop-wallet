@@ -11,8 +11,13 @@
     justify-content: center;
 }
 
+.messagesTitleCompleted,
 .messagesTitle {
     text-align: center;
+}
+
+.messagesTitleCompleted:first-child {
+    margin-top: auto;
 }
 
 .messages,
@@ -26,14 +31,12 @@
     justify-content: center;
 }
 
-.buttonDiv {
-    display: flex;
-    flex-direction: column;
-    margin-top: auto;
-    margin-bottom: 20%;
-    flex: 1;
+.topButton,
+.button {
+    width: 100%;
+    margin: 20px 40px;
 }
 
-.button {
-    margin: 20px;
+.topButton {
+    margin-top: auto;
 }

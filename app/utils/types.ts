@@ -1255,6 +1255,8 @@ export type PolymorphicComponentProps<
     Props = {}
 > = InheritableElementProps<C, Props & AsProp<C>>;
 
+export type StateUpdate<Type> = React.Dispatch<React.SetStateAction<Type>>;
+
 export enum TransactionTypes {
     UpdateInstruction,
     AccountTransaction,

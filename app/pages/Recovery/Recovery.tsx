@@ -15,15 +15,15 @@ import pairWallet from '~/utils/WalletPairing';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import routes from '~/constants/routes.json';
 import errorMessages from '~/constants/errorMessages.json';
-import PageLayout from '~/components/PageLayout';
-import styles from './Recovery.module.scss';
 import {
     getLostIdentityName,
     createLostIdentity,
     recoverIdentity,
 } from './util';
 import { allowedSpacesIdentities } from '~/constants/recoveryConstants.json';
-import Button from '~/cross-app-components/Button';
+import { StateUpdate } from '~/utils/types';
+
+import styles from './Recovery.module.scss';
 
 const addedMessage = (identityName: string, count: number) =>
     `Recovered ${count} credentials on ${identityName}.`;
@@ -46,17 +46,19 @@ async function getPrfKeySeed(
     return prfKeySeed.toString('hex');
 }
 
+interface Props {
+    messages: string[];
+    setMessages: StateUpdate<string[]>;
+}
+
 /**
- * The default page loaded on the base path. Always
- * forwards directly to the home page.
+ * Component to run the account recovery algorithm.
  */
-export default function DefaultPage() {
+export default function Recovery({ messages, setMessages }: Props) {
     const dispatch = useDispatch();
     const identities = useSelector(identitiesSelector);
     const global = useSelector(globalSelector);
     const [error, setError] = useState<string>();
-    const [recoveryComplete, setCompleted] = useState<boolean>(false);
-    const [messages, setMessages] = useState<string[]>([]);
 
     async function performRecovery(
         ledger: ConcordiumLedgerClient,
@@ -128,72 +130,44 @@ export default function DefaultPage() {
         loadIdentities(dispatch);
 
         addMessage(finishedMessage);
-        setCompleted(true);
+        dispatch(
+            push({
+                pathname: routes.RECOVERY_COMPLETED,
+                state: messages,
+            })
+        );
     }
 
     return (
-        <PageLayout>
-            <PageLayout.Header>
-                <h1>Recovery</h1>
-            </PageLayout.Header>
-            <PageLayout.Container padding="vertical" className="flexColumn">
-                <SimpleErrorModal
-                    header="Unable to recover credentials"
-                    content={error}
-                    show={Boolean(error)}
-                    onClick={() => dispatch(push(routes.IDENTITIES))}
-                />
-                <h2>Account Recovery</h2>
-                <p>
-                    Here you can recover the credentials and their accounts from
-                    your current ledger device.
-                </p>
-                <Columns className="flexChildFill">
-                    <Columns.Column>
-                        <div className={styles.ledgerDiv}>
-                            {recoveryComplete || (
-                                <SimpleLedger
-                                    className={styles.card}
-                                    ledgerCall={performRecovery}
-                                />
-                            )}
-                            {recoveryComplete && (
-                                <div className={styles.buttonDiv}>
-                                    <Button
-                                        className={styles.button}
-                                        onClick={() =>
-                                            dispatch(push(routes.ACCOUNTS))
-                                        }
-                                    >
-                                        Go to accounts
-                                    </Button>
-                                    <Button
-                                        className={styles.button}
-                                        onClick={() => {
-                                            setCompleted(false);
-                                            setMessages([]);
-                                        }}
-                                    >
-                                        Recover again
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
-                    </Columns.Column>
-                    <Columns.Column>
-                        <div className={styles.messages}>
-                            {Boolean(messages.length) && (
-                                <h2 className={styles.messagesTitle}>
-                                    Recovery status:
-                                </h2>
-                            )}
-                            {messages.map((m) => (
-                                <p key={m}>{m}</p>
-                            ))}
-                        </div>
-                    </Columns.Column>
-                </Columns>
-            </PageLayout.Container>
-        </PageLayout>
+        <>
+            <SimpleErrorModal
+                header="Unable to recover credentials"
+                content={error}
+                show={Boolean(error)}
+                onClick={() => dispatch(push(routes.IDENTITIES))}
+            />
+            <Columns className="flexChildFill">
+                <Columns.Column>
+                    <div className={styles.ledgerDiv}>
+                        <SimpleLedger
+                            className={styles.card}
+                            ledgerCall={performRecovery}
+                        />
+                    </div>
+                </Columns.Column>
+                <Columns.Column>
+                    <div className={styles.messages}>
+                        {Boolean(messages.length) && (
+                            <h2 className={styles.messagesTitle}>
+                                Recovery status:
+                            </h2>
+                        )}
+                        {messages.map((m) => (
+                            <p key={m}>{m}</p>
+                        ))}
+                    </div>
+                </Columns.Column>
+            </Columns>
+        </>
     );
 }
