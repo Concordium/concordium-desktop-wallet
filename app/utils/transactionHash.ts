@@ -14,7 +14,7 @@ import {
     getAccountTransactionSignDigest,
 } from './transactionSerialization';
 import { hashSha256 } from './serializationHelpers';
-import { getBlockSummary, getConsensusStatus } from '~/node/nodeRequests';
+import { fetchLastFinalizedBlockSummary } from '~/node/nodeHelpers';
 import { attachKeyIndex } from '~/utils/updates/AuthorizationHelper';
 
 /**
@@ -24,10 +24,8 @@ export async function getUpdateInstructionTransactionHash(
     updateInstruction: UpdateInstruction
 ) {
     const handler = findUpdateInstructionHandler(updateInstruction.type);
-    const consensusStatus = await getConsensusStatus();
-    const blockSummary = await getBlockSummary(
-        consensusStatus.lastFinalizedBlock
-    );
+    const blockSummary = (await fetchLastFinalizedBlockSummary())
+        .lastFinalizedBlockSummary;
 
     const signatures = await Promise.all(
         updateInstruction.signatures.map((sig) =>

@@ -34,3 +34,12 @@ export async function getAll(): Promise<MultiSignatureTransaction[]> {
         multiSignatureProposalTable
     );
 }
+
+export async function getMaxOpenNonceOnAccount(
+    address: string
+): Promise<bigint> {
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.multiSignatureTransaction.getMaxOpenNonceOnAccount,
+        address
+    );
+}

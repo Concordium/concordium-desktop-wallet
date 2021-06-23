@@ -88,4 +88,8 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
             return saveZipFile(files);
         }
     );
+
+    ipcMain.handle(ipcCommands.openFileDialog, async (_event, opts) => {
+        return dialog.showOpenDialog(opts);
+    });
 }

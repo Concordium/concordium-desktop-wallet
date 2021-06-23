@@ -69,7 +69,8 @@
         },
         "multiSignatureTransaction": {
             "insert": "DB_MULTI_SIGNATURE_TRANSACTION_INSERT",
-            "update": "DB_MULTI_SIGNATURE_TRANSACTION_UPDATE"
+            "update": "DB_MULTI_SIGNATURE_TRANSACTION_UPDATE",
+            "getMaxOpenNonceOnAccount": "DB_MULTI_SIGNATURE_TRANSACTION_MAX_NONCE_ON_OPEN"
         },
         "settings": {
             "update": "DB_SETITNGS_UPDATE"
