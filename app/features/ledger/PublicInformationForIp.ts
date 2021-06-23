@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer/';
 import { Transport } from './Transport';
 import pathAsBuffer from './Path';
 import { serializeVerifyKey } from '../../utils/serializationHelpers';
@@ -19,7 +20,7 @@ export default async function signPublicInformationForIp(
         pathAsBuffer(path),
         idCredPubBytes,
         regId,
-        Uint8Array.of(verificationKeysListLength),
+        Buffer.from(Uint8Array.of(verificationKeysListLength)),
     ]);
     let p1 = 0x00;
     const p2 = 0x00;
@@ -36,7 +37,7 @@ export default async function signPublicInformationForIp(
         const verificationKey = publicInfoForIp.publicKeys.keys[index];
 
         const keyData = Buffer.concat([
-            Uint8Array.of(index),
+            Buffer.from(Uint8Array.of(index)),
             serializeVerifyKey(verificationKey),
         ]);
 
@@ -50,7 +51,7 @@ export default async function signPublicInformationForIp(
         INS_PUBLIC_INFO_FOR_IP,
         p1,
         p2,
-        Buffer.of(publicInfoForIp.publicKeys.threshold)
+        Buffer.from(Buffer.of(publicInfoForIp.publicKeys.threshold))
     );
 
     const signature = response.slice(0, 64);

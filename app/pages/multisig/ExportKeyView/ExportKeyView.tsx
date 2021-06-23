@@ -10,7 +10,7 @@ import {
     getGovernanceLevel2Path,
     getGovernanceRootPath,
 } from '~/features/ledger/Path';
-import { saveFile } from '~/utils/FileHelper';
+import saveFile from '~/utils/FileHelper';
 import {
     ExportKeyType,
     PublicKeyExportFormat,
@@ -90,6 +90,7 @@ export default function ExportKeyView(): JSX.Element {
         const publicKeyExportJson = JSON.stringify(publicKeyExport);
         await saveFile(publicKeyExportJson, {
             title: 'Save exported public-key',
+            defaultPath: `public-key-${exportKeyType}.json`,
         });
     }
 

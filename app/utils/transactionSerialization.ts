@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer/';
 import {
     AccountTransaction,
     TransactionKindId as TransactionKind,
@@ -161,9 +162,12 @@ export function serializeEncryptedTransferData(
         'hex'
     );
     const transferAmount = Buffer.from(payload.transferAmount, 'hex');
+    const serializedAddress: Buffer = Buffer.from(
+        base58ToBuffer(payload.toAddress)
+    );
 
     return Buffer.concat([
-        base58ToBuffer(payload.toAddress),
+        serializedAddress,
         remainingEncryptedAmount,
         transferAmount,
         encodeWord64(BigInt(payload.index)),
@@ -231,7 +235,7 @@ export function serializeAddBakerProofsStakeRestake(payload: AddBakerPayload) {
 
 export function serializeAddBaker(payload: AddBakerPayload) {
     return Buffer.concat([
-        Uint8Array.of(TransactionKind.Add_baker),
+        Buffer.from(Uint8Array.of(TransactionKind.Add_baker)),
         serializeBakerVerifyKeys(payload),
         serializeAddBakerProofsStakeRestake(payload),
     ]);
@@ -239,7 +243,7 @@ export function serializeAddBaker(payload: AddBakerPayload) {
 
 export function serializeUpdateBakerKeys(payload: UpdateBakerKeysPayload) {
     return Buffer.concat([
-        Uint8Array.of(TransactionKind.Update_baker_keys),
+        Buffer.from(Uint8Array.of(TransactionKind.Update_baker_keys)),
         serializeBakerVerifyKeys(payload),
         serializeBakerKeyProofs(payload),
     ]);
@@ -251,7 +255,7 @@ export function serializeRemoveBaker() {
 
 export function serializeUpdateBakerStake(payload: UpdateBakerStakePayload) {
     return Buffer.concat([
-        Uint8Array.of(TransactionKind.Update_baker_stake),
+        Buffer.from(Uint8Array.of(TransactionKind.Update_baker_stake)),
         encodeWord64(BigInt(payload.stake)),
     ]);
 }
@@ -260,7 +264,9 @@ export function serializeUpdateBakerRestakeEarnings(
     payload: UpdateBakerRestakeEarningsPayload
 ) {
     return Buffer.concat([
-        Uint8Array.of(TransactionKind.Update_baker_restake_earnings),
+        Buffer.from(
+            Uint8Array.of(TransactionKind.Update_baker_restake_earnings)
+        ),
         serializeBoolean(payload.restakeEarnings),
     ]);
 }
@@ -370,10 +376,10 @@ export function serializeTransaction(
  * Returns the transactionHash, which includes the signature, and is used as the
  * submissionId on chain.
  */
-export function getAccountTransactionHash(
+export async function getAccountTransactionHash(
     transaction: AccountTransaction,
     signature: TransactionAccountSignature
-) {
+): Promise<Buffer> {
     const serialized = serializeUnversionedTransaction(transaction, signature);
     return hashSha256(serialized);
 }
@@ -381,7 +387,7 @@ export function getAccountTransactionHash(
 /**
  * Returns the "digest to be signed"", which is the hash that is signed.
  */
-export function getAccountTransactionSignDigest(
+export async function getAccountTransactionSignDigest(
     transaction: AccountTransaction
 ) {
     const payload = serializeTransferPayload(

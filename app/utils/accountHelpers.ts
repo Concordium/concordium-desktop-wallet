@@ -1,5 +1,5 @@
-import bs58check from 'bs58check';
 import { RegisterOptions, Validate } from 'react-hook-form';
+import bs58check from 'bs58check';
 import { Account, AccountInfo } from './types';
 
 /**
@@ -13,12 +13,10 @@ export function isValidAddress(address: string): boolean {
     }
 
     try {
-        // This call throws an error if the input is not a valid
         bs58check.decode(address);
-    } catch (e) {
+    } catch {
         return false;
     }
-
     return true;
 }
 
@@ -60,4 +58,16 @@ export function hasEncryptedBalance(accountInfo: AccountInfo): boolean {
         accountInfo.accountEncryptedAmount.selfAmount !== ENCRYPTED_ZERO ||
         accountInfo.accountEncryptedAmount.incomingAmounts.length > 0
     );
+}
+
+export function isMultiSig(account: Account): boolean {
+    return (account.signatureThreshold ?? 0) > 1;
+}
+
+export function isMultiCred(accountInfo: AccountInfo): boolean {
+    return Object.values(accountInfo.accountCredentials).length > 1;
+}
+
+export function getInitialEncryptedAmount() {
+    return ENCRYPTED_ZERO;
 }

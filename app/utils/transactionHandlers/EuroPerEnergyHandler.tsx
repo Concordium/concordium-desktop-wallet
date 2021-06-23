@@ -13,26 +13,22 @@ import {
     isExchangeRate,
     ExchangeRate,
     UpdateInstruction,
-    UpdateInstructionPayload,
     MultiSignatureTransaction,
     UpdateType,
 } from '../types';
 import { serializeExchangeRate } from '../UpdateSerialization';
+import UpdateHandlerBase from './UpdateHandlerBase';
 
 const TYPE = 'Update Euro Per Energy';
 
 type TransactionType = UpdateInstruction<ExchangeRate>;
 
 export default class EuroPerEnergyHandler
+    extends UpdateHandlerBase<TransactionType>
     implements
         UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
-    confirmType(
-        transaction: UpdateInstruction<UpdateInstructionPayload>
-    ): TransactionType {
-        if (isExchangeRate(transaction)) {
-            return transaction;
-        }
-        throw Error('Invalid transaction type was given as input.');
+    constructor() {
+        super(TYPE, isExchangeRate);
     }
 
     async createTransaction(
@@ -90,11 +86,5 @@ export default class EuroPerEnergyHandler
         return authorizations.euroPerEnergy;
     }
 
-    print = () => undefined;
-
     update = UpdateEuroPerEnergy;
-
-    title = `Foundation Transaction | ${TYPE}`;
-
-    type = TYPE;
 }

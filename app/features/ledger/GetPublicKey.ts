@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer/';
 import { Transport } from './Transport';
 import { SignedPublicKey } from '../../utils/types';
 import pathAsBuffer from './Path';

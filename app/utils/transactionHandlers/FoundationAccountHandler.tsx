@@ -13,25 +13,21 @@ import {
     isFoundationAccount,
     MultiSignatureTransaction,
     UpdateInstruction,
-    UpdateInstructionPayload,
     UpdateType,
 } from '../types';
 import { serializeFoundationAccount } from '../UpdateSerialization';
+import UpdateHandlerBase from './UpdateHandlerBase';
 
 const TYPE = 'Update Foundation Account';
 
 type TransactionType = UpdateInstruction<FoundationAccount>;
 
 export default class FoundationAccountHandler
+    extends UpdateHandlerBase<TransactionType>
     implements
         UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
-    confirmType(
-        transaction: UpdateInstruction<UpdateInstructionPayload>
-    ): TransactionType {
-        if (isFoundationAccount(transaction)) {
-            return transaction;
-        }
-        throw Error('Invalid transaction type was given as input.');
+    constructor() {
+        super(TYPE, isFoundationAccount);
     }
 
     async createTransaction(
@@ -87,11 +83,5 @@ export default class FoundationAccountHandler
         return authorizations.foundationAccount;
     }
 
-    print = () => undefined;
-
     update = UpdateFoundationAccount;
-
-    title = `Foundation Transaction | ${TYPE}`;
-
-    type = TYPE;
 }

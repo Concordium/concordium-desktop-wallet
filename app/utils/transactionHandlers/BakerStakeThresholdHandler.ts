@@ -9,28 +9,24 @@ import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     UpdateInstruction,
-    UpdateInstructionPayload,
     isBakerStakeThreshold,
     BakerStakeThreshold,
     MultiSignatureTransaction,
     UpdateType,
 } from '../types';
 import { serializeBakerStakeThreshold } from '../UpdateSerialization';
+import UpdateHandlerBase from './UpdateHandlerBase';
 
 const TYPE = 'Update Baker Stake Threshold';
 
 type TransactionType = UpdateInstruction<BakerStakeThreshold>;
 
-export default class EuroPerEnergyHandler
+export default class BakerStakeThresholdHandler
+    extends UpdateHandlerBase<TransactionType>
     implements
         UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
-    confirmType(
-        transaction: UpdateInstruction<UpdateInstructionPayload>
-    ): TransactionType {
-        if (isBakerStakeThreshold(transaction)) {
-            return transaction;
-        }
-        throw Error('Invalid transaction type was given as input.');
+    constructor() {
+        super(TYPE, isBakerStakeThreshold);
     }
 
     async createTransaction(
@@ -86,11 +82,5 @@ export default class EuroPerEnergyHandler
         return authorizations.bakerStakeThreshold;
     }
 
-    print = () => undefined;
-
     update = UpdateBakerStakeThreshold;
-
-    title = `Foundation Transaction | ${TYPE}`;
-
-    type = TYPE;
 }

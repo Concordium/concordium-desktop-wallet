@@ -1,5 +1,7 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import { Route, Switch } from 'react-router';
+import { foundationTransactionsEnabledSelector } from '~/features/SettingsSlice';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
 import routes from '~/constants/routes.json';
@@ -7,6 +9,7 @@ import routes from '~/constants/routes.json';
 import BrowseTransactionFile from '../menu/BrowseTransactionFile';
 import ExportKeyList from '../menu/ExportKeyList';
 import MultiSignatureCreateProposalList from '../menu/MultiSignatureCreateProposalList';
+import ImportProposal from '../menu/ImportProposal';
 import ProposalList from '../menu/ProposalList';
 
 import styles from './MultiSignaturePage.module.scss';
@@ -14,6 +17,10 @@ import styles from './MultiSignaturePage.module.scss';
 const { Header, Master, Detail } = MasterDetailPageLayout;
 
 export default function MultiSignaturePage() {
+    const foundationTransactionsEnabled: boolean = useSelector(
+        foundationTransactionsEnabledSelector
+    );
+
     return (
         <MasterDetailPageLayout>
             <Header>
@@ -39,6 +46,14 @@ export default function MultiSignaturePage() {
                 >
                     Sign a transaction
                 </ButtonNavLink>
+                {foundationTransactionsEnabled && (
+                    <ButtonNavLink
+                        to={routes.MULTISIGTRANSACTIONS_IMPORT_PROPOSAL}
+                        className={styles.link}
+                    >
+                        Import proposals
+                    </ButtonNavLink>
+                )}
                 <ButtonNavLink
                     to={routes.MULTISIGTRANSACTIONS_EXPORT_KEY}
                     className={styles.link}
@@ -60,6 +75,10 @@ export default function MultiSignaturePage() {
                     <Route
                         path={routes.MULTISIGTRANSACTIONS_BROWSE_TRANSACTION}
                         component={BrowseTransactionFile}
+                    />
+                    <Route
+                        path={routes.MULTISIGTRANSACTIONS_IMPORT_PROPOSAL}
+                        component={ImportProposal}
                     />
                     <Route
                         path={routes.MULTISIGTRANSACTIONS_EXPORT_KEY}

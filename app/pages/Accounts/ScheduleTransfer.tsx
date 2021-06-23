@@ -14,6 +14,7 @@ import { stringify } from '~/utils/JSONHelper';
 import ExternalTransfer from '~/components/Transfers/ExternalTransfer';
 import ensureExchangeRateAndNonce from '~/components/Transfers/ensureExchangeRateAndNonce';
 import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
+import { isMultiSig } from '~/utils/accountHelpers';
 
 interface Props {
     account: Account;
@@ -33,7 +34,7 @@ function ScheduleTransfer({
 }: Props) {
     const dispatch = useDispatch();
 
-    if (account.signatureThreshold && account.signatureThreshold > 1) {
+    if (isMultiSig(account)) {
         return (
             <Redirect
                 to={createTransferWithAccountRoute(

@@ -9,9 +9,9 @@ import {
     TransactionKindId,
     Fraction,
 } from '~/utils/types';
-import SignTransaction from './SignTransaction';
 import { ensureNonce } from '~/components/Transfers/withNonce';
-import LoadingComponent from './LoadingComponent';
+import Loading from '~/cross-app-components/Loading';
+import SignTransaction from './SignTransaction';
 
 interface Props {
     transactionKind: TransactionKindId;
@@ -69,4 +69,6 @@ function CreateTransaction({
     return <SignTransaction transaction={transaction} account={account} />;
 }
 
-export default ensureNonce(CreateTransaction, LoadingComponent);
+export default ensureNonce(CreateTransaction, () => (
+    <Loading text="Fetching information from the node" />
+));

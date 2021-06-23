@@ -47,7 +47,7 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(false), {
 
     mode: 'development',
 
-    target: 'electron-renderer',
+    target: 'web',
 
     entry: [
         'core-js',
@@ -59,6 +59,7 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(false), {
     ],
 
     output: {
+        libraryTarget: 'var',
         publicPath: `http://localhost:${port}/dist/`,
         filename: 'renderer.dev.js',
     },

@@ -11,6 +11,7 @@ import { serializeTransferPayload } from '../transactionSerialization';
 import {
     AccountTransactionHandler,
     CreateTransactionInput,
+    TransactionExportType,
 } from '../transactionTypes';
 
 export default abstract class TransferHandler<
@@ -70,6 +71,15 @@ export default abstract class TransferHandler<
         _identiconImage?: string
     ): JSX.Element | undefined {
         return undefined;
+    }
+
+    getFileNameForExport(
+        _: TransactionType,
+        exportType: TransactionExportType
+    ) {
+        return `${this.type
+            .toLowerCase()
+            .replace(/\s/g, '-')}_${exportType}.json`;
     }
 
     title = `Account Transaction | ${this.type}`;
