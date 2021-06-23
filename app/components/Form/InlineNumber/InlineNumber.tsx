@@ -2,6 +2,7 @@
 import clsx from 'clsx';
 import React, {
     InputHTMLAttributes,
+    MouseEventHandler,
     useCallback,
     useEffect,
     useLayoutEffect,
@@ -72,7 +73,7 @@ export interface InlineNumberProps
      */
     trimLeadingZeros?: boolean;
     /**
-     * If set, clears input when user clicks the field. Defautls to false.
+     * If set, clears input when user clicks the field. Defaults to false.
      */
     clearOnClick?: boolean;
     customFormatter?(v?: string): string;
@@ -174,6 +175,16 @@ export default function InlineNumber({
         isInvalid,
     ]);
 
+    const handleClick: MouseEventHandler<HTMLInputElement> = useCallback(
+        (e) => {
+            if (clearOnClick && e.currentTarget.value === formattedFallback) {
+                setInnerValue('');
+                e.currentTarget.style.width = '6px';
+            }
+        },
+        [formattedFallback, clearOnClick]
+    );
+
     const handleFocus = useCallback(() => {
         setIsFocused(true);
         onFocus();
@@ -201,12 +212,7 @@ export default function InlineNumber({
             onChange={(e) => setInnerValue(e.target.value)}
             onBlur={handleBlur}
             onFocus={handleFocus}
-            onClick={(e) => {
-                if (clearOnClick) {
-                    setInnerValue('');
-                    e.currentTarget.style.width = '6px';
-                }
-            }}
+            onClick={handleClick}
             ref={ref}
             {...inputProps}
             style={{ width: 5 }} // To prevent initial UI jitter.
