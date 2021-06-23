@@ -1,7 +1,7 @@
 import { createSlice, Dispatch } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
-import { getGlobal } from '../database/GlobalDao';
+import getGlobal from '../database/GlobalDao';
 import { Global } from '../utils/types';
 
 interface GlobalState {

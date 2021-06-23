@@ -29,7 +29,7 @@ import {
 } from '~/utils/transactionHelpers';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import routes from '~/constants/routes.json';
-import { saveFile } from '~/utils/FileHelper';
+import saveFile from '~/utils/FileHelper';
 import {
     useAccountInfo,
     useChainParameters,

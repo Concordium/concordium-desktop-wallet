@@ -1,4 +1,5 @@
 /* eslint-disable no-await-in-loop */
+import { Buffer } from 'buffer/';
 import { Transport } from './Transport';
 import { HigherLevelKeyUpdate, UpdateInstruction } from '../../utils/types';
 import pathAsBuffer from './Path';

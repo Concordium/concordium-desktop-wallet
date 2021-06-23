@@ -1,3 +1,4 @@
+import type { Buffer } from 'buffer/';
 import { findEntries } from '../database/AddressBookDao';
 import { getTransactionStatus } from '../node/nodeRequests';
 import { getDefaultExpiry, getNow, secondsSinceUnixEpoch } from './timeHelpers';

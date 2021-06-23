@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer/';
 import { Transport } from './Transport';
 import {
     AccountTransaction,
@@ -353,7 +354,7 @@ async function signAddBaker(
     const part1 = Buffer.concat([
         pathAsBuffer(path),
         header,
-        Uint8Array.of(TransactionKindId.Add_baker),
+        Buffer.from(Uint8Array.of(TransactionKindId.Add_baker)),
     ]);
 
     const part2 = serializeBakerVerifyKeys(transaction.payload);
@@ -395,7 +396,7 @@ async function signUpdateBakerKeys(
     const part1 = Buffer.concat([
         pathAsBuffer(path),
         header,
-        Uint8Array.of(TransactionKindId.Update_baker_keys),
+        Buffer.from(Uint8Array.of(TransactionKindId.Update_baker_keys)),
     ]);
 
     const part2 = serializeBakerVerifyKeys(transaction.payload);
@@ -436,7 +437,7 @@ async function signRemoveBaker(
     const cdata = Buffer.concat([
         pathAsBuffer(path),
         header,
-        Uint8Array.of(TransactionKindId.Remove_baker),
+        Buffer.from(Uint8Array.of(TransactionKindId.Remove_baker)),
     ]);
 
     const p1 = 0x00;

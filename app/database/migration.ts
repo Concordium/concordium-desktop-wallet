@@ -3,10 +3,9 @@ import WebpackMigrationSource from './WebpackMigrationSource';
 
 /**
  * Executes the database migrations in from the ./migrations directory.
- * If the migrations have already been run, then nothing happens. If the migrations
- * fail to run, then application is destroyed to avoid data corruption.
+ * If the migrations have already been run, then nothing happens.
  */
-export default async function migrate() {
+export default async function migrate(): Promise<boolean> {
     const config = {
         migrationSource: new WebpackMigrationSource(
             require.context('./migrations', false, /.ts$/)
@@ -15,9 +14,8 @@ export default async function migrate() {
 
     try {
         await (await knex()).migrate.latest(config);
+        return true;
     } catch (error) {
-        process.nextTick(() => {
-            process.exit(0);
-        });
+        return false;
     }
 }
