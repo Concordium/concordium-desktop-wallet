@@ -1,6 +1,4 @@
-import ipcCommands, {
-    saveFile as saveFileIpc,
-} from '../constants/ipcCommands.json';
+import ipcCommands from '../constants/ipcCommands.json';
 
 /**
  * Opens an 'open file' prompt where the user can select a file to be read. The
@@ -54,7 +52,7 @@ export default async function saveFile(
     }
 
     return window.ipcRenderer.invoke(
-        saveFileIpc,
+        ipcCommands.saveFile,
         saveFileDialog.filePath,
         data
     );
