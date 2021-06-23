@@ -46,6 +46,10 @@ def parse_and_validate_amount(amountString: str, rowNumber: int):
 		print("An amount with more than 6 decimals, which cannot be resolved into a valid µGTU, was given: " + amountString + " at row " + str(rowNumber))
 		sys.exit(2)
 
+	if (not all(map(lambda x: x.isnumeric(),amountSplit))):
+		print("An amount, which was not a valid number, was given: " + amountString + " at row " + str(rowNumber))
+		sys.exit(2)
+
 	amount = int(Decimal(amountString) * 1000000)
 	if (amount > 18446744073709551615):
 		print("An amount that is greater than the maximum GTU possible for one release (" + str(18446744073709551615/1000000) + ") was given: " + amountString + " at row " + str(rowNumber))
