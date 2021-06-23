@@ -1,3 +1,4 @@
+import type { Buffer } from 'buffer/';
 import { FieldValues } from 'react-hook-form';
 import { AccountPathInput } from '~/features/ledger/Path';
 import {

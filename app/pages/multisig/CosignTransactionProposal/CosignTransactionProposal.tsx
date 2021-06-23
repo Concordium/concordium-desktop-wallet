@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
@@ -38,7 +38,7 @@ import ExpiredTransactionView from '../ExpiredTransactionView';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 import styles from './CosignTransactionProposal.module.scss';
 import { signUpdateInstruction, signAccountTransaction } from './util';
-import { saveFile } from '~/utils/FileHelper';
+import saveFile from '~/utils/FileHelper';
 import Button from '~/cross-app-components/Button';
 import { LedgerCallback } from '~/components/ledger/util';
 import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
@@ -81,10 +81,15 @@ function CosignTransactionProposal({
 
     const [transactionHandler] = useState(() => findHandler(transactionObject));
 
-    const transactionSignDigest = useMemo(
-        () => getTransactionSignDigest(transactionObject),
-        [transactionObject]
-    );
+    const [
+        transactionSignDigest,
+        setTransactionSignDigest,
+    ] = useState<string>();
+    useEffect(() => {
+        getTransactionSignDigest(transactionObject)
+            .then((digest) => setTransactionSignDigest(digest))
+            .catch(() => {});
+    }, [transactionObject]);
 
     const signingFunction: LedgerCallback = async (
         ledger: ConcordiumLedgerClient,

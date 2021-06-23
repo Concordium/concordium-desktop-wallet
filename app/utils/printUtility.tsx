@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     MultiSignatureTransactionStatus,
     AccountTransaction,
@@ -103,29 +103,41 @@ type HashRowsProps = {
 };
 
 export function HashRows({ transaction }: HashRowsProps) {
+    const [digestToSign, setDigestToSign] = useState<string>();
+    const [transactionHash, setTransactionHash] = useState<string>();
+
     const acc = useAccount(transaction.sender);
     const threshold = acc?.signatureThreshold ?? 0;
+
+    useEffect(() => {
+        getAccountTransactionSignDigest(transaction)
+            .then((digest) => {
+                return setDigestToSign(digest.toString('hex'));
+            })
+            .catch(() => {});
+        if (
+            'signatures' in transaction &&
+            Object.keys(transaction.signatures).length >= threshold
+        ) {
+            getAccountTransactionHash(transaction, transaction.signatures)
+                .then((hash) => {
+                    return setTransactionHash(hash.toString('hex'));
+                })
+                .catch(() => {});
+        }
+    }, [transaction, threshold]);
 
     return (
         <>
             <tr>
                 <td>Digest to sign</td>
-                <td>
-                    {getAccountTransactionSignDigest(transaction).toString(
-                        'hex'
-                    )}
-                </td>
+                <td>{digestToSign}</td>
             </tr>
             {'signatures' in transaction &&
             Object.keys(transaction.signatures).length >= threshold ? (
                 <tr>
                     <td>Transaction hash</td>
-                    <td>
-                        {getAccountTransactionHash(
-                            transaction,
-                            transaction.signatures
-                        ).toString('hex')}
-                    </td>
+                    <td>{transactionHash}</td>
                 </tr>
             ) : null}
         </>
@@ -171,15 +183,24 @@ export const displayExpiry = (expiry: bigint) => (
     </tr>
 );
 
-const digestToSignFooter = (transaction: AccountTransaction) => (
-    <p style={{ textAlign: 'right', paddingLeft: '10px' }}>
-        Digest to sign:{' '}
-        {getAccountTransactionSignDigest(transaction)
-            .toString('hex')
-            .substring(0, 8)}
-        ...
-    </p>
-);
+const DigestToSignFooter = (transaction: AccountTransaction) => {
+    const [digestToSign, setDigestToSign] = useState<string>();
+
+    useEffect(() => {
+        getAccountTransactionSignDigest(transaction)
+            .then((digest) => {
+                return setDigestToSign(digest.toString('hex'));
+            })
+            .catch(() => {});
+    }, [transaction]);
+
+    return (
+        <p style={{ textAlign: 'right', paddingLeft: '10px' }}>
+            Digest to sign: {digestToSign && digestToSign.substring(0, 8)}
+            ...
+        </p>
+    );
+};
 
 const timestamp = () => (
     <p style={{ textAlign: 'left', paddingRight: '10px' }}>
@@ -194,7 +215,7 @@ const timestamp = () => (
 
 export const standardPageFooter = (transaction: AccountTransaction) => (
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        {digestToSignFooter(transaction)} {timestamp()}
+        {DigestToSignFooter(transaction)} {timestamp()}
     </div>
 );
 

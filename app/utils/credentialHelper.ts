@@ -23,7 +23,8 @@ export async function findLocalDeployedCredential(
         throw new Error('Invalid input. A wallet id has to be supplied');
     }
 
-    const result = (await getCredentialsOfAccount(accountAddress))
+    const credentialsOfAccount = await getCredentialsOfAccount(accountAddress);
+    const result = credentialsOfAccount
         .filter(instanceOfDeployedCredential)
         .filter(instanceOfCredentialWithIdentityNumber)
         .find((credential) => credential.walletId === walletId);

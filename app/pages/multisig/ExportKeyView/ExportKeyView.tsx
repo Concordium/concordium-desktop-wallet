@@ -10,7 +10,7 @@ import {
     getGovernanceLevel2Path,
     getGovernanceRootPath,
 } from '~/features/ledger/Path';
-import { saveFile } from '~/utils/FileHelper';
+import saveFile from '~/utils/FileHelper';
 import {
     ExportKeyType,
     PublicKeyExportFormat,

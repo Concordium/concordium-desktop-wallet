@@ -1,5 +1,7 @@
-import * as crypto from 'crypto';
-import * as bs58check from 'bs58check';
+import { Buffer } from 'buffer/';
+import bs58check from 'bs58check';
+import ipcCommands from '../constants/ipcCommands.json';
+
 import {
     VerifyKey,
     YearMonth,
@@ -19,8 +21,9 @@ export function putBase58Check(
     }
 }
 
-export function base58ToBuffer(base58Sstring: string) {
-    return bs58check.decode(base58Sstring).slice(1); // remove the first check byte
+export function base58ToBuffer(base58Sstring: string): Buffer {
+    // Remove the first check byte
+    return Buffer.from(bs58check.decode(base58Sstring).slice(1));
 }
 
 type Indexable = Buffer | Uint8Array;
@@ -52,12 +55,9 @@ export function encodeWord64(value: bigint): Buffer {
     return Buffer.from(new Uint8Array(arr));
 }
 
-export function hashSha256(...inputs: Indexable[]): Buffer {
-    const hash = crypto.createHash('sha256');
-
-    inputs.forEach((input) => hash.update(input));
-
-    return hash.digest();
+export async function hashSha256(...inputs: Indexable[]): Promise<Buffer> {
+    const hash = await window.ipcRenderer.invoke(ipcCommands.sha256, inputs);
+    return Buffer.from(hash);
 }
 
 export function parseHexString(hexString: string): Buffer {
@@ -145,7 +145,9 @@ export function serializeCredentialDeploymentInformation(
             serializeVerifyKey
         )
     );
-    buffers.push(Uint8Array.of(credential.credentialPublicKeys.threshold));
+    buffers.push(
+        Buffer.from(Uint8Array.of(credential.credentialPublicKeys.threshold))
+    );
     buffers.push(Buffer.from(credential.credId, 'hex'));
     buffers.push(encodeWord32(credential.ipIdentity));
     buffers.push(putInt8(credential.revocationThreshold));

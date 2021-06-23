@@ -1,5 +1,4 @@
 /* eslint no-console: off, @typescript-eslint/no-var-requires: off */
-
 /**
  * This module executes inside of electron's main process. You can start
  * electron renderer process from here and communicate with the other processes
@@ -11,15 +10,27 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, shell, BrowserWindow, dialog, ipcMain } from 'electron';
+import { app, shell, BrowserWindow, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import ipcCommands from './constants/ipcCommands.json';
 import ipcRendererCommands from './constants/ipcRendererCommands.json';
-import { setClientLocation, grpcCall } from './node/GRPCClient';
-import ConcordiumNodeClient from './node/ConcordiumNodeClient';
-import { ConsensusStatus } from './node/NodeApiTypes';
-import { JsonResponse } from './proto/concordium_p2p_rpc_pb';
+import initializeIpcHandlers from './ipc/http';
+import initializeLedgerIpcHandlers from './ipc/ledger';
+import initializeCryptoIpcHandlers from './ipc/crypto';
+import initializeDatabaseGeneralIpcHandlers from './ipc/database/general';
+import initializeDatabaseAccountIpcHandlers from './ipc/database/accountDao';
+import initializeDatabaseAddressBookIpcHandlers from './ipc/database/addressBookDao';
+import initializeDatabaseCredentialIpcHandlers from './ipc/database/credentialDao';
+import initializeDatabaseIdentityIpcHandlers from './ipc/database/identityDao';
+import initializeDatabaseGenesisAndGlobalIpcHandlers from './ipc/database/genesisAndGlobalDao';
+import initializeDatabaseMultiSignatureTransactionIpcHandlers from './ipc/database/multiSignatureProposalDao';
+import initializeDatabaseSettingsIpcHandlers from './ipc/database/settingsDao';
+import initializeDatabaseTransactionsIpcHandlers from './ipc/database/transactionsDao';
+import initializeDatabaseWalletIpcHandlers from './ipc/database/walletDao';
+import initializeFilesIpcHandlers from './ipc/files';
+import initializeGrpcIpcHandlers from './ipc/grpc';
+import initializeClipboardIpcHandlers from './ipc/clipboard';
 
 export default class AppUpdater {
     constructor() {
@@ -60,48 +71,42 @@ const installExtensions = async () => {
 };
 
 const createWindow = async () => {
-    if (
-        process.env.NODE_ENV === 'development' ||
-        process.env.DEBUG_PROD === 'true'
-    ) {
+    if (process.env.DEBUG_PROD === 'true') {
         await installExtensions();
     }
 
     const titleSuffix = process.env.TARGET_NET || '';
 
+    /**
+     * Do not change any of the webpreference settings without consulting the
+     * security documentation provided
+     */
     mainWindow = new BrowserWindow({
         title: `Concordium Wallet ${titleSuffix}`,
         show: false,
         width: 4096,
         height: 2912,
         webPreferences:
-            (process.env.NODE_ENV === 'development' ||
-                process.env.E2E_BUILD === 'true') &&
-            process.env.ERB_SECURE !== 'true'
+            process.env.NODE_ENV === 'development'
                 ? {
-                      nodeIntegration: true,
+                      preload: path.join(__dirname, 'preload.dev.js'),
+                      nodeIntegration: false,
                       webviewTag: true,
+                      devTools: true,
                   }
                 : {
-                      preload: path.join(__dirname, 'dist/renderer.prod.js'),
-                      webviewTag: true,
+                      preload: path.join(__dirname, 'dist/preload.prod.js'),
                       nodeIntegration: false,
-                      contextIsolation: true,
+                      webviewTag: true,
                       devTools: false,
                   },
     });
 
-    printWindow = new BrowserWindow({
-        parent: mainWindow,
-        modal: false,
-        show: false,
-        webPreferences: {
-            nodeIntegration: false,
-            devTools: false,
-        },
-    });
-
-    mainWindow.loadURL(`file://${__dirname}/app.html`);
+    if (process.env.NODE_ENV === 'production') {
+        mainWindow.loadURL(`file://${__dirname}/app.html`);
+    } else {
+        mainWindow.loadURL(`file://${__dirname}/app-dev.html`);
+    }
 
     mainWindow.webContents.on('did-finish-load', () => {
         if (!mainWindow) {
@@ -128,79 +133,40 @@ const createWindow = async () => {
 
     mainWindow.setMenuBarVisibility(false);
 
+    printWindow = new BrowserWindow({
+        parent: mainWindow,
+        modal: false,
+        show: false,
+        webPreferences: {
+            nodeIntegration: false,
+            devTools: false,
+        },
+    });
+
     // Remove this if your app does not use auto updates
     // eslint-disable-next-line
     new AppUpdater();
+
+    // Setup the IPC methods, so that the renderer threads
+    // can access the exposed methods. This will be moved to
+    // the pre-load script when turning on context isolation.
+    initializeIpcHandlers(ipcMain);
+    initializeLedgerIpcHandlers(ipcMain, mainWindow);
+    initializeCryptoIpcHandlers(ipcMain);
+    initializeFilesIpcHandlers(ipcMain);
+    initializeGrpcIpcHandlers(ipcMain);
+    initializeDatabaseGeneralIpcHandlers(ipcMain);
+    initializeDatabaseAccountIpcHandlers(ipcMain);
+    initializeDatabaseAddressBookIpcHandlers(ipcMain);
+    initializeDatabaseCredentialIpcHandlers(ipcMain);
+    initializeDatabaseIdentityIpcHandlers(ipcMain);
+    initializeDatabaseGenesisAndGlobalIpcHandlers(ipcMain);
+    initializeDatabaseMultiSignatureTransactionIpcHandlers(ipcMain);
+    initializeDatabaseSettingsIpcHandlers(ipcMain);
+    initializeDatabaseTransactionsIpcHandlers(ipcMain);
+    initializeDatabaseWalletIpcHandlers(ipcMain);
+    initializeClipboardIpcHandlers(ipcMain);
 };
-
-// Provides access to the userData path from renderer processes.
-ipcMain.handle(ipcCommands.appGetPath, () => {
-    return app.getPath('userData');
-});
-
-// Provides access to file dialog windows from renderer processes.
-ipcMain.handle(ipcCommands.openFileDialog, async (_event, opts) => {
-    return dialog.showOpenDialog(opts);
-});
-
-// Provides access to save file dialog from renderer processes.
-ipcMain.handle(ipcCommands.saveFileDialog, async (_event, opts) => {
-    return dialog.showSaveDialog(opts);
-});
-
-// Updates the location of the grpc endpoint.
-ipcMain.handle(
-    ipcCommands.grpcSetLocation,
-    async (_event, address: string, port: string) => {
-        return setClientLocation(address, port);
-    }
-);
-
-// Performs the given grpc command, with the given input;
-ipcMain.handle(
-    ipcCommands.grpcCall,
-    async (_event, command: string, input: Record<string, string>) => {
-        try {
-            const response = await grpcCall(command, input);
-            return { successful: true, response };
-        } catch (error) {
-            return { successful: false, error };
-        }
-    }
-);
-
-// Creates a standalone GRPC client for testing the connection
-// to a node. This is used to verify that when changing connection
-// that the new node is on the same blockchain as the wallet was previously connected to.
-ipcMain.handle(
-    ipcCommands.grpcNodeConsensusAndGlobal,
-    async (_event, address: string, port: string) => {
-        try {
-            const nodeClient = new ConcordiumNodeClient(
-                address,
-                Number.parseInt(port, 10)
-            );
-            const consensusStatusSerialized = await nodeClient.getConsensusStatus();
-            const consensusStatus: ConsensusStatus = JSON.parse(
-                JsonResponse.deserializeBinary(
-                    consensusStatusSerialized
-                ).getValue()
-            );
-            const globalSerialized = await nodeClient.getCryptographicParameters(
-                consensusStatus.lastFinalizedBlock
-            );
-            return {
-                successful: true,
-                response: {
-                    consensus: consensusStatusSerialized,
-                    global: globalSerialized,
-                },
-            };
-        } catch (error) {
-            return { successful: false, error };
-        }
-    }
-);
 
 enum PrintErrorTypes {
     Cancelled = 'cancelled',
@@ -208,8 +174,7 @@ enum PrintErrorTypes {
     NoPrinters = 'no valid printers available',
 }
 
-// Prints the given body.
-ipcMain.handle(ipcCommands.print, (_event, body) => {
+async function print(body: string) {
     return new Promise<string | void>((resolve, reject) => {
         if (!printWindow) {
             reject(new Error('Internal error: Unable to print'));
@@ -230,6 +195,11 @@ ipcMain.handle(ipcCommands.print, (_event, body) => {
             });
         }
     });
+}
+
+// Prints the given body.
+ipcMain.handle(ipcCommands.print, async (_event, body) => {
+    return print(body);
 });
 
 ipcMain.handle(ipcCommands.openUrl, (_event, url: string) => {
@@ -238,10 +208,6 @@ ipcMain.handle(ipcCommands.openUrl, (_event, url: string) => {
     }
     shell.openExternal(url);
 });
-
-/**
- * Add event listeners...
- */
 
 app.on('window-all-closed', () => {
     // Respect the OSX convention of having the application in memory even

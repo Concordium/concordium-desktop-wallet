@@ -7,5 +7,7 @@
     "identitiesTable": "identities",
     "multiSignatureProposalTable": "multi_signature_proposal",
     "walletTable": "wallet",
-    "transactionTable": "transactions"
+    "transactionTable": "transactions",
+    "settingsTable": "setting",
+    "settingsGroupTable": "setting_group"
 }
