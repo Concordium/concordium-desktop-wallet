@@ -47,6 +47,16 @@ export default function BrowseTransactionFile() {
             type = 'UpdateInstruction';
         } else if (instanceOfAccountTransaction(transactionObject)) {
             type = 'AccountTransaction';
+
+            if (!transactionObject.nonce) {
+                setShowError({
+                    show: true,
+                    header: 'Missing nonce',
+                    content:
+                        'The chosen file contains an account transaction without a nonce value and it is therefore invalid.',
+                });
+                return;
+            }
         } else {
             setShowError({
                 show: true,
@@ -67,13 +77,13 @@ export default function BrowseTransactionFile() {
     }
 
     useEffect(() => {
-        if (!files) return;
-
-        files
-            .item(0)
-            ?.arrayBuffer()
-            .then((ab) => Buffer.from(ab))
-            .then(loadTransactionFile);
+        if (files) {
+            files
+                .item(0)
+                ?.arrayBuffer()
+                .then((ab) => Buffer.from(ab))
+                .then(loadTransactionFile);
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [files]);
 

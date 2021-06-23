@@ -4,12 +4,10 @@ import { SubmitHandler, useForm, Validate } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import Form from '~/components/Form';
 import PageLayout from '~/components/PageLayout';
-import { setPassword } from '~/database/knex';
-import migrate from '~/database/migration';
 import initApplication from '~/utils/initialize';
 import { passwordValidators } from '~/utils/passwordHelpers';
 import routes from '~/constants/routes.json';
-
+import ipcCommands from '~/constants/ipcCommands.json';
 import homeStyles from '../Home.module.scss';
 import styles from './SelectPassword.module.scss';
 
@@ -26,8 +24,11 @@ export default function SelectPassword() {
 
     const handleSubmit: SubmitHandler<PasswordForm> = useCallback(
         async (values) => {
-            setPassword(values.password);
-            await migrate();
+            await window.ipcRenderer.invoke(
+                ipcCommands.database.setPassword,
+                values.password
+            );
+            await window.ipcRenderer.invoke(ipcCommands.database.migrate);
             await initApplication(dispatch);
             dispatch(push({ pathname: routes.HOME_PASSWORD_SET }));
         },

@@ -1,15 +1,15 @@
-import { ipcRenderer } from 'electron';
 import { useEffect } from 'react';
+import { ipcRenderer } from '~/global';
 
 // eslint-disable-next-line import/prefer-default-export
 export const useIpcRendererEvent: (
     ...args: Parameters<typeof ipcRenderer.on>
 ) => void = (channel, listener) => {
     useEffect(() => {
-        ipcRenderer.on(channel, listener);
+        window.ipcRenderer.on(channel, listener);
 
         return () => {
-            ipcRenderer.off(channel, listener);
+            window.ipcRenderer.off(channel, listener);
         };
     }, [channel, listener]);
 };

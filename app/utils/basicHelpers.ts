@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer/';
 import { Fraction } from './types';
 
 /**
@@ -156,4 +157,8 @@ export function collapseFraction({ numerator, denominator }: Fraction): bigint {
  */
 export function abs(value: bigint) {
     return value < 0n ? -value : value;
+}
+
+export function max(first: bigint, second: bigint) {
+    return first > second ? first : second;
 }

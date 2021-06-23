@@ -6,11 +6,6 @@ import { addPendingIdentity } from '~/features/IdentitySlice';
 import { addPendingAccount } from '~/features/AccountSlice';
 import routes from '~/constants/routes.json';
 import {
-    getPromise,
-    getResponseBody,
-    performIdObjectRequest,
-} from '~/utils/httpRequests';
-import {
     IdentityProvider,
     Dispatch,
     SignedIdRequest,
@@ -19,16 +14,17 @@ import {
 } from '~/utils/types';
 import { confirmIdentityAndInitialAccount } from '~/utils/IdentityStatusPoller';
 import Loading from '~/cross-app-components/Loading';
-import { getAddressFromCredentialId } from '~/utils/rustInterface';
+import ipcCommands from '../../../constants/ipcCommands.json';
+import { performIdObjectRequest } from '~/utils/httpRequests';
 
+import { getAddressFromCredentialId } from '~/utils/rustInterface';
 import generalStyles from '../IdentityIssuance.module.scss';
 import styles from './ExternalIssuance.module.scss';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
-async function getBody(url: string) {
-    const response = await getPromise(url);
-    return getResponseBody(response);
+async function getBody(url: string): Promise<string> {
+    return window.ipcRenderer.invoke(ipcCommands.httpGet, url);
 }
 
 /**
