@@ -158,7 +158,7 @@ export default function ExternalHook(
             onSignError(e);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ledgerCallback, onSignError]);
+    }, [client, ledgerCallback, onSignError]);
 
     return {
         isReady,
