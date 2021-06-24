@@ -35,8 +35,7 @@
             "removeAccount": "DB_ACCOUNTS_REMOVE",
             "updateAccount": "DB_ACCOUNTS_UPDATE",
             "findAccounts": "DB_ACCOUNTS_FIND",
-            "removeInitialAccount": "DB_ACCOUNTS_REMOVE_INITIAL",
-            "confirmInitialAccount": "DB_ACCOUNTS_CONFIRM_INITIAL"
+            "updateInitialAccount": "DB_ACCOUNTS_UPDATE_INITIAL"
         },
         "addressBook": {
             "getAll": "DB_ADDRESS_BOOK_GET_ALL",
@@ -68,7 +67,8 @@
             "getNextIdentityNumber": "DB_IDENTITY_GET_NEXT_IDENTITY_NUMBER",
             "insert": "DB_IDENTITY_INSERT",
             "update": "DB_IDENTITY_UPDATE",
-            "getIdentitiesForWallet": "DB_IDENTITY_GET_FOR_WALLET"
+            "getIdentitiesForWallet": "DB_IDENTITY_GET_FOR_WALLET",
+            "removeIdentityAndInitialAccount": "DB_IDENTITY_REMOVE_AND_INITIAL"
         },
         "genesisAndGlobal": {
             "setValue": "DB_GENESIS_AND_GLOBAL_SET"

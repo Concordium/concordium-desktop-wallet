@@ -2,10 +2,7 @@ import { Dispatch, Identity, IdentityStatus } from './types';
 import { getIdObject } from './httpRequests';
 import { getAccountsOfIdentity } from '../database/AccountDao';
 import { confirmIdentity, rejectIdentity } from '../features/IdentitySlice';
-import {
-    confirmInitialAccount,
-    removeInitialAccount,
-} from '../features/AccountSlice';
+import { confirmInitialAccount } from '../features/AccountSlice';
 import { isInitialAccount } from './accountHelpers';
 import { addToAddressBook } from '../features/AddressBookSlice';
 import { getAllIdentities } from '../database/IdentityDao';
@@ -28,7 +25,6 @@ export async function confirmIdentityAndInitialAccount(
         token = await getIdObject(location);
         if (!token) {
             await rejectIdentity(dispatch, identityId);
-            await removeInitialAccount(dispatch, identityId);
         } else {
             const { accountAddress } = token;
             const credential = token.credential.value.credential.contents;
@@ -55,7 +51,6 @@ export async function confirmIdentityAndInitialAccount(
         }
     } catch (err) {
         await rejectIdentity(dispatch, identityId);
-        await removeInitialAccount(dispatch, identityId);
     }
 }
 

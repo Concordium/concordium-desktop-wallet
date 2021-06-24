@@ -2,6 +2,7 @@
 import { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import { HTMLAttributes } from 'react';
 import { RegisterOptions } from 'react-hook-form';
+import { LocationDescriptorObject } from 'history';
 import { RejectReason } from './node/RejectReasonHelper';
 import { ExternalCredential, Genesis } from '~/database/types';
 
@@ -1201,7 +1202,7 @@ export interface TransactionEvent {
 
 export interface Action {
     label: string;
-    location?: string;
+    location?: LocationDescriptorObject | string;
 }
 
 export type ClassName = Pick<HTMLAttributes<HTMLElement>, 'className'>;

@@ -5,6 +5,7 @@ import {
     getAllIdentities,
     insertIdentity,
     updateIdentity,
+    removeIdentityAndInitialAccount as removeIdentityInDatabase,
 } from '../database/IdentityDao';
 import {
     Identity,
@@ -13,6 +14,8 @@ import {
     IdentityProvider,
     Dispatch,
 } from '../utils/types';
+// eslint-disable-next-line import/no-cycle
+import { loadAccounts, rejectInitialAccount } from './AccountSlice';
 
 interface IdentityState {
     identities: Identity[];
@@ -34,10 +37,20 @@ const identitySlice = createSlice({
         chooseIdentity: (state, input) => {
             state.chosenIdentityId = input.payload;
         },
+        removeIdentity: (state, input) => {
+            const removedIdentityId = input.payload;
+            state.identities = state.identities.filter(
+                (identity) => identity.id !== removedIdentityId
+            );
+        },
     },
 });
 
-export const { updateIdentities, chooseIdentity } = identitySlice.actions;
+export const {
+    updateIdentities,
+    chooseIdentity,
+    removeIdentity: removeIdentityInRedux,
+} = identitySlice.actions;
 
 export const identitiesSelector = (state: RootState) =>
     state.identities.identities;
@@ -99,8 +112,18 @@ export async function confirmIdentity(
     await loadIdentities(dispatch);
 }
 
+export async function removeIdentityAndInitialAccount(
+    dispatch: Dispatch,
+    identityId: number
+) {
+    await removeIdentityInDatabase(identityId);
+    await loadAccounts(dispatch);
+    return dispatch(removeIdentityInRedux(identityId));
+}
+
 export async function rejectIdentity(dispatch: Dispatch, identityId: number) {
     await updateIdentity(identityId, { status: IdentityStatus.Rejected });
+    await rejectInitialAccount(dispatch, identityId);
     await loadIdentities(dispatch);
 }
 

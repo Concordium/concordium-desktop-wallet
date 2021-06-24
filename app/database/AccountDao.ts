@@ -61,19 +61,12 @@ export async function removeAccount(accountAddress: string) {
     );
 }
 
-export async function removeInitialAccount(identityId: number) {
-    return window.ipcRenderer.invoke(
-        ipcCommands.database.accounts.removeInitialAccount,
-        identityId
-    );
-}
-
-export async function confirmInitialAccount(
+export async function updateInitialAccount(
     identityId: number,
     updatedValues: Partial<Account>
 ) {
     return window.ipcRenderer.invoke(
-        ipcCommands.database.accounts.confirmInitialAccount,
+        ipcCommands.database.accounts.updateInitialAccount,
         identityId,
         updatedValues
     );

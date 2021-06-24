@@ -75,13 +75,15 @@ export async function removeAccount(accountAddress: string) {
         .del();
 }
 
-export async function removeInitialAccount(identityId: number) {
-    return (await knex())(accountsTable)
-        .where({ identityId, isInitial: 1 })
-        .del();
+export async function removeInitialAccount(
+    identityId: number,
+    trx: Knex.Transaction
+) {
+    const table = (await knex())(accountsTable).transacting(trx);
+    return table.where({ identityId, isInitial: 1 }).del();
 }
 
-export async function confirmInitialAccount(
+export async function updateInitialAccount(
     identityId: number,
     updatedValues: Partial<Account>
 ) {
@@ -135,16 +137,9 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
     );
 
     ipcMain.handle(
-        ipcCommands.database.accounts.removeInitialAccount,
-        async (_event, identityId: number) => {
-            return removeInitialAccount(identityId);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.accounts.confirmInitialAccount,
+        ipcCommands.database.accounts.updateInitialAccount,
         async (_event, identityId: number, updatedValues: Partial<Account>) => {
-            return confirmInitialAccount(identityId, updatedValues);
+            return updateInitialAccount(identityId, updatedValues);
         }
     );
 }

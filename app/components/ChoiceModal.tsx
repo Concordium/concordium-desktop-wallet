@@ -33,7 +33,8 @@ export default function ChoiceModal({
                         key={label}
                         onClick={() => {
                             if (location) {
-                                dispatch(push(location));
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                dispatch(push(location as any));
                             }
                             postAction();
                         }}
