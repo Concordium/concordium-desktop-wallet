@@ -15,7 +15,7 @@ import {
     IdentityStatus,
 } from '~/utils/types';
 import { getCurrentYearMonth } from '~/utils/timeHelpers';
-import { insertIdentity, removeIdentity } from '~/database/IdentityDao';
+import { insertIdentity } from '~/database/IdentityDao';
 import {
     maxCredentialsOnAccount,
     allowedSpacesCredentials,
@@ -142,7 +142,7 @@ async function recoverCredential(
     return { account, credential };
 }
 
-async function recoverCredentials(
+export async function recoverCredentials(
     prfKeySeed: string,
     identityId: number,
     blockHash: string,
@@ -181,7 +181,7 @@ async function recoverCredentials(
     return { credentials, accounts };
 }
 
-async function addAccounts(accounts: Account[]) {
+export async function addAccounts(accounts: Account[]) {
     for (const account of accounts) {
         const { address } = account;
         const accountExists = (await findAccounts({ address })).length > 0;
@@ -191,12 +191,12 @@ async function addAccounts(accounts: Account[]) {
     }
 }
 
-export async function recoverIdentity(
+export async function recoverFromIdentity(
     prfKeySeed: string,
-    identityId: number,
     blockHash: string,
     global: Global,
-    nextCredentialNumber?: number
+    identityId: number,
+    nextCredentialNumber: number
 ) {
     const { credentials, accounts } = await recoverCredentials(
         prfKeySeed,
@@ -206,12 +206,12 @@ export async function recoverIdentity(
         nextCredentialNumber
     );
 
-    if (credentials.length > 0) {
+    if (accounts.length > 0) {
         await addAccounts(accounts);
+    }
+
+    if (credentials.length > 0) {
         await importCredentials(credentials);
-    } else if (!nextCredentialNumber) {
-        // Remove if new identity, and there exists no credentials
-        await removeIdentity(identityId);
     }
     return credentials.length;
 }

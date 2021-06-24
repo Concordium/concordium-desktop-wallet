@@ -40,10 +40,6 @@ export async function updateIdentity(
     );
 }
 
-export async function removeIdentity(id: number) {
-    return window.ipcRenderer.invoke(ipcCommands.database.identity.remove, id);
-}
-
 /**
  * Find all the identities for a given wallet.
  * @returns a list of identities that have been created from the supplied wallet

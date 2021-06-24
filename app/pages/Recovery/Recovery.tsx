@@ -6,7 +6,7 @@ import SimpleLedger from '~/components/ledger/SimpleLedger';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getConsensusStatus } from '~/node/nodeRequests';
 import { loadAccounts } from '~/features/AccountSlice';
-import { loadCredentials } from '~/features/CredentialSlice';
+import { loadCredentials, importCredentials } from '~/features/CredentialSlice';
 import { globalSelector } from '~/features/GlobalSlice';
 import { loadIdentities, identitiesSelector } from '~/features/IdentitySlice';
 import { getNextIdentityNumber } from '~/database/IdentityDao';
@@ -17,8 +17,10 @@ import routes from '~/constants/routes.json';
 import errorMessages from '~/constants/errorMessages.json';
 import {
     getLostIdentityName,
+    recoverFromIdentity,
+    recoverCredentials,
+    addAccounts,
     createLostIdentity,
-    recoverIdentity,
 } from './util';
 import { allowedSpacesIdentities } from '~/constants/recoveryConstants.json';
 import { StateUpdate } from '~/utils/types';
@@ -85,11 +87,11 @@ export default function Recovery({ messages, setMessages }: Props) {
                     setLedgerMessage,
                     identity.identityNumber
                 );
-                const added = await recoverIdentity(
+                const added = await recoverFromIdentity(
                     prfKeySeed,
-                    identity.id,
                     blockHash,
                     global,
+                    identity.id,
                     await getNextCredentialNumber(identity.id)
                 );
                 addMessage(addedMessage(identity.name, added));
@@ -100,22 +102,34 @@ export default function Recovery({ messages, setMessages }: Props) {
         let skipsRemaining = allowedSpacesIdentities;
         let identityNumber = await getNextIdentityNumber(walletId);
         while (skipsRemaining >= 0) {
-            const identityId = await createLostIdentity(
-                walletId,
-                identityNumber
-            );
             const prfKeySeed = await getPrfKeySeed(
                 ledger,
                 setLedgerMessage,
                 identityNumber
             );
-            const addedCount = await recoverIdentity(
+            const { credentials, accounts } = await recoverCredentials(
                 prfKeySeed,
-                identityId,
+                0,
                 blockHash,
                 global
             );
+            const addedCount = credentials.length;
+
             if (addedCount) {
+                const identityId = await createLostIdentity(
+                    walletId,
+                    identityNumber
+                );
+                await addAccounts(
+                    accounts.map((acc) => {
+                        return { ...acc, identityId };
+                    })
+                );
+                await importCredentials(
+                    credentials.map((cred) => {
+                        return { ...cred, identityId };
+                    })
+                );
                 addMessage(newIdentityMessage(identityNumber, addedCount));
                 skipsRemaining = allowedSpacesIdentities;
             } else {
