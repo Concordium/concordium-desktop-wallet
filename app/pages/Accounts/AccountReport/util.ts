@@ -5,18 +5,18 @@ import {
 } from '~/utils/types';
 import { getTransactionsOfAccount } from '~/database/TransactionDao';
 import { toCSV } from '~/utils/basicHelpers';
-import { attachNames } from '~/utils/transactionHelpers';
+import { attachNames, isOutgoingTransaction } from '~/utils/transactionHelpers';
 import exportTransactionFields from '~/constants/exportTransactionFields.json';
 import { dateFromTimeStamp, getISOFormat } from '~/utils/timeHelpers';
+import { isShieldedBalanceTransaction } from '~/features/TransactionSlice';
 
 type Filter = (transaction: TransferTransaction) => boolean;
 
-function calculateTotal(
+function calculatePublicBalanceChange(
     transaction: TransferTransaction,
-    address: string
+    isOutgoing: boolean
 ): string {
-    const outgoing = transaction.fromAddress === address;
-    if (!outgoing) {
+    if (!isOutgoing) {
         return transaction.subtotal || '0';
     }
     if (
@@ -29,6 +29,30 @@ function calculateTotal(
     return (
         -BigInt(transaction.subtotal) - BigInt(transaction.cost || 0)
     ).toString();
+}
+
+function calculateShieldedBalanceChange(
+    transaction: TransferTransaction,
+    isOutgoing: boolean
+): string {
+    if (isShieldedBalanceTransaction(transaction)) {
+        if (!transaction.decryptedAmount) {
+            return '?';
+        }
+        switch (transaction.transactionKind) {
+            case TransactionKindString.TransferToPublic:
+            case TransactionKindString.TransferToEncrypted:
+                return transaction.decryptedAmount;
+            case TransactionKindString.EncryptedAmountTransfer:
+                return isOutgoing
+                    ? '-'.concat(transaction.decryptedAmount)
+                    : transaction.decryptedAmount;
+            default:
+                throw new Error('unexpected transaction type');
+        }
+    } else {
+        return '0';
+    }
 }
 
 export interface FilterOption {
@@ -73,7 +97,19 @@ function parseTransaction(transaction: TransferTransaction, address: string) {
     });
 
     fieldValues.dateTime = getISOFormat(transaction.blockTime);
-    fieldValues.total = calculateTotal(transaction, address)?.toString();
+
+    const isOutgoing = isOutgoingTransaction(transaction, address);
+    fieldValues.publicBalance = calculatePublicBalanceChange(
+        transaction,
+        isOutgoing
+    );
+    fieldValues.shieldedBalance = calculateShieldedBalanceChange(
+        transaction,
+        isOutgoing
+    );
+    if (!isOutgoing) {
+        fieldValues.cost = '';
+    }
 
     return exportedFields.map((field) => fieldValues[getName(field)]);
 }

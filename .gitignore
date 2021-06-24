@@ -36,6 +36,7 @@ app/main.prod.js
 app/main.prod.js.map
 app/main.dev.js
 app/main.dev.js.map
+app/preload.dev.js
 app/main.prod.js.LICENSE.txt
 app/renderer.prod.js
 app/renderer.prod.js.map

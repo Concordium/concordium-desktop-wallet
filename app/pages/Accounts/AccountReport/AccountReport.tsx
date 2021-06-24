@@ -1,7 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import clsx from 'clsx';
 import { LocationDescriptorObject } from 'history';
-import AdmZip from 'adm-zip';
 import PlusIcon from '@resources/svg/plus.svg';
 import { Account, TransactionKindString } from '~/utils/types';
 import PageLayout from '~/components/PageLayout';
@@ -17,16 +16,16 @@ import Timestamp from '~/components/Form/InputTimestamp';
 import PickAccount from '~/components/PickAccount';
 import Checkbox from '~/components/Form/Checkbox';
 import ErrorModal from '~/components/SimpleErrorModal';
-
-import { saveFile } from '~/utils/FileHelper';
 import {
     FilterOption,
     filterKind,
     filterKindGroup,
     getAccountCSV,
 } from './util';
-
 import styles from './AccountReport.module.scss';
+import { SaveFileData } from '~/ipc/files';
+import ipcCommands from '~/constants/ipcCommands.json';
+import saveFile from '~/utils/FileHelper';
 
 const transactionTypeFilters: FilterOption[] = [
     filterKind('Simple Transfers', TransactionKindString.Transfer),
@@ -62,8 +61,12 @@ const transactionTypeFilters: FilterOption[] = [
     ]),
 ];
 
+interface State {
+    account: Account;
+}
+
 interface Props {
-    location: LocationDescriptorObject<Account>;
+    location: LocationDescriptorObject<State>;
 }
 
 /**
@@ -73,7 +76,7 @@ interface Props {
 export default function AccountReport({ location }: Props) {
     const [modalOpen, setModalOpen] = useState(false);
     const [accounts, setAccounts] = useState<Account[]>(
-        location?.state ? [location?.state] : []
+        location?.state ? [location?.state.account] : []
     );
     const [adding, setAdding] = useState(false);
     const [fromDate, setFrom] = useState<Date | undefined>(
@@ -121,27 +124,27 @@ export default function AccountReport({ location }: Props) {
                     }
                 );
             }
-            const zip = new AdmZip();
+
+            const filesToZip: SaveFileData[] = [];
             for (let i = 0; i < accounts.length; i += 1) {
                 const account = accounts[i];
-                zip.addFile(
-                    `${account.name}.csv`,
-                    Buffer.from(
-                        // eslint-disable-next-line  no-await-in-loop
-                        await getAccountCSV(
-                            account,
-                            currentFilters,
-                            fromDate,
-                            toDate
-                        )
-                    )
+                const data = await getAccountCSV(
+                    account,
+                    currentFilters,
+                    fromDate,
+                    toDate
                 );
+                filesToZip.push({
+                    filename: `${account.name}.csv`,
+                    data: Buffer.from(data),
+                });
             }
-            return saveFile(zip.toBuffer(), {
-                title: 'Save Account Reports',
-                defaultPath: 'reports.zip',
-                filters: [{ name: 'zip', extensions: ['zip'] }],
-            });
+
+            // Send to main thread for saving the files as a single zip file.
+            return window.ipcRenderer.invoke(
+                ipcCommands.saveZipFileDialog,
+                filesToZip
+            );
         } catch (e) {
             setModalOpen(true);
             return Promise.resolve(false);

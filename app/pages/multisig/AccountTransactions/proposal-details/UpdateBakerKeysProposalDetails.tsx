@@ -1,5 +1,5 @@
 import React from 'react';
-import { Account, BakerVerifyKeys, Fraction, Identity } from '~/utils/types';
+import { Account, BakerVerifyKeys, Fraction } from '~/utils/types';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import { AccountDetail, Details, PlainDetail } from './shared';
 import PublicKey from '../../common/PublicKey/PublicKey';
@@ -7,14 +7,12 @@ import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryT
 
 interface Props {
     account?: Account;
-    identity?: Identity;
     estimatedFee?: Fraction;
     bakerVerifyKeys?: BakerVerifyKeys;
     expiryTime?: Date;
 }
 
 export default function UpdateBakerKeysProposalDetails({
-    identity,
     account,
     estimatedFee,
     bakerVerifyKeys,
@@ -22,8 +20,7 @@ export default function UpdateBakerKeysProposalDetails({
 }: Props) {
     return (
         <Details>
-            <PlainDetail title="Identity" value={identity?.name} first />
-            <AccountDetail title="Account" value={account} />
+            <AccountDetail title="Account" value={account} first />
             <DisplayEstimatedFee estimatedFee={estimatedFee} />
             <DisplayTransactionExpiryTime expiryTime={expiryTime} />
             <PlainDetail

@@ -1,3 +1,4 @@
+import type { Buffer } from 'buffer/';
 import { findEntries } from '../database/AddressBookDao';
 import { getTransactionStatus } from '../node/nodeRequests';
 import { getDefaultExpiry, getNow, secondsSinceUnixEpoch } from './timeHelpers';
@@ -643,4 +644,11 @@ export function isRewardKind(kind: TransactionKindString) {
         default:
             return false;
     }
+}
+
+export function isOutgoingTransaction(
+    transaction: TransferTransaction,
+    accountAddress: string
+) {
+    return transaction.fromAddress === accountAddress;
 }

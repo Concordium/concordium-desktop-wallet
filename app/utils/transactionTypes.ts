@@ -1,3 +1,5 @@
+import type { Buffer } from 'buffer/';
+import { FieldValues } from 'react-hook-form';
 import { AccountPathInput } from '~/features/ledger/Path';
 import {
     Authorization,
@@ -26,6 +28,7 @@ export interface TransactionInput {
  * transactions.
  */
 export interface UpdateProps {
+    defaults: FieldValues;
     blockSummary: BlockSummary;
     consensusStatus: ConsensusStatus;
     handleHigherLevelKeySubmit?(

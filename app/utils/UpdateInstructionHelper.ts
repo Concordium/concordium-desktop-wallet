@@ -5,9 +5,7 @@ import {
     UpdateType,
 } from './types';
 
-export default function createUpdateInstruction<
-    T extends UpdateInstructionPayload
->(
+export function createUpdateInstruction<T extends UpdateInstructionPayload>(
     updatePayload: T,
     updateType: UpdateType,
     sequenceNumber: bigint,
@@ -28,4 +26,22 @@ export default function createUpdateInstruction<
     };
 
     return updateInstruction;
+}
+
+export function getUpdateQueueTypes(type: UpdateType) {
+    const updateLevel1Keys = [
+        UpdateType.UpdateLevel1KeysUsingLevel1Keys,
+        UpdateType.UpdateLevel1KeysUsingRootKeys,
+    ];
+    if (updateLevel1Keys.includes(type)) {
+        return updateLevel1Keys;
+    }
+    const updateLevel2Keys = [
+        UpdateType.UpdateLevel2KeysUsingLevel1Keys,
+        UpdateType.UpdateLevel2KeysUsingRootKeys,
+    ];
+    if (updateLevel2Keys.includes(type)) {
+        return updateLevel2Keys;
+    }
+    return [type];
 }

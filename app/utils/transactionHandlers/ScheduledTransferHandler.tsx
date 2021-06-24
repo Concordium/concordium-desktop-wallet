@@ -36,8 +36,6 @@ export default class ScheduledTransferHandler
         const getNewLocation = () => {
             switch (currentLocation) {
                 case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
-                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT;
-                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
                     return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT;
                 case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
                     return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT;
@@ -88,7 +86,10 @@ export default class ScheduledTransferHandler
         const receiver = transaction.payload.toAddress.substring(0, 6);
         const amount = getScheduledTransferAmount(transaction);
 
-        return `scheduled-transfer-${amount}_${sender}-to-${receiver}_${exportType}.json`;
+        return `${transaction.nonce.padStart(
+            3,
+            '0'
+        )}-scheduled-transfer-${amount}_${sender}-to-${receiver}_${exportType}.json`;
     }
 
     print(

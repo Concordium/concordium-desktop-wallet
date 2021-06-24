@@ -3,6 +3,7 @@ import { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import { HTMLAttributes } from 'react';
 import { RegisterOptions } from 'react-hook-form';
 import { RejectReason } from './node/RejectReasonHelper';
+import { Genesis } from '~/database/types';
 
 export type Dispatch = GenericDispatch<AnyAction>;
 
@@ -91,6 +92,7 @@ export enum IdentityStatus {
     Confirmed = 'confirmed',
     Rejected = 'rejected',
     Pending = 'pending',
+    // eslint-disable-next-line no-shadow
     Genesis = 'genesis',
 }
 
@@ -115,6 +117,7 @@ export enum AccountStatus {
     Confirmed = 'confirmed',
     Rejected = 'rejected',
     Pending = 'pending',
+    // eslint-disable-next-line no-shadow
     Genesis = 'genesis',
 }
 
@@ -431,6 +434,11 @@ export interface PublicInformationForIp {
     idCredPub: Hex;
     regId: RegId;
     publicKeys: CredentialPublicKeys;
+}
+
+export interface IdObjectRequest {
+    pubInfoForIp: PublicInformationForIp;
+    // TODO: add remaining fields
 }
 
 // Statuses that a transaction can have.
@@ -1090,6 +1098,7 @@ export interface TransactionDetails {
     rawRejectReason: RejectReasonWithContents;
     transferSource?: Hex;
     transferDestination?: Hex;
+    inputEncryptedAmount?: EncryptedAmount;
     type: TransactionKindString;
     outcome: string;
 }
@@ -1165,7 +1174,7 @@ export interface ExportData {
     addressBook: AddressBookEntry[];
     credentials: Credential[];
     wallets: WalletEntry[];
-    genesis?: string;
+    genesis?: Genesis;
 }
 
 interface RejectReasonWithContents {
@@ -1270,6 +1279,7 @@ export enum ExportKeyType {
     Level1 = 'level1',
     Level2 = 'level2',
     Credential = 'credential',
+    // eslint-disable-next-line no-shadow
     Genesis = 'genesis',
 }
 
@@ -1286,8 +1296,7 @@ export interface PublicKeyExportFormat {
 }
 
 export interface SignedIdRequest {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    idObjectRequest: any;
+    idObjectRequest: Versioned<IdObjectRequest>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     randomness: Hex;
 }
@@ -1309,4 +1318,10 @@ export interface CreationKeys {
     prfKey: string;
     idCredSec: string;
     publicKey: string;
+}
+
+export enum PrintErrorTypes {
+    Cancelled = 'cancelled',
+    Failed = 'failed',
+    NoPrinters = 'no valid printers available',
 }

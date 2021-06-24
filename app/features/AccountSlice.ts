@@ -35,7 +35,10 @@ import {
     TransactionKindString,
 } from '../utils/types';
 import { getStatus } from '../utils/transactionHelpers';
-import { isValidAddress } from '../utils/accountHelpers';
+import {
+    isValidAddress,
+    getInitialEncryptedAmount,
+} from '../utils/accountHelpers';
 
 import { getAccountInfos, getAccountInfoOfAddress } from '../node/nodeHelpers';
 import { hasPendingTransactions } from '~/database/TransactionDao';
@@ -280,12 +283,19 @@ export async function loadAccountInfos(
     dispatch: Dispatch
 ) {
     const map: Record<string, AccountInfo> = {};
+
+    // We don't check that the address is valid for genesis account, because they have a credId as placeholder.
+    // The lookup for accountInfo will still succeed, because the node will, given an invalid address, interpret it as a credId,
+    // and return the associated accounts's info.
+    // Can only be safely removed, if there are no more genesis accounts in circulation, either in
+    // databases or in old exports.
     const confirmedAccounts = accounts.filter(
         (account) =>
             (isValidAddress(account.address) &&
                 account.status === AccountStatus.Confirmed) ||
-            AccountStatus.Genesis === account.status // We don't check that the address is valid for genesis account, because they have a credId as placeholder. The lookup for accountInfo will still suceed, because the node will, given an invalid address, interpret it as a credId, and return the associated accounts's info. // TODO Remove this.
+            AccountStatus.Genesis === account.status
     );
+
     if (confirmedAccounts.length === 0) {
         return Promise.resolve();
     }
@@ -363,6 +373,9 @@ export async function addPendingAccount(
         isInitial,
         deploymentTransactionId,
         rewardFilter: '[]',
+        selfAmounts: getInitialEncryptedAmount(),
+        incomingAmounts: '[]',
+        totalDecrypted: '0',
     };
     await insertAccount(account);
     return loadAccounts(dispatch);
@@ -477,13 +490,6 @@ export async function addExternalAccount(
         rewardFilter: '[]',
     };
     await insertAccount(account);
-    addToAddressBook(dispatch, {
-        readOnly: true,
-        name: accountName,
-        address: accountAddress,
-        note: 'Shared account',
-    });
-
     return loadAccounts(dispatch);
 }
 

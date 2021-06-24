@@ -4,14 +4,12 @@ import { useSelector } from 'react-redux';
 import DoubleCheckmarkIcon from '@resources/svg/double-grey-checkmark.svg';
 import CheckmarkIcon from '@resources/svg/grey-checkmark.svg';
 import Warning from '@resources/svg/warning.svg';
-import { abs } from '~/utils/basicHelpers';
 import { parseTime } from '~/utils/timeHelpers';
 import { getGTUSymbol, displayAsGTU } from '~/utils/gtu';
 import {
     TransferTransaction,
     TransactionStatus,
     TransactionKindString,
-    Account,
 } from '~/utils/types';
 import { chosenAccountSelector } from '~/features/AccountSlice';
 import { viewingShieldedSelector } from '~/features/TransactionSlice';
@@ -20,6 +18,7 @@ import {
     isFailed,
     isTransferKind,
     isRewardKind,
+    isOutgoingTransaction,
 } from '~/utils/transactionHelpers';
 import styles from './Transactions.module.scss';
 
@@ -32,7 +31,7 @@ const isInternalTransfer = (transaction: TransferTransaction) =>
 const isGreen = (
     transaction: TransferTransaction,
     viewingShielded: boolean,
-    isOutgoingTransaction: boolean
+    isOutgoing: boolean
 ) => {
     const kind = transaction.transactionKind;
     if (TransactionKindString.TransferToEncrypted === kind) {
@@ -44,21 +43,14 @@ const isGreen = (
             BigInt(transaction.subtotal) > BigInt(transaction.cost)
         );
     }
-    return !isOutgoingTransaction;
+    return !isOutgoing;
 };
 
-function determineOutgoing(transaction: TransferTransaction, account: Account) {
-    return transaction.fromAddress === account.address;
-}
-
-function getName(
-    transaction: TransferTransaction,
-    isOutgoingTransaction: boolean
-) {
+function getName(transaction: TransferTransaction, isOutgoing: boolean) {
     if (isInternalTransfer(transaction)) {
         return '';
     }
-    if (isOutgoingTransaction) {
+    if (isOutgoing) {
         // Current Account is the sender
         if (transaction.toAddressName !== undefined) {
             return transaction.toAddressName;
@@ -87,8 +79,8 @@ function buildCostString(fee: bigint) {
     };
 }
 
-function buildCostFreeAmountString(amount: bigint, absolute = false) {
-    const displayAmount = absolute ? abs(amount) : amount;
+function buildCostFreeAmountString(amount: bigint, flipSign = false) {
+    const displayAmount = flipSign ? -amount : amount;
     return {
         amount: `${displayAsGTU(displayAmount)}`,
         amountFormula: '',
@@ -97,7 +89,7 @@ function buildCostFreeAmountString(amount: bigint, absolute = false) {
 
 function parseShieldedAmount(
     transaction: TransferTransaction,
-    isOutgoingTransaction: boolean
+    isOutgoing: boolean
 ) {
     if (transaction.decryptedAmount) {
         if (isInternalTransfer(transaction)) {
@@ -111,24 +103,21 @@ function parseShieldedAmount(
         ) {
             return buildCostFreeAmountString(
                 BigInt(transaction.decryptedAmount),
-                !isOutgoingTransaction
+                isOutgoing
             );
         }
         return buildCostFreeAmountString(BigInt(transaction.decryptedAmount));
     }
-    const negative = isOutgoingTransaction ? '-' : '';
+    const negative = isOutgoing ? '-' : '';
     return {
         amount: `${negative} ${getGTUSymbol()} ?`,
         amountFormula: '',
     };
 }
 
-function parseAmount(
-    transaction: TransferTransaction,
-    isOutgoingTransaction: boolean
-) {
+function parseAmount(transaction: TransferTransaction, isOutgoing: boolean) {
     if (isTransferKind(transaction.transactionKind)) {
-        if (isOutgoingTransaction) {
+        if (isOutgoing) {
             const cost = BigInt(transaction.cost || '0');
             if (
                 transaction.transactionKind ===
@@ -157,7 +146,7 @@ function parseAmount(
             );
         }
         // incoming transaction:
-        return buildCostFreeAmountString(BigInt(transaction.subtotal), true);
+        return buildCostFreeAmountString(BigInt(transaction.subtotal));
     }
     if (isRewardKind(transaction.transactionKind)) {
         return buildCostFreeAmountString(BigInt(transaction.subtotal));
@@ -229,14 +218,11 @@ function TransactionListElement({ transaction, onClick }: Props): JSX.Element {
     if (!account) {
         throw new Error('Unexpected missing chosen account');
     }
-    const isOutgoingTransaction = determineOutgoing(transaction, account);
+    const isOutgoing = isOutgoingTransaction(transaction, account.address);
     const time = parseTime(transaction.blockTime);
-    const name = getName(transaction, isOutgoingTransaction);
+    const name = getName(transaction, isOutgoing);
     const amountParser = viewingShielded ? parseShieldedAmount : parseAmount;
-    const { amount, amountFormula } = amountParser(
-        transaction,
-        isOutgoingTransaction
-    );
+    const { amount, amountFormula } = amountParser(transaction, isOutgoing);
 
     const failed = isFailed(transaction);
 
@@ -264,11 +250,8 @@ function TransactionListElement({ transaction, onClick }: Props): JSX.Element {
                     <p
                         className={clsx(
                             'mV0',
-                            isGreen(
-                                transaction,
-                                viewingShielded,
-                                isOutgoingTransaction
-                            ) && styles.greenText
+                            isGreen(transaction, viewingShielded, isOutgoing) &&
+                                styles.greenText
                         )}
                     >
                         {amount}

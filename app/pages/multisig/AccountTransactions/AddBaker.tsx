@@ -1,19 +1,17 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Route, Switch, useRouteMatch } from 'react-router';
+import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
 import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
 import {
-    Identity,
     Account,
     TransactionKindId,
     AccountTransaction,
     AddBakerPayload,
     Fraction,
 } from '~/utils/types';
-import PickIdentity from '~/components/PickIdentity';
 import PickAccount from '~/components/PickAccount';
 import { toMicroUnits } from '~/utils/gtu';
 import PickAmount from './PickAmount';
@@ -31,7 +29,7 @@ import {
 } from '~/utils/transactionHelpers';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import routes from '~/constants/routes.json';
-import { saveFile } from '~/utils/FileHelper';
+import saveFile from '~/utils/FileHelper';
 import {
     useAccountInfo,
     useChainParameters,
@@ -48,28 +46,30 @@ import ButtonGroup from '~/components/ButtonGroup';
 import AddBakerProposalDetails from './proposal-details/AddBakerProposalDetails';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import LoadingComponent from './LoadingComponent';
+import {
+    BakerSubRoutes,
+    getLocationAfterAccounts,
+} from '~/utils/accountRouterHelpers';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
 
 const pageTitle = 'Multi Signature Transactions | Add Baker';
 
-enum BuildSubRoutes {
-    accounts = 'accounts',
-    stake = 'stake',
-    keys = 'keys',
-    expiry = 'expiry',
-    sign = 'sign',
-}
-
 interface PageProps {
     exchangeRate: Fraction;
 }
 
+interface State {
+    account?: Account;
+}
+
 function AddBakerPage({ exchangeRate }: PageProps) {
     const dispatch = useDispatch();
+
+    const { state } = useLocation<State>();
+
     const { path, url } = useRouteMatch();
-    const [identity, setIdentity] = useState<Identity>();
-    const [account, setAccount] = useState<Account>();
+    const [account, setAccount] = useState<Account | undefined>(state?.account);
     const [stake, setStake] = useState<string>();
     const [restakeEnabled, setRestakeEnabled] = useState(true);
     const [error, setError] = useState<string>();
@@ -201,7 +201,6 @@ function AddBakerPage({ exchangeRate }: PageProps) {
                 <Columns.Column header="Transaction Details">
                     <div className={styles.columnContent}>
                         <AddBakerProposalDetails
-                            identity={identity}
                             account={account}
                             stake={stake}
                             estimatedFee={estimatedFee}
@@ -225,67 +224,34 @@ function AddBakerPage({ exchangeRate }: PageProps) {
                 <Switch>
                     <Route exact path={path}>
                         <Columns.Column
-                            header="Identities"
-                            className={styles.stretchColumn}
-                        >
-                            <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
-                                    <PickIdentity
-                                        setIdentity={setIdentity}
-                                        chosenIdentity={identity}
-                                    />
-                                </div>
-                                <Button
-                                    className={styles.listSelectButton}
-                                    disabled={identity === undefined}
-                                    onClick={() =>
-                                        dispatch(
-                                            push(
-                                                `${url}/${BuildSubRoutes.accounts}`
-                                            )
-                                        )
-                                    }
-                                >
-                                    Continue
-                                </Button>
-                            </div>
-                        </Columns.Column>
-                    </Route>
-
-                    <Route path={`${path}/${BuildSubRoutes.accounts}`}>
-                        <Columns.Column
                             header="Accounts"
                             className={styles.stretchColumn}
                         >
                             <div className={styles.columnContent}>
                                 <div className={styles.flex1}>
                                     <PickAccount
-                                        identity={identity}
                                         setAccount={setAccount}
                                         chosenAccount={account}
                                         filter={(_, info) =>
                                             info?.accountBaker === undefined
                                         }
+                                        onAccountClicked={() =>
+                                            dispatch(
+                                                push(
+                                                    getLocationAfterAccounts(
+                                                        url,
+                                                        TransactionKindId.Add_baker
+                                                    )
+                                                )
+                                            )
+                                        }
                                     />
                                 </div>
-                                <Button
-                                    className={styles.listSelectButton}
-                                    disabled={account === undefined}
-                                    onClick={() =>
-                                        dispatch(
-                                            push(
-                                                `${url}/${BuildSubRoutes.stake}`
-                                            )
-                                        )
-                                    }
-                                >
-                                    Continue
-                                </Button>
                             </div>
                         </Columns.Column>
                     </Route>
 
-                    <Route path={`${path}/${BuildSubRoutes.stake}`}>
+                    <Route path={`${path}/${BakerSubRoutes.stake}`}>
                         <Columns.Column
                             header="Stake"
                             className={styles.stretchColumn}
@@ -345,7 +311,7 @@ function AddBakerPage({ exchangeRate }: PageProps) {
                                     onClick={() => {
                                         dispatch(
                                             push(
-                                                `${url}/${BuildSubRoutes.expiry}`
+                                                `${url}/${BakerSubRoutes.expiry}`
                                             )
                                         );
                                     }}
@@ -356,7 +322,7 @@ function AddBakerPage({ exchangeRate }: PageProps) {
                         </Columns.Column>
                     </Route>
 
-                    <Route path={`${path}/${BuildSubRoutes.expiry}`}>
+                    <Route path={`${path}/${BakerSubRoutes.expiry}`}>
                         <Columns.Column
                             header="Transaction expiry time"
                             className={styles.stretchColumn}
@@ -392,7 +358,7 @@ function AddBakerPage({ exchangeRate }: PageProps) {
                                         onGenerateKeys();
                                         dispatch(
                                             push(
-                                                `${url}/${BuildSubRoutes.keys}`
+                                                `${url}/${BakerSubRoutes.keys}`
                                             )
                                         );
                                     }}
@@ -403,7 +369,7 @@ function AddBakerPage({ exchangeRate }: PageProps) {
                         </Columns.Column>
                     </Route>
 
-                    <Route path={`${path}/${BuildSubRoutes.keys}`}>
+                    <Route path={`${path}/${BakerSubRoutes.keys}`}>
                         <Columns.Column
                             header="Baker keys"
                             className={styles.stretchColumn}
@@ -418,7 +384,7 @@ function AddBakerPage({ exchangeRate }: PageProps) {
                                             .then(() =>
                                                 dispatch(
                                                     push(
-                                                        `${url}/${BuildSubRoutes.sign}`
+                                                        `${url}/${BakerSubRoutes.sign}`
                                                     )
                                                 )
                                             )
@@ -435,7 +401,7 @@ function AddBakerPage({ exchangeRate }: PageProps) {
                         </Columns.Column>
                     </Route>
 
-                    <Route path={`${path}/${BuildSubRoutes.sign}`}>
+                    <Route path={`${path}/${BakerSubRoutes.sign}`}>
                         <Columns.Column header="Signature and Hardware Wallet">
                             <SignTransactionColumn
                                 signingFunction={signingFunction}

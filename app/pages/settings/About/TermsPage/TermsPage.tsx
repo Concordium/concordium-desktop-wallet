@@ -1,18 +1,24 @@
-import React, { useCallback, useLayoutEffect, useState } from 'react';
+import React, {
+    useCallback,
+    useEffect,
+    useLayoutEffect,
+    useState,
+} from 'react';
 import { useDispatch } from 'react-redux';
-import { ipcRenderer } from 'electron';
 import ipcCommands from '~/constants/ipcCommands.json';
 import ipcRendererCommands from '~/constants/ipcRendererCommands.json';
 import routes from '~/constants/routes.json';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import PageLayout from '~/components/PageLayout';
 import { acceptTerms } from '~/features/SettingsSlice';
-import { storeTerms, termsUrlBase64 } from '~/utils/termsHelpers';
-import { noOp } from '~/utils/basicHelpers';
 import {
-    useWindowResize,
-    useIpcRendererEvent,
-} from '~/cross-app-components/util/eventHooks';
+    hasAcceptedTerms,
+    storeTerms,
+    termsUrlBase64,
+} from '~/utils/termsHelpers';
+import { noOp } from '~/utils/basicHelpers';
+import { useIpcRendererEvent } from '~/cross-app-components/util/nativeEventHooks';
+import { useWindowResize } from '~/cross-app-components/util/eventHooks';
 
 import styles from './TermsPage.module.scss';
 
@@ -51,7 +57,7 @@ function interceptClickEvent(e: MouseEvent) {
         const href = target.getAttribute('href');
 
         if (href) {
-            ipcRenderer.invoke(ipcCommands.openUrl, href);
+            window.ipcRenderer.invoke(ipcCommands.openUrl, href);
         }
     }
 }
@@ -86,8 +92,9 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
     useIpcRendererEvent(ipcRendererCommands.didFinishLoad, handleResize);
 
     const handleAccept = useCallback(() => {
-        storeTerms();
-        dispatch(acceptTerms());
+        storeTerms()
+            .then(() => dispatch(acceptTerms()))
+            .catch(() => {});
     }, [dispatch]);
 
     useLayoutEffect(() => {
@@ -100,6 +107,17 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
 
         return hijackLinks(frameEl);
     }, [frameEl, handleResize]);
+
+    useEffect(() => {
+        hasAcceptedTerms()
+            .then((accepted) => {
+                if (accepted) {
+                    dispatch(acceptTerms());
+                }
+                return accepted;
+            })
+            .catch(() => {});
+    }, [dispatch]);
 
     return (
         <PageLayout>
