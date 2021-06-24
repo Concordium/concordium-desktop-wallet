@@ -1,27 +1,35 @@
 import { Setting, SettingGroup, Settings } from '../utils/types';
-import { knex } from './knex';
-
-const settingsTable = 'setting';
-const settingsGroupTable = 'setting_group';
+import ipcCommands from '../constants/ipcCommands.json';
+import {
+    settingsGroupTable,
+    settingsTable,
+} from '../constants/databaseNames.json';
 
 /**
  * A select all from the setting table.
  */
 export async function getAllSettings(): Promise<Setting[]> {
-    return (await knex()).select().table(settingsTable);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.dbSelectAll,
+        settingsTable
+    );
 }
 
 /**
  * A select all from the setting group table.
  */
 export async function getSettingGroups(): Promise<SettingGroup[]> {
-    return (await knex()).select().table(settingsGroupTable);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.dbSelectAll,
+        settingsGroupTable
+    );
 }
 
 export async function updateEntry(setting: Setting) {
-    return (await knex())(settingsTable)
-        .where({ name: setting.name })
-        .update(setting);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.settings.update,
+        setting
+    );
 }
 
 /**

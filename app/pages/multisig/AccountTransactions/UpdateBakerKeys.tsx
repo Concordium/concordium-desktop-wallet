@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Route, Switch, useRouteMatch } from 'react-router';
+import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
 import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
@@ -38,28 +38,34 @@ import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
 import LoadingComponent from './LoadingComponent';
+import {
+    BakerSubRoutes,
+    getLocationAfterAccounts,
+} from '~/utils/accountRouterHelpers';
 
 const pageTitle = 'Multi Signature Transactions | Update Baker Keys';
 
-enum BuildSubRoutes {
-    keys = 'keys',
-    sign = 'sign',
-    expiry = 'expiry',
-}
 interface PageProps {
     exchangeRate: Fraction;
 }
 
+interface State {
+    account?: Account;
+}
+
 function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
     const dispatch = useDispatch();
+
+    const { state } = useLocation<State>();
+
     const { path, url } = useRouteMatch();
-    const [account, setAccount] = useState<Account>();
+    const [account, setAccount] = useState<Account | undefined>(state?.account);
     const [error, setError] = useState<string>();
     const [bakerKeys, setBakerKeys] = useState<BakerKeys>();
     const [transaction, setTransaction] = useState<UpdateBakerKeys>();
 
     const estimatedFee = useTransactionCostEstimate(
-        TransactionKindId.Remove_baker,
+        TransactionKindId.Update_baker_keys,
         exchangeRate,
         account?.signatureThreshold
     );
@@ -196,7 +202,10 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                                         onAccountClicked={() => {
                                             dispatch(
                                                 push(
-                                                    `${url}/${BuildSubRoutes.expiry}`
+                                                    getLocationAfterAccounts(
+                                                        url,
+                                                        TransactionKindId.Update_baker_keys
+                                                    )
                                                 )
                                             );
                                         }}
@@ -205,7 +214,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${BuildSubRoutes.expiry}`}>
+                    <Route path={`${path}/${BakerSubRoutes.expiry}`}>
                         <Columns.Column
                             header="Transaction expiry time"
                             className={styles.stretchColumn}
@@ -241,7 +250,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                                         onGenerateKeys();
                                         dispatch(
                                             push(
-                                                `${url}/${BuildSubRoutes.keys}`
+                                                `${url}/${BakerSubRoutes.keys}`
                                             )
                                         );
                                     }}
@@ -251,7 +260,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${BuildSubRoutes.keys}`}>
+                    <Route path={`${path}/${BakerSubRoutes.keys}`}>
                         <Columns.Column
                             header="Baker keys"
                             className={styles.stretchColumn}
@@ -266,7 +275,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                                             .then(() =>
                                                 dispatch(
                                                     push(
-                                                        `${url}/${BuildSubRoutes.sign}`
+                                                        `${url}/${BakerSubRoutes.sign}`
                                                     )
                                                 )
                                             )
@@ -282,7 +291,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                             )}
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${BuildSubRoutes.sign}`}>
+                    <Route path={`${path}/${BakerSubRoutes.sign}`}>
                         <Columns.Column header="Signature and Hardware Wallet">
                             <SignTransactionColumn
                                 signingFunction={signingFunction}

@@ -22,16 +22,16 @@ import {
 } from '~/features/MultiSignatureSlice';
 import { getMultiSignatureTransactionStatus } from '~/utils/TransactionStatusPoller';
 import styles from './SubmittedProposal.module.scss';
-import { sendTransaction } from '~/node/nodeRequests';
+import { sendTransaction, getNextAccountNonce } from '~/node/nodeRequests';
 import findHandler, {
     findUpdateInstructionHandler,
 } from '~/utils/transactionHandlers/HandlerFinder';
 import { serializeForSubmission } from '~/utils/UpdateSerialization';
-import SimpleErrorModal from '~/components/SimpleErrorModal';
-
+import SimpleErrorModal, {
+    ModalErrorInput,
+} from '~/components/SimpleErrorModal';
 import { serializeTransaction } from '~/utils/transactionSerialization';
 import { attachKeyIndex } from '~/utils/updates/AuthorizationHelper';
-
 import withChainData, { ChainData } from '../common/withChainData';
 import TransactionHashView from '~/components/TransactionHash';
 
@@ -75,7 +75,9 @@ function getStatusText(status: MultiSignatureTransactionStatus): string {
 const SubmittedProposalView = withChainData<Props>(
     ({ proposal, blockSummary }) => {
         const dispatch = useDispatch();
-        const [validationError, setValidationError] = useState<string>();
+        const [showError, setShowError] = useState<ModalErrorInput>({
+            show: false,
+        });
 
         const { status, transaction: transactionJSON } = proposal;
         const transaction: Transaction = parse(transactionJSON);
@@ -113,14 +115,38 @@ const SubmittedProposalView = withChainData<Props>(
                         serializedPayload
                     );
                 } catch (error) {
-                    setValidationError(error.message);
+                    setShowError({
+                        show: true,
+                        header: 'Unauthorized key',
+                        content: error.message,
+                    });
                     return;
                 }
             } else if (instanceOfAccountTransactionWithSignature(transaction)) {
-                payload = serializeTransaction(
-                    transaction,
-                    transaction.signatures
-                );
+                const nextNonce = await getNextAccountNonce(transaction.sender);
+                const difference =
+                    BigInt(nextNonce.nonce) - BigInt(transaction.nonce);
+
+                if (difference === 0n) {
+                    payload = serializeTransaction(
+                        transaction,
+                        transaction.signatures
+                    );
+                } else if (difference > 0n) {
+                    setShowError({
+                        show: true,
+                        header: 'Incorrect nonce',
+                        content: 'Transaction contains an already used nonce.',
+                    });
+                    return;
+                } else {
+                    setShowError({
+                        show: true,
+                        header: 'Incorrect nonce',
+                        content: `Transaction has nonce ${transaction.nonce}, but the next expected nonce is ${nextNonce.nonce}.`,
+                    });
+                    return;
+                }
             } else {
                 throw new Error(`Unexpected Transaction type: ${transaction}`);
             }
@@ -154,9 +180,9 @@ const SubmittedProposalView = withChainData<Props>(
                 disableBack
             >
                 <SimpleErrorModal
-                    show={Boolean(validationError)}
-                    header="Unauthorized key"
-                    content={validationError}
+                    show={showError.show}
+                    header={showError.header}
+                    content={showError.content}
                     onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
                 />
                 <div className={styles.body}>

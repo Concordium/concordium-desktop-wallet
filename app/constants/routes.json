@@ -40,6 +40,7 @@
     "MULTISIGTRANSACTIONS_PROPOSAL_EXISTING": "/multi-signature-transaction/existing",
     "MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_SELECTED": "/multi-signature-transaction/existing/:id",
     "MULTISIGTRANSACTIONS_COSIGN_TRANSACTION": "/multi-signature-transaction/cosign",
+    "MULTISIGTRANSACTIONS_IMPORT_PROPOSAL": "/multi-signature-transaction/import-proposal",
     "MULTISIGTRANSACTIONS_BROWSE_TRANSACTION": "/multi-signature-transaction/browse-transaction",
     "MULTISIGTRANSACTIONS_SUBMITTED_TRANSACTION": "/multi-signature-transaction/submitted/:id",
     "MULTISIGTRANSACTIONS_EXPORT_KEY": "/multi-signature-transaction/exportkey",
