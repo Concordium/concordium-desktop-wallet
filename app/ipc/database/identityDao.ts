@@ -28,6 +28,10 @@ async function getIdentitiesForWallet(walletId: number): Promise<Identity[]> {
     return (await knex()).select().table(identitiesTable).where({ walletId });
 }
 
+async function removeIdentity(id: number) {
+    return (await knex())(identitiesTable).where({ id }).del();
+}
+
 export default function initializeIpcHandlers(ipcMain: IpcMain) {
     ipcMain.handle(
         ipcCommands.database.identity.insert,
@@ -47,6 +51,13 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
         ipcCommands.database.identity.getIdentitiesForWallet,
         async (_event, walletId: number) => {
             return getIdentitiesForWallet(walletId);
+        }
+    );
+
+    ipcMain.handle(
+        ipcCommands.database.identity.remove,
+        async (_event, id: number) => {
+            return removeIdentity(id);
         }
     );
 

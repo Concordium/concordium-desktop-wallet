@@ -41,7 +41,7 @@ export async function updateIdentity(
 }
 
 export async function removeIdentity(id: number) {
-    return (await knex())(identitiesTable).where({ id }).del();
+    return window.ipcRenderer.invoke(ipcCommands.database.identity.remove, id);
 }
 
 /**
