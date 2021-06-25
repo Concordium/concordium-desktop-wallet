@@ -1,9 +1,12 @@
 import React from 'react';
+import { useRouteMatch } from 'react-router';
 import { AddressBookEntry, SimpleTransfer } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
+import routes from '~/constants/routes.json';
 import DisplayFee from '~/components/DisplayFee';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
+
 import styles from './transferDetails.module.scss';
 
 interface Props {
@@ -20,6 +23,7 @@ export default function DisplaySimpleTransfer({
     fromName,
     to,
 }: Props) {
+    const singleSigTransfer = useRouteMatch(routes.SUBMITTRANSFER);
     return (
         <>
             <h5 className={styles.title}>From Account:</h5>
@@ -34,9 +38,11 @@ export default function DisplaySimpleTransfer({
                 {displayAsGTU(transaction.payload.amount)}
             </p>
             <DisplayFee className={styles.fee} transaction={transaction} />
-            <DisplayTransactionExpiryTime
-                expiryTime={dateFromTimeStamp(transaction.expiry)}
-            />
+            {Boolean(singleSigTransfer) || (
+                <DisplayTransactionExpiryTime
+                    expiryTime={dateFromTimeStamp(transaction.expiry)}
+                />
+            )}
         </>
     );
 }

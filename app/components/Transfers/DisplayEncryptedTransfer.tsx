@@ -1,9 +1,12 @@
 import React from 'react';
+import { useRouteMatch } from 'react-router';
+import routes from '~/constants/routes.json';
 import { AddressBookEntry, EncryptedTransfer } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
+
 import styles from './transferDetails.module.scss';
 
 interface Props {
@@ -20,6 +23,7 @@ export default function DisplayEncryptedTransfer({
     fromName,
     to,
 }: Props) {
+    const singleSigTransfer = useRouteMatch(routes.SUBMITTRANSFER);
     return (
         <>
             <p className={styles.title}>From Account:</p>
@@ -34,9 +38,11 @@ export default function DisplayEncryptedTransfer({
                 {displayAsGTU(transaction.payload.plainTransferAmount)}
             </p>
             <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
-            <DisplayTransactionExpiryTime
-                expiryTime={dateFromTimeStamp(transaction.expiry)}
-            />
+            {Boolean(singleSigTransfer) || (
+                <DisplayTransactionExpiryTime
+                    expiryTime={dateFromTimeStamp(transaction.expiry)}
+                />
+            )}
         </>
     );
 }

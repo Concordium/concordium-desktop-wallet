@@ -13,7 +13,8 @@ enum LedgerActionType {
     PENDING,
     CONNECTED,
     ERROR,
-    RESET,
+    LOADING,
+    DISCONNECT,
     SET_STATUS_TEXT,
     FINISHED,
     CLEANUP,
@@ -47,10 +48,16 @@ export const connectedAction = (
     client,
 });
 
-type ResetAction = Action<LedgerActionType.RESET>;
+type LoadingAction = Action<LedgerActionType.LOADING>;
 
-export const resetAction = (): ResetAction => ({
-    type: LedgerActionType.RESET,
+export const loadingAction = (): LoadingAction => ({
+    type: LedgerActionType.LOADING,
+});
+
+type DisconnectAction = Action<LedgerActionType.DISCONNECT>;
+
+export const disconnectAction = (): DisconnectAction => ({
+    type: LedgerActionType.DISCONNECT,
 });
 
 type CleanupAction = Action<LedgerActionType.CLEANUP>;
@@ -88,7 +95,8 @@ export const finishedAction = (): FinishedAction => ({
 type LedgerAction =
     | PendingAction
     | ConnectedAction
-    | ResetAction
+    | LoadingAction
+    | DisconnectAction
     | ErrorAction
     | SetStatusTextAction
     | CleanupAction
@@ -99,7 +107,7 @@ function getStatusMessage(
     deviceName?: string
 ): string {
     switch (status) {
-        case LedgerStatusType.LOADING:
+        case LedgerStatusType.DISCONNECTED:
             return 'Waiting for device. Please connect your Ledger.';
         case LedgerStatusType.AWAITING_USER_INPUT:
             return 'Waiting for user to finish the process on device';
@@ -109,14 +117,16 @@ function getStatusMessage(
             return `${deviceName} is ready!`;
         case LedgerStatusType.OPEN_APP:
             return `Please open the Concordium application on your ${deviceName}`;
+        case LedgerStatusType.LOADING:
+            return `Waiting for device`;
         default:
             throw new Error('Unsupported status');
     }
 }
 
 export const getInitialState = (): LedgerReducerState => ({
-    status: LedgerStatusType.LOADING,
-    text: getStatusMessage(LedgerStatusType.LOADING),
+    status: LedgerStatusType.DISCONNECTED,
+    text: getStatusMessage(LedgerStatusType.DISCONNECTED),
 });
 
 const ledgerReducer: Reducer<LedgerReducerState, LedgerAction> = (
@@ -141,7 +151,13 @@ const ledgerReducer: Reducer<LedgerReducerState, LedgerAction> = (
                 client: a.client,
                 text: getStatusMessage(LedgerStatusType.CONNECTED, deviceName),
             };
-        case LedgerActionType.RESET:
+        case LedgerActionType.LOADING:
+            return {
+                ...s,
+                status: LedgerStatusType.LOADING,
+                text: getStatusMessage(LedgerStatusType.LOADING, deviceName),
+            };
+        case LedgerActionType.DISCONNECT:
             return getInitialState();
         case LedgerActionType.SET_STATUS_TEXT:
             return { ...s, text: a.text };

@@ -1,20 +1,11 @@
 @import 'config/bundle';
 
-@keyframes inner-spin {
+@keyframes spin {
     from {
         transform: rotate(0deg);
     }
     from {
         transform: rotate(-359deg);
-    }
-}
-
-@keyframes outer-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    from {
-        transform: rotate(359deg);
     }
 }
 
@@ -36,15 +27,9 @@
     width: 100px;
     height: 100px;
 
-    :global(.logo-pending_svg__c) {
-        transform-origin: center;
-        animation: outer-spin 1.5s linear;
-        animation-iteration-count: infinite;
-    }
-
     :global(.logo-pending_svg__arrows) {
         transform-origin: center;
-        animation: inner-spin 1s;
+        animation: spin 1s;
         animation-iteration-count: infinite;
     }
 }
