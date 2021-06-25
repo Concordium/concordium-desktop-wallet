@@ -1,40 +1,37 @@
 import { MakeOptional } from '~/utils/types';
-import { externalCredentialsTable } from '~/constants/databaseNames.json';
+import ipcCommands from '~/constants/ipcCommands.json';
 import { ExternalCredential } from './types';
-import { knex } from './knex';
 
-type ExternalCredentialOptionalNote = MakeOptional<ExternalCredential, 'note'>;
-
-// eslint-disable-next-line import/prefer-default-export
 export async function upsertExternalCredential(
-    credential: ExternalCredentialOptionalNote
+    credential: MakeOptional<ExternalCredential, 'note'>
 ) {
-    return (await knex())
-        .table(externalCredentialsTable)
-        .insert(credential)
-        .onConflict('credId')
-        .merge();
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.externalCredentials.upsertExternalCredential,
+        credential
+    );
 }
 
 export async function upsertMultipleExternalCredentials(
-    credentials: ExternalCredentialOptionalNote[]
+    credentials: MakeOptional<ExternalCredential, 'note'>[]
 ) {
-    return (await knex())
-        .table(externalCredentialsTable)
-        .insert(credentials)
-        .onConflict('credId')
-        .ignore();
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.externalCredentials
+            .upsertMultipleExternalCredentials,
+        credentials
+    );
 }
 
 export async function deleteExternalCredentials(credIds: string[]) {
-    return (await knex())
-        .table(externalCredentialsTable)
-        .whereIn('credId', credIds)
-        .del();
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.externalCredentials.deleteExternalCredentials,
+        credIds
+    );
 }
 
 export async function getAllExternalCredentials(): Promise<
     ExternalCredential[]
 > {
-    return (await knex()).table(externalCredentialsTable).select();
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.externalCredentials.getAllExternalCredentials
+    );
 }
