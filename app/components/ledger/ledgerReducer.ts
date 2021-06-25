@@ -117,6 +117,8 @@ function getStatusMessage(
             return `${deviceName} is ready!`;
         case LedgerStatusType.OPEN_APP:
             return `Please open the Concordium application on your ${deviceName}`;
+        case LedgerStatusType.LOADING:
+            return `Waiting for device`;
         default:
             throw new Error('Unsupported status');
     }
@@ -153,7 +155,7 @@ const ledgerReducer: Reducer<LedgerReducerState, LedgerAction> = (
             return {
                 ...s,
                 status: LedgerStatusType.LOADING,
-                text: '',
+                text: getStatusMessage(LedgerStatusType.LOADING, deviceName),
             };
         case LedgerActionType.DISCONNECT:
             return getInitialState();
