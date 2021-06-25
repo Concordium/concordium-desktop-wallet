@@ -28,7 +28,7 @@ export default function ShowAccountAddress({ account, returnFunction }: Props) {
                 className={styles.expandButton}
                 onClick={() => dispatch(push(routes.SHOWADDRESS))}
             >
-                <ExpandIcon height="30" />
+                <ExpandIcon height="22" />
             </IconButton>
             <CloseButton
                 className={styles.closeButton}

@@ -33,10 +33,10 @@ export default function ShowAccountAddress() {
                 className={styles.showAddressContainer}
             >
                 <IconButton
-                    className={styles.expandButton}
+                    className={styles.shrinkButton}
                     onClick={() => dispatch(push(routes.ACCOUNTS_MORE_ADDRESS))}
                 >
-                    <ShrinkIcon width="30" />
+                    <ShrinkIcon width="25" />
                 </IconButton>
 
                 <h2 className="m0 mBauto">{account.name} - Address</h2>
