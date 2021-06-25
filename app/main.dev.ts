@@ -77,6 +77,12 @@ const createWindow = async () => {
     }
 
     const titleSuffix = process.env.TARGET_NET || '';
+    const commonMainPreferences: Electron.WebPreferences = {
+        nodeIntegration: false,
+        contextIsolation: false,
+        worldSafeExecuteJavaScript: false,
+        webviewTag: true,
+    };
 
     /**
      * Do not change any of the webpreference settings without consulting the
@@ -90,15 +96,14 @@ const createWindow = async () => {
         webPreferences:
             process.env.NODE_ENV === 'development'
                 ? {
+                      ...commonMainPreferences,
                       preload: path.join(__dirname, 'preload.dev.js'),
-                      nodeIntegration: false,
-                      webviewTag: true,
                       devTools: true,
                   }
                 : {
+                      ...commonMainPreferences,
                       preload: path.join(__dirname, 'dist/preload.prod.js'),
-                      nodeIntegration: false,
-                      webviewTag: true,
+
                       devTools: false,
                   },
     });
@@ -141,6 +146,7 @@ const createWindow = async () => {
         webPreferences: {
             nodeIntegration: false,
             devTools: false,
+            contextIsolation: false,
         },
     });
 
