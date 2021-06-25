@@ -34,6 +34,7 @@ export default function RecoveryCompleted({ messages, setMessages }: Props) {
                     Go to accounts
                 </Button>
                 <Button
+                    inverted
                     className={styles.button}
                     onClick={() => {
                         setMessages([]);
