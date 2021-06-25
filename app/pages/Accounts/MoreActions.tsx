@@ -54,9 +54,7 @@ const items: MoreActionObject[] = [
     },
     {
         name: 'Send GTU with a schedule',
-        location: createTransferWithAccountPathName(
-            TransactionKindId.Transfer_with_schedule
-        ),
+        location: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
         isDisabled: (hasCredential) => !hasCredential,
     },
     {
