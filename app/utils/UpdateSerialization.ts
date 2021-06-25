@@ -1,4 +1,10 @@
-import { putBase58Check, serializeVerifyKey } from './serializationHelpers';
+import { Buffer } from 'buffer/';
+import {
+    encodeWord32,
+    encodeWord64,
+    putBase58Check,
+    serializeVerifyKey,
+} from './serializationHelpers';
 import {
     BakerStakeThreshold,
     BlockItemKind,
@@ -160,10 +166,8 @@ export function serializeHigherLevelKeyUpdate(
 export function serializeBakerStakeThreshold(
     bakerStakeThreshold: BakerStakeThreshold
 ) {
-    const serializedBakerStakeThreshold = Buffer.alloc(8);
-    serializedBakerStakeThreshold.writeBigUInt64BE(
-        BigInt(bakerStakeThreshold.threshold),
-        0
+    const serializedBakerStakeThreshold = encodeWord64(
+        BigInt(bakerStakeThreshold.threshold)
     );
     return serializedBakerStakeThreshold;
 }
@@ -186,13 +190,11 @@ export function serializeElectionDifficulty(
  * Serializes an ExchangeRate to bytes.
  */
 export function serializeExchangeRate(exchangeRate: ExchangeRate) {
-    const serializedExchangeRate = Buffer.alloc(16);
-    serializedExchangeRate.writeBigUInt64BE(BigInt(exchangeRate.numerator), 0);
-    serializedExchangeRate.writeBigUInt64BE(
-        BigInt(exchangeRate.denominator),
-        8
+    const serializedNumerator = encodeWord64(BigInt(exchangeRate.numerator));
+    const serializedDenominator = encodeWord64(
+        BigInt(exchangeRate.denominator)
     );
-    return serializedExchangeRate;
+    return Buffer.concat([serializedNumerator, serializedDenominator]);
 }
 
 /**
@@ -259,8 +261,7 @@ export function serializeUtf8String(input: string): SerializedString {
     }
 
     const encoded = Buffer.from(new TextEncoder().encode(input));
-    const serializedLength = Buffer.alloc(8);
-    serializedLength.writeBigInt64BE(BigInt(encoded.length), 0);
+    const serializedLength = encodeWord64(BigInt(encoded.length));
     return { length: serializedLength, message: encoded };
 }
 
@@ -284,16 +285,15 @@ export function serializeProtocolUpdate(
         'hex'
     );
 
-    const payloadLength =
-        8 +
-        encodedMessage.message.length +
-        8 +
-        encodedSpecificationUrl.message.length +
-        specificationHash.length +
-        auxiliaryData.length;
+    const payloadLength: bigint =
+        BigInt(8) +
+        BigInt(encodedMessage.message.length) +
+        BigInt(8) +
+        BigInt(encodedSpecificationUrl.message.length) +
+        BigInt(specificationHash.length) +
+        BigInt(auxiliaryData.length);
 
-    const serializedPayloadLength = Buffer.alloc(8);
-    serializedPayloadLength.writeBigInt64BE(BigInt(payloadLength), 0);
+    const serializedPayloadLength = encodeWord64(payloadLength);
 
     const serialization = Buffer.concat([
         serializedPayloadLength,
@@ -332,21 +332,24 @@ export function serializeGasRewards(gasRewards: GasRewards) {
  * UpdateHeader for comments regarding the byte allocation for each field.
  */
 export function serializeUpdateHeader(updateHeader: UpdateHeader): Buffer {
-    const serializedUpdateHeader = Buffer.alloc(28);
-    serializedUpdateHeader.writeBigUInt64BE(
-        BigInt(updateHeader.sequenceNumber),
-        0
+    const serializedSequenceNumber = encodeWord64(
+        BigInt(updateHeader.sequenceNumber)
     );
-    serializedUpdateHeader.writeBigUInt64BE(
-        BigInt(updateHeader.effectiveTime),
-        8
+    const serializedEffectiveTime = encodeWord64(
+        BigInt(updateHeader.effectiveTime)
     );
-    serializedUpdateHeader.writeBigUInt64BE(BigInt(updateHeader.timeout), 16);
+    const serializedTimeout = encodeWord64(BigInt(updateHeader.timeout));
+    const serializedUpdateHeader = Buffer.concat([
+        serializedSequenceNumber,
+        serializedEffectiveTime,
+        serializedTimeout,
+    ]);
+
     if (!updateHeader.payloadSize) {
         throw new Error('Unexpected missing payloadSize');
     }
-    serializedUpdateHeader.writeInt32BE(updateHeader.payloadSize, 24);
-    return serializedUpdateHeader;
+    const serializedPayloadSize = encodeWord32(updateHeader.payloadSize);
+    return Buffer.concat([serializedUpdateHeader, serializedPayloadSize]);
 }
 
 /**

@@ -14,7 +14,7 @@ import {
     getAccountTransactionSignDigest,
 } from './transactionSerialization';
 import { hashSha256 } from './serializationHelpers';
-import { getBlockSummary, getConsensusStatus } from '~/node/nodeRequests';
+import { fetchLastFinalizedBlockSummary } from '~/node/nodeHelpers';
 import { attachKeyIndex } from '~/utils/updates/AuthorizationHelper';
 
 /**
@@ -24,10 +24,8 @@ export async function getUpdateInstructionTransactionHash(
     updateInstruction: UpdateInstruction
 ) {
     const handler = findUpdateInstructionHandler(updateInstruction.type);
-    const consensusStatus = await getConsensusStatus();
-    const blockSummary = await getBlockSummary(
-        consensusStatus.lastFinalizedBlock
-    );
+    const blockSummary = (await fetchLastFinalizedBlockSummary())
+        .lastFinalizedBlockSummary;
 
     const signatures = await Promise.all(
         updateInstruction.signatures.map((sig) =>
@@ -41,38 +39,46 @@ export async function getUpdateInstructionTransactionHash(
         handler.serializePayload(updateInstruction)
     );
 
-    return hashSha256(serializedUpdateInstruction).toString('hex');
+    const hash = await hashSha256(serializedUpdateInstruction);
+    return hash.toString('hex');
 }
 
 /**
  * Given a transaction, return the digest, which does not contain the signature
  * And can be used to create the signature
  */
-export default function getTransactionSignDigest(transaction: Transaction) {
+export default async function getTransactionSignDigest(
+    transaction: Transaction
+) {
     if (instanceOfUpdateInstruction(transaction)) {
         const handler = findUpdateInstructionHandler(transaction.type);
-        return hashSha256(
+        const updateHash = await hashSha256(
             serializeUpdateInstructionHeaderAndPayload(
                 transaction,
                 handler.serializePayload(transaction)
             )
-        ).toString('hex');
+        );
+        return updateHash.toString('hex');
     }
-    return getAccountTransactionSignDigest(transaction).toString('hex');
+    const accountTransactionHash = await getAccountTransactionSignDigest(
+        transaction
+    );
+    return accountTransactionHash.toString('hex');
 }
 
 /**
  * Given a transaction, return the transaction hash, which is the hash, that contains the signature.
  */
-export function getTransactionHash(transaction: Transaction) {
+export async function getTransactionHash(transaction: Transaction) {
     if (instanceOfUpdateInstruction(transaction)) {
         return getUpdateInstructionTransactionHash(transaction);
     }
     if (instanceOfAccountTransactionWithSignature(transaction)) {
-        return getAccountTransactionHash(
+        const accountTransactionHash = await getAccountTransactionHash(
             transaction,
             transaction.signatures
-        ).toString('hex');
+        );
+        return accountTransactionHash.toString('hex');
     }
     throw new Error(
         'Unable to get hash for a transaction that is not an update instruction or an account transaction with a signature'

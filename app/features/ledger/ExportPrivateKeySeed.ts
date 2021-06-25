@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer/';
 import { Transport } from './Transport';
 
 const INS_EXPORT_PRIVATE_KEY_SEED = 0x05;

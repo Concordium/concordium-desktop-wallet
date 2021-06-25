@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { encrypt } from '../../utils/encryption';
-import { saveFile } from '../../utils/FileHelper';
+import saveFile from '../../utils/FileHelper';
 import { identitiesSelector } from '../../features/IdentitySlice';
 import { accountsSelector } from '../../features/AccountSlice';
 import { addressBookSelector } from '../../features/AddressBookSlice';
@@ -14,7 +14,7 @@ import Button from '~/cross-app-components/Button';
 import styles from './ExportImport.module.scss';
 import { getAllWallets } from '~/database/WalletDao';
 import SetPasswordModal from '~/components/SetPasswordModal';
-import { getGenesis } from '~/database/GenesisDao';
+import getGenesis from '~/database/GenesisDao';
 
 /**
  * Component for exporting wallets, identities, credentials, accounts and
@@ -72,7 +72,7 @@ export default function Export() {
             wallets,
             genesis,
         };
-        const encrypted = encrypt(JSON.stringify(data), password);
+        const encrypted = await encrypt(JSON.stringify(data), password);
 
         try {
             const completed = await saveFile(JSON.stringify(encrypted), {

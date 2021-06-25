@@ -133,7 +133,7 @@ export default function UpdateAuthorizationKeys({
                             index: addedKeyIndex,
                             status: KeyUpdateEntryStatus.Added,
                         },
-                    ],
+                    ].sort((key1, key2) => key1.index - key2.index),
                 };
                 return updatedAccessStructure;
             }

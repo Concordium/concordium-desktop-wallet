@@ -20,15 +20,15 @@ export default function CloseProposalModal({
 }: CloseProposalModalProps): JSX.Element {
     return (
         <Modal open={open} onOpen={() => {}} onClose={onClose}>
-            <h2>Are you sure that you want to close this proposal?</h2>
+            <h2>Are you sure that you want to cancel this proposal?</h2>
             <ProposalStatus proposal={proposal} />
             <Columns className="mT20">
                 <Columns.Column>
-                    <Button onClick={onClose}>No, cancel</Button>
+                    <Button onClick={onClose}>No, keep proposal</Button>
                 </Columns.Column>
                 <Columns.Column>
                     <Button onClick={onConfirm} negative>
-                        Yes, close
+                        Yes, cancel
                     </Button>
                 </Columns.Column>
             </Columns>

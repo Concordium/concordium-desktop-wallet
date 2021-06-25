@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer/';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
 import ProtocolUpdateView from '~/pages/multisig/updates/Protocol/ProtocolUpdateView';

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import getPath from './UserDataPathAccessor';
+import { app } from 'electron';
 
 async function getProductionFilename(): Promise<string> {
-    const userDataPath = await getPath();
+    const userDataPath = app.getPath('userData');
     const productionDatabaseName = 'concordium-desktop-wallet-database.sqlite3';
     const productionDatabaseLocation = `${userDataPath}/${productionDatabaseName}`;
     return productionDatabaseLocation;

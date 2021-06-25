@@ -3,6 +3,7 @@ import { LocationDescriptorObject } from 'history';
 import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect } from 'react-router';
+import type { Buffer } from 'buffer/';
 import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
 import { parse } from '~/utils/JSONHelper';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
@@ -162,15 +163,11 @@ export default function SubmitTransfer({ location }: Props) {
      * then beings monitoring its status before redirecting the user to the
      * final page.
      */
-    async function ledgerSignTransfer(
-        ledger: ConcordiumLedgerClient,
-        setMessage: (message: string) => void
-    ) {
+    async function ledgerSignTransfer(ledger: ConcordiumLedgerClient) {
         const signatureIndex = 0;
 
         if (!global) {
-            setMessage(errorMessages.missingGlobal);
-            return;
+            throw new Error(errorMessages.missingGlobal);
         }
 
         const credential = await findLocalDeployedCredentialWithWallet(
@@ -206,10 +203,12 @@ export default function SubmitTransfer({ location }: Props) {
             transaction,
             signatureStructured
         );
-        const transactionHash = getAccountTransactionHash(
+
+        const transactionHashBuffer = await getAccountTransactionHash(
             transaction,
             signatureStructured
-        ).toString('hex');
+        );
+        const transactionHash = transactionHashBuffer.toString('hex');
         const response = await sendTransaction(serializedTransaction);
 
         if (response.getValue()) {

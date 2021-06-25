@@ -2,7 +2,6 @@ import { createSlice, Dispatch } from '@reduxjs/toolkit';
 import { loadAllSettings, updateEntry } from '~/database/SettingsDao';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '~/store/store';
-import { hasAcceptedTerms } from '~/utils/termsHelpers';
 import { Setting, Settings } from '~/utils/types';
 
 interface SettingsState {
@@ -10,7 +9,7 @@ interface SettingsState {
     termsAccepted: boolean;
 }
 
-const termsAccepted = hasAcceptedTerms();
+const termsAccepted = false;
 
 const settingsSlice = createSlice({
     name: 'settings',

@@ -34,7 +34,7 @@ import PageLayout from '~/components/PageLayout';
 import Columns from '~/components/Columns';
 import styles from './ExportImport.module.scss';
 import { getAllWallets } from '~/database/WalletDao';
-import { getGenesis } from '~/database/GenesisDao';
+import getGenesis from '~/database/GenesisDao';
 
 type AddressBookEntryKey = keyof AddressBookEntry;
 

@@ -353,6 +353,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                     .map(([id]) => id),
                 threshold: newThreshold || 1,
             };
+
             setFee(
                 getUpdateCredentialsCost(
                     exchangeRate,

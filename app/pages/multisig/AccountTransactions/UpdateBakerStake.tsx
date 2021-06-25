@@ -298,6 +298,10 @@ function PickNewStake({ account, stake, setStake }: PickNewStakeProps) {
     const cooldownUntil = useCalcBakerStakeCooldownUntil();
     const stakeGtu = toMicroUnitsSafe(stake);
 
+    if (stakedAlready === undefined) {
+        return null;
+    }
+
     return (
         <>
             <PickAmount
