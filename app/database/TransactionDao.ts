@@ -48,15 +48,6 @@ export async function insertTransactions(
     );
 }
 
-export async function getMaxTransactionsIdOfAccount(
-    account: Account
-): Promise<number | undefined> {
-    return window.ipcRenderer.invoke(
-        ipcCommands.database.transactions.getMaxTransactionId,
-        account
-    );
-}
-
 export async function hasPendingTransactions(
     fromAddress: string
 ): Promise<boolean> {

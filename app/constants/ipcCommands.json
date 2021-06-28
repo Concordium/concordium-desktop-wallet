@@ -78,7 +78,6 @@
         "transactions": {
             "getPending": "DB_TRANSACTIONS_GET_PENDING",
             "hasPending": "DB_TRANSACTIONS_HAS_PENDING",
-            "getMaxTransactionId": "DB_TRANSACTIONS_GET_MAX_TRANSACTION_ID",
             "getTransactionsForAccount": "DB_TRANSACTIONS_GET_TRANSACTIONS_FOR_ACCOUNT",
             "update": "DB_TRANSACTIONS_UPDATE",
             "insert": "DB_TRANSACTIONS_INSERT"

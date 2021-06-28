@@ -48,19 +48,6 @@ async function hasPendingTransactions(fromAddress: string) {
     return Boolean(transaction);
 }
 
-async function getMaxTransactionsIdOfAccount(
-    account: Account
-): Promise<string | undefined> {
-    const { address } = account;
-    const query = await (await knex())
-        .table<TransferTransaction>(transactionTable)
-        .where({ toAddress: address })
-        .orWhere({ fromAddress: address })
-        .max<{ maxId: TransferTransaction['id'] }>('id as maxId')
-        .first();
-    return query?.maxId;
-}
-
 async function getTransactionsOfAccount(
     account: Account,
     filteredTypes: TransactionKindString[] = [],
@@ -125,13 +112,6 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
         ipcCommands.database.transactions.hasPending,
         async (_event, fromAddress: string) => {
             return hasPendingTransactions(fromAddress);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.transactions.getMaxTransactionId,
-        async (_event, account: Account) => {
-            return getMaxTransactionsIdOfAccount(account);
         }
     );
 
