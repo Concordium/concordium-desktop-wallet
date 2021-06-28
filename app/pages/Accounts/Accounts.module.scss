@@ -3,11 +3,11 @@
 
 .identityAttributesOfCredential {
     composes: blueSeparator;
-    margin-left: -20px;
+    margin-left: -19px;
+    width: calc(100% + 38px);
 }
 
 .releaseScheduleListHeader,
-.identityAttributesOfCredential,
 .releaseSchedule {
     width: calc(100% + 40px);
 }
