@@ -97,7 +97,7 @@ export async function decryptTransactions(
             t.transactionKind ===
                 TransactionKindString.EncryptedAmountTransfer &&
             t.decryptedAmount === null &&
-            t.success
+            t.status === TransactionStatus.Finalized
     );
 
     if (encryptedTransfers.length === 0) {
@@ -297,10 +297,13 @@ export async function confirmTransaction(
         }
     }
 
+    const status = success
+        ? TransactionStatus.Finalized
+        : TransactionStatus.Failed;
+
     const update = {
-        status: TransactionStatus.Finalized,
+        status,
         cost: cost.toString(),
-        success,
         rejectReason,
         blockHash,
     };

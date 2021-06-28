@@ -14,14 +14,9 @@ import { GetTransactionsOutput } from '~/database/TransactionDao';
 function convertBooleans(transactions: TransferTransaction[]) {
     return transactions.map((transaction) => {
         const remote = Boolean(transaction.remote);
-        const success =
-            transaction.success === null
-                ? transaction.success
-                : Boolean(transaction.success);
         return {
             ...transaction,
             remote,
-            success,
         };
     });
 }

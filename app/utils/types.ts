@@ -463,16 +463,13 @@ export enum OriginType {
  */
 export interface TransferTransaction {
     remote: boolean;
-    originType: OriginType;
     transactionKind: TransactionKindString;
     id?: number; // only remote transactions have ids.
     blockHash: Hex;
     blockTime: string;
-    success?: boolean;
     transactionHash: Hex;
     subtotal?: string;
     cost?: string;
-    details?: string;
     encrypted?: string;
     schedule?: string;
     fromAddress: Hex;
@@ -482,7 +479,6 @@ export interface TransferTransaction {
     fromAddressName?: string;
     toAddressName?: string;
     decryptedAmount?: string;
-    origin?: string;
 }
 
 export type EncryptedAmount = Hex;

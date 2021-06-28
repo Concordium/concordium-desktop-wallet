@@ -92,25 +92,25 @@ export function convertIncomingTransaction(
         }
     }
 
+    const status = success
+        ? TransactionStatus.Finalized
+        : TransactionStatus.Failed;
+
     return {
         remote: true,
-        originType,
         transactionKind,
         id: transaction.id,
         blockHash: transaction.blockHash,
         blockTime: transaction.blockTime,
-        success,
         transactionHash: transaction.transactionHash,
         subtotal,
         cost: transaction.cost,
-        origin: JSON.stringify(transaction.origin),
-        details: JSON.stringify(transaction.details),
         encrypted,
         decryptedAmount,
         fromAddress,
         toAddress,
         rejectReason: transaction.details.rawRejectReason?.tag,
-        status: TransactionStatus.Finalized,
+        status,
     };
 }
 
@@ -266,7 +266,6 @@ export async function convertAccountTransaction(
     return {
         blockHash: '',
         remote: false,
-        originType: OriginType.Self,
         transactionHash: hash,
         cost: cost.toString(),
         fromAddress: transaction.sender,

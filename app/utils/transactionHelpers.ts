@@ -481,9 +481,8 @@ export function getScheduledTransferAmount(
 }
 
 export function isFailed(transaction: TransferTransaction) {
-    return (
-        transaction.success === false ||
-        transaction.status === TransactionStatus.Rejected
+    return [TransactionStatus.Rejected, TransactionStatus.Failed].includes(
+        transaction.status
     );
 }
 
