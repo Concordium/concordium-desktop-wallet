@@ -462,7 +462,6 @@ export enum OriginType {
  * This Interface models the structure of the transfer transactions stored in the database
  */
 export interface TransferTransaction {
-    remote: boolean;
     transactionKind: TransactionKindString;
     id?: string; // only remote transactions have ids.
     blockHash: Hex;

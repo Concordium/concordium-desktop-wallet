@@ -11,16 +11,6 @@ import { chunkArray, partition } from '~/utils/basicHelpers';
 import ipcCommands from '~/constants/ipcCommands.json';
 import { GetTransactionsOutput } from '~/database/TransactionDao';
 
-function convertBooleans(transactions: TransferTransaction[]) {
-    return transactions.map((transaction) => {
-        const remote = Boolean(transaction.remote);
-        return {
-            ...transaction,
-            remote,
-        };
-    });
-}
-
 async function updateTransaction(
     identifier: Record<string, unknown>,
     updatedValues: Partial<TransferTransaction>
@@ -36,7 +26,7 @@ async function getPendingTransactions(): Promise<TransferTransaction[]> {
         .table(transactionTable)
         .where({ status: TransactionStatus.Pending })
         .orderBy('id');
-    return convertBooleans(transactions);
+    return transactions;
 }
 
 async function hasPendingTransactions(fromAddress: string) {
@@ -64,7 +54,7 @@ async function getTransactionsOfAccount(
         .orderBy('id', 'desc')
         .limit(limit + 1);
     return {
-        transactions: convertBooleans(transactions).slice(0, limit),
+        transactions: transactions.slice(0, limit),
         more: transactions.length > limit,
     };
 }

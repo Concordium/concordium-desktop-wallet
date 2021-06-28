@@ -97,7 +97,6 @@ export function convertIncomingTransaction(
         : TransactionStatus.Failed;
 
     return {
-        remote: true,
         transactionKind,
         id: transaction.id,
         blockHash: transaction.blockHash,
@@ -265,7 +264,6 @@ export async function convertAccountTransaction(
 
     return {
         blockHash: '',
-        remote: false,
         transactionHash: hash,
         cost: cost.toString(),
         fromAddress: transaction.sender,
