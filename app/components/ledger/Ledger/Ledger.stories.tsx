@@ -38,7 +38,7 @@ const Template: Story<LedgerViewProps> = (args) => (
 export const Loading = Template.bind({});
 Loading.args = {
     isReady: false,
-    status: LedgerStatusType.LOADING,
+    status: LedgerStatusType.DISCONNECTED,
     statusText: 'Waiting for ledger connection',
 };
 

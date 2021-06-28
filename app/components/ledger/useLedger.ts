@@ -9,7 +9,8 @@ import ledgerReducer, {
     finishedAction,
     getInitialState,
     pendingAction,
-    resetAction,
+    loadingAction,
+    disconnectAction,
     setStatusTextAction,
 } from './ledgerReducer';
 import {
@@ -21,6 +22,7 @@ import {
 import { instanceOfClosedWhileSendingError } from '~/features/ledger/ClosedWhileSendingError';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import ledgerIpcCommands from '~/constants/ledgerIpcCommands.json';
+import { noOp } from '~/utils/basicHelpers';
 
 const { CONNECTED, ERROR, OPEN_APP, AWAITING_USER_INPUT } = LedgerStatusType;
 
@@ -44,6 +46,15 @@ function useLedger(): {
         getInitialState()
     );
 
+    useEffect(() => {
+        if (status !== LedgerStatusType.LOADING) {
+            return noOp;
+        }
+
+        const t = setTimeout(() => dispatch(disconnectAction()), 5000); // If 5 seconds pass, it's safe to assume that the ledger has been disconnected.
+        return () => clearTimeout(t);
+    }, [status]);
+
     const [subscribed, setSubscribed] = useState<boolean>();
 
     useEffect(() => {
@@ -58,7 +69,7 @@ function useLedger(): {
                         dispatch(pendingAction(OPEN_APP, deviceName));
                         return;
                     case LedgerSubscriptionAction.RESET:
-                        dispatch(resetAction());
+                        dispatch(loadingAction());
                         return;
                     case LedgerSubscriptionAction.CONNECTED_SUBSCRIPTION:
                         dispatch(
@@ -158,7 +169,7 @@ export default function ExternalHook(
             onSignError(e);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ledgerCallback, onSignError]);
+    }, [client, ledgerCallback, onSignError]);
 
     return {
         isReady,

@@ -12,6 +12,7 @@ import ExportImport from '../pages/exportImport/ExportImportPage';
 import PerformImport from '../pages/exportImport/PerformImport';
 import SubmitTransfer from '../pages/Accounts/SubmitTransfer';
 import GenerateCredential from '../pages/GenerateCredential/GenerateCredentialPage';
+import ShowAccountAddress from '~/pages/Accounts/ShowAccountAddressFull';
 import AccountReport from '~/pages/Accounts/AccountReport';
 import genesisAccount from '../pages/GenesisAccount/GenesisAccount';
 import DefaultPage from '~/pages/Home/DefaultPage';
@@ -25,6 +26,7 @@ export default function Routes(): JSX.Element {
                 path={routes.CREATE_GENESIS_ACCOUNT}
                 component={genesisAccount}
             />
+            <Route path={routes.SHOWADDRESS} component={ShowAccountAddress} />
             <Route path={routes.SUBMITTRANSFER} component={SubmitTransfer} />
             <Route path={routes.ACCOUNT_REPORT} component={AccountReport} />
             <Route path={routes.ACCOUNTCREATION} component={AccountCreation} />

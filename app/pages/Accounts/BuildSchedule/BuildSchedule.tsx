@@ -94,6 +94,8 @@ export default function BuildSchedule({ location }: Props) {
                                 amount,
                                 defaults: recoverState,
                                 recipient,
+                                nonce,
+                                exchangeRate,
                             },
                         },
                         transaction: transactionJSON,
