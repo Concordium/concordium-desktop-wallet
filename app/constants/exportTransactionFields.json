@@ -9,5 +9,6 @@
     "cost": "fee amount",
     "subtotal": "amount",
     "publicBalance": "Public balance change",
-    "shieldedBalance": "Shielded balance change"
+    "shieldedBalance": "Shielded balance change",
+    "status": "status"
 }
