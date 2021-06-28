@@ -25,3 +25,10 @@ export function parse(input: string) {
         return v;
     });
 }
+
+export function intToString(jsonStruct: string, key: string) {
+    return jsonStruct.replace(
+        new RegExp(`"${key}":\\s*([0-9]+)`, 'g'),
+        `"${key}":"$1"`
+    );
+}
