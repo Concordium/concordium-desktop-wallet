@@ -445,6 +445,7 @@ export interface IdObjectRequest {
 export enum TransactionStatus {
     Finalized = 'finalized',
     Committed = 'committed',
+    Failed = 'failed',
     Rejected = 'rejected',
     Pending = 'pending',
 }
