@@ -1,5 +1,6 @@
 import { Knex } from 'knex';
 import { accountsTable, identitiesTable } from '~/constants/databaseNames.json';
+import { ADDRESS_LENGTH } from '~/utils/accountHelpers';
 import { Account } from '~/utils/types';
 
 const TEMP_NAME = 'accounts_temp';
@@ -48,9 +49,9 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 function revertTempAddresses(accounts: Account[]): Account[] {
-    return accounts.map((a, i) => ({
+    return accounts.map((a) => ({
         ...a,
-        address: parseInt(a.address, 10) === i ? '' : a.address,
+        address: a.address.length !== ADDRESS_LENGTH ? '' : a.address,
     }));
 }
 
