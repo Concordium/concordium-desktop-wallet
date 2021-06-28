@@ -47,7 +47,7 @@ export default function CredentialInformation({
     returnFunction,
 }: Props) {
     const dispatch = useDispatch();
-    const [showEditNote, setShowEditNote] = useState(false);
+    const [showEditNote, setShowEditNote] = useState<string | undefined>();
     const externalCredentials = useSelector(externalCredentialsSelector);
     const ownCredentials = useSelector(credentialsSelector);
     const identities = useSelector(identitiesSelector);
@@ -87,7 +87,7 @@ export default function CredentialInformation({
             credId,
             note,
         });
-        setShowEditNote(false);
+        setShowEditNote(undefined);
     };
 
     return (
@@ -130,12 +130,17 @@ export default function CredentialInformation({
                                     <>
                                         {credential.isOwn || (
                                             <InputModal
-                                                open={showEditNote}
+                                                open={
+                                                    showEditNote ===
+                                                    credential.credId
+                                                }
                                                 onOpen={() =>
-                                                    setShowEditNote(true)
+                                                    setShowEditNote(
+                                                        credential.credId
+                                                    )
                                                 }
                                                 onClose={() =>
-                                                    setShowEditNote(false)
+                                                    setShowEditNote(undefined)
                                                 }
                                                 trigger={
                                                     <Button
