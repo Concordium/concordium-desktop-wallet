@@ -30,6 +30,7 @@ import {
 import { updateMaxTransactionId, updateAllDecrypted } from './AccountSlice';
 import AbortController from '~/utils/AbortController';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
+import { max } from '~/utils/basicHelpers';
 
 const updateTransactionInterval = 5000;
 
@@ -190,10 +191,13 @@ export async function loadTransactions(
     }
 }
 
-async function fetchTransactions(address: string, currentMaxId: number) {
-    const { transactions, full } = await getTransactions(address, currentMaxId);
+async function fetchTransactions(address: string, currentMaxId: bigint) {
+    const { transactions, full } = await getTransactions(
+        address,
+        currentMaxId.toString()
+    );
 
-    const newMaxId = transactions.reduce((id, t) => Math.max(id, t.id), 0);
+    const newMaxId = transactions.reduce((id, t) => max(id, BigInt(t.id)), 0n);
     const isFinished = !full;
 
     const newTransactions = await insertTransactions(
@@ -215,7 +219,7 @@ export async function updateTransactions(
     account: Account,
     controller: AbortController
 ) {
-    async function updateSubroutine(maxId: number) {
+    async function updateSubroutine(maxId: bigint) {
         if (controller.isAborted) {
             controller.onAborted();
             return;
@@ -226,7 +230,7 @@ export async function updateTransactions(
             await updateMaxTransactionId(
                 dispatch,
                 account.address,
-                result.newMaxId
+                result.newMaxId.toString()
             );
         }
 
@@ -252,7 +256,9 @@ export async function updateTransactions(
         controller.finish();
     }
 
-    updateSubroutine(account.maxTransactionId || 0);
+    updateSubroutine(
+        account.maxTransactionId ? BigInt(account.maxTransactionId) : 0n
+    );
 }
 
 // Add a pending transaction to storage

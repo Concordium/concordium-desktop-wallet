@@ -154,7 +154,7 @@ function ConfirmAndExport({
                 address,
                 name: accountName,
                 identityId: credentialNumberIdentityId.identityId,
-                maxTransactionId: 0,
+                maxTransactionId: '',
                 isInitial: false,
                 rewardFilter: '[]',
             };

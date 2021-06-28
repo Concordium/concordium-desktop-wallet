@@ -369,7 +369,7 @@ export async function addPendingAccount(
         status: AccountStatus.Pending,
         address: accountAddress,
         signatureThreshold: 1,
-        maxTransactionId: 0,
+        maxTransactionId: '0',
         isInitial,
         deploymentTransactionId,
         rewardFilter: '[]',
@@ -485,7 +485,7 @@ export async function addExternalAccount(
         status: AccountStatus.Confirmed,
         address: accountAddress,
         signatureThreshold,
-        maxTransactionId: 0,
+        maxTransactionId: '0',
         isInitial: false,
         rewardFilter: '[]',
     };
@@ -510,7 +510,7 @@ export async function updateRewardFilter(
 export async function updateMaxTransactionId(
     dispatch: Dispatch,
     address: string,
-    maxTransactionId: number
+    maxTransactionId: string
 ) {
     const updatedFields = { maxTransactionId };
     updateAccount(address, updatedFields);

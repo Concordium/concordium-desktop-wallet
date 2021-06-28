@@ -50,7 +50,7 @@ async function hasPendingTransactions(fromAddress: string) {
 
 async function getMaxTransactionsIdOfAccount(
     account: Account
-): Promise<number | undefined> {
+): Promise<string | undefined> {
     const { address } = account;
     const query = await (await knex())
         .table<TransferTransaction>(transactionTable)
