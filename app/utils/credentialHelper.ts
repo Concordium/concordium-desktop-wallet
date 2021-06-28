@@ -72,5 +72,5 @@ export function getNoteForOwnCredential(
         return undefined;
     }
 
-    return `Own credential from "${identityName}"`;
+    return `Credential from "${identityName}"`;
 }

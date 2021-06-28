@@ -163,8 +163,9 @@ export default function CredentialInformation({
                                                 }}
                                             />
                                         )}
-                                        {credential.note ||
-                                            'No note for credential'}
+                                        {credential.note || (
+                                            <i>No note for credential</i>
+                                        )}
                                     </>
                                 }
                             />
