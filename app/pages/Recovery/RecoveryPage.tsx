@@ -17,7 +17,7 @@ export default function RecoveryPage() {
                 <h2>Account Recovery</h2>
                 <p>
                     Here you can recover the credentials and their accounts from
-                    your current ledger device.
+                    your current Ledger device.
                 </p>
                 <Switch>
                     <Route
