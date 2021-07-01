@@ -8,6 +8,7 @@ import { getlastFinalizedBlockHash } from '~/node/nodeHelpers';
 import { loadAccounts } from '~/features/AccountSlice';
 import { loadCredentials } from '~/features/CredentialSlice';
 import { globalSelector } from '~/features/GlobalSlice';
+import { addressBookSelector } from '~/features/AddressBookSlice';
 import { loadIdentities, identitiesSelector } from '~/features/IdentitySlice';
 import pairWallet from '~/utils/WalletPairing';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
@@ -45,6 +46,7 @@ interface Props {
 export default function Recovery({ messages, setMessages }: Props) {
     const dispatch = useDispatch();
     const identities = useSelector(identitiesSelector);
+    const addressBook = useSelector(addressBookSelector);
     const global = useSelector(globalSelector);
     const [error, setError] = useState<string>();
 
@@ -89,7 +91,8 @@ export default function Recovery({ messages, setMessages }: Props) {
                         prfKeySeed,
                         blockHash,
                         global,
-                        identity.id
+                        identity.id,
+                        addressBook
                     );
                     addMessage(addedMessage(identity.name, addedCount));
                     skipsRemaining = allowedSpacesIdentities;
@@ -99,7 +102,8 @@ export default function Recovery({ messages, setMessages }: Props) {
                         blockHash,
                         global,
                         identityNumber,
-                        walletId
+                        walletId,
+                        addressBook
                     );
                     addMessage(message);
                     skipsRemaining = exists

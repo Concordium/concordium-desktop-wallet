@@ -11,6 +11,7 @@ import {
     Global,
     IdentityStatus,
     Policy,
+    AddressBookEntry,
 } from '~/utils/types';
 import { getCurrentYearMonth } from '~/utils/timeHelpers';
 import { insertIdentity } from '~/database/IdentityDao';
@@ -20,6 +21,7 @@ import {
 } from '~/constants/recoveryConstants.json';
 import { createAccount } from '~/utils/accountHelpers';
 import { getNextCredentialNumber } from '~/database/CredentialDao';
+import { importAddressBookEntry } from '~/features/AddressBookSlice';
 
 export function getRecoveredIdentityName(identityNumber: number) {
     return `Recovered - ${identityNumber}`;
@@ -199,12 +201,23 @@ export async function recoverCredentials(
 /**
  * Imports a list of accounts, but only non-duplicates.
  */
-export async function addAccounts(accounts: Account[]) {
+export async function addAccounts(
+    accounts: Account[],
+    addressBook: AddressBookEntry[]
+) {
     for (const account of accounts) {
         const { address } = account;
         const accountExists = (await findAccounts({ address })).length > 0;
         if (!accountExists) {
             importAccount(account);
+            if (!addressBook.some((abe) => abe.address === address)) {
+                importAddressBookEntry({
+                    readOnly: true,
+                    name: account.name,
+                    address,
+                    note: 'Recovered account',
+                });
+            }
         }
     }
 }
@@ -221,7 +234,8 @@ export async function recoverFromIdentity(
     prfKeySeed: string,
     blockHash: string,
     global: Global,
-    identityId: number
+    identityId: number,
+    addressBook: AddressBookEntry[]
 ) {
     const nextCredentialNumber = await getNextCredentialNumber(identityId);
     const { credentials, accounts } = await recoverCredentials(
@@ -233,7 +247,7 @@ export async function recoverFromIdentity(
     );
 
     if (accounts.length > 0) {
-        await addAccounts(accounts);
+        await addAccounts(accounts, addressBook);
     }
 
     if (credentials.length > 0) {
@@ -254,7 +268,8 @@ export async function recoverNewIdentity(
     blockHash: string,
     global: Global,
     identityNumber: number,
-    walletId: number
+    walletId: number,
+    addressBook: AddressBookEntry[]
 ) {
     const { credentials, accounts } = await recoverCredentials(
         prfKeySeed,
@@ -272,7 +287,8 @@ export async function recoverNewIdentity(
         await addAccounts(
             accounts.map((acc) => {
                 return { ...acc, identityId };
-            })
+            }),
+            addressBook
         );
         await importCredentials(
             credentials.map((cred) => {
