@@ -6,21 +6,14 @@ import SimpleLedger from '~/components/ledger/SimpleLedger';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getlastFinalizedBlockHash } from '~/node/nodeHelpers';
 import { loadAccounts } from '~/features/AccountSlice';
-import { loadCredentials, importCredentials } from '~/features/CredentialSlice';
+import { loadCredentials } from '~/features/CredentialSlice';
 import { globalSelector } from '~/features/GlobalSlice';
 import { loadIdentities, identitiesSelector } from '~/features/IdentitySlice';
-import { getNextIdentityNumber } from '~/database/IdentityDao';
 import pairWallet from '~/utils/WalletPairing';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import routes from '~/constants/routes.json';
 import errorMessages from '~/constants/errorMessages.json';
-import {
-    getRecoveredIdentityName,
-    recoverFromIdentity,
-    recoverCredentials,
-    addAccounts,
-    createRecoveredIdentity,
-} from './util';
+import { recoverFromIdentity, recoverNewIdentity } from './util';
 import { allowedSpacesIdentities } from '~/constants/recoveryConstants.json';
 import { StateUpdate } from '~/utils/types';
 
@@ -28,12 +21,6 @@ import styles from './Recovery.module.scss';
 
 const addedMessage = (identityName: string, count: number) =>
     `Recovered ${count} credentials on ${identityName}.`;
-const newIdentityMessage = (identityNumber: number, count: number) =>
-    `Recovered ${count} credentials from identity on key index ${identityNumber}, naming identity: ${getRecoveredIdentityName(
-        identityNumber
-    )}`;
-const noIdentityMessage = (identityNumber: number) =>
-    `Key index ${identityNumber} has not been used to create an identity yet.`;
 const finishedMessage = 'Finished recovering credentials';
 
 async function getPrfKeySeed(
@@ -76,63 +63,48 @@ export default function Recovery({ messages, setMessages }: Props) {
         const blockHash = await getlastFinalizedBlockHash();
 
         const walletId = await pairWallet(ledger, dispatch);
+        const identitiesOfWallet = identities.filter(
+            (i) => i.walletId === walletId
+        );
+
+        const findIdentity = (identityNumber: number) =>
+            identitiesOfWallet.find(
+                (i) =>
+                    i.identityNumber === identityNumber &&
+                    i.walletId === walletId
+            );
 
         try {
-            // Check for accounts on current identities
-            for (const identity of identities) {
-                if (identity.walletId === walletId) {
-                    const prfKeySeed = await getPrfKeySeed(
-                        ledger,
-                        setLedgerMessage,
-                        identity.identityNumber
-                    );
-                    const added = await recoverFromIdentity(
-                        prfKeySeed,
-                        blockHash,
-                        global,
-                        identity.id
-                    );
-                    addMessage(addedMessage(identity.name, added));
-                }
-            }
-
-            // Next we check identityNumbers, where we don't have saved identities:
             let skipsRemaining = allowedSpacesIdentities;
-            let identityNumber = await getNextIdentityNumber(walletId);
+            let identityNumber = 0;
             while (skipsRemaining >= 0) {
                 const prfKeySeed = await getPrfKeySeed(
                     ledger,
                     setLedgerMessage,
                     identityNumber
                 );
-                const { credentials, accounts } = await recoverCredentials(
-                    prfKeySeed,
-                    0,
-                    blockHash,
-                    global
-                );
-                const addedCount = credentials.length;
-
-                if (addedCount) {
-                    const identityId = await createRecoveredIdentity(
-                        walletId,
-                        identityNumber
+                const identity = findIdentity(identityNumber);
+                if (identity) {
+                    const addedCount = await recoverFromIdentity(
+                        prfKeySeed,
+                        blockHash,
+                        global,
+                        identity.id
                     );
-                    await addAccounts(
-                        accounts.map((acc) => {
-                            return { ...acc, identityId };
-                        })
-                    );
-                    await importCredentials(
-                        credentials.map((cred) => {
-                            return { ...cred, identityId };
-                        })
-                    );
-                    addMessage(newIdentityMessage(identityNumber, addedCount));
+                    addMessage(addedMessage(identity.name, addedCount));
                     skipsRemaining = allowedSpacesIdentities;
                 } else {
-                    addMessage(noIdentityMessage(identityNumber));
-                    skipsRemaining -= 1;
+                    const { exists, message } = await recoverNewIdentity(
+                        prfKeySeed,
+                        blockHash,
+                        global,
+                        identityNumber,
+                        walletId
+                    );
+                    addMessage(message);
+                    skipsRemaining = exists
+                        ? allowedSpacesIdentities
+                        : skipsRemaining - 1;
                 }
                 identityNumber += 1;
             }

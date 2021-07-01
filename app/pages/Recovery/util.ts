@@ -241,3 +241,49 @@ export async function recoverFromIdentity(
     }
     return credentials.length;
 }
+
+const newIdentityMessage = (identityNumber: number, count: number) =>
+    `Recovered ${count} credentials from identity on key index ${identityNumber}, naming identity: ${getRecoveredIdentityName(
+        identityNumber
+    )}`;
+const noIdentityMessage = (identityNumber: number) =>
+    `Key index ${identityNumber} has not been used to create an identity yet.`;
+
+export async function recoverNewIdentity(
+    prfKeySeed: string,
+    blockHash: string,
+    global: Global,
+    identityNumber: number,
+    walletId: number
+) {
+    const { credentials, accounts } = await recoverCredentials(
+        prfKeySeed,
+        0,
+        blockHash,
+        global
+    );
+    const addedCount = credentials.length;
+
+    if (addedCount) {
+        const identityId = await createRecoveredIdentity(
+            walletId,
+            identityNumber
+        );
+        await addAccounts(
+            accounts.map((acc) => {
+                return { ...acc, identityId };
+            })
+        );
+        await importCredentials(
+            credentials.map((cred) => {
+                return { ...cred, identityId };
+            })
+        );
+
+        return {
+            exists: true,
+            message: newIdentityMessage(identityNumber, addedCount),
+        };
+    }
+    return { exists: false, message: noIdentityMessage(identityNumber) };
+}
