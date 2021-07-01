@@ -37,7 +37,7 @@ export default function SetNodeConnection() {
                         <p className="mT0">
                             Most of the features in the Concordium Desktop
                             Wallet requires an active connection to a node
-                            participating in the Concorrdium blockchain. If you
+                            participating in the Concordium blockchain. If you
                             already have your own node running, you can connect
                             to it on the right. Make sure to input the correct
                             IP address and port number.
