@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { IpcMain } from 'electron';
+import { Knex } from 'knex';
 import { knex } from '~/database/knex';
 import { accountsTable, identitiesTable } from '~/constants/databaseNames.json';
 import { Account } from '~/utils/types';
@@ -15,8 +16,8 @@ function convertAccountBooleans(accounts: Account[]) {
     });
 }
 
-export async function getAllAccounts(): Promise<Account[]> {
-    const accounts: Account[] = await (await knex())
+function selectAccounts(builder: Knex) {
+    return builder
         .table(accountsTable)
         .join(
             identitiesTable,
@@ -29,6 +30,10 @@ export async function getAllAccounts(): Promise<Account[]> {
             `${identitiesTable}.name as identityName`,
             `${identitiesTable}.identityNumber as identityNumber`
         );
+}
+
+export async function getAllAccounts(): Promise<Account[]> {
+    const accounts: Account[] = await selectAccounts(await knex());
 
     return convertAccountBooleans(accounts);
 }
@@ -36,22 +41,9 @@ export async function getAllAccounts(): Promise<Account[]> {
 export async function getAccount(
     address: string
 ): Promise<Account | undefined> {
-    const accounts: Account[] = await (await knex())
-        .table(accountsTable)
-        .where({
-            address,
-        })
-        .join(
-            identitiesTable,
-            `${accountsTable}.identityId`,
-            '=',
-            `${identitiesTable}.id`
-        )
-        .select(
-            `${accountsTable}.*`,
-            `${identitiesTable}.name as identityName`,
-            `${identitiesTable}.identityNumber as identityNumber`
-        );
+    const accounts: Account[] = await selectAccounts(await knex()).where({
+        address,
+    });
 
     return convertAccountBooleans(accounts)[0];
 }
