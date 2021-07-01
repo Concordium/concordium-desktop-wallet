@@ -72,10 +72,9 @@ export default function HomePage() {
                 />
                 <Route
                     path={routes.HOME}
-                    render={() => <SetNodeConnection />}
-                    // render={() => {
-                    //     return null;
-                    // }}
+                    render={() => {
+                        return null;
+                    }}
                 />
             </Switch>
         </PageLayout>
