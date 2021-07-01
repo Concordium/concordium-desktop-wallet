@@ -28,11 +28,11 @@ export default function SettingsList() {
                     {settingsName.get(setting.type)}
                 </ButtonNavLink>
             ))}
-            <ButtonNavLink className={styles.item} to={routes.SETTINGS_ABOUT}>
-                About
-            </ButtonNavLink>
             <ButtonNavLink className={styles.item} to={routes.RECOVERY}>
                 Recover existing accounts
+            </ButtonNavLink>
+            <ButtonNavLink className={styles.item} to={routes.SETTINGS_ABOUT}>
+                About
             </ButtonNavLink>
         </>
     );

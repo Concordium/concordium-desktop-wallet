@@ -4,13 +4,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import Columns from '~/components/Columns';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import { getConsensusStatus } from '~/node/nodeRequests';
+import { getlastFinalizedBlockHash } from '~/node/nodeHelpers';
 import { loadAccounts } from '~/features/AccountSlice';
 import { loadCredentials, importCredentials } from '~/features/CredentialSlice';
 import { globalSelector } from '~/features/GlobalSlice';
 import { loadIdentities, identitiesSelector } from '~/features/IdentitySlice';
 import { getNextIdentityNumber } from '~/database/IdentityDao';
-import { getNextCredentialNumber } from '~/database/CredentialDao';
 import pairWallet from '~/utils/WalletPairing';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import routes from '~/constants/routes.json';
@@ -74,8 +73,7 @@ export default function Recovery({ messages, setMessages }: Props) {
         const addMessage = (message: string) =>
             setMessages((ms) => [...ms, message]);
 
-        const consensusStatus = await getConsensusStatus();
-        const blockHash = consensusStatus.lastFinalizedBlock;
+        const blockHash = await getlastFinalizedBlockHash();
 
         const walletId = await pairWallet(ledger, dispatch);
 
@@ -91,14 +89,13 @@ export default function Recovery({ messages, setMessages }: Props) {
                     prfKeySeed,
                     blockHash,
                     global,
-                    identity.id,
-                    await getNextCredentialNumber(identity.id)
+                    identity.id
                 );
                 addMessage(addedMessage(identity.name, added));
             }
         }
 
-        // Check next identities
+        // Next we check identityNumbers, where we don't have saved identities:
         let skipsRemaining = allowedSpacesIdentities;
         let identityNumber = await getNextIdentityNumber(walletId);
         while (skipsRemaining >= 0) {

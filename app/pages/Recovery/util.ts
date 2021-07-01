@@ -11,8 +11,8 @@ import {
     AccountStatus,
     AccountInfo,
     Global,
-    CredentialDeploymentInformation,
     IdentityStatus,
+    Policy,
 } from '~/utils/types';
 import { getCurrentYearMonth } from '~/utils/timeHelpers';
 import { insertIdentity } from '~/database/IdentityDao';
@@ -20,14 +20,16 @@ import {
     maxCredentialsOnAccount,
     allowedSpacesCredentials,
 } from '~/constants/recoveryConstants.json';
+import { getNextCredentialNumber } from '~/database/CredentialDao';
 
 export function getLostIdentityName(identityNumber: number) {
     return `Lost Identity - ${identityNumber}`;
 }
 
 /**
- * Creates a genesis identity for the given wallet if one does not already exist.
- * @param walletId the wallet connected when creating the genesis account
+ * Creates an placeholder identity,
+ * @param walletId the wallet on which the identity is created.
+ * @param identityNumber the identity's number on the wallet.
  * @returns the id of the created identity, or the id of the already existing identity
  */
 export async function createLostIdentity(
@@ -62,13 +64,20 @@ export async function createLostIdentity(
     return (await insertIdentity(identity))[0];
 }
 
+interface CredentialIndexAndPolicy {
+    credentialIndex?: number;
+    policy: Policy;
+}
+
+/**
+ * Given a credId, and accountInfo, extract the credential corresponding to the credId.
+ * N.B. If the credId is not in the accountInfo, we assume that it has been removed.
+ * @returns a CredentialIndexAndPolicy object. CredentialIndex is undefined if the credential is not in the accountInfo.
+ */
 function getCredentialOnChain(
     credId: string,
     accountInfo: AccountInfo
-): [
-    number | undefined,
-    Pick<CredentialDeploymentInformation, 'credId' | 'policy' | 'regId'>
-] {
+): CredentialIndexAndPolicy {
     const credentialOnChain = Object.entries(
         accountInfo.accountCredentials
     ).find(
@@ -76,25 +85,30 @@ function getCredentialOnChain(
             (cred.value.contents.credId || cred.value.contents.regId) === credId
     );
     if (!credentialOnChain) {
-        return [
-            undefined,
-            {
-                credId,
-                policy: {
-                    validTo: getCurrentYearMonth(),
-                    createdAt: getCurrentYearMonth(),
-                    revealedAttributes: {},
-                },
+        return {
+            credentialIndex: undefined,
+            policy: {
+                validTo: getCurrentYearMonth(),
+                createdAt: getCurrentYearMonth(),
+                revealedAttributes: {},
             },
-        ];
+        };
     }
 
-    return [
-        parseInt(credentialOnChain[0], 10),
-        credentialOnChain[1].value.contents,
-    ];
+    return {
+        credentialIndex: parseInt(credentialOnChain[0], 10),
+        policy: credentialOnChain[1].value.contents.policy,
+    };
 }
 
+/**
+ * Attempts to recover the credential with the given credId.
+ * @param credId: credId of the credential, which is to be recovered
+ * @param blockHash: block at which the function will look up the account info
+ * @param credentialNumber: credential number of the credential on it's identity
+ * @param identityId: id of the credential's identity
+ * @returns If the credential has existed on chain, returns an object containing the credential and its accounts. If it never existed, returns undefined.
+ */
 async function recoverCredential(
     credId: string,
     blockHash: string,
@@ -112,14 +126,10 @@ async function recoverCredential(
         firstCredential.regId || firstCredential.credId
     );
 
-    const [credentialIndex, credentialDeploymentInfo] = getCredentialOnChain(
+    const { credentialIndex, policy } = getCredentialOnChain(
         credId,
         accountInfo
     );
-
-    if (!credentialDeploymentInfo.credId) {
-        credentialDeploymentInfo.credId = credentialDeploymentInfo.regId || '';
-    }
 
     const account = createAccount(
         identityId,
@@ -135,13 +145,23 @@ async function recoverCredential(
         credentialNumber,
         identityId,
         credentialIndex,
-        credentialDeploymentInfo.credId,
-        credentialDeploymentInfo.policy
+        credId,
+        policy
     );
 
     return { account, credential };
 }
 
+/**
+ * Attempts to recover credentials on an identity.
+ * @param prfKeySeed: Seed of the prfKey of the identity.
+ * @param identityId: id of the identity
+ * @param blockHash: block at which the function recover credentials
+ * @param global: current global parameters
+ * @param startingCredNumber: credentialNumber, from which to start attempting to recover credentials from.
+ * @param allowedSpaces: Optional parameter that determines how many unused credentialNumbers in a row is tolerated, before the function breaks.
+ * @returns Returns an object containing the list of all recovered credentials and their accounts. The length of these lists are always the same, and each account matches the credential on the same index.
+ */
 export async function recoverCredentials(
     prfKeySeed: string,
     identityId: number,
@@ -165,10 +185,6 @@ export async function recoverCredentials(
         );
 
         if (!recovered) {
-            if (credNumber === 0) {
-                // If the first credential does not exist, then this index has not been used to create an identity
-                break;
-            }
             skipsRemaining -= 1;
         } else {
             skipsRemaining = allowedSpaces;
@@ -181,6 +197,9 @@ export async function recoverCredentials(
     return { credentials, accounts };
 }
 
+/**
+ * Imports a list of accounts, but only non-duplicates.
+ */
 export async function addAccounts(accounts: Account[]) {
     for (const account of accounts) {
         const { address } = account;
@@ -191,13 +210,21 @@ export async function addAccounts(accounts: Account[]) {
     }
 }
 
+/**
+ * Attempts to recover credentials on an identity.
+ * @param prfKeySeed: Seed of the prfKey of the identity.
+ * @param blockHash: block at which the function recover credentials
+ * @param global: current global parameters
+ * @param identityId: id of the identity
+ * @returns Returns the amount of credentials that has been recovered.
+ */
 export async function recoverFromIdentity(
     prfKeySeed: string,
     blockHash: string,
     global: Global,
-    identityId: number,
-    nextCredentialNumber: number
+    identityId: number
 ) {
+    const nextCredentialNumber = await getNextCredentialNumber(identityId);
     const { credentials, accounts } = await recoverCredentials(
         prfKeySeed,
         identityId,
