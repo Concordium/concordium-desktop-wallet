@@ -35,10 +35,7 @@ import {
     TransactionKindString,
 } from '../utils/types';
 import { getStatus } from '../utils/transactionHelpers';
-import {
-    isValidAddress,
-    getInitialEncryptedAmount,
-} from '../utils/accountHelpers';
+import { createAccount, isValidAddress } from '../utils/accountHelpers';
 
 import { getAccountInfos, getAccountInfoOfAddress } from '../node/nodeHelpers';
 import { hasPendingTransactions } from '~/database/TransactionDao';
@@ -354,31 +351,6 @@ export async function updateAccountInfo(account: Account, dispatch: Dispatch) {
     return Promise.resolve();
 }
 
-export function createAccount(
-    identityId: number,
-    address: string,
-    name = address.substr(0, 8),
-    signatureThreshold = 1,
-    status: AccountStatus = AccountStatus.Confirmed,
-    isInitial = false,
-    deploymentTransactionId?: string
-): Account {
-    return {
-        name,
-        identityId,
-        status,
-        address,
-        signatureThreshold,
-        isInitial,
-        deploymentTransactionId,
-        maxTransactionId: 0,
-        rewardFilter: '[]',
-        selfAmounts: getInitialEncryptedAmount(),
-        incomingAmounts: '[]',
-        totalDecrypted: '0',
-    };
-}
-
 // Add an account with pending status..
 export async function addPendingAccount(
     dispatch: Dispatch,
@@ -391,9 +363,9 @@ export async function addPendingAccount(
     const account = createAccount(
         identityId,
         accountAddress,
-        accountName,
-        1,
         AccountStatus.Pending,
+        accountName,
+        undefined,
         isInitial,
         deploymentTransactionId
     );

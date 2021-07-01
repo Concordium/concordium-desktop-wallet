@@ -3,6 +3,7 @@ import { getId } from '~/database/WalletDao';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getPairingPath } from '~/features/ledger/Path';
 import {
+    Policy,
     CredentialWithIdentityNumber,
     DeployedCredential,
     instanceOfCredentialWithIdentityNumber,
@@ -55,4 +56,22 @@ export default async function findLocalDeployedCredentialWithWallet(
         return undefined;
     }
     return findLocalDeployedCredential(walletId, accountAddress);
+}
+
+export function createNewCredential(
+    accountAddress: string,
+    credentialNumber: number,
+    identityId: number,
+    credentialIndex: number | undefined,
+    credId: string,
+    policy: Policy
+) {
+    return {
+        credId,
+        policy: JSON.stringify(policy),
+        accountAddress,
+        credentialNumber,
+        identityId,
+        credentialIndex,
+    };
 }

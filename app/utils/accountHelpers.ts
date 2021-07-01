@@ -1,6 +1,6 @@
 import { RegisterOptions, Validate } from 'react-hook-form';
 import bs58check from 'bs58check';
-import { Account, AccountInfo } from './types';
+import { Account, AccountInfo, AccountStatus } from './types';
 
 /**
  * Verifies whether an address string is a valid Base58check string.
@@ -68,6 +68,27 @@ export function isMultiCred(accountInfo: AccountInfo): boolean {
     return Object.values(accountInfo.accountCredentials).length > 1;
 }
 
-export function getInitialEncryptedAmount() {
-    return ENCRYPTED_ZERO;
+export function createAccount(
+    identityId: number,
+    address: string,
+    status: AccountStatus,
+    name = address.substr(0, 8),
+    signatureThreshold = 1,
+    isInitial = false,
+    deploymentTransactionId?: string
+): Account {
+    return {
+        name,
+        identityId,
+        status,
+        address,
+        signatureThreshold,
+        isInitial,
+        deploymentTransactionId,
+        maxTransactionId: 0,
+        rewardFilter: '[]',
+        selfAmounts: ENCRYPTED_ZERO,
+        incomingAmounts: '[]',
+        totalDecrypted: '0',
+    };
 }

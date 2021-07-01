@@ -1,11 +1,9 @@
 import { getAccountInfo } from '~/node/nodeRequests';
 import { getAddressFromCredentialId, getCredId } from '~/utils/rustInterface';
 import { findAccounts } from '~/database/AccountDao';
-import { createAccount, importAccount } from '~/features/AccountSlice';
-import {
-    createNewCredential,
-    importCredentials,
-} from '~/features/CredentialSlice';
+import { importAccount } from '~/features/AccountSlice';
+import { createNewCredential } from '~/utils/credentialHelper';
+import { importCredentials } from '~/features/CredentialSlice';
 import {
     Account,
     AccountStatus,
@@ -20,6 +18,7 @@ import {
     maxCredentialsOnAccount,
     allowedSpacesCredentials,
 } from '~/constants/recoveryConstants.json';
+import { createAccount } from '~/utils/accountHelpers';
 import { getNextCredentialNumber } from '~/database/CredentialDao';
 
 export function getLostIdentityName(identityNumber: number) {
@@ -134,9 +133,9 @@ async function recoverCredential(
     const account = createAccount(
         identityId,
         address,
+        AccountStatus.Confirmed,
         undefined,
         accountInfo.accountThreshold,
-        AccountStatus.Confirmed,
         credentialNumber === 0
     );
 

@@ -9,13 +9,13 @@ import {
     getCredentialsOfAccount,
 } from '~/database/CredentialDao';
 import {
-    Policy,
     Credential,
     CredentialDeploymentInformation,
     Account,
     AccountInfo,
     instanceOfDeployedCredential,
 } from '~/utils/types';
+import { createNewCredential } from '~/utils/credentialHelper';
 
 interface CredentialState {
     credentials: Credential[];
@@ -73,24 +73,6 @@ export async function loadCredentials(dispatch: Dispatch) {
 
 export async function importCredentials(credentials: Credential[]) {
     return Promise.all(credentials.map(insertCredential));
-}
-
-export function createNewCredential(
-    accountAddress: string,
-    credentialNumber: number,
-    identityId: number,
-    credentialIndex: number | undefined,
-    credId: string,
-    policy: Policy
-) {
-    return {
-        credId,
-        policy: JSON.stringify(policy),
-        accountAddress,
-        credentialNumber,
-        identityId,
-        credentialIndex,
-    };
 }
 
 export async function insertNewCredential(
