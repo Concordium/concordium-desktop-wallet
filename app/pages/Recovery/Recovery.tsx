@@ -8,7 +8,10 @@ import { getlastFinalizedBlockHash } from '~/node/nodeHelpers';
 import { loadAccounts } from '~/features/AccountSlice';
 import { loadCredentials } from '~/features/CredentialSlice';
 import { globalSelector } from '~/features/GlobalSlice';
-import { addressBookSelector } from '~/features/AddressBookSlice';
+import {
+    loadAddressBook,
+    addressBookSelector,
+} from '~/features/AddressBookSlice';
 import { loadIdentities, identitiesSelector } from '~/features/IdentitySlice';
 import pairWallet from '~/utils/WalletPairing';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
@@ -116,6 +119,7 @@ export default function Recovery({ messages, setMessages }: Props) {
             loadAccounts(dispatch);
             loadCredentials(dispatch);
             loadIdentities(dispatch);
+            loadAddressBook(dispatch);
         }
 
         addMessage(finishedMessage);
