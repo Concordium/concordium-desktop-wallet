@@ -1,7 +1,8 @@
-import BakerStakeThresholdView from '~/pages/multisig/BakerStakeThresholdView';
+import React from 'react';
+import BakerStakeThresholdView from '~/pages/multisig/updates/BakerStakeThreshold/BakerStakeThresholdView';
 import UpdateBakerStakeThreshold, {
     UpdateBakerStakeThresholdFields,
-} from '~/pages/multisig/UpdateBakerStakeThreshold';
+} from '~/pages/multisig/updates/BakerStakeThreshold/UpdateBakerStakeThreshold';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
@@ -73,9 +74,11 @@ export default class BakerStakeThresholdHandler
     }
 
     view(transaction: TransactionType) {
-        return BakerStakeThresholdView({
-            bakerStakeThreshold: transaction.payload,
-        });
+        return (
+            <BakerStakeThresholdView
+                bakerStakeThreshold={transaction.payload}
+            />
+        );
     }
 
     getAuthorization(authorizations: Authorizations) {
