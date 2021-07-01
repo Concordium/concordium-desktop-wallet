@@ -2,6 +2,7 @@ import {
     Account,
     TransferTransaction,
     TransactionKindString,
+    TransactionStatus,
 } from '~/utils/types';
 import { getTransactionsOfAccount } from '~/database/TransactionDao';
 import { toCSV } from '~/utils/basicHelpers';
@@ -109,6 +110,12 @@ function parseTransaction(transaction: TransferTransaction, address: string) {
     );
     if (!isOutgoing) {
         fieldValues.cost = '';
+    }
+    if (
+        fieldValues.status === TransactionStatus.Finalized &&
+        !transaction.success
+    ) {
+        fieldValues.status = TransactionStatus.Failed;
     }
 
     return exportedFields.map((field) => fieldValues[getName(field)]);

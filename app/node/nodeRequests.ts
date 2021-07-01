@@ -5,6 +5,7 @@ import {
 } from '../proto/concordium_p2p_rpc_pb';
 import { BlockSummary, ConsensusStatus, AccountNonce } from './NodeApiTypes';
 import { AccountInfo, Global, Versioned } from '../utils/types';
+import { intToString } from '../utils/JSONHelper';
 import grpcMethods from '../constants/grpcMethods.json';
 import ipcCommands from '../constants/ipcCommands.json';
 
@@ -78,8 +79,14 @@ export async function getTransactionStatus(
     return JsonResponse.deserializeBinary(response);
 }
 
-export function getNextAccountNonce(address: string): Promise<AccountNonce> {
-    return sendPromiseParseResult(grpcMethods.getNextAccountNonce, { address });
+export async function getNextAccountNonce(
+    address: string
+): Promise<AccountNonce> {
+    const response = await sendPromise(grpcMethods.getNextAccountNonce, {
+        address,
+    });
+    const json = JsonResponse.deserializeBinary(response).getValue();
+    return JSON.parse(intToString(json, 'nonce'));
 }
 
 /**
