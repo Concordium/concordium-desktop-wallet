@@ -24,7 +24,8 @@ export default function NoIdentities() {
                 start using the Concordium blockchain. You can either request a
                 new identity and an initial account from an identity provider,
                 or if you already have an identity and account, you can import
-                it from a file, or recover it using your Ledger device.
+                it from a file. If you do not have a backup file, you can
+                recover your accounts using the Ledger device.
             </p>
             <footer className="pH30 flex justifySpaceBetween">
                 <Button

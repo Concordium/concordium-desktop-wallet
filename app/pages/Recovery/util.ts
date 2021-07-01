@@ -228,6 +228,7 @@ export async function addAccounts(
  * @param blockHash: block at which the function recover credentials
  * @param global: current global parameters
  * @param identityId: id of the identity
+ * @param addressBook: the addressBook is used to check for duplicates when inserting new accounts.
  * @returns Returns the amount of credentials that has been recovered.
  */
 export async function recoverFromIdentity(
@@ -263,6 +264,16 @@ const newIdentityMessage = (identityNumber: number, count: number) =>
 const noIdentityMessage = (identityNumber: number) =>
     `Key index ${identityNumber} has not been used to create an identity yet.`;
 
+/**
+ * Attempts to recover credentials on an unused identityNumber .
+ * @param prfKeySeed: Seed of the prfKey of the identity.
+ * @param blockHash: block at which the function recover credentials
+ * @param global: current global parameters
+ * @param identityNumber: identityNumber of the current wallet to recover from
+ * @param walletId: id of the wallet to recover from
+ * @param addressBook: the addressBook is used to check for duplicates when inserting new accounts.
+ * @returns Returns an object, which indicates whether there exists credentials on the identityNumber and a message describing the result.
+ */
 export async function recoverNewIdentity(
     prfKeySeed: string,
     blockHash: string,
