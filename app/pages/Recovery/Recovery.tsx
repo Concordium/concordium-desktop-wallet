@@ -80,15 +80,21 @@ export default function Recovery({ messages, setMessages }: Props) {
 
         const findIdentity = (identityNumber: number) =>
             identitiesOfWallet.find(
-                (i) =>
-                    i.identityNumber === identityNumber &&
-                    i.walletId === walletId
+                (identity) => identity.identityNumber === identityNumber
             );
+        const maxExistingIdentityNumber = identitiesOfWallet.reduce(
+            (currentMax, identity) =>
+                Math.max(identity.identityNumber, currentMax),
+            0
+        );
 
         try {
             let skipsRemaining = allowedSpacesIdentities;
             let identityNumber = 0;
-            while (skipsRemaining >= 0) {
+            while (
+                skipsRemaining >= 0 ||
+                identityNumber <= maxExistingIdentityNumber
+            ) {
                 if (controller.isAborted) {
                     return;
                 }
