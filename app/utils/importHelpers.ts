@@ -397,8 +397,8 @@ async function importDuplicateWallets(
 
         const existingId = existingIdentity.id;
 
-        if (importedIdentity.status !== IdentityStatus.Placeholder) {
-            if (existingIdentity.status !== IdentityStatus.Placeholder) {
+        if (importedIdentity.status !== IdentityStatus.Recovered) {
+            if (existingIdentity.status !== IdentityStatus.Recovered) {
                 throw new Error(
                     'An existing and imported identity match on index only, but none of them are placeholders.'
                 );

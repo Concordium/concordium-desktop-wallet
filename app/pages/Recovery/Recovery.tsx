@@ -15,11 +15,11 @@ import SimpleErrorModal from '~/components/SimpleErrorModal';
 import routes from '~/constants/routes.json';
 import errorMessages from '~/constants/errorMessages.json';
 import {
-    getLostIdentityName,
+    getRecoveredIdentityName,
     recoverFromIdentity,
     recoverCredentials,
     addAccounts,
-    createLostIdentity,
+    createRecoveredIdentity,
 } from './util';
 import { allowedSpacesIdentities } from '~/constants/recoveryConstants.json';
 import { StateUpdate } from '~/utils/types';
@@ -29,7 +29,7 @@ import styles from './Recovery.module.scss';
 const addedMessage = (identityName: string, count: number) =>
     `Recovered ${count} credentials on ${identityName}.`;
 const newIdentityMessage = (identityNumber: number, count: number) =>
-    `Recovered ${count} credentials from identity on key index ${identityNumber}, naming identity: ${getLostIdentityName(
+    `Recovered ${count} credentials from identity on key index ${identityNumber}, naming identity: ${getRecoveredIdentityName(
         identityNumber
     )}`;
 const noIdentityMessage = (identityNumber: number) =>
@@ -113,7 +113,7 @@ export default function Recovery({ messages, setMessages }: Props) {
             const addedCount = credentials.length;
 
             if (addedCount) {
-                const identityId = await createLostIdentity(
+                const identityId = await createRecoveredIdentity(
                     walletId,
                     identityNumber
                 );

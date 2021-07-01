@@ -21,8 +21,8 @@ import {
 import { createAccount } from '~/utils/accountHelpers';
 import { getNextCredentialNumber } from '~/database/CredentialDao';
 
-export function getLostIdentityName(identityNumber: number) {
-    return `Lost Identity - ${identityNumber}`;
+export function getRecoveredIdentityName(identityNumber: number) {
+    return `Recovered - ${identityNumber}`;
 }
 
 /**
@@ -31,7 +31,7 @@ export function getLostIdentityName(identityNumber: number) {
  * @param identityNumber the identity's number on the wallet.
  * @returns the id of the created identity, or the id of the already existing identity
  */
-export async function createLostIdentity(
+export async function createRecoveredIdentity(
     walletId: number,
     identityNumber: number
 ): Promise<number> {
@@ -49,10 +49,10 @@ export async function createLostIdentity(
     };
 
     const identity = {
-        name: getLostIdentityName(identityNumber),
+        name: getRecoveredIdentityName(identityNumber),
         identityNumber,
         identityObject: JSON.stringify(identityObject),
-        status: IdentityStatus.Placeholder,
+        status: IdentityStatus.Recovered,
         detail: '',
         codeUri: '',
         identityProvider: '{}',
