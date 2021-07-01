@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer/';
+import { deserializeError } from 'serialize-error';
 import {
     AccountTransaction,
     BakerStakeThreshold,
@@ -29,7 +30,7 @@ function unwrapLedgerIpcMessage<T>(
     callOnResult?: (input: T) => T
 ): T {
     if (message.error) {
-        throw JSON.parse(message.error);
+        throw deserializeError(message.error);
     }
     if (!message.result) {
         throw new Error('Missing result');

@@ -2,6 +2,7 @@
 import type HwTransport from '@ledgerhq/hw-transport';
 import { Buffer } from 'buffer/';
 import { BrowserWindow } from 'electron';
+import { serializeError } from 'serialize-error';
 import { Transport, TransportImpl } from './Transport';
 import {
     getPublicKey,
@@ -57,7 +58,7 @@ async function wrapResult<T>(
         return result;
     } catch (e) {
         const error: LedgerIpcMessage<T> = {
-            error: JSON.stringify(e),
+            error: serializeError(e),
         };
         return error;
     }

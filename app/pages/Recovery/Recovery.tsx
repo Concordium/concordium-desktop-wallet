@@ -77,68 +77,70 @@ export default function Recovery({ messages, setMessages }: Props) {
 
         const walletId = await pairWallet(ledger, dispatch);
 
-        // Check for accounts on current identities
-        for (const identity of identities) {
-            if (identity.walletId === walletId) {
+        try {
+            // Check for accounts on current identities
+            for (const identity of identities) {
+                if (identity.walletId === walletId) {
+                    const prfKeySeed = await getPrfKeySeed(
+                        ledger,
+                        setLedgerMessage,
+                        identity.identityNumber
+                    );
+                    const added = await recoverFromIdentity(
+                        prfKeySeed,
+                        blockHash,
+                        global,
+                        identity.id
+                    );
+                    addMessage(addedMessage(identity.name, added));
+                }
+            }
+
+            // Next we check identityNumbers, where we don't have saved identities:
+            let skipsRemaining = allowedSpacesIdentities;
+            let identityNumber = await getNextIdentityNumber(walletId);
+            while (skipsRemaining >= 0) {
                 const prfKeySeed = await getPrfKeySeed(
                     ledger,
                     setLedgerMessage,
-                    identity.identityNumber
-                );
-                const added = await recoverFromIdentity(
-                    prfKeySeed,
-                    blockHash,
-                    global,
-                    identity.id
-                );
-                addMessage(addedMessage(identity.name, added));
-            }
-        }
-
-        // Next we check identityNumbers, where we don't have saved identities:
-        let skipsRemaining = allowedSpacesIdentities;
-        let identityNumber = await getNextIdentityNumber(walletId);
-        while (skipsRemaining >= 0) {
-            const prfKeySeed = await getPrfKeySeed(
-                ledger,
-                setLedgerMessage,
-                identityNumber
-            );
-            const { credentials, accounts } = await recoverCredentials(
-                prfKeySeed,
-                0,
-                blockHash,
-                global
-            );
-            const addedCount = credentials.length;
-
-            if (addedCount) {
-                const identityId = await createRecoveredIdentity(
-                    walletId,
                     identityNumber
                 );
-                await addAccounts(
-                    accounts.map((acc) => {
-                        return { ...acc, identityId };
-                    })
+                const { credentials, accounts } = await recoverCredentials(
+                    prfKeySeed,
+                    0,
+                    blockHash,
+                    global
                 );
-                await importCredentials(
-                    credentials.map((cred) => {
-                        return { ...cred, identityId };
-                    })
-                );
-                addMessage(newIdentityMessage(identityNumber, addedCount));
-                skipsRemaining = allowedSpacesIdentities;
-            } else {
-                addMessage(noIdentityMessage(identityNumber));
-                skipsRemaining -= 1;
-            }
-            identityNumber += 1;
-        }
+                const addedCount = credentials.length;
 
-        loadAccounts(dispatch);
-        loadCredentials(dispatch);
-        loadIdentities(dispatch);
+                if (addedCount) {
+                    const identityId = await createRecoveredIdentity(
+                        walletId,
+                        identityNumber
+                    );
+                    await addAccounts(
+                        accounts.map((acc) => {
+                            return { ...acc, identityId };
+                        })
+                    );
+                    await importCredentials(
+                        credentials.map((cred) => {
+                            return { ...cred, identityId };
+                        })
+                    );
+                    addMessage(newIdentityMessage(identityNumber, addedCount));
+                    skipsRemaining = allowedSpacesIdentities;
+                } else {
+                    addMessage(noIdentityMessage(identityNumber));
+                    skipsRemaining -= 1;
+                }
+                identityNumber += 1;
+            }
+        } finally {
+            loadAccounts(dispatch);
+            loadCredentials(dispatch);
+            loadIdentities(dispatch);
+        }
 
         addMessage(finishedMessage);
         dispatch(
