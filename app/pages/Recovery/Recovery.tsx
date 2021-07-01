@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import Columns from '~/components/Columns';
@@ -20,6 +20,7 @@ import errorMessages from '~/constants/errorMessages.json';
 import { recoverFromIdentity, recoverNewIdentity } from './util';
 import { allowedSpacesIdentities } from '~/constants/recoveryConstants.json';
 import { StateUpdate } from '~/utils/types';
+import AbortController from '~/utils/AbortController';
 
 import styles from './Recovery.module.scss';
 
@@ -51,7 +52,12 @@ export default function Recovery({ messages, setMessages }: Props) {
     const identities = useSelector(identitiesSelector);
     const addressBook = useSelector(addressBookSelector);
     const global = useSelector(globalSelector);
+    const [controller] = useState(new AbortController());
     const [error, setError] = useState<string>();
+
+    useEffect(() => {
+        return () => controller.abort();
+    }, []);
 
     async function performRecovery(
         ledger: ConcordiumLedgerClient,
@@ -83,6 +89,9 @@ export default function Recovery({ messages, setMessages }: Props) {
             let skipsRemaining = allowedSpacesIdentities;
             let identityNumber = 0;
             while (skipsRemaining >= 0) {
+                if (controller.isAborted) {
+                    return;
+                }
                 const prfKeySeed = await getPrfKeySeed(
                     ledger,
                     setLedgerMessage,
