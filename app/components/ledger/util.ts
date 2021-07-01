@@ -2,10 +2,11 @@ import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { AppAndVersion } from '~/features/ledger/GetAppAndVersion';
 
 export enum LedgerStatusType {
-    LOADING,
+    DISCONNECTED,
     ERROR,
     CONNECTED,
     OPEN_APP,
+    LOADING,
     AWAITING_USER_INPUT,
 }
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Route, Switch } from 'react-router';
+import { Route, Switch, useRouteMatch } from 'react-router';
 import { FieldValues } from 'react-hook-form';
 import Columns from '~/components/Columns/Columns';
 import { BlockSummary, Key } from '~/node/NodeApiTypes';
@@ -49,6 +49,14 @@ export default function UpdateAuthorizationKeys({
     type,
     handleKeySubmit,
 }: Props) {
+    const allowEditingKeys = useRouteMatch({
+        path: [
+            routes.MULTISIGTRANSACTIONS_PROPOSAL_KEY_SET_SIZE,
+            routes.MULTISIGTRANSACTIONS_PROPOSAL,
+        ],
+        exact: true,
+    });
+
     const [error, setError] = useState<string>();
 
     const keyUpdateType: AuthorizationKeysUpdateType =
@@ -272,7 +280,11 @@ export default function UpdateAuthorizationKeys({
                         return (
                             <KeyUpdateEntry
                                 key={matchingKey.verifyKey}
-                                updateKey={updateKey(accessStructure)}
+                                updateKey={
+                                    allowEditingKeys
+                                        ? updateKey(accessStructure)
+                                        : undefined
+                                }
                                 keyInput={{
                                     status: publicKeyIndex.status,
                                     key: matchingKey,
