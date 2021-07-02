@@ -87,10 +87,10 @@ try:
 				print("Encountered an invalid receiver address: \"" + receiverAddress + "\" at row " + str(rowNumber))
 				sys.exit(2)
 
-			# Remove thousands separator if any
-			initialAmountInput = row[2].replace(thousandsSep, '')
+			# Remove thousands separator and trailing/leading whitespaces (if any)
+			initialAmountInput = row[2].replace(thousandsSep, '').strip()
 			initialAmount = parse_and_validate_amount(initialAmountInput, rowNumber)
-			remAmountRawInput = row[3].replace(thousandsSep, '')
+			remAmountRawInput = row[3].replace(thousandsSep, '').strip()
 			remAmount = parse_and_validate_amount(remAmountRawInput, rowNumber)
 
 			proposal = {
