@@ -46,14 +46,12 @@ import { hasPendingTransactions } from '~/database/TransactionDao';
 interface AccountState {
     accounts: Account[];
     accountsInfo: Record<string, AccountInfo>;
-    chosenAccount: Account | undefined;
     chosenAccountIndex: number;
 }
 
 const initialState: AccountState = {
     accounts: [],
     accountsInfo: {},
-    chosenAccount: undefined,
     chosenAccountIndex: -1,
 };
 
@@ -63,25 +61,9 @@ const accountsSlice = createSlice({
     reducers: {
         chooseAccount: (state, input) => {
             state.chosenAccountIndex = input.payload;
-            state.chosenAccount = state.accounts[input.payload];
         },
         updateAccounts: (state, input) => {
-            const { chosenAccount } = state;
             state.accounts = input.payload;
-            if (chosenAccount) {
-                const matchingAccounts = input.payload.filter(
-                    (acc: Account) => acc.address === chosenAccount.address
-                );
-                if (matchingAccounts.length === 1) {
-                    [state.chosenAccount] = matchingAccounts;
-                    state.chosenAccountIndex = input.payload.indexOf(
-                        matchingAccounts[0]
-                    );
-                } else {
-                    state.chosenAccount = undefined;
-                    state.chosenAccountIndex = -1;
-                }
-            }
         },
         setAccountInfos: (state, map) => {
             state.accountsInfo = map.payload;
@@ -101,12 +83,6 @@ const accountsSlice = createSlice({
                     ...updatedFields,
                 };
             }
-            if (
-                state.chosenAccount &&
-                state.chosenAccount.address === address
-            ) {
-                state.chosenAccount = state.accounts[index];
-            }
         },
     },
 });
@@ -124,12 +100,12 @@ export const accountsInfoSelector = (state: RootState) =>
     state.accounts.accountsInfo;
 
 export const chosenAccountSelector = (state: RootState) =>
-    state.accounts.chosenAccount;
+    state.accounts.accounts.find(
+        (_, i) => i === state.accounts.chosenAccountIndex
+    );
 
 export const chosenAccountInfoSelector = (state: RootState) =>
-    state.accounts.accountsInfo && state.accounts.chosenAccount
-        ? state.accounts.accountsInfo[state.accounts.chosenAccount.address]
-        : undefined;
+    state.accounts.accountsInfo?.[chosenAccountSelector(state)?.address ?? ''];
 
 export const chosenAccountIndexSelector = (state: RootState) =>
     state.accounts.chosenAccountIndex;
@@ -536,6 +512,15 @@ export async function updateShieldedBalance(
     const updatedFields = { selfAmounts, totalDecrypted };
     updateAccount(address, updatedFields);
     return dispatch(updateAccountFields({ address, updatedFields }));
+}
+
+export async function editAccountName(
+    dispatch: Dispatch,
+    address: string,
+    name: string
+) {
+    await updateAccount(address, { name });
+    return loadAccounts(dispatch);
 }
 
 export default accountsSlice.reducer;
