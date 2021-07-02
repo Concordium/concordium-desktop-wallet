@@ -4,6 +4,7 @@ import PendingImage from '@resources/svg/pending-small.svg';
 import SuccessImage from '@resources/svg/success-small.svg';
 import RejectedImage from '@resources/svg/warning-small.svg';
 import EditIcon from '@resources/svg/edit.svg';
+import CheckIcon from '@resources/svg/checkmark-blue.svg';
 import { useDispatch } from 'react-redux';
 import { Identity, IdentityObject, IdentityStatus } from '~/utils/types';
 import { formatDate } from '~/utils/timeHelpers';
@@ -51,8 +52,6 @@ function statusImage(status: IdentityStatus) {
             return undefined;
     }
 }
-
-const buttonContent = <EditIcon />;
 
 /**
  * Displays the information of the Identity.
@@ -135,7 +134,7 @@ function IdentityListElement({
                     {canEditName &&
                         (isEditing ? (
                             <Form.Submit className={styles.edit} clear>
-                                {buttonContent}
+                                <CheckIcon />
                             </Form.Submit>
                         ) : (
                             <Button
@@ -143,7 +142,7 @@ function IdentityListElement({
                                 clear
                                 onClick={() => setIsEditing(true)}
                             >
-                                {buttonContent}
+                                <EditIcon />
                             </Button>
                         ))}
                 </Form>

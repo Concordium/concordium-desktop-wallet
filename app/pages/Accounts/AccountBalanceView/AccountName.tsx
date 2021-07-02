@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import EditIcon from '@resources/svg/edit.svg';
+import CheckIcon from '@resources/svg/checkmark-blue.svg';
 import { useDispatch } from 'react-redux';
 import Form from '~/components/Form';
 import { useUpdateEffect } from '~/utils/hooks';
@@ -25,8 +26,9 @@ export default function AccountName({ name, address }: AccountNameProps) {
         setIsEditing(false);
     }, [name]);
 
-    function handleSubmit({ name: newName }: FormFields) {
-        editAccountName(dispatch, address, newName);
+    async function handleSubmit({ name: newName }: FormFields) {
+        await editAccountName(dispatch, address, newName);
+        setIsEditing(false);
     }
 
     return (
@@ -50,7 +52,7 @@ export default function AccountName({ name, address }: AccountNameProps) {
             </h2>
             {isEditing ? (
                 <Form.Submit className={styles.editNameButton} clear>
-                    <EditIcon />
+                    <CheckIcon />
                 </Form.Submit>
             ) : (
                 <Button

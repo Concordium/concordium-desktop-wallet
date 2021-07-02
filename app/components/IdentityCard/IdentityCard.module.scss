@@ -83,6 +83,10 @@
 
     svg {
         width: 20px;
-        fill: $color-grey;
+
+        &,
+        & * {
+            fill: $color-grey;
+        }
     }
 }
