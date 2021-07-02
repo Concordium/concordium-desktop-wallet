@@ -34,24 +34,6 @@ export function getCurrentYearMonth(): YearMonth {
     return date.getFullYear() + month;
 }
 
-/**
- * Given a unix timeStamp, return the date and time in a displayable format.
- * Assumes the timestamp is in seconds, otherwise the unit should be specified.
- */
-export function parseTime(
-    timeStamp: string,
-    unit: TimeStampUnit = TimeStampUnit.seconds,
-    formatOptions: Intl.DateTimeFormatOptions = {
-        dateStyle: 'short',
-        timeStyle: 'short',
-    }
-) {
-    const dtFormat = new Intl.DateTimeFormat('en-ZA', formatOptions);
-
-    const timeStampCorrectUnit = parseInt(timeStamp, 10) * unit;
-    return dtFormat.format(new Date(timeStampCorrectUnit));
-}
-
 export const dateFromTimeStamp = (
     timeStamp: string | bigint,
     unit: TimeStampUnit = TimeStampUnit.seconds
@@ -250,4 +232,12 @@ export function subtractHours(hours: number, date: Date) {
     const before = new Date(date);
     before.setHours(before.getHours() - hours);
     return before;
+}
+
+/**
+ * Given a unix timeStamp, return the date and time in a displayable format.
+ * Assumes the timestamp is in seconds, otherwise the unit should be specified.
+ */
+export function parseTime(timeStamp: string | bigint, unit?: TimeStampUnit) {
+    return getFormattedDateString(dateFromTimeStamp(timeStamp, unit));
 }
