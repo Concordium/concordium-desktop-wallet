@@ -3,7 +3,7 @@ import { Redirect, useParams } from 'react-router';
 import { TransactionKindId } from '~/utils/types';
 import CreateTransferProposal from './CreateTransferProposal';
 
-import UpdateCredentialPage from './UpdateCredentialsPage';
+import UpdateCredentialPage from './UpdateAccountCredentials/UpdateCredentialsPage';
 import AddBaker from './AddBaker';
 import UpdateBakerKeys from './UpdateBakerKeys';
 import RemoveBaker from './RemoveBaker';

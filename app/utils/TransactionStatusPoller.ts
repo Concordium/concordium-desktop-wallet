@@ -25,6 +25,10 @@ import {
     updateSignatureThreshold,
     updateShieldedBalance,
 } from '~/features/AccountSlice';
+import {
+    insertExternalCredentials,
+    removeExternalCredentials,
+} from '~/features/CredentialSlice';
 
 /**
  * Given an UpdateAccountCredentials transaction, update the local state
@@ -42,6 +46,13 @@ export function updateAccountCredentialsPerformConsequence(
         transaction.sender,
         transaction.payload.threshold
     );
+
+    insertExternalCredentials(
+        dispatch,
+        transaction.sender,
+        transaction.payload.addedCredentials
+    );
+    removeExternalCredentials(dispatch, transaction.payload.removedCredIds);
 }
 
 function ShieldedTransferConsequence(

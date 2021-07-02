@@ -5,10 +5,10 @@ import {
     AddedCredential,
     Fraction,
 } from '~/utils/types';
-import SignTransaction from './SignTransaction';
+import SignTransaction from '../SignTransaction';
 import { createUpdateCredentialsTransaction } from '~/utils/transactionHelpers';
 import { ensureNonce } from '~/components/Transfers/withNonce';
-import LoadingComponent from './LoadingComponent';
+import LoadingComponent from '../LoadingComponent';
 
 interface Props {
     account: Account;
