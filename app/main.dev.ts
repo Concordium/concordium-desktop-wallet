@@ -22,7 +22,7 @@ import initializeDatabaseGeneralIpcHandlers from './ipc/database/general';
 import initializeDatabaseAccountIpcHandlers from './ipc/database/accountDao';
 import initializeDatabaseAddressBookIpcHandlers from './ipc/database/addressBookDao';
 import initializeDatabaseCredentialIpcHandlers from './ipc/database/credentialDao';
-import initializeDatabaseExternalCredentialIpcHandlers from './ipc/database/externalCredentialDao';
+import initializeDatabaseExternalCredentialIpcHandlers from './ipc/database/ExternalCredentialDao';
 import initializeDatabaseIdentityIpcHandlers from './ipc/database/identityDao';
 import initializeDatabaseGenesisAndGlobalIpcHandlers from './ipc/database/genesisAndGlobalDao';
 import initializeDatabaseMultiSignatureTransactionIpcHandlers from './ipc/database/multiSignatureProposalDao';
