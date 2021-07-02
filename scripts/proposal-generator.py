@@ -24,8 +24,8 @@ from base58 import b58decode_check
 numReleases = 10
 initialReleaseTime = datetime.fromisoformat("2021-07-26T14:00:00+01:00")
 firstRemReleaseTime = datetime.fromisoformat("2021-08-26T14:00:00+01:00")
-csvDelimiter = ';'
-thousandsSep = '’'
+csvDelimiter = ','
+thousandsSep = ','
 expiry = datetime.now() + relativedelta(hours =+ 2) # proposal expires 2 hours from now
 
 if len(sys.argv) != 2:
