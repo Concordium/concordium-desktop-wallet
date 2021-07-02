@@ -60,11 +60,11 @@ def parse_and_validate_amount(amountString: str, rowNumber: int):
 	return amount
 
 # read csv file
+rowNumber = 0
+
 try:
 	with open(csvFileName, newline='', encoding='utf-8-sig') as csvfile:
 		reader = csv.reader(csvfile, delimiter=csvDelimiter)
-
-		rowNumber = 0
 
 		for row in reader:
 			rowNumber += 1
@@ -143,3 +143,5 @@ try:
 except IOError:
 	print("Error reading file \"", csvFileName, "\".", sep='')
 	sys.exit(3)
+
+print("Successfully generated", rowNumber, "proposals.")
