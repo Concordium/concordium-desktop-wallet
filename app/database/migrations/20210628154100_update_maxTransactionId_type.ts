@@ -1,13 +1,18 @@
 import { Knex } from 'knex';
-import { accountsTable, identitiesTable } from '~/constants/databaseNames.json';
+import {
+    accountsTable,
+    identitiesTable,
+    transactionTable,
+} from '~/constants/databaseNames.json';
 import { Account } from '~/utils/types';
 
 const TEMP_NAME = 'accounts_temp';
+const insertChunkSize = 100;
 
 function stringifyMaxTransactionId(accounts: Account[]): Account[] {
     return accounts.map((a) => ({
         ...a,
-        maxTransactionId: a.maxTransactionId.toString(),
+        maxTransactionId: '0',
     }));
 }
 
@@ -25,7 +30,7 @@ function createCommonFields(table: Knex.CreateTableBuilder) {
     table.string('selfAmounts').defaultTo('');
     table.string('totalDecrypted').defaultTo('');
     table.boolean('allDecrypted').defaultTo(true);
-    table.string('maxTransactionId').defaultTo(0);
+    table.string('deploymentTransactionId').defaultTo('0');
     table.boolean('isInitial').defaultTo(false);
     table.string('rewardFilter').defaultTo('[]');
 }
@@ -37,14 +42,19 @@ export async function up(knex: Knex): Promise<void> {
         await t.schema.renameTable(accountsTable, TEMP_NAME);
         await t.schema.createTable(accountsTable, (table) => {
             createCommonFields(table);
-            table.string('deploymentTransactionId').defaultTo('0');
+            table.string('maxTransactionId').defaultTo('0');
         });
 
         const accounts: Account[] = await t(TEMP_NAME).select();
 
         if (accounts.length) {
-            await t(accountsTable).insert(stringifyMaxTransactionId(accounts));
+            await t.batchInsert(
+                accountsTable,
+                stringifyMaxTransactionId(accounts),
+                insertChunkSize
+            );
         }
+        await knex.table(transactionTable).del();
 
         await knex.schema.dropTableIfExists(TEMP_NAME);
     });
@@ -64,12 +74,16 @@ export async function down(knex: Knex): Promise<void> {
 
         const accounts: Account[] = await t(TEMP_NAME).select();
 
+        await knex.table(transactionTable).del();
+
         if (accounts.length) {
-            await t(accountsTable).insert(
+            await t.batchInsert(
+                accountsTable,
                 accounts.map((a) => ({
                     ...a,
-                    maxTransactionId: parseInt(a.maxTransactionId, 10),
-                }))
+                    maxTransactionId: 0,
+                })),
+                insertChunkSize
             );
         }
 
