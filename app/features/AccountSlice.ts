@@ -100,9 +100,7 @@ export const accountsInfoSelector = (state: RootState) =>
     state.accounts.accountsInfo;
 
 export const chosenAccountSelector = (state: RootState) =>
-    state.accounts.accounts.find(
-        (_, i) => i === state.accounts.chosenAccountIndex
-    );
+    state.accounts.accounts[state.accounts.chosenAccountIndex];
 
 export const chosenAccountInfoSelector = (state: RootState) =>
     state.accounts.accountsInfo?.[chosenAccountSelector(state)?.address ?? ''];
@@ -519,8 +517,9 @@ export async function editAccountName(
     address: string,
     name: string
 ) {
-    await updateAccount(address, { name });
-    return loadAccounts(dispatch);
+    const updatedFields: Partial<Account> = { name };
+    await updateAccount(address, updatedFields);
+    return dispatch(updateAccountFields({ address, updatedFields }));
 }
 
 export default accountsSlice.reducer;
