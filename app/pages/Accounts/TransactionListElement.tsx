@@ -5,7 +5,7 @@ import DoubleCheckmarkIcon from '@resources/svg/double-grey-checkmark.svg';
 import CheckmarkIcon from '@resources/svg/grey-checkmark.svg';
 import Warning from '@resources/svg/warning.svg';
 import { parseTime } from '~/utils/timeHelpers';
-import { getGTUSymbol, displayAsGTU } from '~/utils/gtu';
+import { displayAsGTU } from '~/utils/gtu';
 import {
     TransferTransaction,
     TransactionStatus,
@@ -28,11 +28,23 @@ const isInternalTransfer = (transaction: TransferTransaction) =>
         TransactionKindString.TransferToPublic,
     ].includes(transaction.transactionKind);
 
+const strikeThroughAmount = (
+    transaction: TransferTransaction,
+    viewingShielded: boolean,
+    isOutgoing: boolean
+) =>
+    transaction.status === TransactionStatus.Rejected ||
+    (transaction.status === TransactionStatus.Failed && viewingShielded) ||
+    (transaction.status === TransactionStatus.Failed && !isOutgoing);
+
 const isGreen = (
     transaction: TransferTransaction,
     viewingShielded: boolean,
     isOutgoing: boolean
 ) => {
+    if (isFailed(transaction)) {
+        return false;
+    }
     const kind = transaction.transactionKind;
     if (TransactionKindString.TransferToEncrypted === kind) {
         return viewingShielded;
@@ -108,9 +120,8 @@ function parseShieldedAmount(
         }
         return buildCostFreeAmountString(BigInt(transaction.decryptedAmount));
     }
-    const negative = isOutgoing ? '-' : '';
     return {
-        amount: `${negative} ${getGTUSymbol()} ?`,
+        amount: '',
         amountFormula: '',
     };
 }
@@ -119,6 +130,11 @@ function parseAmount(transaction: TransferTransaction, isOutgoing: boolean) {
     if (isTransferKind(transaction.transactionKind)) {
         if (isOutgoing) {
             const cost = BigInt(transaction.cost || '0');
+
+            if (transaction.status === TransactionStatus.Failed) {
+                return buildCostString(cost);
+            }
+
             if (
                 transaction.transactionKind ===
                 TransactionKindString.EncryptedAmountTransfer
@@ -250,6 +266,11 @@ function TransactionListElement({ transaction, onClick }: Props): JSX.Element {
                     <p
                         className={clsx(
                             'mV0',
+                            strikeThroughAmount(
+                                transaction,
+                                viewingShielded,
+                                isOutgoing
+                            ) && styles.strikedThrough,
                             isGreen(transaction, viewingShielded, isOutgoing) &&
                                 styles.greenText
                         )}
