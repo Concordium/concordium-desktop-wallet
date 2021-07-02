@@ -17,10 +17,10 @@ import {
 } from '~/utils/identityHelpers';
 import Form from '../Form';
 import Button from '~/cross-app-components/Button';
-
-import styles from './IdentityCard.module.scss';
 import { useUpdateEffect } from '~/utils/hooks';
 import { editIdentityName } from '~/features/IdentitySlice';
+
+import styles from './IdentityCard.module.scss';
 
 interface EditIdentityForm {
     name: string;

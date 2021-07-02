@@ -40,7 +40,6 @@ export default function InlineInput({
     const [innerValue, setInnerValue] = useState(value);
 
     useLayoutEffect(() => {
-        console.log(ref.current?.scrollWidth);
         scaleFieldWidth(ref.current);
     }, [innerValue]);
 
