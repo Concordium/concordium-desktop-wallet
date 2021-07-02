@@ -119,7 +119,11 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
         );
 
         useEffect(() => {
-            setScheduleLength(releases);
+            if (!Number.isNaN(Number(releases))) {
+                setScheduleLength(releases);
+            } else {
+                setScheduleLength(0);
+            }
         }, [setScheduleLength, releases]);
 
         return (
