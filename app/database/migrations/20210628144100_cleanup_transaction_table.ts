@@ -14,14 +14,14 @@ export async function up(knex: Knex): Promise<void> {
             transactionTable,
             (table: Knex.TableBuilder) => {
                 // Type Fields
-                table.string('transactionKind');
+                table.string('transactionKind').notNullable();
                 // Always present from proxy
                 table.string('id').unique();
                 table.string('blockHash');
-                table.string('blockTime');
+                table.string('blockTime').notNullable();
                 // Optionals
                 table.string('transactionHash');
-                table.string('subtotal');
+                table.string('subtotal').notNullable();
                 table.string('cost');
                 // Local storage of decrypted amount
                 table.string('decryptedAmount');
@@ -31,7 +31,7 @@ export async function up(knex: Knex): Promise<void> {
                 // Others
                 table.string('fromAddress').index();
                 table.string('toAddress').index();
-                table.string('status');
+                table.string('status').notNullable();
                 table.string('rejectReason');
             }
         );
