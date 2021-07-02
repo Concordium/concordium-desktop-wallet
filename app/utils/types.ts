@@ -3,7 +3,7 @@ import { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import { HTMLAttributes } from 'react';
 import { RegisterOptions } from 'react-hook-form';
 import { RejectReason } from './node/RejectReasonHelper';
-import { Genesis } from '~/database/types';
+import { ExternalCredential, Genesis } from '~/database/types';
 
 export type Dispatch = GenericDispatch<AnyAction>;
 
@@ -227,6 +227,7 @@ export interface ScheduledTransferPayload {
 export interface AddedCredential {
     index: Word8;
     value: CredentialDeploymentInformation;
+    note?: string;
 }
 
 export interface UpdateAccountCredentialsPayload {
@@ -1169,6 +1170,7 @@ export interface ExportData {
     identities: Identity[];
     addressBook: AddressBookEntry[];
     credentials: Credential[];
+    externalCredentials: ExternalCredential[];
     wallets: WalletEntry[];
     genesis?: Genesis;
 }
@@ -1315,6 +1317,9 @@ export interface CreationKeys {
     idCredSec: string;
     publicKey: string;
 }
+
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> &
+    Partial<Pick<T, K>>;
 
 export enum PrintErrorTypes {
     Cancelled = 'cancelled',
