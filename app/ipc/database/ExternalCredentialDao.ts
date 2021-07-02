@@ -18,6 +18,11 @@ async function upsertExternalCredential(
 async function upsertMultipleExternalCredentials(
     credentials: MakeOptional<ExternalCredential, 'note'>[]
 ) {
+    if (!credentials.length) {
+        return;
+    }
+
+    // eslint-disable-next-line consistent-return
     return (await knex())
         .table(externalCredentialsTable)
         .insert(credentials)
@@ -26,6 +31,11 @@ async function upsertMultipleExternalCredentials(
 }
 
 async function deleteExternalCredentials(credIds: string[]) {
+    if (!credIds.length) {
+        return;
+    }
+
+    // eslint-disable-next-line consistent-return
     return (await knex())
         .table(externalCredentialsTable)
         .whereIn('credId', credIds)

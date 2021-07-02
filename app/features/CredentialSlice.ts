@@ -108,8 +108,13 @@ export async function importCredentials(credentials: Credential[]) {
 }
 
 export async function importExternalCredentials(
-    credentials: ExternalCredential[]
+    credentials?: ExternalCredential[]
 ) {
+    if (!credentials?.length) {
+        return;
+    }
+
+    // eslint-disable-next-line consistent-return
     return upsertMultipleExternalCredentials(credentials);
 }
 
@@ -146,6 +151,10 @@ export async function insertExternalCredentials(
     accountAddress: string,
     credentials: AddedCredential[]
 ) {
+    if (!credentials.length) {
+        return;
+    }
+
     const creds: MakeOptional<ExternalCredential, 'note'>[] = credentials.map(
         (c) => ({
             accountAddress,
@@ -155,6 +164,7 @@ export async function insertExternalCredentials(
     );
 
     await upsertMultipleExternalCredentials(creds);
+    // eslint-disable-next-line consistent-return
     return loadExternalCredentials(dispatch);
 }
 
@@ -162,7 +172,12 @@ export async function removeExternalCredentials(
     dispatch: Dispatch,
     credIds: string[]
 ) {
+    if (!credIds.length) {
+        return;
+    }
+
     await deleteExternalCredentials(credIds);
+    // eslint-disable-next-line consistent-return
     return loadExternalCredentials(dispatch);
 }
 
