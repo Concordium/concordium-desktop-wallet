@@ -21,11 +21,11 @@ export default withChainData(function BakerStakeThresholdView({
         return (
             <>
                 <h5 className="mB0">Current baker stake threshold</h5>
-                <h3 className="mT10">
+                <div className="body1 mT10">
                     {displayAsGTU(
                         bs.updates.chainParameters.minimumThresholdForBaking
                     )}
-                </h3>
+                </div>
             </>
         );
     }
@@ -37,9 +37,9 @@ export default withChainData(function BakerStakeThresholdView({
                 <Loading inline />
             )}
             <h5 className="mB0">New baker stake threshold</h5>
-            <h3 className="mT10">
+            <div className="body1 mT10">
                 {displayAsGTU(bakerStakeThreshold.threshold)}
-            </h3>
+            </div>
         </div>
     );
 });
