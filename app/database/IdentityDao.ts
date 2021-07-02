@@ -31,7 +31,7 @@ export async function insertIdentity(identity: Partial<Identity> | Identity[]) {
 
 export async function updateIdentity(
     id: number,
-    updatedValues: Record<string, unknown>
+    updatedValues: Partial<Identity>
 ) {
     return window.ipcRenderer.invoke(
         ipcCommands.database.identity.update,

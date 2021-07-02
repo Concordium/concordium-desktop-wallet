@@ -4,6 +4,7 @@ import PendingImage from '@resources/svg/pending-small.svg';
 import SuccessImage from '@resources/svg/success-small.svg';
 import RejectedImage from '@resources/svg/warning-small.svg';
 import EditIcon from '@resources/svg/edit.svg';
+import { useDispatch } from 'react-redux';
 import { Identity, IdentityObject, IdentityStatus } from '~/utils/types';
 import { formatDate } from '~/utils/timeHelpers';
 import Card from '~/cross-app-components/Card';
@@ -19,6 +20,7 @@ import Button from '~/cross-app-components/Button';
 
 import styles from './IdentityCard.module.scss';
 import { useUpdateEffect } from '~/utils/hooks';
+import { editIdentityName } from '~/features/IdentitySlice';
 
 interface EditIdentityForm {
     name: string;
@@ -64,13 +66,14 @@ function IdentityListElement({
     canEditName = false,
 }: Props): JSX.Element {
     const [isEditing, setIsEditing] = useState(false);
+    const dispatch = useDispatch();
     const identityProvider = JSON.parse(identity.identityProvider);
     const identityObject: IdentityObject | null = JSON.parse(
         identity.identityObject
     )?.value;
 
-    function handleSubmit({ name }: EditIdentityForm) {
-        console.log(name);
+    async function handleSubmit({ name }: EditIdentityForm) {
+        await editIdentityName(dispatch, identity.id, name);
         setIsEditing(false);
     }
 
