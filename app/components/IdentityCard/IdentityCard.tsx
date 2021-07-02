@@ -15,6 +15,7 @@ import {
     attributeNamesMap,
     formatAttributeValue,
     compareAttributes,
+    IDENTITY_NAME_MAX_LENGTH,
 } from '~/utils/identityHelpers';
 import Form from '../Form';
 import Button from '~/cross-app-components/Button';
@@ -119,7 +120,10 @@ function IdentityListElement({
                                 defaultValue={identity.name}
                                 fallbackValue={identity.name}
                                 autoFocus
-                                rules={{ required: true }}
+                                rules={{
+                                    required: true,
+                                    maxLength: IDENTITY_NAME_MAX_LENGTH,
+                                }}
                             />
                         ) : (
                             <span

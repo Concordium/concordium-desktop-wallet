@@ -8,6 +8,7 @@ import Button from '~/cross-app-components/Button';
 import { editAccountName } from '~/features/AccountSlice';
 
 import styles from './AccountBalanceView.module.scss';
+import { ACCOUNT_NAME_MAX_LENGTH } from '~/utils/accountHelpers';
 
 interface FormFields {
     name: string;
@@ -44,7 +45,10 @@ export default function AccountName({ name, address }: AccountNameProps) {
                         defaultValue={name}
                         fallbackValue={name}
                         autoFocus
-                        rules={{ required: true }}
+                        rules={{
+                            required: true,
+                            maxLength: ACCOUNT_NAME_MAX_LENGTH,
+                        }}
                     />
                 ) : (
                     name
