@@ -15,7 +15,7 @@ import json
 import csv
 import os
 from decimal import *
-from datetime import datetime
+from datetime import datetime,date,time
 from dateutil.relativedelta import relativedelta
 from base58 import b58decode_check
 
@@ -23,6 +23,12 @@ welcomeReleaseTime = datetime.fromisoformat("2021-07-15T14:00:00+01:00")
 csvDelimiter = ','
 thousandsSep = ','
 expiry = datetime.now() + relativedelta(hours =+ 2) # proposal expires 2 hours from now
+
+# check that release is sufficiently long in the future, i.e., earliestReleaseTime = 08:00 CET tomorrow.
+earliestReleaseTime = datetime.combine(date.today(), time.fromisoformat("08:00:00+01:00")) + relativedelta(days =+ 1)
+if earliestReleaseTime > welcomeReleaseTime:
+	print("Error: Release time for welcome transfer must not be earlier than 08:00 CET tomorrow.")
+	sys.exit(5)
 
 
 # Parses and validates the the amount.
