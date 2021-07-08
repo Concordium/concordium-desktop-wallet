@@ -14,6 +14,7 @@ import sys
 import json
 import csv
 import os
+import re
 from decimal import *
 from datetime import datetime,date,time
 from dateutil.relativedelta import relativedelta
@@ -22,6 +23,9 @@ from base58 import b58decode_check
 welcomeReleaseTime = datetime.fromisoformat("2021-07-15T14:00:00+01:00")
 csvDelimiter = ','
 thousandsSep = ','
+decimalSep = '.'
+amountRegex = r"^[0-9]*(\.[0-9]{1,6})?$"
+maxAmount = 18446744073709551615
 expiry = datetime.now() + relativedelta(hours =+ 2) # proposal expires 2 hours from now
 
 # check that release is sufficiently long in the future, i.e., earliestReleaseTime = 08:00 CET tomorrow.
@@ -32,25 +36,20 @@ if earliestReleaseTime > welcomeReleaseTime:
 
 
 # Parses and validates the the amount.
-# Validates that it has at most 6 decimals, is a positive number and 
-# that it fits within a uint64. Parses the amount into its µGTU representation.
+# Validiation checks that amountString has the format X or X.Y where 
+# X is an arbitrary string over [0-9] and Y is a string over [0-9] with 1 <= length <= 6.
+# Parses the amount into its µGTU representation if the parsed amount is >0 and <= maxAmount.
 def parse_and_validate_amount(amountString: str, rowNumber: int):
-	amountSplit = amountString.split(".")
-	if (len(amountSplit) > 1 and (len(amountSplit) > 2 or len(amountSplit[1]) > 6)):
-		print("An amount with more than 6 decimals, which cannot be resolved into a valid µGTU, was given: " + amountString + " at row " + str(rowNumber))
-		sys.exit(2)
-
-	if (not all(map(lambda x: x.isnumeric(),amountSplit))):
-		print("An amount, which was not a valid number, was given: " + amountString + " at row " + str(rowNumber))
-		sys.exit(2)
-
-	amount = int(Decimal(amountString) * 1000000)
-	if (amount > 18446744073709551615):
-		print("An amount that is greater than the maximum GTU possible for one release (" + str(18446744073709551615/1000000) + ") was given: " + amountString + " at row " + str(rowNumber))
-		sys.exit(2)
-	if (amount <= 0):
-		print("An amount that is zero or less, which is not allowed in a release schedule, was given: " + amountString + " at row " + str(rowNumber))
-		sys.exit(2)
+	if not bool(re.match(amountRegex, amountString)):
+		raise ValueError("An amount, which was not a valid number, was given: " + amountString + " at row " + str(rowNumber))
+	try: 
+		amount = int(Decimal(amountString) * 1000000)
+	except:
+		raise ValueError("An amount, which could not be converted to GTU, was given: " + amountString + " at row " + str(rowNumber))
+	if (amount > maxAmount):
+		raise ValueError("An amount that is greater than the maximum GTU possible for one release (" + str(maxAmount/1000000) + ") was given: " + amountString + " at row " + str(rowNumber))
+	if (amount <= 0): 
+		raise ValueError("An amount that is zero or less, which is not allowed in a release schedule, was given: " + amountString + " at row " + str(rowNumber))
 	return amount
 
 # Main function
@@ -92,8 +91,12 @@ def main():
 					sys.exit(2)
 
 				# Remove thousands separator and trailing/leading whitespaces (if any)
-				amountInput = row[2].replace(thousandsSep, '').strip()
-				amount = parse_and_validate_amount(amountInput, rowNumber)
+				try:
+					amountInput = row[2].replace(thousandsSep, '').replace(decimalSep,'.').strip()
+					amount = parse_and_validate_amount(amountInput, rowNumber)
+				except ValueError as error:
+					print(error)
+					sys.exit(2)
 
 				proposal = {
 					"sender": senderAddress,
