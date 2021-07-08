@@ -40,13 +40,13 @@ import { submittedProposalRoute } from '~/utils/routerHelper';
 import getTransactionSignDigest from '~/utils/transactionHash';
 import { HandleSignatureFiles, getSignatures } from './util';
 import ProposalViewStatusText from './ProposalViewStatusText';
-
-import styles from './ProposalView.module.scss';
 import { dateFromTimeStamp, subtractHours } from '~/utils/timeHelpers';
 import { getTimeout } from '~/utils/transactionHelpers';
 import { useCurrentTime } from '~/utils/hooks';
 import TransactionHashView from '~/components/TransactionHash';
 import { TransactionExportType } from '~/utils/transactionTypes';
+
+import styles from './ProposalView.module.scss';
 
 const CLOSE_ROUTE = routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING;
 

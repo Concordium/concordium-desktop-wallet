@@ -3,8 +3,10 @@ import { getId } from '~/database/WalletDao';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getPairingPath } from '~/features/ledger/Path';
 import {
+    Credential,
     CredentialWithIdentityNumber,
     DeployedCredential,
+    Identity,
     instanceOfCredentialWithIdentityNumber,
     instanceOfDeployedCredential,
 } from './types';
@@ -55,4 +57,20 @@ export default async function findLocalDeployedCredentialWithWallet(
         return undefined;
     }
     return findLocalDeployedCredential(walletId, accountAddress);
+}
+
+export const CREDENTIAL_NOTE_MAX_LENGTH = 100;
+
+export function getNoteForOwnCredential(
+    identities: Identity[],
+    ownCred: Credential | undefined
+): string | undefined {
+    const identityName = identities.find((i) => i.id === ownCred?.identityId)
+        ?.name;
+
+    if (!identityName) {
+        return undefined;
+    }
+
+    return `Credential from "${identityName}"`;
 }

@@ -3,6 +3,7 @@ import bs58check from 'bs58check';
 import { Account, AccountInfo } from './types';
 
 export const ACCOUNT_NAME_MAX_LENGTH = 25;
+export const ADDRESS_LENGTH = 50;
 
 /**
  * Verifies whether an address string is a valid Base58check string.
@@ -27,12 +28,12 @@ const addressFormat: Validate = (address: string) =>
 
 export const commonAddressValidators: RegisterOptions = {
     minLength: {
-        value: 50,
-        message: 'Address should be 50 characters',
+        value: ADDRESS_LENGTH,
+        message: `Address should be ${ADDRESS_LENGTH} characters`,
     },
     maxLength: {
-        value: 50,
-        message: 'Address should be 50 characters',
+        value: ADDRESS_LENGTH,
+        message: `Address should be ${ADDRESS_LENGTH} characters`,
     },
     validate: {
         addressFormat,

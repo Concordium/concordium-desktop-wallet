@@ -16,6 +16,7 @@ import getGenesis from '~/database/GenesisDao';
 import setGenesisAndGlobal from '~/database/DatabaseHelpers';
 import { displayTargetNet, getTargetNet, Net } from '~/utils/ConfigHelper';
 import genesisBlocks from '~/constants/genesis.json';
+
 import styles from './ConnectionSettingElement.module.scss';
 
 interface Props {

@@ -26,7 +26,7 @@ export default function PasswordHasBeenSet() {
                 <Button
                     className={clsx(styles.button, 'mT100')}
                     onClick={() =>
-                        dispatch(push({ pathname: routes.ACCOUNTS }))
+                        dispatch(push({ pathname: routes.HOME_NODE_CONNECT }))
                     }
                 >
                     Continue to the application
