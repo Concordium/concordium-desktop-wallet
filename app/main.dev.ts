@@ -219,8 +219,8 @@ if (process.env.E2E_BUILD === 'true') {
     // eslint-disable-next-line promise/catch-or-return
     app.whenReady().then(createWindow);
 } else {
-    app.on('ready', () => {
-        createWindow();
+    app.on('ready', async () => {
+        await createWindow();
 
         if (mainWindow) {
             createMenu(mainWindow);
