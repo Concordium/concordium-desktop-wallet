@@ -6,6 +6,8 @@
 # The third column contains amount of the release in GTU
 # (as decimal with 6 digits after decimal dot and possibly using ',' as thousands separator)
 #
+# This script requires python 3.6 or above
+#
 # Note: The script uses dateutil and base58, which can be installed using 
 # "pip install python-dateutil"
 # "pip install base58"
@@ -41,7 +43,7 @@ if earliestReleaseTime > welcomeReleaseTime:
 # - Uses decimalSep as decimal separator
 # - Optionally uses thousandsSep as thousand separator
 # - Is >0 and <= maxAmount
-# Parses the amount into its µGTU representation.
+# Parses the amount into its microGTU representation.
 def parse_and_validate_amount(amount_string: str, row_number: int):
 	amount_regex = rf"^[0-9]+([{decimalSep}][0-9]{{1,6}})?$"
 	amount_regex_with_1000_sep = rf"^[0-9]{{1,3}}([{thousandsSep}][0-9]{{3}})*([{decimalSep}][0-9]{{1,6}})?$"
