@@ -9,7 +9,8 @@ import random
 class TestProposalGenerator(unittest.TestCase):
  
     def format_amount(self,amount_string: str):
-        return amount_string.replace('.',pg.decimalSep).replace(',',pg.thousandsSep)
+        translation_table = {ord(',') : pg.thousandsSep, ord('.'): pg.decimalSep}
+        return amount_string.translate(translation_table)
 
     def test_valid_number(self):
         self.assertEqual(
@@ -49,7 +50,8 @@ class TestProposalGenerator(unittest.TestCase):
 class TestWelcomeProposalGenerator(unittest.TestCase):
 
     def format_amount(self,amount_string: str):
-        return amount_string.replace('.',wpg.decimalSep).replace(',',wpg.thousandsSep)
+        translation_table = {ord(',') : wpg.thousandsSep, ord('.'): wpg.decimalSep}
+        return amount_string.translate(translation_table)
 
     def test_valid_number(self):
         self.assertEqual(

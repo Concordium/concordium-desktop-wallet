@@ -24,9 +24,9 @@ from base58 import b58decode_check
 
 welcomeReleaseTime = datetime.fromisoformat("2021-07-15T14:00:00+01:00")
 csvDelimiter = ','
-thousandsSep = ','
-decimalSep = '.'
-assert thousandsSep not in decimalSep and decimalSep not in thousandsSep
+thousandsSep = '.'
+decimalSep = ','
+assert len(csvDelimiter) == 1 and len(thousandsSep) == 1 and len(decimalSep) == 1 and thousandsSep != decimalSep
 maxAmount = 18446744073709551615
 expiry = datetime.now() + relativedelta(hours =+ 2) # proposal expires 2 hours from now
 
@@ -47,17 +47,18 @@ if earliestReleaseTime > welcomeReleaseTime:
 def parse_and_validate_amount(amount_string: str, row_number: int):
 	amount_regex = r"^[0-9]+([.][0-9]{1,6})?$"
 	amount_regex_with_1000_sep = r"^[0-9]{1,3}([,][0-9]{3})*([.][0-9]{1,6})?$"
+	translation_table = {ord(thousandsSep) : ',', ord(decimalSep): '.'}
 	amount_org_string = amount_string
 	#Strip white space and replace separators
-	amount_string  = amount_string.replace(thousandsSep, ',').replace(decimalSep,'.').strip()
+	amount_string  = amount_string.translate(translation_table).strip()
 	#Ensure valid format
 	if not bool(re.match(amount_regex, amount_string)) and not bool(re.match(amount_regex_with_1000_sep, amount_string)):
 		print(f"Amount {amount_org_string} at row {row_number} is not a valid amount string.")
 		print(f"Valid amounts are positive, use '{decimalSep}' as decimal separator, use '{thousandsSep}' as an optional thousand separator, and have at most 6 decimal digits.")
 		print(f"E.g., 1{thousandsSep}000{thousandsSep}000{decimalSep}12 and 1000000{decimalSep}12 are valid amounts")
 		raise ValueError("Invalid amount format.")
-	#Remove thousand separator and replace decimal separator by .
-	amount_string = amount_string.replace(thousandsSep, '').replace(decimalSep,'.')
+	#Remove thousand separator
+	amount_string = amount_string = amount_string.replace(',', '')
 	try: 
 		amount = int(Decimal(amount_string) * 1000000)
 	except: #this should not happen
