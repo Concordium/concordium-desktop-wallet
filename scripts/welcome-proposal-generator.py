@@ -45,15 +45,15 @@ if earliestReleaseTime > welcomeReleaseTime:
 # - Is >0 and <= maxAmount
 # Parses the amount into its microGTU representation.
 def parse_and_validate_amount(amount_string: str, row_number: int):
-	amount_regex = rf"^[0-9]+([{decimalSep}][0-9]{{1,6}})?$"
-	amount_regex_with_1000_sep = rf"^[0-9]{{1,3}}([{thousandsSep}][0-9]{{3}})*([{decimalSep}][0-9]{{1,6}})?$"
+	amount_regex = r"^[0-9]+([.][0-9]{1,6})?$"
+	amount_regex_with_1000_sep = r"^[0-9]{1,3}([,][0-9]{3})*([.][0-9]{1,6})?$"
 	amount_org_string = amount_string
-	#Strip white space
-	amount_string  = amount_string.strip()
+	#Strip white space and replace separators
+	amount_string  = amount_string.replace(thousandsSep, ',').replace(decimalSep,'.').strip()
 	#Ensure valid format
 	if not bool(re.match(amount_regex, amount_string)) and not bool(re.match(amount_regex_with_1000_sep, amount_string)):
 		print(f"Amount {amount_org_string} at row {row_number} is not a valid amount string.")
-		print(f"Valid amounts are positive, use '{decimalSep}' as decimal separator, use '{thousandsSep}' as optional thousand separator, and have at most 6 decimal digits.")
+		print(f"Valid amounts are positive, use '{decimalSep}' as decimal separator, use '{thousandsSep}' as an optional thousand separator, and have at most 6 decimal digits.")
 		print(f"E.g., 1{thousandsSep}000{thousandsSep}000{decimalSep}12 and 1000000{decimalSep}12 are valid amounts")
 		raise ValueError("Invalid amount format.")
 	#Remove thousand separator and replace decimal separator by .
