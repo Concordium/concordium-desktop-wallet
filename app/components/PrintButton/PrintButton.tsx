@@ -7,6 +7,7 @@ import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
 import styles from './PrintButton.module.scss';
+import { alreadyPrinting } from '~/constants/errorMessages.json';
 
 interface Props {
     className?: string;
@@ -44,23 +45,30 @@ export default function PrintButton({
             </div>
             <ReactToPrint
                 trigger={() => (
-                    <IconButton className={className} disabled={printing}>
+                    <IconButton className={className}>
                         <PrinterIcon height="20" />
                     </IconButton>
                 )}
                 content={() => componentRef.current || null}
-                print={(htmlContentToPrint) => {
-                    setPrinting(true);
-                    return printContent(htmlContentToPrint)
-                        .then(onPrint)
-                        .catch((error) =>
-                            setShowError({
-                                show: true,
-                                header: 'Print Failed',
-                                content: error.toString(),
-                            })
-                        )
-                        .finally(() => setPrinting(false));
+                print={async (htmlContentToPrint) => {
+                    if (!printing) {
+                        setPrinting(true);
+                        return printContent(htmlContentToPrint)
+                            .then(onPrint)
+                            .catch((error) =>
+                                setShowError({
+                                    show: true,
+                                    header: 'Print Failed',
+                                    content: error.toString(),
+                                })
+                            )
+                            .finally(() => setPrinting(false));
+                    }
+                    return setShowError({
+                        show: true,
+                        header: 'Already Printing',
+                        content: alreadyPrinting,
+                    });
                 }}
             />
         </>
