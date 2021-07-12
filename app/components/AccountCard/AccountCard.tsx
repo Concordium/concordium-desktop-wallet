@@ -78,9 +78,10 @@ export function AccountCardView({
             role="button"
         >
             <SidedRow
+                className={styles.header}
                 left={
                     <>
-                        <b className={styles.inline}>{accountName}</b>
+                        <b className={styles.accountName}>{accountName}</b>
                         {initialAccount && <>&nbsp;(Initial)</>}
                         {accountStatus === AccountStatus.Pending && (
                             <PendingImage
@@ -96,7 +97,7 @@ export function AccountCardView({
                         )}
                         {isBaker && (
                             <BakerImage
-                                height="25"
+                                width="20"
                                 className={styles.bakerImage}
                             />
                         )}
@@ -112,15 +113,19 @@ export function AccountCardView({
                 right={
                     <>
                         {connected && (
-                            <LedgerImage height="15" className="mR20" />
+                            <LedgerImage height="15" className="mR10" />
                         )}
                         {multiSig ? (
                             <>
-                                {identityName} +{' '}
+                                <div className="textRight textNoWrap">
+                                    {identityName} +{' '}
+                                </div>
                                 <MultiSigIcon className={styles.multisig} />
                             </>
                         ) : (
-                            identityName
+                            <div className="textRight textNoWrap">
+                                {identityName}
+                            </div>
                         )}
                     </>
                 }

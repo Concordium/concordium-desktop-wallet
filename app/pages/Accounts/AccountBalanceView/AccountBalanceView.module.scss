@@ -4,7 +4,7 @@
     background-color: $color-black;
     text-align: center;
     padding-bottom: 10px;
-    height: 250px;
+    height: 300px;
     position: relative;
     overflow: hidden;
 }
@@ -26,10 +26,6 @@
     margin: 0 20px;
 }
 
-.bold {
-    font-weight: $font-weight-bold;
-}
-
 .bakerRow,
 .amountRow,
 .viewingShieldedButton,
@@ -41,6 +37,15 @@
 .viewingShieldedButton,
 .amountRow {
     font-size: $font-size-body2;
+}
+
+.viewingShieldedButton {
+    text-decoration: underline;
+}
+
+.active {
+    text-decoration: none;
+    font-weight: $font-weight-bold;
 }
 
 .amountRow {
@@ -81,5 +86,51 @@
 
     :global(.shield_svg__lock) {
         fill: $color-black;
+    }
+}
+
+.accountName {
+    position: relative;
+    width: calc(100% + 40px);
+    margin: -5px -20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $color-pale-blue;
+    padding: 0 20px 10px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid rgba($color-grey, 0.3);
+}
+
+.accountNameHeader {
+    margin-bottom: 0;
+    padding: 0 25px;
+}
+
+.accountNameHeader,
+.accountNameField {
+    max-width: 100%;
+}
+
+.editNameButton {
+    width: auto;
+    position: absolute;
+    right: 20px;
+    display: inline-flex;
+
+    svg {
+        width: 20px;
+        fill: rgba($color-pale-blue, 0.5);
+    }
+
+    &:hover svg {
+        fill: $color-pale-blue;
+    }
+
+    &[type='submit'] {
+        svg,
+        svg * {
+            fill: $color-pale-blue;
+        }
     }
 }

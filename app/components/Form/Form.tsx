@@ -7,7 +7,7 @@ import {
     UseFormMethods,
 } from 'react-hook-form';
 
-import Switch from '../../cross-app-components/Switch';
+import Switch from '~/cross-app-components/Switch';
 import {
     connectWithFormControlled,
     connectWithFormUncontrolled,
@@ -23,6 +23,7 @@ import FileInput from './FileInput';
 import { FileInputProps, FileInputValue } from './FileInput/FileInput';
 import InlineNumber, { InlineNumberProps } from './InlineNumber';
 import GtuInput, { GtuInputProps } from './GtuInput';
+import InlineInput, { InlineInputProps } from './InlineInput';
 
 export type FormProps<TFormValues extends FieldValues = FieldValues> = Omit<
     FormHTMLAttributes<HTMLFormElement>,
@@ -105,6 +106,11 @@ Form.InlineNumber = connectWithFormControlled<string, InlineNumberProps>(
 
 Form.GtuInput = connectWithFormControlled<string, GtuInputProps>(GtuInput);
 (Form.GtuInput as FC).displayName = 'Form.GtuInput';
+
+Form.InlineInput = connectWithFormControlled<string, InlineInputProps>(
+    InlineInput
+);
+(Form.InlineInput as FC).displayName = 'Form.InlineInput';
 
 Form.Timestamp = connectWithFormControlled<Date, InputTimestampProps>(
     InputTimestamp

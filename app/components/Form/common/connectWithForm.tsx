@@ -1,4 +1,10 @@
-import React, { ComponentType, FC, RefAttributes, useCallback } from 'react';
+import React, {
+    ComponentType,
+    FC,
+    ForwardRefExoticComponent,
+    RefAttributes,
+    useCallback,
+} from 'react';
 import {
     ControllerRenderProps,
     FieldError,
@@ -41,7 +47,7 @@ interface UncontrolledConnectorProps extends CommonConnectorProps {
 export function connectWithFormUncontrolled<
     TProps extends UncontrolledFieldProps
 >(
-    Field: ComponentType<TProps>
+    Field: ComponentType<TProps> | ForwardRefExoticComponent<TProps>
 ): (
     props: Omit<TProps, 'ref' | 'error' | 'isInvalid'> &
         UncontrolledConnectorProps
