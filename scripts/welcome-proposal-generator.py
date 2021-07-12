@@ -24,8 +24,8 @@ from base58 import b58decode_check
 
 welcomeReleaseTime = datetime.fromisoformat("2021-07-15T14:00:00+01:00")
 csvDelimiter = ','
-thousandsSep = '.'
-decimalSep = ','
+thousandsSep = ','
+decimalSep = '.'
 assert len(csvDelimiter) == 1 and len(thousandsSep) == 1 and len(decimalSep) == 1 and thousandsSep != decimalSep
 maxAmount = 18446744073709551615
 expiry = datetime.now() + relativedelta(hours =+ 2) # proposal expires 2 hours from now
