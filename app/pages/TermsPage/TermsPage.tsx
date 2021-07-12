@@ -126,7 +126,7 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
             </PageLayout.Header>
             <PageLayout.Container
                 disableBack={mustAccept}
-                closeRoute={mustAccept ? undefined : routes.SETTINGS_ABOUT}
+                closeRoute={mustAccept ? undefined : routes.HOME}
                 padding="vertical"
             >
                 <iframe

@@ -134,6 +134,8 @@ const createWindow = async () => {
         mainWindow = null;
     });
 
+    // make menu accessible on windows/linux
+    mainWindow.setAutoHideMenuBar(true);
     mainWindow.setMenuBarVisibility(false);
 
     printWindow = new BrowserWindow({

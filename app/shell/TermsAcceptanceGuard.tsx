@@ -1,7 +1,7 @@
 import React, { PropsWithChildren } from 'react';
 import { useSelector } from 'react-redux';
 import { termsAcceptedSelector } from '~/features/SettingsSlice';
-import TermsPage from '~/pages/settings/About/TermsPage';
+import TermsPage from '~/pages/TermsPage';
 
 type Props = PropsWithChildren<unknown>;
 

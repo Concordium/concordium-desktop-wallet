@@ -6,7 +6,7 @@ import {
 } from 'electron';
 import { licenseNotices } from '~/constants/urls.json';
 import { openRoute } from '~/constants/ipcRendererCommands.json';
-import { SETTINGS_TERMS } from '~/constants/routes.json';
+import { TERMS } from '~/constants/routes.json';
 
 const isMac = process.platform === 'darwin';
 
@@ -33,7 +33,7 @@ export function createMenu(window: BrowserWindow) {
                 {
                     label: 'Terms and Conditions',
                     click: () => {
-                        window.webContents?.send(openRoute, SETTINGS_TERMS);
+                        window.webContents?.send(openRoute, TERMS);
                     },
                 },
                 {
