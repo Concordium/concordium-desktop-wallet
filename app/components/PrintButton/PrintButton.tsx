@@ -28,6 +28,7 @@ export default function PrintButton({
     const [showError, setShowError] = useState<ModalErrorInput>({
         show: false,
     });
+    const [printing, setPrinting] = useState(false);
     const componentRef = useRef(null);
 
     return (
@@ -43,13 +44,14 @@ export default function PrintButton({
             </div>
             <ReactToPrint
                 trigger={() => (
-                    <IconButton className={className}>
+                    <IconButton className={className} disabled={printing}>
                         <PrinterIcon height="20" />
                     </IconButton>
                 )}
                 content={() => componentRef.current || null}
-                print={(htmlContentToPrint) =>
-                    printContent(htmlContentToPrint)
+                print={(htmlContentToPrint) => {
+                    setPrinting(true);
+                    return printContent(htmlContentToPrint)
                         .then(onPrint)
                         .catch((error) =>
                             setShowError({
@@ -58,7 +60,8 @@ export default function PrintButton({
                                 content: error.toString(),
                             })
                         )
-                }
+                        .finally(() => setPrinting(false));
+                }}
             />
         </>
     );
