@@ -17,7 +17,6 @@ import {
     standardPageFooter,
     HashRows,
     standardTableHeader,
-    timeFormat,
     displayExpiry,
 } from '~/utils/printUtility';
 import { parseTime } from '~/utils/timeHelpers';
@@ -87,8 +86,7 @@ function PrintFormatScheduledTransfer({
                                     {index + 1}.{' '}
                                     {parseTime(
                                         schedulePoint.timestamp,
-                                        TimeStampUnit.milliSeconds,
-                                        timeFormat
+                                        TimeStampUnit.milliSeconds
                                     )}
                                 </td>
                                 <td>{displayAsGTU(schedulePoint.amount)}</td>
