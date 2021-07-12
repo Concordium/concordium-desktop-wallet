@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push, replace } from 'connected-react-router';
 import clsx from 'clsx';
+import PlusIcon from '@resources/svg/plus.svg';
 import {
     Account,
     TransactionKindId,
@@ -34,6 +35,7 @@ import { isMultiSig } from '~/utils/accountHelpers';
 import { accountsSelector } from '~/features/AccountSlice';
 
 import styles from './CreateTransferProposal.module.scss';
+import UpsertAddress from '~/components/UpsertAddress';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
@@ -264,6 +266,16 @@ function CreateTransferProposal({
                                             senderAddress={account?.address}
                                             onClickedRecipient={continueAction}
                                         />
+                                        <UpsertAddress
+                                            clear
+                                            className={styles.addRecipient}
+                                            onSubmit={(e) => {
+                                                setRecipient(e);
+                                                continueAction();
+                                            }}
+                                        >
+                                            <PlusIcon />
+                                        </UpsertAddress>
                                     </div>
                                 )}
                             />

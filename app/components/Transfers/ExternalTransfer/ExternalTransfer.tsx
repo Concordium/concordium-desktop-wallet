@@ -89,7 +89,7 @@ export default function ExternalTransfer({
                     </div>
                     <UpsertAddress
                         clear
-                        className={styles.add}
+                        className={styles.addRecipient}
                         onSubmit={selectRecipient}
                     >
                         <PlusIcon />
