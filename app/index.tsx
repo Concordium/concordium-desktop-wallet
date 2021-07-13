@@ -6,9 +6,9 @@ import { ipcRenderer } from './global';
 import Root from './shell/Root';
 import { history, configuredStore } from './store/store';
 import { openRoute } from '~/constants/ipcRendererCommands.json';
+import { init as initMisc } from './features/MiscSlice';
 
 import './styles/app.global.scss';
-import { init as initMisc } from './features/MiscSlice';
 
 const store = configuredStore();
 
