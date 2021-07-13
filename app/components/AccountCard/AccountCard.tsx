@@ -8,6 +8,7 @@ import ShieldImage from '@resources/svg/shield.svg';
 import BakerImage from '@resources/svg/baker.svg';
 import ReadonlyImage from '@resources/svg/read-only.svg';
 import LedgerImage from '@resources/svg/ledger.svg';
+import InfoImage from '@resources/svg/info.svg';
 import { displayAsGTU } from '~/utils/gtu';
 import { AccountInfo, Account, AccountStatus, ClassName } from '~/utils/types';
 import { isInitialAccount, isMultiCred } from '~/utils/accountHelpers';
@@ -35,6 +36,86 @@ interface ViewProps extends ClassName {
     unShielded?: bigint;
     amountAtDisposal?: bigint;
     stakedAmount?: bigint;
+}
+
+function ShieldedBalance({
+    multiSig,
+    shielded = 0n,
+    onClick,
+    hasEncryptedFunds,
+}: Partial<ViewProps>) {
+    const [showingInfo, setShowingInfo] = useState(false);
+
+    const hidden = hasEncryptedFunds && (
+        <>
+            {' '}
+            + <ShieldImage height="15" />
+        </>
+    );
+
+    const closeInfo = (e: Event) => {
+        e.stopPropagation(); // So that we avoid triggering the parent's onClick
+        return setShowingInfo(false);
+    };
+
+    return (
+        <>
+            {multiSig || (
+                <SidedRow
+                    className={clsx(styles.row, 'mB0')}
+                    left={<h3>Shielded Balance:</h3>}
+                    right={
+                        <h3>
+                            {displayAsGTU(shielded)}
+                            {hidden}
+                        </h3>
+                    }
+                    onClick={(e) => {
+                        e.stopPropagation(); // So that we avoid triggering the parent's onClick
+                        return onClick && onClick(true);
+                    }}
+                />
+            )}
+            {multiSig && !showingInfo && (
+                <SidedRow
+                    className={clsx(styles.row, 'textFaded mB0')}
+                    left={<h3>Shielded Balance:</h3>}
+                    right={
+                        <>
+                            <h3>Unavailable</h3>
+                            <InfoImage
+                                onClick={(e: Event) => {
+                                    e.stopPropagation(); // So that we avoid triggering the parent's onClick
+                                    return setShowingInfo(true);
+                                }}
+                                className="mL10"
+                            />
+                        </>
+                    }
+                />
+            )}
+            {multiSig && showingInfo && (
+                <>
+                    <div
+                        tabIndex={0}
+                        role="button"
+                        className={styles.info}
+                        onClick={closeInfo}
+                        onKeyPress={closeInfo}
+                    >
+                        <p className={styles.infoText}>
+                            Shielded balances cannot be used on accounts with
+                            multiple credentials.
+                        </p>
+                    </div>
+                    <InfoImage
+                        onClick={closeInfo}
+                        className={styles.infoImageActivated}
+                    />
+                </>
+            )}
+        </>
+    );
 }
 
 export function AccountCardView({
@@ -157,19 +238,11 @@ export function AccountCardView({
                 right={displayAsGTU(stakedAmount)}
             />
             <div className={styles.dividingLine} />
-            <SidedRow
-                className={clsx(styles.row, 'mB0')}
-                left={<h3>Shielded Balance:</h3>}
-                right={
-                    <h3>
-                        {displayAsGTU(shielded)}
-                        {hidden}
-                    </h3>
-                }
-                onClick={(e) => {
-                    e.stopPropagation(); // So that we avoid triggering the parent's onClick
-                    return onClick && onClick(true);
-                }}
+            <ShieldedBalance
+                multiSig={multiSig}
+                shielded={shielded}
+                onClick={onClick}
+                hasEncryptedFunds={hasEncryptedFunds}
             />
         </div>
     );
