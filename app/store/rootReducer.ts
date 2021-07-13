@@ -11,6 +11,7 @@ import transactionReducer from '../features/TransactionSlice';
 import globalReducer from '../features/GlobalSlice';
 import credentialReducer from '../features/CredentialSlice';
 import walletReducer from '~/features/WalletSlice';
+import miscReducer from '~/features/MiscSlice';
 /* eslint-disable import/no-cycle */
 
 export default function createRootReducer(history: History) {
@@ -25,5 +26,6 @@ export default function createRootReducer(history: History) {
         global: globalReducer,
         credentials: credentialReducer,
         wallet: walletReducer,
+        misc: miscReducer,
     });
 }

@@ -6,28 +6,16 @@ import { Setting, Settings } from '~/utils/types';
 
 interface SettingsState {
     settings: Settings[];
-    termsAccepted: boolean;
-    unlocked: boolean;
 }
-
-const termsAccepted = false;
 
 const settingsSlice = createSlice({
     name: 'settings',
     initialState: {
         settings: [],
-        termsAccepted,
-        unlocked: false,
     } as SettingsState,
     reducers: {
         updateSettings: (state, index) => {
             state.settings = index.payload;
-        },
-        acceptTerms: (state) => {
-            state.termsAccepted = true;
-        },
-        unlock: (state) => {
-            state.unlocked = true;
         },
     },
 });
@@ -61,11 +49,7 @@ export const foundationTransactionsEnabledSelector = (
     }
     return false;
 };
-
-export const termsAcceptedSelector = ({ settings }: RootState) =>
-    settings.termsAccepted;
-
-export const { updateSettings, acceptTerms, unlock } = settingsSlice.actions;
+export const { updateSettings } = settingsSlice.actions;
 
 /**
  * Updates the given Setting in the database, and dispatches an update to the state

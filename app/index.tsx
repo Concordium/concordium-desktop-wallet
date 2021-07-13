@@ -8,9 +8,11 @@ import { history, configuredStore } from './store/store';
 import { openRoute } from '~/constants/ipcRendererCommands.json';
 
 import './styles/app.global.scss';
+import { init as initMisc } from './features/MiscSlice';
 
 const store = configuredStore();
 
+initMisc(store.dispatch);
 ipcRenderer.on(openRoute, (_, route: string) => {
     store.dispatch(push(route));
 });

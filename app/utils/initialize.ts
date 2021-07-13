@@ -7,11 +7,12 @@ import {
 } from '~/features/CredentialSlice';
 import { loadIdentities } from '~/features/IdentitySlice';
 import { loadProposals } from '~/features/MultiSignatureSlice';
-import { findSetting, unlock, updateSettings } from '~/features/SettingsSlice';
+import { findSetting, updateSettings } from '~/features/SettingsSlice';
 import listenForIdentityStatus from './IdentityStatusPoller';
 import startClient from '../node/nodeConnector';
 import { Dispatch } from './types';
 import settingKeys from '../constants/settingKeys.json';
+import { unlock } from '~/features/MiscSlice';
 
 /**
  * Loads settings from the database into the store.

@@ -48,7 +48,7 @@ const links: SidebarLink[] = [
 
 export default function ConnectedSidebar() {
     const disabled = useSelector(
-        (s: RootState) => !s.settings.unlocked || !s.settings.termsAccepted
+        (s: RootState) => !s.misc.unlocked || !s.misc.termsAccepted
     );
 
     let ledgerStatus;
