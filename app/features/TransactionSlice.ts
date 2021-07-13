@@ -27,7 +27,11 @@ import {
     convertAccountTransaction,
 } from '../utils/TransactionConverters';
 // eslint-disable-next-line import/no-cycle
-import { updateMaxTransactionId, updateAllDecrypted } from './AccountSlice';
+import {
+    updateMaxTransactionId,
+    updateAllDecrypted,
+    chosenAccountSelector,
+} from './AccountSlice';
 import AbortController from '~/utils/AbortController';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
 import { max } from '~/utils/basicHelpers';
@@ -197,7 +201,10 @@ async function fetchTransactions(address: string, currentMaxId: bigint) {
         currentMaxId.toString()
     );
 
-    const newMaxId = transactions.reduce((id, t) => max(id, BigInt(t.id)), 0n);
+    const newMaxId = transactions.reduce(
+        (id, t) => max(id, BigInt(t.id)),
+        currentMaxId
+    );
     const isFinished = !full;
 
     const newTransactions = await insertTransactions(
@@ -343,7 +350,8 @@ export const transactionsSelector = (state: RootState) => {
             isShieldedBalanceTransaction
         );
     }
-    const address = state.accounts.chosenAccount?.address;
+    const address = chosenAccountSelector(state)?.address;
+
     if (!address) {
         return [];
     }

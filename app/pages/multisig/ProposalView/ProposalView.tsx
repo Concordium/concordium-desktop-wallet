@@ -40,11 +40,9 @@ import { submittedProposalRoute } from '~/utils/routerHelper';
 import getTransactionSignDigest from '~/utils/transactionHash';
 import { HandleSignatureFiles, getSignatures } from './util';
 import ProposalViewStatusText from './ProposalViewStatusText';
-import { dateFromTimeStamp, subtractHours } from '~/utils/timeHelpers';
-import { getTimeout } from '~/utils/transactionHelpers';
-import { useCurrentTime } from '~/utils/hooks';
 import TransactionHashView from '~/components/TransactionHash';
 import { TransactionExportType } from '~/utils/transactionTypes';
+import FormSubmissionWindowButton from './FormSubmissionWindowButton';
 
 import styles from './ProposalView.module.scss';
 
@@ -75,11 +73,6 @@ function ProposalView({ proposal }: ProposalViewProps) {
         () => parse(proposal.transaction),
         [proposal]
     );
-
-    const now = useCurrentTime();
-    const expiry = dateFromTimeStamp(getTimeout(transaction));
-    const submissionWindowStart = subtractHours(2, expiry);
-    const isBeforeSubmissionWindow = now < submissionWindowStart;
 
     const signatures = getSignatures(transaction);
 
@@ -280,11 +273,9 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                         I understand this is the final
                                         submission and cannot be reverted
                                     </Form.Checkbox>
-                                    <Form.Submit
-                                        disabled={isBeforeSubmissionWindow}
-                                    >
-                                        Submit transaction to chain
-                                    </Form.Submit>
+                                    <FormSubmissionWindowButton
+                                        transaction={transaction}
+                                    />
                                 </div>
                             )}
                         </div>

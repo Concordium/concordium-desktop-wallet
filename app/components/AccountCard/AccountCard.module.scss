@@ -38,8 +38,11 @@ $horizontal-padding: 30px;
     }
 }
 
-.inline {
+.accountName {
+    @include overflowEllipsis;
+
     display: inline;
+    max-width: 100%;
 }
 
 .dividingLine {
@@ -49,6 +52,23 @@ $horizontal-padding: 30px;
     height: 1px;
     display: block;
     margin-left: calc(-1 * #{$horizontal-padding});
+}
+
+.header {
+    > :first-child {
+        margin-right: 10px;
+        flex: 1 1 calc(50% - 10px);
+        min-width: 0;
+    }
+
+    > :last-child {
+        flex: 1 1 auto;
+        margin-left: 10px;
+    }
+
+    svg {
+        flex: 0 0 auto;
+    }
 }
 
 .row {
@@ -67,6 +87,8 @@ $horizontal-padding: 30px;
 .bakerImage {
     margin-left: 10px;
     margin-top: -10px;
+    height: auto;
+    flex: 0 0 20px;
 }
 
 .statusImage {
