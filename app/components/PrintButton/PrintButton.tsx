@@ -7,9 +7,11 @@ import IconButton from '~/cross-app-components/IconButton';
 import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
-import styles from './PrintButton.module.scss';
 import { alreadyPrinting } from '~/constants/errorMessages.json';
-import { setPrinting, isPrintingSelector } from '~/features/PrintSlice';
+import { RootState } from '~/store/store';
+import { setPrinting } from '~/features/MiscSlice';
+
+import styles from './PrintButton.module.scss';
 
 interface Props {
     className?: string;
@@ -32,7 +34,7 @@ export default function PrintButton({
     const [showError, setShowError] = useState<ModalErrorInput>({
         show: false,
     });
-    const isPrinting = useSelector(isPrintingSelector);
+    const { isPrinting } = useSelector((s: RootState) => s.misc);
     const componentRef = useRef(null);
 
     return (

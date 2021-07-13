@@ -1,21 +1,12 @@
-import React, {
-    useCallback,
-    useEffect,
-    useLayoutEffect,
-    useState,
-} from 'react';
+import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import ipcCommands from '~/constants/ipcCommands.json';
 import ipcRendererCommands from '~/constants/ipcRendererCommands.json';
 import routes from '~/constants/routes.json';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import PageLayout from '~/components/PageLayout';
-import { acceptTerms } from '~/features/SettingsSlice';
-import {
-    hasAcceptedTerms,
-    storeTerms,
-    termsUrlBase64,
-} from '~/utils/termsHelpers';
+import { acceptTerms } from '~/features/MiscSlice';
+import { termsUrlBase64 } from '~/utils/termsHelpers';
 import { noOp } from '~/utils/basicHelpers';
 import { useIpcRendererEvent } from '~/cross-app-components/util/nativeEventHooks';
 import { useWindowResize } from '~/cross-app-components/util/eventHooks';
@@ -92,9 +83,7 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
     useIpcRendererEvent(ipcRendererCommands.didFinishLoad, handleResize);
 
     const handleAccept = useCallback(() => {
-        storeTerms()
-            .then(() => dispatch(acceptTerms()))
-            .catch(() => {});
+        acceptTerms(dispatch);
     }, [dispatch]);
 
     useLayoutEffect(() => {
@@ -108,17 +97,6 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
         return hijackLinks(frameEl);
     }, [frameEl, handleResize]);
 
-    useEffect(() => {
-        hasAcceptedTerms()
-            .then((accepted) => {
-                if (accepted) {
-                    dispatch(acceptTerms());
-                }
-                return accepted;
-            })
-            .catch(() => {});
-    }, [dispatch]);
-
     return (
         <PageLayout>
             <PageLayout.Header>
@@ -126,7 +104,7 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
             </PageLayout.Header>
             <PageLayout.Container
                 disableBack={mustAccept}
-                closeRoute={mustAccept ? undefined : routes.SETTINGS_ABOUT}
+                closeRoute={mustAccept ? undefined : routes.HOME}
                 padding="vertical"
             >
                 <iframe
