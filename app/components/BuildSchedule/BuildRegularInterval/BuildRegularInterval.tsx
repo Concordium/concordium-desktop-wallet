@@ -151,6 +151,7 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
                                 }
                                 className={styles.releasesInput}
                                 fallbackValue={1}
+                                trimLeadingZeros
                                 rules={{
                                     required: 'Releases required',
                                     min: {
