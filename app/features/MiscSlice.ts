@@ -6,11 +6,13 @@ import { hasAcceptedTerms, storeTerms } from '~/utils/termsHelpers';
 interface MiscState {
     termsAccepted: boolean;
     unlocked: boolean;
+    isPrinting: boolean;
 }
 
 const initialState: MiscState = {
     termsAccepted: false,
     unlocked: false,
+    isPrinting: false,
 };
 
 const miscSlice = createSlice({
@@ -23,10 +25,13 @@ const miscSlice = createSlice({
         unlock(state) {
             state.unlocked = true;
         },
+        setPrinting: (state, index) => {
+            state.isPrinting = index.payload;
+        },
     },
 });
 
-export const { unlock } = miscSlice.actions;
+export const { unlock, setPrinting } = miscSlice.actions;
 const { acceptTerms: setTermsAccepted } = miscSlice.actions;
 
 export async function init(dispatch: Dispatch) {
