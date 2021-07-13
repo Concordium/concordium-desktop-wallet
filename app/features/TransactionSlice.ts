@@ -197,7 +197,10 @@ export async function loadTransactions(
 async function fetchTransactions(address: string, currentMaxId: number) {
     const { transactions, full } = await getTransactions(address, currentMaxId);
 
-    const newMaxId = transactions.reduce((id, t) => Math.max(id, t.id), 0);
+    const newMaxId = transactions.reduce(
+        (id, t) => Math.max(id, t.id),
+        currentMaxId
+    );
     const isFinished = !full;
 
     const newTransactions = await insertTransactions(

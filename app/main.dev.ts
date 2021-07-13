@@ -178,7 +178,7 @@ async function print(body: string) {
         } else {
             printWindow.loadURL(`data:text/html;charset=utf-8,${body}`);
             const content = printWindow.webContents;
-            content.on('did-finish-load', () => {
+            content.once('did-finish-load', () => {
                 content.print({}, (success, errorType) => {
                     if (!success) {
                         if (errorType === PrintErrorTypes.Cancelled) {
