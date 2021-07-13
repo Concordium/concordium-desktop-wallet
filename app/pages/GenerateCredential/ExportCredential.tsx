@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect } from 'react-router';
 import saveFile from '~/utils/FileHelper';
@@ -26,6 +26,7 @@ export default function ExportCredential({ onExported }: Props): JSX.Element {
     const dispatch = useDispatch();
     const addressBook = useSelector(addressBookSelector);
     const { credential, accountName } = useContext(savedStateContext);
+    const [hasExported, setHasExported] = useState(false);
 
     useEffect(() => {
         onExported(false);
@@ -49,7 +50,7 @@ export default function ExportCredential({ onExported }: Props): JSX.Element {
                 8
             )}.json`,
         });
-        if (success) {
+        if (success && !hasExported) {
             insertNewCredential(
                 dispatch,
                 credential.address,
@@ -82,6 +83,7 @@ export default function ExportCredential({ onExported }: Props): JSX.Element {
                 });
             }
 
+            setHasExported(true);
             onExported(true);
         }
     }

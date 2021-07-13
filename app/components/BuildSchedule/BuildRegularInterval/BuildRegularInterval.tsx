@@ -14,6 +14,7 @@ import {
     TimeConstants,
     getDefaultScheduledStartTime,
 } from '~/utils/timeHelpers';
+import { isValidBigInt } from '~/utils/numberStringHelpers';
 import Form from '../../Form';
 import { futureDate } from '../../Form/util/validation';
 import ButtonGroup from '../../ButtonGroup';
@@ -119,7 +120,11 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
         );
 
         useEffect(() => {
-            setScheduleLength(releases);
+            if (isValidBigInt(releases) && releases <= 255 && releases >= 0) {
+                setScheduleLength(releases);
+            } else {
+                setScheduleLength(0);
+            }
         }, [setScheduleLength, releases]);
 
         return (
@@ -144,6 +149,7 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
                                 defaultValue={
                                     defaults?.releases?.toString() ?? '1'
                                 }
+                                className={styles.releasesInput}
                                 fallbackValue={1}
                                 rules={{
                                     required: 'Releases required',
@@ -156,6 +162,9 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
                                         message: 'Maximum value is 255',
                                     },
                                     validate: {
+                                        number: (numberOfReleases: string) =>
+                                            isValidBigInt(numberOfReleases) ||
+                                            'Releases must be an integer between 1 and 255',
                                         splitable: (numberOfReleases: bigint) =>
                                             numberOfReleases <= amount ||
                                             'Amount cannot be split among releases',

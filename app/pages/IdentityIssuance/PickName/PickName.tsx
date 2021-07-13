@@ -10,6 +10,8 @@ import Button from '~/cross-app-components/Button';
 
 import generalStyles from '../IdentityIssuance.module.scss';
 import styles from './PickName.module.scss';
+import { IDENTITY_NAME_MAX_LENGTH } from '~/utils/identityHelpers';
+import { ACCOUNT_NAME_MAX_LENGTH } from '~/utils/accountHelpers';
 
 interface IdentityIssuancePickNameFields {
     account: string;
@@ -64,7 +66,13 @@ export default function IdentityIssuancePickName({
                         name={fieldNames.identity}
                         defaultValue={identity}
                         placeholder="Identity name"
-                        rules={{ required: 'Please specify an identity name' }}
+                        rules={{
+                            required: 'Please specify an identity name',
+                            maxLength: {
+                                value: IDENTITY_NAME_MAX_LENGTH,
+                                message: `Cannot exceed ${IDENTITY_NAME_MAX_LENGTH} characters`,
+                            },
+                        }}
                     />
                     <p className="mT100 mB30">
                         What would you like to name your initial account?
@@ -76,6 +84,10 @@ export default function IdentityIssuancePickName({
                         placeholder="Initial account name"
                         rules={{
                             required: 'Please specify an initial account name',
+                            maxLength: {
+                                value: ACCOUNT_NAME_MAX_LENGTH,
+                                message: `Cannot exceed ${ACCOUNT_NAME_MAX_LENGTH} characters`,
+                            },
                         }}
                     />
                 </div>

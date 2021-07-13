@@ -1,4 +1,5 @@
 import React, { useRef, useState, PropsWithChildren } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import ReactToPrint from 'react-to-print';
 import PrinterIcon from '@resources/svg/printer.svg';
 import printContent from '~/utils/printContent';
@@ -7,6 +8,8 @@ import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
 import styles from './PrintButton.module.scss';
+import { alreadyPrinting } from '~/constants/errorMessages.json';
+import { setPrinting, isPrintingSelector } from '~/features/PrintSlice';
 
 interface Props {
     className?: string;
@@ -25,9 +28,11 @@ export default function PrintButton({
     children,
     onPrint = () => {},
 }: PropsWithChildren<Props>) {
+    const dispatch = useDispatch();
     const [showError, setShowError] = useState<ModalErrorInput>({
         show: false,
     });
+    const isPrinting = useSelector(isPrintingSelector);
     const componentRef = useRef(null);
 
     return (
@@ -48,17 +53,26 @@ export default function PrintButton({
                     </IconButton>
                 )}
                 content={() => componentRef.current || null}
-                print={(htmlContentToPrint) =>
-                    printContent(htmlContentToPrint)
-                        .then(onPrint)
-                        .catch((error) =>
-                            setShowError({
-                                show: true,
-                                header: 'Print Failed',
-                                content: error.message,
-                            })
-                        )
-                }
+                print={async (htmlContentToPrint) => {
+                    if (!isPrinting) {
+                        dispatch(setPrinting(true));
+                        return printContent(htmlContentToPrint)
+                            .then(onPrint)
+                            .catch((error) =>
+                                setShowError({
+                                    show: true,
+                                    header: 'Print Failed',
+                                    content: error.toString(),
+                                })
+                            )
+                            .finally(() => dispatch(setPrinting(false)));
+                    }
+                    return setShowError({
+                        show: true,
+                        header: 'Already Printing',
+                        content: alreadyPrinting,
+                    });
+                }}
             />
         </>
     );

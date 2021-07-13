@@ -3,7 +3,7 @@
 .root {
     transition: transform $anim-easing $anim-timing;
 
-    &:hover {
+    &:hover:not(:disabled) {
         transform: scale(1.1);
     }
 }

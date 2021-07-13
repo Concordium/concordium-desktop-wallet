@@ -2,6 +2,7 @@ import { RegisterOptions, Validate } from 'react-hook-form';
 import bs58check from 'bs58check';
 import { Account, AccountInfo } from './types';
 
+export const ACCOUNT_NAME_MAX_LENGTH = 25;
 export const ADDRESS_LENGTH = 50;
 
 /**
