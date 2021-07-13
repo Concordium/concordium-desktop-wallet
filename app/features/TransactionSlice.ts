@@ -332,32 +332,41 @@ export async function rejectTransaction(
     );
 }
 
-export const transactionsSelector = (
-    state: RootState
-): TransferTransactionWithNames[] => {
-    let transactions = state.transactions.transactions.filter(
-        isShieldedBalanceTransaction
-    );
-
-    if (!state.transactions.viewingShielded) {
-        const address = chosenAccountSelector(state)?.address;
-
-        if (!address) {
-            return [];
-        }
-        transactions = state.transactions.transactions.filter((transaction) =>
-            isUnshieldedBalanceTransaction(transaction, address)
-        );
-    }
-
+const attachNames = (state: RootState) => (
+    transaction: TransferTransaction
+) => {
     const findName = (address: string) =>
         state.addressBook.addressBook.find((e) => e.address === address)?.name;
 
-    return transactions.map((t) => ({
-        ...t,
-        toName: findName(t.toAddress),
-        fromName: findName(t.fromAddress),
-    }));
+    return {
+        ...transaction,
+        toName: findName(transaction.toAddress),
+        fromName: findName(transaction.fromAddress),
+    };
+};
+
+export const transactionsSelector = (
+    state: RootState
+): TransferTransactionWithNames[] => {
+    const mapNames = attachNames(state);
+
+    if (state.transactions.viewingShielded) {
+        return state.transactions.transactions
+            .filter(isShieldedBalanceTransaction)
+            .map(mapNames);
+    }
+
+    const address = chosenAccountSelector(state)?.address;
+
+    if (!address) {
+        return [];
+    }
+
+    return state.transactions.transactions
+        .filter((transaction) =>
+            isUnshieldedBalanceTransaction(transaction, address)
+        )
+        .map(mapNames);
 };
 
 export const viewingShieldedSelector = (state: RootState) =>
