@@ -17,11 +17,9 @@ import {
     Dispatch,
     TransactionEvent,
     Global,
+    TransferTransactionWithNames,
 } from '../utils/types';
-import {
-    attachNames,
-    isSuccessfulTransaction,
-} from '../utils/transactionHelpers';
+import { isSuccessfulTransaction } from '../utils/transactionHelpers';
 import {
     convertIncomingTransaction,
     convertAccountTransaction,
@@ -185,12 +183,11 @@ export async function loadTransactions(
         JSON.parse(account.rewardFilter)
     );
 
-    const namedTransactions = await attachNames(transactions);
     if (!controller?.isAborted) {
         if (showLoading) {
             dispatch(setLoadingTransactions(false));
         }
-        dispatch(setTransactions({ transactions: namedTransactions, more }));
+        dispatch(setTransactions({ transactions, more }));
     }
 }
 
@@ -335,20 +332,32 @@ export async function rejectTransaction(
     );
 }
 
-export const transactionsSelector = (state: RootState) => {
-    if (state.transactions.viewingShielded) {
-        return state.transactions.transactions.filter(
-            isShieldedBalanceTransaction
+export const transactionsSelector = (
+    state: RootState
+): TransferTransactionWithNames[] => {
+    let transactions = state.transactions.transactions.filter(
+        isShieldedBalanceTransaction
+    );
+
+    if (!state.transactions.viewingShielded) {
+        const address = chosenAccountSelector(state)?.address;
+
+        if (!address) {
+            return [];
+        }
+        transactions = state.transactions.transactions.filter((transaction) =>
+            isUnshieldedBalanceTransaction(transaction, address)
         );
     }
-    const address = chosenAccountSelector(state)?.address;
 
-    if (!address) {
-        return [];
-    }
-    return state.transactions.transactions.filter((transaction) =>
-        isUnshieldedBalanceTransaction(transaction, address)
-    );
+    const findName = (address: string) =>
+        state.accounts.accounts.find((a) => a.address === address)?.name;
+
+    return transactions.map((t) => ({
+        ...t,
+        toName: findName(t.toAddress),
+        fromName: findName(t.fromAddress),
+    }));
 };
 
 export const viewingShieldedSelector = (state: RootState) =>
