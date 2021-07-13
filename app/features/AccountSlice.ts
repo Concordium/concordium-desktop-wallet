@@ -7,7 +7,7 @@ import {
     updateCredentialsStatus,
 } from './CredentialSlice';
 // eslint-disable-next-line import/no-cycle
-import { addToAddressBook } from './AddressBookSlice';
+import { addToAddressBook, updateAddressBookEntry } from './AddressBookSlice';
 import {
     getAllAccounts,
     insertAccount,
@@ -519,6 +519,8 @@ export async function editAccountName(
 ) {
     const updatedFields: Partial<Account> = { name };
     await updateAccount(address, updatedFields);
+    await updateAddressBookEntry(dispatch, address, { name });
+
     return dispatch(updateAccountFields({ address, updatedFields }));
 }
 

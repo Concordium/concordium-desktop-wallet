@@ -351,7 +351,7 @@ export const transactionsSelector = (
     }
 
     const findName = (address: string) =>
-        state.accounts.accounts.find((a) => a.address === address)?.name;
+        state.addressBook.addressBook.find((e) => e.address === address)?.name;
 
     return transactions.map((t) => ({
         ...t,
