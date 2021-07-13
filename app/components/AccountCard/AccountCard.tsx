@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, SyntheticEvent } from 'react';
 import { useSelector } from 'react-redux';
 import clsx from 'clsx';
 import MultiSigIcon from '@resources/svg/multisig.svg';
@@ -53,7 +53,7 @@ function ShieldedBalance({
         </>
     );
 
-    const closeInfo = (e: Event) => {
+    const closeInfo = (e: SyntheticEvent) => {
         e.stopPropagation(); // So that we avoid triggering the parent's onClick
         return setShowingInfo(false);
     };
