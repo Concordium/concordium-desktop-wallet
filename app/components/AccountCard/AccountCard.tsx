@@ -53,6 +53,8 @@ function ShieldedBalance({
         </>
     );
 
+    const rowLeftSide = <h3>Shielded Balance:</h3>;
+
     const closeInfo = (e: SyntheticEvent) => {
         e.stopPropagation(); // So that we avoid triggering the parent's onClick
         return setShowingInfo(false);
@@ -63,7 +65,7 @@ function ShieldedBalance({
             {multiSig || (
                 <SidedRow
                     className={clsx(styles.row, 'mB0')}
-                    left={<h3>Shielded Balance:</h3>}
+                    left={rowLeftSide}
                     right={
                         <h3>
                             {displayAsGTU(shielded)}
@@ -79,7 +81,7 @@ function ShieldedBalance({
             {multiSig && !showingInfo && (
                 <SidedRow
                     className={clsx(styles.row, 'textFaded mB0')}
-                    left={<h3>Shielded Balance:</h3>}
+                    left={rowLeftSide}
                     right={
                         <>
                             <h3>Unavailable</h3>
