@@ -2,6 +2,7 @@ import {
     Account,
     TransferTransaction,
     TransactionKindString,
+    TransactionStatus,
 } from '~/utils/types';
 import { getTransactionsOfAccount } from '~/database/TransactionDao';
 import { toCSV } from '~/utils/basicHelpers';
@@ -16,6 +17,15 @@ function calculatePublicBalanceChange(
     transaction: TransferTransaction,
     isOutgoing: boolean
 ): string {
+    if (TransactionStatus.Rejected === transaction.status) {
+        return '0';
+    }
+    if (TransactionStatus.Failed === transaction.status) {
+        if (isOutgoing && transaction.cost) {
+            return `-${transaction.cost}`;
+        }
+        return '0';
+    }
     if (!isOutgoing) {
         return transaction.subtotal || '0';
     }
@@ -35,6 +45,13 @@ function calculateShieldedBalanceChange(
     transaction: TransferTransaction,
     isOutgoing: boolean
 ): string {
+    if (
+        [TransactionStatus.Failed, TransactionStatus.Rejected].includes(
+            transaction.status
+        )
+    ) {
+        return '0';
+    }
     if (isShieldedBalanceTransaction(transaction)) {
         if (!transaction.decryptedAmount) {
             return '?';
