@@ -39,24 +39,31 @@ export async function up(knex: Knex): Promise<void> {
     await knex.raw('PRAGMA foreign_keys=off;');
 
     await knex.transaction(async (t) => {
-        await t.schema.renameTable(accountsTable, TEMP_NAME);
-        await t.schema.createTable(accountsTable, (table) => {
+        await t.schema.createTable(TEMP_NAME, (table) => {
             createCommonFields(table);
             table.string('maxTransactionId').defaultTo('0');
         });
 
-        const accounts: Account[] = await t(TEMP_NAME).select();
+        const accounts: Account[] = await t(accountsTable).select();
 
         if (accounts.length) {
             await t.batchInsert(
-                accountsTable,
+                TEMP_NAME,
                 stringifyMaxTransactionId(accounts),
                 insertChunkSize
             );
         }
-        await knex.table(transactionTable).del();
 
-        await knex.schema.dropTableIfExists(TEMP_NAME);
+        const violations = await knex.raw('PRAGMA foreign_key_check;');
+        if (violations.length > 1) {
+            await t.rollback();
+            throw new Error('Foreign key violations detected during migration');
+        }
+
+        await t.table(transactionTable).del();
+
+        await t.schema.dropTableIfExists(accountsTable);
+        await t.schema.renameTable(TEMP_NAME, accountsTable);
     });
 
     await knex.raw('PRAGMA foreign_keys=on;');
@@ -66,19 +73,16 @@ export async function down(knex: Knex): Promise<void> {
     await knex.raw('PRAGMA foreign_keys=off;');
 
     await knex.transaction(async (t) => {
-        await t.schema.renameTable(accountsTable, TEMP_NAME);
-        await t.schema.createTable(accountsTable, (table) => {
+        await t.schema.createTable(TEMP_NAME, (table) => {
             createCommonFields(table);
             table.integer('maxTransactionId').defaultTo(0);
         });
 
-        const accounts: Account[] = await t(TEMP_NAME).select();
-
-        await knex.table(transactionTable).del();
+        const accounts: Account[] = await t(accountsTable).select();
 
         if (accounts.length) {
             await t.batchInsert(
-                accountsTable,
+                TEMP_NAME,
                 accounts.map((a) => ({
                     ...a,
                     maxTransactionId: 0,
@@ -87,7 +91,16 @@ export async function down(knex: Knex): Promise<void> {
             );
         }
 
-        await knex.schema.dropTableIfExists(TEMP_NAME);
+        const violations = await knex.raw('PRAGMA foreign_key_check;');
+        if (violations.length > 1) {
+            await t.rollback();
+            throw new Error('Foreign key violations detected during migration');
+        }
+
+        await t.table(transactionTable).del();
+
+        await t.schema.dropTableIfExists(accountsTable);
+        await t.schema.renameTable(TEMP_NAME, accountsTable);
     });
 
     await knex.raw('PRAGMA foreign_keys=on;');
