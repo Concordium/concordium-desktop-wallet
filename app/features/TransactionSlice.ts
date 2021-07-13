@@ -27,7 +27,11 @@ import {
     convertAccountTransaction,
 } from '../utils/TransactionConverters';
 // eslint-disable-next-line import/no-cycle
-import { updateMaxTransactionId, updateAllDecrypted } from './AccountSlice';
+import {
+    updateMaxTransactionId,
+    updateAllDecrypted,
+    chosenAccountSelector,
+} from './AccountSlice';
 import AbortController from '~/utils/AbortController';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
 
@@ -337,7 +341,8 @@ export const transactionsSelector = (state: RootState) => {
             isShieldedBalanceTransaction
         );
     }
-    const address = state.accounts.chosenAccount?.address;
+    const address = chosenAccountSelector(state)?.address;
+
     if (!address) {
         return [];
     }

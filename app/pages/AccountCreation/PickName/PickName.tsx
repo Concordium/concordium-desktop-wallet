@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import React from 'react';
 import Form from '~/components/Form';
+import { ACCOUNT_NAME_MAX_LENGTH } from '~/utils/accountHelpers';
 import { EqualRecord } from '~/utils/types';
 
 import generalStyles from '../AccountCreation.module.scss';
@@ -54,7 +55,13 @@ export default function IdentityIssuancePickName({
                         name={fieldNames.name}
                         defaultValue={initialName}
                         placeholder="Account name"
-                        rules={{ required: 'Please specify an account name' }}
+                        rules={{
+                            required: 'Please specify an account name',
+                            maxLength: {
+                                value: ACCOUNT_NAME_MAX_LENGTH,
+                                message: `Cannot exceed ${ACCOUNT_NAME_MAX_LENGTH} characters`,
+                            },
+                        }}
                     />
                     <Form.Submit
                         className={clsx(generalStyles.button, 'mHauto')}

@@ -3,6 +3,7 @@
 .root {
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .search {
@@ -14,4 +15,10 @@
     &:not(:last-child) {
         margin-bottom: 10px;
     }
+}
+
+.add {
+    position: absolute;
+    top: 5px;
+    right: -20px;
 }

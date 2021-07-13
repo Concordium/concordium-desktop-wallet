@@ -17,6 +17,7 @@
     margin: 0 auto;
 
     .stretchColumn & {
+        position: relative;
         display: flex;
         min-height: 100%;
         flex-direction: column;

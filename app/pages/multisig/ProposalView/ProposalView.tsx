@@ -40,11 +40,11 @@ import { submittedProposalRoute } from '~/utils/routerHelper';
 import getTransactionSignDigest from '~/utils/transactionHash';
 import { HandleSignatureFiles, getSignatures } from './util';
 import ProposalViewStatusText from './ProposalViewStatusText';
-
-import styles from './ProposalView.module.scss';
 import TransactionHashView from '~/components/TransactionHash';
 import { TransactionExportType } from '~/utils/transactionTypes';
 import FormSubmissionWindowButton from './FormSubmissionWindowButton';
+
+import styles from './ProposalView.module.scss';
 
 const CLOSE_ROUTE = routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING;
 
