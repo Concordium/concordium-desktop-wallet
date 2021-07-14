@@ -4,7 +4,7 @@ import {
     MenuItemConstructorOptions,
     shell,
 } from 'electron';
-import { licenseNotices } from '~/constants/urls.json';
+import { licenseNotices, supportForum } from '~/constants/urls.json';
 import { openRoute } from '~/constants/ipcRendererCommands.json';
 import { TERMS } from '~/constants/routes.json';
 
@@ -39,9 +39,16 @@ export function createMenu(window: BrowserWindow) {
                     },
                 },
                 {
-                    label: 'License notices',
+                    label: 'License Notices',
                     click: () => {
                         shell.openExternal(licenseNotices);
+                    },
+                },
+                { type: 'separator' },
+                {
+                    label: 'Concordium Support Forum',
+                    click: () => {
+                        shell.openExternal(supportForum);
                     },
                 },
             ],
