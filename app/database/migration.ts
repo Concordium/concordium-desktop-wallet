@@ -19,3 +19,22 @@ export default async function migrate(): Promise<boolean> {
         return false;
     }
 }
+
+/**
+ * Rollbacks the latest database migrations from the ./migrations directory.
+ * N.B. used for testing migrations.
+ */
+export async function down(): Promise<boolean> {
+    const config = {
+        migrationSource: new WebpackMigrationSource(
+            require.context('./migrations', false, /.ts$/)
+        ),
+    };
+
+    try {
+        await (await knex()).migrate.down(config);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
