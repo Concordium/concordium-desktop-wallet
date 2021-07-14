@@ -13,6 +13,7 @@ import styles from './MintRateInput.module.scss';
 
 const mintRateFormat = Intl.NumberFormat(undefined, {
     maximumSignificantDigits: 9,
+    useGrouping: false,
 }).format;
 
 const mintRateDescriptionFormat = Intl.NumberFormat(undefined, {
