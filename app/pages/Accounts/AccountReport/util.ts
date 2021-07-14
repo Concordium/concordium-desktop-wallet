@@ -10,6 +10,7 @@ import { attachNames, isOutgoingTransaction } from '~/utils/transactionHelpers';
 import exportTransactionFields from '~/constants/exportTransactionFields.json';
 import { dateFromTimeStamp, getISOFormat } from '~/utils/timeHelpers';
 import { isShieldedBalanceTransaction } from '~/features/TransactionSlice';
+import transactionKindNames from '~/constants/transactionKindNames.json';
 
 type Filter = (transaction: TransferTransaction) => boolean;
 
@@ -62,12 +63,9 @@ export interface FilterOption {
     key: string;
 }
 
-export function filterKind(
-    label: string,
-    kind: TransactionKindString
-): FilterOption {
+export function filterKind(kind: TransactionKindString): FilterOption {
     return {
-        label,
+        label: transactionKindNames[kind],
         key: kind,
         filter: (transaction: TransferTransaction) =>
             transaction.transactionKind === kind,
@@ -98,6 +96,8 @@ function parseTransaction(transaction: TransferTransaction, address: string) {
     });
 
     fieldValues.dateTime = getISOFormat(transaction.blockTime);
+    fieldValues.transactionKind =
+        transactionKindNames[transaction.transactionKind];
 
     const isOutgoing = isOutgoingTransaction(transaction, address);
     fieldValues.publicBalance = calculatePublicBalanceChange(

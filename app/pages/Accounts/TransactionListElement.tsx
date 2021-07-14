@@ -21,6 +21,7 @@ import {
     isOutgoingTransaction,
 } from '~/utils/transactionHelpers';
 import styles from './Transactions.module.scss';
+import transactionKindNames from '~/constants/transactionKindNames.json';
 
 const isInternalTransfer = (transaction: TransferTransaction) =>
     [
@@ -158,32 +159,12 @@ function displayType(kind: TransactionKindString) {
     switch (kind) {
         case TransactionKindString.TransferWithSchedule:
             return <i className="mL10">(With schedule)</i>;
-        case TransactionKindString.TransferToEncrypted:
-            return <i>Shielded amount</i>;
-        case TransactionKindString.TransferToPublic:
-            return <i>Unshielded amount</i>;
         case TransactionKindString.EncryptedAmountTransfer:
-            return <i className="mL10">(Encrypted)</i>;
-        case TransactionKindString.BakingReward:
-            return <i>Baker reward</i>;
-        case TransactionKindString.BlockReward:
-            return <i>Block reward</i>;
-        case TransactionKindString.FinalizationReward:
-            return <i>Finalization reward</i>;
-        case TransactionKindString.AddBaker:
-            return <i>Add baker</i>;
-        case TransactionKindString.RemoveBaker:
-            return <i>Remove baker</i>;
-        case TransactionKindString.UpdateBakerStake:
-            return <i>Update baker stake</i>;
-        case TransactionKindString.UpdateBakerRestakeEarnings:
-            return <i>Update baker restake Earnings</i>;
-        case TransactionKindString.UpdateBakerKeys:
-            return <i>Update baker keys</i>;
-        case TransactionKindString.UpdateCredentials:
-            return <i>Update account credentials</i>;
-        default:
+            return <i className="mL10">(Shielded)</i>;
+        case TransactionKindString.Transfer:
             return '';
+        default:
+            return <i>{transactionKindNames[kind]}</i>;
     }
 }
 
