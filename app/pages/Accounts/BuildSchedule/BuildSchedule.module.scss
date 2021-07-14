@@ -19,3 +19,11 @@
         margin-bottom: 40px;
     }
 }
+
+.errorLabel {
+    text-align: center;
+    color: $color-error;
+    min-height: 2.4em;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}

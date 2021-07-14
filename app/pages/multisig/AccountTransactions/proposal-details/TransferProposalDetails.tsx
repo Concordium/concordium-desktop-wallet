@@ -21,6 +21,7 @@ interface Props {
     schedule?: Schedule;
     estimatedFee?: Fraction;
     expiryTime?: Date;
+    amountError?: string;
 }
 
 export default function TransferProposalDetails({
@@ -31,6 +32,7 @@ export default function TransferProposalDetails({
     transactionType,
     estimatedFee,
     expiryTime,
+    amountError,
 }: Props) {
     const isScheduledTransfer =
         transactionType === TransactionKindId.Transfer_with_schedule;
@@ -40,6 +42,7 @@ export default function TransferProposalDetails({
             <AccountDetail title="Account" value={account} first />
             <AmountDetail title="Amount" value={amount} />
             <DisplayEstimatedFee className="mT5" estimatedFee={estimatedFee} />
+            <p className="textError textCenter">{amountError}</p>
             <AccountDetail title="Recipient" value={recipient} />
             {isScheduledTransfer ? (
                 <PlainDetail
