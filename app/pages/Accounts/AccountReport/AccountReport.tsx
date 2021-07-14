@@ -7,7 +7,7 @@ import PageLayout from '~/components/PageLayout';
 import AccountPageHeader from '../AccountPageHeader';
 import routes from '~/constants/routes.json';
 import { getNow, TimeConstants } from '~/utils/timeHelpers';
-
+import { hasEncryptedBalance } from '~/utils/accountHelpers';
 import Columns from '~/components/Columns';
 import Card from '~/cross-app-components/Card';
 import Button from '~/cross-app-components/Button';
@@ -15,7 +15,11 @@ import CloseButton from '~/cross-app-components/CloseButton';
 import Timestamp from '~/components/Form/InputTimestamp';
 import PickAccount from '~/components/PickAccount';
 import Checkbox from '~/components/Form/Checkbox';
-import ErrorModal from '~/components/SimpleErrorModal';
+import SimpleErrorModal, {
+    ModalErrorInput,
+} from '~/components/SimpleErrorModal';
+import DecryptModal, { DecryptModalInput } from '../DecryptModal';
+
 import {
     FilterOption,
     filterKind,
@@ -74,7 +78,13 @@ interface Props {
  * Allows the user to enable filters and to choose accounts.
  */
 export default function AccountReport({ location }: Props) {
-    const [modalOpen, setModalOpen] = useState(false);
+    const [showError, setShowError] = useState<ModalErrorInput>({
+        show: false,
+    });
+    const [showDecrypt, setShowDecrypt] = useState<DecryptModalInput>({
+        show: false,
+    });
+
     const [accounts, setAccounts] = useState<Account[]>(
         location?.state ? [location?.state.account] : []
     );
@@ -86,6 +96,20 @@ export default function AccountReport({ location }: Props) {
     const [currentFilters, setFilters] = useState<FilterOption[]>(() => [
         ...transactionTypeFilters,
     ]);
+
+    function promptDecrypt(account: Account) {
+        return new Promise((resolve) => {
+            setShowDecrypt({
+                show: true,
+                header: `${account.name} has encrypted amounts. To create a complete account report, we need to decrypt them.`,
+                account,
+                onFinish: (decrypted) => {
+                    setShowDecrypt({ show: false });
+                    resolve(decrypted);
+                },
+            });
+        });
+    }
 
     // Flip the given filterOptions status (enabled/disabled)
     function flipStatus(filterOption: FilterOption) {
@@ -107,27 +131,47 @@ export default function AccountReport({ location }: Props) {
      * If there are multiple chosen accounts, the reports will be bundled into a zip file
      */
     const makeReport = useCallback(async () => {
+        const accountsToReport: Account[] = [];
+        for (const account of accounts) {
+            if (
+                !hasEncryptedBalance(account) ||
+                account.allDecrypted ||
+                (await promptDecrypt(account))
+            ) {
+                accountsToReport.push(account);
+            }
+        }
+        const accountsLength = accountsToReport.length;
+
+        if (accountsLength === 0) {
+            setShowError({
+                show: true,
+                header: 'Account Report was not saved.',
+                content: 'All chosen accounts have encrypted amounts.',
+            });
+            return Promise.resolve();
+        }
+
         try {
-            const accountsLength = accounts.length;
             if (accountsLength === 1) {
                 return saveFile(
                     await getAccountCSV(
-                        accounts[0],
+                        accountsToReport[0],
                         currentFilters,
                         fromDate,
                         toDate
                     ),
                     {
                         title: 'Save Account Report',
-                        defaultPath: `${accounts[0].name}.csv`,
+                        defaultPath: `${accountsToReport[0].name}.csv`,
                         filters: [{ name: 'csv', extensions: ['csv'] }],
                     }
                 );
             }
 
             const filesToZip: SaveFileData[] = [];
-            for (let i = 0; i < accounts.length; i += 1) {
-                const account = accounts[i];
+            for (let i = 0; i < accountsLength; i += 1) {
+                const account = accountsToReport[i];
                 const data = await getAccountCSV(
                     account,
                     currentFilters,
@@ -146,8 +190,12 @@ export default function AccountReport({ location }: Props) {
                 filesToZip
             );
         } catch (e) {
-            setModalOpen(true);
-            return Promise.resolve(false);
+            setShowError({
+                show: true,
+                header: 'Account Report was not saved.',
+                content: `Encountered error: ${e.message}`,
+            });
+            return Promise.resolve();
         }
     }, [accounts, currentFilters, fromDate, toDate]);
 
@@ -165,11 +213,13 @@ export default function AccountReport({ location }: Props) {
     }
     return (
         <>
-            <ErrorModal
-                show={modalOpen}
-                header="Account Report was not saved."
-                onClick={() => setModalOpen(false)}
+            <SimpleErrorModal
+                show={showError.show}
+                header={showError.header}
+                content={showError.content}
+                onClick={() => setShowError({ show: false })}
             />
+            <DecryptModal {...showDecrypt} />
             <PageLayout>
                 <PageLayout.Header>
                     <AccountPageHeader />

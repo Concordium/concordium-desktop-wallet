@@ -18,13 +18,14 @@ import errorMessages from '~/constants/errorMessages.json';
 
 interface Props {
     account: Account;
+    onDecrypt?: () => void;
 }
 
 /**
  * Wrapper for the ledger component, for decrypting the account'
  * shielded balance and transactions.
  */
-export default function DecryptComponent({ account }: Props) {
+export default function DecryptComponent({ account, onDecrypt }: Props) {
     const dispatch = useDispatch();
     const transactions = useSelector(transactionsSelector);
     const global = useSelector(globalSelector);
@@ -74,6 +75,9 @@ export default function DecryptComponent({ account }: Props) {
             dispatch
         );
         await loadTransactions(account, dispatch);
+        if (onDecrypt) {
+            onDecrypt();
+        }
     }
 
     return (

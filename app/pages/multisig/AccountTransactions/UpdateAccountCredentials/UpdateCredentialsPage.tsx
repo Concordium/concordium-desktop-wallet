@@ -591,8 +591,8 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
-                                        filter={(_, info) =>
-                                            !!info && !hasEncryptedBalance(info)
+                                        filter={(acc) =>
+                                            !hasEncryptedBalance(acc)
                                         }
                                         onAccountClicked={onContinue}
                                     />

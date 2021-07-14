@@ -56,10 +56,10 @@ const ENCRYPTED_ZERO =
 /**
  * If an account has ever had an ecrypted balance different from 0, this will return true.
  */
-export function hasEncryptedBalance(accountInfo: AccountInfo): boolean {
+export function hasEncryptedBalance(account: Account): boolean {
     return (
-        accountInfo.accountEncryptedAmount.selfAmount !== ENCRYPTED_ZERO ||
-        accountInfo.accountEncryptedAmount.incomingAmounts.length > 0
+        account.selfAmounts !== ENCRYPTED_ZERO ||
+        account.incomingAmounts !== '[]'
     );
 }
 
