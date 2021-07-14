@@ -26,7 +26,9 @@ export function createMenu(window: BrowserWindow) {
                 { role: 'togglefullscreen' },
             ],
         },
-        { role: 'windowMenu' },
+        ...(isMac
+            ? [{ role: 'windowMenu' } as MenuItemConstructorOptions]
+            : []),
         {
             role: 'help',
             submenu: [
