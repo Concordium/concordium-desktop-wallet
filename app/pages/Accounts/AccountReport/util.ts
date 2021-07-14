@@ -3,10 +3,11 @@ import {
     TransferTransaction,
     TransactionKindString,
     TransactionStatus,
+    TransferTransactionWithNames,
 } from '~/utils/types';
 import { getTransactionsOfAccount } from '~/database/TransactionDao';
 import { toCSV } from '~/utils/basicHelpers';
-import { attachNames, isOutgoingTransaction } from '~/utils/transactionHelpers';
+import { isOutgoingTransaction, lookupName } from '~/utils/transactionHelpers';
 import exportTransactionFields from '~/constants/exportTransactionFields.json';
 import { dateFromTimeStamp, getISOFormat } from '~/utils/timeHelpers';
 import { isShieldedBalanceTransaction } from '~/features/TransactionSlice';
@@ -91,7 +92,10 @@ const getLabel = (i: string[]) => i[1];
 const exportedFields = Object.entries(exportTransactionFields);
 
 // Parse a transaction into a array of values, corresponding to those of the exported fields.
-function parseTransaction(transaction: TransferTransaction, address: string) {
+function parseTransaction(
+    transaction: TransferTransactionWithNames,
+    address: string
+) {
     const fieldValues: Record<string, string> = {};
     Object.entries(transaction).forEach(([key, value]) => {
         fieldValues[key] = value?.toString();
@@ -138,10 +142,17 @@ export async function getAccountCSV(
     transactions = transactions.filter((transaction) =>
         filterOptions.some((filterOption) => filterOption.filter(transaction))
     );
-    transactions = await attachNames(transactions);
+
+    const withNames: TransferTransactionWithNames[] = await Promise.all(
+        transactions.map(async (t) => ({
+            ...t,
+            fromName: await lookupName(t.fromAddress),
+            toName: await lookupName(t.toAddress),
+        }))
+    );
 
     return toCSV(
-        transactions.map((t) => parseTransaction(t, account.address)),
+        withNames.map((t) => parseTransaction(t, account.address)),
         exportedFields.map(getLabel)
     );
 }
