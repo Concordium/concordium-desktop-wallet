@@ -69,8 +69,8 @@ export default function IdentityIssuancePage(): JSX.Element {
     }
 
     function checkNavigation(location: Location) {
-        // Allow navigation from the final page or if error is shown
-        if (pathname === routes.IDENTITYISSUANCE_FINAL || errorModalOpen) {
+        // Allow direct navigation from any route but the external issuance page.
+        if (pathname !== routes.IDENTITYISSUANCE_EXTERNAL || errorModalOpen) {
             return true;
         }
 
