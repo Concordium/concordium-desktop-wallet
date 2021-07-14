@@ -82,7 +82,8 @@ export default function BuildSchedule({ location }: Props) {
         } else {
             setAmountError(undefined);
         }
-    }, [estimatedFee]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [estimatedFee, amount, JSON.stringify(accountInfo)]);
 
     const createTransaction = useCallback(
         (schedule: Schedule, recoverState: unknown) => {

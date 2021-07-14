@@ -144,7 +144,8 @@ function CreateTransferProposal({
         } else {
             setAmountError(undefined);
         }
-    }, [estimatedFee]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [estimatedFee, amount, JSON.stringify(accountInfo)]);
 
     function continueAction(routerAction: typeof push = push) {
         const nextLocation = handler.creationLocationHandler(location);
