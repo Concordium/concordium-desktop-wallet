@@ -37,7 +37,7 @@ export async function loadAddressBook(dispatch: Dispatch) {
 export async function updateAddressBookEntry(
     dispatch: Dispatch,
     address: string,
-    newEntry: AddressBookEntry
+    newEntry: Partial<AddressBookEntry>
 ) {
     await updateEntry(address, newEntry);
     loadAddressBook(dispatch);

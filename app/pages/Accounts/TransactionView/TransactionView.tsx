@@ -1,7 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import TransactionListElement from '../TransactionListElement';
-import { TransferTransaction, TransactionStatus } from '~/utils/types';
+import { TransferTransactionWithNames, TransactionStatus } from '~/utils/types';
 import { isFailed } from '~/utils/transactionHelpers';
 import CloseButton from '~/cross-app-components/CloseButton';
 import Card from '~/cross-app-components/Card';
@@ -11,7 +11,7 @@ import { rejectReasonToDisplayText } from '~/utils/node/RejectReasonHelper';
 import styles from './TransactionView.module.scss';
 
 interface Props {
-    transaction: TransferTransaction;
+    transaction: TransferTransactionWithNames;
     returnFunction: () => void;
 }
 
@@ -46,7 +46,7 @@ function CopiableListElement({
     );
 }
 
-function displayRejectReason(transaction: TransferTransaction) {
+function displayRejectReason(transaction: TransferTransactionWithNames) {
     if (isFailed(transaction)) {
         return (
             <p className={clsx(styles.errorMessage, 'mT0')}>
@@ -77,14 +77,14 @@ function TransactionView({ transaction, returnFunction }: Props) {
                 <CopiableListElement
                     title="From Address:"
                     value={`${transaction.fromAddress}`}
-                    note={transaction.fromAddressName}
+                    note={transaction.fromName}
                 />
             )}
             {transaction.toAddress ? (
                 <CopiableListElement
                     title="To Address:"
                     value={`${transaction.toAddress}`}
-                    note={transaction.toAddressName}
+                    note={transaction.toName}
                 />
             ) : null}
             <CopiableListElement

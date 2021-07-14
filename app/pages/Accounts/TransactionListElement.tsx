@@ -10,6 +10,7 @@ import {
     TransferTransaction,
     TransactionStatus,
     TransactionKindString,
+    TransferTransactionWithNames,
 } from '~/utils/types';
 import { chosenAccountSelector } from '~/features/AccountSlice';
 import { viewingShieldedSelector } from '~/features/TransactionSlice';
@@ -46,19 +47,22 @@ const isGreen = (
     return !isOutgoing;
 };
 
-function getName(transaction: TransferTransaction, isOutgoing: boolean) {
+function getName(
+    transaction: TransferTransactionWithNames,
+    isOutgoing: boolean
+) {
     if (isInternalTransfer(transaction)) {
         return '';
     }
     if (isOutgoing) {
         // Current Account is the sender
-        if (transaction.toAddressName !== undefined) {
-            return transaction.toAddressName;
+        if (transaction.toName !== undefined) {
+            return transaction.toName;
         }
         return transaction.toAddress.slice(0, 6);
     }
-    if (transaction.fromAddressName !== undefined) {
-        return transaction.fromAddressName;
+    if (transaction.fromName !== undefined) {
+        return transaction.fromName;
     }
     return transaction.fromAddress.slice(0, 6);
 }
