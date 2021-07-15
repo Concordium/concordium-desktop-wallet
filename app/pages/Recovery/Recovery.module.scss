@@ -7,7 +7,7 @@
     margin: auto auto;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     justify-content: center;
 }
 
@@ -22,7 +22,7 @@
 
 .messages,
 .ledgerDiv {
-    height: 100%;
+    flex-grow: 1;
 }
 
 .ledgerDiv {
@@ -31,6 +31,7 @@
     justify-content: center;
 }
 
+.introductionButtom,
 .topButton,
 .button {
     width: 400px;
@@ -39,4 +40,14 @@
 
 .topButton {
     margin-top: auto;
+}
+
+.leftColumn {
+    margin: 0 20px;
+    composes: flexColumn from global;
+    height: 100%;
+}
+
+.introductionButton {
+    margin: auto auto 0;
 }

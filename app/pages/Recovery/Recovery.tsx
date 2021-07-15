@@ -1,151 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { Switch, Route } from 'react-router-dom';
 import { push } from 'connected-react-router';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import Columns from '~/components/Columns';
-import SimpleLedger from '~/components/ledger/SimpleLedger';
-import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import { getlastFinalizedBlockHash } from '~/node/nodeHelpers';
-import { loadAccounts } from '~/features/AccountSlice';
-import { loadCredentials } from '~/features/CredentialSlice';
-import { globalSelector } from '~/features/GlobalSlice';
-import {
-    loadAddressBook,
-    addressBookSelector,
-} from '~/features/AddressBookSlice';
-import { loadIdentities, identitiesSelector } from '~/features/IdentitySlice';
-import pairWallet from '~/utils/WalletPairing';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import routes from '~/constants/routes.json';
-import errorMessages from '~/constants/errorMessages.json';
-import { recoverFromIdentity, recoverNewIdentity } from './util';
-import { allowedSpacesIdentities } from '~/constants/recoveryConstants.json';
-import { StateUpdate } from '~/utils/types';
-import AbortController from '~/utils/AbortController';
+import { Account } from '~/utils/types';
+import Button from '~/cross-app-components/Button';
+import AccountCard from '~/components/AccountCard';
+import CardList from '~/cross-app-components/CardList';
+import PerformRecovery from './PerformRecovery';
 
 import styles from './Recovery.module.scss';
-
-const addedMessage = (identityName: string, count: number) =>
-    `Recovered ${count} credentials on ${identityName}.`;
-const finishedMessage = 'Finished recovering credentials';
-
-async function getPrfKeySeed(
-    ledger: ConcordiumLedgerClient,
-    setMessage: (message: string) => void,
-    identityNumber: number
-) {
-    setMessage('Please confirm export of PRF key');
-    const prfKeySeed = await ledger.getPrfKey(identityNumber);
-    setMessage('Recovering credentials');
-    return prfKeySeed.toString('hex');
-}
-
-interface Props {
-    messages: string[];
-    setMessages: StateUpdate<string[]>;
-}
 
 /**
  * Component to run the account recovery algorithm.
  */
-export default function Recovery({ messages, setMessages }: Props) {
+export default function Recovery() {
     const dispatch = useDispatch();
-    const identities = useSelector(identitiesSelector);
-    const addressBook = useSelector(addressBookSelector);
-    const global = useSelector(globalSelector);
-    const [controller] = useState(new AbortController());
     const [error, setError] = useState<string>();
-
-    useEffect(() => {
-        return () => controller.abort();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    async function performRecovery(
-        ledger: ConcordiumLedgerClient,
-        setLedgerMessage: (message: string) => void
-    ) {
-        if (!global) {
-            setError(errorMessages.missingGlobal);
-            return;
-        }
-        setMessages([]);
-        const addMessage = (message: string) =>
-            setMessages((ms) => [...ms, message]);
-
-        const blockHash = await getlastFinalizedBlockHash();
-
-        const walletId = await pairWallet(ledger, dispatch);
-        const identitiesOfWallet = identities.filter(
-            (i) => i.walletId === walletId
-        );
-
-        const findIdentity = (identityNumber: number) =>
-            identitiesOfWallet.find(
-                (identity) => identity.identityNumber === identityNumber
-            );
-        const maxExistingIdentityNumber = identitiesOfWallet.reduce(
-            (currentMax, identity) =>
-                Math.max(identity.identityNumber, currentMax),
-            0
-        );
-
-        try {
-            let skipsRemaining = allowedSpacesIdentities;
-            let identityNumber = 0;
-            while (
-                skipsRemaining >= 0 ||
-                identityNumber <= maxExistingIdentityNumber
-            ) {
-                if (controller.isAborted) {
-                    return;
-                }
-                const prfKeySeed = await getPrfKeySeed(
-                    ledger,
-                    setLedgerMessage,
-                    identityNumber
-                );
-                const identity = findIdentity(identityNumber);
-                if (identity) {
-                    const addedCount = await recoverFromIdentity(
-                        prfKeySeed,
-                        blockHash,
-                        global,
-                        identity.id,
-                        addressBook
-                    );
-                    addMessage(addedMessage(identity.name, addedCount));
-                    skipsRemaining = allowedSpacesIdentities;
-                } else {
-                    const { exists, message } = await recoverNewIdentity(
-                        prfKeySeed,
-                        blockHash,
-                        global,
-                        identityNumber,
-                        walletId,
-                        addressBook
-                    );
-                    addMessage(message);
-                    skipsRemaining = exists
-                        ? allowedSpacesIdentities
-                        : skipsRemaining - 1;
-                }
-                identityNumber += 1;
-            }
-        } finally {
-            loadAccounts(dispatch);
-            loadCredentials(dispatch);
-            loadIdentities(dispatch);
-            loadAddressBook(dispatch);
-        }
-
-        addMessage(finishedMessage);
-        dispatch(
-            push({
-                pathname: routes.RECOVERY_COMPLETED,
-                state: messages,
-            })
-        );
-    }
+    const [recoveredAccounts, setRecoveredAccounts] = useState<Account[][]>([]);
 
     return (
         <>
@@ -157,23 +31,88 @@ export default function Recovery({ messages, setMessages }: Props) {
             />
             <Columns className="flexChildFill">
                 <Columns.Column>
-                    <div className={styles.ledgerDiv}>
-                        <SimpleLedger
-                            className={styles.card}
-                            ledgerCall={performRecovery}
-                        />
+                    <div className={styles.leftColumn}>
+                        <h2 className="mB40 textLeft">Account Recovery</h2>
+                        <Switch>
+                            <Route
+                                path={routes.RECOVERY_COMPLETED}
+                                render={() => (
+                                    <>
+                                        <p>
+                                            These are the recovered accounts. If
+                                            it looks correct, you can go to the
+                                            Accounts page and edit their names.
+                                            As identities are not recoverable,
+                                            there will be shown placeholder
+                                            cards in the Identities page. These
+                                            can also have their names edited,
+                                            but they cannot be used to create
+                                            new accounts. If you need more
+                                            accounts, you can always create a
+                                            new identity. If you are still
+                                            missing some accounts, you can go
+                                            back and look for more.
+                                        </p>
+                                        <Button
+                                            className={styles.topButton}
+                                            onClick={() => {
+                                                setRecoveredAccounts([]);
+                                                dispatch(
+                                                    push(routes.RECOVERY_MAIN)
+                                                );
+                                            }}
+                                        >
+                                            Go back and look for more
+                                        </Button>
+                                        <Button
+                                            className={styles.button}
+                                            onClick={() =>
+                                                dispatch(push(routes.ACCOUNTS))
+                                            }
+                                        >
+                                            Go to accounts
+                                        </Button>
+                                    </>
+                                )}
+                            />
+                            <Route
+                                render={() => (
+                                    <PerformRecovery
+                                        setRecoveredAccounts={
+                                            setRecoveredAccounts
+                                        }
+                                        setError={setError}
+                                    />
+                                )}
+                            />
+                        </Switch>
                     </div>
                 </Columns.Column>
                 <Columns.Column>
                     <div className={styles.messages}>
-                        {Boolean(messages.length) && (
-                            <h2 className={styles.messagesTitle}>
-                                Recovery status:
-                            </h2>
-                        )}
-                        {messages.map((m) => (
-                            <p key={m}>{m}</p>
+                        {recoveredAccounts.map((accounts, index) => (
+                            <>
+                                <p className="bodyEmphasized textLeft">
+                                    Index {index}:
+                                </p>
+                                <p className="textLeft">
+                                    Done: Found {accounts.length} account
+                                    {accounts.length === 1 || 's'}.
+                                </p>
+                                <CardList>
+                                    {accounts.map((account) => (
+                                        <AccountCard
+                                            key={account.address}
+                                            account={account}
+                                        />
+                                    ))}
+                                </CardList>
+                            </>
                         ))}
+                        <p className="bodyEmphasized textLeft">
+                            Index {recoveredAccounts.length}:
+                        </p>
+                        <p className="textLeft">Waiting...</p>
                     </div>
                 </Columns.Column>
             </Columns>

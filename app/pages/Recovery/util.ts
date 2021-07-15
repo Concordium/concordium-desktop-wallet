@@ -15,16 +15,13 @@ import {
 } from '~/utils/types';
 import { getCurrentYearMonth } from '~/utils/timeHelpers';
 import { insertIdentity } from '~/database/IdentityDao';
-import {
-    maxCredentialsOnAccount,
-    allowedSpacesCredentials,
-} from '~/constants/recoveryConstants.json';
+import { maxCredentialsOnAccount } from '~/constants/recoveryConstants.json';
 import { createAccount } from '~/utils/accountHelpers';
 import { getNextCredentialNumber } from '~/database/CredentialDao';
 import { importAddressBookEntry } from '~/features/AddressBookSlice';
 
-export function getRecoveredIdentityName(identityNumber: number) {
-    return `Recovered - ${identityNumber}`;
+function getRecoveredIdentityName(identityNumber: number) {
+    return `Recovered - index ${identityNumber}`;
 }
 
 /**
@@ -160,7 +157,6 @@ async function recoverCredential(
  * @param blockHash: block at which the function recover credentials
  * @param global: current global parameters
  * @param startingCredNumber: credentialNumber, from which to start attempting to recover credentials from.
- * @param allowedSpaces: Optional parameter that determines how many unused credentialNumbers in a row is tolerated, before the function breaks.
  * @returns Returns an object containing the list of all recovered credentials and their accounts. The length of these lists are always the same, and each account matches the credential on the same index.
  */
 export async function recoverCredentials(
@@ -168,14 +164,12 @@ export async function recoverCredentials(
     identityId: number,
     blockHash: string,
     global: Global,
-    startingCredNumber = 0,
-    allowedSpaces = allowedSpacesCredentials
+    startingCredNumber = 0
 ) {
     const credentials = [];
     const accounts = [];
     let credNumber = startingCredNumber;
-    let skipsRemaining = allowedSpaces;
-    while (skipsRemaining >= 0 && credNumber < maxCredentialsOnAccount) {
+    while (credNumber < maxCredentialsOnAccount) {
         const credId = await getCredId(prfKeySeed, credNumber, global);
 
         const recovered = await recoverCredential(
@@ -185,10 +179,7 @@ export async function recoverCredentials(
             identityId
         );
 
-        if (!recovered) {
-            skipsRemaining -= 1;
-        } else {
-            skipsRemaining = allowedSpaces;
+        if (recovered) {
             credentials.push(recovered.credential);
             accounts.push(recovered.account);
         }
@@ -254,15 +245,8 @@ export async function recoverFromIdentity(
     if (credentials.length > 0) {
         await importCredentials(credentials);
     }
-    return credentials.length;
+    return accounts;
 }
-
-const newIdentityMessage = (identityNumber: number, count: number) =>
-    `Recovered ${count} credentials from identity on key index ${identityNumber}, naming identity: ${getRecoveredIdentityName(
-        identityNumber
-    )}`;
-const noIdentityMessage = (identityNumber: number) =>
-    `Key index ${identityNumber} has not been used to create an identity yet.`;
 
 /**
  * Attempts to recover credentials on an unused identityNumber .
@@ -309,8 +293,8 @@ export async function recoverNewIdentity(
 
         return {
             exists: true,
-            message: newIdentityMessage(identityNumber, addedCount),
+            accounts,
         };
     }
-    return { exists: false, message: noIdentityMessage(identityNumber) };
+    return { exists: false, accounts: [] };
 }

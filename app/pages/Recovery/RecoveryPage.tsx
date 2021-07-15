@@ -1,42 +1,24 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 import routes from '~/constants/routes.json';
 import PageLayout from '~/components/PageLayout';
 import Recovery from './Recovery';
-import RecoveryCompleted from './RecoveryCompleted';
+import RecoveryIntroduction from './RecoveryIntroduction';
 
 export default function RecoveryPage() {
-    const [messages, setMessages] = useState<string[]>([]);
-
     return (
         <PageLayout>
             <PageLayout.Header>
                 <h1>Recovery</h1>
             </PageLayout.Header>
             <PageLayout.Container padding="vertical" className="flexColumn">
-                <h2>Account Recovery</h2>
-                <p>
-                    Here you can recover the credentials and their accounts from
-                    your current Ledger device.
-                </p>
                 <Switch>
                     <Route
-                        path={routes.RECOVERY_COMPLETED}
-                        render={() => (
-                            <RecoveryCompleted
-                                messages={messages}
-                                setMessages={setMessages}
-                            />
-                        )}
+                        exact
+                        path={routes.RECOVERY}
+                        component={RecoveryIntroduction}
                     />
-                    <Route
-                        render={() => (
-                            <Recovery
-                                messages={messages}
-                                setMessages={setMessages}
-                            />
-                        )}
-                    />
+                    <Route component={Recovery} />
                 </Switch>
             </PageLayout.Container>
         </PageLayout>
