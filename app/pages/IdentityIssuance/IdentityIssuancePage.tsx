@@ -48,6 +48,7 @@ export default function IdentityIssuancePage(): JSX.Element {
 
     const [errorModalOpen, setErrorModalOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState<string>('');
+    const [isSigning, setIsSigning] = useState(false);
 
     function activateModal(message: string) {
         setModalMessage(message);
@@ -70,7 +71,10 @@ export default function IdentityIssuancePage(): JSX.Element {
 
     function checkNavigation(location: Location) {
         // Allow direct navigation from any route but the external issuance page.
-        if (pathname !== routes.IDENTITYISSUANCE_EXTERNAL || errorModalOpen) {
+        if (
+            (pathname !== routes.IDENTITYISSUANCE_EXTERNAL || errorModalOpen) &&
+            !isSigning
+        ) {
             return true;
         }
 
@@ -107,6 +111,7 @@ export default function IdentityIssuancePage(): JSX.Element {
                                 setProvider={setProvider}
                                 onError={activateModal}
                                 provider={provider}
+                                setIsSigning={setIsSigning}
                             />
                         )}
                     />
