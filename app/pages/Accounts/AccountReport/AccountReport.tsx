@@ -32,7 +32,7 @@ import ipcCommands from '~/constants/ipcCommands.json';
 import saveFile from '~/utils/FileHelper';
 
 const decryptMessage = (name: string) =>
-    `'${name}' has encrypted amounts. To create a complete account report, we need to decrypt them. Otherwise this account will be skipped.`;
+    `'${name}' has encrypted funds. To create a complete account report, we need to decrypt them. Otherwise this account will be skipped.`;
 
 function showingShieldedTransfers(filters: FilterOption[]) {
     return filters.some(
@@ -158,7 +158,7 @@ export default function AccountReport({ location }: Props) {
                 setShowError({
                     show: true,
                     header: 'Account Report was not saved.',
-                    content: 'All chosen accounts have encrypted amounts.',
+                    content: 'All chosen accounts have encrypted funds.',
                 });
             }
             return Promise.resolve();
