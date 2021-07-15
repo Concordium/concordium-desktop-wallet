@@ -10,7 +10,9 @@ import { Account } from '~/utils/types';
 const TEMP_NAME = 'accounts_temp';
 const insertChunkSize = 100;
 
-// stringifies MaxTransactionId and ensures unique Account Address
+/**
+ * changes MaxTransactionId to a string and ensures unique Account Address
+ */
 function upAccounts(accounts: Account[]): Account[] {
     return accounts.map((a, i) => ({
         ...a,
@@ -25,22 +27,23 @@ function createCommonFields(table: Knex.CreateTableBuilder) {
         .references('id')
         .inTable(identitiesTable)
         .notNullable();
-    table.string('name');
-    table.string('status');
     table.integer('signatureThreshold');
     table.string('incomingAmounts').defaultTo('[]');
     table.string('selfAmounts').defaultTo('');
-    table.string('totalDecrypted').defaultTo('');
-    table.boolean('allDecrypted').defaultTo(true);
-    table.string('deploymentTransactionId').defaultTo('0');
-    table.boolean('isInitial').defaultTo(false);
-    table.string('rewardFilter').defaultTo('[]');
 }
 
 export async function up(knex: Knex): Promise<void> {
     await knex.transaction(async (t) => {
         await t.schema.createTable(TEMP_NAME, (table) => {
             createCommonFields(table);
+            table.string('name').notNullable();
+            table.string('status').notNullable();
+            table.string('totalDecrypted').defaultTo('0');
+            table.boolean('allDecrypted').defaultTo(true).notNullable();
+            table.string('deploymentTransactionId');
+            table.boolean('isInitial').defaultTo(false).notNullable();
+            table.string('rewardFilter').defaultTo('[]').notNullable();
+
             table.string('address').primary();
             table.string('maxTransactionId').defaultTo('0');
         });
@@ -54,15 +57,21 @@ export async function up(knex: Knex): Promise<void> {
                 insertChunkSize
             );
         }
-        await t.table(transactionTable).del();
 
         await t.schema.dropTableIfExists(accountsTable);
         await t.schema.renameTable(TEMP_NAME, accountsTable);
+
+        await t.table(transactionTable).del();
     });
 }
 
-type AccountWithNumberMaxTransactionId = Omit<Account, 'maxTransactionId'>;
+type AccountWithNumberMaxTransactionId = Omit<Account, 'maxTransactionId'> & {
+    maxTransactionId: number;
+};
 
+/**
+ * changes MaxTransactionId to a number and removes Account Address placeholders
+ */
 function downAccounts(
     accounts: Account[]
 ): AccountWithNumberMaxTransactionId[] {
@@ -77,6 +86,14 @@ export async function down(knex: Knex): Promise<void> {
     await knex.transaction(async (t) => {
         await t.schema.createTable(TEMP_NAME, (table) => {
             createCommonFields(table);
+            table.string('name');
+            table.string('status');
+            table.string('totalDecrypted').defaultTo('');
+            table.boolean('allDecrypted').defaultTo(true);
+            table.string('deploymentTransactionId').defaultTo('0');
+            table.boolean('isInitial').defaultTo(false);
+            table.string('rewardFilter').defaultTo('[]');
+
             table.string('address');
             table.integer('maxTransactionId').defaultTo(0);
         });
@@ -90,10 +107,9 @@ export async function down(knex: Knex): Promise<void> {
                 insertChunkSize
             );
         }
-
-        await t.table(transactionTable).del();
-
         await t.schema.dropTableIfExists(accountsTable);
         await t.schema.renameTable(TEMP_NAME, accountsTable);
+
+        await t.table(transactionTable).del();
     });
 }
