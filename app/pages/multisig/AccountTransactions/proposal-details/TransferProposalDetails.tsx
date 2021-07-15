@@ -42,7 +42,7 @@ export default function TransferProposalDetails({
             <AccountDetail title="Account" value={account} first />
             <AmountDetail title="Amount" value={amount} />
             <DisplayEstimatedFee className="mT5" estimatedFee={estimatedFee} />
-            <p className="textError textCenter">{amountError}</p>
+            {Boolean(amountError) && <p className="textError textCenter">{amountError}</p>}
             <AccountDetail title="Recipient" value={recipient} />
             {isScheduledTransfer ? (
                 <PlainDetail
