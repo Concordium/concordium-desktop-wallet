@@ -196,7 +196,11 @@ export default function InlineNumber({
 
     useUpdateEffect(() => {
         if (!isFocused) {
-            setInnerValue(format(value));
+            try {
+                setInnerValue(format(value));
+            } catch {
+                // do nothing.
+            }
         }
     }, [value]);
 
