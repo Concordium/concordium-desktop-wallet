@@ -353,6 +353,7 @@ function CreateTransferProposal({
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
+                                        filter={isMultiSig}
                                         onAccountClicked={continueAction}
                                     />
                                 </div>
