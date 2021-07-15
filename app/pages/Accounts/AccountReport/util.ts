@@ -11,6 +11,7 @@ import { isOutgoingTransaction, lookupName } from '~/utils/transactionHelpers';
 import exportTransactionFields from '~/constants/exportTransactionFields.json';
 import { dateFromTimeStamp, getISOFormat } from '~/utils/timeHelpers';
 import { isShieldedBalanceTransaction } from '~/features/TransactionSlice';
+import { hasEncryptedBalance } from '~/utils/accountHelpers';
 
 type Filter = (transaction: TransferTransaction) => boolean;
 
@@ -125,8 +126,13 @@ function parseTransaction(
     return exportedFields.map((field) => fieldValues[getName(field)]);
 }
 
-// Updates transactions of the account, and returns them as a csv string.
-export async function getAccountCSV(
+function showingShieldedTransfers(filters: FilterOption[]) {
+    return filters.some(
+        (filter) => filter.key === TransactionKindString.EncryptedAmountTransfer
+    );
+}
+
+async function getTransactions(
     account: Account,
     filterOptions: FilterOption[],
     fromTime?: Date,
@@ -139,8 +145,46 @@ export async function getAccountCSV(
                 dateFromTimeStamp(transaction.blockTime) > fromTime) &&
             (!toTime || dateFromTimeStamp(transaction.blockTime) < toTime)
     );
-    transactions = transactions.filter((transaction) =>
+    return transactions.filter((transaction) =>
         filterOptions.some((filterOption) => filterOption.filter(transaction))
+    );
+}
+
+export async function containsEncrypted(
+    account: Account,
+    filterOptions: FilterOption[],
+    fromTime?: Date,
+    toTime?: Date
+) {
+    if (
+        !showingShieldedTransfers(filterOptions) ||
+        !hasEncryptedBalance(account)
+    ) {
+        return false;
+    }
+    const transactions = await getTransactions(
+        account,
+        filterOptions,
+        fromTime,
+        toTime
+    );
+    return transactions.some(
+        (transaction) => transaction.encrypted && !transaction.decryptedAmount
+    );
+}
+
+// Updates transactions of the account, and returns them as a csv string.
+export async function getAccountCSV(
+    account: Account,
+    filterOptions: FilterOption[],
+    fromTime?: Date,
+    toTime?: Date
+) {
+    const transactions = await getTransactions(
+        account,
+        filterOptions,
+        fromTime,
+        toTime
     );
 
     const withNames: TransferTransactionWithNames[] = await Promise.all(

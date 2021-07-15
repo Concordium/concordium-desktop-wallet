@@ -7,7 +7,6 @@ import PageLayout from '~/components/PageLayout';
 import AccountPageHeader from '../AccountPageHeader';
 import routes from '~/constants/routes.json';
 import { getNow, TimeConstants } from '~/utils/timeHelpers';
-import { hasEncryptedBalance } from '~/utils/accountHelpers';
 import Columns from '~/components/Columns';
 import Card from '~/cross-app-components/Card';
 import Button from '~/cross-app-components/Button';
@@ -25,6 +24,7 @@ import {
     filterKind,
     filterKindGroup,
     getAccountCSV,
+    containsEncrypted,
 } from './util';
 import styles from './AccountReport.module.scss';
 import { SaveFileData } from '~/ipc/files';
@@ -33,12 +33,6 @@ import saveFile from '~/utils/FileHelper';
 
 const decryptMessage = (name: string) =>
     `'${name}' has encrypted funds. To create a complete account report, we need to decrypt them. Otherwise this account will be skipped.`;
-
-function showingShieldedTransfers(filters: FilterOption[]) {
-    return filters.some(
-        (filter) => filter.key === TransactionKindString.EncryptedAmountTransfer
-    );
-}
 
 const transactionTypeFilters: FilterOption[] = [
     filterKind('Simple Transfers', TransactionKindString.Transfer),
@@ -142,12 +136,13 @@ export default function AccountReport({ location }: Props) {
     const makeReport = useCallback(async () => {
         const accountsToReport: Account[] = [];
         for (const account of accounts) {
-            if (
-                !showingShieldedTransfers(currentFilters) ||
-                !hasEncryptedBalance(account) ||
-                account.allDecrypted ||
-                (await promptDecrypt(account))
-            ) {
+            const hasEncrypted = await containsEncrypted(
+                account,
+                currentFilters,
+                fromDate,
+                toDate
+            );
+            if (!hasEncrypted || (await promptDecrypt(account))) {
                 accountsToReport.push(account);
             }
         }
