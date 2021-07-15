@@ -34,6 +34,12 @@ import saveFile from '~/utils/FileHelper';
 const decryptMessage = (name: string) =>
     `'${name}' has encrypted amounts. To create a complete account report, we need to decrypt them. Otherwise this account will be skipped.`;
 
+function showingShieldedTransfers(filters: FilterOption[]) {
+    return filters.some(
+        (filter) => filter.key === TransactionKindString.EncryptedAmountTransfer
+    );
+}
+
 const transactionTypeFilters: FilterOption[] = [
     filterKind('Simple Transfers', TransactionKindString.Transfer),
     filterKind(
@@ -137,6 +143,7 @@ export default function AccountReport({ location }: Props) {
         const accountsToReport: Account[] = [];
         for (const account of accounts) {
             if (
+                !showingShieldedTransfers(currentFilters) ||
                 !hasEncryptedBalance(account) ||
                 account.allDecrypted ||
                 (await promptDecrypt(account))
