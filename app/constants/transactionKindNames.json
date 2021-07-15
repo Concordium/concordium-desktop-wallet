@@ -6,7 +6,7 @@
     "deployModule": "Deploy module",
     "initContract": "Init contract",
     "update": "Update",
-    "transfer": "Simple transfer",
+    "transfer": "Transfer",
     "addBaker": "Add baker",
     "removeBaker": "Remove baker",
     "updateBakerStake": "Update baker stake",
