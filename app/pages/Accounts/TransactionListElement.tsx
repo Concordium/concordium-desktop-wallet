@@ -126,7 +126,7 @@ function parseAmount(transaction: TransferTransaction, isOutgoing: boolean) {
             ) {
                 return {
                     amount: `${displayAsGTU(-cost)}`,
-                    amountFormula: `${displayAsGTU(cost)} Fee`,
+                    amountFormula: `Shielded transaction fee`,
                 };
             }
 
@@ -155,17 +155,23 @@ function parseAmount(transaction: TransferTransaction, isOutgoing: boolean) {
     return buildCostString(BigInt(transaction.cost || '0'));
 }
 
-function displayType(kind: TransactionKindString) {
+function displayType(kind: TransactionKindString, failed: boolean) {
     switch (kind) {
         case TransactionKindString.TransferWithSchedule:
-            return <i className="mL10">(With schedule)</i>;
+            if (!failed) {
+                return <i className="mL10">(With schedule)</i>;
+            }
+            break;
         case TransactionKindString.EncryptedAmountTransfer:
-            return <i className="mL10">(Shielded)</i>;
         case TransactionKindString.Transfer:
-            return '';
+            if (!failed) {
+                return '';
+            }
+            break;
         default:
-            return <i>{transactionKindNames[kind]}</i>;
+            break;
     }
+    return <i>{transactionKindNames[kind]}</i>;
 }
 
 function statusSymbol(status: TransactionStatus) {
@@ -223,8 +229,8 @@ function TransactionListElement({ transaction, onClick }: Props): JSX.Element {
             <SidedRow
                 left={
                     <>
-                        {name}
-                        {displayType(transaction.transactionKind)}
+                        {failed || name}
+                        {displayType(transaction.transactionKind, failed)}
                     </>
                 }
                 right={

@@ -1,7 +1,7 @@
 {
     "encryptedAmountTransfer": "Shielded transfer",
-    "transferToEncrypted": "Shield amount",
-    "transferToPublic": "Unshield amount",
+    "transferToEncrypted": "Shielded amount",
+    "transferToPublic": "Unshielded amount",
     "transferWithSchedule": "Scheduled transfer",
     "deployModule": "Deploy module",
     "initContract": "Init contract",
