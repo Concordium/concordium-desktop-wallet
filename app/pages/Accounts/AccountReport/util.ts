@@ -5,7 +5,10 @@ import {
     TransactionStatus,
     TransferTransactionWithNames,
 } from '~/utils/types';
-import { getTransactionsOfAccount } from '~/database/TransactionDao';
+import {
+    getTransactionsOfAccount,
+    hasEncryptedTransactions,
+} from '~/database/TransactionDao';
 import { toCSV } from '~/utils/basicHelpers';
 import { isOutgoingTransaction, lookupName } from '~/utils/transactionHelpers';
 import exportTransactionFields from '~/constants/exportTransactionFields.json';
@@ -132,24 +135,6 @@ function showingShieldedTransfers(filters: FilterOption[]) {
     );
 }
 
-async function getTransactions(
-    account: Account,
-    filterOptions: FilterOption[],
-    fromTime?: Date,
-    toTime?: Date
-) {
-    let { transactions } = await getTransactionsOfAccount(account, [], 1000000); // load from database
-    transactions = transactions.filter(
-        (transaction) =>
-            (!fromTime ||
-                dateFromTimeStamp(transaction.blockTime) > fromTime) &&
-            (!toTime || dateFromTimeStamp(transaction.blockTime) < toTime)
-    );
-    return transactions.filter((transaction) =>
-        filterOptions.some((filterOption) => filterOption.filter(transaction))
-    );
-}
-
 export async function containsEncrypted(
     account: Account,
     filterOptions: FilterOption[],
@@ -162,14 +147,13 @@ export async function containsEncrypted(
     ) {
         return false;
     }
-    const transactions = await getTransactions(
-        account,
-        filterOptions,
-        fromTime,
-        toTime
-    );
-    return transactions.some(
-        (transaction) => transaction.encrypted && !transaction.decryptedAmount
+
+    const fromBlockTime = fromTime ? fromTime.getTime() : Date.now();
+    const toBlockTime = toTime ? toTime.getTime() : 0;
+    return hasEncryptedTransactions(
+        account.address,
+        (fromBlockTime / 1000).toString(),
+        (toBlockTime / 1000).toString()
     );
 }
 
@@ -180,11 +164,15 @@ export async function getAccountCSV(
     fromTime?: Date,
     toTime?: Date
 ) {
-    const transactions = await getTransactions(
-        account,
-        filterOptions,
-        fromTime,
-        toTime
+    let { transactions } = await getTransactionsOfAccount(account, [], 1000000); // load from database
+    transactions = transactions.filter(
+        (transaction) =>
+            (!fromTime ||
+                dateFromTimeStamp(transaction.blockTime) > fromTime) &&
+            (!toTime || dateFromTimeStamp(transaction.blockTime) < toTime)
+    );
+    transactions = transactions.filter((transaction) =>
+        filterOptions.some((filterOption) => filterOption.filter(transaction))
     );
 
     const withNames: TransferTransactionWithNames[] = await Promise.all(
