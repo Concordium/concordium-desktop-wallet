@@ -41,6 +41,8 @@ const isValidNumber = (parseFun: (v: string) => number): Validate => (
 
 const isValidFloat = isValidNumber(parseFloat);
 
+const MINT_RATE_MAX = 2 ** 32 - 1; // UInt32
+
 /**
  * Component for creating an update mint distribution transaction.
  */
@@ -87,6 +89,10 @@ export default function UpdateMintDistribution({
                         min: {
                             value: 0,
                             message: "Mint rate value can't be negative",
+                        },
+                        max: {
+                            value: MINT_RATE_MAX,
+                            message: `Cannot exceed ${MINT_RATE_MAX} (UInt32 upper bound)`,
                         },
                         validate: {
                             isValidFloat,
