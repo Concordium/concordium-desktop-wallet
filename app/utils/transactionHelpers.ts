@@ -492,7 +492,7 @@ export function isSuccessfulTransaction(event: TransactionEvent) {
 export const isExpired = (transaction: Transaction) =>
     getTimeout(transaction) <= getNow(TimeStampUnit.seconds);
 
-function amountAtDisposal(accountInfo: AccountInfo): bigint {
+export function amountAtDisposal(accountInfo: AccountInfo): bigint {
     const unShielded = BigInt(accountInfo.accountAmount);
     const stakedAmount = accountInfo.accountBaker
         ? BigInt(accountInfo.accountBaker.stakedAmount)

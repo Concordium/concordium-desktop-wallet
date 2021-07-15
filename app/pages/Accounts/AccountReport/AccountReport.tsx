@@ -35,30 +35,15 @@ const decryptMessage = (name: string) =>
     `'${name}' has encrypted funds. To create a complete account report, we need to decrypt them. Otherwise this account will be skipped.`;
 
 const transactionTypeFilters: FilterOption[] = [
-    filterKind('Simple Transfers', TransactionKindString.Transfer),
-    filterKind(
-        'Scheduled Transfers',
-        TransactionKindString.TransferWithSchedule
-    ),
-    filterKind('Transfers to Public', TransactionKindString.TransferToPublic),
-    filterKind(
-        'Transfers to Encrypted',
-        TransactionKindString.TransferToEncrypted
-    ),
-    filterKind(
-        'Encrypted Transfer',
-        TransactionKindString.EncryptedAmountTransfer
-    ),
-    filterKind(
-        'Finalization Rewards',
-        TransactionKindString.FinalizationReward
-    ),
-    filterKind('Baker Rewards', TransactionKindString.BakingReward),
-    filterKind('Block Rewards', TransactionKindString.BlockReward),
-    filterKind(
-        'Update account credentials',
-        TransactionKindString.UpdateCredentials
-    ),
+    filterKind(TransactionKindString.Transfer),
+    filterKind(TransactionKindString.TransferWithSchedule),
+    filterKind(TransactionKindString.TransferToPublic),
+    filterKind(TransactionKindString.TransferToEncrypted),
+    filterKind(TransactionKindString.EncryptedAmountTransfer),
+    filterKind(TransactionKindString.FinalizationReward),
+    filterKind(TransactionKindString.BakingReward),
+    filterKind(TransactionKindString.BlockReward),
+    filterKind(TransactionKindString.UpdateCredentials),
     filterKindGroup('Baker Transactions', [
         TransactionKindString.AddBaker,
         TransactionKindString.RemoveBaker,

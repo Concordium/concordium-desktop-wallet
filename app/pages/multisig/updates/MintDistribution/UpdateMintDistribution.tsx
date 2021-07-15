@@ -41,6 +41,8 @@ const isValidNumber = (parseFun: (v: string) => number): Validate => (
 
 const isValidFloat = isValidNumber(parseFloat);
 
+const MINT_PER_SLOT_MAX = 2 ** 32 - 1; // UInt32 upper bound
+
 /**
  * Component for creating an update mint distribution transaction.
  */
@@ -83,10 +85,14 @@ export default function UpdateMintDistribution({
                     slotsPerYear={slotsPerYear}
                     className="mB20"
                     rules={{
-                        required: 'Mint rate value is required',
+                        required: 'Mint per slot value is required',
                         min: {
                             value: 0,
-                            message: "Mint rate value can't be negative",
+                            message: "Mint per slot value can't be negative",
+                        },
+                        max: {
+                            value: MINT_PER_SLOT_MAX,
+                            message: `Mint per slot cannot exceed ${MINT_PER_SLOT_MAX}`,
                         },
                         validate: {
                             isValidFloat,
