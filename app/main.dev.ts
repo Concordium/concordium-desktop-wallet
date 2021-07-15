@@ -89,6 +89,8 @@ const createWindow = async () => {
         show: false,
         width: 4096,
         height: 2912,
+        minWidth: 800,
+        minHeight: 600,
         webPreferences:
             process.env.NODE_ENV === 'development'
                 ? {
