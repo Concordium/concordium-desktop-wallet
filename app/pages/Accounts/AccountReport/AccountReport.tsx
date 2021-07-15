@@ -31,6 +31,9 @@ import { SaveFileData } from '~/ipc/files';
 import ipcCommands from '~/constants/ipcCommands.json';
 import saveFile from '~/utils/FileHelper';
 
+const decryptMessage = (name: string) =>
+    `'${name}' has encrypted amounts. To create a complete account report, we need to decrypt them. Otherwise this account will be skipped.`;
+
 const transactionTypeFilters: FilterOption[] = [
     filterKind('Simple Transfers', TransactionKindString.Transfer),
     filterKind(
@@ -101,7 +104,7 @@ export default function AccountReport({ location }: Props) {
         return new Promise((resolve) => {
             setShowDecrypt({
                 show: true,
-                header: `${account.name} has encrypted amounts. To create a complete account report, we need to decrypt them.`,
+                header: decryptMessage(account.name),
                 account,
                 onFinish: (decrypted) => {
                     setShowDecrypt({ show: false });
@@ -144,11 +147,13 @@ export default function AccountReport({ location }: Props) {
         const accountsLength = accountsToReport.length;
 
         if (accountsLength === 0) {
-            setShowError({
-                show: true,
-                header: 'Account Report was not saved.',
-                content: 'All chosen accounts have encrypted amounts.',
-            });
+            if (accounts.length > 1) {
+                setShowError({
+                    show: true,
+                    header: 'Account Report was not saved.',
+                    content: 'All chosen accounts have encrypted amounts.',
+                });
+            }
             return Promise.resolve();
         }
 

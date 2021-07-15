@@ -1,5 +1,4 @@
 import React from 'react';
-import Button from '~/cross-app-components/Button';
 import Modal from '~/cross-app-components/Modal';
 import { Account } from '~/utils/types';
 import { noOp } from '~/utils/basicHelpers';
@@ -13,8 +12,7 @@ export interface DecryptModalInput {
 }
 
 /**
- * A simple modal to be used for displaying simple errors, where there is no
- * action performed when user presses the button other than hiding the modal.
+ * A modal that contains a decrypt component, to allow the user to decrypt the chosen account's transactions and balance.
  */
 export default function DecryptModal({
     show,
@@ -23,17 +21,14 @@ export default function DecryptModal({
     onFinish = noOp,
 }: DecryptModalInput) {
     return (
-        <Modal open={show} disableClose>
-            <h2>{header}</h2>
+        <Modal open={show} onClose={() => onFinish(false)}>
+            <h2 className="mB30">{header}</h2>
             {account && (
                 <DecryptComponent
                     account={account}
                     onDecrypt={() => onFinish(true)}
                 />
             )}
-            <Button className="mT40" onClick={() => onFinish(false)}>
-                Skip
-            </Button>
         </Modal>
     );
 }
