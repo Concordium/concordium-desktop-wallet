@@ -14,7 +14,7 @@ import re
 import argparse
 from decimal import *
 from datetime import datetime,date,time
-from typing import List
+from typing import Any, List
 from dateutil.relativedelta import relativedelta
 from base58 import b58decode_check
 
@@ -135,6 +135,67 @@ class ScheduledPreProposal:
 			json.dump(self.data, outFile, indent=4)
 
 
+def generate_release(row_number,row_data,release_times,skipped_releases,json_output_prefix):
+	if len(row_data) != 4:
+		print(f"Error: Incorrect file format. Each row must contains exactly 4 entires. Row {row_number} contains {len(row_data)}.")
+		sys.exit(2)
+
+	senderAddress = row_data[0]
+	try:
+		b58decode_check(senderAddress)
+	except:
+		print(f"Encountered an invalid sender address: \"{senderAddress}\" at row {row_number}.")
+		sys.exit(2)
+
+	receiverAddress = row_data[1]
+	try:
+		b58decode_check(receiverAddress)
+	except:
+		print(f"Encountered an invalid receiver address: \"{receiverAddress}\" at row {row_number}.")
+		sys.exit(2)
+
+	# Remove thousands separator and trailing/leading whitespaces (if any)
+	try:	
+		initial_amount = TransferAmount.from_string(row_data[2], decimal_sep, thousands_sep)
+		rem_amount = TransferAmount.from_string(row_data[3], decimal_sep, thousands_sep)
+	except ValueError as error:
+		print(f"Error: {error}")
+		sys.exit(2)
+
+	pp = ScheduledPreProposal(senderAddress, receiverAddress, transaction_expiry)
+				
+	if len(release_times) == 1:
+		# if there is only one release, amount is sum of initial and remaining amount
+		pp.add_release(initial_amount + rem_amount, release_times[0])
+	else:
+		# if there are more releases, first compute amounts according to original schedule (i.e., assume no skipped releases)
+		# in each remaining step give fraction of amount, rounded down
+		# potentially give more in last release
+					
+		#Split amount into list
+		amount_list = rem_amount.split_amount(num_releases-1)
+
+		#Add up skipped releases
+		first_release = initial_amount
+		for i in range(skipped_releases):
+			first_release  = first_release + amount_list[i]
+			pp.add_release(first_release, release_times[0])
+
+		#Add remaining releases
+		for i in range(skipped_releases, len(amount_list)) :
+			pp.add_release(amount_list[i], release_times[i-skipped_releases])
+					
+
+	out_file_name = json_output_prefix + str(row_number).zfill(3) + ".json";
+	try:
+		pp.write_json(out_file_name)
+	except IOError:
+		print(f"Error writing file \"{out_file_name}\".")
+		sys.exit(3)
+
+def generate_welcome_release(row_number,row_data):
+	return
+
 # Main function
 def main():
 	parser = argparse.ArgumentParser(description="Generate pre-proposals from the csv file \"input_csv\".\n"\
@@ -166,90 +227,34 @@ def main():
 	#
 	# If the transfer is delayed, some realeases can be in the past. In that case,
 	# combine all releases before earliest_release_time into one release at that time.
-	release_times = []
+	if not is_welcome:
+		release_times = []
 		
-	if initial_release_time >= earliest_release_time:
-		release_times.append(initial_release_time)
-	else:
-		release_times.append(earliest_release_time)
+		if initial_release_time >= earliest_release_time:
+			release_times.append(initial_release_time)
+		else:
+			release_times.append(earliest_release_time)
 
-	for i in range(num_releases - 1):
-		# remaining realeses are i month after first remaining release
-		planned_release_time = first_rem_release_time + relativedelta(months =+ i)
+		for i in range(num_releases - 1):
+			# remaining realeses are i month after first remaining release
+			planned_release_time = first_rem_release_time + relativedelta(months =+ i)
 
 		# Only add release if not before earliest_release_time.
 		# Note that earliest_release_time will already be in list since initial_release_time < first_rem_release_time.
-		if planned_release_time >= earliest_release_time:
-			release_times.append(planned_release_time)
+			if planned_release_time >= earliest_release_time:
+				release_times.append(planned_release_time)
 	
-	skipped_releases = num_releases - len(release_times) # number of releases to be combined into the initial release
+		skipped_releases = num_releases - len(release_times) # number of releases to be combined into the initial release
 
 	# read csv file
-	row_number = 0
 	try:
 		with open(csv_input_file, newline='', encoding='utf-8-sig') as csvfile:
 			reader = csv.reader(csvfile, delimiter=csv_delimiter)
-
-			for row in reader:
-				row_number += 1
-
-				if len(row) != 4:
-					print(f"Error: Incorrect file format. Each row must contains exactly 4 entires. Row {row_number} contains {len(row)}.")
-					sys.exit(2)
-
-				senderAddress = row[0]
-				try:
-					b58decode_check(senderAddress)
-				except:
-					print(f"Encountered an invalid sender address: \"{senderAddress}\" at row {row_number}.")
-					sys.exit(2)
-
-				receiverAddress = row[1]
-				try:
-					b58decode_check(receiverAddress)
-				except:
-					print(f"Encountered an invalid receiver address: \"{receiverAddress}\" at row {row_number}.")
-					sys.exit(2)
-
-				# Remove thousands separator and trailing/leading whitespaces (if any)
-				try:	
-					initial_amount = TransferAmount.from_string(row[2], decimal_sep, thousands_sep)
-					rem_amount = TransferAmount.from_string(row[3], decimal_sep, thousands_sep)
-				except ValueError as error:
-					print(f"Error: {error}")
-					sys.exit(2)
-
-				pp = ScheduledPreProposal(senderAddress, receiverAddress, transaction_expiry)
-				
-				if len(release_times) == 1:
-					# if there is only one release, amount is sum of initial and remaining amount
-					pp.add_release(initial_amount + rem_amount, release_times[0])
+			for row_number,row_data in enumerate(reader):
+				if is_welcome:
+					generate_welcome_release(row_number,row_data,json_output_prefix)
 				else:
-					# if there are more releases, first compute amounts according to original schedule (i.e., assume no skipped releases)
-					# in each remaining step give fraction of amount, rounded down
-					# potentially give more in last release
-					
-					#Split amount into list
-					amount_list = rem_amount.split_amount(num_releases-1)
-
-					#Add up skipped releases
-					first_release = initial_amount
-					for i in range(skipped_releases):
-						first_release  = first_release + amount_list[i]
-					pp.add_release(first_release, release_times[0])
-
-					#Add remaining releases
-					for i in range(skipped_releases, len(amount_list)) :
-						pp.add_release(amount_list[i], release_times[i-skipped_releases])
-					
-
-				out_file_name = json_output_prefix + str(row_number).zfill(3) + ".json";
-				try:
-					pp.write_json(out_file_name)
-				except IOError:
-					print(f"Error writing file \"{out_file_name}\".")
-					sys.exit(3)
-
+					generate_release(row_number,row_data,release_times,skipped_releases,json_output_prefix)
 	except IOError:
 		print(f"Error reading file \"{csv_input_file}\".")
 		sys.exit(3)
