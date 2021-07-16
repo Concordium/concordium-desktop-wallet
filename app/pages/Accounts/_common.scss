@@ -1,3 +1,5 @@
+$thick-blue-separator-height: 13px;
+
 .fillCardPadding {
     margin-left: -19px;
     margin-right: -19px;
@@ -23,7 +25,7 @@
 
 .thickBlueSeparator {
     &:not(:last-child) {
-        border-bottom: 13px solid $color-light-blue;
+        border-bottom: $thick-blue-separator-height solid $color-light-blue;
     }
 }
 

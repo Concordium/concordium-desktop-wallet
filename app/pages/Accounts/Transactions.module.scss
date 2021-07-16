@@ -75,7 +75,7 @@
 .transactionGroupHeader {
     composes: fillCardPadding;
     composes: cardPadding;
-    height: 13px;
+    height: $thick-blue-separator-height;
     font-size: 10px;
     line-height: 12px;
     display: flex;
