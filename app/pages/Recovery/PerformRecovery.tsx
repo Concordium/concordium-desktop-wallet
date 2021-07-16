@@ -27,6 +27,8 @@ import Button from '~/cross-app-components/Button';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import ChoiceModal from '~/components/ChoiceModal';
 import { noOp } from '~/utils/basicHelpers';
+import { identitySpacesBetweenWarning } from '~/constants/recoveryConstants.json';
+
 import styles from './Recovery.module.scss';
 
 async function getPrfKeySeed(
@@ -45,7 +47,7 @@ interface Props {
     setStatus: StateUpdate<Status | undefined>;
 }
 
-interface Stop {
+interface ShowStop {
     postAction: (location?: string) => void;
 }
 
@@ -62,7 +64,7 @@ export default function PerformRecovery({
     const global = useSelector(globalSelector);
     const [controller] = useState(new AbortController());
     const [error, setError] = useState<string>();
-    const [showStop, setShowStop] = useState<Stop>();
+    const [showStop, setShowStop] = useState<ShowStop>();
     const [recoveredTotal, setRecoveredTotal] = useState(0);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -109,7 +111,7 @@ export default function PerformRecovery({
             let emptyIndices = 0;
             let identityNumber = 0;
             while (!controller.isAborted) {
-                if (emptyIndices >= 3) {
+                if (emptyIndices >= identitySpacesBetweenWarning) {
                     const stopped = await promptStop();
                     emptyIndices = 0;
                     if (stopped) {
@@ -175,8 +177,8 @@ export default function PerformRecovery({
     const description = (
         <>
             <p>
-                You have gone through 3 empty indices in a row. Have you maybe
-                found all your accounts?
+                You have gone through {identitySpacesBetweenWarning} empty
+                indices in a row. Have you maybe found all your accounts?
             </p>
             <p className="bodyEmphasized">
                 You found {recoveredTotal} accounts in total.
