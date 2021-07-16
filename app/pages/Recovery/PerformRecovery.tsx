@@ -52,7 +52,7 @@ interface ShowStop {
 }
 
 /**
- * Displays the messages after recovery has been completed
+ * Column, which performs the recovery;
  */
 export default function PerformRecovery({
     setRecoveredAccounts,

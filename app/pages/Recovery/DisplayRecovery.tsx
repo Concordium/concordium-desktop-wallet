@@ -17,7 +17,7 @@ interface Props {
 }
 
 /**
- * Component to run the account recovery algorithm.
+ * Column, which displays the recovered accounts and the current status;
  */
 export default function DisplayRecovery({ status, recoveredAccounts }: Props) {
     const dispatch = useDispatch();

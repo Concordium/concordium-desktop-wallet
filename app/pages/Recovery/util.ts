@@ -226,7 +226,7 @@ export async function addAccounts(
  * @param global: current global parameters
  * @param identityId: id of the identity
  * @param addressBook: the addressBook is used to check for duplicates when inserting new accounts.
- * @returns Returns the amount of credentials that has been recovered.
+ * @returns Returns the recovered accounts.
  */
 export async function recoverFromIdentity(
     prfKeySeed: string,
@@ -262,7 +262,7 @@ export async function recoverFromIdentity(
  * @param identityNumber: identityNumber of the current wallet to recover from
  * @param walletId: id of the wallet to recover from
  * @param addressBook: the addressBook is used to check for duplicates when inserting new accounts.
- * @returns Returns an object, which indicates whether there exists credentials on the identityNumber and a message describing the result.
+ * @returns Returns the recovered accounts.
  */
 export async function recoverNewIdentity(
     prfKeySeed: string,

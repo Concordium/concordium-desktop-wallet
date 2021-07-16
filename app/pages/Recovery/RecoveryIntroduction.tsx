@@ -7,7 +7,7 @@ import Button from '~/cross-app-components/Button';
 import styles from './Recovery.module.scss';
 
 /**
- * Displays the messages after recovery has been completed
+ * Displays information about the recovery.
  */
 export default function RecoveryIntroduction() {
     const dispatch = useDispatch();

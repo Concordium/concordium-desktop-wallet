@@ -11,7 +11,7 @@ import { Status } from './util';
 import styles from './Recovery.module.scss';
 
 /**
- * Component to run the account recovery algorithm.
+ * Main Component for the account recovery algorithm.
  */
 export default function Recovery() {
     const [status, setStatus] = useState<Status | undefined>(Status.initial);

@@ -15,7 +15,7 @@ interface Props {
 }
 
 /**
- * Displays the messages after recovery has been completed
+ * Column, which is displayed after the recovery has finished;
  */
 export default function RecoveryCompleted({ setRecoveredAccounts }: Props) {
     const dispatch = useDispatch();
