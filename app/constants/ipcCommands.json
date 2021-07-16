@@ -58,6 +58,12 @@
             "hasDuplicateWalletId": "DB_CREDENTIAL_HAS_DUPLICATE_WALLET_ID",
             "hasExistingCredential": "DB_CREDENTIAL_HAS_EXISTING_CREDENTIAL"
         },
+        "externalCredentials": {
+            "upsertExternalCredential": "DB_UPSERT_EXTERNAL_CREDENTIAL",
+            "upsertMultipleExternalCredentials": "DB_UPSERT_MULTIPLE_EXTERNAL_CREDENTIALS",
+            "deleteExternalCredentials": "DB_DELETE_EXTERNAL_CREDENTIALS",
+            "getAllExternalCredentials": "DB_GET_ALL_EXTERNAL_CREDENTIALS"
+        },
         "identity": {
             "getNextIdentityNumber": "DB_IDENTITY_GET_NEXT_IDENTITY_NUMBER",
             "insert": "DB_IDENTITY_INSERT",
@@ -80,6 +86,7 @@
             "hasPending": "DB_TRANSACTIONS_HAS_PENDING",
             "getMaxTransactionId": "DB_TRANSACTIONS_GET_MAX_TRANSACTION_ID",
             "getTransactionsForAccount": "DB_TRANSACTIONS_GET_TRANSACTIONS_FOR_ACCOUNT",
+            "hasEncryptedTransactions": "DB_TRANSACTIONS_HAS_ENCRYPTED",
             "update": "DB_TRANSACTIONS_UPDATE",
             "insert": "DB_TRANSACTIONS_INSERT"
         }

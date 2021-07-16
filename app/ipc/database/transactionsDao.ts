@@ -87,6 +87,28 @@ async function getTransactionsOfAccount(
     };
 }
 
+async function hasEncryptedTransactions(
+    address: string,
+    fromTime: string,
+    toTime: string
+): Promise<boolean> {
+    const transaction = await (await knex())
+        .select()
+        .table(transactionTable)
+        .where({
+            transactionKind: TransactionKindString.EncryptedAmountTransfer,
+        })
+        .whereBetween('blockTime', [fromTime, toTime])
+        .whereNull('decryptedAmount')
+        .where((builder) => {
+            builder.where({ toAddress: address }).orWhere({
+                fromAddress: address,
+            });
+        })
+        .first();
+    return Boolean(transaction);
+}
+
 export async function insertTransactions(
     transactions: Partial<TransferTransaction>[]
 ) {
@@ -137,6 +159,13 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
         ipcCommands.database.transactions.getMaxTransactionId,
         async (_event, account: Account) => {
             return getMaxTransactionsIdOfAccount(account);
+        }
+    );
+
+    ipcMain.handle(
+        ipcCommands.database.transactions.hasEncryptedTransactions,
+        async (_event, address: string, fromTime: string, toTime: string) => {
+            return hasEncryptedTransactions(address, fromTime, toTime);
         }
     );
 

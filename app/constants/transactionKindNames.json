@@ -1,0 +1,21 @@
+{
+    "encryptedAmountTransfer": "Shielded transfer",
+    "transferToEncrypted": "Shielded amount",
+    "transferToPublic": "Unshielded amount",
+    "transferWithSchedule": "Scheduled transfer",
+    "deployModule": "Deploy module",
+    "initContract": "Init contract",
+    "update": "Update",
+    "transfer": "Transfer",
+    "addBaker": "Add baker",
+    "removeBaker": "Remove baker",
+    "updateBakerStake": "Update baker stake",
+    "updateBakerRestakeEarnings": "Update baker restake earnings",
+    "updateBakerKeys": "Update baker keys",
+    "updateCredentialKeys": "Update credential keys",
+    "bakingReward": "Baking rewards",
+    "blockReward": "Block rewards",
+    "finalizationReward": "Finalization rewards",
+    "updateCredentials": "Update account credentials",
+    "registerData": "Register data"
+}

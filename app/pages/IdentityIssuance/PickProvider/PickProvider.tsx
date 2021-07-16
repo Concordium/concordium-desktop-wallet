@@ -44,12 +44,14 @@ interface Props {
     setProvider(provider: IdentityProvider): void;
     onError(message: string): void;
     provider: IdentityProvider | undefined;
+    setIsSigning(isSigning: boolean): void;
 }
 
 export default function IdentityIssuanceChooseProvider({
     setProvider,
     onError,
     provider,
+    setIsSigning,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const [providers, setProviders] = useState<IdentityProvider[]>([]);
@@ -87,31 +89,43 @@ export default function IdentityIssuanceChooseProvider({
                 ledger: ConcordiumLedgerClient,
                 setMessage: (message: string | JSX.Element) => void
             ) => {
+                setIsSigning(true);
                 setMessage('Please wait');
-                if (!provider) {
-                    return;
+
+                try {
+                    if (!provider) {
+                        return;
+                    }
+
+                    if (!global) {
+                        onError(errorMessages.missingGlobal);
+                        return;
+                    }
+
+                    const walletId = await pairWallet(ledger, dispatch);
+                    const identityNumber = await getNextIdentityNumber(
+                        walletId
+                    );
+
+                    const idObj = await createIdentityRequestObjectLedger(
+                        identityNumber,
+                        keys,
+                        provider.ipInfo,
+                        provider.arsInfos,
+                        global,
+                        setMessage,
+                        ledger,
+                        IPDetails
+                    );
+
+                    setNextLocationState({
+                        ...idObj,
+                        walletId,
+                        identityNumber,
+                    });
+                } finally {
+                    setIsSigning(false);
                 }
-
-                if (!global) {
-                    onError(errorMessages.missingGlobal);
-                    return;
-                }
-
-                const walletId = await pairWallet(ledger, dispatch);
-                const identityNumber = await getNextIdentityNumber(walletId);
-
-                const idObj = await createIdentityRequestObjectLedger(
-                    identityNumber,
-                    keys,
-                    provider.ipInfo,
-                    provider.arsInfos,
-                    global,
-                    setMessage,
-                    ledger,
-                    IPDetails
-                );
-
-                setNextLocationState({ ...idObj, walletId, identityNumber });
             };
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps

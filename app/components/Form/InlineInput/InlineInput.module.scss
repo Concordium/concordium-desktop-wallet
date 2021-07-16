@@ -1,0 +1,35 @@
+@import 'config/bundle';
+
+.root {
+    -moz-appearance: textfield;
+    border: none;
+    padding: 0;
+    color: $color-pale-blue;
+    font-size: inherit;
+    font-family: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    background: none;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    &:focus {
+        outline: none;
+    }
+
+    &:disabled {
+        color: $color-grey;
+    }
+
+    &:read-only {
+        color: inherit;
+    }
+}
+
+.invalid {
+    color: $color-error;
+}

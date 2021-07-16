@@ -4,8 +4,10 @@ import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getPairingPath } from '~/features/ledger/Path';
 import {
     Policy,
+    Credential,
     CredentialWithIdentityNumber,
     DeployedCredential,
+    Identity,
     instanceOfCredentialWithIdentityNumber,
     instanceOfDeployedCredential,
 } from './types';
@@ -74,4 +76,20 @@ export function createNewCredential(
         identityId,
         credentialIndex,
     };
+}
+
+export const CREDENTIAL_NOTE_MAX_LENGTH = 100;
+
+export function getNoteForOwnCredential(
+    identities: Identity[],
+    ownCred: Credential | undefined
+): string | undefined {
+    const identityName = identities.find((i) => i.id === ownCred?.identityId)
+        ?.name;
+
+    if (!identityName) {
+        return undefined;
+    }
+
+    return `Credential from "${identityName}"`;
 }

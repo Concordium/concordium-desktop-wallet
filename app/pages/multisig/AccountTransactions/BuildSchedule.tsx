@@ -17,16 +17,16 @@ interface Props {
         schedule: Schedule,
         defaults: BuildScheduleDefaults
     ) => void;
+    setScheduleLength: (scheduleLength: number) => void;
     amount: string;
     defaults?: BuildScheduleDefaults;
 }
 
-// TODO: Add Estimated Fee connection
 /**
  * Allows the user to build the schedule of a scheduled transfer.
  */
 const BuildSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
-    ({ amount, submitSchedule, defaults }, ref) => {
+    ({ amount, submitSchedule, setScheduleLength, defaults }, ref) => {
         const [explicit, setExplicit] = useState<boolean>(
             defaults?.explicit || false
         );
@@ -53,7 +53,7 @@ const BuildSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
                 <BuildComponent
                     defaults={defaults}
                     submitSchedule={submitSchedule}
-                    setScheduleLength={() => {}}
+                    setScheduleLength={setScheduleLength}
                     amount={toMicroUnits(amount)}
                     ref={ref}
                 />

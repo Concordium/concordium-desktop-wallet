@@ -16,12 +16,12 @@ import {
 
 interface IdentityState {
     identities: Identity[];
-    chosenIdentity: Identity | undefined;
+    chosenIdentityId: number | undefined;
 }
 
 const initialState: IdentityState = {
     identities: [],
-    chosenIdentity: undefined,
+    chosenIdentityId: undefined,
 };
 
 const identitySlice = createSlice({
@@ -32,7 +32,7 @@ const identitySlice = createSlice({
             state.identities = input.payload;
         },
         chooseIdentity: (state, input) => {
-            state.chosenIdentity = input.payload;
+            state.chosenIdentityId = input.payload;
         },
     },
 });
@@ -48,7 +48,9 @@ export const confirmedIdentitiesSelector = (state: RootState) =>
     );
 
 export const chosenIdentitySelector = (state: RootState) =>
-    state.identities.chosenIdentity;
+    state.identities.identities.find(
+        (i) => i.id === state.identities.chosenIdentityId
+    );
 
 export async function loadIdentities(dispatch: Dispatch) {
     const identities: Identity[] = await getAllIdentities();
@@ -99,6 +101,15 @@ export async function importIdentities(
     identities: Identity | Identity[] | Partial<Identity>
 ) {
     await insertIdentity(identities);
+}
+
+export async function editIdentityName(
+    dispatch: Dispatch,
+    identityId: number,
+    name: string
+) {
+    await updateIdentity(identityId, { name });
+    await loadIdentities(dispatch);
 }
 
 export default identitySlice.reducer;

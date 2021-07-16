@@ -10,6 +10,7 @@ import {
     TransferTransaction,
     TransactionStatus,
     TransactionKindString,
+    TransferTransactionWithNames,
 } from '~/utils/types';
 import { chosenAccountSelector } from '~/features/AccountSlice';
 import { viewingShieldedSelector } from '~/features/TransactionSlice';
@@ -21,6 +22,7 @@ import {
     isOutgoingTransaction,
 } from '~/utils/transactionHelpers';
 import styles from './Transactions.module.scss';
+import transactionKindNames from '~/constants/transactionKindNames.json';
 
 const isInternalTransfer = (transaction: TransferTransaction) =>
     [
@@ -46,19 +48,22 @@ const isGreen = (
     return !isOutgoing;
 };
 
-function getName(transaction: TransferTransaction, isOutgoing: boolean) {
+function getName(
+    transaction: TransferTransactionWithNames,
+    isOutgoing: boolean
+) {
     if (isInternalTransfer(transaction)) {
         return '';
     }
     if (isOutgoing) {
         // Current Account is the sender
-        if (transaction.toAddressName !== undefined) {
-            return transaction.toAddressName;
+        if (transaction.toName !== undefined) {
+            return transaction.toName;
         }
         return transaction.toAddress.slice(0, 6);
     }
-    if (transaction.fromAddressName !== undefined) {
-        return transaction.fromAddressName;
+    if (transaction.fromName !== undefined) {
+        return transaction.fromName;
     }
     return transaction.fromAddress.slice(0, 6);
 }
@@ -125,7 +130,7 @@ function parseAmount(transaction: TransferTransaction, isOutgoing: boolean) {
             ) {
                 return {
                     amount: `${displayAsGTU(-cost)}`,
-                    amountFormula: `${displayAsGTU(cost)} Fee`,
+                    amountFormula: `Shielded transaction fee`,
                 };
             }
 
@@ -154,37 +159,23 @@ function parseAmount(transaction: TransferTransaction, isOutgoing: boolean) {
     return buildCostString(BigInt(transaction.cost || '0'));
 }
 
-function displayType(kind: TransactionKindString) {
+function displayType(kind: TransactionKindString, failed: boolean) {
     switch (kind) {
         case TransactionKindString.TransferWithSchedule:
-            return <i className="mL10">(With schedule)</i>;
-        case TransactionKindString.TransferToEncrypted:
-            return <i>Shielded amount</i>;
-        case TransactionKindString.TransferToPublic:
-            return <i>Unshielded amount</i>;
+            if (!failed) {
+                return <i className="mL10">(With schedule)</i>;
+            }
+            break;
         case TransactionKindString.EncryptedAmountTransfer:
-            return <i className="mL10">(Encrypted)</i>;
-        case TransactionKindString.BakingReward:
-            return <i>Baker reward</i>;
-        case TransactionKindString.BlockReward:
-            return <i>Block reward</i>;
-        case TransactionKindString.FinalizationReward:
-            return <i>Finalization reward</i>;
-        case TransactionKindString.AddBaker:
-            return <i>Add baker</i>;
-        case TransactionKindString.RemoveBaker:
-            return <i>Remove baker</i>;
-        case TransactionKindString.UpdateBakerStake:
-            return <i>Update baker stake</i>;
-        case TransactionKindString.UpdateBakerRestakeEarnings:
-            return <i>Update baker restake Earnings</i>;
-        case TransactionKindString.UpdateBakerKeys:
-            return <i>Update baker keys</i>;
-        case TransactionKindString.UpdateCredentials:
-            return <i>Update account credentials</i>;
+        case TransactionKindString.Transfer:
+            if (!failed) {
+                return '';
+            }
+            break;
         default:
-            return '';
+            break;
     }
+    return <i>{transactionKindNames[kind]}</i>;
 }
 
 function statusSymbol(status: TransactionStatus) {
@@ -242,8 +233,8 @@ function TransactionListElement({ transaction, onClick }: Props): JSX.Element {
             <SidedRow
                 left={
                     <>
-                        {name}
-                        {displayType(transaction.transactionKind)}
+                        {failed || name}
+                        {displayType(transaction.transactionKind, failed)}
                     </>
                 }
                 right={

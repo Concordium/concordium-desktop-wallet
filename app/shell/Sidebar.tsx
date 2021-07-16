@@ -1,18 +1,17 @@
 import React from 'react';
-import { useLocation } from 'react-router';
 import { useSelector } from 'react-redux';
-import Sidebar, { SidebarLink } from '../cross-app-components/Sidebar';
-import routes from '../constants/routes.json';
-import pkg from '../package.json';
+import GtuIcon from '@resources/svg/gtu.svg';
+import FingerprintIcon from '@resources/svg/fingerprint.svg';
+import IdentityIcon from '@resources/svg/identity.svg';
+import ImportExportIcon from '@resources/svg/import-export.svg';
+import MultiSigIcon from '@resources/svg/multisig.svg';
+import SettingsIcon from '@resources/svg/settings.svg';
+import Sidebar, { SidebarLink } from '~/cross-app-components/Sidebar';
+import routes from '~/constants/routes.json';
+import pkg from '~/package.json';
 
-import GtuIcon from '../../resources/svg/gtu.svg';
-import FingerprintIcon from '../../resources/svg/fingerprint.svg';
-import IdentityIcon from '../../resources/svg/identity.svg';
-import ImportExportIcon from '../../resources/svg/import-export.svg';
-import MultiSigIcon from '../../resources/svg/multisig.svg';
-import SettingsIcon from '../../resources/svg/settings.svg';
 import LedgerStatus from './LedgerStatus';
-import { termsAcceptedSelector } from '~/features/SettingsSlice';
+import { RootState } from '~/store/store';
 
 const links: SidebarLink[] = [
     {
@@ -48,18 +47,18 @@ const links: SidebarLink[] = [
 ];
 
 export default function ConnectedSidebar() {
-    const location = useLocation();
-    const termsAccepted = useSelector(termsAcceptedSelector);
-    const disableSidebar =
-        location.pathname.startsWith(routes.HOME_PASSWORD) || !termsAccepted;
+    const disabled = useSelector(
+        (s: RootState) => !s.misc.unlocked || !s.misc.termsAccepted
+    );
+
     let ledgerStatus;
-    if (!disableSidebar) {
+    if (!disabled) {
         ledgerStatus = <LedgerStatus />;
     }
 
     return (
         <Sidebar
-            disabled={disableSidebar}
+            disabled={disabled}
             links={links}
             version={pkg.version}
             child={ledgerStatus}

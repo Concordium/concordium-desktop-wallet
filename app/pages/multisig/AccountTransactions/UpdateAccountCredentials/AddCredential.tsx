@@ -11,24 +11,25 @@ import {
     FileInputRef,
     FileInputValue,
 } from '~/components/Form/FileInput/FileInput';
-import Button from '~/cross-app-components/Button';
 import CloseButton from '~/cross-app-components/CloseButton';
-import { CredentialStatus } from './CredentialStatus';
 import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
-import styles from './UpdateAccountCredentials.module.scss';
 import { hasDuplicateWalletId } from '~/database/CredentialDao';
+import Form from '~/components/Form';
+import { CredentialDetails, CredentialStatus } from './util';
+import { CREDENTIAL_NOTE_MAX_LENGTH } from '~/utils/credentialHelper';
+
+import styles from './UpdateAccountCredentials.module.scss';
+
+interface AddCredentialForm {
+    note?: string;
+}
 
 interface Props {
     accountAddress?: string;
-    credentialIds: [string, CredentialStatus][];
-    addCredentialId: (id: [string, CredentialStatus]) => void;
-    setNewCredentials: (
-        update: (
-            current: CredentialDeploymentInformation[]
-        ) => CredentialDeploymentInformation[]
-    ) => void;
+    credentialIds: CredentialDetails[];
+    onAddCredential(cred: CredentialDeploymentInformation, note?: string): void;
 }
 
 /**
@@ -39,8 +40,7 @@ interface Props {
 export default function AddCredential({
     accountAddress,
     credentialIds,
-    addCredentialId,
-    setNewCredentials,
+    onAddCredential,
 }: Props): JSX.Element {
     const fileInputRef = useRef<FileInputRef>(null);
     const [showError, setShowError] = useState<ModalErrorInput>({
@@ -129,9 +129,11 @@ export default function AddCredential({
         }
     }
 
-    function addCurrentCredential(credential: CredentialDeploymentInformation) {
-        addCredentialId([credential.credId, CredentialStatus.Added]);
-        setNewCredentials((newCredentials) => [...newCredentials, credential]);
+    function addCurrentCredential(
+        credential: CredentialDeploymentInformation,
+        note?: string
+    ) {
+        onAddCredential(credential, note);
         setCurrentCredential(undefined);
     }
 
@@ -153,9 +155,36 @@ export default function AddCredential({
                         string={JSON.stringify(currentCredential)}
                     />
                 </div>
-                <Button onClick={() => addCurrentCredential(currentCredential)}>
-                    Add Credential to Proposal
-                </Button>
+                <Form<AddCredentialForm>
+                    onSubmit={({ note }) =>
+                        addCurrentCredential(currentCredential, note)
+                    }
+                >
+                    <Form.Input
+                        className="mV30"
+                        name="note"
+                        placeholder="Who owns the key?"
+                        rules={{
+                            maxLength: {
+                                value: CREDENTIAL_NOTE_MAX_LENGTH,
+                                message: `Cannot be longer than ${CREDENTIAL_NOTE_MAX_LENGTH} characters`,
+                            },
+                        }}
+                    />
+                    <Form.Checkbox
+                        className="mH20"
+                        name="match"
+                        rules={{
+                            required: 'Please verify that the details match.',
+                        }}
+                    >
+                        The key and identicons matches those of the new
+                        custodian exactly
+                    </Form.Checkbox>
+                    <Form.Submit className="mT20">
+                        Add Credential to Proposal
+                    </Form.Submit>
+                </Form>
             </Card>
         );
     } else {
