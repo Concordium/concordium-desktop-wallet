@@ -29,7 +29,7 @@ function Header({ location, hasTransactions, onButtonClick }: HeaderProps) {
         <div
             className={clsx(
                 styles.transactionListHeader,
-                includeSeparator && styles.transactionListHeaderWithSeparator
+                includeSeparator && styles.thickBlueSeparator
             )}
         >
             <Button
