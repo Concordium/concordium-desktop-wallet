@@ -42,7 +42,7 @@ class TransferAmount:
 	def __init__(self, amount: int) -> None:
 		if not self.__in_valid_range(amount):
 			raise ValueError(f"Amount not in valid range (0,{self.max_amount}]")
-		self.amount = amount
+		self.__amount = amount
 
 	#create a transfer amount from a transfer string
 	@classmethod
@@ -61,37 +61,37 @@ class TransferAmount:
 		return TransferAmount(amount)
 
 	def __str__(self):
-		return f"{self.amount} microGTU"
+		return f"{self.__amount} microGTU"
 
 	def __in_valid_range(self,x):
 		return x > 0 and x <= self.max_amount
 
 	#returns amount in GTU
 	def get_GTU(self) -> Decimal:
-		return Decimal(self.amount)/Decimal(1000000)
+		return Decimal(self.__amount)/Decimal(1000000)
 
 	#returns amount in microGTU
 	def get_micro_GTU(self) -> int:
-		return self.amount
+		return self.__amount
 
 	#equality check
 	def __eq__(self, y:'TransferAmount'):
-		return self.amount == y.amount
+		return self.__amount == y.__amount
 
 	#add two amounts
 	def __add__(self,y:'TransferAmount') -> 'TransferAmount':
-		return TransferAmount(self.amount + y.amount)
+		return TransferAmount(self.__amount + y.__amount)
 
 	def split_amount(self,n:int) -> List['TransferAmount']:
 		if n <=0:
 			raise AssertionError(f"Cannot split into {n} parts")
 		elif n == 1:
-			return [TransferAmount(self.amount)]
+			return [TransferAmount(self.__amount)]
 		else:
-			step_amount = self.amount // n
-			last_amount = self.amount - (n-1)*step_amount
+			step_amount = self.__amount // n
+			last_amount = self.__amount - (n-1)*step_amount
 			if step_amount <= 0:
-				raise AssertionError(f"Cannot split {self.amount} into {n} parts, amount is too small")
+				raise AssertionError(f"Cannot split {self.__amount} into {n} parts, amount is too small")
 			amount_list = [TransferAmount(step_amount) for _ in range(n-1)]
 			amount_list.append(TransferAmount(last_amount))
 			return amount_list
