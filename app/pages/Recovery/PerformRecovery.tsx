@@ -65,6 +65,7 @@ export default function PerformRecovery({
     const [showStop, setShowStop] = useState<Stop>();
     const [recoveredTotal, setRecoveredTotal] = useState(0);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => setStatus(Status.initial), []);
 
     function promptStop() {
