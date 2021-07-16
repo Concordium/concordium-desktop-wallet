@@ -5,12 +5,16 @@ import {
     TransactionStatus,
     TransferTransactionWithNames,
 } from '~/utils/types';
-import { getTransactionsOfAccount } from '~/database/TransactionDao';
+import {
+    getTransactionsOfAccount,
+    hasEncryptedTransactions,
+} from '~/database/TransactionDao';
 import { toCSV } from '~/utils/basicHelpers';
 import { isOutgoingTransaction, lookupName } from '~/utils/transactionHelpers';
 import exportTransactionFields from '~/constants/exportTransactionFields.json';
 import { dateFromTimeStamp, getISOFormat } from '~/utils/timeHelpers';
 import { isShieldedBalanceTransaction } from '~/features/TransactionSlice';
+import { hasEncryptedBalance } from '~/utils/accountHelpers';
 import transactionKindNames from '~/constants/transactionKindNames.json';
 
 type Filter = (transaction: TransferTransaction) => boolean;
@@ -123,6 +127,34 @@ function parseTransaction(
     }
 
     return exportedFields.map((field) => fieldValues[getName(field)]);
+}
+
+function showingShieldedTransfers(filters: FilterOption[]) {
+    return filters.some(
+        (filter) => filter.key === TransactionKindString.EncryptedAmountTransfer
+    );
+}
+
+export async function containsEncrypted(
+    account: Account,
+    filterOptions: FilterOption[],
+    fromTime?: Date,
+    toTime?: Date
+) {
+    if (
+        !showingShieldedTransfers(filterOptions) ||
+        !hasEncryptedBalance(account)
+    ) {
+        return false;
+    }
+
+    const fromBlockTime = fromTime ? fromTime.getTime() : Date.now();
+    const toBlockTime = toTime ? toTime.getTime() : 0;
+    return hasEncryptedTransactions(
+        account.address,
+        (fromBlockTime / 1000).toString(),
+        (toBlockTime / 1000).toString()
+    );
 }
 
 // Updates transactions of the account, and returns them as a csv string.
