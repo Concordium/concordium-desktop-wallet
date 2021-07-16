@@ -19,8 +19,9 @@ from dateutil.relativedelta import relativedelta
 from base58 import b58decode_check
 
 num_releases = 10
-initial_release_time = datetime.fromisoformat("2021-07-26T14:00:00+01:00")
-first_rem_release_time = datetime.fromisoformat("2021-08-26T14:00:00+01:00")
+initial_release_time = datetime.fromisoformat("2022-07-26T14:00:00+01:00")
+first_rem_release_time = datetime.fromisoformat("2022-08-26T14:00:00+01:00")
+welcome_release_time = datetime.fromisoformat("2022-07-15T14:00:00+01:00")
 csv_delimiter = ','
 thousands_sep = ','
 decimal_sep = '.'
@@ -32,8 +33,7 @@ transaction_expiry = datetime.now() + relativedelta(hours =+ 2)
 # If regular releases are before earliest_release_time, they get combined into one at that time.
 # earliest_release_time = 14:00 CET tomorrow.
 earliest_release_time = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00")) + relativedelta(days =+ 1)
-
-
+assert earliest_release_time < welcome_release_time and earliest_release_time < initial_release_time
 
 # Class for storing transfer amounts. 
 class TransferAmount:
@@ -135,96 +135,40 @@ class ScheduledPreProposal:
 			json.dump(self.data, outFile, indent=4)
 
 
-def generate_release(row_number,row_data,release_times,skipped_releases,json_output_prefix):
-	if len(row_data) != 4:
-		print(f"Error: Incorrect file format. Each row must contains exactly 4 entires. Row {row_number} contains {len(row_data)}.")
-		sys.exit(2)
-
-	senderAddress = row_data[0]
-	try:
-		b58decode_check(senderAddress)
-	except:
-		print(f"Encountered an invalid sender address: \"{senderAddress}\" at row {row_number}.")
-		sys.exit(2)
-
-	receiverAddress = row_data[1]
-	try:
-		b58decode_check(receiverAddress)
-	except:
-		print(f"Encountered an invalid receiver address: \"{receiverAddress}\" at row {row_number}.")
-		sys.exit(2)
-
+def add_releases(pre_proposal,inital_amount_str:str,rem_amount_string:str,release_times,skipped_releases):
 	# Remove thousands separator and trailing/leading whitespaces (if any)
 	try:	
-		initial_amount = TransferAmount.from_string(row_data[2], decimal_sep, thousands_sep)
-		rem_amount = TransferAmount.from_string(row_data[3], decimal_sep, thousands_sep)
+		initial_amount = TransferAmount.from_string(inital_amount_str, decimal_sep, thousands_sep)
+		rem_amount = TransferAmount.from_string(rem_amount_string, decimal_sep, thousands_sep)
 	except ValueError as error:
 		print(f"Error: {error}")
 		sys.exit(2)
-
-	pp = ScheduledPreProposal(senderAddress, receiverAddress, transaction_expiry)
-				
 	if len(release_times) == 1:
 		# if there is only one release, amount is sum of initial and remaining amount
-		pp.add_release(initial_amount + rem_amount, release_times[0])
+		pre_proposal.add_release(initial_amount + rem_amount, release_times[0])
 	else:
 		# if there are more releases, first compute amounts according to original schedule (i.e., assume no skipped releases)
 		# in each remaining step give fraction of amount, rounded down
-		# potentially give more in last release
-					
+		# potentially give more in last release				
 		#Split amount into list
 		amount_list = rem_amount.split_amount(num_releases-1)
-
 		#Add up skipped releases
 		first_release = initial_amount
 		for i in range(skipped_releases):
 			first_release  = first_release + amount_list[i]
-			pp.add_release(first_release, release_times[0])
-
+			pre_proposal.add_release(first_release, release_times[0])
 		#Add remaining releases
 		for i in range(skipped_releases, len(amount_list)) :
-			pp.add_release(amount_list[i], release_times[i-skipped_releases])
+			pre_proposal.add_release(amount_list[i], release_times[i-skipped_releases])
 					
-	out_file_name = json_output_prefix + str(row_number).zfill(3) + ".json"
-	try:
-		pp.write_json(out_file_name)
-	except IOError:
-		print(f"Error writing file \"{out_file_name}\".")
-		sys.exit(3)
-
-def generate_welcome_release(row_number,row_data,welcome_release_time,json_output_prefix):
-	if len(row_data) != 3:
-		print(f"Error: Incorrect file format. Each row must contains exactly 3 entires. Row {row_number} contains {len(row_data)}.")
-		sys.exit(2)
-
-	senderAddress = row_data[0]
-	try:
-		b58decode_check(senderAddress)
-	except:
-		print(f"Encountered an invalid sender address: \"{senderAddress}\" at row {row_number}.")
-		sys.exit(2)
-
-	receiverAddress = row_data[1]
-	try:
-		b58decode_check(receiverAddress)
-	except:
-		print(f"Encountered an invalid receiver address: \"{receiverAddress}\" at row {row_number}.")
-		sys.exit(2)
+def add_welcome_release(pre_proposal,amount_str:str):
 	# Remove thousands separator and trailing/leading whitespaces (if any)
 	try:
-		amount = TransferAmount.from_string(row_data[2], decimal_sep, thousands_sep)
+		amount = TransferAmount.from_string(amount_str, decimal_sep, thousands_sep)
 	except ValueError as error:
 		print(f"Error: {error}")
 		sys.exit(2)
-
-	pp = ScheduledPreProposal(senderAddress, receiverAddress, transaction_expiry)
-	pp.add_release(amount, welcome_release_time)
-	out_file_name = json_output_prefix + "welcome_" + str(row_number).zfill(3) + ".json"
-	try:
-		pp.write_json(out_file_name)
-	except IOError:
-		print(f"Error writing file \"{out_file_name}\".")
-		sys.exit(3)
+	pre_proposal.add_release(amount, welcome_release_time)
 
 # Main function
 def main():
@@ -251,7 +195,7 @@ def main():
 	#Output files contain the csv_input_file name 
 	json_output_prefix = "pre-proposal_" + os.path.splitext(os.path.basename(csv_input_file))[0] + "_"
 
-	# Build release schedule.
+	# Build release schedule for normal transfers
 	# Normal schedule consists of num_releases, with first one at initial_release_time,
 	# and the remaining ones one month after each other, starting with first_rem_release_time.
 	#
@@ -281,10 +225,40 @@ def main():
 		with open(csv_input_file, newline='', encoding='utf-8-sig') as csvfile:
 			reader = csv.reader(csvfile, delimiter=csv_delimiter)
 			for row_number,row_data in enumerate(reader):
+				#Ensure we have the right number of columns
+				if not is_welcome and len(row_data) != 4:
+					print(f"Error: Incorrect file format. Each row must contains exactly 4 entires. Row {row_number} contains {len(row_data)}.")
+					sys.exit(2)
+				elif is_welcome and len(row_data) != 3:
+					print(f"Error: Incorrect file format. Each row must contains exactly 3 entires. Row {row_number} contains {len(row_data)}.")
+					sys.exit(2)
+				#Read sender and receiver address
+				senderAddress = row_data[0]
+				try:
+					b58decode_check(senderAddress)
+				except:
+					print(f"Encountered an invalid sender address: \"{senderAddress}\" at row {row_number}.")
+					sys.exit(2)
+				receiverAddress = row_data[1]
+				try:
+					b58decode_check(receiverAddress)
+				except:
+					print(f"Encountered an invalid receiver address: \"{receiverAddress}\" at row {row_number}.")
+					sys.exit(2)	
+				#Generate pre schedule proposal
+				pre_proposal = ScheduledPreProposal(senderAddress, receiverAddress, transaction_expiry)		
+				#Add releases
 				if is_welcome:
-					generate_welcome_release(row_number,row_data,json_output_prefix)
+					add_welcome_release(pre_proposal,row_data[3])
 				else:
-					generate_release(row_number,row_data,release_times,skipped_releases,json_output_prefix)
+					add_releases(pre_proposal,row_number,row_data,release_times,skipped_releases)
+				#Write json file
+				out_file_name = json_output_prefix + str(row_number).zfill(3) + ".json"
+				try:
+					pre_proposal.write_json(out_file_name)
+				except IOError:
+					print(f"Error writing file \"{out_file_name}\".")
+					sys.exit(3)
 	except IOError:
 		print(f"Error reading file \"{csv_input_file}\".")
 		sys.exit(3)
