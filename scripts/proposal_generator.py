@@ -145,7 +145,7 @@ def main():
 		"The first column contains the sender address, the second one the receiver address.\n"\
 		"The third column contains the amount of the first release in GTU.\n"\
 		"The fourth column contains the total amount of remaining releases in GTU (if not generating welcome transfers).\n"\
-		"GTU amounts must be formatted as decimals with 6 digits after the decimal dot and possibly using ',' as thousands separator.\n"\
+		f"GTU amounts must be formatted as decimals with 6 digits after the decimal dot '{decimal_sep}' and possibly using '{thousands_sep}' as thousands separator.\n"\
 		"\n"\
 		"If the optional argument \"--welcome\" is present, the tool generates pre-proposals for welcome transfers.\n"\
 		"These only have one release, and thus expect a csv file with only 3 columns: sender, receiver, and amount.\n"
@@ -156,10 +156,9 @@ def main():
 	args = parser.parse_args()
 	
 	is_welcome = args.welcome
-	csv_file_name = args.input_csv
-
-	# Extract base name of csv file without extension and path. Output files will contain this name.
-	base_csv_name = os.path.splitext(os.path.basename(csv_file_name))[0]
+	csv_input_file = args.input_csv
+	#Output files contain the csv_input_file name 
+	json_output_prefix = "pre-proposal_" + os.path.splitext(os.path.basename(csv_input_file))[0] + "_"
 
 	# Build release schedule.
 	# Normal schedule consists of num_releases, with first one at initial_release_time,
@@ -188,7 +187,7 @@ def main():
 	# read csv file
 	row_number = 0
 	try:
-		with open(csv_file_name, newline='', encoding='utf-8-sig') as csvfile:
+		with open(csv_input_file, newline='', encoding='utf-8-sig') as csvfile:
 			reader = csv.reader(csvfile, delimiter=csv_delimiter)
 
 			for row in reader:
@@ -244,7 +243,7 @@ def main():
 						pp.add_release(amount_list[i], release_times[i-skipped_releases])
 					
 
-				out_file_name = "pre-proposal_" + base_csv_name + "_" + str(row_number).zfill(3) + ".json";
+				out_file_name = json_output_prefix + str(row_number).zfill(3) + ".json";
 				try:
 					pp.write_json(out_file_name)
 				except IOError:
@@ -252,7 +251,7 @@ def main():
 					sys.exit(3)
 
 	except IOError:
-		print(f"Error reading file \"{csv_file_name}\".")
+		print(f"Error reading file \"{csv_input_file}\".")
 		sys.exit(3)
 
 	print(f"Successfully generated {row_number} proposals.")
