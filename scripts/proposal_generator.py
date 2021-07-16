@@ -185,16 +185,46 @@ def generate_release(row_number,row_data,release_times,skipped_releases,json_out
 		for i in range(skipped_releases, len(amount_list)) :
 			pp.add_release(amount_list[i], release_times[i-skipped_releases])
 					
-
-	out_file_name = json_output_prefix + str(row_number).zfill(3) + ".json";
+	out_file_name = json_output_prefix + str(row_number).zfill(3) + ".json"
 	try:
 		pp.write_json(out_file_name)
 	except IOError:
 		print(f"Error writing file \"{out_file_name}\".")
 		sys.exit(3)
 
-def generate_welcome_release(row_number,row_data):
-	return
+def generate_welcome_release(row_number,row_data,welcome_release_time,json_output_prefix):
+	if len(row_data) != 3:
+		print(f"Error: Incorrect file format. Each row must contains exactly 3 entires. Row {row_number} contains {len(row_data)}.")
+		sys.exit(2)
+
+	senderAddress = row_data[0]
+	try:
+		b58decode_check(senderAddress)
+	except:
+		print(f"Encountered an invalid sender address: \"{senderAddress}\" at row {row_number}.")
+		sys.exit(2)
+
+	receiverAddress = row_data[1]
+	try:
+		b58decode_check(receiverAddress)
+	except:
+		print(f"Encountered an invalid receiver address: \"{receiverAddress}\" at row {row_number}.")
+		sys.exit(2)
+	# Remove thousands separator and trailing/leading whitespaces (if any)
+	try:
+		amount = TransferAmount.from_string(row_data[2], decimal_sep, thousands_sep)
+	except ValueError as error:
+		print(f"Error: {error}")
+		sys.exit(2)
+
+	pp = ScheduledPreProposal(senderAddress, receiverAddress, transaction_expiry)
+	pp.add_release(amount, welcome_release_time)
+	out_file_name = json_output_prefix + "welcome_" + str(row_number).zfill(3) + ".json"
+	try:
+		pp.write_json(out_file_name)
+	except IOError:
+		print(f"Error writing file \"{out_file_name}\".")
+		sys.exit(3)
 
 # Main function
 def main():
