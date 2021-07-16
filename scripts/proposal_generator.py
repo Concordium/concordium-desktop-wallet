@@ -1,12 +1,4 @@
 # This script allows to generate proposals from a csv file exported from Excel.
-# Run the script with one command line argument determining the path to that file.
-# The expected format of that file is a UTF-8 csv file with:
-# one row for each transfer, columns separated by ','
-# The first column contains sender address, the second one the receiver address
-# The third column contains amount of first release in GTU
-# (as decimal with 6 digits after decimal dot and possibly using ',' as thousands separator)
-# The fourth column contains total amount of remaining releases in GTU (formatted as second column)
-# The release schedules are hard-coded in this script.
 #
 # This script requires python 3.6 or above
 #
@@ -18,6 +10,7 @@ import json
 import csv
 import os
 import re
+import argparse
 from decimal import *
 from datetime import datetime,date,time
 from dateutil.relativedelta import relativedelta
@@ -113,11 +106,26 @@ def parse_and_validate_amount(amount_string: str, row_number: int):
 
 # Main function
 def main():
-	if len(sys.argv) != 2:
-		print("Error: Incorrect number of arguments. Please provide the path to a csv file as the only argument.")
-		sys.exit(1)
-
-	csvFileName = sys.argv[1]
+	parser = argparse.ArgumentParser(description="Generate pre-proposals from the csv file \"input_csv\".\n"\
+		"For each row in the csv file, a json file with the corresponding pre-proposal is generated in the same folder.\n"
+		"\n"
+		"The expected format of that file is a UTF-8 csv file with:\n"\
+		"One row for each transfer, columns separated by ','.\n"\
+		"The first column contains the sender address, the second one the receiver address.\n"\
+		"The third column contains the amount of the first release in GTU.\n"\
+		"The fourth column contains the total amount of remaining releases in GTU (if not generating welcome transfers).\n"\
+		"GTU amounts must be formatted as decimals with 6 digits after the decimal dot and possibly using ',' as thousands separator.\n"\
+		"\n"\
+		"If the optional argument \"--welcome\" is present, the tool generates pre-proposals for welcome transfers.\n"\
+		"These only have one release, and thus expect a csv file with only 3 columns: sender, receiver, and amount.\n"
+		"\n"
+		"The release schedules are hard-coded in this script.", formatter_class=argparse.RawDescriptionHelpFormatter)
+	parser.add_argument("input_csv", type=str, help="Filename of a csv file to generate pre-proposals from.")
+	parser.add_argument("--welcome", help="Generate welcome transfers with only one release.", action="store_true")
+	args = parser.parse_args()
+	
+	is_welcome = args.welcome
+	csvFileName = args.input_csv
 
 	# Extract base name of csv file without extension and path. Output files will contain this name.
 	baseCsvName = os.path.splitext(os.path.basename(csvFileName))[0]
