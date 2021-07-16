@@ -18,20 +18,22 @@ from typing import List
 from dateutil.relativedelta import relativedelta
 from base58 import b58decode_check
 
-numReleases = 10
-initialReleaseTime = datetime.fromisoformat("2021-07-26T14:00:00+01:00")
-firstRemReleaseTime = datetime.fromisoformat("2021-08-26T14:00:00+01:00")
+num_releases = 10
+initial_release_time = datetime.fromisoformat("2021-07-26T14:00:00+01:00")
+first_rem_release_time = datetime.fromisoformat("2021-08-26T14:00:00+01:00")
 csv_delimiter = ','
 thousands_sep = ','
 decimal_sep = '.'
 assert len(csv_delimiter) == 1 and len(thousands_sep) == 1 and len(decimal_sep) == 1 and thousands_sep != decimal_sep
-transaction_expiry = datetime.now() + relativedelta(hours =+ 2) # proposals expire 2 hours from now
+assert initial_release_time < first_rem_release_time
 
-# If regular releases are before earliestReleaseTime, they get combined into one at that time.
-# earliestReleaseTime = 14:00 CET tomorrow.
-earliestReleaseTime = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00")) + relativedelta(days =+ 1)
+# proposals expire 2 hours from now
+transaction_expiry = datetime.now() + relativedelta(hours =+ 2) 
+# If regular releases are before earliest_release_time, they get combined into one at that time.
+# earliest_release_time = 14:00 CET tomorrow.
+earliest_release_time = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00")) + relativedelta(days =+ 1)
 
-assert initialReleaseTime < firstRemReleaseTime
+
 
 # Class for storing transfer amounts. 
 class TransferAmount:
@@ -160,28 +162,28 @@ def main():
 	base_csv_name = os.path.splitext(os.path.basename(csv_file_name))[0]
 
 	# Build release schedule.
-	# Normal schedule consists of numReleases, with first one at initialReleaseTime,
-	# and the remaining ones one month after each other, starting with firstRemReleaseTime.
+	# Normal schedule consists of num_releases, with first one at initial_release_time,
+	# and the remaining ones one month after each other, starting with first_rem_release_time.
 	#
 	# If the transfer is delayed, some realeases can be in the past. In that case,
-	# combine all releases before earliestReleaseTime into one release at that time.
+	# combine all releases before earliest_release_time into one release at that time.
 	release_times = []
 		
-	if initialReleaseTime >= earliestReleaseTime:
-		release_times.append(initialReleaseTime)
+	if initial_release_time >= earliest_release_time:
+		release_times.append(initial_release_time)
 	else:
-		release_times.append(earliestReleaseTime)
+		release_times.append(earliest_release_time)
 
-	for i in range(numReleases - 1):
+	for i in range(num_releases - 1):
 		# remaining realeses are i month after first remaining release
-		plannedReleaseTime = firstRemReleaseTime + relativedelta(months =+ i)
+		planned_release_time = first_rem_release_time + relativedelta(months =+ i)
 
-		# Only add release if not before earliestReleaseTime.
-		# Note that earliestReleaseTime will already be in list since initialReleaseTime < firstRemReleaseTime.
-		if plannedReleaseTime >= earliestReleaseTime:
-			release_times.append(plannedReleaseTime)
+		# Only add release if not before earliest_release_time.
+		# Note that earliest_release_time will already be in list since initial_release_time < first_rem_release_time.
+		if planned_release_time >= earliest_release_time:
+			release_times.append(planned_release_time)
 	
-	skippedReleases = numReleases - len(release_times) # number of releases to be combined into the initial release
+	skipped_releases = num_releases - len(release_times) # number of releases to be combined into the initial release
 
 	# read csv file
 	row_number = 0
@@ -212,8 +214,8 @@ def main():
 
 				# Remove thousands separator and trailing/leading whitespaces (if any)
 				try:	
-					initialAmount = TransferAmount.from_string(row[2], decimal_sep, thousands_sep)
-					remAmount = TransferAmount.from_string(row[3], decimal_sep, thousands_sep)
+					initial_amount = TransferAmount.from_string(row[2], decimal_sep, thousands_sep)
+					rem_amount = TransferAmount.from_string(row[3], decimal_sep, thousands_sep)
 				except ValueError as error:
 					print(f"Error: {error}")
 					sys.exit(2)
@@ -222,31 +224,31 @@ def main():
 				
 				if len(release_times) == 1:
 					# if there is only one release, amount is sum of initial and remaining amount
-					pp.add_release(initialAmount + remAmount, release_times[0])
+					pp.add_release(initial_amount + rem_amount, release_times[0])
 				else:
 					# if there are more releases, first compute amounts according to original schedule (i.e., assume no skipped releases)
 					# in each remaining step give fraction of amount, rounded down
 					# potentially give more in last release
 					
 					#Split amount into list
-					amount_list = remAmount.split_amount(numReleases-1)
+					amount_list = rem_amount.split_amount(num_releases-1)
 
 					#Add up skipped releases
-					first_release = initialAmount
-					for i in range(skippedReleases):
+					first_release = initial_amount
+					for i in range(skipped_releases):
 						first_release  = first_release + amount_list[i]
 					pp.add_release(first_release, release_times[0])
 
 					#Add remaining releases
-					for i in range(skippedReleases, len(amount_list)) :
-						pp.add_release(amount_list[i], release_times[i-skippedReleases])
+					for i in range(skipped_releases, len(amount_list)) :
+						pp.add_release(amount_list[i], release_times[i-skipped_releases])
 					
 
-				outFileName = "pre-proposal_" + base_csv_name + "_" + str(row_number).zfill(3) + ".json";
+				out_file_name = "pre-proposal_" + base_csv_name + "_" + str(row_number).zfill(3) + ".json";
 				try:
-					pp.write_json(outFileName)
+					pp.write_json(out_file_name)
 				except IOError:
-					print("Error writing file \"", outFileName, "\".", sep='')
+					print(f"Error writing file \"{out_file_name}\".")
 					sys.exit(3)
 
 	except IOError:
