@@ -5,6 +5,7 @@
 # Note: The script uses dateutil and base58, which can be installed using 
 # "pip install python-dateutil"
 # "pip install base58"
+from abc import abstractproperty
 import sys
 import json
 import csv
@@ -13,6 +14,7 @@ import re
 import argparse
 from decimal import *
 from datetime import datetime,date,time
+from typing import List
 from dateutil.relativedelta import relativedelta
 from base58 import b58decode_check
 
@@ -20,10 +22,9 @@ numReleases = 10
 initialReleaseTime = datetime.fromisoformat("2021-07-26T14:00:00+01:00")
 firstRemReleaseTime = datetime.fromisoformat("2021-08-26T14:00:00+01:00")
 csvDelimiter = ','
-thousandsSep = ','
-decimalSep = '.'
-assert len(csvDelimiter) == 1 and len(thousandsSep) == 1 and len(decimalSep) == 1 and thousandsSep != decimalSep
-maxAmount = 18446744073709551615
+thousands_sep = ','
+decimal_sep = '.'
+assert len(csvDelimiter) == 1 and len(thousands_sep) == 1 and len(decimal_sep) == 1 and thousands_sep != decimal_sep
 transaction_expiry = datetime.now() + relativedelta(hours =+ 2) # proposals expire 2 hours from now
 
 # If regular releases are before earliestReleaseTime, they get combined into one at that time.
@@ -32,6 +33,65 @@ earliestReleaseTime = datetime.combine(date.today(), time.fromisoformat("14:00:0
 
 assert initialReleaseTime < firstRemReleaseTime
 
+# Class for storing transfer amounts. 
+class TransferAmount:
+
+	max_amount:int = 18446744073709551615
+
+	#basic constructor where amount is in microGTU
+	def __init__(self, amount: int) -> None:
+		if not self.__in_valid_range(amount):
+			raise ValueError(f"Amount not in valid range (0,{self.max_amount}]")
+		self.amount = amount
+
+	#create a transfer amount from a transfer string
+	@classmethod
+	def from_string(cls,amount_string:str, decimal_sep:str, thousands_sep: str) -> 'TransferAmount':
+		amount_regex = r"^[0-9]+([.][0-9]{1,6})?$"
+		amount_regex_with_1000_sep = r"^[0-9]{1,3}([,][0-9]{3})*([.][0-9]{1,6})?$"
+		translation_table = {ord(thousands_sep) : ',', ord(decimal_sep): '.'}
+		amount_org_string = amount_string	
+		if not bool(re.match(amount_regex, amount_string)) and not bool(re.match(amount_regex_with_1000_sep, amount_string)):
+			raise ValueError(f"Amount {amount_org_string} is not a valid amount string.")
+		amount_string = amount_string.replace(',', '')
+		try: 
+			amount = int(Decimal(amount_string) * 1000000)
+		except: #this should not happen
+			raise ValueError("Amount stringn {amount_org_string} could not be converted.")
+		return TransferAmount(amount)
+
+	def __str__(self):
+		return f"{self.amount} microGTU"
+
+	def __in_valid_range(self,x):
+		return x > 0 and x <= self.max_amount
+
+	#returns amount in GTU
+	def get_GTU(self) -> Decimal:
+		return Decimal(self.amount)/Decimal(1000000)
+
+	#returns amount in microGTU
+	def get_micro_GTU(self) -> int:
+		return self.amount
+
+	#add two amounts
+	def __add__(self,y:'TransferAmount') -> 'TransferAmount':
+		return TransferAmount(self.amount + y.amount)
+
+	def split_amount(self,n:int) -> List['TransferAmount']:
+		if n <=0:
+			raise AssertionError(f"Cannot split into {n} parts")
+		elif n == 1:
+			return [TransferAmount(self.amount)]
+		else:
+			step_amount = self.amount // n
+			last_amount = self.amount - (n-1)*step_amount
+			if step_amount <= 0:
+				raise AssertionError(f"Cannot split {self.amount} into {n} parts, amount is too small")
+			amount_list = [TransferAmount(step_amount) for _ in range(n-1)]
+			amount_list.append(TransferAmount(last_amount))
+			return amount_list
+		
 # Class for generating scheduled pre-proposals and saving them as json files.
 # A pre-proposal is a proposal with empty nonce, energy and fee amounts.
 # The desktop wallet can convert them to proper proposals.
@@ -56,9 +116,9 @@ class ScheduledPreProposal:
 		}
 
 	# Add a release to the schedule.
-	def add_release(self, amount: int, release_time: datetime):
+	def add_release(self, amount: TransferAmount, release_time: datetime):
 		release = {
-			"amount": amount,
+			"amount": amount.get_micro_GTU(),
 			"timestamp": int(release_time.timestamp()) * 1000 # multiply by 1000 since timestamps here are in milliseconds
 		} 
 		self.data["payload"]["schedule"].append(release)
@@ -68,41 +128,6 @@ class ScheduledPreProposal:
 		with open(filename, 'w') as outFile:
 			json.dump(self.data, outFile, indent=4)
 
-# Parses and validates the the amount.
-# An amount_string is valid if stripped of leading and trailing whitespaces it 
-# - Is a number with at most 6 decimal digits
-# - Uses decimalSep as decimal separator
-# - Optionally uses thousandsSep as thousand separator
-# - Is >0 and <= maxAmount
-# Parses the amount into its microGTU representation.
-def parse_and_validate_amount(amount_string: str, row_number: int):
-	amount_regex = r"^[0-9]+([.][0-9]{1,6})?$"
-	amount_regex_with_1000_sep = r"^[0-9]{1,3}([,][0-9]{3})*([.][0-9]{1,6})?$"
-	translation_table = {ord(thousandsSep) : ',', ord(decimalSep): '.'}
-	amount_org_string = amount_string
-	#Strip white space and replace separators
-	amount_string  = amount_string.translate(translation_table).strip()
-	#Ensure valid format
-	if not bool(re.match(amount_regex, amount_string)) and not bool(re.match(amount_regex_with_1000_sep, amount_string)):
-		print(f"Amount {amount_org_string} at row {row_number} is not a valid amount string.")
-		print(f"Valid amounts are positive, use '{decimalSep}' as decimal separator, use '{thousandsSep}' as an optional thousand separator, and have at most 6 decimal digits.")
-		print(f"E.g., 1{thousandsSep}000{thousandsSep}000{decimalSep}12 and 1000000{decimalSep}12 are valid amounts")
-		raise ValueError("Invalid amount format.")
-	#Remove thousand separator
-	amount_string = amount_string.replace(',', '')
-	try: 
-		amount = int(Decimal(amount_string) * 1000000)
-	except: #this should not happen
-		print(f"Amount {amount_org_string} at row {row_number} seems valid, but could not be converted to microGTU")
-		raise ValueError("Could not convert amount.")
-	#Check bounds
-	if (amount > maxAmount):
-		print(f"Amount {amount_org_string} at row {row_number} is greater than the maximum GTU possible for one release ({Decimal(maxAmount)/Decimal(1000000)}).")
-		raise ValueError("Amount too large.")
-	if (amount <= 0): 
-		print(f"Amount {amount_org_string} at row {row_number} is zero or less, which is not allowed in a release schedule.")
-		raise ValueError("Amount too small.")
-	return amount
 
 # Main function
 def main():
@@ -183,8 +208,8 @@ def main():
 
 				# Remove thousands separator and trailing/leading whitespaces (if any)
 				try:	
-					initialAmount = parse_and_validate_amount(row[2], rowNumber)
-					remAmount = parse_and_validate_amount(row[3], rowNumber)
+					initialAmount = TransferAmount.from_string(row[2], decimal_sep, thousands_sep)
+					remAmount = TransferAmount.from_string(row[3], decimal_sep, thousands_sep)
 				except ValueError as error:
 					print(f"Error: {error}")
 					sys.exit(2)
@@ -198,17 +223,20 @@ def main():
 					# if there are more releases, first compute amounts according to original schedule (i.e., assume no skipped releases)
 					# in each remaining step give fraction of amount, rounded down
 					# potentially give more in last release
-					stepAmount = remAmount // (numReleases - 1)
-					lastAmount = remAmount - (numReleases - 2) * stepAmount
-
-					pp.add_release(initialAmount + (skippedReleases * stepAmount), releases[0])
-
-					for i in range(len(releases) - 2) :
-						pp.add_release(stepAmount, releases[i+1])
 					
-					# add last release
-					pp.add_release(lastAmount, releases[len(releases)-1])
+					#Split amount into list
+					amount_list = remAmount.split_amount(numReleases-1)
 
+					#Add up skipped releases
+					first_release = initialAmount
+					for i in range(skippedReleases):
+						first_release  = first_release + amount_list[i]
+					pp.add_release(first_release, releases[0])
+
+					#Add remaining releases
+					for i in range(skippedReleases, len(amount_list)) :
+						pp.add_release(amount_list[i], releases[i-skippedReleases])
+					
 
 				outFileName = "pre-proposal_" + baseCsvName + "_" + str(rowNumber).zfill(3) + ".json";
 				try:
