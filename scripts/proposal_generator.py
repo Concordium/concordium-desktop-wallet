@@ -35,39 +35,54 @@ transaction_expiry = datetime.now() + relativedelta(hours =+ 2)
 earliest_release_time = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00")) + relativedelta(days =+ 1)
 assert earliest_release_time < welcome_release_time and earliest_release_time < initial_release_time
 
-# Class for storing transfer amounts. 
+# Class for storing transfer amounts. The amounts are internally stored in microGTU
 class TransferAmount:
-
+	#max amount in microGTU
 	max_amount:int = 18446744073709551615
+	#regex for valid amount strings using '.' as decimal separator and ',' as thousands separator
 	amount_regex:str = r"^[0-9]+([.][0-9]{1,6})?$"
 	amount_regex_with_1000_sep:str = r"^[0-9]{1,3}([,][0-9]{3})*([.][0-9]{1,6})?$"
 
-	#basic constructor where amount is in microGTU
+	# Creates a TransferAmount with amount microGTU
 	def __init__(self, amount: int) -> None:
 		if not self.__in_valid_range(amount):
 			raise ValueError(f"Amount not in valid range (0,{self.max_amount}]")
 		self.__amount = amount
 
-	#create a transfer amount from a transfer string
+	# Creates a TransferAmount from an amount string that represents an amount in GTU. 
+	# The string must valid, i.e., satisfy amount_regex or amount_regex_with_1000_sep.
 	@classmethod
 	def from_string(cls,amount_string:str, decimal_sep:str, thousands_sep: str) -> 'TransferAmount':
+		#Convert the separators
 		translation_table = {ord(thousands_sep) : ',', ord(decimal_sep): '.'}
 		amount_org_string = amount_string	
+		#Check validity of amount string
 		if not bool(re.match(cls.amount_regex, amount_string)) and not bool(re.match(cls.amount_regex_with_1000_sep, amount_string)):
 			raise ValueError(f"Amount {amount_org_string} is not a valid amount string.")
 		amount_string = amount_string.replace(',', '')
+		#Convert to microGTU
 		try: 
 			amount = int(Decimal(amount_string) * 1000000)
 		except: #this should not happen
 			raise ValueError("Amount stringn {amount_org_string} could not be converted.")
 		return TransferAmount(amount)
 
+	# String representation of a TransferAmount
 	def __str__(self):
 		return f"{self.__amount} microGTU"
 
+	# Range check 
 	def __in_valid_range(self,x):
 		return x > 0 and x <= self.max_amount
 
+	# Equality check
+	def __eq__(self, y:'TransferAmount'):
+		return self.__amount == y.__amount
+
+	# Addition
+	def __add__(self,y:'TransferAmount') -> 'TransferAmount':
+		return TransferAmount(self.__amount + y.__amount)
+	
 	#returns amount in GTU
 	def get_GTU(self) -> Decimal:
 		return Decimal(self.__amount)/Decimal(1000000)
@@ -75,15 +90,10 @@ class TransferAmount:
 	#returns amount in microGTU
 	def get_micro_GTU(self) -> int:
 		return self.__amount
-
-	#equality check
-	def __eq__(self, y:'TransferAmount'):
-		return self.__amount == y.__amount
-
-	#add two amounts
-	def __add__(self,y:'TransferAmount') -> 'TransferAmount':
-		return TransferAmount(self.__amount + y.__amount)
-
+	
+	# Split the TransferAmount into a list of n equal TransferAmounts. 
+	# Each split is computed as floor(self.amount/n) with the exception
+	# of the last which additionally contains the remainder.
 	def split_amount(self,n:int) -> List['TransferAmount']:
 		if n <=0:
 			raise AssertionError(f"Cannot split into {n} parts")
@@ -136,7 +146,7 @@ class ScheduledPreProposal:
 
 
 def add_releases(pre_proposal,inital_amount_str:str,rem_amount_string:str,release_times,skipped_releases):
-	# Remove thousands separator and trailing/leading whitespaces (if any)
+	#Convert amount strings to proper amounts
 	try:	
 		initial_amount = TransferAmount.from_string(inital_amount_str, decimal_sep, thousands_sep)
 		rem_amount = TransferAmount.from_string(rem_amount_string, decimal_sep, thousands_sep)
@@ -162,12 +172,13 @@ def add_releases(pre_proposal,inital_amount_str:str,rem_amount_string:str,releas
 			pre_proposal.add_release(amount_list[i], release_times[i-skipped_releases])
 					
 def add_welcome_release(pre_proposal,amount_str:str):
-	# Remove thousands separator and trailing/leading whitespaces (if any)
+	#Convert amount string to proper amount
 	try:
 		amount = TransferAmount.from_string(amount_str, decimal_sep, thousands_sep)
 	except ValueError as error:
 		print(f"Error: {error}")
 		sys.exit(2)
+	#Add single release to pre proposal
 	pre_proposal.add_release(amount, welcome_release_time)
 
 # Main function
@@ -262,7 +273,6 @@ def main():
 	except IOError as e:
 		print(f"Error reading file \"{csv_input_file}\": {e}")
 		sys.exit(3)
-
 	print(f"Successfully generated {row_number+1} proposals.")
 
 if __name__ == "__main__":
