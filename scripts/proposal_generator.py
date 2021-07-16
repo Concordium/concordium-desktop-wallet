@@ -29,11 +29,10 @@ numReleases = 10
 initialReleaseTime = datetime.fromisoformat("2021-07-26T14:00:00+01:00")
 firstRemReleaseTime = datetime.fromisoformat("2021-08-26T14:00:00+01:00")
 csvDelimiter = ','
-thousandsSep = ','
-decimalSep = '.'
-assert len(csvDelimiter) == 1 and len(thousandsSep) == 1 and len(decimalSep) == 1 and thousandsSep != decimalSep
-maxAmount = 18446744073709551615
-expiry = datetime.now() + relativedelta(hours =+ 2) # proposal expires 2 hours from now
+thousands_sep = ','
+decimal_sep = '.'
+assert len(csvDelimiter) == 1 and len(thousands_sep) == 1 and len(decimal_sep) == 1 and thousands_sep != decimal_sep
+transaction_expiry = datetime.now() + relativedelta(hours =+ 2) # proposals expire 2 hours from now
 
 # If regular releases are before earliestReleaseTime, they get combined into one at that time.
 # earliestReleaseTime = 14:00 CET tomorrow.
@@ -41,7 +40,7 @@ earliestReleaseTime = datetime.combine(date.today(), time.fromisoformat("14:00:0
 
 assert initialReleaseTime < firstRemReleaseTime
 
-
+# Class for storing transfer amounts. 
 class TransferAmount:
 
 	max_amount:int = 18446744073709551615
@@ -99,6 +98,43 @@ class TransferAmount:
 			amount_list = [TransferAmount(step_amount) for _ in range(n-1)]
 			amount_list.append(TransferAmount(last_amount))
 			return amount_list
+		
+# Class for generating scheduled pre-proposals and saving them as json files.
+# A pre-proposal is a proposal with empty nonce, energy and fee amounts.
+# The desktop wallet can convert them to proper proposals.
+class ScheduledPreProposal:
+	# Initialize pre-proposal with sender, receiver, and expiry time, with empty schedule
+	def __init__(self, senderAddress: str, receiverAddress: str, expiry: datetime):
+		self.data = {
+			"sender": senderAddress,
+			"nonce": "", # filled by desktop wallet
+			"energyAmount": "", # filled by desktop wallet
+			"estimatedFee": "", # filled by desktop wallet,
+			"expiry": {
+				"@type": "bigint",
+				"value": int(expiry.timestamp())
+			},
+			"transactionKind": 19,
+			"payload": {
+				"toAddress": receiverAddress,
+				"schedule": [] # initially empty, filled by add_release
+			},
+			"signatures": {}
+		}
+
+	# Add a release to the schedule.
+	def add_release(self, amount: int, release_time: datetime):
+		release = {
+			"amount": amount,
+			"timestamp": int(release_time.timestamp()) * 1000 # multiply by 1000 since timestamps here are in milliseconds
+		} 
+		self.data["payload"]["schedule"].append(release)
+
+	# Write pre-proposal to json file with given filename.
+	def write_json(self, filename: str):
+		with open(filename, 'w') as outFile:
+			json.dump(self.data, outFile, indent=4)
+
 
 # Main function
 def main():
@@ -164,61 +200,39 @@ def main():
 
 				# Remove thousands separator and trailing/leading whitespaces (if any)
 				try:	
-					initialAmount = parse_and_validate_amount(row[2], rowNumber)
-					remAmount = parse_and_validate_amount(row[3], rowNumber)
+					initialAmount = TransferAmount.from_string(row[2], decimal_sep, thousands_sep)
+					remAmount = TransferAmount.from_string(row[3], decimal_sep, thousands_sep)
 				except ValueError as error:
 					print(f"Error: {error}")
 					sys.exit(2)
 
-				proposal = {
-					"sender": senderAddress,
-					"nonce": "", # filled by desktop wallet
-					"energyAmount": "", # filled by desktop wallet
-					"estimatedFee": "", # filled by desktop wallet,
-					"expiry": {
-						"@type": "bigint",
-						"value": int(expiry.timestamp())
-					},
-					"transactionKind": 19,
-					"payload": {
-						"toAddress": receiverAddress,
-						"schedule": [] # filled below
-					},
-					"signatures": {}
-				}
-
+				pp = ScheduledPreProposal(senderAddress, receiverAddress, transaction_expiry)
+				
 				if len(releases) == 1:
 					# if there is only one release, amount is sum of initial and remaining amount
-					schedule = [{
-						"amount": initialAmount + remAmount,
-						"timestamp": int(releases[0].timestamp()) * 1000 # multiply with 1000 to convert to milliseconds
-					}]
+					pp.add_release(initialAmount + remAmount, releases[0])
 				else:
 					# if there are more releases, first compute amounts according to original schedule (i.e., assume no skipped releases)
 					# in each remaining step give fraction of amount, rounded down
 					# potentially give more in last release
-					stepAmount = remAmount // (numReleases - 1)
-					lastAmount = remAmount - (numReleases - 2) * stepAmount
-
-					schedule = [{ # start with initial release plus all skipped releases and add remaining releases below
-						"amount": initialAmount + (skippedReleases * stepAmount),
-						"timestamp": int(releases[0].timestamp()) * 1000 # multiply with 1000 to convert to milliseconds
-					}]
-
-					for i in range(len(releases) - 2) :
-						release = {"amount": stepAmount, "timestamp": int(releases[i+1].timestamp()) * 1000}
-						schedule.append(release)
 					
-					lastRelease = {"amount": lastAmount, "timestamp": int(releases[len(releases)-1].timestamp()) * 1000}
-					schedule.append(lastRelease)
+					#Split amount into list
+					amount_list = remAmount.split_amount(numReleases-1)
+					first_release = initialAmount
 
+					#Add up skipped releases
+					for i in range(skippedReleases):
+						first_release  = first_release + amount_list[i]
+					pp.add_release(first_release, releases[0])
 
-				proposal["payload"]["schedule"] = schedule
+					#Add remaining releases
+					for i in range(skippedReleases, len(releases)) :
+						pp.add_release(amount_list[i], releases[i+1])
+					
 
 				outFileName = "pre-proposal_" + baseCsvName + "_" + str(rowNumber).zfill(3) + ".json";
 				try:
-					with open(outFileName, 'w') as outFile:
-						json.dump(proposal, outFile, indent=4)
+					pp.write_json(outFileName)
 				except IOError:
 					print("Error writing file \"", outFileName, "\".", sep='')
 					sys.exit(3)
