@@ -16,7 +16,7 @@ export default function TransactionListGroup({
     onTransactionClick,
 }: Props) {
     return (
-        <div>
+        <section>
             <header className={styles.transactionGroupHeader}>{header}</header>
             {transactions.map((transaction: TransferTransaction) => (
                 <TransactionListElement
@@ -25,6 +25,6 @@ export default function TransactionListGroup({
                     transaction={transaction}
                 />
             ))}
-        </div>
+        </section>
     );
 }
