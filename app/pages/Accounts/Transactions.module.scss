@@ -1,8 +1,7 @@
 @import 'config/bundle';
 @import './common';
 
-.transactionListHeader,
-.identityDataHeader {
+.transactionListHeader {
     composes: cardPadding;
     composes: fillCardPadding;
     margin-top: -20px;
@@ -11,10 +10,10 @@
         width: 50%;
         padding: 10px;
     }
-}
 
-.identityDataHeader {
-    composes: thickBlueSeparator;
+    &WithSeparator {
+        composes: thickBlueSeparator;
+    }
 }
 
 .transactionListHeaderNotChosen,

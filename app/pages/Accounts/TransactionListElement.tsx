@@ -196,7 +196,10 @@ function statusSymbol(status: TransactionStatus) {
     }
 }
 
-const onlyTime = Intl.DateTimeFormat(undefined, { timeStyle: 'medium' }).format;
+const onlyTime = Intl.DateTimeFormat(undefined, {
+    timeStyle: 'medium',
+    hourCycle: 'h24',
+}).format;
 
 interface Props {
     transaction: TransferTransaction;
