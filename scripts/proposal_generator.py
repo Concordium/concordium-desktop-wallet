@@ -21,10 +21,10 @@ from base58 import b58decode_check
 numReleases = 10
 initialReleaseTime = datetime.fromisoformat("2021-07-26T14:00:00+01:00")
 firstRemReleaseTime = datetime.fromisoformat("2021-08-26T14:00:00+01:00")
-csvDelimiter = ','
+csv_delimiter = ','
 thousands_sep = ','
 decimal_sep = '.'
-assert len(csvDelimiter) == 1 and len(thousands_sep) == 1 and len(decimal_sep) == 1 and thousands_sep != decimal_sep
+assert len(csv_delimiter) == 1 and len(thousands_sep) == 1 and len(decimal_sep) == 1 and thousands_sep != decimal_sep
 transaction_expiry = datetime.now() + relativedelta(hours =+ 2) # proposals expire 2 hours from now
 
 # If regular releases are before earliestReleaseTime, they get combined into one at that time.
@@ -101,9 +101,9 @@ class TransferAmount:
 # The desktop wallet can convert them to proper proposals.
 class ScheduledPreProposal:
 	# Initialize pre-proposal with sender, receiver, and expiry time, with empty schedule
-	def __init__(self, senderAddress: str, receiverAddress: str, expiry: datetime):
+	def __init__(self, sender_address: str, receiver_address: str, expiry: datetime):
 		self.data = {
-			"sender": senderAddress,
+			"sender": sender_address,
 			"nonce": "", # filled by desktop wallet
 			"energyAmount": "", # filled by desktop wallet
 			"estimatedFee": "", # filled by desktop wallet,
@@ -113,7 +113,7 @@ class ScheduledPreProposal:
 			},
 			"transactionKind": 19,
 			"payload": {
-				"toAddress": receiverAddress,
+				"toAddress": receiver_address,
 				"schedule": [] # initially empty, filled by add_release
 			},
 			"signatures": {}
@@ -154,10 +154,10 @@ def main():
 	args = parser.parse_args()
 	
 	is_welcome = args.welcome
-	csvFileName = args.input_csv
+	csv_file_name = args.input_csv
 
 	# Extract base name of csv file without extension and path. Output files will contain this name.
-	baseCsvName = os.path.splitext(os.path.basename(csvFileName))[0]
+	base_csv_name = os.path.splitext(os.path.basename(csv_file_name))[0]
 
 	# Build release schedule.
 	# Normal schedule consists of numReleases, with first one at initialReleaseTime,
@@ -184,30 +184,30 @@ def main():
 	skippedReleases = numReleases - len(release_times) # number of releases to be combined into the initial release
 
 	# read csv file
-	rowNumber = 0
+	row_number = 0
 	try:
-		with open(csvFileName, newline='', encoding='utf-8-sig') as csvfile:
-			reader = csv.reader(csvfile, delimiter=csvDelimiter)
+		with open(csv_file_name, newline='', encoding='utf-8-sig') as csvfile:
+			reader = csv.reader(csvfile, delimiter=csv_delimiter)
 
 			for row in reader:
-				rowNumber += 1
+				row_number += 1
 
 				if len(row) != 4:
-					print("Error: Incorrect file format. Each row must contains exactly 4 entires. Row ", rowNumber, " contains ", len(row), ".", sep='')
+					print(f"Error: Incorrect file format. Each row must contains exactly 4 entires. Row {row_number} contains {len(row)}.")
 					sys.exit(2)
 
 				senderAddress = row[0]
 				try:
 					b58decode_check(senderAddress)
 				except:
-					print("Encountered an invalid sender address: \"" + senderAddress + "\" at row " + str(rowNumber))
+					print(f"Encountered an invalid sender address: \"{senderAddress}\" at row {row_number}.")
 					sys.exit(2)
 
 				receiverAddress = row[1]
 				try:
 					b58decode_check(receiverAddress)
 				except:
-					print("Encountered an invalid receiver address: \"" + receiverAddress + "\" at row " + str(rowNumber))
+					print(f"Encountered an invalid receiver address: \"{receiverAddress}\" at row {row_number}.")
 					sys.exit(2)
 
 				# Remove thousands separator and trailing/leading whitespaces (if any)
@@ -242,7 +242,7 @@ def main():
 						pp.add_release(amount_list[i], release_times[i-skippedReleases])
 					
 
-				outFileName = "pre-proposal_" + baseCsvName + "_" + str(rowNumber).zfill(3) + ".json";
+				outFileName = "pre-proposal_" + base_csv_name + "_" + str(row_number).zfill(3) + ".json";
 				try:
 					pp.write_json(outFileName)
 				except IOError:
@@ -250,10 +250,10 @@ def main():
 					sys.exit(3)
 
 	except IOError:
-		print("Error reading file \"", csvFileName, "\".", sep='')
+		print(f"Error reading file \"{csv_file_name}\".")
 		sys.exit(3)
 
-	print("Successfully generated", rowNumber, "proposals.")
+	print(f"Successfully generated {row_number} proposals.")
 
 if __name__ == "__main__":
 	main()
