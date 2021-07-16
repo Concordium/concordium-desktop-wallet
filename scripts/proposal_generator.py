@@ -161,12 +161,12 @@ def main():
 	#
 	# If the transfer is delayed, some realeases can be in the past. In that case,
 	# combine all releases before earliestReleaseTime into one release at that time.
-	releases = []
+	release_times = []
 		
 	if initialReleaseTime >= earliestReleaseTime:
-		releases.append(initialReleaseTime)
+		release_times.append(initialReleaseTime)
 	else:
-		releases.append(earliestReleaseTime)
+		release_times.append(earliestReleaseTime)
 
 	for i in range(numReleases - 1):
 		# remaining realeses are i month after first remaining release
@@ -175,9 +175,9 @@ def main():
 		# Only add release if not before earliestReleaseTime.
 		# Note that earliestReleaseTime will already be in list since initialReleaseTime < firstRemReleaseTime.
 		if plannedReleaseTime >= earliestReleaseTime:
-			releases.append(plannedReleaseTime)
+			release_times.append(plannedReleaseTime)
 	
-	skippedReleases = numReleases - len(releases) # number of releases to be combined into the initial release
+	skippedReleases = numReleases - len(release_times) # number of releases to be combined into the initial release
 
 	# read csv file
 	rowNumber = 0
@@ -216,9 +216,9 @@ def main():
 
 				pp = ScheduledPreProposal(senderAddress, receiverAddress, transaction_expiry)
 				
-				if len(releases) == 1:
+				if len(release_times) == 1:
 					# if there is only one release, amount is sum of initial and remaining amount
-					pp.add_release(initialAmount + remAmount, releases[0])
+					pp.add_release(initialAmount + remAmount, release_times[0])
 				else:
 					# if there are more releases, first compute amounts according to original schedule (i.e., assume no skipped releases)
 					# in each remaining step give fraction of amount, rounded down
@@ -231,11 +231,11 @@ def main():
 					first_release = initialAmount
 					for i in range(skippedReleases):
 						first_release  = first_release + amount_list[i]
-					pp.add_release(first_release, releases[0])
+					pp.add_release(first_release, release_times[0])
 
 					#Add remaining releases
 					for i in range(skippedReleases, len(amount_list)) :
-						pp.add_release(amount_list[i], releases[i-skippedReleases])
+						pp.add_release(amount_list[i], release_times[i-skippedReleases])
 					
 
 				outFileName = "pre-proposal_" + baseCsvName + "_" + str(rowNumber).zfill(3) + ".json";
