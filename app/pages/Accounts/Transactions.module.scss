@@ -1,16 +1,20 @@
 @import 'config/bundle';
 @import './common';
 
-.transactionListHeader {
-    composes: thickBlueSeparator;
-    composes: fillCardPadding;
+.transactionListHeader,
+.identityDataHeader {
     composes: cardPadding;
+    composes: fillCardPadding;
     margin-top: -20px;
 
     button {
         width: 50%;
         padding: 10px;
     }
+}
+
+.identityDataHeader {
+    composes: thickBlueSeparator;
 }
 
 .transactionListHeaderNotChosen,
@@ -59,10 +63,22 @@
 }
 
 .checkmark {
+    position: relative;
+    top: 2px;
     margin-left: 5px;
-    margin-top: 5px;
 }
 
 .greenText {
     color: $color-success;
+}
+
+.transactionGroupHeader {
+    composes: fillCardPadding;
+    composes: cardPadding;
+    height: 13px;
+    font-size: 10px;
+    line-height: 12px;
+    display: flex;
+    align-items: center;
+    background-color: $color-light-blue;
 }

@@ -50,7 +50,13 @@ export default function TransferHistory({ account }: Props) {
 
     function Header() {
         return (
-            <div className={styles.transactionListHeader}>
+            <div
+                className={
+                    location === locations.viewIdentityData
+                        ? styles.identityDataHeader
+                        : styles.transactionListHeader
+                }
+            >
                 <Button
                     clear
                     onClick={() => setLocation(locations.listTransactions)}

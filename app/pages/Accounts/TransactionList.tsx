@@ -1,12 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import TransactionListElement from './TransactionListElement';
+import groupBy from 'lodash.groupby';
 import { TransferTransaction } from '~/utils/types';
 import {
     moreTransactionsSelector,
     loadingTransactionsSelector,
 } from '~/features/TransactionSlice';
 import LoadingComponent from '~/cross-app-components/Loading';
+import { TimeConstants } from '~/utils/timeHelpers';
+import TransactionListGroup from './TransactionListGroup';
+
+const dateFormat = Intl.DateTimeFormat(undefined, { dateStyle: 'medium' })
+    .format;
+
+const getGroupHeader = (d: Date): string => {
+    switch (d.toDateString()) {
+        case new Date().toDateString():
+            return 'Today';
+        case new Date(new Date().getDate() - 1).toDateString():
+            return 'Yesterday';
+        default:
+            return dateFormat(d);
+    }
+};
 
 interface Props {
     transactions: TransferTransaction[];
@@ -24,6 +40,16 @@ function TransactionList({
     const more = useSelector(moreTransactionsSelector);
     const loading = useSelector(loadingTransactionsSelector);
     const [showLoading, setShowLoading] = useState(false);
+
+    const transactionGroups = useMemo(
+        () =>
+            groupBy(transactions, (t) =>
+                getGroupHeader(
+                    new Date(Number(t.blockTime) * TimeConstants.Second)
+                )
+            ),
+        [transactions]
+    );
 
     useEffect(() => {
         if (loading) {
@@ -60,11 +86,12 @@ function TransactionList({
 
     return (
         <>
-            {transactions.map((transaction: TransferTransaction) => (
-                <TransactionListElement
-                    onClick={() => onTransactionClick(transaction)}
-                    key={transaction.transactionHash || transaction.id}
-                    transaction={transaction}
+            {Object.entries(transactionGroups).map(([h, ts]) => (
+                <TransactionListGroup
+                    key={h}
+                    header={h}
+                    transactions={ts}
+                    onTransactionClick={onTransactionClick}
                 />
             ))}
             {more && (
