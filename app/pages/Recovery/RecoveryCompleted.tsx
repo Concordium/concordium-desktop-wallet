@@ -24,12 +24,18 @@ export default function RecoveryCompleted({ setRecoveredAccounts }: Props) {
         <>
             <p>
                 These are the recovered accounts. If it looks correct, you can
-                go to the Accounts page and edit their names. As identities are
-                not recoverable, there will be shown placeholder cards in the
-                Identities page. These can also have their names edited, but
-                they cannot be used to create new accounts. If you need more
-                accounts, you can always create a new identity. If you are still
-                missing some accounts, you can go back and look for more.
+                go to the Accounts page and edit their names.
+            </p>
+            <p>
+                As identities are not recoverable, there will be shown
+                placeholder cards in the Identities page. These can also have
+                their names edited, but they cannot be used to create new
+                accounts. If you need more accounts, you can always create a new
+                identity.
+            </p>
+            <p>
+                If you are still missing some accounts, you can go back and look
+                for more.
             </p>
             <Button
                 className={styles.topButton}

@@ -65,6 +65,8 @@ export default function PerformRecovery({
     const [showStop, setShowStop] = useState<Stop>();
     const [recoveredTotal, setRecoveredTotal] = useState(0);
 
+    useEffect(() => setStatus(Status.initial), []);
+
     function promptStop() {
         return new Promise((resolve) => {
             setShowStop({
@@ -225,6 +227,7 @@ export default function PerformRecovery({
                 inverted
                 onClick={() => {
                     controller.abort();
+                    setStatus(undefined);
                     dispatch(push(routes.RECOVERY_COMPLETED));
                 }}
             >
