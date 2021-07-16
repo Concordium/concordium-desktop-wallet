@@ -8,10 +8,10 @@ import { Action } from '../utils/types';
 
 interface Props {
     title: string;
-    description: string;
+    description: string | JSX.Element;
     actions: Action[];
     open: boolean;
-    postAction(): void;
+    postAction(chosenLocation?: string): void;
 }
 
 export default function ChoiceModal({
@@ -23,7 +23,7 @@ export default function ChoiceModal({
 }: Props) {
     const dispatch = useDispatch();
     return (
-        <Modal open={open}>
+        <Modal open={open} onClose={postAction}>
             <h3>{title}</h3>
             <p>{description}</p>
             <div className="flex justifySpaceBetween mT30">
@@ -35,7 +35,7 @@ export default function ChoiceModal({
                             if (location) {
                                 dispatch(push(location));
                             }
-                            postAction();
+                            postAction(location);
                         }}
                     >
                         {label}

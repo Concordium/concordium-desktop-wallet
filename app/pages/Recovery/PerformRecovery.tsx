@@ -24,7 +24,9 @@ import {
 import { Account, StateUpdate } from '~/utils/types';
 import AbortController from '~/utils/AbortController';
 import Button from '~/cross-app-components/Button';
-
+import SimpleErrorModal from '~/components/SimpleErrorModal';
+import ChoiceModal from '~/components/ChoiceModal';
+import { noOp } from '~/utils/basicHelpers';
 import styles from './Recovery.module.scss';
 
 async function getPrfKeySeed(
@@ -40,8 +42,11 @@ async function getPrfKeySeed(
 
 interface Props {
     setRecoveredAccounts: StateUpdate<Account[][]>;
-    setError: StateUpdate<string | undefined>;
     setStatus: StateUpdate<Status | undefined>;
+}
+
+interface Stop {
+    postAction: (location?: string) => void;
 }
 
 /**
@@ -49,7 +54,6 @@ interface Props {
  */
 export default function PerformRecovery({
     setRecoveredAccounts,
-    setError,
     setStatus,
 }: Props) {
     const dispatch = useDispatch();
@@ -57,6 +61,20 @@ export default function PerformRecovery({
     const addressBook = useSelector(addressBookSelector);
     const global = useSelector(globalSelector);
     const [controller] = useState(new AbortController());
+    const [error, setError] = useState<string>();
+    const [showStop, setShowStop] = useState<Stop>();
+    const [recoveredTotal, setRecoveredTotal] = useState(0);
+
+    function promptStop() {
+        return new Promise((resolve) => {
+            setShowStop({
+                postAction: (location) => {
+                    setShowStop(undefined);
+                    resolve(Boolean(location));
+                },
+            });
+        });
+    }
 
     useEffect(() => {
         return () => controller.abort();
@@ -85,8 +103,16 @@ export default function PerformRecovery({
             );
 
         try {
+            let emptyIndices = 0;
             let identityNumber = 0;
             while (!controller.isAborted) {
+                if (emptyIndices >= 3) {
+                    const stopped = await promptStop();
+                    emptyIndices = 0;
+                    if (stopped) {
+                        break;
+                    }
+                }
                 setStatus(Status.waitingForInput);
                 const prfKeySeed = await getPrfKeySeed(
                     ledger,
@@ -97,6 +123,7 @@ export default function PerformRecovery({
                 const identity = findIdentity(identityNumber);
                 let accounts: Account[];
                 if (identity) {
+                    emptyIndices = 0;
                     accounts = await recoverFromIdentity(
                         prfKeySeed,
                         blockHash,
@@ -122,8 +149,14 @@ export default function PerformRecovery({
                     accounts.forEach((acc) => {
                         acc.identityName = identityName;
                     });
+                    if (accounts.length) {
+                        emptyIndices = 0;
+                    } else {
+                        emptyIndices += 1;
+                    }
                 }
                 loadCredentials(dispatch);
+                setRecoveredTotal((n) => n + accounts.length);
                 setRecoveredAccounts((ra) => [...ra, accounts]);
                 identityNumber += 1;
             }
@@ -136,8 +169,47 @@ export default function PerformRecovery({
         }
     }
 
+    const description = (
+        <>
+            <p>
+                You have gone through 3 empty indices in a row. Have you maybe
+                found all your accounts?
+            </p>
+            <p className="bodyEmphasized">
+                You found {recoveredTotal} accounts in total.
+            </p>
+            <p>
+                If this is the amount of accounts you expected, you can stop the
+                process now.
+            </p>
+            <p>
+                if you expected more accounts, you can continue and look for
+                more.
+            </p>
+        </>
+    );
+
     return (
         <>
+            <SimpleErrorModal
+                header="Unable to recover credentials"
+                content={error}
+                show={Boolean(error)}
+                onClick={() => dispatch(push(routes.IDENTITIES))}
+            />
+            <ChoiceModal
+                description={description}
+                actions={[
+                    { label: 'Look for more' },
+                    {
+                        label: 'Stop the process',
+                        location: routes.RECOVERY_COMPLETED,
+                    },
+                ]}
+                title="Continue the recovery?"
+                open={Boolean(showStop)}
+                postAction={showStop?.postAction || noOp}
+            />
             <p>
                 Connect and unlock your Ledger device to get started. When
                 prompted, allow export of the PRF keys on the Ledger. The wallet
