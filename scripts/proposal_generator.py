@@ -74,11 +74,11 @@ class TransferAmount:
 		return x > 0 and x <= self.max_amount
 
 	#returns amount in GTU
-	def get_GTU(self):
+	def get_GTU(self) -> Decimal:
 		return Decimal(self.amount)/Decimal(1000000)
 
 	#returns amount in microGTU
-	def get_micro_GTU(self):
+	def get_micro_GTU(self) -> int:
 		return self.amount
 
 	#add two amounts
@@ -123,9 +123,9 @@ class ScheduledPreProposal:
 		}
 
 	# Add a release to the schedule.
-	def add_release(self, amount: int, release_time: datetime):
+	def add_release(self, amount: TransferAmount, release_time: datetime):
 		release = {
-			"amount": amount,
+			"amount": amount.get_micro_GTU(),
 			"timestamp": int(release_time.timestamp()) * 1000 # multiply by 1000 since timestamps here are in milliseconds
 		} 
 		self.data["payload"]["schedule"].append(release)
@@ -218,16 +218,16 @@ def main():
 					
 					#Split amount into list
 					amount_list = remAmount.split_amount(numReleases-1)
-					first_release = initialAmount
 
 					#Add up skipped releases
+					first_release = initialAmount
 					for i in range(skippedReleases):
 						first_release  = first_release + amount_list[i]
 					pp.add_release(first_release, releases[0])
 
 					#Add remaining releases
-					for i in range(skippedReleases, len(releases)) :
-						pp.add_release(amount_list[i], releases[i+1])
+					for i in range(skippedReleases, len(amount_list)) :
+						pp.add_release(amount_list[i], releases[i-skippedReleases])
 					
 
 				outFileName = "pre-proposal_" + baseCsvName + "_" + str(rowNumber).zfill(3) + ".json";
