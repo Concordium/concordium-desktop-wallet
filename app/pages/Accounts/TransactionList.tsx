@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import groupBy from 'lodash.groupby';
-import { TransferTransaction } from '~/utils/types';
+import { TimeStampUnit, TransferTransaction } from '~/utils/types';
 import {
     moreTransactionsSelector,
     loadingTransactionsSelector,
 } from '~/features/TransactionSlice';
 import LoadingComponent from '~/cross-app-components/Loading';
-import { TimeConstants } from '~/utils/timeHelpers';
+import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import TransactionListGroup from './TransactionListGroup';
 
 const dateFormat = Intl.DateTimeFormat(undefined, { dateStyle: 'medium' })
@@ -50,7 +50,7 @@ function TransactionList({
         () =>
             groupBy(transactions, (t) =>
                 getGroupHeader(
-                    new Date(Number(t.blockTime) * TimeConstants.Second)
+                    dateFromTimeStamp(t.blockTime, TimeStampUnit.seconds)
                 )
             ),
         [transactions]

@@ -71,7 +71,7 @@ function TransactionView({ transaction, returnFunction }: Props) {
                 className={styles.closeButton}
                 onClick={returnFunction}
             />
-            <TransactionListElement transaction={transaction} />
+            <TransactionListElement transaction={transaction} showDate />
             {displayRejectReason(transaction)}
             {!!transaction.fromAddress && (
                 <CopiableListElement
