@@ -15,8 +15,12 @@ import { loadIdentities, identitiesSelector } from '~/features/IdentitySlice';
 import pairWallet from '~/utils/WalletPairing';
 import routes from '~/constants/routes.json';
 import errorMessages from '~/constants/errorMessages.json';
-import { recoverFromIdentity, recoverNewIdentity } from './util';
-import { allowedSpacesIdentities } from '~/constants/recoveryConstants.json';
+import {
+    Status,
+    recoverFromIdentity,
+    recoverNewIdentity,
+    getRecoveredIdentityName,
+} from './util';
 import { Account, StateUpdate } from '~/utils/types';
 import AbortController from '~/utils/AbortController';
 import Button from '~/cross-app-components/Button';
@@ -37,14 +41,16 @@ async function getPrfKeySeed(
 interface Props {
     setRecoveredAccounts: StateUpdate<Account[][]>;
     setError: StateUpdate<string | undefined>;
+    setStatus: StateUpdate<Status | undefined>;
 }
 
 /**
  * Displays the messages after recovery has been completed
  */
-export default function RecoveryCompleted({
+export default function PerformRecovery({
     setRecoveredAccounts,
     setError,
+    setStatus,
 }: Props) {
     const dispatch = useDispatch();
     const identities = useSelector(identitiesSelector);
@@ -77,28 +83,17 @@ export default function RecoveryCompleted({
             identitiesOfWallet.find(
                 (identity) => identity.identityNumber === identityNumber
             );
-        const maxExistingIdentityNumber = identitiesOfWallet.reduce(
-            (currentMax, identity) =>
-                Math.max(identity.identityNumber, currentMax),
-            0
-        );
 
         try {
-            let skipsRemaining = allowedSpacesIdentities;
             let identityNumber = 0;
-            while (
-                skipsRemaining >= 0 ||
-                identityNumber <= maxExistingIdentityNumber
-            ) {
-                if (controller.isAborted) {
-                    controller.onAborted();
-                    return;
-                }
+            while (!controller.isAborted) {
+                setStatus(Status.waitingForInput);
                 const prfKeySeed = await getPrfKeySeed(
                     ledger,
                     setLedgerMessage,
                     identityNumber
                 );
+                setStatus(Status.searching);
                 const identity = findIdentity(identityNumber);
                 let accounts: Account[];
                 if (identity) {
@@ -112,9 +107,8 @@ export default function RecoveryCompleted({
                     accounts.forEach((acc) => {
                         acc.identityName = identity.name;
                     });
-                    skipsRemaining = allowedSpacesIdentities;
                 } else {
-                    const result = await recoverNewIdentity(
+                    accounts = await recoverNewIdentity(
                         prfKeySeed,
                         blockHash,
                         global,
@@ -122,19 +116,23 @@ export default function RecoveryCompleted({
                         walletId,
                         addressBook
                     );
-                    accounts = result.accounts;
-                    skipsRemaining = result.exists
-                        ? allowedSpacesIdentities
-                        : skipsRemaining - 1;
+                    const identityName = getRecoveredIdentityName(
+                        identityNumber
+                    );
+                    accounts.forEach((acc) => {
+                        acc.identityName = identityName;
+                    });
                 }
+                loadCredentials(dispatch);
                 setRecoveredAccounts((ra) => [...ra, accounts]);
                 identityNumber += 1;
             }
         } finally {
+            controller.onAborted();
             loadAccounts(dispatch);
-            loadCredentials(dispatch);
             loadIdentities(dispatch);
             loadAddressBook(dispatch);
+            setStatus(undefined);
         }
     }
 

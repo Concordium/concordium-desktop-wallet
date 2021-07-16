@@ -20,7 +20,13 @@ import { createAccount } from '~/utils/accountHelpers';
 import { getNextCredentialNumber } from '~/database/CredentialDao';
 import { importAddressBookEntry } from '~/features/AddressBookSlice';
 
-function getRecoveredIdentityName(identityNumber: number) {
+export enum Status {
+    initial = 'Waiting...',
+    waitingForInput = 'Waiting for Ledger input.',
+    searching = 'Looking for accounts...',
+}
+
+export function getRecoveredIdentityName(identityNumber: number) {
     return `Recovered - index ${identityNumber}`;
 }
 
@@ -290,11 +296,6 @@ export async function recoverNewIdentity(
                 return { ...cred, identityId };
             })
         );
-
-        return {
-            exists: true,
-            accounts,
-        };
     }
-    return { exists: false, accounts: [] };
+    return accounts;
 }
