@@ -81,6 +81,10 @@ class TransferAmount:
 	def get_micro_GTU(self) -> int:
 		return self.amount
 
+	#equality check
+	def __eq__(self, y:'TransferAmount'):
+		return self.amount == y.amount
+
 	#add two amounts
 	def __add__(self,y:'TransferAmount') -> 'TransferAmount':
 		return TransferAmount(self.amount + y.amount)

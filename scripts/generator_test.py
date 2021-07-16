@@ -1,91 +1,43 @@
-
-pg = __import__('proposal-generator')
-wpg = __import__('welcome-proposal-generator')
-
 from decimal import Decimal
 import unittest
 import random
+from proposal_generator import *
 
-class TestProposalGenerator(unittest.TestCase):
- 
-    def format_amount(self,amount_string: str):
-        translation_table = {ord(',') : pg.thousandsSep, ord('.'): pg.decimalSep}
-        return amount_string.translate(translation_table)
+class TestTransferAmount(unittest.TestCase):
 
-    def test_valid_number(self):
-        self.assertEqual(
-            pg.parse_and_validate_amount(self.format_amount('1278.123456'),1),
-            1278123456
-        )
-        self.assertEqual(
-            pg.parse_and_validate_amount(self.format_amount('1,278.123456'),1),
-            1278123456
-        )
+    def test_from_string_valid(self):
+        self.assertEqual(TransferAmount.from_string('1278.123456','.',','),TransferAmount(1278123456))
+        self.assertEqual(TransferAmount.from_string('1,278.123456','.',','),TransferAmount(1278123456))
 
-    def test_random_valid_numbers(self):
+    def test_from_string_random_valid(self):
         for i in range(0,1000):
-            x = random.randrange(1,pg.maxAmount//1000000)
+            x = random.randrange(1,TransferAmount.max_amount//1000000)
             y = random.randrange(1,1000000)
             z = x*1000000+y*10**(6-len(str(y)))
-            self.assertEqual(pg.parse_and_validate_amount(self.format_amount(f"{x}.{y}"),1),z)
-            self.assertEqual(pg.parse_and_validate_amount(self.format_amount(f"{x:,}.{y}"),1),z)
+            self.assertEqual(TransferAmount.from_string(f"{x}.{y}",'.',','),TransferAmount(z))
+            self.assertEqual(TransferAmount.from_string(f"{x:,}.{y}",'.',','),TransferAmount(z))
 
-    def test_invalid_numbers(self):
+    def test_from_string_invalid(self):
         #Invalid format
-        self.assertRaises(ValueError, pg.parse_and_validate_amount,self.format_amount('-12'),1)
-        self.assertRaises(ValueError, pg.parse_and_validate_amount,self.format_amount('12,0'),1)
-        self.assertRaises(ValueError, pg.parse_and_validate_amount,self.format_amount('120,0000.0'),1)
-        self.assertRaises(ValueError, pg.parse_and_validate_amount,self.format_amount('0,,,,0,0.1,000,000000'),1)
-        self.assertRaises(ValueError, pg.parse_and_validate_amount,self.format_amount('٠.001'),1)
-        self.assertRaises(ValueError, pg.parse_and_validate_amount,self.format_amount('¼'),1)
-        self.assertRaises(ValueError, pg.parse_and_validate_amount,self.format_amount('0.0000001'),1)
+        self.assertRaises(ValueError, TransferAmount.from_string,'-12','.',',')
+        self.assertRaises(ValueError, TransferAmount.from_string,'12,0','.',',')
+        self.assertRaises(ValueError, TransferAmount.from_string,'120,0000.0','.',',')
+        self.assertRaises(ValueError, TransferAmount.from_string,'0,,,,0,0.1,000,000000','.',',')
+        self.assertRaises(ValueError, TransferAmount.from_string,'٠.001','.',',')
+        self.assertRaises(ValueError, TransferAmount.from_string,'¼','.',',')
+        self.assertRaises(ValueError, TransferAmount.from_string,'0.0000001','.',',')
         #Too small
-        self.assertRaises(ValueError, pg.parse_and_validate_amount,self.format_amount('0'),1)
-        self.assertRaises(ValueError, pg.parse_and_validate_amount,self.format_amount('0.0'),1)
+        self.assertRaises(ValueError, TransferAmount.from_string,'0','.',',')
+        self.assertRaises(ValueError, TransferAmount.from_string,'0.0','.',',')
         #Too large
-        self.assertRaises(ValueError, pg.parse_and_validate_amount,self.format_amount(str(pg.maxAmount//1000000+1)),1)
+        self.assertRaises(ValueError, TransferAmount.from_string,str(TransferAmount.max_amount//1000000+1),'.',',')
 
-
-
-class TestWelcomeProposalGenerator(unittest.TestCase):
-
-    def format_amount(self,amount_string: str):
-        translation_table = {ord(',') : wpg.thousandsSep, ord('.'): wpg.decimalSep}
-        return amount_string.translate(translation_table)
-
-    def test_valid_number(self):
-        self.assertEqual(
-            wpg.parse_and_validate_amount(self.format_amount('1278.123456'),1),
-            1278123456
-        )
-        self.assertEqual(
-            wpg.parse_and_validate_amount(self.format_amount('1,278.123456'),1),
-            1278123456
-        )
-
-    def test_random_valid_numbers(self):
+    def test_addition(self):
         for i in range(0,1000):
-            x = random.randrange(1,pg.maxAmount//1000000)
-            y = random.randrange(1,1000000)
-            z = x*1000000+y*10**(6-len(str(y)))
-            self.assertEqual(wpg.parse_and_validate_amount(self.format_amount(f"{x}.{y}"),1),z)
-            self.assertEqual(wpg.parse_and_validate_amount(self.format_amount(f"{x:,}.{y}"),1),z)
-
-    def test_invalid_numbers(self):
-        #Invalid format
-        self.assertRaises(ValueError, wpg.parse_and_validate_amount,self.format_amount('-12'),1)
-        self.assertRaises(ValueError, wpg.parse_and_validate_amount,self.format_amount('12,0'),1)
-        self.assertRaises(ValueError, wpg.parse_and_validate_amount,self.format_amount('120,0000.0'),1)
-        self.assertRaises(ValueError, wpg.parse_and_validate_amount,self.format_amount('0,,,,0,0.1,000,000000'),1)
-        self.assertRaises(ValueError, wpg.parse_and_validate_amount,self.format_amount('٠.001'),1)
-        self.assertRaises(ValueError, wpg.parse_and_validate_amount,self.format_amount('¼'),1)
-        self.assertRaises(ValueError, wpg.parse_and_validate_amount,self.format_amount('0.0000001'),1)
-        #Too small
-        self.assertRaises(ValueError, wpg.parse_and_validate_amount,self.format_amount('0'),1)
-        self.assertRaises(ValueError, wpg.parse_and_validate_amount,self.format_amount('0.0'),1)
-        #Too large
-        self.assertRaises(ValueError, wpg.parse_and_validate_amount,self.format_amount(str(wpg.maxAmount//1000000+1)),1)
-
+            c = random.randrange(1,TransferAmount.max_amount)
+            b = random.randrange(1,c)
+            a = c-b
+            self.assertEqual(TransferAmount(a)+TransferAmount(b),TransferAmount(c))
 
 if __name__ == '__main__':
     unittest.main()
