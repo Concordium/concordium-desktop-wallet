@@ -14,10 +14,15 @@ const dateFormat = Intl.DateTimeFormat(undefined, { dateStyle: 'medium' })
     .format;
 
 const getGroupHeader = (d: Date): string => {
+    const today = new Date().toDateString();
+    const yesterday = new Date(
+        new Date().setDate(new Date().getDate() - 1)
+    ).toDateString();
+
     switch (d.toDateString()) {
-        case new Date().toDateString():
+        case today:
             return 'Today';
-        case new Date(new Date().getDate() - 1).toDateString():
+        case yesterday:
             return 'Yesterday';
         default:
             return dateFormat(d);
