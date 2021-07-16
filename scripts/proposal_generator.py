@@ -39,6 +39,8 @@ assert earliest_release_time < welcome_release_time and earliest_release_time < 
 class TransferAmount:
 
 	max_amount:int = 18446744073709551615
+	amount_regex:str = r"^[0-9]+([.][0-9]{1,6})?$"
+	amount_regex_with_1000_sep:str = r"^[0-9]{1,3}([,][0-9]{3})*([.][0-9]{1,6})?$"
 
 	#basic constructor where amount is in microGTU
 	def __init__(self, amount: int) -> None:
@@ -49,11 +51,9 @@ class TransferAmount:
 	#create a transfer amount from a transfer string
 	@classmethod
 	def from_string(cls,amount_string:str, decimal_sep:str, thousands_sep: str) -> 'TransferAmount':
-		amount_regex = r"^[0-9]+([.][0-9]{1,6})?$"
-		amount_regex_with_1000_sep = r"^[0-9]{1,3}([,][0-9]{3})*([.][0-9]{1,6})?$"
 		translation_table = {ord(thousands_sep) : ',', ord(decimal_sep): '.'}
 		amount_org_string = amount_string	
-		if not bool(re.match(amount_regex, amount_string)) and not bool(re.match(amount_regex_with_1000_sep, amount_string)):
+		if not bool(re.match(cls.amount_regex, amount_string)) and not bool(re.match(cls.amount_regex_with_1000_sep, amount_string)):
 			raise ValueError(f"Amount {amount_org_string} is not a valid amount string.")
 		amount_string = amount_string.replace(',', '')
 		try: 
@@ -227,43 +227,43 @@ def main():
 			for row_number,row_data in enumerate(reader):
 				#Ensure we have the right number of columns
 				if not is_welcome and len(row_data) != 4:
-					print(f"Error: Incorrect file format. Each row must contains exactly 4 entires. Row {row_number} contains {len(row_data)}.")
+					print(f"Error: Incorrect file format. Each row must contains exactly 4 entires. Row {row_number+1} contains {len(row_data)}.")
 					sys.exit(2)
 				elif is_welcome and len(row_data) != 3:
-					print(f"Error: Incorrect file format. Each row must contains exactly 3 entires. Row {row_number} contains {len(row_data)}.")
+					print(f"Error: Incorrect file format. Each row must contains exactly 3 entires. Row {row_number+1} contains {len(row_data)}.")
 					sys.exit(2)
 				#Read sender and receiver address
 				senderAddress = row_data[0]
 				try:
 					b58decode_check(senderAddress)
 				except:
-					print(f"Encountered an invalid sender address: \"{senderAddress}\" at row {row_number}.")
+					print(f"Encountered an invalid sender address: \"{senderAddress}\" at row {row_number+1}.")
 					sys.exit(2)
 				receiverAddress = row_data[1]
 				try:
 					b58decode_check(receiverAddress)
 				except:
-					print(f"Encountered an invalid receiver address: \"{receiverAddress}\" at row {row_number}.")
+					print(f"Encountered an invalid receiver address: \"{receiverAddress}\" at row {row_number+1}.")
 					sys.exit(2)	
 				#Generate pre schedule proposal
 				pre_proposal = ScheduledPreProposal(senderAddress, receiverAddress, transaction_expiry)		
 				#Add releases
 				if is_welcome:
-					add_welcome_release(pre_proposal,row_data[3])
+					add_welcome_release(pre_proposal,row_data[2])
 				else:
-					add_releases(pre_proposal,row_number,row_data,release_times,skipped_releases)
+					add_releases(pre_proposal,row_data[2],row_data[3],release_times,skipped_releases)
 				#Write json file
-				out_file_name = json_output_prefix + str(row_number).zfill(3) + ".json"
+				out_file_name = json_output_prefix + str(row_number+1).zfill(3) + ".json"
 				try:
 					pre_proposal.write_json(out_file_name)
 				except IOError:
 					print(f"Error writing file \"{out_file_name}\".")
 					sys.exit(3)
-	except IOError:
-		print(f"Error reading file \"{csv_input_file}\".")
+	except IOError as e:
+		print(f"Error reading file \"{csv_input_file}\": {e}")
 		sys.exit(3)
 
-	print(f"Successfully generated {row_number} proposals.")
+	print(f"Successfully generated {row_number+1} proposals.")
 
 if __name__ == "__main__":
 	main()
