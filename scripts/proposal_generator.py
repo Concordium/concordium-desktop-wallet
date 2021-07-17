@@ -114,7 +114,7 @@ class TransferAmount:
 class ScheduledPreProposal:
 	# Initialize pre-proposal with sender, receiver, and expiry time, with empty schedule
 	def __init__(self, sender_address: str, receiver_address: str, expiry: datetime):
-		self.data = {
+		self.__data = {
 			"sender": sender_address,
 			"nonce": "", # filled by desktop wallet
 			"energyAmount": "", # filled by desktop wallet
@@ -137,12 +137,12 @@ class ScheduledPreProposal:
 			"amount": amount.get_micro_GTU(),
 			"timestamp": int(release_time.timestamp()) * 1000 # multiply by 1000 since timestamps here are in milliseconds
 		} 
-		self.data["payload"]["schedule"].append(release)
+		self.__data["payload"]["schedule"].append(release)
 
 	# Write pre-proposal to json file with given filename.
 	def write_json(self, filename: str):
 		with open(filename, 'w') as outFile:
-			json.dump(self.data, outFile, indent=4)
+			json.dump(self.__data, outFile, indent=4)
 
 
 def add_releases(pre_proposal,inital_amount_str:str,rem_amount_string:str,release_times,skipped_releases):
