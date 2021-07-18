@@ -234,9 +234,9 @@ def main():
 			# remaining realeses are i month after first remaining release
 			planned_release_time = first_rem_release_time + relativedelta(months =+ i)
 
-			# Only add release if not before earliest_release_time.
-			# Note that earliest_release_time will already be in list since initial_release_time < first_rem_release_time.
-			if planned_release_time >= earliest_release_time:
+			# Only add release if after earliest_release_time.
+			# Note that in this case, earliest_release_time is already in list since initial_release_time < first_rem_release_time.
+			if planned_release_time > earliest_release_time:
 				release_times.append(planned_release_time)
 	
 		skipped_releases = num_releases - len(release_times) # number of releases to be combined into the initial release
