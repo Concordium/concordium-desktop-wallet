@@ -19,9 +19,9 @@ from dateutil.relativedelta import relativedelta
 from base58 import b58decode_check
 
 num_releases = 10
-initial_release_time = datetime.fromisoformat("2022-07-26T14:00:00+01:00")
-first_rem_release_time = datetime.fromisoformat("2022-08-26T14:00:00+01:00")
-welcome_release_time = datetime.fromisoformat("2022-07-15T14:00:00+01:00")
+welcome_release_time = datetime.fromisoformat("2021-08-15T14:00:00+01:00")
+initial_release_time = datetime.fromisoformat("2021-08-26T14:00:00+01:00")
+first_rem_release_time = datetime.fromisoformat("2021-09-26T14:00:00+01:00")
 csv_delimiter = ','
 thousands_sep = ','
 decimal_sep = '.'
@@ -32,8 +32,9 @@ assert initial_release_time < first_rem_release_time
 transaction_expiry = datetime.now() + relativedelta(hours =+ 2) 
 # If regular releases are before earliest_release_time, they get combined into one at that time.
 # earliest_release_time = 14:00 CET tomorrow.
+# This can be later than all release times, in which case all releases happen at that time.
 earliest_release_time = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00")) + relativedelta(days =+ 1)
-assert earliest_release_time < welcome_release_time and earliest_release_time < initial_release_time
+
 
 # Class for storing transfer amounts. The amounts are internally stored in microGTU
 class TransferAmount:
@@ -46,25 +47,26 @@ class TransferAmount:
 	# Creates a TransferAmount with amount microGTU
 	def __init__(self, amount: int) -> None:
 		if not self.__in_valid_range(amount):
-			raise ValueError(f"Amount not in valid range (0,{self.max_amount}]")
+			raise ValueError(f"Amount {amount} not in valid range (0,{self.max_amount}]")
 		self.__amount = amount
 
 	# Creates a TransferAmount from an amount string that represents an amount in GTU. 
 	# The string must valid, i.e., satisfy amount_regex or amount_regex_with_1000_sep.
 	@classmethod
-	def from_string(cls,amount_string:str, decimal_sep:str, thousands_sep: str) -> 'TransferAmount':
+	def from_string(cls, amount_string:str, decimal_sep:str, thousands_sep: str) -> 'TransferAmount':
 		#Convert the separators
 		translation_table = {ord(thousands_sep) : ',', ord(decimal_sep): '.'}
-		amount_org_string = amount_string	
+		amount_string = amount_string.strip()
+		amount_org_string = amount_string
 		#Check validity of amount string
 		if not bool(re.match(cls.amount_regex, amount_string)) and not bool(re.match(cls.amount_regex_with_1000_sep, amount_string)):
-			raise ValueError(f"Amount {amount_org_string} is not a valid amount string.")
+			raise ValueError(f"\"{amount_org_string}\" is not a valid amount string.")
 		amount_string = amount_string.replace(',', '')
 		#Convert to microGTU
 		try: 
 			amount = int(Decimal(amount_string) * 1000000)
 		except: #this should not happen
-			raise ValueError("Amount stringn {amount_org_string} could not be converted.")
+			raise ValueError("Amount string \"{amount_org_string}\" could not be converted.")
 		return TransferAmount(amount)
 
 	# String representation of a TransferAmount
@@ -145,41 +147,50 @@ class ScheduledPreProposal:
 			json.dump(self.__data, outFile, indent=4)
 
 
-def add_releases(pre_proposal,inital_amount_str:str,rem_amount_string:str,release_times,skipped_releases):
-	#Convert amount strings to proper amounts
-	try:	
-		initial_amount = TransferAmount.from_string(inital_amount_str, decimal_sep, thousands_sep)
-		rem_amount = TransferAmount.from_string(rem_amount_string, decimal_sep, thousands_sep)
-	except ValueError as error:
-		print(f"Error: {error}")
-		sys.exit(2)
-	if len(release_times) == 1:
-		# if there is only one release, amount is sum of initial and remaining amount
-		pre_proposal.add_release(initial_amount + rem_amount, release_times[0])
-	else:
-		# if there are more releases, first compute amounts according to original schedule (i.e., assume no skipped releases)
-		# in each remaining step give fraction of amount, rounded down
-		# potentially give more in last release				
-		#Split amount into list
-		amount_list = rem_amount.split_amount(num_releases-1)
-		#Add up skipped releases
-		first_release = initial_amount
-		for i in range(skipped_releases):
-			first_release  = first_release + amount_list[i]
-			pre_proposal.add_release(first_release, release_times[0])
-		#Add remaining releases
-		for i in range(skipped_releases, len(amount_list)) :
-			pre_proposal.add_release(amount_list[i], release_times[i-skipped_releases])
-					
-def add_welcome_release(pre_proposal,amount_str:str):
-	#Convert amount string to proper amount
-	try:
-		amount = TransferAmount.from_string(amount_str, decimal_sep, thousands_sep)
-	except ValueError as error:
-		print(f"Error: {error}")
-		sys.exit(2)
-	#Add single release to pre proposal
-	pre_proposal.add_release(amount, welcome_release_time)
+# Read csv file and return a list with one entry for each row in csv.
+def csv_to_list(filename:str, is_welcome:bool, decimal_sep:str, thousands_sep:str):
+	result = []
+
+	with open(filename, newline='', encoding='utf-8-sig') as csvfile:
+		reader = csv.reader(csvfile, delimiter=csv_delimiter)
+		for row_number,row_data in enumerate(reader, start=1): # start counting rows with 1 for error messages
+			# Ensure we have the right number of columns
+			if not is_welcome and len(row_data) != 4:
+				raise ValueError(f"Incorrect file format. Each row must contains exactly 4 entires. Row {row_number} contains {len(row_data)}.")
+			elif is_welcome and len(row_data) != 3:
+				raise ValueError(f"Incorrect file format. Each row must contains exactly 3 entires. Row {row_number} contains {len(row_data)}.")
+			
+			# Read sender and receiver address
+			senderAddress = row_data[0]
+			try:
+				b58decode_check(senderAddress)
+			except:
+				raise ValueError(f"Invalid sender address \"{senderAddress}\" in row {row_number}.")
+			receiverAddress = row_data[1]
+			try:
+				b58decode_check(receiverAddress)
+			except:
+				raise ValueError(f"Invalid receiver address \"{receiverAddress}\" in row {row_number}.")
+			
+			# Read amounts
+			if is_welcome:
+				try:
+					amount = TransferAmount.from_string(row_data[2], decimal_sep, thousands_sep)
+				except ValueError as error:
+					raise ValueError(f"In row {row_number}: {error}")
+
+				result.append([senderAddress, receiverAddress, amount])
+			else:
+				try:
+					initial_amount = TransferAmount.from_string(row_data[2], decimal_sep, thousands_sep)
+					rem_amount = TransferAmount.from_string(row_data[3], decimal_sep, thousands_sep)
+				except ValueError as error:
+					raise ValueError(f"In row {row_number}: {error}")
+
+				result.append([senderAddress, receiverAddress, initial_amount, rem_amount])
+
+	return result
+
 
 # Main function
 def main():
@@ -206,74 +217,70 @@ def main():
 	#Output files contain the csv_input_file name 
 	json_output_prefix = "pre-proposal_" + os.path.splitext(os.path.basename(csv_input_file))[0] + "_"
 
-	# Build release schedule for normal transfers
-	# Normal schedule consists of num_releases, with first one at initial_release_time,
-	# and the remaining ones one month after each other, starting with first_rem_release_time.
-	#
-	# If the transfer is delayed, some realeases can be in the past. In that case,
-	# combine all releases before earliest_release_time into one release at that time.
-	if not is_welcome:
-		release_times = []
-		
-		if initial_release_time >= earliest_release_time:
-			release_times.append(initial_release_time)
-		else:
-			release_times.append(earliest_release_time)
+
+	# Build release schedule
+	if is_welcome:
+		# Release schedule for welcome transfer is just single date
+		release_times = [max(welcome_release_time, earliest_release_time)]
+	else:
+		# Normal schedule consists of num_releases, with first one at initial_release_time,
+		# and the remaining ones one month after each other, starting with first_rem_release_time.
+		#
+		# If the transfer is delayed, some realeases can be in the past. In that case,
+		# combine all releases before earliest_release_time into one release at that time.
+		release_times = [max(initial_release_time, earliest_release_time)]
 
 		for i in range(num_releases - 1):
 			# remaining realeses are i month after first remaining release
 			planned_release_time = first_rem_release_time + relativedelta(months =+ i)
 
-		# Only add release if not before earliest_release_time.
-		# Note that earliest_release_time will already be in list since initial_release_time < first_rem_release_time.
+			# Only add release if not before earliest_release_time.
+			# Note that earliest_release_time will already be in list since initial_release_time < first_rem_release_time.
 			if planned_release_time >= earliest_release_time:
 				release_times.append(planned_release_time)
 	
 		skipped_releases = num_releases - len(release_times) # number of releases to be combined into the initial release
-
+	
 	# read csv file
 	try:
-		with open(csv_input_file, newline='', encoding='utf-8-sig') as csvfile:
-			reader = csv.reader(csvfile, delimiter=csv_delimiter)
-			for row_number,row_data in enumerate(reader):
-				#Ensure we have the right number of columns
-				if not is_welcome and len(row_data) != 4:
-					print(f"Error: Incorrect file format. Each row must contains exactly 4 entires. Row {row_number+1} contains {len(row_data)}.")
-					sys.exit(2)
-				elif is_welcome and len(row_data) != 3:
-					print(f"Error: Incorrect file format. Each row must contains exactly 3 entires. Row {row_number+1} contains {len(row_data)}.")
-					sys.exit(2)
-				#Read sender and receiver address
-				senderAddress = row_data[0]
-				try:
-					b58decode_check(senderAddress)
-				except:
-					print(f"Encountered an invalid sender address: \"{senderAddress}\" at row {row_number+1}.")
-					sys.exit(2)
-				receiverAddress = row_data[1]
-				try:
-					b58decode_check(receiverAddress)
-				except:
-					print(f"Encountered an invalid receiver address: \"{receiverAddress}\" at row {row_number+1}.")
-					sys.exit(2)	
-				#Generate pre schedule proposal
-				pre_proposal = ScheduledPreProposal(senderAddress, receiverAddress, transaction_expiry)		
-				#Add releases
-				if is_welcome:
-					add_welcome_release(pre_proposal,row_data[2])
-				else:
-					add_releases(pre_proposal,row_data[2],row_data[3],release_times,skipped_releases)
-				#Write json file
-				out_file_name = json_output_prefix + str(row_number+1).zfill(3) + ".json"
-				try:
-					pre_proposal.write_json(out_file_name)
-				except IOError:
-					print(f"Error writing file \"{out_file_name}\".")
-					sys.exit(3)
+		transfers = csv_to_list(csv_input_file, is_welcome, decimal_sep, thousands_sep)
+
 	except IOError as e:
 		print(f"Error reading file \"{csv_input_file}\": {e}")
 		sys.exit(3)
-	print(f"Successfully generated {row_number+1} proposals.")
+	except ValueError as e:
+		print(f"Error: {e}")
+		sys.exit(2)
+
+	# process all transfers in list
+	for transfer_number, transfer in enumerate(transfers, start=1):
+		pre_proposal = ScheduledPreProposal(transfer[0], transfer[1], transaction_expiry)
+
+		if is_welcome:
+			# welcome transfer only has one amount
+			amounts = [transfer[2]]
+		else:
+			# regular transfer has first initial amount, then the remaining amount split into num_releases-1 releases
+			regular_amounts = [transfer[2], *transfer[3].split_amount(num_releases-1)]
+
+			# add all skipped amounts into initial amount and put remaining ones after that in list
+			initial_amount = sum(regular_amounts[1:(skipped_releases+1)], regular_amounts[0])
+			amounts = [initial_amount, *regular_amounts[skipped_releases+1:]]
+
+		# add all releases
+		for i in range(len(release_times)):
+			pre_proposal.add_release(amounts[i], release_times[i])
+
+		# Write json file
+		out_file_name = json_output_prefix + str(transfer_number).zfill(3) + ".json"
+		try:
+			pre_proposal.write_json(out_file_name)
+		except IOError:
+			print(f"Error writing file \"{out_file_name}\".")
+			sys.exit(3)
+
+
+	print(f"Successfully generated {len(transfers)} proposals.")
 
 if __name__ == "__main__":
 	main()
