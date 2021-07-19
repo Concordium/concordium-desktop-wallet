@@ -12,7 +12,7 @@ extern "C" {
     fn log(s: &str);
 }
 use crypto_common::{types::{KeyIndex, Amount, TransactionTime}, *};
-use encrypted_transfers::types::{AggregatedDecryptedAmount, EncryptedAmount};
+use encrypted_transfers::types::{AggregatedDecryptedAmount, EncryptedAmount, EncryptedAmountAggIndex};
 use elgamal::BabyStepGiantStep;
 use dodis_yampolskiy_prf::secret as prf;
 use hex::FromHex;
@@ -26,8 +26,7 @@ use random_oracle::RandomOracle;
 use sha2::{Digest, Sha256};
 
 use rand::thread_rng;
-
-use ::failure::Fallible;
+use anyhow::{Result, anyhow, bail, ensure};
 use id::{
     account_holder::{build_pub_info_for_ip, generate_pio, create_unsigned_credential},
     secret_sharing::Threshold,
@@ -40,7 +39,7 @@ pub fn build_pub_info_for_ip_aux(
     input: &str,
     id_cred_sec_seed: &str,
     prf_key_seed: &str,
-) -> Fallible<String> {
+) -> Result<String> {
     let v: SerdeValue = from_str(input)?;
 
     let global_context: GlobalContext<ExampleCurve> = try_get(&v, "global")?;
@@ -56,7 +55,7 @@ pub fn build_pub_info_for_ip_aux(
     let pub_info_for_ip =
         match build_pub_info_for_ip(&global_context, &id_cred_sec, &prf_key, &initial_acc_data) {
             Some(x) => x,
-            None => return Err(format_err!("failed building pub_info_for_ip.")),
+            None => return Err(anyhow!("failed building pub_info_for_ip.")),
         };
 
     let response = json!(pub_info_for_ip);
@@ -68,13 +67,13 @@ pub fn create_id_request_aux(
     signature: &str,
     id_cred_sec_seed: &str,
     prf_key_seed: &str,
-) -> Fallible<String> {
+) -> Result<String> {
     let v: SerdeValue = from_str(input)?;
 
     let ip_info: IpInfo<Bls12> = try_get(&v, "ipInfo")?;
     let global_context: GlobalContext<ExampleCurve> = try_get(&v, "global")?;
     let ars_infos: BTreeMap<ArIdentity, ArInfo<ExampleCurve>> = try_get(&v, "arsInfos")?;
-    let context = IPContext::new(&ip_info, &ars_infos, &global_context);
+    let context = IpContext::new(&ip_info, &ars_infos, &global_context);
 
     // FIXME: IP defined threshold
     let threshold = {
@@ -121,7 +120,7 @@ pub fn create_id_request_aux(
 
 pub fn generate_unsigned_credential_aux(
     input: &str
-) -> Fallible<String> {
+) -> Result<String> {
     let v: SerdeValue = from_str(input)?;
     let ip_info: IpInfo<Bls12> = try_get(&v, "ipInfo")?;
 
@@ -137,7 +136,7 @@ pub fn generate_unsigned_credential_aux(
     let cred_num: u8 = try_get(&v, "credentialNumber")?;
 
     let public_keys: Vec<VerifyKey> = try_get(&v, "publicKeys")?;
-    let cred_key_info = CredentialPublicKeys { //This is assumed to be an new account TODO: handle existing account
+    let cred_key_info = CredentialPublicKeys { // This is assumed to be an new account TODO: handle existing account
         keys: build_key_map(&public_keys),
         threshold: try_get(&v, "threshold")?,
     };
@@ -182,14 +181,14 @@ pub fn generate_unsigned_credential_aux(
         _phantom: Default::default(),
     };
 
-    let context = IPContext::new(&ip_info, &ars_infos, &global_context);
+    let context = IpContext::new(&ip_info, &ars_infos, &global_context);
 
     let address: Option<AccountAddress> = match try_get(&v, "address") {
         Ok(x) => Some(x),
         Err(_) => None
     };
 
-    let cdi = create_unsigned_credential(
+    let (cdi, rand) = create_unsigned_credential(
         context,
         &id_object,
         &id_use_data,
@@ -199,7 +198,7 @@ pub fn generate_unsigned_credential_aux(
         address.as_ref()
     )?;
 
-    let response = json!(cdi);
+    let response = json!({"cdi": cdi, "randomness": rand});
 
     Ok(response.to_string())
 }
@@ -207,7 +206,7 @@ pub fn generate_unsigned_credential_aux(
 pub fn get_credential_deployment_info_aux(
     signature: &str,
     unsigned_info: &str,
-) -> Fallible<String> {
+) -> Result<String> {
     console_error_panic_hook::set_once();
     let v: SerdeValue = from_str(unsigned_info)?;
     let values: CredentialDeploymentValues<ExampleCurve, AttributeKind> = from_str(unsigned_info)?;
@@ -244,7 +243,7 @@ pub fn get_credential_deployment_details_aux(
     signature: &str,
     unsigned_info: &str,
     expiry: u64,
-) -> Fallible<String> {
+) -> Result<String> {
     console_error_panic_hook::set_once();
     let v: SerdeValue = from_str(unsigned_info)?;
     let values: CredentialDeploymentValues<ExampleCurve, AttributeKind> = from_str(unsigned_info)?;
@@ -308,7 +307,7 @@ pub fn get_credential_deployment_details_aux(
 
 pub fn decrypt_amounts_aux(
     input: &str,
-) -> Fallible<String> {
+) -> Result<String> {
     let v: SerdeValue = from_str(input)?;
     let encrypted_amounts: Vec<EncryptedAmount<ExampleCurve>> = try_get(&v, "encryptedAmounts")?;
 
@@ -341,7 +340,7 @@ pub fn decrypt_amounts_aux(
 
 pub fn create_sec_to_pub_aux(
     input: &str,
-) -> Fallible<String> {
+) -> Result<String> {
     let v: SerdeValue = from_str(input)?;
 
     let prf_key_string: String = try_get(&v, "prfKey")?;
@@ -360,7 +359,7 @@ pub fn create_sec_to_pub_aux(
 
     let incoming_amounts: Vec<EncryptedAmount<ExampleCurve>> = try_get(&v, "incomingAmounts")?;
     let self_amount: EncryptedAmount<ExampleCurve> = try_get(&v, "encryptedSelfAmount")?;
-    let agg_index: u64 = try_get(&v, "aggIndex")?;
+    let agg_index: EncryptedAmountAggIndex = try_get(&v, "aggIndex")?;
     let to_transfer: Amount = try_get(&v, "amount")?;
 
     let input_amount = incoming_amounts.iter().fold(self_amount, |acc, amount| encrypted_transfers::aggregate(&acc,amount));
@@ -412,7 +411,7 @@ pub fn create_sec_to_pub_aux(
 
 pub fn create_pub_to_sec_aux(
     input: &str,
-) -> Fallible<String> {
+) -> Result<String> {
     let v: SerdeValue = from_str(input)?;
 
     let prf_key_string: String = try_get(&v, "prfKey")?;
@@ -458,7 +457,7 @@ pub fn create_pub_to_sec_aux(
 
 pub fn create_encrypted_transfer_aux(
     input: &str,
-) -> Fallible<String> {
+) -> Result<String> {
     let v: SerdeValue = from_str(input)?;
 
     let prf_key_string: String = try_get(&v, "prfKey")?;
@@ -479,7 +478,7 @@ pub fn create_encrypted_transfer_aux(
 
     let incoming_amounts: Vec<EncryptedAmount<ExampleCurve>> = try_get(&v, "incomingAmounts")?;
     let self_amount: EncryptedAmount<ExampleCurve> = try_get(&v, "encryptedSelfAmount")?;
-    let agg_index: u64 = try_get(&v, "aggIndex")?;
+    let agg_index: EncryptedAmountAggIndex = try_get(&v, "aggIndex")?;
     let to_transfer: Amount = try_get(&v, "amount")?;
 
     let input_amount = incoming_amounts.iter().fold(self_amount, |acc, amount| encrypted_transfers::aggregate(&acc,amount));
@@ -588,7 +587,7 @@ pub fn generate_baker_keys(sender: &AccountAddress, key_variant: BakerKeyVariant
     }
 }
 
-pub fn get_address_from_cred_id(cred_id: &str) -> Fallible<String> {
+pub fn get_address_from_cred_id(cred_id: &str) -> Result<String> {
     let cred_id_parsed: ExampleCurve = base16_decode_string(cred_id)?;
     Ok(AccountAddress::new(&cred_id_parsed).to_string())
 }

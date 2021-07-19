@@ -44,7 +44,8 @@ export async function confirmIdentityAndInitialAccount(
                 0,
                 identityId,
                 0, // credentialIndex = 0 on original
-                parsedCredential
+                parsedCredential,
+                undefined // There are no commitments (and therefore randomness) for initial accounts.
             );
             addToAddressBook(dispatch, {
                 name: accountName,

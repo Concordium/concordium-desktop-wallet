@@ -10,7 +10,7 @@ type ExampleCurve = G1;
 
 use rand::thread_rng;
 
-use ::failure::Fallible;
+use anyhow::{Result, bail, anyhow};
 use id::{
     account_holder::*,
     secret_sharing::Threshold,
@@ -41,7 +41,7 @@ pub fn create_genesis_account (
     input: &str,
     id_cred_sec_seed: &str,
     prf_key_seed: &str,
-) -> Fallible<String> {
+) -> Result<String> {
     let v: SerdeValue = from_str(input)?;
 
     let mut csprng = thread_rng();
@@ -88,7 +88,7 @@ pub fn create_genesis_account (
     let acc_data =
         match build_pub_info_for_ip(&global_context, &id_cred_sec, &prf_key, &initial_acc_data) {
             Some(x) => x,
-            None => return Err(format_err!("failed building pub_info_for_ip.")),
+            None => return Err(anyhow!("failed building pub_info_for_ip.")),
         };
 
     let ah_info = CredentialHolderInfo::<ExampleCurve> {
