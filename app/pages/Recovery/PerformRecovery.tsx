@@ -52,7 +52,7 @@ interface ShowStop {
 }
 
 /**
- * Column, which performs the recovery;
+ * Column, which performs the recovery.
  */
 export default function PerformRecovery({
     setRecoveredAccounts,
@@ -222,7 +222,7 @@ export default function PerformRecovery({
             </p>
             <div className={styles.ledgerDiv}>
                 <SimpleLedger
-                    className={styles.card}
+                    className={styles.ledger}
                     ledgerCall={performRecovery}
                 />
             </div>

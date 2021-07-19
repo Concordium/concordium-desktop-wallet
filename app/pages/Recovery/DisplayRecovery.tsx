@@ -17,7 +17,7 @@ interface Props {
 }
 
 /**
- * Column, which displays the recovered accounts and the current status;
+ * Column, which displays the recovered accounts and the current status.
  */
 export default function DisplayRecovery({ status, recoveredAccounts }: Props) {
     const dispatch = useDispatch();
@@ -34,7 +34,7 @@ export default function DisplayRecovery({ status, recoveredAccounts }: Props) {
     }, [recoveredAccounts.length]);
 
     return (
-        <div className={styles.messages}>
+        <div className={styles.recoveredDiv}>
             {recoveredAccounts.map((accounts, index) => (
                 <>
                     <p className="bodyEmphasized textLeft">Index {index}:</p>

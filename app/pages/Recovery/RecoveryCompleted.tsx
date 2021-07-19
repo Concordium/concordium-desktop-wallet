@@ -7,15 +7,12 @@ import { Account, StateUpdate } from '~/utils/types';
 
 import styles from './Recovery.module.scss';
 
-/**
- * Displays the messages after recovery has been completed
- */
 interface Props {
     setRecoveredAccounts: StateUpdate<Account[][]>;
 }
 
 /**
- * Column, which is displayed after the recovery has finished;
+ * Column, which is displayed after the recovery has finished.
  */
 export default function RecoveryCompleted({ setRecoveredAccounts }: Props) {
     const dispatch = useDispatch();

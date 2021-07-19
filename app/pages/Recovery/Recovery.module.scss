@@ -1,9 +1,4 @@
-.card {
-    flex-grow: 1;
-    max-width: 428px;
-}
-
-.messages {
+.recoveredDiv {
     margin: auto auto;
     display: flex;
     flex-direction: column;
@@ -12,17 +7,9 @@
     max-width: 428px;
 }
 
-.messagesTitleCompleted,
-.messagesTitle {
-    text-align: center;
-}
-
-.messagesTitleCompleted:first-child {
-    margin-top: auto;
-}
-
-.messages,
-.ledgerDiv {
+.recoveredDiv,
+.ledgerDiv,
+.ledger {
     flex-grow: 1;
 }
 
@@ -32,7 +19,11 @@
     justify-content: center;
 }
 
-.introductionButtom,
+.ledger {
+    max-width: 428px;
+}
+
+.introductionButton,
 .topButton,
 .button {
     width: 400px;
@@ -58,5 +49,4 @@
 
 .introductionButton {
     margin: auto auto 0;
-    width: 400px;
 }
