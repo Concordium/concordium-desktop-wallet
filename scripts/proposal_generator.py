@@ -14,25 +14,20 @@ import re
 import argparse
 from decimal import *
 from datetime import datetime,date,time
-from typing import Any, List, Tuple
+from typing import Any, Dict, List, Tuple
 from dateutil.relativedelta import relativedelta
 from base58 import b58decode_check
 
-num_releases = 10
-welcome_release_time = datetime.fromisoformat("2021-08-15T14:00:00+01:00")
-initial_release_time = datetime.fromisoformat("2021-08-26T14:00:00+01:00")
-first_rem_release_time = datetime.fromisoformat("2021-09-26T14:00:00+01:00") #Must be after the initial release
-csv_delimiter = ','
-thousands_sep = ','
-decimal_sep = '.'
-assert len(csv_delimiter) == 1 and len(thousands_sep) == 1 and len(decimal_sep) == 1 and thousands_sep != decimal_sep
-
-# proposals expire 2 hours from now
-transaction_expiry = datetime.now() + relativedelta(hours =+ 2) 
-# If regular releases are before earliest_release_time, they get combined into one at that time.
-# earliest_release_time = 14:00 CET tomorrow.
-# This can be later than all release times, in which case all releases happen at that time.
-earliest_release_time = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00")) + relativedelta(days =+ 1)
+def get_config() -> Dict[str, Any]:
+	return {
+		"num_releases" : 10,
+		"welcome_release_time" : datetime.fromisoformat("2021-08-15T14:00:00+01:00"),
+		"initial_release_time" : datetime.fromisoformat("2021-08-26T14:00:00+01:00"),
+		"first_rem_release_time" : datetime.fromisoformat("2021-09-26T14:00:00+01:00"), #Must be after the initial release
+		"csv_delimiter" : ',',
+		"thousands_sep" : ',',
+		"decimal_sep" : '.'
+	}
 
 
 # Class for storing transfer amounts. The amounts are internally stored in microGTU
@@ -148,6 +143,10 @@ class ScheduledPreProposal:
 
 # Read csv file and return a list with one entry for each row in csv.
 def csv_to_list(filename:str, is_welcome:bool, decimal_sep:str, thousands_sep:str, csv_delimiter:str) -> List[Any]:
+	if len(csv_delimiter) != 1 or len(thousands_sep) != 1 or len(decimal_sep) != 1 or thousands_sep == decimal_sep:
+		raise ValueError(f"Invalid delimiters. Note that all delimiters must be a single character "\
+			"and thousands_sep must be different from decimal_sep.")
+	
 	result = []
 
 	with open(filename, newline='', encoding='utf-8-sig') as csvfile:
@@ -191,35 +190,37 @@ def csv_to_list(filename:str, is_welcome:bool, decimal_sep:str, thousands_sep:st
 	return result
 
 # Build the release schedule
+# Normal schedule consists of num_releases, with first one at initial_release_time,
+# and the remaining ones one month after each other, starting with first_rem_release_time.
+#
+# If the transfer is delayed, some realeases can be in the past. In that case,
+# combine all releases before earliest_release_time into one release at that time.
+#
 # Returns a tuple, where the first element is a list of times of all releases,
-# and the second element is the number of skipped releases.
+# and the second element is the number of skipped releases, i.e.,
+# the number of releases to be combined into the initial release.
 def build_release_schedule(
-	i_release_time:datetime,
-	f_rem_release_time:datetime,
-	e_release_time:datetime,
+	initial_release_time:datetime,
+	first_rem_release_time:datetime,
+	earliest_release_time:datetime,
 	num_releases:int
 	) -> Tuple[List[datetime],int]:
-	if i_release_time > f_rem_release_time:
+	if initial_release_time > first_rem_release_time:
 		raise ValueError("Initial release must be before the remaining ones")
 	
-	# Normal schedule consists of num_releases, with first one at i_release_time,
-	# and the remaining ones one month after each other, starting with f_rem_release_time.
-	#
-	# If the transfer is delayed, some realeases can be in the past. In that case,
-	# combine all releases before e_release_time into one release at that time.
-	release_times = [max(i_release_time, e_release_time)]
+	# first release at initial_release_time, but not before earliest_release_time
+	release_times = [max(initial_release_time, earliest_release_time)]
 
 	for i in range(num_releases - 1):
 		# remaining realeses are i month after first remaining release
-		planned_release_time = f_rem_release_time + relativedelta(months =+ i)
+		planned_release_time = first_rem_release_time + relativedelta(months =+ i)
 
-		# Only add release if after e_release_time.
-		# Note that in this case, e_release_time is already in list since i_release_time < f_rem_release_time.
-		if planned_release_time > e_release_time:
+		# Only add release if after earliest_release_time.
+		if planned_release_time > earliest_release_time:
 			release_times.append(planned_release_time)
 
-	skipped_releases = num_releases - len(release_times) # number of releases to be combined into the initial release
-	return (release_times,skipped_releases)
+	skipped_releases = num_releases - len(release_times)
+	return (release_times, skipped_releases)
 
 #Creates schedule proposal from a transfer and write it into a json file
 def transfer_to_json(
@@ -258,6 +259,22 @@ def transfer_to_json(
 
 # Main function
 def main():
+	config = get_config()
+	num_releases = config["num_releases"]
+	welcome_release_time = config["welcome_release_time"]
+	initial_release_time = config["initial_release_time"]
+	first_rem_release_time = config["first_rem_release_time"]
+	csv_delimiter = config["csv_delimiter"]
+	thousands_sep = config["thousands_sep"]
+	decimal_sep = config["decimal_sep"]
+
+	# proposals expire 2 hours from now
+	transaction_expiry = datetime.now() + relativedelta(hours =+ 2) 
+	# If regular releases are before earliest_release_time, they get combined into one at that time.
+	# earliest_release_time = 14:00 CET tomorrow.
+	# This can be later than all release times, in which case all releases happen at that time.
+	earliest_release_time = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00")) + relativedelta(days =+ 1)
+
 	parser = argparse.ArgumentParser(description="Generate pre-proposals from the csv file \"input_csv\".\n"\
 		"For each row in the csv file, a json file with the corresponding pre-proposal is generated in the same folder.\n"
 		"\n"
