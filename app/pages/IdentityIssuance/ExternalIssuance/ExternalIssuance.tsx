@@ -86,6 +86,11 @@ async function generateIdentity(
             iframeRef
         );
 
+        // TODO This code still has an issue if the application fails before
+        // inserting the pending identity and account, as the identity might exist
+        // at the identity provider at this point. This requires a change to the
+        // identity providers, and cannot be fixed before that has been implemented.
+
         const identity: Partial<Identity> = {
             identityNumber,
             name: identityName,

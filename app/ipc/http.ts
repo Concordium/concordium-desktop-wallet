@@ -41,7 +41,7 @@ async function httpsGet(urlString: string, params: Record<string, string>) {
             validateStatus(status: number) {
                 // We also want to accept a 302 redirect, as that is used by the
                 // identity provider flow
-                return status >= 200 && status <= 302; // Reject only if the status code is greater than 302
+                return status >= 200 && status <= 302;
             },
         }
     );
