@@ -10,8 +10,11 @@ import { getAccountsOfIdentity } from '../database/AccountDao';
 import { loadIdentities } from '../features/IdentitySlice';
 import { loadAccounts } from '../features/AccountSlice';
 import { isInitialAccount } from './accountHelpers';
-import { getAllIdentities } from '../database/IdentityDao';
-import ipcCommands from '../constants/ipcCommands.json';
+import {
+    confirmIdentity,
+    getAllIdentities,
+    rejectIdentityAndDeleteInitialAccount,
+} from '../database/IdentityDao';
 import { loadCredentials } from '~/features/CredentialSlice';
 import { loadAddressBook } from '~/features/AddressBookSlice';
 
@@ -34,10 +37,7 @@ export async function confirmIdentityAndInitialAccount(
     // The identity provider failed the identity creation request. Clean up the
     // identity and account in the database and refresh the state.
     if (idObjectResponse.error) {
-        await window.ipcRenderer.invoke(
-            ipcCommands.database.identity.rejectIdentityAndDeleteInitialAccount,
-            identityId
-        );
+        await rejectIdentityAndDeleteInitialAccount(identityId);
         await loadIdentities(dispatch);
         await loadAccounts(dispatch);
         return;
@@ -68,10 +68,7 @@ export async function confirmIdentityAndInitialAccount(
         readOnly: true,
     };
 
-    // Transactionally update the identity, account and insert the
-    // credential and address book entry.
-    await window.ipcRenderer.invoke(
-        ipcCommands.database.identity.confirmIdentity,
+    await confirmIdentity(
         identityId,
         JSON.stringify(token.identityObject),
         accountAddress,

@@ -25,6 +25,7 @@ import { getAddressFromCredentialId } from '~/utils/rustInterface';
 import generalStyles from '../IdentityIssuance.module.scss';
 import styles from './ExternalIssuance.module.scss';
 import { getInitialEncryptedAmount } from '~/utils/accountHelpers';
+import { insertPendingIdentityAndInitialAccount } from '~/database/IdentityDao';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
@@ -113,14 +114,10 @@ async function generateIdentity(
             deploymentTransactionId: undefined,
         };
 
-        // Insert the pending identity and account transactionally.
-        identityId = await window.ipcRenderer.invoke(
-            ipcCommands.database.identity
-                .insertPendingIdentityAndInitialAccount,
+        identityId = await insertPendingIdentityAndInitialAccount(
             identity,
             initialAccount
         );
-
         loadIdentities(dispatch);
         loadAccounts(dispatch);
     } catch (e) {
