@@ -157,11 +157,11 @@ async function recoverCredential(
 }
 
 /**
- * Attempts to recover credentials on an identity.
+ * Attempts to recover credentials on an existing identity.
  * @param prfKeySeed: Seed of the prfKey of the identity.
- * @param identityId: id of the identity
- * @param blockHash: block at which the function recover credentials
- * @param global: current global parameters
+ * @param identityId: id of the identity.
+ * @param blockHash: block at which the function recover credentials.
+ * @param global: current global parameters.
  * @param startingCredNumber: credentialNumber, from which to start attempting to recover credentials from.
  * @returns Returns an object containing the list of all recovered credentials and their accounts. The length of these lists are always the same, and each account matches the credential on the same index.
  */
@@ -197,6 +197,8 @@ export async function recoverCredentials(
 
 /**
  * Imports a list of accounts, but only non-duplicates.
+ * @param accounts: the accounts to be added.
+ * @param addressBook: the addressBook is used to check for duplicates.
  */
 export async function addAccounts(
     accounts: Account[],
@@ -222,9 +224,9 @@ export async function addAccounts(
 /**
  * Attempts to recover credentials on an identity.
  * @param prfKeySeed: Seed of the prfKey of the identity.
- * @param blockHash: block at which the function recover credentials
- * @param global: current global parameters
- * @param identityId: id of the identity
+ * @param blockHash: block at which the function recover credentials.
+ * @param global: current global parameters.
+ * @param identityId: id of the identity.
  * @param addressBook: the addressBook is used to check for duplicates when inserting new accounts.
  * @returns Returns the recovered accounts.
  */
@@ -255,12 +257,12 @@ export async function recoverFromIdentity(
 }
 
 /**
- * Attempts to recover credentials on an unused identityNumber .
+ * Attempts to recover credentials on an unused identityNumber.
  * @param prfKeySeed: Seed of the prfKey of the identity.
- * @param blockHash: block at which the function recover credentials
- * @param global: current global parameters
- * @param identityNumber: identityNumber of the current wallet to recover from
- * @param walletId: id of the wallet to recover from
+ * @param blockHash: block at which the function recover credentials.
+ * @param global: current global parameters.
+ * @param identityNumber: identityNumber of the current wallet to recover from.
+ * @param walletId: id of the wallet to recover from.
  * @param addressBook: the addressBook is used to check for duplicates when inserting new accounts.
  * @returns Returns the recovered accounts.
  */
@@ -278,9 +280,10 @@ export async function recoverNewIdentity(
         blockHash,
         global
     );
-    const addedCount = credentials.length;
 
-    if (addedCount) {
+    // If we have found any credentials, create an identity and add the credentials and accounts.
+    // N.B. It is sufficient to check credentials, because accounts are not found without credentials.
+    if (credentials.length) {
         const identityId = await createRecoveredIdentity(
             walletId,
             identityNumber

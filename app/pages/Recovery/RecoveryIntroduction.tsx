@@ -13,7 +13,7 @@ export default function RecoveryIntroduction() {
     const dispatch = useDispatch();
 
     return (
-        <div className="flexColumn justifyCenter mH40">
+        <div className={styles.introduction}>
             <h2>Account Recovery:</h2>
             <p>
                 You can recover your lost accounts using a Ledger device that

@@ -49,6 +49,14 @@
     height: 100%;
 }
 
+.introduction {
+    composes: flexColumn from global;
+    composes: justifyCenter from global;
+    composes: mH40 from global;
+    height: 100%;
+}
+
 .introductionButton {
     margin: auto auto 0;
+    width: 400px;
 }
