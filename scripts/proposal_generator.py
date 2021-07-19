@@ -159,16 +159,16 @@ def csv_to_list(filename:str, is_welcome:bool, decimal_sep:str, thousands_sep:st
 				raise ValueError(f"Incorrect file format. Each row must contains exactly 3 entires. Row {row_number} contains {len(row_data)}.")
 			
 			# Read sender and receiver address
-			senderAddress = row_data[0]
+			sender_address = row_data[0]
 			try:
-				b58decode_check(senderAddress)
+				b58decode_check(sender_address)
 			except:
-				raise ValueError(f"Invalid sender address \"{senderAddress}\" in row {row_number}.")
-			receiverAddress = row_data[1]
+				raise ValueError(f"Invalid sender address \"{sender_address}\" in row {row_number}.")
+			receiver_address = row_data[1]
 			try:
-				b58decode_check(receiverAddress)
+				b58decode_check(receiver_address)
 			except:
-				raise ValueError(f"Invalid receiver address \"{receiverAddress}\" in row {row_number}.")
+				raise ValueError(f"Invalid receiver address \"{receiver_address}\" in row {row_number}.")
 			
 			# Read amounts
 			if is_welcome:
@@ -177,15 +177,22 @@ def csv_to_list(filename:str, is_welcome:bool, decimal_sep:str, thousands_sep:st
 				except ValueError as error:
 					raise ValueError(f"In row {row_number}: {error}")
 
-				result.append([senderAddress, receiverAddress, amount])
+				result.append({"sender_address" : sender_address,
+					"receiver_address" : receiver_address,
+					"amount" : amount
+				})
 			else:
 				try:
 					initial_amount = TransferAmount.from_string(row_data[2], decimal_sep, thousands_sep)
-					rem_amount = TransferAmount.from_string(row_data[3], decimal_sep, thousands_sep)
+					remaining_amount = TransferAmount.from_string(row_data[3], decimal_sep, thousands_sep)
 				except ValueError as error:
 					raise ValueError(f"In row {row_number}: {error}")
 
-				result.append([senderAddress, receiverAddress, initial_amount, rem_amount])
+				result.append({"sender_address" : sender_address,
+					"receiver_address" : receiver_address,
+					"initial_amount" : initial_amount,
+					"remaining_amount" : remaining_amount
+				})
 
 	return result
 
@@ -317,12 +324,12 @@ def main():
 		
 		if is_welcome:
 			# welcome transfer only has one amount
-			amounts = [transfer[2]]
+			amounts = [transfer["amount"]]
 		else:
-			amounts = amounts_to_scheduled_list(transfer[2], transfer[3], num_releases, skipped_releases)
+			amounts = amounts_to_scheduled_list(transfer["initial_amount"], transfer["remaining_amount"], num_releases, skipped_releases)
 
 		# create pre-proposal and add all releases
-		pre_proposal = ScheduledPreProposal(transfer[0], transfer[1], transaction_expiry)
+		pre_proposal = ScheduledPreProposal(transfer["sender_address"], transfer["receiver_address"], transaction_expiry)
 		for i in range(len(release_times)):
 			pre_proposal.add_release(amounts[i], release_times[i])
 		
