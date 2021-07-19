@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
@@ -48,6 +48,7 @@ interface Props {
 }
 
 interface ShowStop {
+    emptyCount: number;
     postAction: (location?: string) => void;
 }
 
@@ -70,9 +71,10 @@ export default function PerformRecovery({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => setStatus(Status.initial), []);
 
-    function promptStop() {
+    function promptStop(emptyCount: number) {
         return new Promise((resolve) => {
             setShowStop({
+                emptyCount,
                 postAction: (location) => {
                     setShowStop(undefined);
                     resolve(Boolean(location));
@@ -111,9 +113,11 @@ export default function PerformRecovery({
             let emptyIndices = 0;
             let identityNumber = 0;
             while (!controller.isAborted) {
-                if (emptyIndices >= identitySpacesBetweenWarning) {
-                    const stopped = await promptStop();
-                    emptyIndices = 0;
+                if (
+                    emptyIndices > 0 &&
+                    emptyIndices % identitySpacesBetweenWarning === 0
+                ) {
+                    const stopped = await promptStop(emptyIndices);
                     if (stopped) {
                         break;
                     }
@@ -174,24 +178,27 @@ export default function PerformRecovery({
         }
     }
 
-    const description = (
-        <>
-            <p>
-                You have gone through {identitySpacesBetweenWarning} empty
-                indices in a row. Have you maybe found all your accounts?
-            </p>
-            <p className="bodyEmphasized">
-                You found {recoveredTotal} accounts in total.
-            </p>
-            <p>
-                If this is the amount of accounts you expected, you can stop the
-                process now.
-            </p>
-            <p>
-                if you expected more accounts, you can continue and look for
-                more.
-            </p>
-        </>
+    const description = useMemo(
+        () => (
+            <>
+                <p>
+                    You have gone through {showStop?.emptyCount} empty indices
+                    in a row. Have you maybe found all your accounts?
+                </p>
+                <p className="bodyEmphasized">
+                    You found {recoveredTotal} accounts in total.
+                </p>
+                <p>
+                    If this is the amount of accounts you expected, you can stop
+                    the process now.
+                </p>
+                <p>
+                    if you expected more accounts, you can continue and look for
+                    more.
+                </p>
+            </>
+        ),
+        [showStop?.emptyCount, recoveredTotal]
     );
 
     return (
