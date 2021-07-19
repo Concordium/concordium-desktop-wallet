@@ -9,6 +9,7 @@ import {
 } from '~/constants/databaseNames.json';
 import ipcCommands from '~/constants/ipcCommands.json';
 import {
+    Account,
     AccountStatus,
     AddressBookEntry,
     Identity,
@@ -49,6 +50,23 @@ async function rejectIdentityAndDeleteInitialAccount(identityId: number) {
             .where({ id: identityId })
             .update({ status: IdentityStatus.Rejected });
         await trx(accountsTable).where({ identityId, isInitial: 1 }).del();
+    });
+}
+
+async function addPendingIdentityAndInitialAccount(
+    identity: Partial<Identity>,
+    initialAccount: Omit<Account, 'identityId'>
+) {
+    return (await knex()).transaction(async (trx) => {
+        const identityId = (
+            await trx.table(identitiesTable).insert(identity)
+        )[0];
+        const initialAccountWithIdentityId = {
+            ...initialAccount,
+            identityId,
+        };
+        await trx.table(accountsTable).insert(initialAccountWithIdentityId);
+        return identityId;
     });
 }
 
@@ -137,6 +155,20 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
                 accountAddress,
                 credential,
                 addressBookEntry
+            );
+        }
+    );
+
+    ipcMain.handle(
+        ipcCommands.database.identity.insertPendingIdentityAndInitialAccount,
+        async (
+            _event,
+            identity: Partial<Identity>,
+            initialAccount: Omit<Account, 'identityId'>
+        ) => {
+            return addPendingIdentityAndInitialAccount(
+                identity,
+                initialAccount
             );
         }
     );

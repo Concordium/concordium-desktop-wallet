@@ -2,8 +2,8 @@ import React, { useState, useRef, RefObject, useLayoutEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Redirect, useLocation } from 'react-router';
-import { addPendingIdentity } from '~/features/IdentitySlice';
-import { addPendingAccount } from '~/features/AccountSlice';
+import { loadIdentities } from '~/features/IdentitySlice';
+import { loadAccounts } from '~/features/AccountSlice';
 import routes from '~/constants/routes.json';
 import {
     IdentityProvider,
@@ -11,6 +11,10 @@ import {
     SignedIdRequest,
     IdObjectRequest,
     Versioned,
+    Identity,
+    IdentityStatus,
+    AccountStatus,
+    Account,
 } from '~/utils/types';
 import { confirmIdentityAndInitialAccount } from '~/utils/IdentityStatusPoller';
 import Loading from '~/cross-app-components/Loading';
@@ -20,6 +24,7 @@ import { performIdObjectRequest } from '~/utils/httpRequests';
 import { getAddressFromCredentialId } from '~/utils/rustInterface';
 import generalStyles from '../IdentityIssuance.module.scss';
 import styles from './ExternalIssuance.module.scss';
+import { getInitialEncryptedAmount } from '~/utils/accountHelpers';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
@@ -70,36 +75,54 @@ async function generateIdentity(
     let identityObjectLocation;
     let identityId;
     try {
-        const IdentityProviderLocation = await performIdObjectRequest(
+        const identityProviderLocation = await performIdObjectRequest(
             provider.metadata.issuanceStart,
             redirectUri,
             idObjectRequest
         );
-        setLocation(IdentityProviderLocation);
+        setLocation(identityProviderLocation);
         identityObjectLocation = await handleIdentityProviderLocation(
             iframeRef
         );
 
-        // TODO: Handle the case where the app closes before we are able to save pendingIdentity
-        identityId = await addPendingIdentity(
+        const identity: Partial<Identity> = {
             identityNumber,
-            dispatch,
-            identityName,
-            identityObjectLocation,
-            provider,
+            name: identityName,
+            status: IdentityStatus.Pending,
+            codeUri: identityObjectLocation,
+            identityProvider: JSON.stringify(provider),
             randomness,
-            walletId
-        );
-        const address = await getAddressFromCredentialId(
+            walletId,
+        };
+
+        const accountAddress = await getAddressFromCredentialId(
             idObjectRequest.value.pubInfoForIp.regId
         );
-        await addPendingAccount(
-            dispatch,
-            accountName,
-            identityId,
-            true,
-            address
+
+        const initialAccount: Omit<Account, 'identityId'> = {
+            name: accountName,
+            status: AccountStatus.Pending,
+            address: accountAddress,
+            signatureThreshold: 1,
+            maxTransactionId: 0,
+            isInitial: true,
+            rewardFilter: '[]',
+            selfAmounts: getInitialEncryptedAmount(),
+            incomingAmounts: '[]',
+            totalDecrypted: '0',
+            deploymentTransactionId: undefined,
+        };
+
+        // Insert the pending identity and account transactionally.
+        identityId = await window.ipcRenderer.invoke(
+            ipcCommands.database.identity
+                .insertPendingIdentityAndInitialAccount,
+            identity,
+            initialAccount
         );
+
+        loadIdentities(dispatch);
+        loadAccounts(dispatch);
     } catch (e) {
         onError(`Failed to create identity due to ${e}`);
         // Rethrow this to avoid redirection;

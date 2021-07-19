@@ -63,7 +63,8 @@
             "update": "DB_IDENTITY_UPDATE",
             "getIdentitiesForWallet": "DB_IDENTITY_GET_FOR_WALLET",
             "rejectIdentityAndDeleteInitialAccount": "DB_IDENTITY_REJECT_IDENTITY_AND_INITIAL_ACCOUNT",
-            "confirmIdentity": "DB_IDENTITY_CONFIRM"
+            "confirmIdentity": "DB_IDENTITY_CONFIRM",
+            "insertPendingIdentityAndInitialAccount": "DB_IDENTITY_INSERT_PENDING_IDENTITY_AND_INITIAL_ACCOUNT"
         },
         "genesisAndGlobal": {
             "setValue": "DB_GENESIS_AND_GLOBAL_SET"
