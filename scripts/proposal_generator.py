@@ -14,7 +14,7 @@ import re
 import argparse
 from decimal import *
 from datetime import datetime,date,time
-from typing import Any, List
+from typing import Any, List, Tuple
 from dateutil.relativedelta import relativedelta
 from base58 import b58decode_check
 
@@ -148,7 +148,7 @@ class ScheduledPreProposal:
 
 
 # Read csv file and return a list with one entry for each row in csv.
-def csv_to_list(filename:str, is_welcome:bool, decimal_sep:str, thousands_sep:str):
+def csv_to_list(filename:str, is_welcome:bool, decimal_sep:str, thousands_sep:str) -> List[Any]:
 	result = []
 
 	with open(filename, newline='', encoding='utf-8-sig') as csvfile:
@@ -191,6 +191,61 @@ def csv_to_list(filename:str, is_welcome:bool, decimal_sep:str, thousands_sep:st
 
 	return result
 
+#Build the realase schedule using the global variables 
+def build_release_schedule(
+	is_welcome:bool,
+	welcome_release_time:datetime,
+	initial_release_time:datetime,
+	earliest_release_time:datetime,
+	num_releases:int
+	) -> Tuple[List[datetime],int]:
+	if is_welcome:
+		# Release schedule for welcome transfer is just single date
+		release_times = [max(welcome_release_time, earliest_release_time)]
+		return (release_times,0)
+	else:
+		# Normal schedule consists of num_releases, with first one at initial_release_time,
+		# and the remaining ones one month after each other, starting with first_rem_release_time.
+		#
+		# If the transfer is delayed, some realeases can be in the past. In that case,
+		# combine all releases before earliest_release_time into one release at that time.
+		release_times = [max(initial_release_time, earliest_release_time)]
+
+		for i in range(num_releases - 1):
+			# remaining realeses are i month after first remaining release
+			planned_release_time = first_rem_release_time + relativedelta(months =+ i)
+
+			# Only add release if after earliest_release_time.
+			# Note that in this case, earliest_release_time is already in list since initial_release_time < first_rem_release_time.
+			if planned_release_time > earliest_release_time:
+				release_times.append(planned_release_time)
+	
+		skipped_releases = num_releases - len(release_times) # number of releases to be combined into the initial release
+		return (release_times,skipped_releases)
+
+def transfer_to_json(
+	is_welcome:bool, 
+	transfer:List[Any], 
+	release_times:List[datetime], 
+	skipped_releases:int,
+	out_file_name:str
+	):
+		pre_proposal = ScheduledPreProposal(transfer[0], transfer[1], transaction_expiry)
+		if is_welcome:
+			# welcome transfer only has one amount
+			amounts = [transfer[2]]
+		else:
+			# regular transfer has first initial amount, then the remaining amount split into num_releases-1 releases
+			regular_amounts = [transfer[2], *transfer[3].split_amount(num_releases-1)]
+
+			# add all skipped amounts into initial amount and put remaining ones after that in list
+			initial_amount = sum(regular_amounts[1:(skipped_releases+1)], regular_amounts[0])
+			amounts = [initial_amount, *regular_amounts[skipped_releases+1:]]
+		# add all releases
+		for i in range(len(release_times)):
+			pre_proposal.add_release(amounts[i], release_times[i])
+		# Write json file
+		pre_proposal.write_json(out_file_name)
 
 # Main function
 def main():
@@ -217,34 +272,12 @@ def main():
 	#Output files contain the csv_input_file name 
 	json_output_prefix = "pre-proposal_" + os.path.splitext(os.path.basename(csv_input_file))[0] + "_"
 
-
 	# Build release schedule
-	if is_welcome:
-		# Release schedule for welcome transfer is just single date
-		release_times = [max(welcome_release_time, earliest_release_time)]
-	else:
-		# Normal schedule consists of num_releases, with first one at initial_release_time,
-		# and the remaining ones one month after each other, starting with first_rem_release_time.
-		#
-		# If the transfer is delayed, some realeases can be in the past. In that case,
-		# combine all releases before earliest_release_time into one release at that time.
-		release_times = [max(initial_release_time, earliest_release_time)]
-
-		for i in range(num_releases - 1):
-			# remaining realeses are i month after first remaining release
-			planned_release_time = first_rem_release_time + relativedelta(months =+ i)
-
-			# Only add release if after earliest_release_time.
-			# Note that in this case, earliest_release_time is already in list since initial_release_time < first_rem_release_time.
-			if planned_release_time > earliest_release_time:
-				release_times.append(planned_release_time)
-	
-		skipped_releases = num_releases - len(release_times) # number of releases to be combined into the initial release
+	(release_times,skipped_releases) = build_release_schedule(is_welcome,welcome_release_time,initial_release_time,earliest_release_time,num_releases)
 	
 	# read csv file
 	try:
 		transfers = csv_to_list(csv_input_file, is_welcome, decimal_sep, thousands_sep)
-
 	except IOError as e:
 		print(f"Error reading file \"{csv_input_file}\": {e}")
 		sys.exit(3)
@@ -254,32 +287,12 @@ def main():
 
 	# process all transfers in list
 	for transfer_number, transfer in enumerate(transfers, start=1):
-		pre_proposal = ScheduledPreProposal(transfer[0], transfer[1], transaction_expiry)
-
-		if is_welcome:
-			# welcome transfer only has one amount
-			amounts = [transfer[2]]
-		else:
-			# regular transfer has first initial amount, then the remaining amount split into num_releases-1 releases
-			regular_amounts = [transfer[2], *transfer[3].split_amount(num_releases-1)]
-
-			# add all skipped amounts into initial amount and put remaining ones after that in list
-			initial_amount = sum(regular_amounts[1:(skipped_releases+1)], regular_amounts[0])
-			amounts = [initial_amount, *regular_amounts[skipped_releases+1:]]
-
-		# add all releases
-		for i in range(len(release_times)):
-			pre_proposal.add_release(amounts[i], release_times[i])
-
-		# Write json file
-		out_file_name = json_output_prefix + str(transfer_number).zfill(3) + ".json"
 		try:
-			pre_proposal.write_json(out_file_name)
+			transfer_to_json(is_welcome,transfer,release_times,skipped_releases,json_output_prefix + str(transfer_number).zfill(3) + ".json")
 		except IOError:
 			print(f"Error writing file \"{out_file_name}\".")
 			sys.exit(3)
-
-
+			
 	print(f"Successfully generated {len(transfers)} proposals.")
 
 if __name__ == "__main__":
