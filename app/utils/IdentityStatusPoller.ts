@@ -12,9 +12,11 @@ import { getAllIdentities } from '../database/IdentityDao';
 import { insertNewCredential } from '../features/CredentialSlice';
 
 /**
- * Listens until, the identityProvider confirms the identity/initial account and returns the identityObject.
- * Then updates the identity/initial account in the database.
- * If not confirmed, the identity will be marked as rejected.
+ * Poll the identity provider for an identity until the identity and initial account either
+ * are confirmed as being created, or until the identity provider returns an error for the
+ * identity creation. If confirmed the identity object is received and used to update
+ * the identity and initial account in the database, and if failed then the identity is
+ * marked as rejected.
  */
 export async function confirmIdentityAndInitialAccount(
     dispatch: Dispatch,
@@ -23,40 +25,39 @@ export async function confirmIdentityAndInitialAccount(
     accountName: string,
     location: string
 ) {
-    let token;
-    try {
-        token = await getIdObject(location);
-        if (!token) {
-            await rejectIdentity(dispatch, identityId);
-            await removeInitialAccount(dispatch, identityId);
-        } else {
-            const { accountAddress } = token;
-            const credential = token.credential.value.credential.contents;
-            const parsedCredential = {
-                credId: credential.credId || credential.regId,
-                policy: credential.policy,
-            };
-            await confirmIdentity(dispatch, identityId, token.identityObject);
-            await confirmInitialAccount(dispatch, identityId, accountAddress);
-            insertNewCredential(
-                dispatch,
-                accountAddress,
-                0,
-                identityId,
-                0, // credentialIndex = 0 on original
-                parsedCredential
-            );
-            addToAddressBook(dispatch, {
-                name: accountName,
-                address: accountAddress,
-                note: `Initial account of identity: ${identityName}`,
-                readOnly: true,
-            });
-        }
-    } catch (err) {
+    const idObjectResponse = await getIdObject(location);
+
+    if (idObjectResponse.error) {
         await rejectIdentity(dispatch, identityId);
         await removeInitialAccount(dispatch, identityId);
+        return;
     }
+
+    // An identity object was received, so the identity has been created
+    // by the provider. Update the corresponding state in the database.
+    const { token } = idObjectResponse;
+    const { accountAddress } = token;
+    const credential = token.credential.value.credential.contents;
+    const parsedCredential = {
+        credId: credential.credId || credential.regId,
+        policy: credential.policy,
+    };
+    await confirmIdentity(dispatch, identityId, token.identityObject);
+    await confirmInitialAccount(dispatch, identityId, accountAddress);
+    insertNewCredential(
+        dispatch,
+        accountAddress,
+        0,
+        identityId,
+        0, // credentialIndex = 0 on original
+        parsedCredential
+    );
+    addToAddressBook(dispatch, {
+        name: accountName,
+        address: accountAddress,
+        note: `Initial account of identity: ${identityName}`,
+        readOnly: true,
+    });
 }
 
 async function findInitialAccount(identity: Identity) {

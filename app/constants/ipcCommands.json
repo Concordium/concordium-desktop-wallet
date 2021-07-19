@@ -10,7 +10,6 @@
     "grpcCall": "GRPC_CALL",
     "grpcNodeConsensusAndGlobal": "GRPC_NODE_CONSENSUS_GLOBAL",
     "openUrl": "OPEN_URL",
-    "createAxios": "CREATE_AXIOS",
     "httpGet": "HTTP_GET",
     "getTransactions": "WALLET_PROXY_GET_TRANSACTIONS",
     "getIdProviders": "WALLET_PROXY_GET_ID_PROVIDERS",
