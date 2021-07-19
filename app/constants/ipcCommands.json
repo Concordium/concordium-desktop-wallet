@@ -61,7 +61,9 @@
             "getNextIdentityNumber": "DB_IDENTITY_GET_NEXT_IDENTITY_NUMBER",
             "insert": "DB_IDENTITY_INSERT",
             "update": "DB_IDENTITY_UPDATE",
-            "getIdentitiesForWallet": "DB_IDENTITY_GET_FOR_WALLET"
+            "getIdentitiesForWallet": "DB_IDENTITY_GET_FOR_WALLET",
+            "rejectIdentityAndDeleteInitialAccount": "DB_IDENTITY_REJECT_IDENTITY_AND_INITIAL_ACCOUNT",
+            "confirmIdentity": "DB_IDENTITY_CONFIRM"
         },
         "genesisAndGlobal": {
             "setValue": "DB_GENESIS_AND_GLOBAL_SET"

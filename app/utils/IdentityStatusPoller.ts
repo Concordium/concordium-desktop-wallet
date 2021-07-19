@@ -1,15 +1,19 @@
-import { Dispatch, Identity, IdentityStatus } from './types';
+import {
+    AddressBookEntry,
+    Credential,
+    Dispatch,
+    Identity,
+    IdentityStatus,
+} from './types';
 import { getIdObject } from './httpRequests';
 import { getAccountsOfIdentity } from '../database/AccountDao';
-import { confirmIdentity, rejectIdentity } from '../features/IdentitySlice';
-import {
-    confirmInitialAccount,
-    removeInitialAccount,
-} from '../features/AccountSlice';
+import { loadIdentities } from '../features/IdentitySlice';
+import { loadAccounts } from '../features/AccountSlice';
 import { isInitialAccount } from './accountHelpers';
-import { addToAddressBook } from '../features/AddressBookSlice';
 import { getAllIdentities } from '../database/IdentityDao';
-import { insertNewCredential } from '../features/CredentialSlice';
+import ipcCommands from '../constants/ipcCommands.json';
+import { loadCredentials } from '~/features/CredentialSlice';
+import { loadAddressBook } from '~/features/AddressBookSlice';
 
 /**
  * Poll the identity provider for an identity until the identity and initial account either
@@ -24,12 +28,18 @@ export async function confirmIdentityAndInitialAccount(
     identityId: number,
     accountName: string,
     location: string
-) {
+): Promise<void> {
     const idObjectResponse = await getIdObject(location);
 
+    // The identity provider failed the identity creation request. Clean up the
+    // identity and account in the database and refresh the state.
     if (idObjectResponse.error) {
-        await rejectIdentity(dispatch, identityId);
-        await removeInitialAccount(dispatch, identityId);
+        await window.ipcRenderer.invoke(
+            ipcCommands.database.identity.rejectIdentityAndDeleteInitialAccount,
+            identityId
+        );
+        await loadIdentities(dispatch);
+        await loadAccounts(dispatch);
         return;
     }
 
@@ -42,22 +52,38 @@ export async function confirmIdentityAndInitialAccount(
         credId: credential.credId || credential.regId,
         policy: credential.policy,
     };
-    await confirmIdentity(dispatch, identityId, token.identityObject);
-    await confirmInitialAccount(dispatch, identityId, accountAddress);
-    insertNewCredential(
-        dispatch,
+
+    const credentialToStore: Credential = {
+        credId: parsedCredential.credId,
+        policy: JSON.stringify(parsedCredential.policy),
         accountAddress,
-        0,
+        credentialNumber: 0,
+        credentialIndex: 0,
         identityId,
-        0, // credentialIndex = 0 on original
-        parsedCredential
-    );
-    addToAddressBook(dispatch, {
+    };
+    const addressBookEntry: AddressBookEntry = {
         name: accountName,
         address: accountAddress,
         note: `Initial account of identity: ${identityName}`,
         readOnly: true,
-    });
+    };
+
+    // Transactionally update the identity, account and insert the
+    // credential and address book entry.
+    await window.ipcRenderer.invoke(
+        ipcCommands.database.identity.confirmIdentity,
+        identityId,
+        JSON.stringify(token.identityObject),
+        accountAddress,
+        credentialToStore,
+        addressBookEntry
+    );
+
+    // Update the state with the changes made in the database.
+    loadIdentities(dispatch);
+    loadAccounts(dispatch);
+    loadCredentials(dispatch);
+    loadAddressBook(dispatch);
 }
 
 async function findInitialAccount(identity: Identity) {
