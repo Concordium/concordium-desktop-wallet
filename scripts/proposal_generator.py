@@ -222,40 +222,26 @@ def build_release_schedule(
 	skipped_releases = num_releases - len(release_times)
 	return (release_times, skipped_releases)
 
-#Creates schedule proposal from a transfer and write it into a json file
-def transfer_to_json(
-	is_welcome:bool, 
-	transfer:List[Any], 
-	release_times:List[datetime], 
+# Returns list of amounts contructed by splitting remaining_amount into num_releases
+# and adding all skipped releases with initial_amount into the initial amount
+def amounts_to_scheduled_list(
+	initial_amount:TransferAmount,
+	remaining_amount:TransferAmount,
 	num_releases:int,
-	skipped_releases:int,
-	transaction_expiry:datetime,
-	out_file_name:str
+	skipped_releases:int
 	):
-		if not is_welcome and len(transfer) != 4:
-			raise ValueError(f"Incorrect length of transfer. Each transfer must contains exactly 4 entires. The transfer contains {len(transfer)} entries.")
-		elif is_welcome and len(transfer) != 3:
-			raise ValueError(f"Incorrect length of welcome transfer. Each welcome transfer must contains exactly 3 entires. The transfer contains {len(transfer)} entries.")
-		pre_proposal = ScheduledPreProposal(transfer[0], transfer[1], transaction_expiry)
-		if is_welcome:
-			if len(release_times) != 1:
-				raise ValueError("Welcome transfer must have exactly one release date.")
-			# welcome transfer only has one amount
-			amounts = [transfer[2]]
-		else:
-			if len(release_times) != num_releases-skipped_releases:
-				raise ValueError(f"The release schedule length {len(release_times)} does not match the number of unskipped releases {num_releases-skipped_releases}.")
-			# regular transfer has first initial amount, then the remaining amount split into num_releases-1 releases
-			regular_amounts = [transfer[2], *transfer[3].split_amount(num_releases-1)]
+		if skipped_releases >= num_releases:
+			raise ValueError("The number of skipped releases must be less than total number of releases.")
 
-			# add all skipped amounts into initial amount and put remaining ones after that in list
-			initial_amount = sum(regular_amounts[1:(skipped_releases+1)], regular_amounts[0])
-			amounts = [initial_amount, *regular_amounts[skipped_releases+1:]]
-		# add all releases
-		for i in range(len(release_times)):
-			pre_proposal.add_release(amounts[i], release_times[i])
-		# Write json file
-		pre_proposal.write_json(out_file_name)
+		# regular transfer has first initial amount, then the remaining amount split into num_releases-1 releases
+		regular_amounts = [initial_amount, *remaining_amount.split_amount(num_releases-1)]
+
+		# add all skipped amounts into initial amount and put remaining ones after that in list
+		initial_amount = sum(regular_amounts[1:(skipped_releases+1)], regular_amounts[0])
+		amounts = [initial_amount, *regular_amounts[skipped_releases+1:]]
+
+		return amounts
+		
 
 # Main function
 def main():
@@ -328,23 +314,25 @@ def main():
 	# process all transfers in list
 	for transfer_number, transfer in enumerate(transfers, start=1):
 		out_file_name = json_output_prefix + str(transfer_number).zfill(3) + ".json"
+		
+		if is_welcome:
+			# welcome transfer only has one amount
+			amounts = [transfer[2]]
+		else:
+			amounts = amounts_to_scheduled_list(transfer[2], transfer[3], num_releases, skipped_releases)
+
+		# create pre-proposal and add all releases
+		pre_proposal = ScheduledPreProposal(transfer[0], transfer[1], transaction_expiry)
+		for i in range(len(release_times)):
+			pre_proposal.add_release(amounts[i], release_times[i])
+		
+		# Finally write json file
 		try:
-			transfer_to_json(
-				is_welcome,
-				transfer,
-				release_times,
-				num_releases,
-				skipped_releases,
-				transaction_expiry,
-				out_file_name
-				)
+			pre_proposal.write_json(out_file_name)
 		except IOError:
 			print(f"Error writing file \"{out_file_name}\".")
 			sys.exit(3)
-		except ValueError:
-			print(f"Error: {e}")
-			sys.exit(2)
-
+		
 	print(f"Successfully generated {len(transfers)} proposals.")
 
 if __name__ == "__main__":
