@@ -164,7 +164,7 @@ class TestCSVReader(unittest.TestCase):
             mock_file.assert_called_once_with(test_filename, newline='', encoding='utf-8-sig') 
 
     def test_invalid_receiver(self):
-        release_test_data = ( #third row is bad
+        release_test_data = ( #second row is bad
             '38Dh9TwGWCieKppVu3ft91bjPvpyt7hWWNdFTRz9P3CCdvYHjE,4QbKSwdnF1PTtN6LqdTfmUt7FQDTToxFVV746ysy7TazZy4zx7," 1,000.000000 "," 2,000.000000 "\n'
             '38Dh9TwGWCieKppVu3ft91bjPvpyt7hWWNdFTRz9P3CCdvYHjE,4abKSwdnF1PTtN6LqdTfmUt7FQDTToxFVV746ysy7TazZy4zx7," 2,000.000000 "," 2,000.000000 "\n'
             '38Dh9TwGWCieKppVu3ft91bjPvpyt7hWWNdFTRz9P3CCdvYHjE,4QbKSwdnF1PTtN6LqdTfmUt7FQDTToxFVV746ysy7TazZy4zx7," 3,000.000000 "," 2,000.000000 "\n'
@@ -172,9 +172,9 @@ class TestCSVReader(unittest.TestCase):
         test_filename = './test.csv'
         with patch('builtins.open', new=mock_open(read_data=release_test_data)) as mock_file:
             self.assertRaises(ValueError,csv_to_list,test_filename,False,'.',',',',')
-            mock_file.assert_called_once_with(test_filename, newline='', encoding='utf-8-sig') 
+            mock_file.assert_called_once_with(test_filename, newline='', encoding='utf-8-sig')
 
-class TestReleasScheduleBuilder(unittest.TestCase):
+class TestReleaseScheduleBuilder(unittest.TestCase):
 
     def test_valid_welcome(self):
         time1 = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00"))

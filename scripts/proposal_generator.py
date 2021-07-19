@@ -26,7 +26,6 @@ csv_delimiter = ','
 thousands_sep = ','
 decimal_sep = '.'
 assert len(csv_delimiter) == 1 and len(thousands_sep) == 1 and len(decimal_sep) == 1 and thousands_sep != decimal_sep
-#assert initial_release_time < first_rem_release_time
 
 # proposals expire 2 hours from now
 transaction_expiry = datetime.now() + relativedelta(hours =+ 2) 
@@ -191,8 +190,9 @@ def csv_to_list(filename:str, is_welcome:bool, decimal_sep:str, thousands_sep:st
 
 	return result
 
-# Build the realase schedule using the global variables
-# Returns a tuple, where the first element is a list of times of all releases, and the second elment is the number of skipped releases.
+# Build the release schedule
+# Returns a tuple, where the first element is a list of times of all releases,
+# and the second element is the number of skipped releases.
 def build_release_schedule(
 	is_welcome:bool,
 	w_release_time:datetime,
@@ -244,7 +244,7 @@ def transfer_to_json(
 		pre_proposal = ScheduledPreProposal(transfer[0], transfer[1], transaction_expiry)
 		if is_welcome:
 			if len(release_times) != 1:
-				raise ValueError("Weclome transfer must have exactly one release date.")
+				raise ValueError("Welcome transfer must have exactly one release date.")
 			# welcome transfer only has one amount
 			amounts = [transfer[2]]
 		else:
