@@ -190,6 +190,7 @@ class TestReleaseScheduleBuilder(unittest.TestCase):
             (release_times,skipped_releases) = build_release_schedule(ir_time,frem_time,er_time,num_releases)
             self.assertEqual(skipped_releases,0)
             self.assertEqual(release_times,expected_rt)
+            self.assertEqual(len(release_times),num_releases-skipped_releases)
         #Test release schedule for earliest release right before the (i+1)th remaining release
         for i in range(0,num_releases-1):
             with self.subTest(i=i+2):
@@ -197,12 +198,14 @@ class TestReleaseScheduleBuilder(unittest.TestCase):
                 expected_rt = [er_time] + [frem_time + relativedelta(months =+ j) for j in range(i,num_releases-1)]
                 (release_times,skipped_releases) = build_release_schedule(ir_time,frem_time,er_time,num_releases)
                 self.assertEqual(skipped_releases,i)
+                self.assertEqual(len(release_times),num_releases-skipped_releases)
         #Test release schedule for earliest release after all releases
         with self.subTest(i=num_releases+1):
                 er_time = frem_time + relativedelta(months =+ num_releases-2,seconds =+ 1)
                 expected_rt = [er_time]
                 (release_times,skipped_releases) = build_release_schedule(ir_time,frem_time,er_time,num_releases)
                 self.assertEqual(skipped_releases,num_releases-1)
+                self.assertEqual(len(release_times),num_releases-skipped_releases)
 
     def test_invalid_release(self):
         num_releases = 10
@@ -212,18 +215,59 @@ class TestReleaseScheduleBuilder(unittest.TestCase):
         not_relevant = time1
         self.assertRaises(ValueError,build_release_schedule,time2,time1,not_relevant,num_releases)
 
-@unittest.skip("test too old")
-class TestJSONWriter(unittest.TestCase):
+class TestAmountToScheduledList(unittest.TestCase):
+
+    def test_valid_amounts(self):
+        initial_amount = TransferAmount(1000)
+        remaining_amount = TransferAmount(10)
+        n = 10
+        s = 3
+        expected_result = [TransferAmount(1003)] + [TransferAmount(1)]*6 + [TransferAmount(2)]
+        result = amounts_to_scheduled_list(initial_amount,remaining_amount,n,s)       
+
+    def test_random_valid_amounts(self):
+        for i in range(0,1000):
+            with self.subTest(i=i):
+                n = random.randrange(1,25) #at least 2 releases
+                s = random.randrange(0,n+1) #skipped releases
+                init = random.randrange(1,10000)
+                q = random.randrange(1,10000)
+                r = random.randrange(0,n) 
+                initial_amount = TransferAmount(init)
+                remaining_amount = TransferAmount(q*n+r)
+                expected_result = [TransferAmount(init+q*s)] + [TransferAmount(q)] * (n-s)
+                if r > 0:
+                    expected_result[-1] += TransferAmount(r)
+                result = amounts_to_scheduled_list(initial_amount,remaining_amount,n+1,s)
+                self.assertEqual(result,expected_result)
+
+    def test_invalid_amounts(self):
+        self.assertRaises(ValueError,amounts_to_scheduled_list,TransferAmount(1),TransferAmount(1),10,10)
+
+
+
+class TestMain(unittest.TestCase):
 
     def test_valid_welcome_transfer(self):
-        welcome_transfer = [
-            '38Dh9TwGWCieKppVu3ft91bjPvpyt7hWWNdFTRz9P3CCdvYHjE',
-            '4QbKSwdnF1PTtN6LqdTfmUt7FQDTToxFVV746ysy7TazZy4zx7',
-            TransferAmount(1000)
+        time1 = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00")) + relativedelta(days =+ 10)
+        transfers = [
+            {
+                "sender_address": '38Dh9TwGWCieKppVu3ft91bjPvpyt7hWWNdFTRz9P3CCdvYHjE',
+                "receiver_address":'4QbKSwdnF1PTtN6LqdTfmUt7FQDTToxFVV746ysy7TazZy4zx7',
+                "amount" : TransferAmount(1000000000)
+            }
         ]
-        time1 = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00"))
-        release_times = [time1]
-        transaction_expiry = datetime.now() + relativedelta(hours =+ 2) 
+        arguments = argparse.Namespace(welcome=True, input_csv='./test.csv')
+        config = {
+		"num_releases" : 10,
+		"welcome_release_time" : time1,
+		"initial_release_time" : datetime.fromisoformat("1970-08-26T14:00:00+01:00"),
+		"first_rem_release_time" : datetime.fromisoformat("1970-08-26T14:00:00+01:00"), 
+		"csv_delimiter" : ',',
+		"thousands_sep" : ',',
+		"decimal_sep" : '.'
+	    }
+        transaction_expiry = datetime.now() + relativedelta(hours =+ 2) #Must be the same as in main
         expected_content = {
 			"sender": '38Dh9TwGWCieKppVu3ft91bjPvpyt7hWWNdFTRz9P3CCdvYHjE',
 			"nonce": "", 
@@ -237,29 +281,44 @@ class TestJSONWriter(unittest.TestCase):
 			"payload": {
 				"toAddress": '4QbKSwdnF1PTtN6LqdTfmUt7FQDTToxFVV746ysy7TazZy4zx7',
 				"schedule": [
-                  {'amount': 1000, 'timestamp': int(time1.timestamp())*1000}  
+                  {'amount': 1000000000, 'timestamp': int(time1.timestamp())*1000}  
                 ]
 			},
 			"signatures": {}
 		}
-        test_filename = './test.json'
-        #Mock the file opening
-        with patch('builtins.open', new=mock_open()) as mock_file: 
-            #Mock json.dump as json.dump
-            with patch('json.dump', new=mock_open()) as mock_call:
-                transfer_to_json(True,welcome_transfer,release_times,1,0,transaction_expiry,test_filename)
-                mock_call.assert_called_once_with(expected_content, mock_file(),indent=4)
-
+        #Mock various calls
+        with patch('proposal_generator.get_config', return_value=config) as get_fake_config:
+            with patch('argparse.ArgumentParser.parse_args', return_value=arguments) as fake_args:
+                with patch('proposal_generator.csv_to_list',return_value=transfers) as fake_csv:
+                    with patch('builtins.open', new=mock_open()) as mock_file: 
+                        with patch('json.dump', new=mock_open()) as mock_call:
+                            main()
+                            mock_call.assert_called_once_with(expected_content, mock_file(),indent=4)
+                           
     def test_valid_transfer(self):
-        transfer = [
-            '38Dh9TwGWCieKppVu3ft91bjPvpyt7hWWNdFTRz9P3CCdvYHjE',
-            '4QbKSwdnF1PTtN6LqdTfmUt7FQDTToxFVV746ysy7TazZy4zx7',
-            TransferAmount(1000),
-            TransferAmount(10)
+        time1 = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00")) + relativedelta(months =- 3)
+        time2 = time1 + relativedelta(months =+ 1)
+        transfers = [
+            {
+                "sender_address": '38Dh9TwGWCieKppVu3ft91bjPvpyt7hWWNdFTRz9P3CCdvYHjE',
+                "receiver_address":'4QbKSwdnF1PTtN6LqdTfmUt7FQDTToxFVV746ysy7TazZy4zx7',
+                "initial_amount" : TransferAmount(1000),
+                "remaining_amount" : TransferAmount(10)
+            }
         ]
-        time1 = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00"))
-        release_times = [time1+ relativedelta(months =+ i) for i in range(7)]
-        transaction_expiry = datetime.now() + relativedelta(hours =+ 2) 
+        arguments = argparse.Namespace(welcome=False, input_csv='./test.csv')
+        config = {
+		"num_releases" : 10,
+		"welcome_release_time" : datetime.fromisoformat("1970-08-26T14:00:00+01:00"),
+		"initial_release_time" : time1,
+		"first_rem_release_time" : time2, 
+		"csv_delimiter" : ',',
+		"thousands_sep" : ',',
+		"decimal_sep" : '.'
+	    }
+        #These two dates must be the same as in main
+        transaction_expiry = datetime.now() + relativedelta(hours =+ 2)
+        earliest_release_time = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00")) + relativedelta(days =+ 1)
         expected_content = {
 			"sender": '38Dh9TwGWCieKppVu3ft91bjPvpyt7hWWNdFTRz9P3CCdvYHjE',
 			"nonce": "", 
@@ -272,61 +331,20 @@ class TestJSONWriter(unittest.TestCase):
 			"transactionKind": 19,
 			"payload": {
 				"toAddress": '4QbKSwdnF1PTtN6LqdTfmUt7FQDTToxFVV746ysy7TazZy4zx7',
-				"schedule": [{'amount': 1003, 'timestamp': int(release_times[0].timestamp())*1000}] + 
-                [{'amount': 1, 'timestamp': int(release_times[i].timestamp())*1000} for i in range(1,6)] +
-                [{'amount': 2, 'timestamp': int(release_times[6].timestamp())*1000}]
+				"schedule": [{'amount': 1003, 'timestamp': int(earliest_release_time.timestamp())*1000}] + 
+                [{'amount': 1, 'timestamp': int((time1 + relativedelta(months =+ i)).timestamp())*1000} for i in range(4,9)] +
+                [{'amount': 2, 'timestamp': int((time1 + relativedelta(months =+ 9)).timestamp())*1000}]
 			},
 			"signatures": {}
 		}
-        test_filename = './test.json'
-        #Mock the file opening
-        with patch('builtins.open', new=mock_open()) as mock_file: 
-            #Mock json.dump as json.dump
-            with patch('json.dump', new=mock_open()) as mock_call:
-                transfer_to_json(False,transfer,release_times,10,3,transaction_expiry,test_filename)
-                mock_call.assert_called_once_with(expected_content, mock_file(),indent=4)
-
-    def test_invalid_welcome_transfer(self):
-        with self.subTest(i=1):
-            transfer = [
-                '38Dh9TwGWCieKppVu3ft91bjPvpyt7hWWNdFTRz9P3CCdvYHjE',
-                '4QbKSwdnF1PTtN6LqdTfmUt7FQDTToxFVV746ysy7TazZy4zx7',
-                TransferAmount(1000),
-                TransferAmount(10)
-            ]
-            time1 = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00"))
-            release_times = [time1]           
-            self.assertRaises(ValueError,transfer_to_json,True,transfer,release_times,10,0,time1,'./test.json')
-        with self.subTest(i=2):
-            transfer = [
-                '38Dh9TwGWCieKppVu3ft91bjPvpyt7hWWNdFTRz9P3CCdvYHjE',
-                '4QbKSwdnF1PTtN6LqdTfmUt7FQDTToxFVV746ysy7TazZy4zx7',
-                TransferAmount(1000)
-            ]
-            time1 = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00"))
-            release_times = [time1, time1]           
-            self.assertRaises(ValueError,transfer_to_json,True,transfer,release_times,10,0,time1,'./test.json')
-
-    def test_invalid_transfer(self):
-        with self.subTest(i=1):
-            transfer = [
-                '38Dh9TwGWCieKppVu3ft91bjPvpyt7hWWNdFTRz9P3CCdvYHjE',
-                '4QbKSwdnF1PTtN6LqdTfmUt7FQDTToxFVV746ysy7TazZy4zx7',
-                TransferAmount(1000)
-            ]
-            time1 = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00"))
-            release_times = [time1,time1]           
-            self.assertRaises(ValueError,transfer_to_json,True,transfer,release_times,10,0,time1,'./test.json')
-        with self.subTest(i=2):
-            transfer = [
-                '38Dh9TwGWCieKppVu3ft91bjPvpyt7hWWNdFTRz9P3CCdvYHjE',
-                '4QbKSwdnF1PTtN6LqdTfmUt7FQDTToxFVV746ysy7TazZy4zx7',
-                TransferAmount(1000),
-                TransferAmount(1000)
-            ]
-            time1 = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00"))
-            release_times = [time1,time1,time1,time1]         
-            self.assertRaises(ValueError,transfer_to_json,True,transfer,release_times,10,3,time1,'./test.json')
+        #Mock various calls
+        with patch('proposal_generator.get_config', return_value=config) as get_fake_config:
+            with patch('argparse.ArgumentParser.parse_args', return_value=arguments) as fake_args:
+                with patch('proposal_generator.csv_to_list',return_value=transfers) as fake_csv:
+                    with patch('builtins.open', new=mock_open()) as mock_file: 
+                        with patch('json.dump', new=mock_open()) as mock_call:
+                            main()
+                            mock_call.assert_called_once_with(expected_content, mock_file(),indent=4)
 
 if __name__ == '__main__':
     unittest.main()
