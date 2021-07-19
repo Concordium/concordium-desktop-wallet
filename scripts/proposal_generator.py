@@ -148,7 +148,7 @@ class ScheduledPreProposal:
 
 
 # Read csv file and return a list with one entry for each row in csv.
-def csv_to_list(filename:str, is_welcome:bool, decimal_sep:str, thousands_sep:str) -> List[Any]:
+def csv_to_list(filename:str, is_welcome:bool, decimal_sep:str, thousands_sep:str, csv_delimiter:str) -> List[Any]:
 	result = []
 
 	with open(filename, newline='', encoding='utf-8-sig') as csvfile:
@@ -191,33 +191,37 @@ def csv_to_list(filename:str, is_welcome:bool, decimal_sep:str, thousands_sep:st
 
 	return result
 
-#Build the realase schedule using the global variables 
+# Build the realase schedule using the global variables
+# Returns a tuple, where the first element is a list of times of all releases, and the second elment is the number of skipped releases.
 def build_release_schedule(
 	is_welcome:bool,
-	welcome_release_time:datetime,
-	initial_release_time:datetime,
-	earliest_release_time:datetime,
+	w_release_time:datetime,
+	i_release_time:datetime,
+	f_rem_release_time:datetime,
+	e_release_time:datetime,
 	num_releases:int
 	) -> Tuple[List[datetime],int]:
 	if is_welcome:
 		# Release schedule for welcome transfer is just single date
-		release_times = [max(welcome_release_time, earliest_release_time)]
+		release_times = [max(w_release_time, e_release_time)]
 		return (release_times,0)
 	else:
-		# Normal schedule consists of num_releases, with first one at initial_release_time,
-		# and the remaining ones one month after each other, starting with first_rem_release_time.
+		if i_release_time > f_rem_release_time:
+			raise ValueError("Initial release must be before the remaining ones")
+		# Normal schedule consists of num_releases, with first one at i_release_time,
+		# and the remaining ones one month after each other, starting with f_rem_release_time.
 		#
 		# If the transfer is delayed, some realeases can be in the past. In that case,
-		# combine all releases before earliest_release_time into one release at that time.
-		release_times = [max(initial_release_time, earliest_release_time)]
+		# combine all releases before e_release_time into one release at that time.
+		release_times = [max(i_release_time, e_release_time)]
 
 		for i in range(num_releases - 1):
 			# remaining realeses are i month after first remaining release
-			planned_release_time = first_rem_release_time + relativedelta(months =+ i)
+			planned_release_time = f_rem_release_time + relativedelta(months =+ i)
 
-			# Only add release if after earliest_release_time.
-			# Note that in this case, earliest_release_time is already in list since initial_release_time < first_rem_release_time.
-			if planned_release_time > earliest_release_time:
+			# Only add release if after e_release_time.
+			# Note that in this case, e_release_time is already in list since i_release_time < f_rem_release_time.
+			if planned_release_time > e_release_time:
 				release_times.append(planned_release_time)
 	
 		skipped_releases = num_releases - len(release_times) # number of releases to be combined into the initial release
@@ -273,11 +277,21 @@ def main():
 	json_output_prefix = "pre-proposal_" + os.path.splitext(os.path.basename(csv_input_file))[0] + "_"
 
 	# Build release schedule
-	(release_times,skipped_releases) = build_release_schedule(is_welcome,welcome_release_time,initial_release_time,earliest_release_time,num_releases)
+	try:
+		(release_times,skipped_releases) = build_release_schedule(
+			is_welcome,welcome_release_time,
+			initial_release_time,
+			first_rem_release_time,
+			earliest_release_time,
+			num_releases)
+	except ValueError as e:
+		print(f"Error: {e}")
+		sys.exit(2)
+
 	
 	# read csv file
 	try:
-		transfers = csv_to_list(csv_input_file, is_welcome, decimal_sep, thousands_sep)
+		transfers = csv_to_list(csv_input_file, is_welcome, decimal_sep, thousands_sep, csv_delimiter)
 	except IOError as e:
 		print(f"Error reading file \"{csv_input_file}\": {e}")
 		sys.exit(3)
@@ -292,7 +306,7 @@ def main():
 		except IOError:
 			print(f"Error writing file \"{out_file_name}\".")
 			sys.exit(3)
-			
+
 	print(f"Successfully generated {len(transfers)} proposals.")
 
 if __name__ == "__main__":
