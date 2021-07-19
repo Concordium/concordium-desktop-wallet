@@ -21,12 +21,12 @@ from base58 import b58decode_check
 num_releases = 10
 welcome_release_time = datetime.fromisoformat("2021-08-15T14:00:00+01:00")
 initial_release_time = datetime.fromisoformat("2021-08-26T14:00:00+01:00")
-first_rem_release_time = datetime.fromisoformat("2021-09-26T14:00:00+01:00")
+first_rem_release_time = datetime.fromisoformat("2021-09-26T14:00:00+01:00") #Must be after the initial release
 csv_delimiter = ','
 thousands_sep = ','
 decimal_sep = '.'
 assert len(csv_delimiter) == 1 and len(thousands_sep) == 1 and len(decimal_sep) == 1 and thousands_sep != decimal_sep
-assert initial_release_time < first_rem_release_time
+#assert initial_release_time < first_rem_release_time
 
 # proposals expire 2 hours from now
 transaction_expiry = datetime.now() + relativedelta(hours =+ 2) 
@@ -227,18 +227,29 @@ def build_release_schedule(
 		skipped_releases = num_releases - len(release_times) # number of releases to be combined into the initial release
 		return (release_times,skipped_releases)
 
+#Creates schedule proposal from a transfer and write it into a json file
 def transfer_to_json(
 	is_welcome:bool, 
 	transfer:List[Any], 
 	release_times:List[datetime], 
+	num_releases:int,
 	skipped_releases:int,
+	transaction_expiry:datetime,
 	out_file_name:str
 	):
+		if not is_welcome and len(transfer) != 4:
+			raise ValueError(f"Incorrect length of transfer. Each transfer must contains exactly 4 entires. The transfer contains {len(transfer)} entries.")
+		elif is_welcome and len(transfer) != 3:
+			raise ValueError(f"Incorrect length of welcome transfer. Each welcome transfer must contains exactly 3 entires. The transfer contains {len(transfer)} entries.")
 		pre_proposal = ScheduledPreProposal(transfer[0], transfer[1], transaction_expiry)
 		if is_welcome:
+			if len(release_times) != 1:
+				raise ValueError("Weclome transfer must have exactly one release date.")
 			# welcome transfer only has one amount
 			amounts = [transfer[2]]
 		else:
+			if len(release_times) != num_releases-skipped_releases:
+				raise ValueError(f"The release schedule length {len(release_times)} does not match the number of unskipped releases {num_releases-skipped_releases}.")
 			# regular transfer has first initial amount, then the remaining amount split into num_releases-1 releases
 			regular_amounts = [transfer[2], *transfer[3].split_amount(num_releases-1)]
 
@@ -301,11 +312,23 @@ def main():
 
 	# process all transfers in list
 	for transfer_number, transfer in enumerate(transfers, start=1):
+		out_file_name = json_output_prefix + str(transfer_number).zfill(3) + ".json"
 		try:
-			transfer_to_json(is_welcome,transfer,release_times,skipped_releases,json_output_prefix + str(transfer_number).zfill(3) + ".json")
+			transfer_to_json(
+				is_welcome,
+				transfer,
+				release_times,
+				num_releases,
+				skipped_releases,
+				transaction_expiry,
+				out_file_name
+				)
 		except IOError:
 			print(f"Error writing file \"{out_file_name}\".")
 			sys.exit(3)
+		except ValueError:
+			print(f"Error: {e}")
+			sys.exit(2)
 
 	print(f"Successfully generated {len(transfers)} proposals.")
 
