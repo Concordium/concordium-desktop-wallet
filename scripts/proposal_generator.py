@@ -5,7 +5,6 @@
 # Note: The script uses dateutil and base58, which can be installed using 
 # "pip install python-dateutil"
 # "pip install base58"
-from abc import abstractproperty
 import sys
 import json
 import csv
