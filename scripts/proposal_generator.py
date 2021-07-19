@@ -41,7 +41,7 @@ class TransferAmount:
 	def __init__(self, amount: int) -> None:
 		if not self.__in_valid_range(amount):
 			raise ValueError(f"Amount {amount} not in valid range (0,{self.max_amount}]")
-		self.__amount = amount
+		self.amount = amount
 
 	# Creates a TransferAmount from an amount string that represents an amount in GTU. 
 	# The string must valid, i.e., satisfy amount_regex or amount_regex_with_1000_sep.
@@ -64,7 +64,7 @@ class TransferAmount:
 
 	# String representation of a TransferAmount
 	def __str__(self):
-		return f"{self.__amount} microGTU"
+		return f"{self.amount} microGTU"
 
 	# Range check 
 	def __in_valid_range(self,x):
@@ -72,19 +72,19 @@ class TransferAmount:
 
 	# Equality check
 	def __eq__(self, y:'TransferAmount'):
-		return self.__amount == y.__amount
+		return self.amount == y.amount
 
 	# Addition
 	def __add__(self,y:'TransferAmount') -> 'TransferAmount':
-		return TransferAmount(self.__amount + y.__amount)
+		return TransferAmount(self.amount + y.amount)
 	
 	#returns amount in GTU
 	def get_GTU(self) -> Decimal:
-		return Decimal(self.__amount)/Decimal(1000000)
+		return Decimal(self.amount)/Decimal(1000000)
 
 	#returns amount in microGTU
 	def get_micro_GTU(self) -> int:
-		return self.__amount
+		return self.amount
 	
 	# Split the TransferAmount into a list of n equal TransferAmounts. 
 	# Each split is computed as floor(self.amount/n) with the exception
@@ -93,12 +93,12 @@ class TransferAmount:
 		if n <=0:
 			raise AssertionError(f"Cannot split into {n} parts")
 		elif n == 1:
-			return [TransferAmount(self.__amount)]
+			return [TransferAmount(self.amount)]
 		else:
-			step_amount = self.__amount // n
-			last_amount = self.__amount - (n-1)*step_amount
+			step_amount = self.amount // n
+			last_amount = self.amount - (n-1)*step_amount
 			if step_amount <= 0:
-				raise AssertionError(f"Cannot split {self.__amount} into {n} parts, amount is too small")
+				raise AssertionError(f"Cannot split {self.amount} into {n} parts, amount is too small")
 			amount_list = [TransferAmount(step_amount) for _ in range(n-1)]
 			amount_list.append(TransferAmount(last_amount))
 			return amount_list
@@ -109,7 +109,7 @@ class TransferAmount:
 class ScheduledPreProposal:
 	# Initialize pre-proposal with sender, receiver, and expiry time, with empty schedule
 	def __init__(self, sender_address: str, receiver_address: str, expiry: datetime):
-		self.__data = {
+		self.data = {
 			"sender": sender_address,
 			"nonce": "", # filled by desktop wallet
 			"energyAmount": "", # filled by desktop wallet
@@ -132,12 +132,12 @@ class ScheduledPreProposal:
 			"amount": amount.get_micro_GTU(),
 			"timestamp": int(release_time.timestamp()) * 1000 # multiply by 1000 since timestamps here are in milliseconds
 		} 
-		self.__data["payload"]["schedule"].append(release)
+		self.data["payload"]["schedule"].append(release)
 
 	# Write pre-proposal to json file with given filename.
 	def write_json(self, filename: str):
 		with open(filename, 'w') as outFile:
-			json.dump(self.__data, outFile, indent=4)
+			json.dump(self.data, outFile, indent=4)
 
 
 # Read csv file and return a list with one entry for each row in csv.
