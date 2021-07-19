@@ -235,7 +235,7 @@ def amounts_to_scheduled_list(
 	remaining_amount:TransferAmount,
 	num_releases:int,
 	skipped_releases:int
-	):
+	) -> List[TransferAmount]:
 		if skipped_releases >= num_releases:
 			raise ValueError("The number of skipped releases must be less than total number of releases.")
 
