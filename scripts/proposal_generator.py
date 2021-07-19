@@ -338,8 +338,11 @@ def main():
 		except IOError:
 			print(f"Error writing file \"{out_file_name}\".")
 			sys.exit(3)
-		
-	print(f"Successfully generated {len(transfers)} proposals.")
+	
+	if (len(transfers) == 1):
+		print(f"Successfully generated {len(transfers)} proposal.")
+	else:
+		print(f"Successfully generated {len(transfers)} proposals.")
 
 if __name__ == "__main__":
 	main()
