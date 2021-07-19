@@ -68,7 +68,6 @@ class TestTransferAmount(unittest.TestCase):
         self.assertEqual(y[-1],TransferAmount(2))
 
 
-
 if __name__ == '__main__':
     unittest.main()
     
