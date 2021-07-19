@@ -194,38 +194,32 @@ def csv_to_list(filename:str, is_welcome:bool, decimal_sep:str, thousands_sep:st
 # Returns a tuple, where the first element is a list of times of all releases,
 # and the second element is the number of skipped releases.
 def build_release_schedule(
-	is_welcome:bool,
-	w_release_time:datetime,
 	i_release_time:datetime,
 	f_rem_release_time:datetime,
 	e_release_time:datetime,
 	num_releases:int
 	) -> Tuple[List[datetime],int]:
-	if is_welcome:
-		# Release schedule for welcome transfer is just single date
-		release_times = [max(w_release_time, e_release_time)]
-		return (release_times,0)
-	else:
-		if i_release_time > f_rem_release_time:
-			raise ValueError("Initial release must be before the remaining ones")
-		# Normal schedule consists of num_releases, with first one at i_release_time,
-		# and the remaining ones one month after each other, starting with f_rem_release_time.
-		#
-		# If the transfer is delayed, some realeases can be in the past. In that case,
-		# combine all releases before e_release_time into one release at that time.
-		release_times = [max(i_release_time, e_release_time)]
-
-		for i in range(num_releases - 1):
-			# remaining realeses are i month after first remaining release
-			planned_release_time = f_rem_release_time + relativedelta(months =+ i)
-
-			# Only add release if after e_release_time.
-			# Note that in this case, e_release_time is already in list since i_release_time < f_rem_release_time.
-			if planned_release_time > e_release_time:
-				release_times.append(planned_release_time)
+	if i_release_time > f_rem_release_time:
+		raise ValueError("Initial release must be before the remaining ones")
 	
-		skipped_releases = num_releases - len(release_times) # number of releases to be combined into the initial release
-		return (release_times,skipped_releases)
+	# Normal schedule consists of num_releases, with first one at i_release_time,
+	# and the remaining ones one month after each other, starting with f_rem_release_time.
+	#
+	# If the transfer is delayed, some realeases can be in the past. In that case,
+	# combine all releases before e_release_time into one release at that time.
+	release_times = [max(i_release_time, e_release_time)]
+
+	for i in range(num_releases - 1):
+		# remaining realeses are i month after first remaining release
+		planned_release_time = f_rem_release_time + relativedelta(months =+ i)
+
+		# Only add release if after e_release_time.
+		# Note that in this case, e_release_time is already in list since i_release_time < f_rem_release_time.
+		if planned_release_time > e_release_time:
+			release_times.append(planned_release_time)
+
+	skipped_releases = num_releases - len(release_times) # number of releases to be combined into the initial release
+	return (release_times,skipped_releases)
 
 #Creates schedule proposal from a transfer and write it into a json file
 def transfer_to_json(
@@ -288,16 +282,20 @@ def main():
 	json_output_prefix = "pre-proposal_" + os.path.splitext(os.path.basename(csv_input_file))[0] + "_"
 
 	# Build release schedule
-	try:
-		(release_times,skipped_releases) = build_release_schedule(
-			is_welcome,welcome_release_time,
-			initial_release_time,
-			first_rem_release_time,
-			earliest_release_time,
-			num_releases)
-	except ValueError as e:
-		print(f"Error: {e}")
-		sys.exit(2)
+	if is_welcome:
+		# Release schedule for welcome transfer is just single date
+		release_times = [max(welcome_release_time, earliest_release_time)]
+		skipped_releases = 0
+	else:
+		try:
+			(release_times,skipped_releases) = build_release_schedule(
+				initial_release_time,
+				first_rem_release_time,
+				earliest_release_time,
+				num_releases)
+		except ValueError as e:
+			print(f"Error: {e}")
+			sys.exit(2)
 
 	
 	# read csv file
