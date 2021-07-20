@@ -339,7 +339,9 @@ def main():
 			print(f"Error writing file \"{out_file_name}\".")
 			sys.exit(3)
 	
-	if (len(transfers) == 1):
+	if (len(transfers) == 0):
+		print(f"CSV file does not contain any transfers.")
+	elif (len(transfers) == 1):
 		print(f"Successfully generated {len(transfers)} proposal.")
 	else:
 		print(f"Successfully generated {len(transfers)} proposals.")
