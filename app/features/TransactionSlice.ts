@@ -221,7 +221,7 @@ export async function updateTransactions(
 ) {
     async function updateSubroutine(maxId: number) {
         if (controller.isAborted) {
-            controller.onAborted();
+            controller.finish();
             return;
         }
         const result = await fetchTransactions(account.address, maxId);
@@ -239,7 +239,7 @@ export async function updateTransactions(
         }
 
         if (controller.isAborted) {
-            controller.onAborted();
+            controller.finish();
             return;
         }
         if (maxId !== result.newMaxId) {
