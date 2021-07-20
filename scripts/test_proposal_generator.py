@@ -1,6 +1,7 @@
 from decimal import Decimal
 import unittest
 import random
+from unittest.case import skip
 from dateutil.relativedelta import relativedelta
 from unittest.mock import patch, mock_open
 from proposal_generator import *
@@ -220,25 +221,29 @@ class TestAmountToScheduledList(unittest.TestCase):
     def test_valid_amounts(self):
         initial_amount = TransferAmount(1000)
         remaining_amount = TransferAmount(10)
-        n = 10
-        s = 3
-        expected_result = [TransferAmount(1003)] + [TransferAmount(1)]*6 + [TransferAmount(2)]
-        result = amounts_to_scheduled_list(initial_amount,remaining_amount,n,s)       
+        num_releases = 10 #
+        skipped = 3
+        expected_result = [TransferAmount(1003)] + [TransferAmount(1)]*5 + [TransferAmount(2)]
+        result = amounts_to_scheduled_list(initial_amount,remaining_amount,num_releases,skipped)    
+        self.assertEqual(result,expected_result)
 
     def test_random_valid_amounts(self):
         for i in range(0,1000):
             with self.subTest(i=i):
-                n = random.randrange(1,25) #at least 2 releases
-                s = random.randrange(0,n+1) #skipped releases
+                n = random.randrange(1,25) #num_releases := n+1
+                skipped = random.randrange(0,n+1) #skipped releases
+                #Amount for the initial release
                 init = random.randrange(1,10000)
+                #Amount for each remaining release
                 q = random.randrange(1,10000)
+                #Remainder payed out with the last release
                 r = random.randrange(0,n) 
                 initial_amount = TransferAmount(init)
                 remaining_amount = TransferAmount(q*n+r)
-                expected_result = [TransferAmount(init+q*s)] + [TransferAmount(q)] * (n-s)
+                expected_result = [TransferAmount(init+q*skipped)] + [TransferAmount(q)] * (n-skipped)
                 if r > 0:
                     expected_result[-1] += TransferAmount(r)
-                result = amounts_to_scheduled_list(initial_amount,remaining_amount,n+1,s)
+                result = amounts_to_scheduled_list(initial_amount,remaining_amount,n+1,skipped)
                 self.assertEqual(result,expected_result)
 
     def test_invalid_amounts(self):
