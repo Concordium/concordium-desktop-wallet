@@ -32,7 +32,10 @@ import InputTimestamp from '~/components/Form/InputTimestamp';
 import PickRecipient from '~/components/Transfers/PickRecipient';
 import { useTransactionExpiryState } from '~/utils/dataHooks';
 import { isMultiSig } from '~/utils/accountHelpers';
-import { accountsSelector } from '~/features/AccountSlice';
+import { accountsSelector, accountInfoSelector } from '~/features/AccountSlice';
+import { amountAtDisposal } from '~/utils/transactionHelpers';
+import { collapseFraction } from '~/utils/basicHelpers';
+import { toMicroUnits, displayAsGTU } from '~/utils/gtu';
 
 import styles from './CreateTransferProposal.module.scss';
 import UpsertAddress from '~/components/UpsertAddress';
@@ -97,17 +100,18 @@ function CreateTransferProposal({
         setScheduleDefaults,
     ] = useState<BuildScheduleDefaults>();
 
+    const [scheduleLength, setScheduleLength] = useState<number>(0);
     const [estimatedFee, setFee] = useState<Fraction>();
 
     useEffect(() => {
         if (account) {
             if (transactionKind === TransactionKindId.Transfer_with_schedule) {
-                if (schedule) {
+                if (scheduleLength) {
                     setFee(
                         scheduledTransferCost(
                             exchangeRate,
                             account.signatureThreshold
-                        )(schedule.length)
+                        )(scheduleLength)
                     );
                 } else {
                     setFee(undefined);
@@ -122,7 +126,26 @@ function CreateTransferProposal({
                 );
             }
         }
-    }, [account, transactionKind, setFee, schedule, exchangeRate]);
+    }, [account, transactionKind, setFee, scheduleLength, exchangeRate]);
+
+    const [amountError, setAmountError] = useState<string>();
+    const accountInfo = useSelector(accountInfoSelector(account));
+
+    useEffect(() => {
+        const atDisposal = accountInfo ? amountAtDisposal(accountInfo) : 0n;
+        if (
+            estimatedFee &&
+            amount &&
+            atDisposal < toMicroUnits(amount) + collapseFraction(estimatedFee)
+        ) {
+            setAmountError(
+                `Insufficient funds: ${displayAsGTU(atDisposal)} at disposal.`
+            );
+        } else {
+            setAmountError(undefined);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [estimatedFee, amount, JSON.stringify(accountInfo)]);
 
     function continueAction(routerAction: typeof push = push) {
         const nextLocation = handler.creationLocationHandler(location);
@@ -174,10 +197,14 @@ function CreateTransferProposal({
         return (
             <BuildSchedule
                 submitSchedule={(newSchedule, defaults) => {
+                    if (amountError) {
+                        return;
+                    }
                     setSchedule(newSchedule);
                     setScheduleDefaults(defaults);
                     continueAction();
                 }}
+                setScheduleLength={setScheduleLength}
                 amount={amount}
                 defaults={scheduleDefaults}
             />
@@ -208,6 +235,7 @@ function CreateTransferProposal({
                                 schedule={schedule}
                                 estimatedFee={estimatedFee}
                                 expiryTime={expiryTime}
+                                amountError={amountError}
                             />
                         </div>
                     </Columns.Column>

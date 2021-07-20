@@ -108,6 +108,9 @@ export const chosenAccountInfoSelector = (state: RootState) =>
 export const chosenAccountIndexSelector = (state: RootState) =>
     state.accounts.chosenAccountIndex;
 
+export const accountInfoSelector = (account?: Account) => (state: RootState) =>
+    state.accounts.accountsInfo?.[account?.address ?? ''];
+
 export const {
     chooseAccount,
     updateAccounts,

@@ -118,7 +118,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
     const accountHasDeployedCredentials = useSelector(
         accountHasDeployedCredentialsSelector(account)
     );
-    const hasUsedEncrypted = hasEncryptedBalance(accountInfo);
+    const hasUsedEncrypted = hasEncryptedBalance(account);
     const hasBakerCooldown = Boolean(accountInfo?.accountBaker?.pendingChange);
 
     function MoreActionsMenu() {

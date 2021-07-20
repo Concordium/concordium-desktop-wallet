@@ -4,13 +4,14 @@ import { useSelector } from 'react-redux';
 import DoubleCheckmarkIcon from '@resources/svg/double-grey-checkmark.svg';
 import CheckmarkIcon from '@resources/svg/grey-checkmark.svg';
 import Warning from '@resources/svg/warning.svg';
-import { parseTime } from '~/utils/timeHelpers';
+import { dateFromTimeStamp, parseTime } from '~/utils/timeHelpers';
 import { getGTUSymbol, displayAsGTU } from '~/utils/gtu';
 import {
     TransferTransaction,
     TransactionStatus,
     TransactionKindString,
     TransferTransactionWithNames,
+    TimeStampUnit,
 } from '~/utils/types';
 import { chosenAccountSelector } from '~/features/AccountSlice';
 import { viewingShieldedSelector } from '~/features/TransactionSlice';
@@ -22,6 +23,7 @@ import {
     isOutgoingTransaction,
 } from '~/utils/transactionHelpers';
 import styles from './Transactions.module.scss';
+import transactionKindNames from '~/constants/transactionKindNames.json';
 
 const isInternalTransfer = (transaction: TransferTransaction) =>
     [
@@ -129,7 +131,7 @@ function parseAmount(transaction: TransferTransaction, isOutgoing: boolean) {
             ) {
                 return {
                     amount: `${displayAsGTU(-cost)}`,
-                    amountFormula: `${displayAsGTU(cost)} Fee`,
+                    amountFormula: `Shielded transaction fee`,
                 };
             }
 
@@ -158,37 +160,23 @@ function parseAmount(transaction: TransferTransaction, isOutgoing: boolean) {
     return buildCostString(BigInt(transaction.cost || '0'));
 }
 
-function displayType(kind: TransactionKindString) {
+function displayType(kind: TransactionKindString, failed: boolean) {
     switch (kind) {
         case TransactionKindString.TransferWithSchedule:
-            return <i className="mL10">(With schedule)</i>;
-        case TransactionKindString.TransferToEncrypted:
-            return <i>Shielded amount</i>;
-        case TransactionKindString.TransferToPublic:
-            return <i>Unshielded amount</i>;
+            if (!failed) {
+                return <i className="mL10">(With schedule)</i>;
+            }
+            break;
         case TransactionKindString.EncryptedAmountTransfer:
-            return <i className="mL10">(Encrypted)</i>;
-        case TransactionKindString.BakingReward:
-            return <i>Baker reward</i>;
-        case TransactionKindString.BlockReward:
-            return <i>Block reward</i>;
-        case TransactionKindString.FinalizationReward:
-            return <i>Finalization reward</i>;
-        case TransactionKindString.AddBaker:
-            return <i>Add baker</i>;
-        case TransactionKindString.RemoveBaker:
-            return <i>Remove baker</i>;
-        case TransactionKindString.UpdateBakerStake:
-            return <i>Update baker stake</i>;
-        case TransactionKindString.UpdateBakerRestakeEarnings:
-            return <i>Update baker restake Earnings</i>;
-        case TransactionKindString.UpdateBakerKeys:
-            return <i>Update baker keys</i>;
-        case TransactionKindString.UpdateCredentials:
-            return <i>Update account credentials</i>;
+        case TransactionKindString.Transfer:
+            if (!failed) {
+                return '';
+            }
+            break;
         default:
-            return '';
+            break;
     }
+    return <i>{transactionKindNames[kind]}</i>;
 }
 
 function statusSymbol(status: TransactionStatus) {
@@ -208,22 +196,36 @@ function statusSymbol(status: TransactionStatus) {
     }
 }
 
+const onlyTime = Intl.DateTimeFormat(undefined, {
+    timeStyle: 'medium',
+    hourCycle: 'h24',
+}).format;
+
 interface Props {
     transaction: TransferTransaction;
     onClick?: () => void;
+    showDate?: boolean;
 }
 
 /**
  * Displays the given transaction basic information.
  */
-function TransactionListElement({ transaction, onClick }: Props): JSX.Element {
+function TransactionListElement({
+    transaction,
+    onClick,
+    showDate = false,
+}: Props): JSX.Element {
     const account = useSelector(chosenAccountSelector);
     const viewingShielded = useSelector(viewingShieldedSelector);
     if (!account) {
         throw new Error('Unexpected missing chosen account');
     }
     const isOutgoing = isOutgoingTransaction(transaction, account.address);
-    const time = parseTime(transaction.blockTime);
+    const time = showDate
+        ? parseTime(transaction.blockTime)
+        : onlyTime(
+              dateFromTimeStamp(transaction.blockTime, TimeStampUnit.seconds)
+          );
     const name = getName(transaction, isOutgoing);
     const amountParser = viewingShielded ? parseShieldedAmount : parseAmount;
     const { amount, amountFormula } = amountParser(transaction, isOutgoing);
@@ -246,8 +248,8 @@ function TransactionListElement({ transaction, onClick }: Props): JSX.Element {
             <SidedRow
                 left={
                     <>
-                        {name}
-                        {displayType(transaction.transactionKind)}
+                        {failed || name}
+                        {displayType(transaction.transactionKind, failed)}
                     </>
                 }
                 right={

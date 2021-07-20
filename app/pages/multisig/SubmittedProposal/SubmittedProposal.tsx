@@ -136,7 +136,16 @@ const SubmittedProposalView = withChainData<Props>(
                     setShowError({
                         show: true,
                         header: 'Incorrect nonce',
-                        content: 'Transaction contains an already used nonce.',
+                        content:
+                            'Transaction contains an already used nonce, the transaction has been cancelled.',
+                    });
+                    /**
+                     * Updates the multi signature transaction in the database, and updates the
+                     * state with the updated transaction.
+                     */
+                    updateCurrentProposal(dispatch, {
+                        ...proposal,
+                        status: MultiSignatureTransactionStatus.Closed,
                     });
                     return;
                 } else {
