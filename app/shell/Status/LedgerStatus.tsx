@@ -4,11 +4,12 @@ import { useDispatch } from 'react-redux';
 import useLedger from '~/components/ledger/useLedger';
 import { LedgerStatusType } from '~/components/ledger/util';
 import { asyncNoOp } from '~/utils/basicHelpers';
-import styles from './LedgerStatus.module.scss';
 import { setCurrentWalletId } from '~/features/WalletSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getPairingPath } from '~/features/ledger/Path';
 import { getId } from '~/database/WalletDao';
+
+import styles from './Status.module.scss';
 
 const listenerTimeout = 5000;
 

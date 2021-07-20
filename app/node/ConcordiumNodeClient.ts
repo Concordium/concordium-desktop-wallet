@@ -5,6 +5,7 @@ import {
     BlockHash,
     Empty,
     GetAddressInfoRequest,
+    PeersRequest,
     SendTransactionRequest,
     TransactionHash,
 } from '~/proto/concordium_p2p_rpc_pb';
@@ -127,6 +128,12 @@ export default class ConcordiumNodeClient {
 
     getNodeInfo() {
         return this.sendRequest(this.client.nodeInfo, new Empty());
+    }
+
+    getPeerList(includeBootstrappers: boolean) {
+        const peersRequest = new PeersRequest();
+        peersRequest.setIncludeBootstrappers(includeBootstrappers);
+        return this.sendRequest(this.client.peerList, peersRequest);
     }
 
     sendRequest<T, Response extends Serializable>(

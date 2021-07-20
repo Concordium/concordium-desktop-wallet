@@ -6,7 +6,6 @@
     align-items: center;
     justify-content: center;
     margin: 20px;
-    margin-bottom: 40px;
     border: 1px solid $color-grey;
     padding: 10px;
     border-radius: 7px;
@@ -14,4 +13,8 @@
 
 .greenText {
     color: $color-success;
+}
+
+.outer {
+    margin: 20px 0 40px;
 }
