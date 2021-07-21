@@ -27,7 +27,7 @@ export enum Status {
 }
 
 export function getRecoveredIdentityName(identityNumber: number) {
-    return `Recovered - index ${identityNumber}`;
+    return `Recovered: Index ${identityNumber}`;
 }
 
 /**

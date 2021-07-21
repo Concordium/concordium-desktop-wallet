@@ -72,6 +72,8 @@ function IdentityListElement({
         identity.identityObject
     )?.value;
 
+    const isPlaceholder = identity.status !== IdentityStatus.Recovered;
+
     async function handleSubmit({ name }: EditIdentityForm) {
         await editIdentityName(dispatch, identity.id, name);
         setIsEditing(false);
@@ -105,14 +107,14 @@ function IdentityListElement({
                     ) : null}
                     {statusImage(identity.status)}
                     <span className={clsx(styles.rightAligned, 'body2')}>
-                        Identity
+                        {isPlaceholder || 'Identity'}
                     </span>
                 </div>
                 <Form<EditIdentityForm>
                     onSubmit={handleSubmit}
                     className={styles.form}
                 >
-                    <h1 className={styles.name}>
+                    <h2 className={styles.name}>
                         {isEditing ? (
                             <Form.InlineInput
                                 name="name"
@@ -134,7 +136,7 @@ function IdentityListElement({
                                 {identity.name}
                             </span>
                         )}
-                    </h1>
+                    </h2>
                     {canEditName &&
                         (isEditing ? (
                             <Form.Submit className={styles.edit} clear>
@@ -150,16 +152,19 @@ function IdentityListElement({
                             </Button>
                         ))}
                 </Form>
-                <div className="textFaded">
+                <div className="textFaded pH30">
                     {' '}
-                    {identityObject
+                    {!isPlaceholder && identityObject
                         ? ` Expires on ${formatDate(
                               identityObject.attributeList.validTo
                           )} `
                         : undefined}
+                    {isPlaceholder &&
+                        showAttributes &&
+                        'Placeholder identities from account recoveries cannot be used to create new accounts.'}
                 </div>
             </div>
-            {showAttributes && identityObject && (
+            {showAttributes && !isPlaceholder && identityObject && (
                 <div className={styles.details}>
                     {Object.entries(
                         identityObject.attributeList.chosenAttributes ?? {}
