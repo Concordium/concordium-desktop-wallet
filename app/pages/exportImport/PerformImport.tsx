@@ -19,6 +19,7 @@ import {
     loadAddressBook,
     importAddressBookEntry,
     addressBookSelector,
+    updateAddressBookEntry,
 } from '~/features/AddressBookSlice';
 import {
     credentialsSelector,
@@ -35,24 +36,57 @@ import Columns from '~/components/Columns';
 import styles from './ExportImport.module.scss';
 import { getAllWallets } from '~/database/WalletDao';
 import getGenesis from '~/database/GenesisDao';
+import ResolveModal, { ResolveModalInput } from './ResolveModal';
 
 type AddressBookEntryKey = keyof AddressBookEntry;
 
-export const addressBookFields: AddressBookEntryKey[] = [
-    'name',
-    'address',
-    'note',
-];
+export const addressBookFields: AddressBookEntryKey[] = ['address'];
 
 export async function importAddressBookEntries(
+    dispatch: Dispatch,
     entries: AddressBookEntry[],
-    addressBook: AddressBookEntry[]
+    addressBook: AddressBookEntry[],
+    resolveConflict: (names: string[]) => Promise<string>
 ): Promise<AddressBookEntry[]> {
     const [nonDuplicates, duplicates] = partition(entries, (entry) =>
-        hasNoDuplicate(entry, addressBook, addressBookFields, ['note'])
+        hasNoDuplicate(entry, addressBook, addressBookFields)
     );
     if (nonDuplicates.length > 0) {
         await importAddressBookEntry(nonDuplicates);
+    }
+    if (duplicates.length > 0) {
+        for (const duplicate of duplicates) {
+            const { address } = duplicate;
+            const match = addressBook.find((abe) => abe.address === address);
+            if (!match) {
+                // eslint-disable-next-line no-continue
+                continue;
+            }
+            const sameName = duplicate.name === match.name;
+            const sameNote = duplicate.note === match.note;
+            if (sameName && sameNote) {
+                // eslint-disable-next-line no-continue
+                continue;
+            }
+            const update: Partial<AddressBookEntry> = {};
+            if (!sameName) {
+                update.name = await resolveConflict([
+                    duplicate.name,
+                    match.name,
+                ]);
+            }
+            if (!sameNote) {
+                if (!duplicate.note || !match.note) {
+                    update.note = duplicate.note || match.note;
+                } else {
+                    update.note = await resolveConflict([
+                        duplicate.note,
+                        match.note,
+                    ]);
+                }
+            }
+            updateAddressBookEntry(dispatch, address, update);
+        }
     }
     return duplicates;
 }
@@ -68,7 +102,8 @@ interface Props {
 async function performImport(
     importedData: ExportData,
     existingData: ExportData,
-    dispatch: Dispatch
+    dispatch: Dispatch,
+    resolveConflict: (names: string[]) => Promise<string>
 ) {
     if (importedData.genesis) {
         const genesis = await getGenesis();
@@ -107,8 +142,10 @@ async function performImport(
 
     try {
         await importAddressBookEntries(
+            dispatch,
             importedData.addressBook,
-            existingData.addressBook
+            existingData.addressBook,
+            resolveConflict
         );
     } catch (e) {
         throw new Error(
@@ -141,7 +178,24 @@ export default function PerformImport({ location }: Props) {
     const externalCredentials = useSelector(externalCredentialsSelector);
 
     const [error, setError] = useState<string>();
+    const [showConflict, setShowConflict] = useState<ResolveModalInput>({
+        open: false,
+    });
     const [started, setStarted] = useState(false);
+
+    function resolveNameConflict(names: string[]) {
+        return new Promise<string>((resolve) => {
+            setShowConflict({
+                open: true,
+                header: 'Please resolve conflict',
+                choices: names,
+                onResolve: (chosenName: string) => {
+                    setShowConflict({ open: false });
+                    resolve(chosenName);
+                },
+            });
+        });
+    }
 
     useEffect(() => {
         if (!started && importedData) {
@@ -156,7 +210,8 @@ export default function PerformImport({ location }: Props) {
                     externalCredentials,
                     wallets: [],
                 },
-                dispatch
+                dispatch,
+                resolveNameConflict
             ).catch((e) => setError(e.message));
         }
     }, [
@@ -191,6 +246,7 @@ export default function PerformImport({ location }: Props) {
 
     return (
         <>
+            <ResolveModal {...showConflict} />
             <SimpleErrorModal
                 header="Unable to complete import"
                 content={error}
