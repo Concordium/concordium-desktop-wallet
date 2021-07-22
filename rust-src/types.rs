@@ -1,7 +1,7 @@
 use crate::{
     helpers::*,
 };
-use ps_sig::unknown_message::SigRetrievalRandomness;
+use ps_sig::SigRetrievalRandomness;
 use crypto_common::{types::KeyIndex, *};
 use curve_arithmetic::{Curve, Pairing};
 use std::collections::BTreeMap;

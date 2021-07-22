@@ -2,7 +2,7 @@ use crate::{
     helpers::*,
     types::*,
 };
-use dodis_yampolskiy_prf::secret as prf;
+use dodis_yampolskiy_prf as prf;
 use pairing::bls12_381::{Bls12, G1};
 use serde_json::{from_str, Value as SerdeValue};
 use std::collections::BTreeMap;
@@ -15,11 +15,10 @@ use id::{
     account_holder::*,
     secret_sharing::Threshold,
     types::*,
-    ffi::AttributeKind,
-    constants::BaseField,
+    constants::{BaseField, AttributeKind},
 };
 use pedersen_scheme::{
-    randomness::Randomness as PedersenRandomness, value::Value,
+    Randomness as PedersenRandomness, Value,
 };
 
 type ExampleAttributeList = AttributeList<BaseField, AttributeKind>;
