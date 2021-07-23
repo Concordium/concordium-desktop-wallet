@@ -1,10 +1,14 @@
 /* eslint-disable no-await-in-loop */
-import { getAccountsOfIdentity, insertAccount } from '../database/AccountDao';
+import {
+    getAccountsOfIdentity,
+    insertAccount,
+    updateAccount,
+} from '../database/AccountDao';
 import {
     getCredentialsForIdentity,
     insertCredential,
 } from '../database/CredentialDao';
-import { insertIdentity } from '../database/IdentityDao';
+import { insertIdentity, updateIdentity } from '../database/IdentityDao';
 import { insertWallet } from '../database/WalletDao';
 import { partition } from './basicHelpers';
 import {
@@ -30,6 +34,41 @@ interface AttachedEntities {
     attachedCredentials: Credential[];
     attachedAccounts: Account[];
 }
+
+export enum ConflictTypes {
+    // eslint-disable-next-line no-shadow
+    Account = 'account',
+    // eslint-disable-next-line no-shadow
+    Identity = 'identity',
+    AddressbookName = 'addressbook-name',
+    AddressbookNote = 'addressbook-note',
+}
+
+interface AccountMetadata {
+    type: ConflictTypes.Account;
+    account: Account;
+}
+
+interface IdentityMetadata {
+    type: ConflictTypes.Identity;
+    identity: Identity;
+}
+
+interface AddressbookMetadata {
+    type: ConflictTypes.AddressbookName | ConflictTypes.AddressbookNote;
+    address: string;
+}
+
+export type ConflictMetadata =
+    | AccountMetadata
+    | IdentityMetadata
+    | AddressbookMetadata;
+
+export type NameResolver = (
+    existingName: string,
+    importName: string,
+    metaData: ConflictMetadata
+) => Promise<string>;
 
 export function updateWalletIdReference<T extends HasWalletId>(
     importedWalletId: number,
@@ -167,25 +206,44 @@ async function insertNewIdentities(
 async function insertNewAccountsAndCredentials(
     identityId: number,
     accountsOnIdentity: Account[],
-    credentialsOnIdentity: Credential[]
+    credentialsOnIdentity: Credential[],
+    resolveConflict: NameResolver
 ) {
-    // Only consider accounts that are not already in the database.
-    const existingAccountAddressesInDatabase = (
-        await getAccountsOfIdentity(identityId)
-    ).map((account) => account.address);
+    const existingAccounts = await getAccountsOfIdentity(identityId);
 
-    const newAccounts = accountsOnIdentity.filter(
-        (accountOnIdentity) =>
-            !existingAccountAddressesInDatabase.includes(
-                accountOnIdentity.address
-            )
+    // Partition the accounts into those that match the existing data, and those that
+    // do not.
+    const [
+        duplicateAccounts,
+        nonDuplicateAccounts,
+    ] = partition(accountsOnIdentity, (acc) =>
+        isDuplicate(acc, existingAccounts, ['address'])
     );
-    for (let j = 0; j < newAccounts.length; j += 1) {
+
+    // Insert new accounts
+    for (const newAccount of nonDuplicateAccounts) {
         const newAccountToInsert: Account = {
-            ...newAccounts[j],
+            ...newAccount,
             identityId,
         };
         await insertAccount(newAccountToInsert);
+    }
+
+    // Check for name conflicts on existing accounts, and resolve them.
+    for (const duplicate of duplicateAccounts) {
+        const match = existingAccounts.find(
+            (acc) => acc.address === duplicate.address
+        );
+        if (match && duplicate.name !== match.name) {
+            const chosenName = await resolveConflict(
+                match.name,
+                duplicate.name,
+                { type: ConflictTypes.Account, account: match }
+            );
+            if (chosenName !== match.name) {
+                updateAccount(duplicate.address, { name: chosenName });
+            }
+        }
     }
 
     // Only consider credentials that are not already in the database.
@@ -199,9 +257,9 @@ async function insertNewAccountsAndCredentials(
                 credentialOnIdentity.credId
             )
     );
-    for (let k = 0; k < newCredentials.length; k += 1) {
+    for (const newCredential of newCredentials) {
         const newCredentialToInsert = {
-            ...newCredentials[k],
+            ...newCredential,
             identityId,
         };
         await insertCredential(newCredentialToInsert);
@@ -274,7 +332,8 @@ async function importDuplicateWallets(
     duplicateWallets: WalletEntry[],
     importedIdentities: Identity[],
     importedCredentials: Credential[],
-    importedAccounts: Account[]
+    importedAccounts: Account[],
+    resolveConflict: NameResolver
 ) {
     const {
         attachedIdentities,
@@ -319,7 +378,8 @@ async function importDuplicateWallets(
         await insertNewAccountsAndCredentials(
             identityId,
             accountsOnIdentity,
-            credentialsOnIdentity
+            credentialsOnIdentity,
+            resolveConflict
         );
     }
 
@@ -333,7 +393,6 @@ async function importDuplicateWallets(
         isDuplicate(nonDuplicateIdentity, existingData.identities, [
             'identityNumber',
             'identityObject',
-            'name',
             'randomness',
         ])
     );
@@ -346,10 +405,9 @@ async function importDuplicateWallets(
         const existingIdentity = existingIdentities[i];
 
         // Find the identity id as it is in the database.
-        const newIdentity = existingData.identities.find((ident) => {
+        const identityInDatabase = existingData.identities.find((ident) => {
             if (
                 ident.identityNumber === existingIdentity.identityNumber &&
-                ident.name === existingIdentity.name &&
                 ident.randomness === existingIdentity.randomness
             ) {
                 return true;
@@ -357,13 +415,26 @@ async function importDuplicateWallets(
             return false;
         });
 
-        if (!newIdentity) {
+        if (!identityInDatabase) {
             throw new Error(
                 'Internal error. An existing and matching identity should have been found, but was not.'
             );
         }
 
-        const newIdentityId = newIdentity.id;
+        const newIdentityId = identityInDatabase.id;
+
+        // If there is a naming conflict between the names, ask the user to resolve it.
+        if (existingIdentity.name !== identityInDatabase.name) {
+            const chosenName = await resolveConflict(
+                identityInDatabase.name,
+                existingIdentity.name,
+                { type: ConflictTypes.Identity, identity: identityInDatabase }
+            );
+            if (chosenName !== identityInDatabase.name) {
+                updateIdentity(newIdentityId, { name: chosenName });
+            }
+        }
+
         const {
             accountsOnIdentity,
             credentialsOnIdentity,
@@ -376,7 +447,8 @@ async function importDuplicateWallets(
         await insertNewAccountsAndCredentials(
             newIdentityId,
             accountsOnIdentity,
-            credentialsOnIdentity
+            credentialsOnIdentity,
+            resolveConflict
         );
     }
 
@@ -398,7 +470,8 @@ async function importExistingWallets(
     existingData: ExportData,
     importedIdentities: Identity[],
     importedCredentials: Credential[],
-    importedAccounts: Account[]
+    importedAccounts: Account[],
+    resolveConflict: NameResolver
 ) {
     const { attachedIdentities } = findAttachedEntities(
         existingWallets,
@@ -440,7 +513,8 @@ async function importExistingWallets(
         duplicateWallets,
         identitiesWithUpdatedWalletIds,
         importedCredentials,
-        importedAccounts
+        importedAccounts,
+        resolveConflict
     );
 }
 
@@ -453,7 +527,8 @@ export async function importWallets(
     importedWallets: WalletEntry[],
     importedIdentities: Identity[],
     importedAccounts: Account[],
-    importedCredentials: Credential[]
+    importedCredentials: Credential[],
+    resolveConflict: NameResolver
 ) {
     const [
         duplicateWalletEntries,
@@ -471,7 +546,8 @@ export async function importWallets(
         duplicateWalletEntries,
         importedIdentities,
         importedCredentials,
-        importedAccounts
+        importedAccounts,
+        resolveConflict
     );
 
     // The wallets that are not exact duplicates of what is already present in the database, can
@@ -492,7 +568,8 @@ export async function importWallets(
         existingData,
         importedIdentities,
         importedCredentials,
-        importedAccounts
+        importedAccounts,
+        resolveConflict
     );
     await importNewWallets(
         newWallets,
