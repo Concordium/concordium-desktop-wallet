@@ -53,7 +53,7 @@ export async function importAddressBookEntries(
     entries: AddressBookEntry[],
     addressBook: AddressBookEntry[],
     resolveConflict: NameResolver
-): Promise<AddressBookEntry[]> {
+) {
     const [nonDuplicates, duplicates] = partition(entries, (entry) =>
         hasNoDuplicate(entry, addressBook, addressBookFields)
     );
@@ -77,8 +77,8 @@ export async function importAddressBookEntries(
             const update: Partial<AddressBookEntry> = {};
             if (!sameName) {
                 update.name = await resolveConflict(
-                    duplicate.name,
                     match.name,
+                    duplicate.name,
                     { type: ConflictTypes.AddressbookName, address }
                 );
             }
@@ -87,8 +87,8 @@ export async function importAddressBookEntries(
                     update.note = duplicate.note || match.note;
                 } else {
                     update.note = await resolveConflict(
-                        duplicate.note,
                         match.note,
+                        duplicate.note,
                         { type: ConflictTypes.AddressbookNote, address }
                     );
                 }
@@ -96,7 +96,6 @@ export async function importAddressBookEntries(
             updateAddressBookEntry(dispatch, address, update);
         }
     }
-    return duplicates;
 }
 
 interface Location {
@@ -278,7 +277,10 @@ export default function PerformImport({ location }: Props) {
     const AddressBookList = importedData.addressBook.map(
         (entry: AddressBookEntry) => (
             <p key={entry.address} className={styles.importedAddress}>
-                {entry.name}
+                {entry.name}{' '}
+                <span className="bodyLight">
+                    {messages[entry.address] && `(${messages[entry.address]})`}
+                </span>
             </p>
         )
     );

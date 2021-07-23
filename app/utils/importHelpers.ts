@@ -84,15 +84,20 @@ export function chooseName(
     let chosenName = existingName;
     let identifier: string | number = '';
     let message = '';
+
+    function resolveAccountName(address: string) {
+        if (address.includes(existingName)) {
+            chosenName = importName;
+            message = `Replaces name: ${existingName}`;
+        } else {
+            message = `Already exists as: ${existingName}`;
+        }
+    }
+
     switch (metaData.type) {
         case ConflictTypes.Account: {
             identifier = metaData.account.address;
-            if (metaData.account.address.includes(existingName)) {
-                chosenName = importName;
-                message = `Replaces name: ${existingName}`;
-            } else {
-                message = `Already exists as: ${existingName}`;
-            }
+            resolveAccountName(metaData.account.address);
             break;
         }
         case ConflictTypes.Identity: {
@@ -109,9 +114,8 @@ export function chooseName(
             break;
         }
         case ConflictTypes.AddressbookName: {
-            if (metaData.address.includes(existingName)) {
-                chosenName = importName;
-            }
+            identifier = metaData.address;
+            resolveAccountName(metaData.address);
             break;
         }
         case ConflictTypes.AddressbookNote:
