@@ -53,13 +53,14 @@ export async function importAddressBookEntries(
     entries: AddressBookEntry[],
     addressBook: AddressBookEntry[],
     resolveConflict: NameResolver
-) {
+): Promise<AddressBookEntry[]> {
     const [nonDuplicates, duplicates] = partition(entries, (entry) =>
         hasNoDuplicate(entry, addressBook, addressBookFields)
     );
     if (nonDuplicates.length > 0) {
         await importAddressBookEntry(nonDuplicates);
     }
+    const trueDuplicates = [];
     if (duplicates.length > 0) {
         for (const duplicate of duplicates) {
             const { address } = duplicate;
@@ -71,31 +72,32 @@ export async function importAddressBookEntries(
             const sameName = duplicate.name === match.name;
             const sameNote = duplicate.note === match.note;
             if (sameName && sameNote) {
-                // eslint-disable-next-line no-continue
-                continue;
-            }
-            const update: Partial<AddressBookEntry> = {};
-            if (!sameName) {
-                update.name = await resolveConflict(
-                    match.name,
-                    duplicate.name,
-                    { type: ConflictTypes.AddressbookName, address }
-                );
-            }
-            if (!sameNote) {
-                if (!duplicate.note || !match.note) {
-                    update.note = duplicate.note || match.note;
-                } else {
-                    update.note = await resolveConflict(
-                        match.note,
-                        duplicate.note,
-                        { type: ConflictTypes.AddressbookNote, address }
+                trueDuplicates.push(duplicate);
+            } else {
+                const update: Partial<AddressBookEntry> = {};
+                if (!sameName) {
+                    update.name = await resolveConflict(
+                        match.name,
+                        duplicate.name,
+                        { type: ConflictTypes.AddressbookName, address }
                     );
                 }
+                if (!sameNote) {
+                    if (!duplicate.note || !match.note) {
+                        update.note = duplicate.note || match.note;
+                    } else {
+                        update.note = await resolveConflict(
+                            match.note,
+                            duplicate.note,
+                            { type: ConflictTypes.AddressbookNote, address }
+                        );
+                    }
+                }
+                updateAddressBookEntry(dispatch, address, update);
             }
-            updateAddressBookEntry(dispatch, address, update);
         }
     }
+    return trueDuplicates;
 }
 
 interface Location {
@@ -147,9 +149,9 @@ async function performImport(
             'The imported data is not compatible with existing data.'
         );
     }
-
+    let duplicateAddressBookEntries;
     try {
-        await importAddressBookEntries(
+        duplicateAddressBookEntries = await importAddressBookEntries(
             dispatch,
             importedData.addressBook,
             existingData.addressBook,
@@ -186,6 +188,8 @@ async function performImport(
     await loadAddressBook(dispatch);
     await loadCredentials(dispatch);
     await loadExternalCredentials(dispatch);
+
+    return duplicateAddressBookEntries;
 }
 
 /**
@@ -203,6 +207,10 @@ export default function PerformImport({ location }: Props) {
     const credentials = useSelector(credentialsSelector);
     const externalCredentials = useSelector(externalCredentialsSelector);
 
+    const [
+        duplicateAddressBookEntries,
+        setDuplicateAddressBookEntries,
+    ] = useState<AddressBookEntry[]>([]);
     const [messages, setMessages] = useState<Record<string | number, string>>(
         {}
     );
@@ -244,7 +252,9 @@ export default function PerformImport({ location }: Props) {
                 },
                 dispatch,
                 resolveNameConflict
-            ).catch((e) => setError(e.message));
+            )
+                .then(setDuplicateAddressBookEntries)
+                .catch((e) => setError(e.message));
         }
     }, [
         importedData,
@@ -274,16 +284,21 @@ export default function PerformImport({ location }: Props) {
                 </p>
             ));
 
-    const AddressBookList = importedData.addressBook.map(
-        (entry: AddressBookEntry) => (
+    const AddressBookList = importedData.addressBook
+        .filter(
+            (abe) =>
+                !duplicateAddressBookEntries.some(
+                    (dAbe) => abe.address === dAbe.address
+                )
+        )
+        .map((entry: AddressBookEntry) => (
             <p key={entry.address} className={styles.importedAddress}>
                 {entry.name}{' '}
                 <span className="bodyLight">
                     {messages[entry.address] && `(${messages[entry.address]})`}
                 </span>
             </p>
-        )
-    );
+        ));
 
     return (
         <>
@@ -366,6 +381,17 @@ export default function PerformImport({ location }: Props) {
                                             Recipient accounts:
                                         </p>
                                         {AddressBookList}
+                                        {duplicateAddressBookEntries.length && (
+                                            <p>
+                                                (
+                                                {
+                                                    duplicateAddressBookEntries.length
+                                                }{' '}
+                                                recipient accounts were not
+                                                imported, as they already
+                                                existed)
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
