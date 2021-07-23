@@ -42,6 +42,7 @@ export enum ConflictTypes {
     Identity = 'identity',
     AddressbookName = 'addressbook-name',
     AddressbookNote = 'addressbook-note',
+    CredentialNote = 'credential-note',
 }
 
 interface AccountMetadata {
@@ -59,9 +60,14 @@ interface AddressbookMetadata {
     address: string;
 }
 
+interface CredentialNoteMetadata {
+    type: ConflictTypes.CredentialNote;
+}
+
 export type ConflictMetadata =
     | AccountMetadata
     | IdentityMetadata
+    | CredentialNoteMetadata
     | AddressbookMetadata;
 
 export type NameResolver = (
@@ -69,6 +75,55 @@ export type NameResolver = (
     importName: string,
     metaData: ConflictMetadata
 ) => Promise<string>;
+
+export function chooseName(
+    existingName: string,
+    importName: string,
+    metaData: ConflictMetadata
+) {
+    let chosenName = existingName;
+    let identifier: string | number = '';
+    let message = '';
+    switch (metaData.type) {
+        case ConflictTypes.Account: {
+            identifier = metaData.account.address;
+            if (metaData.account.address.includes(existingName)) {
+                chosenName = importName;
+                message = `Replaces name: ${existingName}`;
+            } else {
+                message = `Already exists as: ${existingName}`;
+            }
+            break;
+        }
+        case ConflictTypes.Identity: {
+            identifier = metaData.identity.id;
+            /*
+                if (metaData.identity.status === IdentityStatus.Recovered) {
+                    chosenName = importName;
+                    message = `Replaces Placeholder identity: ${existingName}`;
+                } else {
+                    message = `Already exists as: ${existingName}`;
+                }
+                */
+            message = `Already exists as: ${existingName}`;
+            break;
+        }
+        case ConflictTypes.AddressbookName: {
+            if (metaData.address.includes(existingName)) {
+                chosenName = importName;
+            }
+            break;
+        }
+        case ConflictTypes.AddressbookNote:
+        case ConflictTypes.CredentialNote: {
+            chosenName = existingName || importName;
+            break;
+        }
+        default:
+            break;
+    }
+    return { chosenName, identifier, message };
+}
 
 export function updateWalletIdReference<T extends HasWalletId>(
     importedWalletId: number,

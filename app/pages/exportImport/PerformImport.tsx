@@ -35,6 +35,7 @@ import {
     ConflictTypes,
     NameResolver,
     ConflictMetadata,
+    chooseName,
 } from '~/utils/importHelpers';
 import { partition } from '~/utils/basicHelpers';
 import PageLayout from '~/components/PageLayout';
@@ -161,7 +162,23 @@ async function performImport(
         );
     }
 
-    await importExternalCredentials(importedData.externalCredentials);
+    const newExternalCredentials = [];
+    for (const externalCredential of importedData.externalCredentials) {
+        const match = existingData.externalCredentials.find(
+            (cred) => cred.credId === externalCredential.credId
+        );
+        if (!match) {
+            newExternalCredentials.push(externalCredential);
+        } else if (match.note !== externalCredential.note) {
+            const note = await resolveConflict(
+                match.note,
+                externalCredential.note,
+                { type: ConflictTypes.CredentialNote }
+            );
+            newExternalCredentials.push({ ...externalCredential, note });
+        }
+    }
+    await importExternalCredentials(newExternalCredentials);
 
     await loadIdentities(dispatch);
     await loadAccounts(dispatch);
@@ -196,36 +213,11 @@ export default function PerformImport({ location }: Props) {
         importName: string,
         metaData: ConflictMetadata
     ) {
-        let chosenName = existingName;
-        let identifier: string | number = '';
-        let message = '';
-        switch (metaData.type) {
-            case ConflictTypes.Account: {
-                identifier = metaData.account.address;
-                if (metaData.account.address.includes(existingName)) {
-                    chosenName = importName;
-                    message = `Replaces name: ${existingName}`;
-                } else {
-                    message = `Already exists as: ${existingName}`;
-                }
-                break;
-            }
-            case ConflictTypes.Identity: {
-                identifier = metaData.identity.id;
-                /*
-                if (metaData.identity.status === IdentityStatus.Recovered) {
-                    chosenName = importName;
-                    message = `Replaces Placeholder identity: ${existingName}`;
-                } else {
-                    message = `Already exists as: ${existingName}`;
-                }
-                */
-                message = `Already exists as: ${existingName}`;
-                break;
-            }
-            default:
-                break;
-        }
+        const { chosenName, identifier, message } = chooseName(
+            existingName,
+            importName,
+            metaData
+        );
         if (message) {
             setMessages((currentMessages) => {
                 const newMap = { ...currentMessages };
