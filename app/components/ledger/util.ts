@@ -20,11 +20,3 @@ export type LedgerSubmitHandler = () => Promise<void>;
 export function isConcordiumApp({ name }: AppAndVersion) {
     return name === 'Concordium';
 }
-
-export interface TransportStatusError {
-    name: string;
-    message: string;
-    stack: string;
-    statusCode: number;
-    statusText: string;
-}

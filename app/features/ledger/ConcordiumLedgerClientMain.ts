@@ -64,15 +64,6 @@ async function wrapResult<T>(
     }
 }
 
-function connectToLedgerEmulator(): boolean {
-    if (process.env.LEDGER_EMULATOR_URL) {
-        return true;
-    }
-    return false;
-}
-
-const connectToEmulator: boolean = connectToLedgerEmulator();
-
 /**
  * Concordium Ledger API.
  *
@@ -87,13 +78,13 @@ export default class ConcordiumLedgerClientMain {
 
     mainWindow: BrowserWindow;
 
-    constructor(transport: HwTransport, mainWindow: BrowserWindow) {
-        if (connectToEmulator) {
+    constructor(mainWindow: BrowserWindow, transport?: HwTransport) {
+        if (transport) {
+            this.transport = new TransportImpl(transport);
+        } else {
             // Transport for communicating with the Ledger Speculos emulator.
             // Only to be used for testing, as the emulator is not secure in any way.
             this.transport = new EmulatorTransport();
-        } else {
-            this.transport = new TransportImpl(transport);
         }
         this.mainWindow = mainWindow;
     }
