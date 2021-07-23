@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import PickRecipient from './PickRecipient';
-import PickAmount from './PickAmount';
-import FinalPage from './FinalPage';
+import PlusIcon from '@resources/svg/plus.svg';
+import PickRecipient from '../PickRecipient';
+import PickAmount from '../PickAmount';
+import FinalPage from '../FinalPage';
 import { TransactionKindId, AddressBookEntry, Fraction } from '~/utils/types';
 import locations from '~/constants/transferLocations.json';
 import { TransferState } from '~/utils/transactionTypes';
-import TransferView from './TransferView';
+import TransferView from '../TransferView';
+import UpsertAddress from '../../UpsertAddress';
+
+import styles from './ExternalTransfer.module.scss';
 
 interface Props {
     toConfirmTransfer(amount: string, recipient: AddressBookEntry): void;
@@ -41,7 +45,7 @@ export default function ExternalTransfer({
         location?.state?.recipient
     );
 
-    function chooseRecipientOnClick(entry: AddressBookEntry) {
+    function selectRecipient(entry: AddressBookEntry) {
         setRecipient(entry);
         setSubLocation(locations.pickAmount);
     }
@@ -75,12 +79,22 @@ export default function ExternalTransfer({
                 />
             )}
             {subLocation === locations.pickRecipient && (
-                <div className="mH30">
-                    <PickRecipient
-                        pickRecipient={chooseRecipientOnClick}
-                        senderAddress={senderAddress}
-                    />
-                </div>
+                <>
+                    <div className="mH30">
+                        <h3 className="textCenter">Select recipient</h3>
+                        <PickRecipient
+                            pickRecipient={selectRecipient}
+                            senderAddress={senderAddress}
+                        />
+                    </div>
+                    <UpsertAddress
+                        clear
+                        className={styles.addRecipient}
+                        onSubmit={selectRecipient}
+                    >
+                        <PlusIcon />
+                    </UpsertAddress>
+                </>
             )}
             {subLocation === locations.transferSubmitted && (
                 <FinalPage location={location} />

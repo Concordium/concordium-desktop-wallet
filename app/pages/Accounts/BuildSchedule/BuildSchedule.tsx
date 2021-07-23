@@ -1,12 +1,16 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { stringify, parse } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
 import { Account, AddressBookEntry, Schedule } from '~/utils/types';
 import { displayAsGTU, microGtuToGtu } from '~/utils/gtu';
-import { createScheduledTransferTransaction } from '~/utils/transactionHelpers';
+import { collapseFraction } from '~/utils/basicHelpers';
+import {
+    createScheduledTransferTransaction,
+    amountAtDisposal,
+} from '~/utils/transactionHelpers';
 import locations from '~/constants/transferLocations.json';
 import RegularInterval from '~/components/BuildSchedule/BuildRegularInterval';
 import ExplicitSchedule from '~/components/BuildSchedule/BuildExplicitSchedule';
@@ -16,6 +20,7 @@ import TransferView from '~/components/Transfers/TransferView';
 import styles from './BuildSchedule.module.scss';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import ButtonGroup from '~/components/ButtonGroup';
+import { chosenAccountInfoSelector } from '~/features/AccountSlice';
 
 interface State {
     account: Account;
@@ -53,18 +58,38 @@ export default function BuildSchedule({ location }: Props) {
     } = location.state;
 
     const [scheduleLength, setScheduleLength] = useState<number>(0);
+    const accountInfo = useSelector(chosenAccountInfoSelector);
 
-    const feeCalculator = useMemo(
-        () => scheduledTransferCost(parse(exchangeRate)),
-        [exchangeRate]
-    );
     const estimatedFee = useMemo(
-        () => (scheduleLength ? feeCalculator(scheduleLength) : undefined),
-        [feeCalculator, scheduleLength]
+        () =>
+            scheduleLength
+                ? scheduledTransferCost(parse(exchangeRate))(scheduleLength)
+                : undefined,
+        [exchangeRate, scheduleLength]
     );
+
+    const [amountError, setAmountError] = useState<string>();
+
+    useEffect(() => {
+        const atDisposal = amountAtDisposal(accountInfo);
+        if (
+            estimatedFee &&
+            atDisposal < BigInt(amount) + collapseFraction(estimatedFee)
+        ) {
+            setAmountError(
+                `Insufficient funds: ${displayAsGTU(atDisposal)} at disposal.`
+            );
+        } else {
+            setAmountError(undefined);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [estimatedFee, amount, JSON.stringify(accountInfo)]);
 
     const createTransaction = useCallback(
         (schedule: Schedule, recoverState: unknown) => {
+            if (amountError) {
+                return;
+            }
             const transaction = createScheduledTransferTransaction(
                 account.address,
                 recipient.address,
@@ -94,6 +119,8 @@ export default function BuildSchedule({ location }: Props) {
                                 amount,
                                 defaults: recoverState,
                                 recipient,
+                                nonce,
+                                exchangeRate,
                             },
                         },
                         transaction: transactionJSON,
@@ -103,7 +130,7 @@ export default function BuildSchedule({ location }: Props) {
             );
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [JSON.stringify(account), estimatedFee, recipient]
+        [JSON.stringify(account), estimatedFee, recipient, amountError]
     );
 
     const BuildComponent = explicit ? ExplicitSchedule : RegularInterval;
@@ -129,6 +156,7 @@ export default function BuildSchedule({ location }: Props) {
                         {displayAsGTU(amount)} to {recipient.name}
                     </h2>
                     <DisplayEstimatedFee estimatedFee={estimatedFee} />
+                    <p className={styles.errorLabel}>{amountError}</p>
                 </div>
                 <ButtonGroup
                     buttons={[

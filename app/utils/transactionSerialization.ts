@@ -117,7 +117,7 @@ export function serializeTransferToPublicData(
     payload: TransferToPublicPayload
 ) {
     if (payload.index === undefined || !payload.remainingEncryptedAmount) {
-        throw new Error('unexpected missing data of Transfer to Public data');
+        throw new Error('unexpected missing data of Unshielding data');
     }
     const remainingEncryptedAmount = Buffer.from(
         payload.remainingEncryptedAmount,
@@ -133,7 +133,7 @@ export function serializeTransferToPublicData(
 
 function serializeTransferToPublic(payload: TransferToPublicPayload) {
     if (!payload.proof) {
-        throw new Error('unexpected missing proof of Transfer to Public data');
+        throw new Error('unexpected missing proof of Unshielding data');
     }
 
     const proof = Buffer.from(payload.proof, 'hex');
@@ -155,7 +155,7 @@ export function serializeEncryptedTransferData(
         !payload.remainingEncryptedAmount ||
         !payload.transferAmount
     ) {
-        throw new Error('unexpected missing data of Encrypted Transfer data');
+        throw new Error('unexpected missing data of Shielded Transfer data');
     }
     const remainingEncryptedAmount = Buffer.from(
         payload.remainingEncryptedAmount,
@@ -176,7 +176,7 @@ export function serializeEncryptedTransferData(
 
 function serializeEncryptedTransfer(payload: EncryptedTransferPayload) {
     if (!payload.proof) {
-        throw new Error('unexpected missing proof of Encrypted Transfer data');
+        throw new Error('unexpected missing proof of Shielded Transfer data');
     }
 
     const proof = Buffer.from(payload.proof, 'hex');

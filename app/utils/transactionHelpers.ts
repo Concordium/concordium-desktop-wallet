@@ -56,35 +56,6 @@ export async function lookupName(address: string): Promise<string | undefined> {
     return (await lookupAddressBookEntry(address))?.name;
 }
 
-/**
- * Attempts to find names on the addresses of the transaction, and adds
- * toAddressName/fromAddressName fields, if successful.
- * returns the potentially modified transaction.
- */
-async function attachName(
-    transaction: TransferTransaction
-): Promise<TransferTransaction> {
-    const updatedTransaction = { ...transaction };
-    const toName = await lookupName(transaction.toAddress);
-    if (toName) {
-        updatedTransaction.toAddressName = toName;
-    }
-    const fromName = await lookupName(transaction.fromAddress);
-    if (fromName) {
-        updatedTransaction.fromAddressName = fromName;
-    }
-    return updatedTransaction;
-}
-
-/**
- * AttachName for a list of transaction. See attachName.
- */
-export async function attachNames(
-    transactions: TransferTransaction[]
-): Promise<TransferTransaction[]> {
-    return Promise.all(transactions.map(attachName));
-}
-
 interface CreateAccountTransactionInput<T> {
     fromAddress: string;
     expiry: Date;
@@ -521,7 +492,7 @@ export function isSuccessfulTransaction(event: TransactionEvent) {
 export const isExpired = (transaction: Transaction) =>
     getTimeout(transaction) <= getNow(TimeStampUnit.seconds);
 
-function amountAtDisposal(accountInfo: AccountInfo): bigint {
+export function amountAtDisposal(accountInfo: AccountInfo): bigint {
     const unShielded = BigInt(accountInfo.accountAmount);
     const stakedAmount = accountInfo.accountBaker
         ? BigInt(accountInfo.accountBaker.stakedAmount)

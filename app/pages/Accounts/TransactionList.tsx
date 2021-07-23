@@ -1,12 +1,33 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import TransactionListElement from './TransactionListElement';
-import { TransferTransaction } from '~/utils/types';
+import groupBy from 'lodash.groupby';
+import { TimeStampUnit, TransferTransaction } from '~/utils/types';
 import {
     moreTransactionsSelector,
     loadingTransactionsSelector,
 } from '~/features/TransactionSlice';
 import LoadingComponent from '~/cross-app-components/Loading';
+import { dateFromTimeStamp } from '~/utils/timeHelpers';
+import TransactionListGroup from './TransactionListGroup';
+
+const dateFormat = Intl.DateTimeFormat(undefined, { dateStyle: 'medium' })
+    .format;
+
+const getGroupHeader = (d: Date): string => {
+    const today = new Date().toDateString();
+    const yesterday = new Date(
+        new Date().setDate(new Date().getDate() - 1)
+    ).toDateString();
+
+    switch (d.toDateString()) {
+        case today:
+            return 'Today';
+        case yesterday:
+            return 'Yesterday';
+        default:
+            return dateFormat(d);
+    }
+};
 
 interface Props {
     transactions: TransferTransaction[];
@@ -24,6 +45,16 @@ function TransactionList({
     const more = useSelector(moreTransactionsSelector);
     const loading = useSelector(loadingTransactionsSelector);
     const [showLoading, setShowLoading] = useState(false);
+
+    const transactionGroups = useMemo(
+        () =>
+            groupBy(transactions, (t) =>
+                getGroupHeader(
+                    dateFromTimeStamp(t.blockTime, TimeStampUnit.seconds)
+                )
+            ),
+        [transactions]
+    );
 
     useEffect(() => {
         if (loading) {
@@ -60,11 +91,12 @@ function TransactionList({
 
     return (
         <>
-            {transactions.map((transaction: TransferTransaction) => (
-                <TransactionListElement
-                    onClick={() => onTransactionClick(transaction)}
-                    key={transaction.transactionHash || transaction.id}
-                    transaction={transaction}
+            {Object.entries(transactionGroups).map(([h, ts]) => (
+                <TransactionListGroup
+                    key={h}
+                    header={h}
+                    transactions={ts}
+                    onTransactionClick={onTransactionClick}
                 />
             ))}
             {more && (

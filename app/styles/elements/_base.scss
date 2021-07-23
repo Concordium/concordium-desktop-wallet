@@ -38,6 +38,14 @@ body {
     background-color: transparent;
 }
 
+a {
+    &,
+    &:hover,
+    &:visited {
+        color: $color-pale-blue;
+    }
+}
+
 button,
 label {
     cursor: pointer;

@@ -2,8 +2,9 @@ import React from 'react';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import { UpdateAccountCredentials } from '~/utils/types';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
-import styles from './DisplayAccountCredentialUpdate.module.scss';
 import DisplayEstimatedFee from '../DisplayEstimatedFee';
+
+import styles from './DisplayAccountCredentialUpdate.module.scss';
 
 interface Props {
     transaction: UpdateAccountCredentials;
@@ -48,7 +49,15 @@ export default function DisplayAccountCredentialUpdate({
                             key={addedCredential.value.credId}
                             className={styles.credId}
                         >
-                            {addedCredential.value.credId}
+                            {addedCredential.note !== undefined && (
+                                <>
+                                    {addedCredential.note}
+                                    <br />
+                                </>
+                            )}
+                            <span className="textFaded">
+                                {addedCredential.value.credId}
+                            </span>
                         </p>
                     ))}
                 </>

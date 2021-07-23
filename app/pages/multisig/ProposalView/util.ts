@@ -56,7 +56,7 @@ async function HandleAccountTransactionSignatureFile(
 
     let accountInfo;
     try {
-        accountInfo = await getAccountInfoOfAddress(transactionObject.sender);
+        accountInfo = await getAccountInfoOfAddress(proposal.sender);
     } catch (e) {
         return {
             show: true,
@@ -194,14 +194,26 @@ export async function HandleSignatureFiles(
         } catch (error) {
             return invalidFile;
         }
-        const result = await signatureFileHandler(
-            transactionInFile,
-            transaction
-        );
-        if ('show' in result) {
-            return result;
+        if (!transactionInFile?.signatures) {
+            return invalidFile;
         }
-        transaction = result;
+
+        try {
+            const result = await signatureFileHandler(
+                transactionInFile,
+                transaction
+            );
+            if ('show' in result) {
+                return result;
+            }
+            transaction = result;
+        } catch (e) {
+            return {
+                show: true,
+                header: 'Unable to load signature',
+                content: `We were unable to load a given signature due to: ${e.message}`,
+            };
+        }
     }
 
     const updatedProposal = {

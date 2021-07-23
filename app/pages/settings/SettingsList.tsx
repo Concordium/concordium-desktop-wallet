@@ -2,7 +2,6 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { settingsSelector } from '~/features/SettingsSlice';
 import settingKeys from '~/constants/settingKeys.json';
-import routes from '~/constants/routes.json';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import { selectedSettingRoute } from '~/utils/routerHelper';
 
@@ -28,9 +27,6 @@ export default function SettingsList() {
                     {settingsName.get(setting.type)}
                 </ButtonNavLink>
             ))}
-            <ButtonNavLink className={styles.item} to={routes.SETTINGS_ABOUT}>
-                About
-            </ButtonNavLink>
         </>
     );
 }

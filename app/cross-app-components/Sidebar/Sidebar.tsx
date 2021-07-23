@@ -61,7 +61,6 @@ export default function Sidebar<THasSwitch extends boolean = false>({
                 <NavLink
                     className={styles.item}
                     to={routes.HOME}
-                    onClick={handleClick}
                     activeClassName={styles.itemActive}
                 >
                     <span className={styles.itemContent}>

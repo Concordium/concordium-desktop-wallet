@@ -22,6 +22,7 @@ import initializeDatabaseGeneralIpcHandlers from './ipc/database/general';
 import initializeDatabaseAccountIpcHandlers from './ipc/database/accountDao';
 import initializeDatabaseAddressBookIpcHandlers from './ipc/database/addressBookDao';
 import initializeDatabaseCredentialIpcHandlers from './ipc/database/credentialDao';
+import initializeDatabaseExternalCredentialIpcHandlers from './ipc/database/externalCredentialDao';
 import initializeDatabaseIdentityIpcHandlers from './ipc/database/identityDao';
 import initializeDatabaseGenesisAndGlobalIpcHandlers from './ipc/database/genesisAndGlobalDao';
 import initializeDatabaseMultiSignatureTransactionIpcHandlers from './ipc/database/multiSignatureProposalDao';
@@ -32,6 +33,7 @@ import initializeFilesIpcHandlers from './ipc/files';
 import initializeGrpcIpcHandlers from './ipc/grpc';
 import initializeClipboardIpcHandlers from './ipc/clipboard';
 import { PrintErrorTypes } from './utils/types';
+import { createMenu } from './main/menu';
 
 export default class AppUpdater {
     constructor() {
@@ -85,8 +87,17 @@ const createWindow = async () => {
     mainWindow = new BrowserWindow({
         title: `Concordium Wallet ${titleSuffix}`,
         show: false,
-        width: 4096,
-        height: 2912,
+        minWidth: 800,
+        minHeight: 600,
+        ...(process.env.NODE_ENV === 'development'
+            ? {
+                  width: 2560,
+                  height: 1440,
+              }
+            : {
+                  width: 1400,
+                  height: 1000,
+              }),
         webPreferences:
             process.env.NODE_ENV === 'development'
                 ? {
@@ -132,6 +143,8 @@ const createWindow = async () => {
         mainWindow = null;
     });
 
+    // make menu accessible on windows/linux
+    mainWindow.setAutoHideMenuBar(true);
     mainWindow.setMenuBarVisibility(false);
 
     printWindow = new BrowserWindow({
@@ -160,6 +173,7 @@ const createWindow = async () => {
     initializeDatabaseAccountIpcHandlers(ipcMain);
     initializeDatabaseAddressBookIpcHandlers(ipcMain);
     initializeDatabaseCredentialIpcHandlers(ipcMain);
+    initializeDatabaseExternalCredentialIpcHandlers(ipcMain);
     initializeDatabaseIdentityIpcHandlers(ipcMain);
     initializeDatabaseGenesisAndGlobalIpcHandlers(ipcMain);
     initializeDatabaseMultiSignatureTransactionIpcHandlers(ipcMain);
@@ -176,7 +190,7 @@ async function print(body: string) {
         } else {
             printWindow.loadURL(`data:text/html;charset=utf-8,${body}`);
             const content = printWindow.webContents;
-            content.on('did-finish-load', () => {
+            content.once('did-finish-load', () => {
                 content.print({}, (success, errorType) => {
                     if (!success) {
                         if (errorType === PrintErrorTypes.Cancelled) {
@@ -216,7 +230,13 @@ if (process.env.E2E_BUILD === 'true') {
     // eslint-disable-next-line promise/catch-or-return
     app.whenReady().then(createWindow);
 } else {
-    app.on('ready', createWindow);
+    app.on('ready', async () => {
+        await createWindow();
+
+        if (mainWindow) {
+            createMenu(mainWindow);
+        }
+    });
 }
 
 app.on('activate', () => {

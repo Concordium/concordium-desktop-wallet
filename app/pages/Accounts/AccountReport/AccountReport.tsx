@@ -7,7 +7,6 @@ import PageLayout from '~/components/PageLayout';
 import AccountPageHeader from '../AccountPageHeader';
 import routes from '~/constants/routes.json';
 import { getNow, TimeConstants } from '~/utils/timeHelpers';
-
 import Columns from '~/components/Columns';
 import Card from '~/cross-app-components/Card';
 import Button from '~/cross-app-components/Button';
@@ -15,43 +14,36 @@ import CloseButton from '~/cross-app-components/CloseButton';
 import Timestamp from '~/components/Form/InputTimestamp';
 import PickAccount from '~/components/PickAccount';
 import Checkbox from '~/components/Form/Checkbox';
-import ErrorModal from '~/components/SimpleErrorModal';
+import SimpleErrorModal, {
+    ModalErrorInput,
+} from '~/components/SimpleErrorModal';
+import DecryptModal, { DecryptModalInput } from '../DecryptModal';
+
 import {
     FilterOption,
     filterKind,
     filterKindGroup,
     getAccountCSV,
+    containsEncrypted,
 } from './util';
 import styles from './AccountReport.module.scss';
 import { SaveFileData } from '~/ipc/files';
 import ipcCommands from '~/constants/ipcCommands.json';
 import saveFile from '~/utils/FileHelper';
 
+const decryptMessage = (name: string) =>
+    `'${name}' has encrypted funds. To create a complete account report, we need to decrypt them. Otherwise this account will be skipped.`;
+
 const transactionTypeFilters: FilterOption[] = [
-    filterKind('Simple Transfers', TransactionKindString.Transfer),
-    filterKind(
-        'Scheduled Transfers',
-        TransactionKindString.TransferWithSchedule
-    ),
-    filterKind('Transfers to Public', TransactionKindString.TransferToPublic),
-    filterKind(
-        'Transfers to Encrypted',
-        TransactionKindString.TransferToEncrypted
-    ),
-    filterKind(
-        'Encrypted Transfer',
-        TransactionKindString.EncryptedAmountTransfer
-    ),
-    filterKind(
-        'Finalization Rewards',
-        TransactionKindString.FinalizationReward
-    ),
-    filterKind('Baker Rewards', TransactionKindString.BakingReward),
-    filterKind('Block Rewards', TransactionKindString.BlockReward),
-    filterKind(
-        'Update account credentials',
-        TransactionKindString.UpdateCredentials
-    ),
+    filterKind(TransactionKindString.Transfer),
+    filterKind(TransactionKindString.TransferWithSchedule),
+    filterKind(TransactionKindString.TransferToPublic),
+    filterKind(TransactionKindString.TransferToEncrypted),
+    filterKind(TransactionKindString.EncryptedAmountTransfer),
+    filterKind(TransactionKindString.FinalizationReward),
+    filterKind(TransactionKindString.BakingReward),
+    filterKind(TransactionKindString.BlockReward),
+    filterKind(TransactionKindString.UpdateCredentials),
     filterKindGroup('Baker Transactions', [
         TransactionKindString.AddBaker,
         TransactionKindString.RemoveBaker,
@@ -74,7 +66,13 @@ interface Props {
  * Allows the user to enable filters and to choose accounts.
  */
 export default function AccountReport({ location }: Props) {
-    const [modalOpen, setModalOpen] = useState(false);
+    const [showError, setShowError] = useState<ModalErrorInput>({
+        show: false,
+    });
+    const [showDecrypt, setShowDecrypt] = useState<DecryptModalInput>({
+        show: false,
+    });
+
     const [accounts, setAccounts] = useState<Account[]>(
         location?.state ? [location?.state.account] : []
     );
@@ -86,6 +84,20 @@ export default function AccountReport({ location }: Props) {
     const [currentFilters, setFilters] = useState<FilterOption[]>(() => [
         ...transactionTypeFilters,
     ]);
+
+    function promptDecrypt(account: Account) {
+        return new Promise((resolve) => {
+            setShowDecrypt({
+                show: true,
+                header: decryptMessage(account.name),
+                account,
+                onFinish: (decrypted) => {
+                    setShowDecrypt({ show: false });
+                    resolve(decrypted);
+                },
+            });
+        });
+    }
 
     // Flip the given filterOptions status (enabled/disabled)
     function flipStatus(filterOption: FilterOption) {
@@ -107,27 +119,51 @@ export default function AccountReport({ location }: Props) {
      * If there are multiple chosen accounts, the reports will be bundled into a zip file
      */
     const makeReport = useCallback(async () => {
+        const accountsToReport: Account[] = [];
+        for (const account of accounts) {
+            const hasEncrypted = await containsEncrypted(
+                account,
+                currentFilters,
+                fromDate,
+                toDate
+            );
+            if (!hasEncrypted || (await promptDecrypt(account))) {
+                accountsToReport.push(account);
+            }
+        }
+        const accountsLength = accountsToReport.length;
+
+        if (accountsLength === 0) {
+            if (accounts.length > 1) {
+                setShowError({
+                    show: true,
+                    header: 'Account Report was not saved.',
+                    content: 'All chosen accounts have encrypted funds.',
+                });
+            }
+            return Promise.resolve();
+        }
+
         try {
-            const accountsLength = accounts.length;
             if (accountsLength === 1) {
                 return saveFile(
                     await getAccountCSV(
-                        accounts[0],
+                        accountsToReport[0],
                         currentFilters,
                         fromDate,
                         toDate
                     ),
                     {
                         title: 'Save Account Report',
-                        defaultPath: `${accounts[0].name}.csv`,
+                        defaultPath: `${accountsToReport[0].name}.csv`,
                         filters: [{ name: 'csv', extensions: ['csv'] }],
                     }
                 );
             }
 
             const filesToZip: SaveFileData[] = [];
-            for (let i = 0; i < accounts.length; i += 1) {
-                const account = accounts[i];
+            for (let i = 0; i < accountsLength; i += 1) {
+                const account = accountsToReport[i];
                 const data = await getAccountCSV(
                     account,
                     currentFilters,
@@ -146,8 +182,12 @@ export default function AccountReport({ location }: Props) {
                 filesToZip
             );
         } catch (e) {
-            setModalOpen(true);
-            return Promise.resolve(false);
+            setShowError({
+                show: true,
+                header: 'Account Report was not saved.',
+                content: `Encountered error: ${e.message}`,
+            });
+            return Promise.resolve();
         }
     }, [accounts, currentFilters, fromDate, toDate]);
 
@@ -165,11 +205,13 @@ export default function AccountReport({ location }: Props) {
     }
     return (
         <>
-            <ErrorModal
-                show={modalOpen}
-                header="Account Report was not saved."
-                onClick={() => setModalOpen(false)}
+            <SimpleErrorModal
+                show={showError.show}
+                header={showError.header}
+                content={showError.content}
+                onClick={() => setShowError({ show: false })}
             />
+            <DecryptModal {...showDecrypt} />
             <PageLayout>
                 <PageLayout.Header>
                     <AccountPageHeader />

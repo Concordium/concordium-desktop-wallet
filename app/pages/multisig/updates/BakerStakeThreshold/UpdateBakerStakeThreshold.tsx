@@ -1,5 +1,6 @@
 import React from 'react';
 import Form from '~/components/Form';
+import Label from '~/components/Label';
 import { onlyDigitsNoLeadingZeroes } from '~/utils/basicHelpers';
 import { UpdateProps } from '~/utils/transactionTypes';
 import { EqualRecord } from '~/utils/types';
@@ -23,11 +24,12 @@ export default function UpdateBakerStakeThreshold({
 
     return (
         <>
-            <div>
-                <h3>Current baker stake threshold (µGTU)</h3>
+            <div className="body1">
+                <Label>Current baker stake threshold (µGTU)</Label>
                 {currentBakerStakeThreshold.toString()}
             </div>
             <Form.Input
+                className="body1"
                 name={fieldNames.threshold}
                 label="New baker stake threshold (µGTU)"
                 defaultValue={currentBakerStakeThreshold.toString()}

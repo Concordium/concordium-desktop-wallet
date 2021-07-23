@@ -66,6 +66,19 @@ export async function hasPendingTransactions(
     );
 }
 
+export async function hasEncryptedTransactions(
+    address: string,
+    fromTime: string,
+    toTime: string
+) {
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.transactions.hasEncryptedTransactions,
+        address,
+        fromTime,
+        toTime
+    );
+}
+
 export async function getPendingTransactions(): Promise<TransferTransaction[]> {
     return window.ipcRenderer.invoke(
         ipcCommands.database.transactions.getPending

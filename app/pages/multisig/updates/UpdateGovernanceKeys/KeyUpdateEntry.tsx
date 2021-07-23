@@ -5,7 +5,7 @@ import styles from './KeyUpdateEntry.module.scss';
 
 export interface KeyUpdateEntryProps {
     keyInput: KeyWithStatus;
-    updateKey(keyToUpdate: KeyWithStatus): void;
+    updateKey?: (keyToUpdate: KeyWithStatus) => void;
 }
 
 function generateButtonText(status: KeyUpdateEntryStatus) {
@@ -62,13 +62,15 @@ export function KeyUpdateEntry({ keyInput, updateKey }: KeyUpdateEntryProps) {
             <li className={styles.listItem}>
                 {generateStatusLabel(keyInput.status)}
                 <div className="flex alignCenter">
-                    <Button
-                        size="tiny"
-                        onClick={() => updateKey(updateKeyStatus(keyInput))}
-                        className={styles.button}
-                    >
-                        {generateButtonText(keyInput.status)}
-                    </Button>
+                    {updateKey && (
+                        <Button
+                            size="tiny"
+                            onClick={() => updateKey(updateKeyStatus(keyInput))}
+                            className={styles.button}
+                        >
+                            {generateButtonText(keyInput.status)}
+                        </Button>
+                    )}
                     <p className={styles.keyText}>{keyInput.key.verifyKey}</p>
                 </div>
             </li>
