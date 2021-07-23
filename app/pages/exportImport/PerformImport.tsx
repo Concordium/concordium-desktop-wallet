@@ -162,23 +162,25 @@ async function performImport(
         );
     }
 
-    const newExternalCredentials = [];
-    for (const externalCredential of importedData.externalCredentials) {
-        const match = existingData.externalCredentials.find(
-            (cred) => cred.credId === externalCredential.credId
-        );
-        if (!match) {
-            newExternalCredentials.push(externalCredential);
-        } else if (match.note !== externalCredential.note) {
-            const note = await resolveConflict(
-                match.note,
-                externalCredential.note,
-                { type: ConflictTypes.CredentialNote }
+    if (importedData.externalCredentials) {
+        const newExternalCredentials = [];
+        for (const externalCredential of importedData.externalCredentials) {
+            const match = existingData.externalCredentials.find(
+                (cred) => cred.credId === externalCredential.credId
             );
-            newExternalCredentials.push({ ...externalCredential, note });
+            if (!match) {
+                newExternalCredentials.push(externalCredential);
+            } else if (match.note !== externalCredential.note) {
+                const note = await resolveConflict(
+                    match.note,
+                    externalCredential.note,
+                    { type: ConflictTypes.CredentialNote }
+                );
+                newExternalCredentials.push({ ...externalCredential, note });
+            }
         }
+        await importExternalCredentials(newExternalCredentials);
     }
-    await importExternalCredentials(newExternalCredentials);
 
     await loadIdentities(dispatch);
     await loadAccounts(dispatch);
@@ -266,8 +268,10 @@ export default function PerformImport({ location }: Props) {
             .map((account: Account) => (
                 <p key={account.address}>
                     {account.name}{' '}
-                    {messages[account.address] &&
-                        `(${messages[account.address]})`}
+                    <span className="bodyLight">
+                        {messages[account.address] &&
+                            `(${messages[account.address]})`}
+                    </span>
                 </p>
             ));
 
@@ -318,7 +322,7 @@ export default function PerformImport({ location }: Props) {
                         </Columns.Column>
                         <Columns.Column>
                             <div className={styles.importedList}>
-                                <div className="flexChildFill flexColumn justifyCenter">
+                                <div className={styles.importedListInner}>
                                     {importedData.identities.map(
                                         (identity: Identity) => (
                                             <div
@@ -328,7 +332,7 @@ export default function PerformImport({ location }: Props) {
                                                 <h3 className="mB0">
                                                     <b>ID:</b> {identity.name}
                                                 </h3>
-                                                <p>
+                                                <p className="mT0 body3 bodyLight">
                                                     {messages[identity.id] &&
                                                         `(${
                                                             messages[
