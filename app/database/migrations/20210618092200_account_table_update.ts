@@ -16,6 +16,10 @@ const insertChunkSize = 100;
 function upAccounts(accounts: Account[]): Account[] {
     return accounts.map((a, i) => ({
         ...a,
+        selfAmounts: a.selfAmounts || '',
+        incomingAmounts: a.incomingAmounts || '[]',
+        signatureThreshold: a.signatureThreshold || 1,
+        totalDecrypted: a.totalDecrypted || '0',
         maxTransactionId: '0',
         address: a.address || `${i}`,
     }));
@@ -27,9 +31,6 @@ function createCommonFields(table: Knex.CreateTableBuilder) {
         .references('id')
         .inTable(identitiesTable)
         .notNullable();
-    table.integer('signatureThreshold');
-    table.string('incomingAmounts').defaultTo('[]');
-    table.string('selfAmounts').defaultTo('');
 }
 
 export async function up(knex: Knex): Promise<void> {
@@ -38,14 +39,17 @@ export async function up(knex: Knex): Promise<void> {
             createCommonFields(table);
             table.string('name').notNullable();
             table.string('status').notNullable();
-            table.string('totalDecrypted').defaultTo('0');
+            table.string('selfAmounts').defaultTo('').notNullable();
+            table.string('incomingAmounts').defaultTo('[]').notNullable();
+            table.integer('signatureThreshold').defaultTo(1).notNullable();
+            table.string('totalDecrypted').defaultTo('0').notNullable();
             table.boolean('allDecrypted').defaultTo(true).notNullable();
             table.string('deploymentTransactionId');
             table.boolean('isInitial').defaultTo(false).notNullable();
             table.string('rewardFilter').defaultTo('[]').notNullable();
 
             table.string('address').primary();
-            table.string('maxTransactionId').defaultTo('0');
+            table.string('maxTransactionId').defaultTo('0').notNullable();
         });
 
         const accounts: Account[] = await t(accountsTable).select();
@@ -88,6 +92,9 @@ export async function down(knex: Knex): Promise<void> {
             createCommonFields(table);
             table.string('name');
             table.string('status');
+            table.string('selfAmounts').defaultTo('');
+            table.string('incomingAmounts').defaultTo('[]');
+            table.integer('signatureThreshold');
             table.string('totalDecrypted').defaultTo('');
             table.boolean('allDecrypted').defaultTo(true);
             table.string('deploymentTransactionId').defaultTo('0');
