@@ -48,14 +48,10 @@ export async function confirmIdentityAndInitialAccount(
     const { token } = idObjectResponse;
     const { accountAddress } = token;
     const credential = token.credential.value.credential.contents;
-    const parsedCredential = {
-        credId: credential.credId || credential.regId,
-        policy: credential.policy,
-    };
 
     const credentialToStore: Credential = {
-        credId: parsedCredential.credId,
-        policy: JSON.stringify(parsedCredential.policy),
+        credId: credential.credId || credential.regId,
+        policy: JSON.stringify(credential.policy),
         accountAddress,
         credentialNumber: 0,
         credentialIndex: 0,

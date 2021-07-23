@@ -93,7 +93,6 @@ export async function sleep(time: number) {
 
 export interface ErrorIdObjectResponse {
     error: Error;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     token?: null;
 }
 export interface DoneIdObjectResponse {

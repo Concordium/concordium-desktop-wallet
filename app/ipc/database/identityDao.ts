@@ -54,7 +54,7 @@ async function rejectIdentityAndDeleteInitialAccount(identityId: number) {
 }
 
 /**
- * Transactionnally inserts an identity and its initial account.
+ * Transactionally inserts an identity and its initial account.
  * @returns the identityId of the inserted identity
  */
 async function addPendingIdentityAndInitialAccount(
