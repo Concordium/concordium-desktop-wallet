@@ -83,15 +83,7 @@ export async function importAddressBookEntries(
                     );
                 }
                 if (!sameNote) {
-                    if (!duplicate.note || !match.note) {
-                        update.note = duplicate.note || match.note;
-                    } else {
-                        update.note = await resolveConflict(
-                            match.note,
-                            duplicate.note,
-                            { type: ConflictTypes.AddressbookNote, address }
-                        );
-                    }
+                    update.note = match.note || duplicate.note;
                 }
                 updateAddressBookEntry(dispatch, address, update);
             }
@@ -172,11 +164,7 @@ async function performImport(
             if (!match) {
                 newExternalCredentials.push(externalCredential);
             } else if (match.note !== externalCredential.note) {
-                const note = await resolveConflict(
-                    match.note,
-                    externalCredential.note,
-                    { type: ConflictTypes.CredentialNote }
-                );
+                const note = match.note || externalCredential.note;
                 newExternalCredentials.push({ ...externalCredential, note });
             }
         }

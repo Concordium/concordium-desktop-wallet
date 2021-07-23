@@ -41,8 +41,6 @@ export enum ConflictTypes {
     // eslint-disable-next-line no-shadow
     Identity = 'identity',
     AddressbookName = 'addressbook-name',
-    AddressbookNote = 'addressbook-note',
-    CredentialNote = 'credential-note',
 }
 
 interface AccountMetadata {
@@ -56,18 +54,13 @@ interface IdentityMetadata {
 }
 
 interface AddressbookMetadata {
-    type: ConflictTypes.AddressbookName | ConflictTypes.AddressbookNote;
+    type: ConflictTypes.AddressbookName;
     address: string;
-}
-
-interface CredentialNoteMetadata {
-    type: ConflictTypes.CredentialNote;
 }
 
 export type ConflictMetadata =
     | AccountMetadata
     | IdentityMetadata
-    | CredentialNoteMetadata
     | AddressbookMetadata;
 
 export type NameResolver = (
@@ -116,11 +109,6 @@ export function chooseName(
         case ConflictTypes.AddressbookName: {
             identifier = metaData.address;
             resolveAccountName(metaData.address);
-            break;
-        }
-        case ConflictTypes.AddressbookNote:
-        case ConflictTypes.CredentialNote: {
-            chosenName = existingName || importName;
             break;
         }
         default:
