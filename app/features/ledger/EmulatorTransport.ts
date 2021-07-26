@@ -9,7 +9,7 @@ interface LedgerEmulatorResponse {
 }
 
 const successStatusCode = '9000';
-const speculusEmulator = axios.create({
+const speculosEmulator = axios.create({
     baseURL: process.env.LEDGER_EMULATOR_URL,
 });
 
@@ -58,18 +58,10 @@ export default class EmulatorTransport implements Transport {
             // Ledger device. Send the APDU message in the format expected by the REST API, and parse the message
             // for any errors returned. If an error was present, then throw it (like it would have been) in the
             // real Transport implementation.
-            const source = axios.CancelToken.source();
-            const timeout = setTimeout(() => {
-                source.cancel();
-            }, 10000);
-            const emulatorResponse: AxiosResponse<LedgerEmulatorResponse> = await speculusEmulator.post(
+            const emulatorResponse: AxiosResponse<LedgerEmulatorResponse> = await speculosEmulator.post(
                 '/apdu',
-                { data: message },
-                {
-                    cancelToken: source.token,
-                }
+                { data: message }
             );
-            clearTimeout(timeout);
 
             // The status code is available in the last 4 characters of the data.
             const statusCode = emulatorResponse.data.data.substring(

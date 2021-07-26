@@ -1,4 +1,5 @@
 import { BrowserWindow } from 'electron';
+import axios from 'axios';
 import ConcordiumLedgerClientMain from '../../features/ledger/ConcordiumLedgerClientMain';
 import { isConcordiumApp } from '../../components/ledger/util';
 import { LedgerSubscriptionAction } from '../../components/ledger/useLedger';
@@ -9,6 +10,12 @@ import { LedgerObserver } from './ledgerObserver';
 export default class LedgerEmulatorObserverImpl implements LedgerObserver {
     concordiumClient: ConcordiumLedgerClientMain | undefined;
 
+    isConnected: boolean;
+
+    constructor() {
+        this.isConnected = false;
+    }
+
     getLedgerClient(): ConcordiumLedgerClientMain {
         if (!this.concordiumClient) {
             throw new Error('A connection to the Ledger is not available.');
@@ -17,43 +24,63 @@ export default class LedgerEmulatorObserverImpl implements LedgerObserver {
     }
 
     async subscribeLedger(mainWindow: BrowserWindow): Promise<void> {
-        const listeningClient = new ConcordiumLedgerClientMain(mainWindow);
+        const speculosEmulator = axios.create({
+            baseURL: process.env.LEDGER_EMULATOR_URL,
+        });
+
         // eslint-disable-next-line no-constant-condition
         while (true) {
-            const result = await listeningClient.getAppAndVersion();
-            if (result.error) {
-                if (this.concordiumClient) {
-                    this.concordiumClient.closeTransport();
-                }
-                mainWindow.webContents.send(
-                    ledgerIpcCommands.listenChannel,
-                    LedgerSubscriptionAction.RESET
-                );
-            } else if (result) {
-                this.concordiumClient = new ConcordiumLedgerClientMain(
-                    mainWindow
-                );
+            const source = axios.CancelToken.source();
+            const timeout = setTimeout(() => {
+                source.cancel();
+            }, 5000);
 
-                const appAndVersionResult = await this.concordiumClient.getAppAndVersion();
-                const appAndVersion = appAndVersionResult.result;
-                if (!appAndVersion) {
-                    // We could not extract the version information.
+            try {
+                await speculosEmulator.get('/', {
+                    cancelToken: source.token,
+                });
+                clearTimeout(timeout);
+
+                if (!this.isConnected) {
+                    this.concordiumClient = new ConcordiumLedgerClientMain(
+                        mainWindow
+                    );
+
+                    const appAndVersionResult = await this.concordiumClient.getAppAndVersion();
+                    const appAndVersion = appAndVersionResult.result;
+                    if (!appAndVersion) {
+                        // We could not extract the version information.
+                        mainWindow.webContents.send(
+                            ledgerIpcCommands.listenChannel,
+                            LedgerSubscriptionAction.RESET
+                        );
+                        return;
+                    }
+
+                    if (isConcordiumApp(appAndVersion)) {
+                        mainWindow.webContents.send(
+                            ledgerIpcCommands.listenChannel,
+                            LedgerSubscriptionAction.CONNECTED_SUBSCRIPTION,
+                            'Ledger Emulator'
+                        );
+                        this.isConnected = true;
+                    }
+                }
+            } catch (e) {
+                if (this.isConnected) {
+                    this.isConnected = false;
+                    // The emulator was not reachable.
+                    if (this.concordiumClient) {
+                        this.concordiumClient.closeTransport();
+                    }
                     mainWindow.webContents.send(
                         ledgerIpcCommands.listenChannel,
                         LedgerSubscriptionAction.RESET
                     );
-                    return;
-                }
-
-                if (isConcordiumApp(appAndVersion)) {
-                    mainWindow.webContents.send(
-                        ledgerIpcCommands.listenChannel,
-                        LedgerSubscriptionAction.CONNECTED_SUBSCRIPTION,
-                        'Ledger Emulator'
-                    );
                 }
             }
-            await sleep(10000);
+
+            await sleep(5000);
         }
     }
 

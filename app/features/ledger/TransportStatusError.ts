@@ -20,9 +20,8 @@ export function instanceOfTransportStatusError(
 ): object is TransportStatusError {
     return (
         'name' in object &&
+        object.name === 'TransportStatusError' &&
         'message' in object &&
-        'stack' in object &&
-        'statusCode' in object &&
-        'statusText' in object
+        'statusCode' in object
     );
 }
