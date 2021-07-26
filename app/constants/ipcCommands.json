@@ -10,7 +10,6 @@
     "grpcCall": "GRPC_CALL",
     "grpcNodeConsensusAndGlobal": "GRPC_NODE_CONSENSUS_GLOBAL",
     "openUrl": "OPEN_URL",
-    "createAxios": "CREATE_AXIOS",
     "httpGet": "HTTP_GET",
     "getTransactions": "WALLET_PROXY_GET_TRANSACTIONS",
     "getIdProviders": "WALLET_PROXY_GET_ID_PROVIDERS",
@@ -68,7 +67,10 @@
             "getNextIdentityNumber": "DB_IDENTITY_GET_NEXT_IDENTITY_NUMBER",
             "insert": "DB_IDENTITY_INSERT",
             "update": "DB_IDENTITY_UPDATE",
-            "getIdentitiesForWallet": "DB_IDENTITY_GET_FOR_WALLET"
+            "getIdentitiesForWallet": "DB_IDENTITY_GET_FOR_WALLET",
+            "rejectIdentityAndDeleteInitialAccount": "DB_IDENTITY_REJECT_IDENTITY_AND_INITIAL_ACCOUNT",
+            "confirmIdentity": "DB_IDENTITY_CONFIRM",
+            "insertPendingIdentityAndInitialAccount": "DB_IDENTITY_INSERT_PENDING_IDENTITY_AND_INITIAL_ACCOUNT"
         },
         "genesisAndGlobal": {
             "setValue": "DB_GENESIS_AND_GLOBAL_SET"
