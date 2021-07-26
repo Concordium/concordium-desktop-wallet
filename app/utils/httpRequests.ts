@@ -1,23 +1,34 @@
 import { IdObjectRequest, IncomingTransaction, Versioned } from './types';
 import ipcCommands from '../constants/ipcCommands.json';
+import {
+    DoneIdentityTokenContainer,
+    IdentityProviderIdentityStatus,
+    IdentityTokenContainer,
+    ErrorIdentityTokenContainer,
+} from './id/types';
 
-interface HttpResponse {
-    body: string;
-    statusCode: number;
-    location?: string;
+interface HttpGetResponse<T> {
+    data: T;
+    headers: Record<string, string>;
+    status: number;
 }
 
 /**
  * Performs a HTTP get request using IPC to the main thread.
  * @param urlString the url at which to perform the http get request
  * @param params additional URL search parameters to add to the request
- * @returns an HttpResponse containing the body, status code and the redirect location if the status code was 302
+ * @returns an HttpGetResponse containing the body, status code and the returned headers
  */
-export async function httpGet(
+export async function httpGet<T>(
     urlString: string,
     params: Record<string, string> = {}
-): Promise<HttpResponse> {
-    return window.ipcRenderer.invoke(ipcCommands.httpGet, urlString, params);
+): Promise<HttpGetResponse<T>> {
+    const response: string = await window.ipcRenderer.invoke(
+        ipcCommands.httpGet,
+        urlString,
+        params
+    );
+    return JSON.parse(response);
 }
 
 interface GetTransactionsOutput {
@@ -37,8 +48,9 @@ export async function getIdentityProviders() {
 }
 
 /**
- * This function will perform an IdObjectRequest, and Intercept the redirect,
- * returning the location, that the Identity Provider attempted to redirect to.
+ * This function will send an IdObjectRequest to an identity provider and intercept the
+ * redirect returned to extract the location that the Identity Provider attempted to redirect to.
+ * @returns the redirect location where the identity object can be polled from
  */
 export async function performIdObjectRequest(
     url: string,
@@ -55,10 +67,10 @@ export async function performIdObjectRequest(
     };
 
     const response = await httpGet(url, parameters);
-    if (response.statusCode === 302) {
-        const { location } = response;
+    if (response.status === 302) {
+        const { location } = response.headers;
         if (!location) {
-            throw new Error('Missing error from redirect response');
+            throw new Error('Missing location from redirect response');
         }
         if (location[0] === '/') {
             const urlObject = new URL(url);
@@ -66,7 +78,9 @@ export async function performIdObjectRequest(
         }
         return location;
     }
-    throw new Error(`Request failed: ${response.body}`);
+    throw new Error(
+        `The identity provider did not return a 302 Redirect as expected: ${response.data}`
+    );
 }
 
 /**
@@ -77,25 +91,62 @@ export async function sleep(time: number) {
     return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-// TODO: Handle the service being unavailable better than keep spamming.
+export interface ErrorIdObjectResponse {
+    error: Error;
+    token?: null;
+}
+export interface DoneIdObjectResponse {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    token: any;
+    error?: null;
+}
+
+export type IdObjectResponse = ErrorIdObjectResponse | DoneIdObjectResponse;
+
 /**
- * Polls the provided location until a valid IdObject is returned
+ * Polls the provided location until a valid identity object
+ * is available, or that an error is returned.
+ *
+ * The method has to continue polling until the identity provider returns
+ * a concluding status. This is required to prevent the loss of an identity,
+ * i.e. an identity was eventually successful at the identity provider, but
+ * was already failed locally in the desktop wallet beforehand.
+ *
+ * @returns the identity object
  */
-export async function getIdObject(location: string) {
+export async function getIdObject(location: string): Promise<IdObjectResponse> {
     // eslint-disable-next-line no-constant-condition
     while (true) {
-        const response = await httpGet(location);
-        const data = JSON.parse(response.body);
-        switch (data.status) {
-            case 'done':
-                return data.token;
-            case 'error':
-                throw new Error(data.detail);
-            case 'pending':
-                break;
-            default:
-                throw new Error(`Unknown status: ${data.status}`);
+        try {
+            const response = await httpGet<IdentityTokenContainer>(location);
+            const { data } = response;
+            if (
+                data.status &&
+                (data.status === IdentityProviderIdentityStatus.Error ||
+                    data.status === IdentityProviderIdentityStatus.Done)
+            ) {
+                const tokenContainer:
+                    | DoneIdentityTokenContainer
+                    | ErrorIdentityTokenContainer = data;
+
+                if (
+                    tokenContainer.status ===
+                    IdentityProviderIdentityStatus.Done
+                ) {
+                    return { token: data.token };
+                }
+                if (
+                    tokenContainer.status ===
+                    IdentityProviderIdentityStatus.Error
+                ) {
+                    return {
+                        error: new Error(data.detail),
+                    };
+                }
+            }
+            await sleep(10000);
+        } catch (error) {
+            await sleep(10000);
         }
-        await sleep(10000);
     }
 }
