@@ -1,7 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
-import { getAllIdentities, insertIdentity } from '../database/IdentityDao';
+import {
+    getAllIdentities,
+    insertIdentity,
+    updateIdentity,
+} from '../database/IdentityDao';
 import { Identity, IdentityStatus, Dispatch } from '../utils/types';
 
 interface IdentityState {

@@ -110,7 +110,7 @@ async function generateIdentity(
             status: AccountStatus.Pending,
             address: accountAddress,
             signatureThreshold: 1,
-            maxTransactionId: 0,
+            maxTransactionId: '0',
             isInitial: true,
             rewardFilter: '[]',
             selfAmounts: getInitialEncryptedAmount(),
