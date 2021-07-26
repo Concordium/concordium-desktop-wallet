@@ -13,16 +13,12 @@ import ledgerReducer, {
     disconnectAction,
     setStatusTextAction,
 } from './ledgerReducer';
-import {
-    LedgerStatusType,
-    instanceOfTransportStatusError,
-    LedgerSubmitHandler,
-    LedgerCallback,
-} from './util';
+import { LedgerStatusType, LedgerSubmitHandler, LedgerCallback } from './util';
 import { instanceOfClosedWhileSendingError } from '~/features/ledger/ClosedWhileSendingError';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import ledgerIpcCommands from '~/constants/ledgerIpcCommands.json';
 import { noOp } from '~/utils/basicHelpers';
+import { instanceOfTransportStatusError } from '~/features/ledger/TransportStatusError';
 
 const { CONNECTED, ERROR, OPEN_APP, AWAITING_USER_INPUT } = LedgerStatusType;
 

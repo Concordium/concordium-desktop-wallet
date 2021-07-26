@@ -30,6 +30,7 @@ module.exports = merge(baseConfig, {
     plugins: [
         new webpack.EnvironmentPlugin({
             NODE_ENV: 'development',
+            LEDGER_EMULATOR_URL: process.env.LEDGER_EMULATOR_URL,
         }),
     ],
 
