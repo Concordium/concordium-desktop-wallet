@@ -1,21 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
+// eslint-disable-next-line import/no-cycle
+import { loadAccounts } from './AccountSlice';
 import {
     getAllIdentities,
     insertIdentity,
     updateIdentity,
-    removeIdentityAndInitialAccount as removeIdentityInDatabase,
+    removeIdentityAndInitialAccount as removeIdentityAndInitialAccountInDatabase,
 } from '../database/IdentityDao';
-import {
-    Identity,
-    IdentityStatus,
-    IdentityObject,
-    IdentityProvider,
-    Dispatch,
-} from '../utils/types';
-// eslint-disable-next-line import/no-cycle
-import { loadAccounts, rejectInitialAccount } from './AccountSlice';
+import { Identity, IdentityStatus, Dispatch } from '../utils/types';
 
 interface IdentityState {
     identities: Identity[];
@@ -77,54 +71,13 @@ export async function loadIdentities(dispatch: Dispatch) {
     dispatch(updateIdentities(identities));
 }
 
-export async function addPendingIdentity(
-    identityNumber: number,
-    dispatch: Dispatch,
-    identityName: string,
-    codeUri: string,
-    identityProvider: IdentityProvider,
-    randomness: string,
-    walletId: number
-) {
-    const identity = {
-        identityNumber,
-        name: identityName,
-        status: IdentityStatus.Pending,
-        codeUri,
-        identityProvider: JSON.stringify(identityProvider),
-        randomness,
-        walletId,
-    };
-    const identityId = await insertIdentity(identity);
-    loadIdentities(dispatch);
-    return identityId[0];
-}
-
-export async function confirmIdentity(
-    dispatch: Dispatch,
-    identityId: number,
-    identityObject: IdentityObject
-) {
-    await updateIdentity(identityId, {
-        status: IdentityStatus.Confirmed,
-        identityObject: JSON.stringify(identityObject),
-    });
-    await loadIdentities(dispatch);
-}
-
 export async function removeIdentityAndInitialAccount(
     dispatch: Dispatch,
     identityId: number
 ) {
-    await removeIdentityInDatabase(identityId);
+    await removeIdentityAndInitialAccountInDatabase(identityId);
     await loadAccounts(dispatch);
     return dispatch(removeIdentityInRedux(identityId));
-}
-
-export async function rejectIdentity(dispatch: Dispatch, identityId: number) {
-    await updateIdentity(identityId, { status: IdentityStatus.Rejected });
-    await rejectInitialAccount(dispatch, identityId);
-    await loadIdentities(dispatch);
 }
 
 export async function importIdentities(

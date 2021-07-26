@@ -4,13 +4,14 @@ import { useSelector } from 'react-redux';
 import DoubleCheckmarkIcon from '@resources/svg/double-grey-checkmark.svg';
 import CheckmarkIcon from '@resources/svg/grey-checkmark.svg';
 import Warning from '@resources/svg/warning.svg';
-import { parseTime } from '~/utils/timeHelpers';
+import { dateFromTimeStamp, parseTime } from '~/utils/timeHelpers';
 import { getGTUSymbol, displayAsGTU } from '~/utils/gtu';
 import {
     TransferTransaction,
     TransactionStatus,
     TransactionKindString,
     TransferTransactionWithNames,
+    TimeStampUnit,
 } from '~/utils/types';
 import { chosenAccountSelector } from '~/features/AccountSlice';
 import { viewingShieldedSelector } from '~/features/TransactionSlice';
@@ -195,22 +196,36 @@ function statusSymbol(status: TransactionStatus) {
     }
 }
 
+const onlyTime = Intl.DateTimeFormat(undefined, {
+    timeStyle: 'medium',
+    hourCycle: 'h24',
+}).format;
+
 interface Props {
     transaction: TransferTransaction;
     onClick?: () => void;
+    showDate?: boolean;
 }
 
 /**
  * Displays the given transaction basic information.
  */
-function TransactionListElement({ transaction, onClick }: Props): JSX.Element {
+function TransactionListElement({
+    transaction,
+    onClick,
+    showDate = false,
+}: Props): JSX.Element {
     const account = useSelector(chosenAccountSelector);
     const viewingShielded = useSelector(viewingShieldedSelector);
     if (!account) {
         throw new Error('Unexpected missing chosen account');
     }
     const isOutgoing = isOutgoingTransaction(transaction, account.address);
-    const time = parseTime(transaction.blockTime);
+    const time = showDate
+        ? parseTime(transaction.blockTime)
+        : onlyTime(
+              dateFromTimeStamp(transaction.blockTime, TimeStampUnit.seconds)
+          );
     const name = getName(transaction, isOutgoing);
     const amountParser = viewingShielded ? parseShieldedAmount : parseAmount;
     const { amount, amountFormula } = amountParser(transaction, isOutgoing);
