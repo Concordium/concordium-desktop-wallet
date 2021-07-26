@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
@@ -35,7 +35,7 @@ import {
     ConflictTypes,
     NameResolver,
     ConflictMetadata,
-    chooseName,
+    resolveNameConflict,
 } from '~/utils/importHelpers';
 import { partition } from '~/utils/basicHelpers';
 import PageLayout from '~/components/PageLayout';
@@ -205,25 +205,28 @@ export default function PerformImport({ location }: Props) {
     const [error, setError] = useState<string>();
     const [started, setStarted] = useState(false);
 
-    async function resolveNameConflict(
-        existingName: string,
-        importName: string,
-        metaData: ConflictMetadata
-    ) {
-        const { chosenName, identifier, message } = chooseName(
-            existingName,
-            importName,
-            metaData
-        );
-        if (message) {
-            setMessages((currentMessages) => {
-                const newMap = { ...currentMessages };
-                newMap[identifier] = message;
-                return newMap;
-            });
-        }
-        return chosenName;
-    }
+    const chooseName = useCallback(
+        (
+            existingName: string,
+            importName: string,
+            metaData: ConflictMetadata
+        ) => {
+            const { chosenName, identifier, message } = resolveNameConflict(
+                existingName,
+                importName,
+                metaData
+            );
+            if (message) {
+                setMessages((currentMessages) => {
+                    const newMap = { ...currentMessages };
+                    newMap[identifier] = message;
+                    return newMap;
+                });
+            }
+            return chosenName;
+        },
+        [setMessages]
+    );
 
     useEffect(() => {
         if (!started && importedData) {
@@ -239,7 +242,7 @@ export default function PerformImport({ location }: Props) {
                     wallets: [],
                 },
                 dispatch,
-                resolveNameConflict
+                chooseName
             )
                 .then(setDuplicateAddressBookEntries)
                 .catch((e) => setError(e.message));
@@ -253,6 +256,7 @@ export default function PerformImport({ location }: Props) {
         addressBook,
         dispatch,
         started,
+        chooseName,
     ]);
 
     if (!importedData) {

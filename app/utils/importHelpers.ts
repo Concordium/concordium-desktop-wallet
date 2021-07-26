@@ -67,9 +67,9 @@ export type NameResolver = (
     existingName: string,
     importName: string,
     metaData: ConflictMetadata
-) => Promise<string>;
+) => string;
 
-export function chooseName(
+export function resolveNameConflict(
     existingName: string,
     importName: string,
     metaData: ConflictMetadata
