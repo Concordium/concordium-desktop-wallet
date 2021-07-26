@@ -16,7 +16,7 @@ import log from 'electron-log';
 import ipcCommands from './constants/ipcCommands.json';
 import ipcRendererCommands from './constants/ipcRendererCommands.json';
 import initializeIpcHandlers from './ipc/http';
-import initializeLedgerIpcHandlers from './ipc/ledger';
+import initializeLedgerIpcHandlers from './ipc/ledger/ledger';
 import initializeCryptoIpcHandlers from './ipc/crypto';
 import initializeDatabaseGeneralIpcHandlers from './ipc/database/general';
 import initializeDatabaseAccountIpcHandlers from './ipc/database/accountDao';
