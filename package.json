@@ -39,8 +39,8 @@
     "test-e2e": "node ./internals/scripts/CheckBuildsExist.js && cross-env NODE_ENV=test testcafe electron:./app ./test/e2e/HomePage.e2e.ts",
     "test-e2e-live": "node ./internals/scripts/CheckBuildsExist.js && cross-env NODE_ENV=test testcafe --live electron:./app ./test/e2e/HomePage.e2e.ts",
     "test-watch": "yarn test --watch",
-    "down": "ts-node --project scripts/tsconfig.json -r tsconfig-paths/register ./scripts/down.ts",
-    "up": "ts-node --project scripts/tsconfig.json -r tsconfig-paths/register ./scripts/up.ts"
+    "down": "ts-node --project scripts/migrations/tsconfig.json -r tsconfig-paths/register ./scripts/migrations/down.ts",
+    "up": "ts-node --project scripts/migrations/tsconfig.json -r tsconfig-paths/register ./scripts/migrations/up.ts"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
