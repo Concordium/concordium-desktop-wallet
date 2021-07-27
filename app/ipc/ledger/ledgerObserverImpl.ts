@@ -69,37 +69,26 @@ export default class LedgerObserverImpl implements LedgerObserver {
 
                     const appAndVersionResult = await this.concordiumClient.getAppAndVersion();
                     const appAndVersion = appAndVersionResult.result;
+                    let action;
                     if (!appAndVersion) {
                         // We could not extract the version information.
-                        mainWindow.webContents.send(
-                            ledgerIpcCommands.listenChannel,
-                            LedgerSubscriptionAction.RESET
-                        );
-                        return;
-                    }
-
-                    if (!isConcordiumApp(appAndVersion)) {
+                        action = LedgerSubscriptionAction.RESET;
+                    } else if (!isConcordiumApp(appAndVersion)) {
                         // The device has been connected, but the Concordium application has not
                         // been opened yet.
-                        mainWindow.webContents.send(
-                            ledgerIpcCommands.listenChannel,
-                            LedgerSubscriptionAction.PENDING,
-                            deviceName
-                        );
+                        action = LedgerSubscriptionAction.PENDING;
                     } else if (isOutdated(appAndVersion)) {
                         // The device has been connected, but the Concordium application is outdated
-                        mainWindow.webContents.send(
-                            ledgerIpcCommands.listenChannel,
-                            LedgerSubscriptionAction.OUTDATED,
-                            deviceName
-                        );
+                        action = LedgerSubscriptionAction.OUTDATED;
                     } else {
-                        mainWindow.webContents.send(
-                            ledgerIpcCommands.listenChannel,
-                            LedgerSubscriptionAction.CONNECTED_SUBSCRIPTION,
-                            deviceName
-                        );
+                        action =
+                            LedgerSubscriptionAction.CONNECTED_SUBSCRIPTION;
                     }
+                    mainWindow.webContents.send(
+                        ledgerIpcCommands.listenChannel,
+                        action,
+                        deviceName
+                    );
                 } else if (event.type === 'remove') {
                     if (this.concordiumClient) {
                         this.concordiumClient.closeTransport();
