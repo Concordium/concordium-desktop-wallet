@@ -4,6 +4,7 @@ import ipcCommands from '../constants/ipcCommands.json';
 import { walletProxytransactionLimit } from '../constants/externalConstants.json';
 import { getTargetNet, Net } from '~/utils/ConfigHelper';
 import urls from '../constants/urls.json';
+import { intToString, parse } from '~/utils/JSONHelper';
 
 function getWalletProxy() {
     const targetNet = getTargetNet();
@@ -72,7 +73,10 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
         ipcCommands.getTransactions,
         async (_event, address: string, id: number) => {
             const response = await walletProxy.get(
-                `/v0/accTransactions/${address}?limit=${walletProxytransactionLimit}&from=${id}&includeRawRejectReason`
+                `/v0/accTransactions/${address}?limit=${walletProxytransactionLimit}&from=${id}&includeRawRejectReason`,
+                {
+                    transformResponse: (res) => parse(intToString(res, 'id')),
+                }
             );
             const { transactions, count, limit } = response.data;
             return { transactions, full: count === limit };

@@ -38,7 +38,9 @@
     "test-all": "yarn lint && yarn test-tsc && yarn build && yarn test",
     "test-e2e": "node ./internals/scripts/CheckBuildsExist.js && cross-env NODE_ENV=test testcafe electron:./app ./test/e2e/HomePage.e2e.ts",
     "test-e2e-live": "node ./internals/scripts/CheckBuildsExist.js && cross-env NODE_ENV=test testcafe --live electron:./app ./test/e2e/HomePage.e2e.ts",
-    "test-watch": "yarn test --watch"
+    "test-watch": "yarn test --watch",
+    "down": "ts-node --project scripts/migrations/tsconfig.json -r tsconfig-paths/register ./scripts/migrations/down.ts",
+    "up": "ts-node --project scripts/migrations/tsconfig.json -r tsconfig-paths/register ./scripts/migrations/up.ts"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -135,6 +137,7 @@
     "@babel/core": "^7.12.13",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.12.13",
     "@babel/plugin-proposal-optional-chaining": "^7.12.16",
+    "@journeyapps/sqlcipher": "^5.2.0",
     "@storybook/addon-actions": "^6.1.17",
     "@storybook/addon-essentials": "^6.1.17",
     "@storybook/addon-links": "^6.1.17",
@@ -224,6 +227,7 @@
     "testcafe-react-selectors": "^4.0.0",
     "ts-jest": "^26.5.0",
     "ts-loader": "^8.0.15",
+    "ts-node": "^10.1.0",
     "tsconfig-paths-webpack-plugin": "^3.3.0",
     "typescript": "4",
     "url-loader": "^4.1.0",
