@@ -52,7 +52,6 @@
             "getForIdentity": "DB_CREDENTIAL_GET_FOR_IDENTITY",
             "getForAccount": "DB_CREDENTIAL_GET_FOR_ACCOUNT",
             "getNextNumber": "DB_CREDENTIAL_GET_NEXT_NUMBER",
-            "updateIndex": "DB_CREDENTIAL_UPDATE_INDEX",
             "update": "DB_CREDENTIAL_UPDATE",
             "hasDuplicateWalletId": "DB_CREDENTIAL_HAS_DUPLICATE_WALLET_ID",
             "hasExistingCredential": "DB_CREDENTIAL_HAS_EXISTING_CREDENTIAL"

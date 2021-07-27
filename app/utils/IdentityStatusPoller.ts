@@ -1,6 +1,7 @@
 import {
     AddressBookEntry,
     Credential,
+    CredentialStatus,
     Dispatch,
     Identity,
     IdentityStatus,
@@ -56,6 +57,7 @@ export async function confirmIdentityAndInitialAccount(
         credentialNumber: 0,
         credentialIndex: 0,
         identityId,
+        status: CredentialStatus.Deployed,
     };
     const addressBookEntry: AddressBookEntry = {
         name: accountName,

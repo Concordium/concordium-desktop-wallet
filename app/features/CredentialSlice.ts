@@ -4,7 +4,6 @@ import { RootState } from '~/store/store';
 import {
     insertCredential,
     getCredentials,
-    updateCredentialIndex as updateCredentialIndexInDatabase,
     updateCredential as updateCredentialInDatabase,
     getCredentialsOfAccount,
 } from '~/database/CredentialDao';
@@ -16,6 +15,7 @@ import {
     instanceOfDeployedCredential,
     AddedCredential,
     MakeOptional,
+    CredentialStatus,
 } from '~/utils/types';
 import { ExternalCredential } from '~/database/types';
 import {
@@ -24,6 +24,11 @@ import {
     upsertExternalCredential,
     upsertMultipleExternalCredentials,
 } from '~/database/ExternalCredentialDao';
+import {
+    getCredentialsFromAccountInfo,
+    getCredentialStatus,
+} from '~/utils/credentialHelper';
+import { getlastFinalizedBlockHash } from '~/node/nodeHelpers';
 
 interface CredentialState {
     credentials: Credential[];
@@ -44,14 +49,14 @@ const credentialSlice = createSlice({
             state.credentials = [...state.credentials, input.payload];
         },
         updateCredential: (state, update) => {
-            const { credId, ...fields } = update.payload;
+            const { credId, updatedFields } = update.payload;
             const index = state.credentials.findIndex(
                 (cred) => cred.credId === credId
             );
             if (index > -1) {
                 state.credentials[index] = {
                     ...state.credentials[index],
-                    ...fields,
+                    ...updatedFields,
                 };
             }
         },
@@ -88,13 +93,52 @@ export const accountHasDeployedCredentialsSelector = (account: Account) => (
 export const {
     updateCredentials,
     addCredential,
-    updateCredential,
+    updateCredential: updateCredentialInRedux,
     addExternalCredential,
     updateExternalCredentials,
 } = credentialSlice.actions;
 
+async function updateCredential(
+    dispatch: Dispatch,
+    credId: string,
+    updatedFields: Partial<Credential>
+) {
+    await updateCredentialInDatabase(credId, updatedFields);
+    return dispatch(updateCredentialInRedux({ credId, updatedFields }));
+}
+
+export async function updateOffChainCredentials(credentials: Credential[]) {
+    try {
+        const blockHash = await getlastFinalizedBlockHash();
+
+        return Promise.all(
+            credentials.map(async (credential) => {
+                if (credential.status !== CredentialStatus.Offchain) {
+                    return credential;
+                }
+                const statusUpdate = await getCredentialStatus(
+                    credential.credId,
+                    blockHash
+                );
+                await updateCredentialInDatabase(
+                    credential.credId,
+                    statusUpdate
+                );
+                return { ...credential, ...statusUpdate };
+            })
+        );
+    } catch {
+        return credentials;
+    }
+}
+
 export async function loadCredentials(dispatch: Dispatch) {
-    const credentials: Credential[] = await getCredentials();
+    let credentials: Credential[] = await getCredentials();
+    if (
+        credentials.some(({ status }) => status === CredentialStatus.Offchain)
+    ) {
+        credentials = await updateOffChainCredentials(credentials);
+    }
     dispatch(updateCredentials(credentials));
 }
 
@@ -124,6 +168,7 @@ export async function insertNewCredential(
     credentialNumber: number,
     identityId: number,
     credentialIndex: number | undefined,
+    status: CredentialStatus,
     credential: Pick<CredentialDeploymentInformation, 'credId' | 'policy'>
 ) {
     const parsed = {
@@ -133,6 +178,7 @@ export async function insertNewCredential(
         credentialNumber,
         identityId,
         credentialIndex,
+        status,
     };
     await insertCredential(parsed);
     return loadCredentials(dispatch);
@@ -182,19 +228,6 @@ export async function removeExternalCredentials(
 }
 
 /**
- * updates the credentialIndex of the credential with the given credId.
- * @param credentialIndex, the new value to set. If this is undefined, this will remove the current index.
- */
-export async function updateCredentialIndex(
-    dispatch: Dispatch,
-    credId: string,
-    credentialIndex: number | undefined
-) {
-    await updateCredentialIndexInDatabase(credId, credentialIndex);
-    return dispatch(updateCredential({ credId, credentialIndex }));
-}
-
-/**
  * Adds the credential's credentialIndex and updates the account address (Because previously this was a credId acting as a placeholder).
  */
 export async function initializeGenesisCredential(
@@ -218,18 +251,10 @@ export async function initializeGenesisCredential(
 
     const credentialIndex = parseInt(credentialOnChain[0], 10);
 
-    await updateCredentialInDatabase(credential.credId, {
+    updateCredential(dispatch, credential.credId, {
         accountAddress,
         credentialIndex,
     });
-
-    return dispatch(
-        updateCredential({
-            credId: credential.credId,
-            credentialIndex,
-            accountAddress,
-        })
-    );
 }
 
 export async function updateCredentialsStatus(
@@ -241,16 +266,8 @@ export async function updateCredentialsStatus(
     const onChainCredentials: [
         CredentialDeploymentInformation,
         number
-    ][] = Object.entries(accountInfo.accountCredentials).map(
-        ([index, versioned]) => {
-            const { regId, credId, ...content } = versioned.value.contents;
-            return [
-                { ...content, credId: regId || credId },
-                parseInt(index, 10),
-            ];
-        }
-    );
-    // Find any credentials, which have been removed from the account, and remove their (former) index.
+    ][] = getCredentialsFromAccountInfo(accountInfo);
+    // Find any credentials, which have been removed from the account, remove their (former) index and update their status.
     const removed = localCredentials.filter(
         (cred) =>
             instanceOfDeployedCredential(cred) &&
@@ -261,10 +278,13 @@ export async function updateCredentialsStatus(
     );
 
     for (const cred of removed) {
-        await updateCredentialIndex(dispatch, cred.credId, undefined);
+        await updateCredential(dispatch, cred.credId, {
+            credentialIndex: undefined,
+            status: CredentialStatus.Removed,
+        });
     }
 
-    // Find any local credentials, which have been deployed on the account, and attach their index.
+    // Find any local credentials, which have been deployed on the account, attach their index and update their status.
     for (const cred of localCredentials) {
         if (!instanceOfDeployedCredential(cred)) {
             const onChainReference = onChainCredentials.find(
@@ -273,11 +293,10 @@ export async function updateCredentialsStatus(
             );
             if (onChainReference) {
                 const [, credentialIndex] = onChainReference;
-                await updateCredentialIndex(
-                    dispatch,
-                    cred.credId,
-                    credentialIndex
-                );
+                await updateCredential(dispatch, cred.credId, {
+                    credentialIndex,
+                    status: CredentialStatus.Deployed,
+                });
             }
         }
     }

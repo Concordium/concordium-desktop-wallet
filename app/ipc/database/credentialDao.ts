@@ -89,24 +89,22 @@ export async function getNextCredentialNumber(identityId: number) {
     return currentNumber + 1;
 }
 
-export async function updateCredentialIndex(
-    credId: string,
-    credentialIndex: number | undefined
-) {
-    if (credentialIndex === undefined) {
-        return (await knex())(credentialsTable)
-            .where({ credId })
-            .update({ credentialIndex: null });
-    }
-    return (await knex())(credentialsTable)
-        .where({ credId })
-        .update({ credentialIndex });
-}
-
 export async function updateCredential(
     credId: string,
     updatedValues: Partial<Credential>
 ) {
+    if (
+        Object.prototype.hasOwnProperty.call(
+            updatedValues,
+            'credentialIndex'
+        ) &&
+        updatedValues.credentialIndex === undefined
+    ) {
+        // TODO: why do we convert this to null? is it because undefined is ignored?
+        return (await knex())(credentialsTable)
+            .where({ credId })
+            .update({ ...updatedValues, credentialIndex: null });
+    }
     return (await knex())(credentialsTable)
         .where({ credId })
         .update(updatedValues);
@@ -182,13 +180,6 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
         ipcCommands.database.credentials.getNextNumber,
         async (_event, identityId: number) => {
             return getNextCredentialNumber(identityId);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.credentials.updateIndex,
-        async (_event, credId: string, credentialIndex: number | undefined) => {
-            return updateCredentialIndex(credId, credentialIndex);
         }
     );
 

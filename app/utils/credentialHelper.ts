@@ -2,8 +2,12 @@ import { getCredentialsOfAccount } from '~/database/CredentialDao';
 import { getId } from '~/database/WalletDao';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getPairingPath } from '~/features/ledger/Path';
+import { getAccountInfo } from '~/node/nodeRequests';
 import {
+    AccountInfo,
     Credential,
+    CredentialDeploymentInformation,
+    CredentialStatus,
     CredentialWithIdentityNumber,
     DeployedCredential,
     Identity,
@@ -73,4 +77,31 @@ export function getNoteForOwnCredential(
     }
 
     return `Credential from "${identityName}"`;
+}
+
+export function getCredentialsFromAccountInfo(
+    accountInfo: AccountInfo
+): [CredentialDeploymentInformation, number][] {
+    return Object.entries(accountInfo.accountCredentials).map(
+        ([index, versioned]) => {
+            const { regId, credId, ...content } = versioned.value.contents;
+            return [
+                { ...content, credId: regId || credId },
+                parseInt(index, 10),
+            ];
+        }
+    );
+}
+
+export async function getCredentialStatus(credId: string, blockHash: string) {
+    const info = await getAccountInfo(credId, blockHash);
+    if (!info) {
+        return { status: CredentialStatus.Pending };
+    }
+    const creds = getCredentialsFromAccountInfo(info);
+    const match = creds.find(([cred]) => cred.credId === credId);
+    if (match) {
+        return { status: CredentialStatus.Deployed, credentialIndex: match[1] };
+    }
+    return { status: CredentialStatus.Removed, credentialIndex: undefined };
 }

@@ -352,6 +352,14 @@ export interface CredentialDeploymentInformation
     proofs: Proofs;
 }
 
+export enum CredentialStatus {
+    Deployed = 'deployed',
+    Pending = 'pending',
+    Removed = 'removed',
+    // Temporary used for migration
+    Offchain = 'offchain',
+}
+
 export interface Credential {
     accountAddress: string;
     credentialIndex?: number;
@@ -361,6 +369,7 @@ export interface Credential {
     walletId?: number;
     credId: Hex;
     policy: JSONString;
+    status: CredentialStatus;
 }
 
 export interface DeployedCredential extends Credential {

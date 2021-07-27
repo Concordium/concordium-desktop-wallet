@@ -64,17 +64,6 @@ export async function getNextCredentialNumber(identityId: number) {
     );
 }
 
-export async function updateCredentialIndex(
-    credId: string,
-    credentialIndex: number | undefined
-) {
-    return window.ipcRenderer.invoke(
-        ipcCommands.database.credentials.updateIndex,
-        credId,
-        credentialIndex
-    );
-}
-
 export async function updateCredential(
     credId: string,
     updatedValues: Partial<Credential>

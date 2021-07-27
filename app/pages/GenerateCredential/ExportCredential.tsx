@@ -13,7 +13,7 @@ import { findAccounts } from '~/database/AccountDao';
 import routes from '~/constants/routes.json';
 import AccountCredentialSummary from './AccountCredentialSummary';
 import savedStateContext from './savedStateContext';
-import { CredentialExportFormat } from '~/utils/types';
+import { CredentialExportFormat, CredentialStatus } from '~/utils/types';
 
 interface Props {
     onExported(didExport: boolean): void;
@@ -57,6 +57,7 @@ export default function ExportCredential({ onExported }: Props): JSX.Element {
                 credential.credentialNumber,
                 credential.identityId,
                 undefined,
+                CredentialStatus.Pending,
                 credential.credential
             );
             const name = accountName || credential.address.substr(0, 8);
