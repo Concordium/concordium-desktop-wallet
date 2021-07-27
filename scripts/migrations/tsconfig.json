@@ -5,11 +5,11 @@
         "files": true
     },
     "compilerOptions": {
-        "baseUrl": "../",
+        "baseUrl": "../../",
         "paths": {
             "~/*": ["./app/*"]
         },
         "module": "CommonJS"
     },
-    "include": ["../app"]
+    "include": ["../../app"]
 }
