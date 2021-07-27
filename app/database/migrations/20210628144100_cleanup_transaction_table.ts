@@ -7,7 +7,7 @@ import { up as createTransactionTable } from './20201230111229_create_transactio
 
 export async function up(knex: Knex): Promise<void> {
     await knex.transaction(async (t) => {
-        t.table(accountsTable).update({ maxTransactionId: 0 });
+        await t.table(accountsTable).update({ maxTransactionId: 0 });
 
         await t.schema.dropTableIfExists(transactionTable);
         await t.schema.createTable(
@@ -41,4 +41,5 @@ export async function up(knex: Knex): Promise<void> {
 export async function down(knex: Knex): Promise<void> {
     await knex.schema.dropTableIfExists(transactionTable);
     await createTransactionTable(knex);
+    await knex.table(accountsTable).update({ maxTransactionId: 0 });
 }
