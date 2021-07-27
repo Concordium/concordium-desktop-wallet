@@ -4,6 +4,7 @@ import { loadAddressBook } from '~/features/AddressBookSlice';
 import {
     loadCredentials,
     loadExternalCredentials,
+    updateOffChainCredentials,
 } from '~/features/CredentialSlice';
 import { loadIdentities } from '~/features/IdentitySlice';
 import { loadProposals } from '~/features/MultiSignatureSlice';
@@ -37,6 +38,7 @@ async function loadSettingsIntoStore(dispatch: Dispatch) {
  */
 export default async function initApplication(dispatch: Dispatch) {
     await loadSettingsIntoStore(dispatch);
+    await updateOffChainCredentials();
 
     await Promise.all([
         loadAddressBook(dispatch),

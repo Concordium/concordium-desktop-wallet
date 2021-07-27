@@ -107,44 +107,8 @@ async function updateCredential(
     return dispatch(updateCredentialInRedux({ credId, updatedFields }));
 }
 
-/**
- * Given a list of credentials, attempts to update those with status Offchain,
- * with their actual status.
- * N.B. updates the credential in the database, but not in redux.
- * @return all given credentials, with the updated credentials changed.
- */
-export async function updateOffChainCredentials(credentials: Credential[]) {
-    try {
-        const blockHash = await getlastFinalizedBlockHash();
-
-        return Promise.all(
-            credentials.map(async (credential) => {
-                if (credential.status !== CredentialStatus.Offchain) {
-                    return credential;
-                }
-                const statusUpdate = await getCredentialStatusAndIndex(
-                    credential.credId,
-                    blockHash
-                );
-                await updateCredentialInDatabase(
-                    credential.credId,
-                    statusUpdate
-                );
-                return { ...credential, ...statusUpdate };
-            })
-        );
-    } catch {
-        return credentials;
-    }
-}
-
 export async function loadCredentials(dispatch: Dispatch) {
-    let credentials: Credential[] = await getCredentials();
-    if (
-        credentials.some(({ status }) => status === CredentialStatus.Offchain)
-    ) {
-        credentials = await updateOffChainCredentials(credentials);
-    }
+    const credentials: Credential[] = await getCredentials();
     dispatch(updateCredentials(credentials));
 }
 
@@ -305,6 +269,43 @@ export async function updateCredentialsStatus(
                 });
             }
         }
+    }
+}
+
+/**
+ * Attempts to update credentials with status Offchain,
+ * with their actual status.
+ * N.B. updates the credential in the database, but not in redux.
+ */
+export async function updateOffChainCredentials() {
+    const credentials: Credential[] = await getCredentials();
+    if (
+        !credentials.some(({ status }) => status === CredentialStatus.Offchain)
+    ) {
+        return undefined;
+    }
+
+    try {
+        const blockHash = await getlastFinalizedBlockHash();
+
+        return Promise.all(
+            credentials.map(async (credential) => {
+                if (credential.status !== CredentialStatus.Offchain) {
+                    return Promise.resolve();
+                }
+                const statusUpdate = await getCredentialStatusAndIndex(
+                    credential.credId,
+                    blockHash
+                );
+                return updateCredentialInDatabase(
+                    credential.credId,
+                    statusUpdate
+                );
+            })
+        );
+    } catch {
+        // no-nothing: assumption is that node is un-reachable.
+        return undefined;
     }
 }
 
