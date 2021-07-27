@@ -79,6 +79,10 @@ export function getNoteForOwnCredential(
     return `Credential from "${identityName}"`;
 }
 
+/**
+ * Given an AccountInfo, extracts the list of credentials on the account, and their indices.
+ * @return [CredentialDeploymentInformation, credentialIndex][]
+ */
 export function getCredentialsFromAccountInfo(
     accountInfo: AccountInfo
 ): [CredentialDeploymentInformation, number][] {
@@ -93,10 +97,16 @@ export function getCredentialsFromAccountInfo(
     );
 }
 
-export async function getCredentialStatus(credId: string, blockHash: string) {
+/**
+ * Determines the status and index of the given credId, at the time of the given blockHash.
+ */
+export async function getCredentialStatusAndIndex(
+    credId: string,
+    blockHash: string
+): Promise<Pick<Credential, 'status' | 'credentialIndex'>> {
     const info = await getAccountInfo(credId, blockHash);
     if (!info) {
-        return { status: CredentialStatus.Pending };
+        return { status: CredentialStatus.Pending, credentialIndex: undefined };
     }
     const creds = getCredentialsFromAccountInfo(info);
     const match = creds.find(([cred]) => cred.credId === credId);

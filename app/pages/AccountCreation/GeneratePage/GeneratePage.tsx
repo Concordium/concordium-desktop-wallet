@@ -104,7 +104,7 @@ export default function AccountCreationGenerate({
             credNumber,
             identity.id,
             0, // credentialIndex = 0 on original
-            CredentialStatus.Deployed, // Should we say Pending and update when account is confirmed?
+            CredentialStatus.Deployed,
             credentialDeploymentInfo
         );
     }

@@ -356,7 +356,7 @@ export enum CredentialStatus {
     Deployed = 'deployed',
     Pending = 'pending',
     Removed = 'removed',
-    // Temporary used for migration
+    // Temporary status, which is used for migration, until it is determined whether the credential is pending or removed.
     Offchain = 'offchain',
 }
 

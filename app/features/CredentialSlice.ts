@@ -26,7 +26,7 @@ import {
 } from '~/database/ExternalCredentialDao';
 import {
     getCredentialsFromAccountInfo,
-    getCredentialStatus,
+    getCredentialStatusAndIndex,
 } from '~/utils/credentialHelper';
 import { getlastFinalizedBlockHash } from '~/node/nodeHelpers';
 
@@ -107,6 +107,12 @@ async function updateCredential(
     return dispatch(updateCredentialInRedux({ credId, updatedFields }));
 }
 
+/**
+ * Given a list of credentials, attempts to update those with status Offchain,
+ * with their actual status.
+ * N.B. updates the credential in the database, but not in redux.
+ * @return all given credentials, with the updated credentials changed.
+ */
 export async function updateOffChainCredentials(credentials: Credential[]) {
     try {
         const blockHash = await getlastFinalizedBlockHash();
@@ -116,7 +122,7 @@ export async function updateOffChainCredentials(credentials: Credential[]) {
                 if (credential.status !== CredentialStatus.Offchain) {
                     return credential;
                 }
-                const statusUpdate = await getCredentialStatus(
+                const statusUpdate = await getCredentialStatusAndIndex(
                     credential.credId,
                     blockHash
                 );
@@ -251,7 +257,7 @@ export async function initializeGenesisCredential(
 
     const credentialIndex = parseInt(credentialOnChain[0], 10);
 
-    updateCredential(dispatch, credential.credId, {
+    return updateCredential(dispatch, credential.credId, {
         accountAddress,
         credentialIndex,
     });
