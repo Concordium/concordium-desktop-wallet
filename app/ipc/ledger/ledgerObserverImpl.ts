@@ -8,7 +8,7 @@ import type {
 } from '@ledgerhq/hw-transport';
 import { BrowserWindow } from 'electron';
 import ConcordiumLedgerClientMain from '../../features/ledger/ConcordiumLedgerClientMain';
-import { isConcordiumApp } from '../../components/ledger/util';
+import { isConcordiumApp, isOutdated } from '../../components/ledger/util';
 import { LedgerSubscriptionAction } from '../../components/ledger/useLedger';
 import ledgerIpcCommands from '~/constants/ledgerIpcCommands.json';
 import { LedgerObserver } from './ledgerObserver';
@@ -78,18 +78,25 @@ export default class LedgerObserverImpl implements LedgerObserver {
                         return;
                     }
 
-                    if (isConcordiumApp(appAndVersion)) {
-                        mainWindow.webContents.send(
-                            ledgerIpcCommands.listenChannel,
-                            LedgerSubscriptionAction.CONNECTED_SUBSCRIPTION,
-                            deviceName
-                        );
-                    } else {
+                    if (!isConcordiumApp(appAndVersion)) {
                         // The device has been connected, but the Concordium application has not
                         // been opened yet.
                         mainWindow.webContents.send(
                             ledgerIpcCommands.listenChannel,
                             LedgerSubscriptionAction.PENDING,
+                            deviceName
+                        );
+                    } else if (isOutdated(appAndVersion)) {
+                        // The device has been connected, but the Concordium application is outdated
+                        mainWindow.webContents.send(
+                            ledgerIpcCommands.listenChannel,
+                            LedgerSubscriptionAction.OUTDATED,
+                            deviceName
+                        );
+                    } else {
+                        mainWindow.webContents.send(
+                            ledgerIpcCommands.listenChannel,
+                            LedgerSubscriptionAction.CONNECTED_SUBSCRIPTION,
                             deviceName
                         );
                     }
