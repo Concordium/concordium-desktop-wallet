@@ -10,6 +10,7 @@ import { partition } from './basicHelpers';
 import {
     Account,
     Credential,
+    CredentialStatus,
     EncryptedData,
     ExportData,
     Identity,
@@ -149,8 +150,14 @@ async function insertNewIdentities(
         }
 
         for (let k = 0; k < credentialsOnIdentity.length; k += 1) {
+            const cred = credentialsOnIdentity[k];
             const newCredentialToInsert = {
-                ...credentialsOnIdentity[k],
+                ...cred,
+                status:
+                    cred.status ||
+                    (cred.credentialIndex || cred.credentialIndex === 0
+                        ? CredentialStatus.Deployed
+                        : CredentialStatus.Offchain),
                 identityId: newIdentityId,
             };
             await insertCredential(newCredentialToInsert);
@@ -200,8 +207,14 @@ async function insertNewAccountsAndCredentials(
             )
     );
     for (let k = 0; k < newCredentials.length; k += 1) {
+        const cred = newCredentials[k];
         const newCredentialToInsert = {
-            ...newCredentials[k],
+            ...cred,
+            status:
+                cred.status ||
+                (cred.credentialIndex
+                    ? CredentialStatus.Deployed
+                    : CredentialStatus.Offchain),
             identityId,
         };
         await insertCredential(newCredentialToInsert);

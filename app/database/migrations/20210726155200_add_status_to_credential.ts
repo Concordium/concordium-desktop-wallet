@@ -7,7 +7,7 @@ type CredWithoutStatus = Omit<Credential, 'status'>;
 export async function up(knex: Knex): Promise<void> {
     await knex.transaction(async (trx) => {
         await trx.schema.alterTable(credentialsTable, (table) => {
-            table.string('status');
+            table.string('status').notNullable();
         });
 
         const credentials: CredWithoutStatus[] = await trx(
