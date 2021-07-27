@@ -373,6 +373,7 @@ export interface Credential {
 }
 
 export interface DeployedCredential extends Credential {
+    status: CredentialStatus.Deployed;
     credentialIndex: number;
 }
 
@@ -383,9 +384,7 @@ export interface CredentialWithIdentityNumber extends Credential {
 export function instanceOfDeployedCredential(
     object: Credential
 ): object is DeployedCredential {
-    return !(
-        object.credentialIndex === undefined || object.credentialIndex === null
-    );
+    return object.status === CredentialStatus.Deployed;
 }
 
 export function instanceOfCredentialWithIdentityNumber(

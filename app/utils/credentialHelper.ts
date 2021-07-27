@@ -11,7 +11,6 @@ import {
     CredentialWithIdentityNumber,
     DeployedCredential,
     Identity,
-    instanceOfCredentialWithIdentityNumber,
     instanceOfDeployedCredential,
 } from './types';
 
@@ -32,14 +31,9 @@ export async function findLocalDeployedCredential(
     const credentialsOfAccount = await getCredentialsOfAccount(accountAddress);
     const result = credentialsOfAccount
         .filter(instanceOfDeployedCredential)
-        .filter(instanceOfCredentialWithIdentityNumber)
         .find((credential) => credential.walletId === walletId);
 
-    if (
-        result === undefined ||
-        !instanceOfDeployedCredential(result) ||
-        !instanceOfCredentialWithIdentityNumber(result)
-    ) {
+    if (result === undefined || !instanceOfDeployedCredential(result)) {
         return undefined;
     }
 

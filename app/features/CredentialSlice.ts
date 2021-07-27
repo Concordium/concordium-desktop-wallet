@@ -256,7 +256,11 @@ export async function updateCredentialsStatus(
 
     // Find any local credentials, which have been deployed on the account, attach their index and update their status.
     for (const cred of localCredentials) {
-        if (!instanceOfDeployedCredential(cred)) {
+        if (
+            [CredentialStatus.Pending, CredentialStatus.Offchain].includes(
+                cred.status
+            )
+        ) {
             const onChainReference = onChainCredentials.find(
                 ([onChainCredential]) =>
                     cred.credId === onChainCredential.credId
@@ -304,7 +308,7 @@ export async function updateOffChainCredentials() {
             })
         );
     } catch {
-        // no-nothing: assumption is that node is un-reachable.
+        // do nothing: assumption is that node is un-reachable.
         return undefined;
     }
 }
