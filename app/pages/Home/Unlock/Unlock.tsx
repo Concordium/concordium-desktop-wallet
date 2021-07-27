@@ -18,6 +18,7 @@ export default function Unlock() {
     const dispatch = useDispatch();
     const form = useForm<UnlockForm>({ mode: 'onSubmit' });
     const { password: pwField } = form.watch();
+    const [isUnlocking, setUnlocking] = useState(false);
     const [validationError, setValidationError] = useState<
         string | undefined
     >();
@@ -37,6 +38,7 @@ export default function Unlock() {
 
     const unlock = useCallback(
         async ({ password }: UnlockForm) => {
+            setUnlocking(true);
             await window.ipcRenderer.invoke(
                 ipcCommands.database.setPassword,
                 password
@@ -55,6 +57,7 @@ export default function Unlock() {
                 setValidationError('Invalid password');
                 form.trigger();
             }
+            setUnlocking(false);
         },
         [dispatch, form]
     );
@@ -73,7 +76,7 @@ export default function Unlock() {
                     }}
                     autoFocus
                 />
-                <Form.Submit>Unlock</Form.Submit>
+                <Form.Submit disabled={isUnlocking}>Unlock</Form.Submit>
             </Card>
         </Form>
     );
