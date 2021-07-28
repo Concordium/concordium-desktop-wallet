@@ -24,7 +24,7 @@ export default function IdentityList() {
                     identity={identity}
                     key={identity.id}
                     active={chosenIdentity === identity}
-                    onClick={() => dispatch(chooseIdentity(identity))}
+                    onClick={() => dispatch(chooseIdentity(identity.id))}
                 />
             ))}
         </CardList>

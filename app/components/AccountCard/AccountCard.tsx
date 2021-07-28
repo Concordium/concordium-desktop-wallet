@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, SyntheticEvent } from 'react';
 import { useSelector } from 'react-redux';
 import clsx from 'clsx';
 import MultiSigIcon from '@resources/svg/multisig.svg';
@@ -8,6 +8,7 @@ import ShieldImage from '@resources/svg/shield.svg';
 import BakerImage from '@resources/svg/baker.svg';
 import ReadonlyImage from '@resources/svg/read-only.svg';
 import LedgerImage from '@resources/svg/ledger.svg';
+import InfoImage from '@resources/svg/info.svg';
 import { displayAsGTU } from '~/utils/gtu';
 import { AccountInfo, Account, AccountStatus, ClassName } from '~/utils/types';
 import { isInitialAccount, isMultiCred } from '~/utils/accountHelpers';
@@ -35,6 +36,88 @@ interface ViewProps extends ClassName {
     unShielded?: bigint;
     amountAtDisposal?: bigint;
     stakedAmount?: bigint;
+}
+
+function ShieldedBalance({
+    multiSig,
+    shielded = 0n,
+    onClick,
+    hasEncryptedFunds,
+}: Partial<ViewProps>) {
+    const [showingInfo, setShowingInfo] = useState(false);
+
+    const hidden = hasEncryptedFunds && (
+        <>
+            {' '}
+            + <ShieldImage height="15" />
+        </>
+    );
+
+    const rowLeftSide = <h3>Shielded Balance:</h3>;
+
+    const closeInfo = (e: SyntheticEvent) => {
+        e.stopPropagation(); // So that we avoid triggering the parent's onClick
+        return setShowingInfo(false);
+    };
+
+    return (
+        <>
+            {multiSig || (
+                <SidedRow
+                    className={clsx(styles.row, 'mB0')}
+                    left={rowLeftSide}
+                    right={
+                        <h3>
+                            {displayAsGTU(shielded)}
+                            {hidden}
+                        </h3>
+                    }
+                    onClick={(e) => {
+                        e.stopPropagation(); // So that we avoid triggering the parent's onClick
+                        return onClick && onClick(true);
+                    }}
+                />
+            )}
+            {multiSig && !showingInfo && (
+                <SidedRow
+                    className={clsx(styles.row, 'textFaded mB0')}
+                    left={rowLeftSide}
+                    right={
+                        <>
+                            <h3>Unavailable</h3>
+                            <InfoImage
+                                onClick={(e: Event) => {
+                                    e.stopPropagation(); // So that we avoid triggering the parent's onClick
+                                    return setShowingInfo(true);
+                                }}
+                                className="mL10"
+                            />
+                        </>
+                    }
+                />
+            )}
+            {multiSig && showingInfo && (
+                <>
+                    <div
+                        tabIndex={0}
+                        role="button"
+                        className={styles.info}
+                        onClick={closeInfo}
+                        onKeyPress={closeInfo}
+                    >
+                        <p className={styles.infoText}>
+                            Shielded balances cannot be used on accounts with
+                            multiple credentials.
+                        </p>
+                    </div>
+                    <InfoImage
+                        onClick={closeInfo}
+                        className={styles.infoImageActivated}
+                    />
+                </>
+            )}
+        </>
+    );
 }
 
 export function AccountCardView({
@@ -78,9 +161,10 @@ export function AccountCardView({
             role="button"
         >
             <SidedRow
+                className={styles.header}
                 left={
                     <>
-                        <b className={styles.inline}>{accountName}</b>
+                        <b className={styles.accountName}>{accountName}</b>
                         {initialAccount && <>&nbsp;(Initial)</>}
                         {accountStatus === AccountStatus.Pending && (
                             <PendingImage
@@ -96,7 +180,7 @@ export function AccountCardView({
                         )}
                         {isBaker && (
                             <BakerImage
-                                height="25"
+                                width="20"
                                 className={styles.bakerImage}
                             />
                         )}
@@ -112,15 +196,19 @@ export function AccountCardView({
                 right={
                     <>
                         {connected && (
-                            <LedgerImage height="15" className="mR20" />
+                            <LedgerImage height="15" className="mR10" />
                         )}
                         {multiSig ? (
                             <>
-                                {identityName} +{' '}
+                                <div className="textRight textNoWrap">
+                                    {identityName} +{' '}
+                                </div>
                                 <MultiSigIcon className={styles.multisig} />
                             </>
                         ) : (
-                            identityName
+                            <div className="textRight textNoWrap">
+                                {identityName}
+                            </div>
                         )}
                     </>
                 }
@@ -152,19 +240,11 @@ export function AccountCardView({
                 right={displayAsGTU(stakedAmount)}
             />
             <div className={styles.dividingLine} />
-            <SidedRow
-                className={clsx(styles.row, 'mB0')}
-                left={<h3>Shielded Balance:</h3>}
-                right={
-                    <h3>
-                        {displayAsGTU(shielded)}
-                        {hidden}
-                    </h3>
-                }
-                onClick={(e) => {
-                    e.stopPropagation(); // So that we avoid triggering the parent's onClick
-                    return onClick && onClick(true);
-                }}
+            <ShieldedBalance
+                multiSig={multiSig}
+                shielded={shielded}
+                onClick={onClick}
+                hasEncryptedFunds={hasEncryptedFunds}
             />
         </div>
     );

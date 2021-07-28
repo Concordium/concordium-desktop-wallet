@@ -62,9 +62,6 @@ proto/
 # ignore rust outputs
 target/
 
-#Ignore Cargo.lock
-Cargo.lock
-
 #VSCode
 .vscode/
 

@@ -1,4 +1,5 @@
 {
+    "alreadyPrinting": "You seem to be printing already, please close your current print dialog before attempting to print again.",
     "missingGlobal": "Missing cryptographic parameters, please connect to a node to load these.",
     "unableToReachNode": "Unable to reach node."
 }

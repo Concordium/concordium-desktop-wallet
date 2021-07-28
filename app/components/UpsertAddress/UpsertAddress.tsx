@@ -30,7 +30,7 @@ import styles from './UpsertAddress.module.scss';
 type Props = PropsWithChildren<{
     initialValues?: AddressBookEntryForm;
     readOnly?: boolean;
-    onSubmit?(name: string, address: string, note?: string): void;
+    onSubmit?(entry: AddressBookEntry): void;
 }>;
 
 type UpsertAddressProps<
@@ -67,14 +67,17 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
     const As = as || Button;
 
     const upsertAddress = useCallback(
-        (values: AddressBookEntryForm) => {
+        async (values: AddressBookEntryForm) => {
             const entry: AddressBookEntry = { ...values, readOnly };
 
             if (isEditMode && initialValues) {
-                updateAddressBookEntry(dispatch, initialValues.address, entry);
-            } else {
-                addToAddressBook(dispatch, entry);
+                return updateAddressBookEntry(
+                    dispatch,
+                    initialValues.address,
+                    entry
+                );
             }
+            return addToAddressBook(dispatch, entry);
         },
         [isEditMode, initialValues, dispatch, readOnly]
     );
@@ -96,18 +99,15 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
     );
 
     const handleSubmit: SubmitHandler<AddressBookEntryForm> = useCallback(
-        (values) => {
-            upsertAddress(values);
-
-            const { name, address, note } = values;
+        async (values) => {
+            await upsertAddress(values);
 
             if (onSubmit) {
-                onSubmit(name, address, note);
+                onSubmit({ ...values, readOnly });
             }
-
             setOpen(false);
         },
-        [onSubmit, setOpen, upsertAddress]
+        [onSubmit, setOpen, upsertAddress, readOnly]
     );
 
     return (

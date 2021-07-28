@@ -17,17 +17,19 @@ import {
     Dispatch,
     TransactionEvent,
     Global,
+    TransferTransactionWithNames,
 } from '../utils/types';
-import {
-    attachNames,
-    isSuccessfulTransaction,
-} from '../utils/transactionHelpers';
+import { isSuccessfulTransaction } from '../utils/transactionHelpers';
 import {
     convertIncomingTransaction,
     convertAccountTransaction,
 } from '../utils/TransactionConverters';
 // eslint-disable-next-line import/no-cycle
-import { updateMaxTransactionId, updateAllDecrypted } from './AccountSlice';
+import {
+    updateMaxTransactionId,
+    updateAllDecrypted,
+    chosenAccountSelector,
+} from './AccountSlice';
 import AbortController from '~/utils/AbortController';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
 import { max } from '~/utils/basicHelpers';
@@ -182,12 +184,11 @@ export async function loadTransactions(
         JSON.parse(account.rewardFilter)
     );
 
-    const namedTransactions = await attachNames(transactions);
     if (!controller?.isAborted) {
         if (showLoading) {
             dispatch(setLoadingTransactions(false));
         }
-        dispatch(setTransactions({ transactions: namedTransactions, more }));
+        dispatch(setTransactions({ transactions, more }));
     }
 }
 
@@ -197,7 +198,10 @@ async function fetchTransactions(address: string, currentMaxId: bigint) {
         currentMaxId.toString()
     );
 
-    const newMaxId = transactions.reduce((id, t) => max(id, BigInt(t.id)), 0n);
+    const newMaxId = transactions.reduce(
+        (id, t) => max(id, BigInt(t.id)),
+        currentMaxId
+    );
     const isFinished = !full;
 
     const newTransactions = await insertTransactions(
@@ -337,19 +341,41 @@ export async function rejectTransaction(
     );
 }
 
-export const transactionsSelector = (state: RootState) => {
+const attachNames = (state: RootState) => (
+    transaction: TransferTransaction
+) => {
+    const findName = (address: string) =>
+        state.addressBook.addressBook.find((e) => e.address === address)?.name;
+
+    return {
+        ...transaction,
+        toName: findName(transaction.toAddress),
+        fromName: findName(transaction.fromAddress),
+    };
+};
+
+export const transactionsSelector = (
+    state: RootState
+): TransferTransactionWithNames[] => {
+    const mapNames = attachNames(state);
+
     if (state.transactions.viewingShielded) {
-        return state.transactions.transactions.filter(
-            isShieldedBalanceTransaction
-        );
+        return state.transactions.transactions
+            .filter(isShieldedBalanceTransaction)
+            .map(mapNames);
     }
-    const address = state.accounts.chosenAccount?.address;
+
+    const address = chosenAccountSelector(state)?.address;
+
     if (!address) {
         return [];
     }
-    return state.transactions.transactions.filter((transaction) =>
-        isUnshieldedBalanceTransaction(transaction, address)
-    );
+
+    return state.transactions.transactions
+        .filter((transaction) =>
+            isUnshieldedBalanceTransaction(transaction, address)
+        )
+        .map(mapNames);
 };
 
 export const viewingShieldedSelector = (state: RootState) =>

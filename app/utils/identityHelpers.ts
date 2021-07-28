@@ -1,6 +1,8 @@
 import { formatDate } from './timeHelpers';
 import { ChosenAttributes, ChosenAttributesKeys } from './types';
 
+export const IDENTITY_NAME_MAX_LENGTH = 25;
+
 export type AttributeKey = keyof ChosenAttributes;
 
 export const attributeNamesMap: {

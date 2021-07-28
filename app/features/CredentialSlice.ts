@@ -1,4 +1,4 @@
-import { createSlice, Dispatch } from '@reduxjs/toolkit';
+import { createSlice, Dispatch, PayloadAction } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '~/store/store';
 import {
@@ -14,16 +14,27 @@ import {
     Account,
     AccountInfo,
     instanceOfDeployedCredential,
+    AddedCredential,
+    MakeOptional,
 } from '~/utils/types';
+import { ExternalCredential } from '~/database/types';
+import {
+    deleteExternalCredentials,
+    getAllExternalCredentials,
+    upsertExternalCredential,
+    upsertMultipleExternalCredentials,
+} from '~/database/ExternalCredentialDao';
 
 interface CredentialState {
     credentials: Credential[];
+    externalCredentials: ExternalCredential[];
 }
 
 const credentialSlice = createSlice({
     name: 'credentials',
     initialState: {
         credentials: [],
+        externalCredentials: [],
     } as CredentialState,
     reducers: {
         updateCredentials: (state, input) => {
@@ -44,11 +55,26 @@ const credentialSlice = createSlice({
                 };
             }
         },
+        addExternalCredential(
+            state,
+            action: PayloadAction<ExternalCredential>
+        ) {
+            state.externalCredentials.push(action.payload);
+        },
+        updateExternalCredentials(
+            state,
+            action: PayloadAction<ExternalCredential[]>
+        ) {
+            state.externalCredentials = action.payload;
+        },
     },
 });
 
 export const credentialsSelector = (state: RootState) =>
     state.credentials.credentials;
+
+export const externalCredentialsSelector = (state: RootState) =>
+    state.credentials.externalCredentials;
 
 export const accountHasDeployedCredentialsSelector = (account: Account) => (
     state: RootState
@@ -63,6 +89,8 @@ export const {
     updateCredentials,
     addCredential,
     updateCredential,
+    addExternalCredential,
+    updateExternalCredentials,
 } = credentialSlice.actions;
 
 export async function loadCredentials(dispatch: Dispatch) {
@@ -70,8 +98,24 @@ export async function loadCredentials(dispatch: Dispatch) {
     dispatch(updateCredentials(credentials));
 }
 
+export async function loadExternalCredentials(dispatch: Dispatch) {
+    const ex: ExternalCredential[] = await getAllExternalCredentials();
+    dispatch(updateExternalCredentials(ex));
+}
+
 export async function importCredentials(credentials: Credential[]) {
     return Promise.all(credentials.map(insertCredential));
+}
+
+export async function importExternalCredentials(
+    credentials?: ExternalCredential[]
+) {
+    if (!credentials?.length) {
+        return;
+    }
+
+    // eslint-disable-next-line consistent-return
+    return upsertMultipleExternalCredentials(credentials);
 }
 
 export async function insertNewCredential(
@@ -92,6 +136,49 @@ export async function insertNewCredential(
     };
     await insertCredential(parsed);
     return loadCredentials(dispatch);
+}
+
+export async function updateExternalCredential(
+    dispatch: Dispatch,
+    credential: ExternalCredential
+) {
+    await upsertExternalCredential(credential);
+    return loadExternalCredentials(dispatch);
+}
+
+export async function insertExternalCredentials(
+    dispatch: Dispatch,
+    accountAddress: string,
+    credentials: AddedCredential[]
+) {
+    if (!credentials.length) {
+        return;
+    }
+
+    const creds: MakeOptional<ExternalCredential, 'note'>[] = credentials.map(
+        (c) => ({
+            accountAddress,
+            credId: c.value.credId,
+            note: c.note,
+        })
+    );
+
+    await upsertMultipleExternalCredentials(creds);
+    // eslint-disable-next-line consistent-return
+    return loadExternalCredentials(dispatch);
+}
+
+export async function removeExternalCredentials(
+    dispatch: Dispatch,
+    credIds: string[]
+) {
+    if (!credIds.length) {
+        return;
+    }
+
+    await deleteExternalCredentials(credIds);
+    // eslint-disable-next-line consistent-return
+    return loadExternalCredentials(dispatch);
 }
 
 /**

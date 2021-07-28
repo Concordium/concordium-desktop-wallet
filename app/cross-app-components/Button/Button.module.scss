@@ -34,12 +34,17 @@
 }
 
 .root {
-    color: $color-off-white;
     font-size: $font-size-button1;
     padding: 0 30px;
     height: 50px;
     border-radius: 4px;
     transition: background-color $anim-easing $anim-timing;
+
+    &,
+    &:hover,
+    &:visited {
+        color: $color-off-white;
+    }
 
     @include button($color-pale-blue);
 
@@ -87,9 +92,14 @@
         @include shadowBorder($color-text);
 
         background-color: $color-white;
-        color: $color-text;
         transition: box-shadow $anim-easing $anim-timing,
             color $anim-easing $anim-timing;
+
+        &,
+        &:hover,
+        &:visited {
+            color: $color-text;
+        }
 
         &:disabled {
             @include shadowBorder($color-text-faded);
@@ -110,8 +120,13 @@
         &.rootNegative:not(:disabled) {
             @include shadowBorder($color-salmon-red);
 
-            color: $color-salmon-red;
             box-shadow: 0 0 0 1px $color-salmon-red inset;
+
+            &,
+            &:hover,
+            &:visited {
+                color: $color-salmon-red;
+            }
 
             &:hover,
             &:focus,

@@ -5,8 +5,8 @@ import { settingsSelector } from '~/features/SettingsSlice';
 import settingKeys from '~/constants/settingKeys.json';
 import routes from '~/constants/routes.json';
 import { Setting, SettingTypeEnum } from '~/utils/types';
+import ConnectionSettingElement from '~/components/ConnectionSettingElement';
 import BooleanSetting from './BooleanSettingElement';
-import ConnectionSettingElement from './ConnectionSettingElement';
 import PasswordSettingElement from './PasswordSettingElement';
 
 // A static definition of warning messages, where the key matches the

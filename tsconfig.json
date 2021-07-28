@@ -25,6 +25,7 @@
         }
     },
     "exclude": [
+        "scripts",
         "test",
         "release",
         "app/main.prod.js",
