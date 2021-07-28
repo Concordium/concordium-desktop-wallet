@@ -32,6 +32,7 @@ import {
 } from './AccountSlice';
 import AbortController from '~/utils/AbortController';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
+import { max } from '~/utils/basicHelpers';
 
 const updateTransactionInterval = 5000;
 
@@ -99,7 +100,7 @@ export async function decryptTransactions(
             t.transactionKind ===
                 TransactionKindString.EncryptedAmountTransfer &&
             t.decryptedAmount === null &&
-            t.success
+            t.status === TransactionStatus.Finalized
     );
 
     if (encryptedTransfers.length === 0) {
@@ -191,11 +192,14 @@ export async function loadTransactions(
     }
 }
 
-async function fetchTransactions(address: string, currentMaxId: number) {
-    const { transactions, full } = await getTransactions(address, currentMaxId);
+async function fetchTransactions(address: string, currentMaxId: bigint) {
+    const { transactions, full } = await getTransactions(
+        address,
+        currentMaxId.toString()
+    );
 
     const newMaxId = transactions.reduce(
-        (id, t) => Math.max(id, t.id),
+        (id, t) => max(id, BigInt(t.id)),
         currentMaxId
     );
     const isFinished = !full;
@@ -219,7 +223,7 @@ export async function updateTransactions(
     account: Account,
     controller: AbortController
 ) {
-    async function updateSubroutine(maxId: number) {
+    async function updateSubroutine(maxId: bigint) {
         if (controller.isAborted) {
             controller.finish();
             return;
@@ -230,7 +234,7 @@ export async function updateTransactions(
             await updateMaxTransactionId(
                 dispatch,
                 account.address,
-                result.newMaxId
+                result.newMaxId.toString()
             );
         }
 
@@ -256,7 +260,9 @@ export async function updateTransactions(
         controller.finish();
     }
 
-    updateSubroutine(account.maxTransactionId || 0);
+    updateSubroutine(
+        account.maxTransactionId ? BigInt(account.maxTransactionId) : 0n
+    );
 }
 
 // Add a pending transaction to storage
@@ -301,10 +307,13 @@ export async function confirmTransaction(
         }
     }
 
+    const status = success
+        ? TransactionStatus.Finalized
+        : TransactionStatus.Failed;
+
     const update = {
-        status: TransactionStatus.Finalized,
+        status,
         cost: cost.toString(),
-        success,
         rejectReason,
         blockHash,
     };

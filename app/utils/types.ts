@@ -138,7 +138,7 @@ export interface Account {
     incomingAmounts?: string;
     rewardFilter: string;
     selfAmounts?: string;
-    maxTransactionId: number;
+    maxTransactionId: string;
     deploymentTransactionId?: string;
     isInitial: boolean;
 }
@@ -463,17 +463,13 @@ export enum OriginType {
  * This Interface models the structure of the transfer transactions stored in the database
  */
 export interface TransferTransaction {
-    remote: boolean;
-    originType: OriginType;
     transactionKind: TransactionKindString;
-    id?: number; // only remote transactions have ids.
+    id?: string; // only remote transactions have ids.
     blockHash: Hex;
     blockTime: string;
-    success?: boolean;
     transactionHash: Hex;
     subtotal?: string;
     cost?: string;
-    details?: string;
     encrypted?: string;
     schedule?: string;
     fromAddress: Hex;
@@ -481,7 +477,6 @@ export interface TransferTransaction {
     status: TransactionStatus;
     rejectReason?: RejectReason | string;
     decryptedAmount?: string;
-    origin?: string;
 }
 
 export interface TransferTransactionWithNames extends TransferTransaction {
@@ -1122,7 +1117,7 @@ export interface EncryptedInfo {
  * The transaction format that is returned by the wallet proxy.
  */
 export interface IncomingTransaction {
-    id: number;
+    id: string;
     blockHash: Hex;
     blockTime: string;
     total: string;
