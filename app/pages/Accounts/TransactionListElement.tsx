@@ -202,6 +202,7 @@ function statusSymbol(status: TransactionStatus) {
             return '';
         case TransactionStatus.Committed:
             return <CheckmarkIcon className={styles.checkmark} height="10" />;
+        case TransactionStatus.Failed:
         case TransactionStatus.Finalized:
             return (
                 <DoubleCheckmarkIcon className={styles.checkmark} height="10" />
@@ -248,6 +249,10 @@ function TransactionListElement({
     const { amount, amountFormula } = amountParser(transaction, isOutgoing);
 
     const failed = isFailed(transaction);
+    const notFinished = [
+        TransactionStatus.Committed,
+        TransactionStatus.Pending,
+    ].includes(transaction.status);
 
     return (
         <div
@@ -296,12 +301,7 @@ function TransactionListElement({
                 right={
                     amountFormula
                         ? amountFormula.concat(
-                              ` ${
-                                  transaction.status !==
-                                  TransactionStatus.Finalized
-                                      ? ' (Estimated)'
-                                      : ''
-                              }`
+                              ` ${notFinished ? ' (Estimated)' : ''}`
                           )
                         : ''
                 }
