@@ -4,11 +4,12 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import routes from '~/constants/routes.json';
 import PageLayout from '~/components/PageLayout';
+import ipcCommands from '~/constants/ipcCommands.json';
 import SelectPassword from './SelectPassword';
 import NewUserInit from './NewUserInit';
 import PasswordHasBeenSet from './PasswordHasBeenSet';
 import Unlock from './Unlock';
-import ipcCommands from '~/constants/ipcCommands.json';
+import SetNodeConnection from './SetNodeConnection';
 
 export default function HomePage() {
     const dispatch = useDispatch();
@@ -64,6 +65,10 @@ export default function HomePage() {
                 <Route
                     path={routes.HOME_NEW_USER}
                     render={() => <NewUserInit />}
+                />
+                <Route
+                    path={routes.HOME_NODE_CONNECT}
+                    render={() => <SetNodeConnection />}
                 />
                 <Route
                     path={routes.HOME}

@@ -15,6 +15,8 @@ import {
     chosenAccountInfoSelector,
 } from '~/features/AccountSlice';
 import SidedRow from '~/components/SidedRow';
+import AccountName from './AccountName';
+
 import styles from './AccountBalanceView.module.scss';
 
 /**
@@ -49,7 +51,7 @@ export default function AccountBalanceView(): JSX.Element | null {
                 disabled={!viewingShielded}
                 className={clsx(
                     styles.viewingShieldedButton,
-                    !viewingShielded && styles.bold
+                    !viewingShielded && styles.active
                 )}
                 onClick={() => dispatch(setViewingShielded(false))}
             >
@@ -61,7 +63,7 @@ export default function AccountBalanceView(): JSX.Element | null {
                     disabled={viewingShielded}
                     className={clsx(
                         styles.viewingShieldedButton,
-                        viewingShielded && styles.bold
+                        viewingShielded && styles.active
                     )}
                     onClick={() => dispatch(setViewingShielded(true))}
                 >
@@ -131,6 +133,7 @@ export default function AccountBalanceView(): JSX.Element | null {
 
     return (
         <Card className={styles.accountBalanceView}>
+            <AccountName name={account.name} address={account.address} />
             {buttons}
             {main}
         </Card>

@@ -10,7 +10,6 @@
     "grpcCall": "GRPC_CALL",
     "grpcNodeConsensusAndGlobal": "GRPC_NODE_CONSENSUS_GLOBAL",
     "openUrl": "OPEN_URL",
-    "createAxios": "CREATE_AXIOS",
     "httpGet": "HTTP_GET",
     "getTransactions": "WALLET_PROXY_GET_TRANSACTIONS",
     "getIdProviders": "WALLET_PROXY_GET_ID_PROVIDERS",
@@ -58,11 +57,20 @@
             "hasDuplicateWalletId": "DB_CREDENTIAL_HAS_DUPLICATE_WALLET_ID",
             "hasExistingCredential": "DB_CREDENTIAL_HAS_EXISTING_CREDENTIAL"
         },
+        "externalCredentials": {
+            "upsertExternalCredential": "DB_UPSERT_EXTERNAL_CREDENTIAL",
+            "upsertMultipleExternalCredentials": "DB_UPSERT_MULTIPLE_EXTERNAL_CREDENTIALS",
+            "deleteExternalCredentials": "DB_DELETE_EXTERNAL_CREDENTIALS",
+            "getAllExternalCredentials": "DB_GET_ALL_EXTERNAL_CREDENTIALS"
+        },
         "identity": {
             "getNextIdentityNumber": "DB_IDENTITY_GET_NEXT_IDENTITY_NUMBER",
             "insert": "DB_IDENTITY_INSERT",
             "update": "DB_IDENTITY_UPDATE",
-            "getIdentitiesForWallet": "DB_IDENTITY_GET_FOR_WALLET"
+            "getIdentitiesForWallet": "DB_IDENTITY_GET_FOR_WALLET",
+            "rejectIdentityAndDeleteInitialAccount": "DB_IDENTITY_REJECT_IDENTITY_AND_INITIAL_ACCOUNT",
+            "confirmIdentity": "DB_IDENTITY_CONFIRM",
+            "insertPendingIdentityAndInitialAccount": "DB_IDENTITY_INSERT_PENDING_IDENTITY_AND_INITIAL_ACCOUNT"
         },
         "genesisAndGlobal": {
             "setValue": "DB_GENESIS_AND_GLOBAL_SET"
@@ -78,8 +86,8 @@
         "transactions": {
             "getPending": "DB_TRANSACTIONS_GET_PENDING",
             "hasPending": "DB_TRANSACTIONS_HAS_PENDING",
-            "getMaxTransactionId": "DB_TRANSACTIONS_GET_MAX_TRANSACTION_ID",
             "getTransactionsForAccount": "DB_TRANSACTIONS_GET_TRANSACTIONS_FOR_ACCOUNT",
+            "hasEncryptedTransactions": "DB_TRANSACTIONS_HAS_ENCRYPTED",
             "update": "DB_TRANSACTIONS_UPDATE",
             "insert": "DB_TRANSACTIONS_INSERT"
         }

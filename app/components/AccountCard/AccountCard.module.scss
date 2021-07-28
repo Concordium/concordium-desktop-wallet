@@ -1,13 +1,15 @@
 @import 'config/bundle';
 
 $horizontal-padding: 30px;
+$border-radius: 10px;
 
 .accountListElement {
     @include shadowBorder($color-grey);
 
+    position: relative;
     display: flex;
     flex-direction: column;
-    border-radius: 10px;
+    border-radius: $border-radius;
     background-color: $color-white;
     color: $color-text;
     padding: 15px $horizontal-padding;
@@ -38,8 +40,11 @@ $horizontal-padding: 30px;
     }
 }
 
-.inline {
+.accountName {
+    @include overflowEllipsis;
+
     display: inline;
+    max-width: 100%;
 }
 
 .dividingLine {
@@ -49,6 +54,23 @@ $horizontal-padding: 30px;
     height: 1px;
     display: block;
     margin-left: calc(-1 * #{$horizontal-padding});
+}
+
+.header {
+    > :first-child {
+        margin-right: 10px;
+        flex: 1 1 calc(50% - 10px);
+        min-width: 0;
+    }
+
+    > :last-child {
+        flex: 1 1 auto;
+        margin-left: 10px;
+    }
+
+    svg {
+        flex: 0 0 auto;
+    }
 }
 
 .row {
@@ -67,10 +89,39 @@ $horizontal-padding: 30px;
 .bakerImage {
     margin-left: 10px;
     margin-top: -10px;
+    height: auto;
+    flex: 0 0 20px;
 }
 
 .statusImage {
     margin-left: 10px;
     margin-top: -6px;
     margin-bottom: -6px;
+}
+
+.info {
+    display: flex;
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    height: calc(100% - 2px);
+    width: calc(100% - 2px);
+    border-radius: $border-radius;
+    background: $color-white;
+    opacity: 95%;
+}
+
+.infoText {
+    text-align: center;
+    margin: auto;
+    max-width: 80%;
+}
+
+.infoImageActivated {
+    margin-left: auto;
+    margin-top: 11px;
+    z-index: 1;
+    path {
+        fill: $color-pale-blue;
+    }
 }

@@ -42,7 +42,7 @@ export default function IdentityView() {
                     postAction={() => setModalOpen(false)}
                 />
             )}
-            <IdentityCard identity={identity} showAttributes />
+            <IdentityCard identity={identity} showAttributes canEditName />
         </>
     );
 }

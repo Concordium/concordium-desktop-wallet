@@ -4,7 +4,6 @@ import routes from '~/constants/routes.json';
 import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
 import SettingsList from './SettingsList';
 import SettingsView from './SettingsView';
-import About from './About';
 
 const { Header, Master, Detail } = MasterDetailPageLayout;
 
@@ -19,10 +18,6 @@ export default function SettingsPage() {
             </Master>
             <Detail>
                 <Switch>
-                    <Route
-                        path={routes.SETTINGS_ABOUT}
-                        render={() => <About />}
-                    />
                     <Route
                         path={routes.SETTINGS_SELECTED}
                         render={() => <SettingsView />}

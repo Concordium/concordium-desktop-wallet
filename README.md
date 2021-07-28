@@ -84,6 +84,15 @@ export TARGET_NET=stagenet
 yarn build-main-dev && yarn start-renderer-dev
 ```
 
+## Targeting Ledger emulator (Speculos)
+
+It is possible to run the desktop wallet in development mode against a Ledger emulator (Speculos). Note
+that this is not safe and is only relevant for development.
+
+```bash
+LEDGER_EMULATOR_URL=http://emulator-ip-address:port yarn start
+```
+
 ## Packaging for Production
 
 To package apps for the local platform:

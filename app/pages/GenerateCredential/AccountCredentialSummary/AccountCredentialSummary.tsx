@@ -5,7 +5,10 @@ import { useFormContext, Validate } from 'react-hook-form';
 import Identicon from '~/components/CopiableIdenticon/CopiableIdenticon';
 import Form from '~/components/Form';
 import routes from '~/constants/routes.json';
-import { commonAddressValidators } from '~/utils/accountHelpers';
+import {
+    ACCOUNT_NAME_MAX_LENGTH,
+    commonAddressValidators,
+} from '~/utils/accountHelpers';
 import { ClassName } from '~/utils/types';
 import Label from '~/components/Label';
 import Card from '~/cross-app-components/Card';
@@ -96,6 +99,10 @@ export default function AccountCredentialSummary({
                     placeholder="Name of account"
                     rules={{
                         required: 'Please enter account name',
+                        maxLength: {
+                            value: ACCOUNT_NAME_MAX_LENGTH,
+                            message: `Cannot exceed ${ACCOUNT_NAME_MAX_LENGTH} characters`,
+                        },
                     }}
                 />
             ) : (

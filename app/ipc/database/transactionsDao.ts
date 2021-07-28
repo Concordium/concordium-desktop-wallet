@@ -11,21 +11,6 @@ import { chunkArray, partition } from '~/utils/basicHelpers';
 import ipcCommands from '~/constants/ipcCommands.json';
 import { GetTransactionsOutput } from '~/database/TransactionDao';
 
-function convertBooleans(transactions: TransferTransaction[]) {
-    return transactions.map((transaction) => {
-        const remote = Boolean(transaction.remote);
-        const success =
-            transaction.success === null
-                ? transaction.success
-                : Boolean(transaction.success);
-        return {
-            ...transaction,
-            remote,
-            success,
-        };
-    });
-}
-
 async function updateTransaction(
     identifier: Record<string, unknown>,
     updatedValues: Partial<TransferTransaction>
@@ -41,7 +26,7 @@ async function getPendingTransactions(): Promise<TransferTransaction[]> {
         .table(transactionTable)
         .where({ status: TransactionStatus.Pending })
         .orderBy('id');
-    return convertBooleans(transactions);
+    return transactions;
 }
 
 async function hasPendingTransactions(fromAddress: string) {
@@ -51,19 +36,6 @@ async function hasPendingTransactions(fromAddress: string) {
         .where({ status: TransactionStatus.Pending, fromAddress })
         .first();
     return Boolean(transaction);
-}
-
-async function getMaxTransactionsIdOfAccount(
-    account: Account
-): Promise<number | undefined> {
-    const { address } = account;
-    const query = await (await knex())
-        .table<TransferTransaction>(transactionTable)
-        .where({ toAddress: address })
-        .orWhere({ fromAddress: address })
-        .max<{ maxId: TransferTransaction['id'] }>('id as maxId')
-        .first();
-    return query?.maxId;
 }
 
 async function getTransactionsOfAccount(
@@ -82,9 +54,31 @@ async function getTransactionsOfAccount(
         .orderBy('id', 'desc')
         .limit(limit + 1);
     return {
-        transactions: convertBooleans(transactions).slice(0, limit),
+        transactions: transactions.slice(0, limit),
         more: transactions.length > limit,
     };
+}
+
+async function hasEncryptedTransactions(
+    address: string,
+    fromTime: string,
+    toTime: string
+): Promise<boolean> {
+    const transaction = await (await knex())
+        .select()
+        .table(transactionTable)
+        .where({
+            transactionKind: TransactionKindString.EncryptedAmountTransfer,
+        })
+        .whereBetween('blockTime', [fromTime, toTime])
+        .whereNull('decryptedAmount')
+        .where((builder) => {
+            builder.where({ toAddress: address }).orWhere({
+                fromAddress: address,
+            });
+        })
+        .first();
+    return Boolean(transaction);
 }
 
 export async function insertTransactions(
@@ -134,9 +128,9 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
     );
 
     ipcMain.handle(
-        ipcCommands.database.transactions.getMaxTransactionId,
-        async (_event, account: Account) => {
-            return getMaxTransactionsIdOfAccount(account);
+        ipcCommands.database.transactions.hasEncryptedTransactions,
+        async (_event, address: string, fromTime: string, toTime: string) => {
+            return hasEncryptedTransactions(address, fromTime, toTime);
         }
     );
 

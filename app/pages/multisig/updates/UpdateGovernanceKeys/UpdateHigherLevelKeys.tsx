@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
+import { Route, Switch, useRouteMatch } from 'react-router';
 import { FieldValues } from 'react-hook-form';
-import { Route, Switch } from 'react-router';
 import Columns from '~/components/Columns';
 import { BlockSummary, KeysWithThreshold } from '~/node/NodeApiTypes';
 import routes from '~/constants/routes.json';
@@ -62,6 +62,13 @@ export default function UpdateHigherLevelKeys({
     type,
     handleHigherLevelKeySubmit,
 }: Props) {
+    const allowEditingKeys = useRouteMatch({
+        path: [
+            routes.MULTISIGTRANSACTIONS_PROPOSAL_KEY_SET_SIZE,
+            routes.MULTISIGTRANSACTIONS_PROPOSAL,
+        ],
+        exact: true,
+    });
     // Current values on the blockchain received from the node.
     const currentKeysWithThreshold = getCurrentKeysWithThreshold(
         type,
@@ -171,7 +178,9 @@ export default function UpdateHigherLevelKeys({
                             return (
                                 <KeyUpdateEntry
                                     key={keyWithStatus.key.verifyKey}
-                                    updateKey={updateKey}
+                                    updateKey={
+                                        allowEditingKeys ? updateKey : undefined
+                                    }
                                     keyInput={keyWithStatus}
                                 />
                             );

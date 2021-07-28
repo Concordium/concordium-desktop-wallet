@@ -12,7 +12,8 @@ import { ClassName, MintRate } from '~/utils/types';
 import styles from './MintRateInput.module.scss';
 
 const mintRateFormat = Intl.NumberFormat(undefined, {
-    maximumSignificantDigits: 9,
+    maximumSignificantDigits: 10,
+    useGrouping: false,
 }).format;
 
 const mintRateDescriptionFormat = Intl.NumberFormat(undefined, {

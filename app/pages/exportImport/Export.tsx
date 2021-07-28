@@ -5,7 +5,10 @@ import saveFile from '../../utils/FileHelper';
 import { identitiesSelector } from '../../features/IdentitySlice';
 import { accountsSelector } from '../../features/AccountSlice';
 import { addressBookSelector } from '../../features/AddressBookSlice';
-import { credentialsSelector } from '../../features/CredentialSlice';
+import {
+    credentialsSelector,
+    externalCredentialsSelector,
+} from '../../features/CredentialSlice';
 import MessageModal from '../../components/MessageModal';
 import Button from '~/cross-app-components/Button';
 import styles from './ExportImport.module.scss';
@@ -20,8 +23,10 @@ import getGenesis from '~/database/GenesisDao';
 export default function Export() {
     const accounts = useSelector(accountsSelector);
     const credentials = useSelector(credentialsSelector);
+    const externalCredentials = useSelector(externalCredentialsSelector);
     const identities = useSelector(identitiesSelector);
     const addressBook = useSelector(addressBookSelector);
+
     const [openPasswordModal, setOpenPasswordModal] = useState(false);
     const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
     const [modalMessage, setModalMessage] = useState<string>('');
@@ -63,6 +68,7 @@ export default function Export() {
             identities,
             addressBook,
             credentials: cleanCredentials,
+            externalCredentials,
             wallets,
             genesis,
         };

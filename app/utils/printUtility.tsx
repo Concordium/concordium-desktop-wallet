@@ -15,11 +15,6 @@ import { getStatusText } from '~/pages/multisig/ProposalStatus/util';
 import { parseTime, getNow } from '~/utils/timeHelpers';
 import { useAccount } from './dataHooks';
 
-export const timeFormat: Intl.DateTimeFormatOptions = {
-    dateStyle: 'short',
-    timeStyle: 'medium',
-};
-
 const account = (title: string, address: string, name?: string) => (
     <>
         {name && (
@@ -177,9 +172,7 @@ export const displayStatus = (status: MultiSignatureTransactionStatus) => (
 export const displayExpiry = (expiry: bigint) => (
     <tr>
         <td>Expires on</td>
-        <td>
-            {parseTime(expiry.toString(), TimeStampUnit.seconds, timeFormat)}
-        </td>
+        <td>{parseTime(expiry.toString(), TimeStampUnit.seconds)}</td>
     </tr>
 );
 
@@ -207,8 +200,7 @@ const timestamp = () => (
         Printed on:{' '}
         {parseTime(
             getNow(TimeStampUnit.seconds).toString(),
-            TimeStampUnit.seconds,
-            timeFormat
+            TimeStampUnit.seconds
         )}{' '}
     </p>
 );

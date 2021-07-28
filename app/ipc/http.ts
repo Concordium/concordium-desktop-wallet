@@ -1,11 +1,10 @@
 import axios from 'axios';
-import { IncomingMessage } from 'http';
 import { IpcMain } from 'electron';
-import https from 'https';
 import ipcCommands from '../constants/ipcCommands.json';
 import { walletProxytransactionLimit } from '../constants/externalConstants.json';
 import { getTargetNet, Net } from '~/utils/ConfigHelper';
 import urls from '../constants/urls.json';
+import { intToString, parse } from '~/utils/JSONHelper';
 
 function getWalletProxy() {
     const targetNet = getTargetNet();
@@ -25,32 +24,34 @@ const walletProxy = axios.create({
     baseURL: getWalletProxy(),
 });
 
-async function httpsGet(
-    urlString: string,
-    params: Record<string, string>
-): Promise<IncomingMessage> {
-    const url = new URL(urlString);
+async function httpsGet(urlString: string, params: Record<string, string>) {
+    // Setup timeout for axios (it's a little weird, as default timeout
+    // settings in axios only concern themselves with response timeout,
+    // not a connect timeout).
+    const source = axios.CancelToken.source();
+    const timeout = setTimeout(() => {
+        source.cancel();
+    }, 60000);
+
     const searchParams = new URLSearchParams(params);
-    url.searchParams.forEach((value, name) => searchParams.append(name, value));
-    const options = {
-        hostname: url.hostname,
-        port: url.port,
-        path: `${url.pathname}?${searchParams.toString()}`,
-        timeout: 60000,
-    };
+    const response = await axios.get(
+        `${urlString}?${searchParams.toString()}`,
+        {
+            cancelToken: source.token,
+            maxRedirects: 0,
+            validateStatus(status: number) {
+                // We also want to accept a 302 redirect, as that is used by the
+                // identity provider flow
+                return status >= 200 && status <= 302;
+            },
+        }
+    );
+    clearTimeout(timeout);
 
-    return new Promise((resolve) => {
-        https.get(options, (res) => resolve(res));
-    });
-}
-
-function getResponseBody(response: IncomingMessage): Promise<string> {
-    return new Promise((resolve) => {
-        let data = '';
-        response.on('data', (chunk) => {
-            data += chunk;
-        });
-        response.on('end', () => resolve(data));
+    return JSON.stringify({
+        data: response.data,
+        headers: response.headers,
+        status: response.status,
     });
 }
 
@@ -58,13 +59,13 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
     ipcMain.handle(
         ipcCommands.httpGet,
         async (_event, urlString: string, params: Record<string, string>) => {
-            const response = await httpsGet(urlString, params);
-            const body = await getResponseBody(response);
-            return {
-                body,
-                statusCode: response.statusCode,
-                location: response.headers.location,
-            };
+            try {
+                return await httpsGet(urlString, params);
+            } catch (error) {
+                return {
+                    error: JSON.stringify(error),
+                };
+            }
         }
     );
 
@@ -72,7 +73,10 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
         ipcCommands.getTransactions,
         async (_event, address: string, id: number) => {
             const response = await walletProxy.get(
-                `/v0/accTransactions/${address}?limit=${walletProxytransactionLimit}&from=${id}&includeRawRejectReason`
+                `/v0/accTransactions/${address}?limit=${walletProxytransactionLimit}&from=${id}&includeRawRejectReason`,
+                {
+                    transformResponse: (res) => parse(intToString(res, 'id')),
+                }
             );
             const { transactions, count, limit } = response.data;
             return { transactions, full: count === limit };
@@ -83,11 +87,5 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
     ipcMain.handle(ipcCommands.getIdProviders, async (_event) => {
         const response = await walletProxy.get('/v0/ip_info');
         return response.data;
-    });
-
-    ipcMain.handle(ipcCommands.createAxios, (_event, baseUrl) => {
-        return axios.create({
-            baseURL: baseUrl,
-        });
     });
 }

@@ -5,6 +5,7 @@ import { push } from 'connected-react-router';
 import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
+import { BlockSummary } from '~/node/NodeApiTypes';
 import {
     Account,
     TransactionKindId,
@@ -19,7 +20,7 @@ import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
 import SignTransactionColumn from '../SignTransactionProposal/SignTransaction';
 import errorMessages from '~/constants/errorMessages.json';
-
+import { ensureChainData, ChainData } from '../common/withChainData';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 
@@ -32,7 +33,6 @@ import routes from '~/constants/routes.json';
 import saveFile from '~/utils/FileHelper';
 import {
     useAccountInfo,
-    useChainParameters,
     useTransactionCostEstimate,
     useTransactionExpiryState,
 } from '~/utils/dataHooks';
@@ -55,15 +55,16 @@ import styles from './MultisignatureAccountTransactions.module.scss';
 
 const pageTitle = 'Multi Signature Transactions | Add Baker';
 
-interface PageProps {
+interface PageProps extends ChainData {
     exchangeRate: Fraction;
+    blockSummary: BlockSummary;
 }
 
 interface State {
     account?: Account;
 }
 
-function AddBakerPage({ exchangeRate }: PageProps) {
+function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
     const dispatch = useDispatch();
 
     const { state } = useLocation<State>();
@@ -77,11 +78,9 @@ function AddBakerPage({ exchangeRate }: PageProps) {
     const [transaction, setTransaction] = useState<
         AccountTransaction<AddBakerPayload>
     >();
-    const chainParameters = useChainParameters();
-    const minimumThresholdForBaking =
-        chainParameters === undefined
-            ? undefined
-            : BigInt(chainParameters.minimumThresholdForBaking);
+    const minimumThresholdForBaking = BigInt(
+        blockSummary.updates.chainParameters.minimumThresholdForBaking
+    );
     const [
         expiryTime,
         setExpiryTime,
@@ -476,4 +475,7 @@ export function DownloadBakerCredentialsStep({
     );
 }
 
-export default ensureExchangeRate(AddBakerPage, LoadingComponent);
+export default ensureExchangeRate(
+    ensureChainData(AddBakerPage, LoadingComponent),
+    LoadingComponent
+);

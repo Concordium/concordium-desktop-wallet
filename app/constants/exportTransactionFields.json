@@ -2,12 +2,13 @@
     "dateTime": "dateTime",
     "transactionHash": "transaction hash",
     "transactionKind": "type",
-    "fromAddressName": "from name",
-    "toAddressName": "to name",
+    "fromName": "from name",
+    "toName": "to name",
     "fromAddress": "from address",
     "toAddress": "to address",
     "cost": "fee amount",
     "subtotal": "amount",
     "publicBalance": "Public balance change",
-    "shieldedBalance": "Shielded balance change"
+    "shieldedBalance": "Shielded balance change",
+    "status": "status"
 }

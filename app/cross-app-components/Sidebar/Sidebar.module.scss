@@ -10,6 +10,12 @@ $sidebar-link-height: $page-header-height;
     flex-direction: column;
     justify-content: space-between;
     box-shadow: inset -10px 0 15px -10px $color-grey;
+    overflow: overlay;
+
+    &::-webkit-scrollbar-thumb {
+        box-shadow: 0 0 transparent;
+        background-color: transparent;
+    }
 }
 
 .items {

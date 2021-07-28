@@ -2,6 +2,9 @@ import { RegisterOptions, Validate } from 'react-hook-form';
 import bs58check from 'bs58check';
 import { Account, AccountInfo } from './types';
 
+export const ACCOUNT_NAME_MAX_LENGTH = 25;
+export const ADDRESS_LENGTH = 50;
+
 /**
  * Verifies whether an address string is a valid Base58check string.
  * @param address the string to check whether is a valid Base58check string or not
@@ -25,12 +28,12 @@ const addressFormat: Validate = (address: string) =>
 
 export const commonAddressValidators: RegisterOptions = {
     minLength: {
-        value: 50,
-        message: 'Address should be 50 characters',
+        value: ADDRESS_LENGTH,
+        message: `Address should be ${ADDRESS_LENGTH} characters`,
     },
     maxLength: {
-        value: 50,
-        message: 'Address should be 50 characters',
+        value: ADDRESS_LENGTH,
+        message: `Address should be ${ADDRESS_LENGTH} characters`,
     },
     validate: {
         addressFormat,
@@ -53,10 +56,10 @@ const ENCRYPTED_ZERO =
 /**
  * If an account has ever had an ecrypted balance different from 0, this will return true.
  */
-export function hasEncryptedBalance(accountInfo: AccountInfo): boolean {
+export function hasEncryptedBalance(account: Account): boolean {
     return (
-        accountInfo.accountEncryptedAmount.selfAmount !== ENCRYPTED_ZERO ||
-        accountInfo.accountEncryptedAmount.incomingAmounts.length > 0
+        account.selfAmounts !== ENCRYPTED_ZERO ||
+        account.incomingAmounts !== '[]'
     );
 }
 

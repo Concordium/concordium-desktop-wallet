@@ -1,4 +1,4 @@
-import { parse, stringify } from '../../app/utils/JSONHelper';
+import { intToString, parse, stringify } from '../../app/utils/JSONHelper';
 
 test('parse/stringify handles a number', () => {
     const x = 5;
@@ -45,4 +45,12 @@ test('parse/stringify handles null', () => {
 test('parse/stringify handles undefined fields', () => {
     const x = { a: undefined };
     expect(parse(stringify(x)).a).toBeUndefined();
+});
+
+test('intToString converts large numbers', () => {
+    const json = '{ "nonce": 900719925474099212, "number": 10 }';
+    const jsonConverted = intToString(json, 'nonce');
+    const parsed = JSON.parse(jsonConverted);
+    expect(parsed.nonce).toBe('900719925474099212');
+    expect(parsed.number).toBe(10);
 });
