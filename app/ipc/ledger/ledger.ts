@@ -24,6 +24,7 @@ import {
     HigherLevelKeyUpdate,
     AuthorizationKeysUpdate,
     UpdateAccountCredentials,
+    AddIdentityProvider,
 } from '~/utils/types';
 
 export default function initializeIpcHandlers(
@@ -236,6 +237,25 @@ export default function initializeIpcHandlers(
                 transactionAsJson
             );
             return getLedgerClient().signProtocolUpdate(
+                transaction,
+                serializedPayload,
+                keypath
+            );
+        }
+    );
+
+    ipcMain.handle(
+        ledgerIpcCommands.signAddIdentityProvider,
+        (
+            _event,
+            transactionAsJson: string,
+            serializedPayload: Buffer,
+            keypath: number[]
+        ) => {
+            const transaction: UpdateInstruction<AddIdentityProvider> = parse(
+                transactionAsJson
+            );
+            return getLedgerClient().signAddIdentityProvider(
                 transaction,
                 serializedPayload,
                 keypath

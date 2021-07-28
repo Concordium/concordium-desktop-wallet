@@ -23,6 +23,8 @@ import {
     UpdateInstructionSignatureWithIndex,
     AuthorizationKeysUpdate,
     AccessStructure,
+    IpInfo,
+    Description,
 } from './types';
 
 /**
@@ -42,6 +44,7 @@ export enum OnChainUpdateType {
     UpdateBakerStakeThreshold = 9,
     UpdateRootKeys = 10,
     UpdateLevel1Keys = 11,
+    AddIdentityProvider = 14,
 }
 
 export interface SerializedString {
@@ -327,6 +330,33 @@ export function serializeGasRewards(gasRewards: GasRewards) {
     return serializedGasRewards;
 }
 
+export function serializeDescription(description: Description) {
+    const name = serializeUtf8String(description.name);
+    const url = serializeUtf8String(description.url);
+    const descriptionText = serializeUtf8String(description.description);
+    return Buffer.concat([
+        name.length,
+        name.message,
+        url.length,
+        url.message,
+        descriptionText.length,
+        descriptionText.message,
+    ]);
+}
+
+/**
+ * Serializes an AddIdentityProvider to bytes.
+ */
+export function serializeAddIdentityProvider(addIdentityProvider: IpInfo) {
+    const id = encodeWord32(addIdentityProvider.ipIdentity);
+    const description = serializeDescription(addIdentityProvider.ipDescription);
+    const verifyKey = Buffer.from(addIdentityProvider.ipVerifyKey, 'hex');
+    const cdiVerifyKey = Buffer.from(addIdentityProvider.ipCdiVerifyKey, 'hex');
+    const data = Buffer.concat([id, description, verifyKey, cdiVerifyKey]);
+    const length = encodeWord32(data.length);
+    return Buffer.concat([length, data]);
+}
+
 /**
  * Serializes an UpdateHeader to exactly 28 bytes. See the interface
  * UpdateHeader for comments regarding the byte allocation for each field.
@@ -418,6 +448,8 @@ function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
             return OnChainUpdateType.UpdateRootKeys;
         case UpdateType.UpdateLevel2KeysUsingLevel1Keys:
             return OnChainUpdateType.UpdateLevel1Keys;
+        case UpdateType.AddIdentityProvider:
+            return OnChainUpdateType.AddIdentityProvider;
         default:
             throw new Error(`An invalid update type was given: ${type}`);
     }
