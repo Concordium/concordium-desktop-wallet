@@ -16,7 +16,7 @@ import log from 'electron-log';
 import ipcCommands from './constants/ipcCommands.json';
 import ipcRendererCommands from './constants/ipcRendererCommands.json';
 import initializeIpcHandlers from './ipc/http';
-import initializeLedgerIpcHandlers from './ipc/ledger';
+import initializeLedgerIpcHandlers from './ipc/ledger/ledger';
 import initializeCryptoIpcHandlers from './ipc/crypto';
 import initializeDatabaseGeneralIpcHandlers from './ipc/database/general';
 import initializeDatabaseAccountIpcHandlers from './ipc/database/accountDao';
@@ -33,6 +33,7 @@ import initializeFilesIpcHandlers from './ipc/files';
 import initializeGrpcIpcHandlers from './ipc/grpc';
 import initializeClipboardIpcHandlers from './ipc/clipboard';
 import { PrintErrorTypes } from './utils/types';
+import { createMenu } from './main/menu';
 
 export default class AppUpdater {
     constructor() {
@@ -86,8 +87,17 @@ const createWindow = async () => {
     mainWindow = new BrowserWindow({
         title: `Concordium Wallet ${titleSuffix}`,
         show: false,
-        width: 4096,
-        height: 2912,
+        minWidth: 800,
+        minHeight: 600,
+        ...(process.env.NODE_ENV === 'development'
+            ? {
+                  width: 2560,
+                  height: 1440,
+              }
+            : {
+                  width: 1400,
+                  height: 1000,
+              }),
         webPreferences:
             process.env.NODE_ENV === 'development'
                 ? {
@@ -133,6 +143,8 @@ const createWindow = async () => {
         mainWindow = null;
     });
 
+    // make menu accessible on windows/linux
+    mainWindow.setAutoHideMenuBar(true);
     mainWindow.setMenuBarVisibility(false);
 
     printWindow = new BrowserWindow({
@@ -218,7 +230,13 @@ if (process.env.E2E_BUILD === 'true') {
     // eslint-disable-next-line promise/catch-or-return
     app.whenReady().then(createWindow);
 } else {
-    app.on('ready', createWindow);
+    app.on('ready', async () => {
+        await createWindow();
+
+        if (mainWindow) {
+            createMenu(mainWindow);
+        }
+    });
 }
 
 app.on('activate', () => {

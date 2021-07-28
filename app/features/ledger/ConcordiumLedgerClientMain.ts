@@ -40,6 +40,7 @@ import signUpdateProtocolTransaction from './SignProtocolUpdate';
 import signHigherLevelKeyUpdate from './SignHigherLevelKeyUpdate';
 import signUpdateCredentialTransaction from './SignUpdateCredentials';
 import signAuthorizationKeysUpdate from './SignAuthorizationKeysUpdate';
+import EmulatorTransport from './EmulatorTransport';
 
 export interface LedgerIpcMessage<T> {
     result?: T;
@@ -77,8 +78,14 @@ export default class ConcordiumLedgerClientMain {
 
     mainWindow: BrowserWindow;
 
-    constructor(transport: HwTransport, mainWindow: BrowserWindow) {
-        this.transport = new TransportImpl(transport);
+    constructor(mainWindow: BrowserWindow, transport?: HwTransport) {
+        if (transport) {
+            this.transport = new TransportImpl(transport);
+        } else {
+            // Transport for communicating with the Ledger Speculos emulator.
+            // Only to be used for testing, as the emulator is not secure in any way.
+            this.transport = new EmulatorTransport();
+        }
         this.mainWindow = mainWindow;
     }
 

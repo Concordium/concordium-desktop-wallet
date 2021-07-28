@@ -12,6 +12,7 @@ import listenForIdentityStatus from './IdentityStatusPoller';
 import startClient from '../node/nodeConnector';
 import { Dispatch } from './types';
 import settingKeys from '../constants/settingKeys.json';
+import { unlock } from '~/features/MiscSlice';
 
 /**
  * Loads settings from the database into the store.
@@ -45,6 +46,7 @@ export default async function initApplication(dispatch: Dispatch) {
         loadCredentials(dispatch),
         loadExternalCredentials(dispatch),
     ]);
+    dispatch(unlock());
 
     listenForIdentityStatus(dispatch);
 }

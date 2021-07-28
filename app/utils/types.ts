@@ -476,9 +476,12 @@ export interface TransferTransaction {
     toAddress: Hex;
     status: TransactionStatus;
     rejectReason?: RejectReason | string;
-    fromAddressName?: string;
-    toAddressName?: string;
     decryptedAmount?: string;
+}
+
+export interface TransferTransactionWithNames extends TransferTransaction {
+    fromName?: string;
+    toName?: string;
 }
 
 export type EncryptedAmount = Hex;
