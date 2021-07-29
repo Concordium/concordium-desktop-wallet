@@ -6,7 +6,7 @@ interface Props {
 }
 
 /**
- * Displays an overview of a add Identity provider transaction payload.
+ * Displays an overview of an "Add Identity provider" transaction payload.
  */
 export default function AddIdentityProviderView({
     addIdentityProvider,
@@ -18,11 +18,11 @@ export default function AddIdentityProviderView({
                 {addIdentityProvider.ipDescription.name}
             </div>
             <div className="body1">
-                <h5 className="mB0">Name</h5>
+                <h5 className="mB0">URL</h5>
                 {addIdentityProvider.ipDescription.url}
             </div>
             <div className="body1">
-                <h5 className="mB0">Name</h5>
+                <h5 className="mB0">Description</h5>
                 {addIdentityProvider.ipDescription.description}
             </div>
             <div className="body1">

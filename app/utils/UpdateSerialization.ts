@@ -24,7 +24,7 @@ import {
     UpdateInstructionSignatureWithIndex,
     AuthorizationKeysUpdate,
     AccessStructure,
-    IpInfo,
+    AddIdentityProvider,
 } from './types';
 
 /**
@@ -44,6 +44,7 @@ export enum OnChainUpdateType {
     UpdateBakerStakeThreshold = 9,
     UpdateRootKeys = 10,
     UpdateLevel1Keys = 11,
+    // eslint-disable-next-line no-shadow
     AddIdentityProvider = 13,
 }
 
@@ -333,7 +334,9 @@ export function serializeGasRewards(gasRewards: GasRewards) {
 /**
  * Serializes an AddIdentityProvider update's payload to bytes.
  */
-export function serializeAddIdentityProvider(addIdentityProvider: IpInfo) {
+export function serializeAddIdentityProvider(
+    addIdentityProvider: AddIdentityProvider
+) {
     const data = serializeIpInfo(addIdentityProvider);
     const length = encodeWord32(data.length);
     return Buffer.concat([length, data]);

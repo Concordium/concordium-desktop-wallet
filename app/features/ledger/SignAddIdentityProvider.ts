@@ -83,7 +83,7 @@ export default async function signAddIdentityProviderTransaction(
         verifyKeyLengthData
     );
 
-    // Stream the description bytes (maximum of 255 bytes per packet)
+    // Stream the verifyKey bytes (maximum of 255 bytes per packet)
     p1 = 0x04;
     const verifyKeyChunks = chunkBuffer(verifyKey, 255);
     for (const chunk of verifyKeyChunks) {
