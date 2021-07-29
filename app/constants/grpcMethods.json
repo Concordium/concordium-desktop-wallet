@@ -6,5 +6,6 @@
     "getNextAccountNonce": "get-next-account-nonce",
     "getBlockSummary": "get-block-summary",
     "getAccountInfo": "get-account-info",
-    "getCryptographicParameters": "get-cryptographic-parameters"
+    "getCryptographicParameters": "get-cryptographic-parameters",
+    "getIdentityProviders": "getIdentityProviders"
 }

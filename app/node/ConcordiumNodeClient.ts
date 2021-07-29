@@ -82,6 +82,12 @@ export default class ConcordiumNodeClient {
         return this.sendRequest(this.client.getConsensusStatus, new Empty());
     }
 
+    getIdentityProviders(blockHashValue: string) {
+        const blockHash = new BlockHash();
+        blockHash.setBlockHash(blockHashValue);
+        return this.sendRequest(this.client.getIdentityProviders, blockHash);
+    }
+
     sendTransaction(transactionPayload: Uint8Array, networkId = 100) {
         const request = this.buildSendTransactionRequest(
             transactionPayload,

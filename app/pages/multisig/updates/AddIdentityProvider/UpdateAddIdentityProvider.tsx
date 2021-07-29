@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Validate, ValidationRule } from 'react-hook-form';
 
 import { EqualRecord, AddIdentityProvider, Description } from '~/utils/types';
 import { isHex, onlyDigitsNoLeadingZeroes } from '~/utils/basicHelpers';
 import Form from '~/components/Form';
 import { UpdateProps } from '~/utils/transactionTypes';
+import { useIdentityProviders } from '~/utils/dataHooks';
 
 export type AddIdentityProviderFields = Omit<
     AddIdentityProvider,
@@ -40,6 +41,13 @@ const validateHex: Validate = (v: string) =>
 export default function UpdateAddIdentityProvider({
     defaults,
 }: UpdateProps): JSX.Element | null {
+    const identityProviders = useIdentityProviders();
+    const existingIdentifiers = useMemo(
+        () =>
+            identityProviders.map((provider) => provider.ipIdentity.toString()),
+        [identityProviders]
+    );
+
     return (
         <>
             <Form.TextArea
@@ -73,9 +81,14 @@ export default function UpdateAddIdentityProvider({
                 placeholder="Enter ipIdentity here"
                 rules={{
                     required: 'ipIdentity is required',
-                    validate: (v) =>
-                        onlyDigitsNoLeadingZeroes(v) ||
-                        'Must be a valid number',
+                    validate: {
+                        mustBeANumber: (v) =>
+                            onlyDigitsNoLeadingZeroes(v) ||
+                            'Must be a valid number',
+                        mayNotBeUsed: (v) =>
+                            !existingIdentifiers.includes(v) ||
+                            'This ipIdentity is already in use',
+                    },
                 }}
             />
             <Form.TextArea
