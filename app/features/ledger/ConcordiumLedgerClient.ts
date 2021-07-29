@@ -18,6 +18,7 @@ import {
     AuthorizationKeysUpdate,
     Hex,
     AddIdentityProvider,
+    AddAnonymityRevoker,
 } from '~/utils/types';
 import { AccountPathInput } from './Path';
 import { AppAndVersion } from './GetAppAndVersion';
@@ -331,6 +332,20 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signAddIdentityProvider,
+            stringify(transaction),
+            serializedPayload,
+            path
+        );
+        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
+    }
+
+    async signAddAnonymityRevoker(
+        transaction: UpdateInstruction<AddAnonymityRevoker>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
+            ledgerIpcCommands.signAddAnonymityRevoker,
             stringify(transaction),
             serializedPayload,
             path

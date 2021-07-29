@@ -21,6 +21,7 @@
     "signHigherLevelKeysUpdate": "LEDGER_SIGN_HIGHER_LEVEL_KEYS_UPDATE",
     "signAuthorizationKeysUpdate": "LEDGER_SIGN_AUTHORIZATION_KEYS_UPDATE",
     "signAddIdentityProvider": "LEDGER_SIGN_ADD_IDENTITY_PROVIDER",
+    "signAddAnonymityRevoker": "LEDGER_SIGN_ADD_ANONYMITY_REVOKER",
     "getAppAndVersion": "LEDGER_GET_APP_AND_VERSION",
     "onAwaitVerificationKey": "LEDGER_ON_AWAIT_VERIFICATION_KEY",
     "onVerificationKeysConfirmed": "LEDGER_ON_VERIFICATION_KEY_CONFIRMED",

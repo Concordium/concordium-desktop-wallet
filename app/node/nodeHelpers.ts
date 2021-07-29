@@ -4,6 +4,7 @@ import {
     getCryptographicParameters,
     getBlockSummary,
     getIdentityProviders,
+    getAnonymityRevokers,
 } from './nodeRequests';
 import { AccountInfo, Account, Global, Fraction } from '../utils/types';
 
@@ -57,6 +58,11 @@ export async function fetchLastFinalizedBlockSummary() {
 export async function fetchLastFinalizedIdentityProviders() {
     const blockHash = await getlastFinalizedBlockHash();
     return getIdentityProviders(blockHash);
+}
+
+export async function fetchLastFinalizedAnonymityRevokers() {
+    const blockHash = await getlastFinalizedBlockHash();
+    return getAnonymityRevokers(blockHash);
 }
 
 export async function fetchGlobal(specificBlockHash?: string): Promise<Global> {

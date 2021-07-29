@@ -1,33 +1,33 @@
 import React from 'react';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
-import AddIdentityProviderView from '~/pages/multisig/updates/AddIdentityProvider/AddIdentityProviderView';
-import UpdateAddIdentityProvider, {
-    AddIdentityProviderFields,
-} from '~/pages/multisig/updates/AddIdentityProvider/UpdateAddIdentityProvider';
+import AddAnonymityRevokerView from '~/pages/multisig/updates/AddAnonymityRevoker/AddAnonymityRevokerView';
+import UpdateAddAnonymityRevoker, {
+    AddAnonymityRevokerFields,
+} from '~/pages/multisig/updates/AddAnonymityRevoker/UpdateAddAnonymityRevoker';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
-    isAddIdentityProvider,
-    AddIdentityProvider,
+    AddAnonymityRevoker,
+    isAddAnonymityRevoker,
     UpdateInstruction,
     MultiSignatureTransaction,
     UpdateType,
 } from '../types';
-import { serializeAddIdentityProvider } from '../UpdateSerialization';
+import { serializeAddAnonymityRevoker } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Add Identity Provider';
+const TYPE = 'Add Anonymity Revoker';
 
-type TransactionType = UpdateInstruction<AddIdentityProvider>;
+type TransactionType = UpdateInstruction<AddAnonymityRevoker>;
 
-export default class EuroPerEnergyHandler
+export default class AddAnonymityRevokerHandler
     extends UpdateHandlerBase<TransactionType>
     implements
         UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     constructor() {
-        super(TYPE, isAddIdentityProvider);
+        super(TYPE, isAddAnonymityRevoker);
     }
 
     async createTransaction(
@@ -36,10 +36,9 @@ export default class EuroPerEnergyHandler
             name,
             url,
             description,
-            ipIdentity,
-            ipVerifyKey,
-            ipCdiVerifyKey,
-        }: AddIdentityProviderFields,
+            arIdentity,
+            arPublicKey,
+        }: AddAnonymityRevokerFields,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
@@ -47,29 +46,28 @@ export default class EuroPerEnergyHandler
             return undefined;
         }
 
-        const ipDescription = {
+        const arDescription = {
             name,
             url,
             description,
         };
 
         const sequenceNumber =
-            blockSummary.updates.updateQueues.addIdentityProvider
+            blockSummary.updates.updateQueues.addAnonymityRevoker
                 .nextSequenceNumber;
         const {
             threshold,
-        } = blockSummary.updates.keys.level2Keys.addIdentityProvider;
+        } = blockSummary.updates.keys.level2Keys.addAnonymityRevoker;
 
         const payload = {
-            ipDescription,
-            ipIdentity,
-            ipVerifyKey,
-            ipCdiVerifyKey,
+            arIdentity,
+            arDescription,
+            arPublicKey,
         };
 
         return createUpdateMultiSignatureTransaction(
             payload,
-            UpdateType.AddIdentityProvider,
+            UpdateType.AddAnonymityRevoker,
             sequenceNumber,
             threshold,
             effectiveTime,
@@ -78,7 +76,7 @@ export default class EuroPerEnergyHandler
     }
 
     serializePayload(transaction: TransactionType) {
-        return serializeAddIdentityProvider(transaction.payload);
+        return serializeAddAnonymityRevoker(transaction.payload);
     }
 
     signTransaction(
@@ -86,7 +84,7 @@ export default class EuroPerEnergyHandler
         ledger: ConcordiumLedgerClient
     ) {
         const path: number[] = getGovernanceLevel2Path();
-        return ledger.signAddIdentityProvider(
+        return ledger.signAddAnonymityRevoker(
             transaction,
             this.serializePayload(transaction),
             path
@@ -95,15 +93,15 @@ export default class EuroPerEnergyHandler
 
     view(transaction: TransactionType) {
         return (
-            <AddIdentityProviderView
-                addIdentityProvider={transaction.payload}
+            <AddAnonymityRevokerView
+                addAnonymityRevoker={transaction.payload}
             />
         );
     }
 
     getAuthorization(authorizations: Authorizations) {
-        return authorizations.addIdentityProvider;
+        return authorizations.addAnonymityRevoker;
     }
 
-    update = UpdateAddIdentityProvider;
+    update = UpdateAddAnonymityRevoker;
 }

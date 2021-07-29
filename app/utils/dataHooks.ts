@@ -6,6 +6,7 @@ import {
     fetchLastFinalizedIdentityProviders,
     fetchLastFinalizedBlockSummary,
     getAccountInfoOfAddress,
+    fetchLastFinalizedAnonymityRevokers,
 } from '../node/nodeHelpers';
 import { useCurrentTime } from './hooks';
 import {
@@ -23,6 +24,7 @@ import {
     TransactionKindId,
     Account,
     IpInfo,
+    ArInfo,
 } from './types';
 
 /** Hook for looking up an account name from an address */
@@ -115,6 +117,17 @@ export function useIdentityProviders() {
             .catch(() => {});
     }, []);
     return providers;
+}
+
+/** Hook for fetching anonymity revokers */
+export function useAnonymityRevokers() {
+    const [revokers, setRevokers] = useState<ArInfo[]>([]);
+    useEffect(() => {
+        fetchLastFinalizedAnonymityRevokers()
+            .then(setRevokers)
+            .catch(() => {});
+    }, []);
+    return revokers;
 }
 
 /** Hook for fetching staked amount for a given account address, Returns undefined while loading and 0 if account is not a baker */

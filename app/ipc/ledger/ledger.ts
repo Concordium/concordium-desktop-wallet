@@ -25,6 +25,7 @@ import {
     AuthorizationKeysUpdate,
     UpdateAccountCredentials,
     AddIdentityProvider,
+    AddAnonymityRevoker,
 } from '~/utils/types';
 
 export default function initializeIpcHandlers(
@@ -237,6 +238,25 @@ export default function initializeIpcHandlers(
                 transactionAsJson
             );
             return getLedgerClient().signProtocolUpdate(
+                transaction,
+                serializedPayload,
+                keypath
+            );
+        }
+    );
+
+    ipcMain.handle(
+        ledgerIpcCommands.signAddAnonymityRevoker,
+        (
+            _event,
+            transactionAsJson: string,
+            serializedPayload: Buffer,
+            keypath: number[]
+        ) => {
+            const transaction: UpdateInstruction<AddAnonymityRevoker> = parse(
+                transactionAsJson
+            );
+            return getLedgerClient().signAddAnonymityRevoker(
                 transaction,
                 serializedPayload,
                 keypath

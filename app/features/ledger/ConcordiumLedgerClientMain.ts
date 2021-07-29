@@ -33,6 +33,7 @@ import {
     UpdateAccountCredentials,
     AuthorizationKeysUpdate,
     AddIdentityProvider,
+    AddAnonymityRevoker,
 } from '~/utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
@@ -42,6 +43,7 @@ import signHigherLevelKeyUpdate from './SignHigherLevelKeyUpdate';
 import signUpdateCredentialTransaction from './SignUpdateCredentials';
 import signAuthorizationKeysUpdate from './SignAuthorizationKeysUpdate';
 import signAddIdentityProviderTransaction from './SignAddIdentityProvider';
+import signAddAnonymityRevokerTransaction from './SignAddAnonymityRevoker';
 import EmulatorTransport from './EmulatorTransport';
 
 export interface LedgerIpcMessage<T> {
@@ -351,6 +353,20 @@ export default class ConcordiumLedgerClientMain {
     ): Promise<LedgerIpcMessage<Buffer>> {
         return wrapResult(
             signAddIdentityProviderTransaction,
+            this.transport,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signAddAnonymityRevoker(
+        transaction: UpdateInstruction<AddAnonymityRevoker>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<LedgerIpcMessage<Buffer>> {
+        return wrapResult(
+            signAddAnonymityRevokerTransaction,
             this.transport,
             path,
             transaction,
