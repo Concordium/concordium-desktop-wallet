@@ -4,6 +4,7 @@ import {
     encodeWord64,
     putBase58Check,
     serializeVerifyKey,
+    serializeIpInfo,
 } from './serializationHelpers';
 import {
     BakerStakeThreshold,
@@ -24,7 +25,6 @@ import {
     AuthorizationKeysUpdate,
     AccessStructure,
     IpInfo,
-    Description,
 } from './types';
 
 /**
@@ -330,28 +330,8 @@ export function serializeGasRewards(gasRewards: GasRewards) {
     return serializedGasRewards;
 }
 
-export function serializeDescription(description: Description) {
-    const buffers = [];
-    const parts = [description.name, description.url, description.description];
-    for (const part of parts) {
-        const encoded = Buffer.from(new TextEncoder().encode(part));
-        const serializedLength = encodeWord32(encoded.length);
-        buffers.push(serializedLength);
-        buffers.push(encoded);
-    }
-    return Buffer.concat(buffers);
-}
-
-export function serializeIpInfo(ipInfo: IpInfo) {
-    const id = encodeWord32(ipInfo.ipIdentity);
-    const description = serializeDescription(ipInfo.ipDescription);
-    const verifyKey = Buffer.from(ipInfo.ipVerifyKey, 'hex');
-    const cdiVerifyKey = Buffer.from(ipInfo.ipCdiVerifyKey, 'hex');
-    return Buffer.concat([id, description, verifyKey, cdiVerifyKey]);
-}
-
 /**
- * Serializes an AddIdentityProvider to bytes.
+ * Serializes an AddIdentityProvider update's payload to bytes.
  */
 export function serializeAddIdentityProvider(addIdentityProvider: IpInfo) {
     const data = serializeIpInfo(addIdentityProvider);

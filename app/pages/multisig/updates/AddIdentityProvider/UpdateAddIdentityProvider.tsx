@@ -35,9 +35,9 @@ const validateHex: Validate = (v: string) =>
     isHex(v) || 'The key must be HEX format';
 
 /**
- * Component for creating an update protocol transaction.
+ * Component for creating an addIdentityProvider transaction.
  */
-export default function UpdateProtocol({
+export default function UpdateAddIdentityProvider({
     defaults,
 }: UpdateProps): JSX.Element | null {
     return (

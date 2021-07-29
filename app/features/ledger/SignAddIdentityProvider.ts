@@ -6,11 +6,13 @@ import pathAsBuffer from './Path';
 import {
     serializeUpdateHeader,
     serializeUpdateType,
-    serializeDescription,
-    serializeIpInfo,
 } from '../../utils/UpdateSerialization';
 import { chunkBuffer } from '../../utils/basicHelpers';
-import { encodeWord32 } from '~/utils/serializationHelpers';
+import {
+    serializeDescription,
+    serializeIpInfo,
+    encodeWord32,
+} from '~/utils/serializationHelpers';
 
 const INS_ADD_IDENTITY_PROVIDER = 0x2d;
 

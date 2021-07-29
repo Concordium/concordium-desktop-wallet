@@ -8,6 +8,8 @@ import {
     SchemeId,
     CredentialDeploymentInformation,
     ChosenAttributesKeys,
+    Description,
+    IpInfo,
 } from './types';
 
 export function putBase58Check(
@@ -189,4 +191,32 @@ export function serializeCredentialDeploymentInformation(
     buffers.push(encodeWord32(proofs.length));
     buffers.push(proofs);
     return Buffer.concat(buffers);
+}
+
+/**
+ * Serializes a Description object.
+ * (Which is used in IpInfo and ArInfo)
+ */
+export function serializeDescription(description: Description) {
+    const buffers = [];
+    const parts = [description.name, description.url, description.description];
+    for (const part of parts) {
+        const encoded = Buffer.from(new TextEncoder().encode(part));
+        const serializedLength = encodeWord32(encoded.length);
+        buffers.push(serializedLength);
+        buffers.push(encoded);
+    }
+    return Buffer.concat(buffers);
+}
+
+/**
+ * Serializes an IpInfo object.
+ * N.B. does not include the length of the entire object.
+ */
+export function serializeIpInfo(ipInfo: IpInfo) {
+    const id = encodeWord32(ipInfo.ipIdentity);
+    const description = serializeDescription(ipInfo.ipDescription);
+    const verifyKey = Buffer.from(ipInfo.ipVerifyKey, 'hex');
+    const cdiVerifyKey = Buffer.from(ipInfo.ipCdiVerifyKey, 'hex');
+    return Buffer.concat([id, description, verifyKey, cdiVerifyKey]);
 }
