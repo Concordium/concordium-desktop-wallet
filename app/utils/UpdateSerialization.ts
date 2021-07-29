@@ -44,7 +44,7 @@ export enum OnChainUpdateType {
     UpdateBakerStakeThreshold = 9,
     UpdateRootKeys = 10,
     UpdateLevel1Keys = 11,
-    AddIdentityProvider = 14,
+    AddIdentityProvider = 13,
 }
 
 export interface SerializedString {
@@ -331,28 +331,30 @@ export function serializeGasRewards(gasRewards: GasRewards) {
 }
 
 export function serializeDescription(description: Description) {
-    const name = serializeUtf8String(description.name);
-    const url = serializeUtf8String(description.url);
-    const descriptionText = serializeUtf8String(description.description);
-    return Buffer.concat([
-        name.length,
-        name.message,
-        url.length,
-        url.message,
-        descriptionText.length,
-        descriptionText.message,
-    ]);
+    const buffers = [];
+    const parts = [description.name, description.url, description.description];
+    for (const part of parts) {
+        const encoded = Buffer.from(new TextEncoder().encode(part));
+        const serializedLength = encodeWord32(encoded.length);
+        buffers.push(serializedLength);
+        buffers.push(encoded);
+    }
+    return Buffer.concat(buffers);
+}
+
+export function serializeIpInfo(ipInfo: IpInfo) {
+    const id = encodeWord32(ipInfo.ipIdentity);
+    const description = serializeDescription(ipInfo.ipDescription);
+    const verifyKey = Buffer.from(ipInfo.ipVerifyKey, 'hex');
+    const cdiVerifyKey = Buffer.from(ipInfo.ipCdiVerifyKey, 'hex');
+    return Buffer.concat([id, description, verifyKey, cdiVerifyKey]);
 }
 
 /**
  * Serializes an AddIdentityProvider to bytes.
  */
 export function serializeAddIdentityProvider(addIdentityProvider: IpInfo) {
-    const id = encodeWord32(addIdentityProvider.ipIdentity);
-    const description = serializeDescription(addIdentityProvider.ipDescription);
-    const verifyKey = Buffer.from(addIdentityProvider.ipVerifyKey, 'hex');
-    const cdiVerifyKey = Buffer.from(addIdentityProvider.ipCdiVerifyKey, 'hex');
-    const data = Buffer.concat([id, description, verifyKey, cdiVerifyKey]);
+    const data = serializeIpInfo(addIdentityProvider);
     const length = encodeWord32(data.length);
     return Buffer.concat([length, data]);
 }

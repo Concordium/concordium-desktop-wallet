@@ -7,9 +7,10 @@ import {
     serializeUpdateHeader,
     serializeUpdateType,
     serializeDescription,
+    serializeIpInfo,
 } from '../../utils/UpdateSerialization';
 import { chunkBuffer } from '../../utils/basicHelpers';
-import { encodeWord32, encodeWord64 } from '~/utils/serializationHelpers';
+import { encodeWord32 } from '~/utils/serializationHelpers';
 
 const INS_ADD_IDENTITY_PROVIDER = 0x2d;
 
@@ -29,6 +30,7 @@ export default async function signAddIdentityProviderTransaction(
     const serializedDescription = serializeDescription(
         transaction.payload.ipDescription
     );
+    const serializedIpInfo = serializeIpInfo(transaction.payload);
 
     let p1 = 0x00;
     const p2 = 0x00;
@@ -38,15 +40,14 @@ export default async function signAddIdentityProviderTransaction(
         pathAsBuffer(path),
         serializedHeader,
         serializedUpdateType,
+        encodeWord32(serializedIpInfo.length),
         encodeWord32(transaction.payload.ipIdentity),
     ]);
     await transport.send(0xe0, INS_ADD_IDENTITY_PROVIDER, p1, p2, initialData);
 
     // Send description
     p1 = 0x01;
-    const descriptionLengthData = encodeWord64(
-        BigInt(serializedDescription.length)
-    );
+    const descriptionLengthData = encodeWord32(serializedDescription.length);
     await transport.send(
         0xe0,
         INS_ADD_IDENTITY_PROVIDER,
@@ -71,7 +72,7 @@ export default async function signAddIdentityProviderTransaction(
     // Send verifyKey
     p1 = 0x03;
     const verifyKey = Buffer.from(transaction.payload.ipVerifyKey, 'hex');
-    const verifyKeyLengthData = encodeWord64(BigInt(verifyKey.length));
+    const verifyKeyLengthData = encodeWord32(verifyKey.length);
     await transport.send(
         0xe0,
         INS_ADD_IDENTITY_PROVIDER,

@@ -28,11 +28,11 @@ const lengthRule: (length: number) => ValidationRule<number> = (
     length: number
 ) => ({
     value: length,
-    message: 'Specification hash must be 64 characters',
+    message: `The key must be ${length} characters`,
 });
 
 const validateHex: Validate = (v: string) =>
-    isHex(v) || 'Specification hash must be HEX format';
+    isHex(v) || 'The key must be HEX format';
 
 /**
  * Component for creating an update protocol transaction.
@@ -54,17 +54,16 @@ export default function UpdateProtocol({
                 className="body1"
                 name={fieldNames.url}
                 defaultValue={defaults.url || undefined}
-                label="Provider URL:"
-                placeholder="Enter URL"
+                label="URL:"
+                placeholder="Enter the URL here"
                 rules={{ required: 'URL is required' }}
             />
             <Form.TextArea
                 className="body1"
                 name={fieldNames.description}
-                label="Description:"
                 defaultValue={defaults.description || undefined}
-                placeholder="Enter descriptive text about the provider here"
-                rules={{ required: 'Description is required' }}
+                label="Description:"
+                placeholder="Enter description of the provider here"
             />
             <Form.Input
                 className="body1"
