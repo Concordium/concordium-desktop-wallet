@@ -24,13 +24,13 @@ const fieldNames: EqualRecord<AddIdentityProviderFields> = {
     ipCdiVerifyKey: 'ipCdiVerifyKey',
 };
 
-const fieldDisplays = {
+export const fieldDisplays = {
     name: 'Name',
     url: 'URL',
     description: 'Description',
-    ipIdentity: 'ipIdentity',
+    ipIdentity: 'Identity Provider',
     ipVerifyKey: 'Verify Key',
-    ipCdiVerifyKey: 'Cdi Verify Key:',
+    ipCdiVerifyKey: 'CDI Verify Key:',
 };
 
 const requiredMessage = (name: string) => `${name} is required`;

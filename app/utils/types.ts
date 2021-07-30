@@ -2,6 +2,7 @@
 import { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import { HTMLAttributes } from 'react';
 import { RegisterOptions } from 'react-hook-form';
+import { Buffer } from 'buffer/';
 import { RejectReason } from './node/RejectReasonHelper';
 import { ExternalCredential, Genesis } from '~/database/types';
 
@@ -550,6 +551,17 @@ export interface Description {
     name: string;
     url: string;
     description: string;
+}
+
+export interface SerializedTextWithLength {
+    data: Buffer;
+    length: Buffer;
+}
+
+export interface SerializedDescription {
+    name: SerializedTextWithLength;
+    url: SerializedTextWithLength;
+    description: SerializedTextWithLength;
 }
 
 // Identity Provider information
