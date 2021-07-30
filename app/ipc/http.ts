@@ -34,18 +34,22 @@ async function httpsGet(urlString: string, params: Record<string, string>) {
     }, 60000);
 
     const searchParams = new URLSearchParams(params);
-    const response = await axios.get(
-        `${urlString}?${searchParams.toString()}`,
-        {
-            cancelToken: source.token,
-            maxRedirects: 0,
-            validateStatus(status: number) {
-                // We also want to accept a 302 redirect, as that is used by the
-                // identity provider flow
-                return status >= 200 && status <= 302;
-            },
-        }
-    );
+    let urlGet: string;
+    if (Object.entries(params).length === 0) {
+        urlGet = urlString;
+    } else {
+        urlGet = `${urlString}?${searchParams.toString()}`;
+    }
+
+    const response = await axios.get(urlGet, {
+        cancelToken: source.token,
+        maxRedirects: 0,
+        validateStatus(status: number) {
+            // We also want to accept a 302 redirect, as that is used by the
+            // identity provider flow
+            return status >= 200 && status <= 302;
+        },
+    });
     clearTimeout(timeout);
 
     return JSON.stringify({
