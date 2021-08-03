@@ -7,7 +7,7 @@ async function getAccountPrivateKeySeed(
     transport: Transport,
     p1: number,
     identity: number
-): Promise<Buffer> {
+) {
     const data = Buffer.alloc(4);
     data.writeInt32BE(identity, 0);
 
@@ -20,29 +20,31 @@ async function getAccountPrivateKeySeed(
         p2,
         data
     );
-    return response.slice(0, 32);
+    const idCredSec = response.slice(0, 32);
+    const prfKey = response.slice(32, 64);
+    return { idCredSec, prfKey };
 }
 
 export async function getIdCredSec(
     transport: Transport,
     identity: number
 ): Promise<Buffer> {
-    const idCredSecKeySeed = await getAccountPrivateKeySeed(
+    const { idCredSec } = await getAccountPrivateKeySeed(
         transport,
-        0x00,
+        0x01,
         identity
     );
-    return idCredSecKeySeed;
+    return idCredSec;
 }
 
 export async function getPrfKey(
     transport: Transport,
     identity: number
 ): Promise<Buffer> {
-    const prfKeySeed = await getAccountPrivateKeySeed(
+    const { prfKey } = await getAccountPrivateKeySeed(
         transport,
         0x01,
         identity
     );
-    return prfKeySeed;
+    return prfKey;
 }
