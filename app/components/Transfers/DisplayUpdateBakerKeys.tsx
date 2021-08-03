@@ -6,6 +6,7 @@ import styles from './transferDetails.module.scss';
 import PublicKey from '~/pages/multisig/common/PublicKey/PublicKey';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
+import DisplayAddress from '../DisplayAddress';
 
 interface Props {
     transaction: UpdateBakerKeys;
@@ -20,7 +21,10 @@ export default function DisplayUpdateBakerKeys({ transaction }: Props) {
         <>
             <p className={styles.title}>From Account:</p>
             <p className={styles.name}>{senderName}</p>
-            <p className={styles.address}>{transaction.sender}</p>
+            <DisplayAddress
+                address={transaction.sender}
+                lineClassName={styles.address}
+            />
             <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
             <p className={styles.title}>Public keys:</p>
             <PublicKey

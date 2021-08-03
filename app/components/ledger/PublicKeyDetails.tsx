@@ -3,15 +3,15 @@ import React from 'react';
 import { chunkString } from '~/utils/basicHelpers';
 
 interface Props {
-    publickey: string;
+    publicKey: string;
 }
 
-const lineLength = 18;
+const lineLength = 16;
 
-export default function PublicKeyDetails({ publickey }: Props) {
+export default function PublicKeyDetails({ publicKey }: Props) {
     return (
         <div className="textCenter mV40">
-            {chunkString(publickey, lineLength).map((text) => (
+            {chunkString(publicKey, lineLength).map((text) => (
                 <p className="m0" key={text}>
                     {text}
                 </p>

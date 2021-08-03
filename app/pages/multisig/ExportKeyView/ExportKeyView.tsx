@@ -26,6 +26,7 @@ import Card from '~/cross-app-components/Card';
 import PrintButton from '~/components/PrintButton';
 import PrintFormat from './ExportKeyPrintFormat';
 import TextArea from '~/components/Form/TextArea';
+import PublicKeyDetails from '~/components/ledger/PublicKeyDetails';
 
 interface ParamTypes {
     keyType: ExportKeyType;
@@ -114,7 +115,7 @@ export default function ExportKeyView(): JSX.Element {
                         />
                     </PrintButton>
                     <h3>New {getKeyDisplay(keyType)}</h3>
-                    {signedPublicKey.key}
+                    <PublicKeyDetails publicKey={signedPublicKey.key} />
                     <CopiableIdenticon
                         data={signedPublicKey.key}
                         setScreenshot={setImage}
