@@ -6,10 +6,7 @@ import { DecryptionData, DecryptionResult } from '~/ipc/crypto';
  * AES-256 in CBC mode. The cipher text is returned along with the parameters
  * required to decrypt the file.
  */
-export async function encrypt(
-    data: string,
-    password: string
-): Promise<EncryptedData> {
+export function encrypt(data: string, password: string): EncryptedData {
     const encryptedResult = window.cryptoMethods.encrypt(data, password);
     return encryptedResult;
 }
@@ -18,10 +15,10 @@ export async function encrypt(
  * Decrypts the data using the metadata in the file that was given as input
  * and the provided password.
  */
-export async function decrypt(
+export function decrypt(
     { cipherText, metadata }: EncryptedData,
     password: string
-): Promise<string> {
+): string {
     const decryptedResult: DecryptionResult = window.cryptoMethods.decrypt(
         { cipherText, metadata },
         password

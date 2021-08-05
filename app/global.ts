@@ -12,7 +12,8 @@ import {
 
 declare global {
     interface Window {
-        listen: Listen;
+        addListener: Listen;
+        removeListener: Listen;
         once: Once;
         grpc: GRPC;
         cryptoMethods: CryptoMethods;

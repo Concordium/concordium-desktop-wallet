@@ -7,9 +7,9 @@ export const useIpcRendererEvent: (
     listener: Listener
 ) => void = (channel: keyof Listen, listener: Listener) => {
     useEffect(() => {
-        window.listen[channel](listener);
-        // return () => {
-        //   window.ipcRenderer.off(channel, listener);
-        // };
+        window.addListener[channel](listener);
+        return () => {
+            window.removeListener[channel](listener);
+        };
     }, [channel, listener]);
 };

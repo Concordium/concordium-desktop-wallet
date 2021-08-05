@@ -4,11 +4,10 @@ import {
     SignedPublicKey,
     UnsignedCredentialDeploymentInformation,
 } from '~/utils/types';
-import { LedgerIpcMessage } from './features/ledger/ConcordiumLedgerClientMain';
 import { AppAndVersion } from './features/ledger/GetAppAndVersion';
 import { AccountPathInput } from './features/ledger/Path';
 
-type ReturnBuffer = Promise<LedgerIpcMessage<Buffer>>;
+type ReturnBuffer = Promise<Buffer>;
 
 type SignUpdate = (
     transactionAsJson: string,
@@ -24,11 +23,9 @@ type SignKeyUpdate = (
 ) => ReturnBuffer;
 
 type LedgerCommands = {
-    getPublicKey: (keypath: number[]) => ReturnBuffer;
+    getPublicKey: (keypath: number[]) => Promise<Buffer>;
     getPublicKeySilent: (keypath: number[]) => ReturnBuffer;
-    getSignedPublicKey: (
-        keypath: number[]
-    ) => Promise<LedgerIpcMessage<SignedPublicKey>>;
+    getSignedPublicKey: (keypath: number[]) => Promise<SignedPublicKey>;
     getIdCredSec: (identity: number) => ReturnBuffer;
     getPrfKey: (identity: number) => ReturnBuffer;
     signTransfer: (
@@ -64,7 +61,7 @@ type LedgerCommands = {
     signElectionDifficulty: SignUpdate;
     signHigherLevelKeysUpdate: SignKeyUpdate;
     signAuthorizationKeysUpdate: SignKeyUpdate;
-    getAppAndVersion: () => Promise<LedgerIpcMessage<AppAndVersion>>;
+    getAppAndVersion: () => Promise<AppAndVersion>;
     subscribe: () => Promise<void>;
     closeTransport: () => void;
 };

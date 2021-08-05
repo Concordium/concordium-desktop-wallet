@@ -8,8 +8,6 @@ import {
     GasRewards,
     MintDistribution,
     ProtocolUpdate,
-    PublicInformationForIp,
-    SignedPublicKey,
     TransactionFeeDistribution,
     UpdateInstruction,
     UnsignedCredentialDeploymentInformation,
@@ -18,27 +16,7 @@ import {
     AuthorizationKeysUpdate,
     Hex,
 } from '~/utils/types';
-import { AccountPathInput } from './Path';
-import { AppAndVersion } from './GetAppAndVersion';
 import { stringify } from '~/utils/JSONHelper';
-import { LedgerIpcMessage } from './ConcordiumLedgerClientMain';
-
-function unwrapLedgerIpcMessage<T>(
-    message: LedgerIpcMessage<T>,
-    callOnResult?: (input: T) => T
-): T {
-    if (message.error) {
-        throw JSON.parse(message.error);
-    }
-    if (!message.result) {
-        throw new Error('Missing result');
-    }
-
-    if (callOnResult) {
-        return callOnResult(message.result);
-    }
-    return message.result;
-}
 
 /**
  * Concordium Ledger API that can be used, safely, from a renderer thread.
@@ -48,43 +26,31 @@ function unwrapLedgerIpcMessage<T>(
  * const client = new ConcordiumLedgerClient(transport);
  */
 export default class ConcordiumLedgerClient {
-    async getPublicKey(path: number[]): Promise<Buffer> {
-        const result = await window.ledger.getPublicKey(path);
-        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
-    }
+    getPublicKey = window.ledger.getPublicKey;
 
-    async getPublicKeySilent(path: number[]): Promise<Buffer> {
-        const result = await window.ledger.getPublicKeySilent(path);
-        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
-    }
+    getPublicKeySilent = window.ledger.getPublicKeySilent;
 
-    async getSignedPublicKey(path: number[]): Promise<SignedPublicKey> {
-        const result = await window.ledger.getSignedPublicKey(path);
-        return unwrapLedgerIpcMessage(result);
-    }
+    getSignedPublicKey = window.ledger.getSignedPublicKey;
 
-    async getIdCredSec(identity: number): Promise<Buffer> {
-        const result = await window.ledger.getIdCredSec(identity);
-        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
-    }
+    getIdCredSec = window.ledger.getIdCredSec;
 
-    async getPrfKey(identity: number): Promise<Buffer> {
-        const result = await window.ledger.getPrfKey(identity);
-        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
-    }
+    getPrfKey = window.ledger.getPrfKey;
 
-    async signTransfer(
+    signPublicInformationForIp = window.ledger.signPublicInformationForIp;
+
+    signCredentialDeploymentOnExistingAccount =
+        window.ledger.signCredentialDeploymentOnExistingAccount;
+
+    getAppAndVersion = window.ledger.getAppAndVersion;
+
+    signTransfer(
         transaction: AccountTransaction,
         path: number[]
     ): Promise<Buffer> {
-        const result = await window.ledger.signTransfer(
-            stringify(transaction),
-            path
-        );
-        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
+        return window.ledger.signTransfer(stringify(transaction), path);
     }
 
-    async signUpdateCredentialTransaction(
+    signUpdateCredentialTransaction(
         transaction: UpdateAccountCredentials,
         path: number[],
         onAwaitVerificationKeyConfirmation: (key: Hex) => void,
@@ -92,199 +58,157 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         window.once.onAwaitVerificationKey(onAwaitVerificationKeyConfirmation);
         window.once.onVerificationKeysConfirmed(onVerificationKeysConfirmed);
-        const result = await window.ledger.signUpdateCredentialTransaction(
+        return window.ledger.signUpdateCredentialTransaction(
             stringify(transaction),
             path
         );
-        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
     }
 
-    async signPublicInformationForIp(
-        publicInfoForIp: PublicInformationForIp,
-        accountPathInput: AccountPathInput
-    ): Promise<Buffer> {
-        const result = await window.ledger.signPublicInformationForIp(
-            publicInfoForIp,
-            accountPathInput
-        );
-        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
-    }
-
-    async signCredentialDeploymentOnExistingAccount(
-        credentialDeployment: UnsignedCredentialDeploymentInformation,
-        address: string,
-        path: number[]
-    ): Promise<Buffer> {
-        const result = await window.ledger.signCredentialDeploymentOnExistingAccount(
-            credentialDeployment,
-            address,
-            path
-        );
-        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
-    }
-
-    async signCredentialDeploymentOnNewAccount(
+    signCredentialDeploymentOnNewAccount(
         credentialDeployment: UnsignedCredentialDeploymentInformation,
         expiry: bigint,
         path: number[]
     ): Promise<Buffer> {
-        const result = await window.ledger.signCredentialDeploymentOnNewAccount(
+        return window.ledger.signCredentialDeploymentOnNewAccount(
             credentialDeployment,
             stringify(expiry),
             path
         );
-        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
     }
 
-    async signMicroGtuPerEuro(
+    signMicroGtuPerEuro(
         transaction: UpdateInstruction<ExchangeRate>,
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        const result = await window.ledger.signMicroGtuPerEuro(
+        return window.ledger.signMicroGtuPerEuro(
             stringify(transaction),
             serializedPayload,
             path
         );
-        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
     }
 
-    async signEuroPerEnergy(
+    signEuroPerEnergy(
         transaction: UpdateInstruction<ExchangeRate>,
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        const result = await window.ledger.signEuroPerEnergy(
+        return window.ledger.signEuroPerEnergy(
             stringify(transaction),
             serializedPayload,
             path
         );
-        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
     }
 
-    async signTransactionFeeDistribution(
+    signTransactionFeeDistribution(
         transaction: UpdateInstruction<TransactionFeeDistribution>,
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        const result = await window.ledger.signTransactionFeeDistribution(
+        return window.ledger.signTransactionFeeDistribution(
             stringify(transaction),
             serializedPayload,
             path
         );
-        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
     }
 
-    async signFoundationAccount(
+    signFoundationAccount(
         transaction: UpdateInstruction<FoundationAccount>,
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        const result = await window.ledger.signFoundationAccount(
+        return window.ledger.signFoundationAccount(
             stringify(transaction),
             serializedPayload,
             path
         );
-        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
     }
 
-    async signMintDistribution(
+    signMintDistribution(
         transaction: UpdateInstruction<MintDistribution>,
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        const result = await window.ledger.signMintDistribution(
+        return window.ledger.signMintDistribution(
             stringify(transaction),
             serializedPayload,
             path
         );
-        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
     }
 
-    async signProtocolUpdate(
+    signProtocolUpdate(
         transaction: UpdateInstruction<ProtocolUpdate>,
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        const result = await window.ledger.signProtocolUpdate(
+        return window.ledger.signProtocolUpdate(
             stringify(transaction),
             serializedPayload,
             path
         );
-        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
     }
 
-    async signGasRewards(
+    signGasRewards(
         transaction: UpdateInstruction<GasRewards>,
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        const result = await window.ledger.signGasRewards(
+        return window.ledger.signGasRewards(
             stringify(transaction),
             serializedPayload,
             path
         );
-        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
     }
 
-    async signBakerStakeThreshold(
+    signBakerStakeThreshold(
         transaction: UpdateInstruction<BakerStakeThreshold>,
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        const result = await window.ledger.signBakerStakeThreshold(
+        return window.ledger.signBakerStakeThreshold(
             stringify(transaction),
             serializedPayload,
             path
         );
-        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
     }
 
-    async signElectionDifficulty(
+    signElectionDifficulty(
         transaction: UpdateInstruction<ElectionDifficulty>,
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        const result = await window.ledger.signElectionDifficulty(
+        return window.ledger.signElectionDifficulty(
             stringify(transaction),
             serializedPayload,
             path
         );
-        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
     }
 
-    async signHigherLevelKeysUpdate(
+    signHigherLevelKeysUpdate(
         transaction: UpdateInstruction<HigherLevelKeyUpdate>,
         serializedPayload: Buffer,
         path: number[],
         INS: number
     ): Promise<Buffer> {
-        const result = await window.ledger.signHigherLevelKeysUpdate(
+        return window.ledger.signHigherLevelKeysUpdate(
             stringify(transaction),
             serializedPayload,
             path,
             INS
         );
-        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
     }
 
-    async signAuthorizationKeysUpdate(
+    signAuthorizationKeysUpdate(
         transaction: UpdateInstruction<AuthorizationKeysUpdate>,
         serializedPayload: Buffer,
         path: number[],
         INS: number
     ): Promise<Buffer> {
-        const result = await window.ledger.signAuthorizationKeysUpdate(
+        return window.ledger.signAuthorizationKeysUpdate(
             stringify(transaction),
             serializedPayload,
             path,
             INS
         );
-        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
-    }
-
-    async getAppAndVersion(): Promise<AppAndVersion> {
-        const result = await window.ledger.getAppAndVersion();
-        return unwrapLedgerIpcMessage(result);
     }
 }

@@ -11,8 +11,7 @@ import './styles/app.global.scss';
 const store = configuredStore();
 
 initMisc(store.dispatch);
-console.log(window);
-window.listen.openRoute((_, route: string) => {
+window.addListener.openRoute((_, route: string) => {
     store.dispatch(push(route));
 });
 

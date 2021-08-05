@@ -41,6 +41,13 @@ const listenImpl: Listen = {
     ledgerChannel: (func) => eventEmitter.on(listenChannel, func),
 };
 
+const removeListener: Listen = {
+    openRoute: (func) => ipcRenderer.off(openRoute, func),
+    readyToShow: (func) => ipcRenderer.off(readyToShow, func),
+    didFinishLoad: (func) => ipcRenderer.off(didFinishLoad, func),
+    ledgerChannel: (func) => eventEmitter.off(listenChannel, func),
+};
+
 const onceImpl: Once = {
     onAwaitVerificationKey: (func) =>
         eventEmitter.once(onAwaitVerificationKey, func),
@@ -51,7 +58,9 @@ const onceImpl: Once = {
 contextBridge.exposeInMainWorld('removeAllListeners', (channel: string) =>
     ipcRenderer.removeAllListeners(channel)
 );
-contextBridge.exposeInMainWorld('listen', listenImpl);
+contextBridge.exposeInMainWorld('addListener', listenImpl);
+contextBridge.exposeInMainWorld('removeListener', removeListener);
+
 contextBridge.exposeInMainWorld('once', onceImpl);
 contextBridge.exposeInMainWorld('printElement', (body: string) =>
     ipcRenderer.invoke(ipcCommands.print, body)
@@ -59,6 +68,19 @@ contextBridge.exposeInMainWorld('printElement', (body: string) =>
 contextBridge.exposeInMainWorld('openUrl', (href: string) =>
     ipcRenderer.invoke(ipcCommands.openUrl, href)
 );
+
+contextBridge.exposeInMainWorld('grpc', initializeGrpcIpcHandlers);
+contextBridge.exposeInMainWorld(
+    'writeImageToClipboard',
+    initializeClipboardIpcHandlers
+);
+contextBridge.exposeInMainWorld('files', initializeFilesIpcHandlers);
+contextBridge.exposeInMainWorld('cryptoMethods', initializeCryptoIpcHandlers);
+contextBridge.exposeInMainWorld(
+    'ledger',
+    initializeLedgerIpcHandlers(eventEmitter)
+);
+contextBridge.exposeInMainWorld('http', initializeHttpIpcHandlers);
 
 const databaseIpcHandlers: Database = {
     general: initializeDatabaseGeneralIpcHandlers,
@@ -73,17 +95,4 @@ const databaseIpcHandlers: Database = {
     transaction: initializeDatabaseTransactionsIpcHandlers,
     wallet: initializeDatabaseWalletIpcHandlers,
 };
-
-contextBridge.exposeInMainWorld('grpc', initializeGrpcIpcHandlers);
-contextBridge.exposeInMainWorld(
-    'writeImageToClipboard',
-    initializeClipboardIpcHandlers
-);
-contextBridge.exposeInMainWorld('files', initializeFilesIpcHandlers);
-contextBridge.exposeInMainWorld('cryptoMethods', initializeCryptoIpcHandlers);
-contextBridge.exposeInMainWorld(
-    'ledger',
-    initializeLedgerIpcHandlers(eventEmitter)
-);
-contextBridge.exposeInMainWorld('http', initializeHttpIpcHandlers);
 contextBridge.exposeInMainWorld('database', databaseIpcHandlers);

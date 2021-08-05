@@ -46,8 +46,7 @@ export default class LedgerEmulatorObserverImpl implements LedgerObserver {
                         eventEmitter
                     );
 
-                    const appAndVersionResult = await this.concordiumClient.getAppAndVersion();
-                    const appAndVersion = appAndVersionResult.result;
+                    const appAndVersion = await this.concordiumClient.getAppAndVersion();
                     if (!appAndVersion) {
                         // We could not extract the version information.
                         eventEmitter.emit(
