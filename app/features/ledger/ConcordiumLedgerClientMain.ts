@@ -76,9 +76,9 @@ async function wrapResult<T>(
 export default class ConcordiumLedgerClientMain {
     transport: Transport;
 
-    mainWindow: EventEmitter;
+    eventEmitter: EventEmitter;
 
-    constructor(mainWindow: EventEmitter, transport?: HwTransport) {
+    constructor(eventEmitter: EventEmitter, transport?: HwTransport) {
         if (transport) {
             this.transport = new TransportImpl(transport);
         } else {
@@ -86,7 +86,7 @@ export default class ConcordiumLedgerClientMain {
             // Only to be used for testing, as the emulator is not secure in any way.
             this.transport = new EmulatorTransport();
         }
-        this.mainWindow = mainWindow;
+        this.eventEmitter = eventEmitter;
     }
 
     closeTransport(): Promise<void> {
@@ -131,7 +131,7 @@ export default class ConcordiumLedgerClientMain {
             this.transport,
             path,
             transaction,
-            this.mainWindow
+            this.eventEmitter
         );
     }
 

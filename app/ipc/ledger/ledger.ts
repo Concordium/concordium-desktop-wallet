@@ -27,7 +27,7 @@ import {
 import { LedgerCommands } from '~/preloadTypes';
 
 export default function initializeIpcHandlers(
-    mainWindow: EventEmitter
+    eventEmitter: EventEmitter
 ): LedgerCommands {
     return {
         getPublicKey: (keypath: number[]) =>
@@ -245,7 +245,7 @@ export default function initializeIpcHandlers(
             );
         },
         getAppAndVersion: () => getLedgerClient().getAppAndVersion(),
-        subscribe: () => subscribeLedger(mainWindow),
+        subscribe: () => subscribeLedger(eventEmitter),
         closeTransport,
     };
 }

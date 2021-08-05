@@ -14,6 +14,6 @@ export function getLedgerClient() {
     return ledgerObserver.getLedgerClient();
 }
 
-export function subscribeLedger(mainWindow: EventEmitter) {
-    return ledgerObserver.subscribeLedger(mainWindow);
+export function subscribeLedger(eventEmitter: EventEmitter) {
+    return ledgerObserver.subscribeLedger(eventEmitter);
 }

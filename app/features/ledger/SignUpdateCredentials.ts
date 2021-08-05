@@ -22,7 +22,7 @@ export default async function signUpdateCredentials(
     transport: Transport,
     path: number[],
     transaction: UpdateAccountCredentials,
-    window: EventEmitter
+    eventEmitter: EventEmitter
 ): Promise<Buffer> {
     const pathPrefix = pathAsBuffer(path);
     const ins = INS_UPDATE_CREDENTIALS;
@@ -78,7 +78,7 @@ export default async function signUpdateCredentials(
             p2,
             true,
             true,
-            window
+            eventEmitter
         );
         // eslint-disable-next-line  no-await-in-loop
         await signCredentialProofs(
