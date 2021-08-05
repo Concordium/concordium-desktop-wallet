@@ -19,7 +19,10 @@ import styles from './BrowseTransactionFile/BrowseTransactionFile.module.scss';
 import { fileListToFileArray } from '~/components/Form/FileInput/util';
 import createMultiSignatureTransaction from '~/utils/MultiSignatureTransactionHelper';
 import { loadProposals } from '~/features/MultiSignatureSlice';
-import getMultiSigDao from '~/database/MultiSignatureProposalDao';
+import {
+    insert,
+    getMaxOpenNonceOnAccount,
+} from '~/database/MultiSignatureProposalDao';
 import { getAccount } from '~/database/AccountDao';
 import { getNextAccountNonce, getAccountInfo } from '~/node/nodeRequests';
 import {
@@ -130,9 +133,7 @@ async function loadTransactionFile(
         nonceTracker[address] += 1n;
     } else {
         const accountNonce = await getNextAccountNonce(address);
-        const maxOpenNonce = await getMultiSigDao().getMaxOpenNonceOnAccount(
-            address
-        );
+        const maxOpenNonce = await getMaxOpenNonceOnAccount(address);
         nonceTracker[address] = max(
             BigInt(accountNonce.nonce),
             maxOpenNonce + 1n
@@ -227,7 +228,7 @@ export default function ImportProposal() {
 
         for (const [, proposal] of proposals) {
             // Save to database and use the assigned id to update the local object.
-            const entryId = (await getMultiSigDao().insert(proposal))[0];
+            const entryId = (await insert(proposal))[0];
             proposal.id = entryId;
         }
 

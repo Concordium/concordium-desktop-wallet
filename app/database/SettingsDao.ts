@@ -39,6 +39,4 @@ export async function loadAllSettings(): Promise<Settings[]> {
     return settings;
 }
 
-export function updateEntry(setting: Setting) {
-    return window.database.settings.update(setting);
-}
+export const { update: updateEntry } = window.database.settings;

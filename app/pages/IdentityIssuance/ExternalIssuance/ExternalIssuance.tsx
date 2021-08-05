@@ -24,7 +24,7 @@ import { getAddressFromCredentialId } from '~/utils/rustInterface';
 import generalStyles from '../IdentityIssuance.module.scss';
 import styles from './ExternalIssuance.module.scss';
 import { getInitialEncryptedAmount } from '~/utils/accountHelpers';
-import getIdentityDao from '~/database/IdentityDao';
+import { insertPendingIdentityAndInitialAccount } from '~/database/IdentityDao';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
@@ -118,7 +118,7 @@ async function generateIdentity(
             deploymentTransactionId: undefined,
         };
 
-        identityId = await getIdentityDao().insertPendingIdentityAndInitialAccount(
+        identityId = await insertPendingIdentityAndInitialAccount(
             identity,
             initialAccount
         );

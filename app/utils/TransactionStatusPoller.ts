@@ -1,7 +1,5 @@
 import { parse, stringify } from './JSONHelper';
-import getMultiSigDao, {
-    getAllProposals,
-} from '~/database/MultiSignatureProposalDao';
+import { getAll, updateEntry } from '~/database/MultiSignatureProposalDao';
 import { loadProposals } from '~/features/MultiSignatureSlice';
 import {
     MultiSignatureTransaction,
@@ -19,7 +17,7 @@ import {
     rejectTransaction,
     isShieldedBalanceTransaction,
 } from '~/features/TransactionSlice';
-import getTransactionDao from '~/database/TransactionDao';
+import { getPendingTransactions } from '~/database/TransactionDao';
 import { getStatus, isSuccessfulTransaction } from './transactionHelpers';
 import { getTransactionHash } from './transactionHash';
 import {
@@ -130,7 +128,7 @@ export async function getMultiSignatureTransactionStatus(
     }
 
     // Update the proposal and reload state from the database.
-    await getMultiSigDao().update(updatedProposal);
+    await updateEntry(updatedProposal);
     loadProposals(dispatch);
 }
 
@@ -172,12 +170,12 @@ export async function monitorTransactionStatus(
  * start listening for their status towards the node.
  */
 export default async function listenForTransactionStatus(dispatch: Dispatch) {
-    const transfers = await getTransactionDao().getPending();
+    const transfers = await getPendingTransactions();
     transfers.forEach((transfer) =>
         monitorTransactionStatus(dispatch, transfer)
     );
 
-    const allProposals = await getAllProposals();
+    const allProposals = await getAll();
     allProposals
         .filter(
             (proposal) =>

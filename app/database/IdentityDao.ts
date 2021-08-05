@@ -5,4 +5,12 @@ export async function getAllIdentities(): Promise<Identity[]> {
     return window.database.general.selectAll(identitiesTable);
 }
 
-export default () => window.database.identity;
+export const {
+    getNextIdentityNumber,
+    insert: insertIdentity,
+    update: updateIdentity,
+    getIdentitiesForWallet,
+    rejectIdentityAndDeleteInitialAccount,
+    confirmIdentity,
+    insertPendingIdentityAndInitialAccount,
+} = window.database.identity;

@@ -9,7 +9,7 @@ import {
 } from '~/features/AddressBookSlice';
 import { insertNewCredential } from '~/features/CredentialSlice';
 import { addExternalAccount } from '~/features/AccountSlice';
-import getAccountDao from '~/database/AccountDao';
+import { findAccounts } from '~/database/AccountDao';
 import routes from '~/constants/routes.json';
 import AccountCredentialSummary from './AccountCredentialSummary';
 import savedStateContext from './savedStateContext';
@@ -64,8 +64,7 @@ export default function ExportCredential({ onExported }: Props): JSX.Element {
 
             // The account may already exists, if the credential being exported is for an
             // internal account in the database. In that case a new one should not be created.
-            const accountExists =
-                (await getAccountDao().findAccounts({ address })).length > 0;
+            const accountExists = (await findAccounts({ address })).length > 0;
             if (!accountExists) {
                 addExternalAccount(
                     dispatch,

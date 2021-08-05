@@ -1,7 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
-import getIdentityDao, { getAllIdentities } from '../database/IdentityDao';
+import {
+    getAllIdentities,
+    insertIdentity,
+    updateIdentity,
+} from '../database/IdentityDao';
 import { Identity, IdentityStatus, Dispatch } from '../utils/types';
 
 interface IdentityState {
@@ -57,7 +61,7 @@ export async function loadIdentities(dispatch: Dispatch) {
 export async function importIdentities(
     identities: Identity | Identity[] | Partial<Identity>
 ) {
-    await getIdentityDao().insert(identities);
+    await insertIdentity(identities);
 }
 
 export async function editIdentityName(
@@ -65,7 +69,7 @@ export async function editIdentityName(
     identityId: number,
     name: string
 ) {
-    await getIdentityDao().update(identityId, { name });
+    await updateIdentity(identityId, { name });
     await loadIdentities(dispatch);
 }
 

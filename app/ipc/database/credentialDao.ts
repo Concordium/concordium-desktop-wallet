@@ -8,6 +8,13 @@ import {
 import { Credential, CredentialWithIdentityNumber } from '~/utils/types';
 import { CredentialMethods } from '~/preloadTypes';
 
+/**
+ * Get all credentials for the account with the given account address. The identity
+ * number is joined in from the identity table, and the walletId is joined from
+ * the wallet table and augmented into the credential object.
+ * @param accountAddress address of the account to get the credentials for
+ * @returns an array of credentials for the given account, augmented with the identityNumber and walletId
+ */
 async function getCredentialsOfAccount(accountAddress: string) {
     const credentials = await (await knex())
         .select()
@@ -64,6 +71,10 @@ export async function getCredentials(): Promise<
     return credentials;
 }
 
+/**
+ * Get all credentials for the given identity id, i.e. exactly those credentials
+ * that refer to a specific identity.
+ */
 export async function getCredentialsForIdentity(
     identityId: number
 ): Promise<Credential[]> {

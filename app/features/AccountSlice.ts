@@ -8,7 +8,16 @@ import {
 } from './CredentialSlice';
 // eslint-disable-next-line import/no-cycle
 import { addToAddressBook, updateAddressBookEntry } from './AddressBookSlice';
-import getAccountDao from '../database/AccountDao';
+import {
+    getAllAccounts,
+    insertAccount,
+    updateAccount,
+    getAccount,
+    confirmInitialAccount as confirmInitialAccountInDatabase,
+    removeAccount as removeAccountFromDatabase,
+    removeInitialAccount as removeInitialAccountInDatabase,
+    findAccounts,
+} from '../database/AccountDao';
 import { getCredentialsOfAccount } from '~/database/CredentialDao';
 import {
     decryptAmounts,
@@ -32,7 +41,7 @@ import {
 } from '../utils/accountHelpers';
 
 import { getAccountInfos, getAccountInfoOfAddress } from '../node/nodeHelpers';
-import getTransactionDao from '~/database/TransactionDao';
+import { hasPendingTransactions } from '~/database/TransactionDao';
 
 interface AccountState {
     accounts: Account[];
@@ -112,7 +121,7 @@ export const {
 
 // Load accounts into state, and updates their infos
 export async function loadAccounts(dispatch: Dispatch) {
-    const accounts: Account[] = await getAccountDao().getAll();
+    const accounts: Account[] = await getAllAccounts();
     dispatch(updateAccounts(accounts.reverse()));
     return accounts;
 }
@@ -131,7 +140,7 @@ async function updateAccountEncryptedAmount(
     const incoming = account.incomingAmounts !== incomingAmountsString;
     const checkExternalSelfUpdate =
         account.selfAmounts !== selfAmounts &&
-        !(await getTransactionDao().hasPending(account.address));
+        !(await hasPendingTransactions(account.address));
 
     if (incoming || checkExternalSelfUpdate) {
         return {
@@ -147,7 +156,7 @@ export async function removeAccount(
     dispatch: Dispatch,
     accountAddress: string
 ) {
-    await getAccountDao().removeAccount(accountAddress);
+    await removeAccountFromDatabase(accountAddress);
     return loadAccounts(dispatch);
 }
 
@@ -172,12 +181,12 @@ async function initializeGenesisAccount(
         status: AccountStatus.Confirmed,
         signatureThreshold: accountInfo.accountThreshold,
     };
-    if ((await getAccountDao().findAccounts({ address })).length > 0) {
+    if ((await findAccounts({ address })).length > 0) {
         // The account already exists, so we should merge with it.
         removeAccount(dispatch, account.address); // Remove this instance of the account, which still has the credId as placeholder for the address.
     } else {
         // The account does not already exists, so we can update the current entry.
-        await getAccountDao().updateAccount(account.address, accountUpdate);
+        await updateAccount(account.address, accountUpdate);
         await dispatch(
             updateAccountFields({
                 address: account.address,
@@ -207,7 +216,7 @@ export async function updateSignatureThreshold(
     signatureThreshold: number
 ) {
     const updatedFields = { signatureThreshold };
-    getAccountDao().updateAccount(address, updatedFields);
+    updateAccount(address, updatedFields);
     return dispatch(updateAccountFields({ address, updatedFields }));
 }
 
@@ -232,7 +241,7 @@ async function updateAccountFromAccountInfo(
     accountUpdate = { ...encryptedAmountsUpdate, ...accountUpdate };
 
     if (Object.keys(accountUpdate).length > 0) {
-        await getAccountDao().updateAccount(account.address, accountUpdate);
+        await updateAccount(account.address, accountUpdate);
         await dispatch(
             updateAccountFields({
                 address: account.address,
@@ -345,7 +354,7 @@ export async function addPendingAccount(
         incomingAmounts: '[]',
         totalDecrypted: '0',
     };
-    await getAccountDao().insertAccount(account);
+    await insertAccount(account);
     return loadAccounts(dispatch);
 }
 
@@ -354,7 +363,7 @@ export async function confirmInitialAccount(
     identityId: number,
     accountAddress: string
 ) {
-    await getAccountDao().confirmInitialAccount(identityId, {
+    await confirmInitialAccountInDatabase(identityId, {
         status: AccountStatus.Confirmed,
         address: accountAddress,
     });
@@ -365,7 +374,7 @@ export async function removeInitialAccount(
     dispatch: Dispatch,
     identityId: number
 ) {
-    await getAccountDao().removeInitialAccount(identityId);
+    await removeInitialAccountInDatabase(identityId);
     return loadAccounts(dispatch);
 }
 
@@ -377,19 +386,18 @@ export async function confirmAccount(
     transactionId: string
 ) {
     const response = await getStatus(transactionId);
-    const dao = getAccountDao();
     switch (response.status) {
         case TransactionStatus.Rejected:
-            await dao.updateAccount(accountAddress, {
+            await updateAccount(accountAddress, {
                 status: AccountStatus.Rejected,
             });
             break;
         case TransactionStatus.Finalized:
-            await dao.updateAccount(accountAddress, {
+            await updateAccount(accountAddress, {
                 status: AccountStatus.Confirmed,
             });
             // eslint-disable-next-line no-case-declarations
-            const account = (await dao.getAccount(accountAddress)) as Account;
+            const account = (await getAccount(accountAddress)) as Account;
 
             addToAddressBook(dispatch, {
                 name: account.name,
@@ -434,7 +442,7 @@ export async function decryptAccountBalance(
         totalDecrypted,
         allDecrypted: true,
     };
-    getAccountDao().updateAccount(account.address, updatedFields);
+    updateAccount(account.address, updatedFields);
     return dispatch(
         updateAccountFields({ address: account.address, updatedFields })
     );
@@ -458,12 +466,12 @@ export async function addExternalAccount(
         isInitial: false,
         rewardFilter: '[]',
     };
-    await getAccountDao().insertAccount(account);
+    await insertAccount(account);
     return loadAccounts(dispatch);
 }
 
 export async function importAccount(account: Account | Account[]) {
-    await getAccountDao().insertAccount(account);
+    await insertAccount(account);
 }
 
 export async function updateRewardFilter(
@@ -472,7 +480,7 @@ export async function updateRewardFilter(
     rewardFilter: TransactionKindString[]
 ) {
     const updatedFields = { rewardFilter: JSON.stringify(rewardFilter) };
-    getAccountDao().updateAccount(address, updatedFields);
+    updateAccount(address, updatedFields);
     return dispatch(updateAccountFields({ address, updatedFields }));
 }
 
@@ -482,7 +490,7 @@ export async function updateMaxTransactionId(
     maxTransactionId: string
 ) {
     const updatedFields = { maxTransactionId };
-    getAccountDao().updateAccount(address, updatedFields);
+    updateAccount(address, updatedFields);
     return dispatch(updateAccountFields({ address, updatedFields }));
 }
 
@@ -492,7 +500,7 @@ export async function updateAllDecrypted(
     allDecrypted: boolean
 ) {
     const updatedFields = { allDecrypted };
-    getAccountDao().updateAccount(address, updatedFields);
+    updateAccount(address, updatedFields);
     return dispatch(updateAccountFields({ address, updatedFields }));
 }
 
@@ -503,7 +511,7 @@ export async function updateShieldedBalance(
     totalDecrypted: string
 ) {
     const updatedFields = { selfAmounts, totalDecrypted };
-    getAccountDao().updateAccount(address, updatedFields);
+    updateAccount(address, updatedFields);
     return dispatch(updateAccountFields({ address, updatedFields }));
 }
 
@@ -513,7 +521,7 @@ export async function editAccountName(
     name: string
 ) {
     const updatedFields: Partial<Account> = { name };
-    await getAccountDao().updateAccount(address, updatedFields);
+    await updateAccount(address, updatedFields);
     await updateAddressBookEntry(dispatch, address, { name });
 
     return dispatch(updateAccountFields({ address, updatedFields }));

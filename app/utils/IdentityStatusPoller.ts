@@ -10,7 +10,11 @@ import { getAccountsOfIdentity } from '../database/AccountDao';
 import { loadIdentities } from '../features/IdentitySlice';
 import { loadAccounts } from '../features/AccountSlice';
 import { isInitialAccount } from './accountHelpers';
-import getIdentityDao, { getAllIdentities } from '../database/IdentityDao';
+import {
+    confirmIdentity,
+    getAllIdentities,
+    rejectIdentityAndDeleteInitialAccount,
+} from '../database/IdentityDao';
 import { loadCredentials } from '~/features/CredentialSlice';
 import { loadAddressBook } from '~/features/AddressBookSlice';
 
@@ -33,9 +37,7 @@ export async function confirmIdentityAndInitialAccount(
     // The identity provider failed the identity creation request. Clean up the
     // identity and account in the database and refresh the state.
     if (idObjectResponse.error) {
-        await getIdentityDao().rejectIdentityAndDeleteInitialAccount(
-            identityId
-        );
+        await rejectIdentityAndDeleteInitialAccount(identityId);
         await loadIdentities(dispatch);
         await loadAccounts(dispatch);
         return;
@@ -62,7 +64,7 @@ export async function confirmIdentityAndInitialAccount(
         readOnly: true,
     };
 
-    await getIdentityDao().confirmIdentity(
+    await confirmIdentity(
         identityId,
         JSON.stringify(token.identityObject),
         accountAddress,

@@ -4,8 +4,12 @@ import { multiSignatureProposalTable } from '../constants/databaseNames.json';
 /**
  * Function for reading all items in the multi signature transaction proposal table.
  */
-export async function getAllProposals(): Promise<MultiSignatureTransaction[]> {
+export async function getAll(): Promise<MultiSignatureTransaction[]> {
     return window.database.general.selectAll(multiSignatureProposalTable);
 }
 
-export default () => window.database.multiSignatureTransaction;
+export const {
+    insert,
+    update: updateEntry,
+    getMaxOpenNonceOnAccount,
+} = window.database.multiSignatureTransaction;

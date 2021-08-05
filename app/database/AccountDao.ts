@@ -1,6 +1,15 @@
 import { Account } from '../utils/types';
 
-export default () => window.database.account;
+export const {
+    getAll: getAllAccounts,
+    getAccount,
+    insertAccount,
+    updateAccount,
+    findAccounts,
+    removeAccount,
+    removeInitialAccount,
+    confirmInitialAccount,
+} = window.database.account;
 
 /**
  * Extracts all accounts for a given identity.
@@ -10,9 +19,5 @@ export default () => window.database.account;
 export async function getAccountsOfIdentity(
     identityId: number
 ): Promise<Account[]> {
-    return window.database.account.findAccounts({ identityId });
+    return findAccounts({ identityId });
 }
-
-export const getAccount: typeof window.database.account.getAccount = (
-    ...args
-) => window.database.account.getAccount(...args);

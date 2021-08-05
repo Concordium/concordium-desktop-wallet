@@ -1,7 +1,5 @@
 import { createSlice, Dispatch } from '@reduxjs/toolkit';
-import getMultiSigDao, {
-    getAllProposals,
-} from '../database/MultiSignatureProposalDao';
+import { getAll, updateEntry } from '../database/MultiSignatureProposalDao';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
 import {
@@ -55,7 +53,7 @@ export async function updateCurrentProposal(
     dispatch: Dispatch,
     multiSignatureTransactionProposal: MultiSignatureTransaction
 ) {
-    getMultiSigDao().update(multiSignatureTransactionProposal);
+    updateEntry(multiSignatureTransactionProposal);
     dispatch(updateProposals(multiSignatureTransactionProposal));
 }
 
@@ -64,7 +62,7 @@ export async function updateCurrentProposal(
  * exactly what was loaded from the database
  */
 export async function loadProposals(dispatch: Dispatch) {
-    const allProposals = await getAllProposals();
+    const allProposals = await getAll();
     dispatch(setProposals(allProposals));
 }
 

@@ -12,7 +12,7 @@ import { stringify } from '~/utils/JSONHelper';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { globalSelector } from '~/features/GlobalSlice';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
-import getMultiSigDao from '~/database/MultiSignatureProposalDao';
+import { insert } from '~/database/MultiSignatureProposalDao';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
 import SignTransactionColumn from '../SignTransactionProposal/SignTransaction';
@@ -83,9 +83,7 @@ export async function createMultisignatureTransaction(
     };
 
     // Save to database and use the assigned id to update the local object.
-    const entryId = (
-        await getMultiSigDao().insert(multiSignatureTransaction)
-    )[0];
+    const entryId = (await insert(multiSignatureTransaction))[0];
     multiSignatureTransaction.id = entryId;
 
     return multiSignatureTransaction;

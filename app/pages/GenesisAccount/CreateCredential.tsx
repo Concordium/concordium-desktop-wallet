@@ -11,7 +11,11 @@ import Card from '~/cross-app-components/Card';
 import Button from '~/cross-app-components/Button';
 import { asyncNoOp } from '~/utils/basicHelpers';
 import pairWallet from '~/utils/WalletPairing';
-import getIdentityDao, { getAllIdentities } from '~/database/IdentityDao';
+import {
+    getAllIdentities,
+    getIdentitiesForWallet,
+    insertIdentity,
+} from '~/database/IdentityDao';
 
 interface Props {
     setGenesisAccount: (g: GenesisAccount) => void;
@@ -29,9 +33,7 @@ const identityNumber = 0;
  * @returns the id of the created identity, or the id of the already existing identity
  */
 async function createGenesisIdentity(walletId: number): Promise<number> {
-    const existingIdentities = await getIdentityDao().getIdentitiesForWallet(
-        walletId
-    );
+    const existingIdentities = await getIdentitiesForWallet(walletId);
     if (existingIdentities.length === 1) {
         return existingIdentities[0].id;
     }
@@ -68,7 +70,7 @@ async function createGenesisIdentity(walletId: number): Promise<number> {
         walletId,
     };
 
-    return (await getIdentityDao().insert(identity))[0];
+    return (await insertIdentity(identity))[0];
 }
 
 export default function CreateCredential({

@@ -31,6 +31,10 @@ function selectAccounts(builder: Knex) {
         );
 }
 
+/**
+ * Returns all stored accounts from the database. Attaches the identityName
+ * and identityNumber from the identity table.
+ */
 export async function getAllAccounts(): Promise<Account[]> {
     const accounts: Account[] = await selectAccounts(await knex());
 

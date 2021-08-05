@@ -16,6 +16,12 @@ import {
 } from '~/utils/types';
 import { IdentityMethods } from '~/preloadTypes';
 
+/**
+ * Get the identity number to be used to create the next identity with
+ * the wallet with the given id.
+ * @param walletId the database id key for the wallet used
+ * @returns the id for the next identity to be created by the given wallet
+ */
 export async function getNextIdentityNumber(walletId: number): Promise<number> {
     const model = (await knex())
         .table(identitiesTable)
@@ -35,6 +41,10 @@ async function updateIdentity(
     return (await knex())(identitiesTable).where({ id }).update(updatedValues);
 }
 
+/**
+ * Find all the identities for a given wallet.
+ * @returns a list of identities that have been created from the supplied wallet
+ */
 async function getIdentitiesForWallet(walletId: number): Promise<Identity[]> {
     return (await knex()).select().table(identitiesTable).where({ walletId });
 }

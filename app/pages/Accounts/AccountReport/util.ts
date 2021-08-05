@@ -4,7 +4,10 @@ import {
     TransactionKindString,
     TransferTransactionWithNames,
 } from '~/utils/types';
-import getTransactionDao from '~/database/TransactionDao';
+import {
+    getTransactionsOfAccount,
+    hasEncryptedTransactions,
+} from '~/database/TransactionDao';
 import { toCSV } from '~/utils/basicHelpers';
 import { isOutgoingTransaction, lookupName } from '~/utils/transactionHelpers';
 import exportTransactionFields from '~/constants/exportTransactionFields.json';
@@ -140,7 +143,7 @@ export async function containsEncrypted(
 
     const fromBlockTime = fromTime ? fromTime.getTime() : Date.now();
     const toBlockTime = toTime ? toTime.getTime() : 0;
-    return getTransactionDao().hasEncryptedTransactions(
+    return hasEncryptedTransactions(
         account.address,
         (fromBlockTime / 1000).toString(),
         (toBlockTime / 1000).toString()
@@ -154,11 +157,7 @@ export async function getAccountCSV(
     fromTime?: Date,
     toTime?: Date
 ) {
-    let { transactions } = await getTransactionDao().getTransactionsForAccount(
-        account,
-        [],
-        1000000
-    ); // load from database
+    let { transactions } = await getTransactionsOfAccount(account, [], 1000000); // load from database
     transactions = transactions.filter(
         (transaction) =>
             (!fromTime ||

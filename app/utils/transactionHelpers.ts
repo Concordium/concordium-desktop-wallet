@@ -1,5 +1,5 @@
 import type { Buffer } from 'buffer/';
-import getAddressBookDao from '../database/AddressBookDao';
+import { findEntries } from '../database/AddressBookDao';
 import { getTransactionStatus } from '../node/nodeRequests';
 import { getDefaultExpiry, getNow, secondsSinceUnixEpoch } from './timeHelpers';
 import {
@@ -44,7 +44,7 @@ import { toMicroUnits, isValidGTUString, displayAsGTU } from './gtu';
 export async function lookupAddressBookEntry(
     address: string
 ): Promise<AddressBookEntry | undefined> {
-    const entries = await getAddressBookDao().findEntries({ address });
+    const entries = await findEntries({ address });
     return entries[0];
 }
 

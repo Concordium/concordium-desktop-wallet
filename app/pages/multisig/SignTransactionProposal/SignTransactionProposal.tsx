@@ -12,7 +12,7 @@ import {
 } from '~/utils/types';
 import { UpdateInstructionHandler } from '~/utils/transactionTypes';
 import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
-import getMultiSigDao from '~/database/MultiSignatureProposalDao';
+import { insert } from '~/database/MultiSignatureProposalDao';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getUpdateKey } from '~/utils/updates/AuthorizationHelper';
@@ -85,7 +85,7 @@ function SignTransactionProposalView({ proposal }: Props) {
         };
 
         // Save to database and use the assigned id to update the local object.
-        const entryId = (await getMultiSigDao().insert(updatedProposal))[0];
+        const entryId = (await insert(updatedProposal))[0];
         updatedProposal.id = entryId;
 
         // Set the current proposal in the state to the one that was just generated.

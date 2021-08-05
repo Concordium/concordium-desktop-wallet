@@ -9,4 +9,4 @@ export async function getAllWallets(): Promise<WalletEntry[]> {
     return window.database.general.selectAll(walletTable);
 }
 
-export default () => window.database.wallet;
+export const { getWalletId, insertWallet } = window.database.wallet;

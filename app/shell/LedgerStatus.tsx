@@ -8,7 +8,7 @@ import styles from './LedgerStatus.module.scss';
 import { setCurrentWalletId } from '~/features/WalletSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getPairingPath } from '~/features/ledger/Path';
-import getWalletDao from '~/database/WalletDao';
+import { getWalletId } from '~/database/WalletDao';
 
 const listenerTimeout = 5000;
 
@@ -19,7 +19,7 @@ export default function LedgerStatus(): JSX.Element {
 
     const onWalletIdentifier = useCallback(
         async (walletIdentifier: string) => {
-            const walletId = await getWalletDao().getWalletId(walletIdentifier);
+            const walletId = await getWalletId(walletIdentifier);
             dispatch(setCurrentWalletId(walletId));
             if (!walletId) {
                 setStatusText('New device detected');
