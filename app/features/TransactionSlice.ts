@@ -3,11 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../store/store';
 import { getTransactions } from '../utils/httpRequests';
 import { decryptAmounts } from '../utils/rustInterface';
-import {
-    getTransactionsOfAccount,
-    insertTransactions,
-    updateTransaction,
-} from '../database/TransactionDao';
+import getTransactionDao from '../database/TransactionDao';
 import {
     TransferTransaction,
     TransactionStatus,
@@ -126,7 +122,7 @@ export async function decryptTransactions(
 
     return Promise.all(
         encryptedTransfers.map(async (transaction, index) =>
-            updateTransaction(
+            getTransactionDao().update(
                 { id: transaction.id },
                 {
                     decryptedAmount: decryptedAmounts[index],
@@ -179,7 +175,10 @@ export async function loadTransactions(
     if (showLoading) {
         dispatch(setLoadingTransactions(true));
     }
-    const { transactions, more } = await getTransactionsOfAccount(
+    const {
+        transactions,
+        more,
+    } = await getTransactionDao().getTransactionsForAccount(
         account,
         JSON.parse(account.rewardFilter)
     );
@@ -204,7 +203,7 @@ async function fetchTransactions(address: string, currentMaxId: bigint) {
     );
     const isFinished = !full;
 
-    const newTransactions = await insertTransactions(
+    const newTransactions = await getTransactionDao().insert(
         transactions.map((transaction) =>
             convertIncomingTransaction(transaction, address)
         )
@@ -274,7 +273,7 @@ export async function addPendingTransaction(
         transaction,
         hash
     );
-    await insertTransactions([convertedTransaction]);
+    await getTransactionDao().insert([convertedTransaction]);
     return convertedTransaction;
 }
 
@@ -317,7 +316,7 @@ export async function confirmTransaction(
         rejectReason,
         blockHash,
     };
-    updateTransaction({ transactionHash }, update);
+    getTransactionDao().update({ transactionHash }, update);
     return dispatch(
         updateTransactionFields({
             hash: transactionHash,
@@ -332,7 +331,7 @@ export async function rejectTransaction(
     transactionHash: string
 ) {
     const status = { status: TransactionStatus.Rejected };
-    updateTransaction({ transactionHash }, status);
+    getTransactionDao().update({ transactionHash }, status);
     return dispatch(
         updateTransactionFields({
             hash: transactionHash,

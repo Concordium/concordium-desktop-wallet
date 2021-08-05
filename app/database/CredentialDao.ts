@@ -1,44 +1,28 @@
-import { Credential, CredentialWithIdentityNumber } from '../utils/types';
-import ipcCommands from '../constants/ipcCommands.json';
+import { Credential } from '../utils/types';
 
-export async function insertCredential(credential: Credential) {
-    return window.ipcRenderer.invoke(
-        ipcCommands.database.credentials.insert,
-        credential
-    );
+export const insertCredential = (credential: Credential) =>
+    window.database.credentials.insert(credential);
+
+export function removeCredential(credential: Partial<Credential>) {
+    return window.database.credentials.delete(credential);
 }
 
-export async function removeCredential(credential: Partial<Credential>) {
-    return window.ipcRenderer.invoke(
-        ipcCommands.database.credentials.delete,
-        credential
-    );
+export function removeCredentialsOfAccount(accountAddress: string) {
+    return window.database.credentials.deleteForAccount(accountAddress);
 }
 
-export async function removeCredentialsOfAccount(accountAddress: string) {
-    return window.ipcRenderer.invoke(
-        ipcCommands.database.credentials.deleteForAccount,
-        accountAddress
-    );
-}
-
-export async function getCredentials(): Promise<
-    CredentialWithIdentityNumber[]
-> {
-    return window.ipcRenderer.invoke(ipcCommands.database.credentials.getAll);
+export function getCredentials() {
+    return window.database.credentials.getAll();
 }
 
 /**
  * Get all credentials for the given identity id, i.e. exactly those credentials
  * that refer to a specific identity.
  */
-export async function getCredentialsForIdentity(
+export function getCredentialsForIdentity(
     identityId: number
 ): Promise<Credential[]> {
-    return window.ipcRenderer.invoke(
-        ipcCommands.database.credentials.getForIdentity,
-        identityId
-    );
+    return window.database.credentials.getForIdentity(identityId);
 }
 
 /**
@@ -48,64 +32,45 @@ export async function getCredentialsForIdentity(
  * @param accountAddress address of the account to get the credentials for
  * @returns an array of credentials for the given account, augmented with the identityNumber and walletId
  */
-export async function getCredentialsOfAccount(
-    accountAddress: string
-): Promise<CredentialWithIdentityNumber[]> {
-    return window.ipcRenderer.invoke(
-        ipcCommands.database.credentials.getForAccount,
-        accountAddress
-    );
+export function getCredentialsOfAccount(accountAddress: string) {
+    return window.database.credentials.getForAccount(accountAddress);
 }
 
-export async function getNextCredentialNumber(identityId: number) {
-    return window.ipcRenderer.invoke(
-        ipcCommands.database.credentials.getNextNumber,
-        identityId
-    );
+export function getNextCredentialNumber(identityId: number) {
+    return window.database.credentials.getNextNumber(identityId);
 }
 
-export async function updateCredentialIndex(
+export function updateCredentialIndex(
     credId: string,
     credentialIndex: number | undefined
 ) {
-    return window.ipcRenderer.invoke(
-        ipcCommands.database.credentials.updateIndex,
-        credId,
-        credentialIndex
-    );
+    return window.database.credentials.updateIndex(credId, credentialIndex);
 }
 
-export async function updateCredential(
+export function updateCredential(
     credId: string,
     updatedValues: Partial<Credential>
 ) {
-    return window.ipcRenderer.invoke(
-        ipcCommands.database.credentials.update,
-        credId,
-        updatedValues
-    );
+    return window.database.credentials.update(credId, updatedValues);
 }
 
-export async function hasDuplicateWalletId(
+export function hasDuplicateWalletId(
     accountAddress: string,
     credId: string,
     otherCredIds: string[]
 ) {
-    return window.ipcRenderer.invoke(
-        ipcCommands.database.credentials.hasDuplicateWalletId,
+    return window.database.credentials.hasDuplicateWalletId(
         accountAddress,
         credId,
         otherCredIds
     );
 }
 
-export async function hasExistingCredential(
+export function hasExistingCredential(
     accountAddress: string,
     currentWalletId: number
 ) {
-    return window.ipcRenderer.invoke(
-        ipcCommands.database.credentials.hasExistingCredential,
-        accountAddress,
+    return window.database.credentials.hasExistingCredential(
         accountAddress,
         currentWalletId
     );

@@ -1,6 +1,5 @@
-import { BrowserWindow, IpcMain } from 'electron';
 import { Buffer } from 'buffer/';
-import ledgerIpcCommands from '~/constants/ledgerIpcCommands.json';
+import EventEmitter from 'events';
 import { parse } from '~/utils/JSONHelper';
 import {
     closeTransport,
@@ -25,55 +24,26 @@ import {
     AuthorizationKeysUpdate,
     UpdateAccountCredentials,
 } from '~/utils/types';
+import { LedgerCommands } from '~/preloadTypes';
 
 export default function initializeIpcHandlers(
-    ipcMain: IpcMain,
-    mainWindow: BrowserWindow
-) {
-    ipcMain.handle(
-        ledgerIpcCommands.getPublicKey,
-        (_event, keypath: number[]) => {
-            return getLedgerClient().getPublicKey(keypath);
-        }
-    );
-
-    ipcMain.handle(
-        ledgerIpcCommands.getPublicKeySilent,
-        (_event, keypath: number[]) => {
-            return getLedgerClient().getPublicKeySilent(keypath);
-        }
-    );
-
-    ipcMain.handle(
-        ledgerIpcCommands.getSignedPublicKey,
-        (_event, keypath: number[]) => {
-            return getLedgerClient().getSignedPublicKey(keypath);
-        }
-    );
-
-    ipcMain.handle(
-        ledgerIpcCommands.getIdCredSec,
-        (_event, identity: number) => {
-            return getLedgerClient().getIdCredSec(identity);
-        }
-    );
-
-    ipcMain.handle(ledgerIpcCommands.getPrfKey, (_event, identity: number) => {
-        return getLedgerClient().getPrfKey(identity);
-    });
-
-    ipcMain.handle(
-        ledgerIpcCommands.signTransfer,
-        (_event, transactionAsJson: string, keypath: number[]) => {
+    mainWindow: EventEmitter
+): LedgerCommands {
+    return {
+        getPublicKey: (keypath: number[]) =>
+            getLedgerClient().getPublicKey(keypath),
+        getPublicKeySilent: (keypath: number[]) =>
+            getLedgerClient().getPublicKeySilent(keypath),
+        getSignedPublicKey: (keypath: number[]) =>
+            getLedgerClient().getSignedPublicKey(keypath),
+        getIdCredSec: (identity: number) =>
+            getLedgerClient().getIdCredSec(identity),
+        getPrfKey: (identity: number) => getLedgerClient().getPrfKey(identity),
+        signTransfer: (transactionAsJson: string, keypath: number[]) => {
             const transaction: AccountTransaction = parse(transactionAsJson);
             return getLedgerClient().signTransfer(transaction, keypath);
-        }
-    );
-
-    ipcMain.handle(
-        ledgerIpcCommands.signPublicInformationForIp,
-        (
-            _event,
+        },
+        signPublicInformationForIp: (
             publicInfoForIp: PublicInformationForIp,
             accountPathInput: AccountPathInput
         ) => {
@@ -81,12 +51,11 @@ export default function initializeIpcHandlers(
                 publicInfoForIp,
                 accountPathInput
             );
-        }
-    );
-
-    ipcMain.handle(
-        ledgerIpcCommands.signUpdateCredentialTransaction,
-        (_event, transactionAsJson: string, path: number[]) => {
+        },
+        signUpdateCredentialTransaction: (
+            transactionAsJson: string,
+            path: number[]
+        ) => {
             const transaction: UpdateAccountCredentials = parse(
                 transactionAsJson
             );
@@ -94,13 +63,8 @@ export default function initializeIpcHandlers(
                 transaction,
                 path
             );
-        }
-    );
-
-    ipcMain.handle(
-        ledgerIpcCommands.signCredentialDeploymentOnExistingAccount,
-        (
-            _event,
+        },
+        signCredentialDeploymentOnExistingAccount: (
             credentialDeployment: UnsignedCredentialDeploymentInformation,
             address: string,
             keypath: number[]
@@ -110,13 +74,8 @@ export default function initializeIpcHandlers(
                 address,
                 keypath
             );
-        }
-    );
-
-    ipcMain.handle(
-        ledgerIpcCommands.signCredentialDeploymentOnNewAccount,
-        (
-            _event,
+        },
+        signCredentialDeploymentOnNewAccount: (
             credentialDeployment: UnsignedCredentialDeploymentInformation,
             expiry: string,
             keypath: number[]
@@ -126,13 +85,8 @@ export default function initializeIpcHandlers(
                 parse(expiry),
                 keypath
             );
-        }
-    );
-
-    ipcMain.handle(
-        ledgerIpcCommands.signMicroGtuPerEuro,
-        (
-            _event,
+        },
+        signMicroGtuPerEuro: (
             transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[]
@@ -145,13 +99,8 @@ export default function initializeIpcHandlers(
                 serializedPayload,
                 keypath
             );
-        }
-    );
-
-    ipcMain.handle(
-        ledgerIpcCommands.signEuroPerEnergy,
-        (
-            _event,
+        },
+        signEuroPerEnergy: (
             transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[]
@@ -164,13 +113,8 @@ export default function initializeIpcHandlers(
                 serializedPayload,
                 keypath
             );
-        }
-    );
-
-    ipcMain.handle(
-        ledgerIpcCommands.signTransactionFeeDistribution,
-        (
-            _event,
+        },
+        signTransactionFeeDistribution: (
             transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[]
@@ -183,13 +127,8 @@ export default function initializeIpcHandlers(
                 serializedPayload,
                 keypath
             );
-        }
-    );
-
-    ipcMain.handle(
-        ledgerIpcCommands.signFoundationAccount,
-        (
-            _event,
+        },
+        signFoundationAccount: (
             transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[]
@@ -202,13 +141,8 @@ export default function initializeIpcHandlers(
                 serializedPayload,
                 keypath
             );
-        }
-    );
-
-    ipcMain.handle(
-        ledgerIpcCommands.signMintDistribution,
-        (
-            _event,
+        },
+        signMintDistribution: (
             transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[]
@@ -221,13 +155,8 @@ export default function initializeIpcHandlers(
                 serializedPayload,
                 keypath
             );
-        }
-    );
-
-    ipcMain.handle(
-        ledgerIpcCommands.signProtocolUpdate,
-        (
-            _event,
+        },
+        signProtocolUpdate: (
             transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[]
@@ -240,13 +169,8 @@ export default function initializeIpcHandlers(
                 serializedPayload,
                 keypath
             );
-        }
-    );
-
-    ipcMain.handle(
-        ledgerIpcCommands.signGasRewards,
-        (
-            _event,
+        },
+        signGasRewards: (
             transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[]
@@ -259,13 +183,8 @@ export default function initializeIpcHandlers(
                 serializedPayload,
                 keypath
             );
-        }
-    );
-
-    ipcMain.handle(
-        ledgerIpcCommands.signBakerStakeThreshold,
-        (
-            _event,
+        },
+        signBakerStakeThreshold: (
             transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[]
@@ -278,13 +197,8 @@ export default function initializeIpcHandlers(
                 serializedPayload,
                 keypath
             );
-        }
-    );
-
-    ipcMain.handle(
-        ledgerIpcCommands.signElectionDifficulty,
-        (
-            _event,
+        },
+        signElectionDifficulty: (
             transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[]
@@ -297,13 +211,8 @@ export default function initializeIpcHandlers(
                 serializedPayload,
                 keypath
             );
-        }
-    );
-
-    ipcMain.handle(
-        ledgerIpcCommands.signHigherLevelKeysUpdate,
-        (
-            _event,
+        },
+        signHigherLevelKeysUpdate: (
             transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[],
@@ -318,13 +227,8 @@ export default function initializeIpcHandlers(
                 keypath,
                 INS
             );
-        }
-    );
-
-    ipcMain.handle(
-        ledgerIpcCommands.signAuthorizationKeysUpdate,
-        (
-            _event,
+        },
+        signAuthorizationKeysUpdate: (
             transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[],
@@ -339,21 +243,9 @@ export default function initializeIpcHandlers(
                 keypath,
                 INS
             );
-        }
-    );
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ipcMain.handle(ledgerIpcCommands.getAppAndVersion, (_event) => {
-        return getLedgerClient().getAppAndVersion();
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ipcMain.handle(ledgerIpcCommands.subscribe, (_event) => {
-        return subscribeLedger(mainWindow);
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ipcMain.handle(ledgerIpcCommands.closeTransport, (_event) => {
-        return closeTransport();
-    });
+        },
+        getAppAndVersion: () => getLedgerClient().getAppAndVersion(),
+        subscribe: () => subscribeLedger(mainWindow),
+        closeTransport,
+    };
 }

@@ -1,5 +1,4 @@
-import { clipboard, IpcMain, nativeImage } from 'electron';
-import ipcCommands from '~/constants/ipcCommands.json';
+import { clipboard, nativeImage } from 'electron';
 
 /**
  * Writes the image, provided as a data url, to the clipboard.
@@ -9,11 +8,4 @@ function writeImageToClipboard(dataUrl: string) {
     clipboard.writeImage(img);
 }
 
-export default function initializeIpcHandlers(ipcMain: IpcMain) {
-    ipcMain.handle(
-        ipcCommands.writeImageToClipboard,
-        (_event, dataUrl: string) => {
-            return writeImageToClipboard(dataUrl);
-        }
-    );
-}
+export default writeImageToClipboard;

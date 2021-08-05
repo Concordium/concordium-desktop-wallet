@@ -1,7 +1,7 @@
 import { Dispatch, Account, AccountStatus } from './types';
 import { confirmAccount } from '../features/AccountSlice';
 import { isInitialAccount } from './accountHelpers';
-import { getAllAccounts } from '../database/AccountDao';
+import getAccountDao from '../database/AccountDao';
 
 function resumeAccountStatusPolling(account: Account, dispatch: Dispatch) {
     const { address, deploymentTransactionId } = account;
@@ -12,7 +12,7 @@ function resumeAccountStatusPolling(account: Account, dispatch: Dispatch) {
 }
 
 export default async function listenForAccountStatus(dispatch: Dispatch) {
-    const accounts = await getAllAccounts();
+    const accounts = await getAccountDao().getAll();
     accounts
         .filter(
             (account) =>

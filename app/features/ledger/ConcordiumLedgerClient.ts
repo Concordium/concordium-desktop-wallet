@@ -20,7 +20,6 @@ import {
 } from '~/utils/types';
 import { AccountPathInput } from './Path';
 import { AppAndVersion } from './GetAppAndVersion';
-import ledgerIpcCommands from '../../constants/ledgerIpcCommands.json';
 import { stringify } from '~/utils/JSONHelper';
 import { LedgerIpcMessage } from './ConcordiumLedgerClientMain';
 
@@ -45,47 +44,32 @@ function unwrapLedgerIpcMessage<T>(
  * Concordium Ledger API that can be used, safely, from a renderer thread.
  *
  * @example
- * import ConcordiumLedgerClient from "..."
+ * import ConcordiumLedgerClient from ".."
  * const client = new ConcordiumLedgerClient(transport);
  */
 export default class ConcordiumLedgerClient {
     async getPublicKey(path: number[]): Promise<Buffer> {
-        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.getPublicKey,
-            path
-        );
+        const result = await window.ledger.getPublicKey(path);
         return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
     }
 
     async getPublicKeySilent(path: number[]): Promise<Buffer> {
-        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.getPublicKeySilent,
-            path
-        );
+        const result = await window.ledger.getPublicKeySilent(path);
         return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
     }
 
     async getSignedPublicKey(path: number[]): Promise<SignedPublicKey> {
-        const result: LedgerIpcMessage<SignedPublicKey> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.getSignedPublicKey,
-            path
-        );
+        const result = await window.ledger.getSignedPublicKey(path);
         return unwrapLedgerIpcMessage(result);
     }
 
     async getIdCredSec(identity: number): Promise<Buffer> {
-        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.getIdCredSec,
-            identity
-        );
+        const result = await window.ledger.getIdCredSec(identity);
         return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
     }
 
     async getPrfKey(identity: number): Promise<Buffer> {
-        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.getPrfKey,
-            identity
-        );
+        const result = await window.ledger.getPrfKey(identity);
         return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
     }
 
@@ -93,8 +77,7 @@ export default class ConcordiumLedgerClient {
         transaction: AccountTransaction,
         path: number[]
     ): Promise<Buffer> {
-        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.signTransfer,
+        const result = await window.ledger.signTransfer(
             stringify(transaction),
             path
         );
@@ -107,18 +90,9 @@ export default class ConcordiumLedgerClient {
         onAwaitVerificationKeyConfirmation: (key: Hex) => void,
         onVerificationKeysConfirmed: () => void
     ): Promise<Buffer> {
-        window.ipcRenderer.once(
-            ledgerIpcCommands.onAwaitVerificationKey,
-            (_event, key) => onAwaitVerificationKeyConfirmation(key)
-        );
-        window.ipcRenderer.once(
-            ledgerIpcCommands.onVerificationKeysConfirmed,
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            (_event) => onVerificationKeysConfirmed()
-        );
-
-        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.signUpdateCredentialTransaction,
+        window.once.onAwaitVerificationKey(onAwaitVerificationKeyConfirmation);
+        window.once.onVerificationKeysConfirmed(onVerificationKeysConfirmed);
+        const result = await window.ledger.signUpdateCredentialTransaction(
             stringify(transaction),
             path
         );
@@ -129,8 +103,7 @@ export default class ConcordiumLedgerClient {
         publicInfoForIp: PublicInformationForIp,
         accountPathInput: AccountPathInput
     ): Promise<Buffer> {
-        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.signPublicInformationForIp,
+        const result = await window.ledger.signPublicInformationForIp(
             publicInfoForIp,
             accountPathInput
         );
@@ -142,8 +115,7 @@ export default class ConcordiumLedgerClient {
         address: string,
         path: number[]
     ): Promise<Buffer> {
-        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.signCredentialDeploymentOnExistingAccount,
+        const result = await window.ledger.signCredentialDeploymentOnExistingAccount(
             credentialDeployment,
             address,
             path
@@ -156,8 +128,7 @@ export default class ConcordiumLedgerClient {
         expiry: bigint,
         path: number[]
     ): Promise<Buffer> {
-        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.signCredentialDeploymentOnNewAccount,
+        const result = await window.ledger.signCredentialDeploymentOnNewAccount(
             credentialDeployment,
             stringify(expiry),
             path
@@ -170,8 +141,7 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.signMicroGtuPerEuro,
+        const result = await window.ledger.signMicroGtuPerEuro(
             stringify(transaction),
             serializedPayload,
             path
@@ -184,8 +154,7 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.signEuroPerEnergy,
+        const result = await window.ledger.signEuroPerEnergy(
             stringify(transaction),
             serializedPayload,
             path
@@ -198,8 +167,7 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.signTransactionFeeDistribution,
+        const result = await window.ledger.signTransactionFeeDistribution(
             stringify(transaction),
             serializedPayload,
             path
@@ -212,8 +180,7 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.signFoundationAccount,
+        const result = await window.ledger.signFoundationAccount(
             stringify(transaction),
             serializedPayload,
             path
@@ -226,8 +193,7 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.signMintDistribution,
+        const result = await window.ledger.signMintDistribution(
             stringify(transaction),
             serializedPayload,
             path
@@ -240,8 +206,7 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.signProtocolUpdate,
+        const result = await window.ledger.signProtocolUpdate(
             stringify(transaction),
             serializedPayload,
             path
@@ -254,8 +219,7 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.signGasRewards,
+        const result = await window.ledger.signGasRewards(
             stringify(transaction),
             serializedPayload,
             path
@@ -268,8 +232,7 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.signBakerStakeThreshold,
+        const result = await window.ledger.signBakerStakeThreshold(
             stringify(transaction),
             serializedPayload,
             path
@@ -282,8 +245,7 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.signElectionDifficulty,
+        const result = await window.ledger.signElectionDifficulty(
             stringify(transaction),
             serializedPayload,
             path
@@ -297,8 +259,7 @@ export default class ConcordiumLedgerClient {
         path: number[],
         INS: number
     ): Promise<Buffer> {
-        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.signHigherLevelKeysUpdate,
+        const result = await window.ledger.signHigherLevelKeysUpdate(
             stringify(transaction),
             serializedPayload,
             path,
@@ -313,8 +274,7 @@ export default class ConcordiumLedgerClient {
         path: number[],
         INS: number
     ): Promise<Buffer> {
-        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.signAuthorizationKeysUpdate,
+        const result = await window.ledger.signAuthorizationKeysUpdate(
             stringify(transaction),
             serializedPayload,
             path,
@@ -324,9 +284,7 @@ export default class ConcordiumLedgerClient {
     }
 
     async getAppAndVersion(): Promise<AppAndVersion> {
-        const result: LedgerIpcMessage<AppAndVersion> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.getAppAndVersion
-        );
+        const result = await window.ledger.getAppAndVersion();
         return unwrapLedgerIpcMessage(result);
     }
 }

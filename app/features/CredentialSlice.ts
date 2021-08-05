@@ -18,12 +18,7 @@ import {
     MakeOptional,
 } from '~/utils/types';
 import { ExternalCredential } from '~/database/types';
-import {
-    deleteExternalCredentials,
-    getAllExternalCredentials,
-    upsertExternalCredential,
-    upsertMultipleExternalCredentials,
-} from '~/database/ExternalCredentialDao';
+import getExternalCredentialDao from '~/database/ExternalCredentialDao';
 
 interface CredentialState {
     credentials: Credential[];
@@ -99,7 +94,7 @@ export async function loadCredentials(dispatch: Dispatch) {
 }
 
 export async function loadExternalCredentials(dispatch: Dispatch) {
-    const ex: ExternalCredential[] = await getAllExternalCredentials();
+    const ex: ExternalCredential[] = await getExternalCredentialDao().getAllExternalCredentials();
     dispatch(updateExternalCredentials(ex));
 }
 
@@ -115,7 +110,9 @@ export async function importExternalCredentials(
     }
 
     // eslint-disable-next-line consistent-return
-    return upsertMultipleExternalCredentials(credentials);
+    return getExternalCredentialDao().upsertMultipleExternalCredentials(
+        credentials
+    );
 }
 
 export async function insertNewCredential(
@@ -142,7 +139,7 @@ export async function updateExternalCredential(
     dispatch: Dispatch,
     credential: ExternalCredential
 ) {
-    await upsertExternalCredential(credential);
+    await getExternalCredentialDao().upsertExternalCredential(credential);
     return loadExternalCredentials(dispatch);
 }
 
@@ -163,7 +160,7 @@ export async function insertExternalCredentials(
         })
     );
 
-    await upsertMultipleExternalCredentials(creds);
+    await getExternalCredentialDao().upsertMultipleExternalCredentials(creds);
     // eslint-disable-next-line consistent-return
     return loadExternalCredentials(dispatch);
 }
@@ -176,7 +173,7 @@ export async function removeExternalCredentials(
         return;
     }
 
-    await deleteExternalCredentials(credIds);
+    await getExternalCredentialDao().deleteExternalCredentials(credIds);
     // eslint-disable-next-line consistent-return
     return loadExternalCredentials(dispatch);
 }

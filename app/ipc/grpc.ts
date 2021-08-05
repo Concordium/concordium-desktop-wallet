@@ -1,9 +1,8 @@
-import { IpcMain } from 'electron';
-import ipcCommands from '~/constants/ipcCommands.json';
 import { setClientLocation, grpcCall } from '~/node/GRPCClient';
 import ConcordiumNodeClient from '~/node/ConcordiumNodeClient';
 import { ConsensusStatus } from '~/node/NodeApiTypes';
 import { JsonResponse } from '~/proto/concordium_p2p_rpc_pb';
+import { GRPC } from '~/preloadTypes';
 
 async function getConsensusStatusAndCryptographicParameters(
     address: string,
@@ -42,30 +41,21 @@ async function performGrpcCall(command: string, input: Record<string, string>) {
     }
 }
 
-export default function initializeIpcHandlers(ipcMain: IpcMain) {
+const initializeIpcHandlers: GRPC = {
     // Updates the location of the grpc endpoint.
-    ipcMain.handle(
-        ipcCommands.grpcSetLocation,
-        async (_event, address: string, port: string) => {
-            return setClientLocation(address, port);
-        }
-    );
-
+    setLocation: async (address: string, port: string) => {
+        return setClientLocation(address, port);
+    },
     // Performs the given grpc command, with the given input;
-    ipcMain.handle(
-        ipcCommands.grpcCall,
-        async (_event, command: string, input: Record<string, string>) => {
-            return performGrpcCall(command, input);
-        }
-    );
-
+    call: async (command: string, input: Record<string, string>) => {
+        return performGrpcCall(command, input);
+    },
     // Creates a standalone GRPC client for testing the connection
     // to a node. This is used to verify that when changing connection
     // that the new node is on the same blockchain as the wallet was previously connected to.
-    ipcMain.handle(
-        ipcCommands.grpcNodeConsensusAndGlobal,
-        async (_event, address: string, port: string) => {
-            return getConsensusStatusAndCryptographicParameters(address, port);
-        }
-    );
-}
+    nodeConsensusAndGlobal: async (address: string, port: string) => {
+        return getConsensusStatusAndCryptographicParameters(address, port);
+    },
+};
+
+export default initializeIpcHandlers;

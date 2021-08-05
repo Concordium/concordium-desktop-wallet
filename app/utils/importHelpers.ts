@@ -1,11 +1,11 @@
 /* eslint-disable no-await-in-loop */
-import { getAccountsOfIdentity, insertAccount } from '../database/AccountDao';
+import getAccountDao, { getAccountsOfIdentity } from '../database/AccountDao';
 import {
     getCredentialsForIdentity,
     insertCredential,
 } from '../database/CredentialDao';
-import { insertIdentity } from '../database/IdentityDao';
-import { insertWallet } from '../database/WalletDao';
+import getIdentityDao from '../database/IdentityDao';
+import getWalletDao from '../database/WalletDao';
 import { partition } from './basicHelpers';
 import {
     Account,
@@ -130,7 +130,7 @@ async function insertNewIdentities(
     for (let i = 0; i < newIdentities.length; i += 1) {
         const { id, ...newIdentity } = newIdentities[i];
 
-        const newIdentityId = (await insertIdentity(newIdentity))[0];
+        const newIdentityId = (await getIdentityDao().insert(newIdentity))[0];
 
         const {
             accountsOnIdentity,
@@ -145,7 +145,7 @@ async function insertNewIdentities(
                 ...accountsOnIdentity[j],
                 identityId: newIdentityId,
             };
-            await insertAccount(newAccountToInsert);
+            await getAccountDao().insertAccount(newAccountToInsert);
         }
 
         for (let k = 0; k < credentialsOnIdentity.length; k += 1) {
@@ -185,7 +185,7 @@ async function insertNewAccountsAndCredentials(
             ...newAccounts[j],
             identityId,
         };
-        await insertAccount(newAccountToInsert);
+        await getAccountDao().insertAccount(newAccountToInsert);
     }
 
     // Only consider credentials that are not already in the database.
@@ -242,7 +242,7 @@ async function importNewWallets(
         const wallet = newWallets[i];
 
         const importedWalletId = wallet.id;
-        const insertedWalletId = await insertWallet(
+        const insertedWalletId = await getWalletDao().insertWallet(
             wallet.identifier,
             wallet.type
         );

@@ -1,5 +1,5 @@
 import { getCredentialsOfAccount } from '~/database/CredentialDao';
-import { getId } from '~/database/WalletDao';
+import getWalletDao from '~/database/WalletDao';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getPairingPath } from '~/features/ledger/Path';
 import {
@@ -52,7 +52,9 @@ export default async function findLocalDeployedCredentialWithWallet(
     ledger: ConcordiumLedgerClient
 ): Promise<(CredentialWithIdentityNumber & DeployedCredential) | undefined> {
     const walletIdentifier = await ledger.getPublicKeySilent(getPairingPath());
-    const walletId = await getId(walletIdentifier.toString('hex'));
+    const walletId = await getWalletDao().getWalletId(
+        walletIdentifier.toString('hex')
+    );
     if (walletId === undefined) {
         return undefined;
     }

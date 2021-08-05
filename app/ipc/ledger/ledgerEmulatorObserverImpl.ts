@@ -1,5 +1,5 @@
-import { BrowserWindow } from 'electron';
 import axios from 'axios';
+import EventEmitter from 'events';
 import ConcordiumLedgerClientMain from '../../features/ledger/ConcordiumLedgerClientMain';
 import { isConcordiumApp } from '../../components/ledger/util';
 import { LedgerSubscriptionAction } from '../../components/ledger/useLedger';
@@ -23,7 +23,7 @@ export default class LedgerEmulatorObserverImpl implements LedgerObserver {
         return this.concordiumClient;
     }
 
-    async subscribeLedger(mainWindow: BrowserWindow): Promise<void> {
+    async subscribeLedger(mainWindow: EventEmitter): Promise<void> {
         const speculosEmulator = axios.create({
             baseURL: process.env.LEDGER_EMULATOR_URL,
         });
@@ -50,7 +50,7 @@ export default class LedgerEmulatorObserverImpl implements LedgerObserver {
                     const appAndVersion = appAndVersionResult.result;
                     if (!appAndVersion) {
                         // We could not extract the version information.
-                        mainWindow.webContents.send(
+                        mainWindow.emit(
                             ledgerIpcCommands.listenChannel,
                             LedgerSubscriptionAction.RESET
                         );
@@ -58,7 +58,7 @@ export default class LedgerEmulatorObserverImpl implements LedgerObserver {
                     }
 
                     if (isConcordiumApp(appAndVersion)) {
-                        mainWindow.webContents.send(
+                        mainWindow.emit(
                             ledgerIpcCommands.listenChannel,
                             LedgerSubscriptionAction.CONNECTED_SUBSCRIPTION,
                             'Ledger Emulator'
@@ -73,7 +73,7 @@ export default class LedgerEmulatorObserverImpl implements LedgerObserver {
                     if (this.concordiumClient) {
                         this.concordiumClient.closeTransport();
                     }
-                    mainWindow.webContents.send(
+                    mainWindow.emit(
                         ledgerIpcCommands.listenChannel,
                         LedgerSubscriptionAction.RESET
                     );

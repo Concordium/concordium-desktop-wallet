@@ -1,5 +1,4 @@
 import { Setting, SettingGroup, Settings } from '../utils/types';
-import ipcCommands from '../constants/ipcCommands.json';
 import {
     settingsGroupTable,
     settingsTable,
@@ -9,27 +8,14 @@ import {
  * A select all from the setting table.
  */
 export async function getAllSettings(): Promise<Setting[]> {
-    return window.ipcRenderer.invoke(
-        ipcCommands.database.dbSelectAll,
-        settingsTable
-    );
+    return window.database.general.selectAll(settingsTable);
 }
 
 /**
  * A select all from the setting group table.
  */
 export async function getSettingGroups(): Promise<SettingGroup[]> {
-    return window.ipcRenderer.invoke(
-        ipcCommands.database.dbSelectAll,
-        settingsGroupTable
-    );
-}
-
-export async function updateEntry(setting: Setting) {
-    return window.ipcRenderer.invoke(
-        ipcCommands.database.settings.update,
-        setting
-    );
+    return window.database.general.selectAll(settingsGroupTable);
 }
 
 /**
@@ -51,4 +37,8 @@ export async function loadAllSettings(): Promise<Settings[]> {
     });
 
     return settings;
+}
+
+export function updateEntry(setting: Setting) {
+    return window.database.settings.update(setting);
 }

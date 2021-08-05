@@ -1,4 +1,4 @@
-import { BrowserWindow } from 'electron';
+import EventEmitter from 'events';
 import LedgerEmulatorObserverImpl from './ledgerEmulatorObserverImpl';
 import LedgerObserverImpl from './ledgerObserverImpl';
 
@@ -14,6 +14,6 @@ export function getLedgerClient() {
     return ledgerObserver.getLedgerClient();
 }
 
-export function subscribeLedger(mainWindow: BrowserWindow) {
-    ledgerObserver.subscribeLedger(mainWindow);
+export function subscribeLedger(mainWindow: EventEmitter) {
+    return ledgerObserver.subscribeLedger(mainWindow);
 }

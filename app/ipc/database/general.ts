@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { IpcMain } from 'electron';
 import { knex as externalKnex } from 'knex';
-import ipcCommands from '~/constants/ipcCommands.json';
 import { invalidateKnexSingleton, knex, setPassword } from '~/database/knex';
 import migrate from '~/database/migration';
 import { settingsTable } from '~/constants/databaseNames.json';
 import config from '~/database/knexfile';
+import { GeneralMethods } from '~/preloadTypes';
 
 /**
  * Checks the connection to the database by trying to select
@@ -48,48 +47,18 @@ async function rekeyDatabase(oldPassword: string, newPassword: string) {
     return true;
 }
 
-export default function initializeIpcHandlers(ipcMain: IpcMain) {
-    ipcMain.handle(
-        ipcCommands.database.rekeyDatabase,
-        async (_event, oldPassword: string, newPassword: string) => {
-            return rekeyDatabase(oldPassword, newPassword);
-        }
-    );
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ipcMain.handle(ipcCommands.database.checkAccess, async (_event) => {
-        return checkDatabaseAccess();
-    });
-
-    ipcMain.handle(
-        ipcCommands.database.setPassword,
-        (_event, password: string) => {
-            setPassword(password);
-        }
-    );
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ipcMain.handle(ipcCommands.database.invalidateKnexSingleton, (_event) => {
-        invalidateKnexSingleton();
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ipcMain.handle(ipcCommands.database.migrate, async (_event) => {
-        return migrate();
-    });
-
-    ipcMain.handle(
-        ipcCommands.database.selectFirst,
-        async (_event, tableName: string) => {
-            return (await knex()).table(tableName).first();
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.dbSelectAll,
-        async (_event, tableName: string) => {
-            const table = (await knex())(tableName);
-            return table.select();
-        }
-    );
-}
+const initializeIpcHandlers: GeneralMethods = {
+    rekeyDatabase,
+    checkAccess: checkDatabaseAccess,
+    setPassword,
+    invalidateKnexSingleton,
+    migrate,
+    selectFirst: async (tableName: string) => {
+        return (await knex()).table(tableName).first();
+    },
+    selectAll: async (tableName: string) => {
+        const table = (await knex())(tableName);
+        return table.select();
+    },
+};
+export default initializeIpcHandlers;

@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as crypto from 'crypto';
-import { IpcMain } from 'electron';
+import { CryptoMethods } from '~/preloadTypes';
 import { EncryptedData } from '~/utils/types';
-import ipcCommands from '../constants/ipcCommands.json';
 
 export interface DecryptionData {
     data: string;
@@ -131,35 +130,21 @@ export function decrypt(
     return data;
 }
 
-async function hashSha256(data: (Buffer | Uint8Array)[]) {
+function hashSha256(data: (Buffer | Uint8Array)[]) {
     const hash = crypto.createHash('sha256');
     data.forEach((input) => hash.update(input));
     return hash.digest();
 }
 
-export default function initializeIpcHandlers(ipcMain: IpcMain) {
-    ipcMain.handle(
-        ipcCommands.encrypt,
-        (_event, data: string, password: string) => {
-            return encrypt(data, password);
+const initializeIpcHandlers: CryptoMethods = {
+    encrypt,
+    decrypt: ({ cipherText, metadata }: EncryptedData, password: string) => {
+        try {
+            return { data: decrypt({ cipherText, metadata }, password) };
+        } catch (e) {
+            return { error: e };
         }
-    );
-
-    ipcMain.handle(
-        ipcCommands.decrypt,
-        (_event, { cipherText, metadata }: EncryptedData, password: string) => {
-            try {
-                return { data: decrypt({ cipherText, metadata }, password) };
-            } catch (e) {
-                return { error: e };
-            }
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.sha256,
-        async (_event, data: (Buffer | Uint8Array)[]) => {
-            return hashSha256(data);
-        }
-    );
-}
+    },
+    sha256: hashSha256,
+};
+export default initializeIpcHandlers;

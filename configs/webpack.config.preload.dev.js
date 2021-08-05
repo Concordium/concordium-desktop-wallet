@@ -19,7 +19,7 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
     entry: [
         'core-js',
         'regenerator-runtime/runtime',
-        fromRoot('./app/preload.js'),
+        fromRoot('./app/preload.ts'),
     ],
     output: {
         path: fromRoot('./app'),

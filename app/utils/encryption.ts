@@ -1,5 +1,4 @@
 import { EncryptedData } from './types';
-import ipcCommands from '../constants/ipcCommands.json';
 import { DecryptionData, DecryptionResult } from '~/ipc/crypto';
 
 /**
@@ -11,11 +10,7 @@ export async function encrypt(
     data: string,
     password: string
 ): Promise<EncryptedData> {
-    const encryptedResult = await window.ipcRenderer.invoke(
-        ipcCommands.encrypt,
-        data,
-        password
-    );
+    const encryptedResult = window.cryptoMethods.encrypt(data, password);
     return encryptedResult;
 }
 
@@ -27,8 +22,7 @@ export async function decrypt(
     { cipherText, metadata }: EncryptedData,
     password: string
 ): Promise<string> {
-    const decryptedResult: DecryptionResult = await window.ipcRenderer.invoke(
-        ipcCommands.decrypt,
+    const decryptedResult: DecryptionResult = window.cryptoMethods.decrypt(
         { cipherText, metadata },
         password
     );

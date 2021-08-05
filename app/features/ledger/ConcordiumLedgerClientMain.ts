@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type HwTransport from '@ledgerhq/hw-transport';
 import { Buffer } from 'buffer/';
-import { BrowserWindow } from 'electron';
+import EventEmitter from 'events';
 import { Transport, TransportImpl } from './Transport';
 import {
     getPublicKey,
@@ -76,9 +76,9 @@ async function wrapResult<T>(
 export default class ConcordiumLedgerClientMain {
     transport: Transport;
 
-    mainWindow: BrowserWindow;
+    mainWindow: EventEmitter;
 
-    constructor(mainWindow: BrowserWindow, transport?: HwTransport) {
+    constructor(mainWindow: EventEmitter, transport?: HwTransport) {
         if (transport) {
             this.transport = new TransportImpl(transport);
         } else {

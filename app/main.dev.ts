@@ -10,28 +10,11 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, shell, BrowserWindow, ipcMain } from 'electron';
+import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import ipcCommands from './constants/ipcCommands.json';
 import ipcRendererCommands from './constants/ipcRendererCommands.json';
-import initializeIpcHandlers from './ipc/http';
-import initializeLedgerIpcHandlers from './ipc/ledger/ledger';
-import initializeCryptoIpcHandlers from './ipc/crypto';
-import initializeDatabaseGeneralIpcHandlers from './ipc/database/general';
-import initializeDatabaseAccountIpcHandlers from './ipc/database/accountDao';
-import initializeDatabaseAddressBookIpcHandlers from './ipc/database/addressBookDao';
-import initializeDatabaseCredentialIpcHandlers from './ipc/database/credentialDao';
-import initializeDatabaseExternalCredentialIpcHandlers from './ipc/database/externalCredentialDao';
-import initializeDatabaseIdentityIpcHandlers from './ipc/database/identityDao';
-import initializeDatabaseGenesisAndGlobalIpcHandlers from './ipc/database/genesisAndGlobalDao';
-import initializeDatabaseMultiSignatureTransactionIpcHandlers from './ipc/database/multiSignatureProposalDao';
-import initializeDatabaseSettingsIpcHandlers from './ipc/database/settingsDao';
-import initializeDatabaseTransactionsIpcHandlers from './ipc/database/transactionsDao';
-import initializeDatabaseWalletIpcHandlers from './ipc/database/walletDao';
-import initializeFilesIpcHandlers from './ipc/files';
-import initializeGrpcIpcHandlers from './ipc/grpc';
-import initializeClipboardIpcHandlers from './ipc/clipboard';
 import { PrintErrorTypes } from './utils/types';
 import { createMenu } from './main/menu';
 
@@ -81,7 +64,7 @@ const createWindow = async () => {
     const titleSuffix = process.env.TARGET_NET || '';
     const commonMainPreferences: Electron.WebPreferences = {
         nodeIntegration: false,
-        contextIsolation: false,
+        contextIsolation: true,
         worldSafeExecuteJavaScript: false,
         webviewTag: true,
     };
@@ -166,27 +149,6 @@ const createWindow = async () => {
     // Remove this if your app does not use auto updates
     // eslint-disable-next-line
     new AppUpdater();
-
-    // Setup the IPC methods, so that the renderer threads
-    // can access the exposed methods. This will be moved to
-    // the pre-load script when turning on context isolation.
-    initializeIpcHandlers(ipcMain);
-    initializeLedgerIpcHandlers(ipcMain, mainWindow);
-    initializeCryptoIpcHandlers(ipcMain);
-    initializeFilesIpcHandlers(ipcMain);
-    initializeGrpcIpcHandlers(ipcMain);
-    initializeDatabaseGeneralIpcHandlers(ipcMain);
-    initializeDatabaseAccountIpcHandlers(ipcMain);
-    initializeDatabaseAddressBookIpcHandlers(ipcMain);
-    initializeDatabaseCredentialIpcHandlers(ipcMain);
-    initializeDatabaseExternalCredentialIpcHandlers(ipcMain);
-    initializeDatabaseIdentityIpcHandlers(ipcMain);
-    initializeDatabaseGenesisAndGlobalIpcHandlers(ipcMain);
-    initializeDatabaseMultiSignatureTransactionIpcHandlers(ipcMain);
-    initializeDatabaseSettingsIpcHandlers(ipcMain);
-    initializeDatabaseTransactionsIpcHandlers(ipcMain);
-    initializeDatabaseWalletIpcHandlers(ipcMain);
-    initializeClipboardIpcHandlers(ipcMain);
 };
 
 async function print(body: string) {
@@ -222,6 +184,15 @@ ipcMain.handle(ipcCommands.openUrl, (_event, url: string) => {
         return;
     }
     shell.openExternal(url);
+});
+
+// Provides access to save file dialog from renderer processes.
+ipcMain.handle(ipcCommands.saveFileDialog, async (_event, opts) => {
+    return dialog.showSaveDialog(opts);
+});
+
+ipcMain.handle(ipcCommands.openFileDialog, async (_event, opts) => {
+    return dialog.showOpenDialog(opts);
 });
 
 app.on('window-all-closed', () => {

@@ -12,7 +12,7 @@ import {
 import Card from '~/cross-app-components/Card';
 import { globalSelector } from '~/features/GlobalSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import { getNextIdentityNumber } from '~/database/IdentityDao';
+import getIdentityDao from '~/database/IdentityDao';
 import { createIdentityRequestObjectLedger } from '~/utils/rustInterface';
 import errorMessages from '~/constants/errorMessages.json';
 import SimpleLedgerWithCreationKeys from '~/components/ledger/SimpleLedgerWithCreationKeys';
@@ -103,7 +103,7 @@ export default function IdentityIssuanceChooseProvider({
                     }
 
                     const walletId = await pairWallet(ledger, dispatch);
-                    const identityNumber = await getNextIdentityNumber(
+                    const identityNumber = await getIdentityDao().getNextIdentityNumber(
                         walletId
                     );
 
@@ -134,7 +134,9 @@ export default function IdentityIssuanceChooseProvider({
 
     async function getIdentityNumber(ledger: ConcordiumLedgerClient) {
         const walletId = await pairWallet(ledger, dispatch);
-        const identityNumber = await getNextIdentityNumber(walletId);
+        const identityNumber = await getIdentityDao().getNextIdentityNumber(
+            walletId
+        );
         return { identityNumber };
     }
 

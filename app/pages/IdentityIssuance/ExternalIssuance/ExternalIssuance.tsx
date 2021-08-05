@@ -18,20 +18,15 @@ import {
 } from '~/utils/types';
 import { confirmIdentityAndInitialAccount } from '~/utils/IdentityStatusPoller';
 import Loading from '~/cross-app-components/Loading';
-import ipcCommands from '../../../constants/ipcCommands.json';
 import { performIdObjectRequest } from '~/utils/httpRequests';
 
 import { getAddressFromCredentialId } from '~/utils/rustInterface';
 import generalStyles from '../IdentityIssuance.module.scss';
 import styles from './ExternalIssuance.module.scss';
 import { getInitialEncryptedAmount } from '~/utils/accountHelpers';
-import { insertPendingIdentityAndInitialAccount } from '~/database/IdentityDao';
+import getIdentityDao from '~/database/IdentityDao';
 
 const redirectUri = 'ConcordiumRedirectToken';
-
-async function getBody(url: string): Promise<string> {
-    return window.ipcRenderer.invoke(ipcCommands.httpGet, url);
-}
 
 /**
  *   This function puts a listener on the given iframeRef, and when it navigates (due to a redirect http response) it resolves,
@@ -52,7 +47,11 @@ async function handleIdentityProviderLocation(
                     if (loc.includes(redirectUri)) {
                         resolve(loc.substring(loc.indexOf('=') + 1));
                     } else if (e.httpResponseCode !== 200) {
-                        reject(new Error(await getBody(e.url)));
+                        reject(
+                            new Error(
+                                (await window.http.get<string>(e.url, {})).data
+                            )
+                        ); // TODO Handle this properly
                     }
                 }
             );
@@ -119,7 +118,7 @@ async function generateIdentity(
             deploymentTransactionId: undefined,
         };
 
-        identityId = await insertPendingIdentityAndInitialAccount(
+        identityId = await getIdentityDao().insertPendingIdentityAndInitialAccount(
             identity,
             initialAccount
         );

@@ -1,4 +1,3 @@
-import { IpcMain } from 'electron';
 import {
     AccountTransaction,
     MultiSignatureTransaction,
@@ -6,16 +5,23 @@ import {
 } from '~/utils/types';
 import { multiSignatureProposalTable } from '~/constants/databaseNames.json';
 import { knex } from '~/database/knex';
-import ipcCommands from '~/constants/ipcCommands.json';
 import { parse } from '~/utils/JSONHelper';
 import { max } from '~/utils/basicHelpers';
+import { MultiSignatureTransactionMethods } from '~/preloadTypes';
 
+/**
+ * Function for inserting a multi signature transaction proposal
+ * into the database.
+ */
 async function insert(transaction: Partial<MultiSignatureTransaction>) {
     return (await knex())
         .table(multiSignatureProposalTable)
         .insert(transaction);
 }
 
+/**
+ * Updates the given proposal entry.
+ */
 async function updateEntry(multiSigTransaction: MultiSignatureTransaction) {
     return (await knex())(multiSignatureProposalTable)
         .where({ id: multiSigTransaction.id })
@@ -36,25 +42,9 @@ async function getMaxOpenNonceOnAccount(address: string): Promise<bigint> {
     );
 }
 
-export default function initializeIpcHandlers(ipcMain: IpcMain) {
-    ipcMain.handle(
-        ipcCommands.database.multiSignatureTransaction.insert,
-        async (_event, transaction: Partial<MultiSignatureTransaction>) => {
-            return insert(transaction);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.multiSignatureTransaction.update,
-        async (_event, multiSigTransaction: MultiSignatureTransaction) => {
-            return updateEntry(multiSigTransaction);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.multiSignatureTransaction.getMaxOpenNonceOnAccount,
-        async (_event, address: string) => {
-            return getMaxOpenNonceOnAccount(address);
-        }
-    );
-}
+const initializeIpcHandlers: MultiSignatureTransactionMethods = {
+    insert,
+    update: updateEntry,
+    getMaxOpenNonceOnAccount,
+};
+export default initializeIpcHandlers;

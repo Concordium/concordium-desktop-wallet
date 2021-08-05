@@ -1,14 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { IpcMain } from 'electron';
 import { knex } from '~/database/knex';
 import { addressBookTable } from '~/constants/databaseNames.json';
 import { AddressBookEntry } from '~/utils/types';
-import ipcCommands from '~/constants/ipcCommands.json';
+import { AddressBookMethods } from '~/preloadTypes';
 
 function sanitizeAddressBookEntry(e: AddressBookEntry): AddressBookEntry {
     return { ...e, readOnly: Boolean(e.readOnly) };
 }
 
+/**
+ * Get all entries of the address book from the database, ordered
+ * by their name.
+ */
 async function getAddressBook(): Promise<AddressBookEntry[]> {
     return (await knex())
         .select()
@@ -44,41 +47,11 @@ async function findEntries(
         .then((e) => e.map(sanitizeAddressBookEntry));
 }
 
-export default function initializeIpcHandlers(ipcMain: IpcMain) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ipcMain.handle(ipcCommands.database.addressBook.getAll, async (_event) => {
-        return getAddressBook();
-    });
-
-    ipcMain.handle(
-        ipcCommands.database.addressBook.insert,
-        async (_event, entry: AddressBookEntry | AddressBookEntry[]) => {
-            return insertEntry(entry);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.addressBook.update,
-        async (
-            _event,
-            address: string,
-            updatedValues: Partial<AddressBookEntry>
-        ) => {
-            return updateEntry(address, updatedValues);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.addressBook.remove,
-        async (_event, entry: Partial<AddressBookEntry>) => {
-            return removeEntry(entry);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.addressBook.findEntries,
-        async (_event, condition: Partial<AddressBookEntry>) => {
-            return findEntries(condition);
-        }
-    );
-}
+const initializeIpcHandlers: AddressBookMethods = {
+    getAll: getAddressBook,
+    insert: insertEntry,
+    update: updateEntry,
+    remove: removeEntry,
+    findEntries,
+};
+export default initializeIpcHandlers;

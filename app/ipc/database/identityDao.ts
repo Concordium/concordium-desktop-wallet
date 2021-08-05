@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { IpcMain } from 'electron';
 import { knex } from '~/database/knex';
 import {
     identitiesTable,
@@ -7,14 +6,15 @@ import {
     credentialsTable,
     addressBookTable,
 } from '~/constants/databaseNames.json';
-import ipcCommands from '~/constants/ipcCommands.json';
 import {
     Account,
+    Credential,
     AccountStatus,
     AddressBookEntry,
     Identity,
     IdentityStatus,
 } from '~/utils/types';
+import { IdentityMethods } from '~/preloadTypes';
 
 export async function getNextIdentityNumber(walletId: number): Promise<number> {
     const model = (await knex())
@@ -57,7 +57,7 @@ async function rejectIdentityAndDeleteInitialAccount(identityId: number) {
  * Transactionally inserts an identity and its initial account.
  * @returns the identityId of the inserted identity
  */
-async function addPendingIdentityAndInitialAccount(
+async function insertPendingIdentityAndInitialAccount(
     identity: Partial<Identity>,
     initialAccount: Omit<Account, 'identityId'>
 ) {
@@ -107,73 +107,14 @@ async function confirmIdentity(
     });
 }
 
-export default function initializeIpcHandlers(ipcMain: IpcMain) {
-    ipcMain.handle(
-        ipcCommands.database.identity.insert,
-        async (_event, identity: Identity) => {
-            return insertIdentity(identity);
-        }
-    );
+const initializeIpcHandlers: IdentityMethods = {
+    getNextIdentityNumber,
+    insert: insertIdentity,
+    update: updateIdentity,
+    getIdentitiesForWallet,
+    rejectIdentityAndDeleteInitialAccount,
+    confirmIdentity,
+    insertPendingIdentityAndInitialAccount,
+};
 
-    ipcMain.handle(
-        ipcCommands.database.identity.update,
-        async (_event, id: number, updatedValues: Record<string, unknown>) => {
-            return updateIdentity(id, updatedValues);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.identity.getIdentitiesForWallet,
-        async (_event, walletId: number) => {
-            return getIdentitiesForWallet(walletId);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.identity.getNextIdentityNumber,
-        async (_event, walletId: number) => {
-            return getNextIdentityNumber(walletId);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.identity.rejectIdentityAndDeleteInitialAccount,
-        async (_event, identityId: number) => {
-            return rejectIdentityAndDeleteInitialAccount(identityId);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.identity.confirmIdentity,
-        async (
-            _event,
-            identityId: number,
-            identityObjectJson: string,
-            accountAddress: string,
-            credential: Credential,
-            addressBookEntry: AddressBookEntry
-        ) => {
-            return confirmIdentity(
-                identityId,
-                identityObjectJson,
-                accountAddress,
-                credential,
-                addressBookEntry
-            );
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.identity.insertPendingIdentityAndInitialAccount,
-        async (
-            _event,
-            identity: Partial<Identity>,
-            initialAccount: Omit<Account, 'identityId'>
-        ) => {
-            return addPendingIdentityAndInitialAccount(
-                identity,
-                initialAccount
-            );
-        }
-    );
-}
+export default initializeIpcHandlers;

@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer/';
-import { BrowserWindow } from 'electron';
+import EventEmitter from 'events';
 import { Transport } from './Transport';
 import {
     UpdateAccountCredentials,
@@ -22,7 +22,7 @@ export default async function signUpdateCredentials(
     transport: Transport,
     path: number[],
     transaction: UpdateAccountCredentials,
-    window: BrowserWindow
+    window: EventEmitter
 ): Promise<Buffer> {
     const pathPrefix = pathAsBuffer(path);
     const ins = INS_UPDATE_CREDENTIALS;
