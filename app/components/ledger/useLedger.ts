@@ -55,7 +55,7 @@ function useLedger(): {
 
     useEffect(() => {
         window.listen.ledgerChannel(
-            (_event, action: LedgerSubscriptionAction, deviceName: string) => {
+            (action: LedgerSubscriptionAction, deviceName: string) => {
                 switch (action) {
                     case LedgerSubscriptionAction.ERROR_SUBSCRIPTION:
                         dispatch(errorAction());
