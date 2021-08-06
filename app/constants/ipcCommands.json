@@ -2,5 +2,6 @@
     "print": "PRINT",
     "openFileDialog": "OPEN_FILE_DIALOG",
     "saveFileDialog": "SAVE_FILE_DIALOG",
-    "openUrl": "OPEN_URL"
+    "openUrl": "OPEN_URL",
+    "getUserDataPath": "GET_USER_DATA_PATH"
 }

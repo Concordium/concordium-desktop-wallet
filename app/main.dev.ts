@@ -97,7 +97,6 @@ const createWindow = async () => {
                 : {
                       ...commonMainPreferences,
                       preload: path.join(__dirname, 'dist/preload.prod.js'),
-
                       devTools: false,
                   },
     });
@@ -173,6 +172,11 @@ async function print(body: string) {
         }
     });
 }
+
+// Returns the path to userdata.
+ipcMain.handle(ipcCommands.getUserDataPath, async (_event) => {
+    return app.getPath('userData');
+});
 
 // Prints the given body.
 ipcMain.handle(ipcCommands.print, async (_event, body) => {
