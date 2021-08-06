@@ -47,11 +47,15 @@ async function handleIdentityProviderLocation(
                     if (loc.includes(redirectUri)) {
                         resolve(loc.substring(loc.indexOf('=') + 1));
                     } else if (e.httpResponseCode !== 200) {
-                        reject(
-                            new Error(
-                                (await window.http.get<string>(e.url, {})).data
-                            )
-                        ); // TODO Handle this properly
+                        try {
+                            const { data } = await window.http.get<string>(
+                                e.url,
+                                {}
+                            );
+                            reject(new Error(data));
+                        } catch (error) {
+                            reject(error);
+                        }
                     }
                 }
             );

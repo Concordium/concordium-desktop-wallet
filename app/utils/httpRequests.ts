@@ -45,8 +45,12 @@ export async function performIdObjectRequest(
             idObjectRequest,
         }),
     };
-
-    const response = await httpGet(url, parameters);
+    let response;
+    try {
+        response = await httpGet(url, parameters);
+    } catch (e) {
+        throw new Error(`Unable to perform Id Object Request: ${e}`);
+    }
     if (response.status === 302) {
         const { location } = response.headers;
         if (!location) {

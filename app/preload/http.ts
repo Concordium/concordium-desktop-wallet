@@ -27,7 +27,6 @@ const walletProxy = axios.create({
     baseURL: getWalletProxy(),
 });
 
-// TODO do we need to handle the errors internally in the function?
 async function httpsGet<T>(
     urlString: string,
     params: Record<string, string>
