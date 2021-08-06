@@ -2,7 +2,7 @@
 import { knex } from '~/database/knex';
 import { addressBookTable } from '~/constants/databaseNames.json';
 import { AddressBookEntry } from '~/utils/types';
-import { AddressBookMethods } from '~/preloadTypes';
+import { AddressBookMethods } from '~/preload/preloadTypes';
 
 function sanitizeAddressBookEntry(e: AddressBookEntry): AddressBookEntry {
     return { ...e, readOnly: Boolean(e.readOnly) };
@@ -47,11 +47,11 @@ async function findEntries(
         .then((e) => e.map(sanitizeAddressBookEntry));
 }
 
-const initializeIpcHandlers: AddressBookMethods = {
+const exposedMethods: AddressBookMethods = {
     getAll: getAddressBook,
     insert: insertEntry,
     update: updateEntry,
     remove: removeEntry,
     findEntries,
 };
-export default initializeIpcHandlers;
+export default exposedMethods;

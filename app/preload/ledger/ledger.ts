@@ -24,9 +24,9 @@ import {
     AuthorizationKeysUpdate,
     UpdateAccountCredentials,
 } from '~/utils/types';
-import { LedgerCommands } from '~/preloadTypes';
+import { LedgerCommands } from '~/preload/preloadTypes';
 
-export default function initializeIpcHandlers(
+export default function exposedMethods(
     eventEmitter: EventEmitter
 ): LedgerCommands {
     return {

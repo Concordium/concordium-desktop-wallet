@@ -1,17 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as crypto from 'crypto';
-import { CryptoMethods } from '~/preloadTypes';
+import { CryptoMethods } from '~/preload/preloadTypes';
 import { EncryptedData } from '~/utils/types';
-
-export interface DecryptionData {
-    data: string;
-    error?: never;
-}
-interface DecryptionError {
-    data?: never;
-    error: any;
-}
-export type DecryptionResult = DecryptionData | DecryptionError;
 
 const encoding = 'base64';
 
@@ -136,7 +126,7 @@ function hashSha256(data: (Buffer | Uint8Array)[]) {
     return hash.digest();
 }
 
-const initializeIpcHandlers: CryptoMethods = {
+const exposedMethods: CryptoMethods = {
     encrypt,
     decrypt: ({ cipherText, metadata }: EncryptedData, password: string) => {
         try {
@@ -147,4 +137,4 @@ const initializeIpcHandlers: CryptoMethods = {
     },
     sha256: hashSha256,
 };
-export default initializeIpcHandlers;
+export default exposedMethods;

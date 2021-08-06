@@ -3,7 +3,7 @@ import { Knex } from 'knex';
 import { knex } from '~/database/knex';
 import { accountsTable, identitiesTable } from '~/constants/databaseNames.json';
 import { Account } from '~/utils/types';
-import { AccountMethods } from '~/preloadTypes';
+import { AccountMethods } from '~/preload/preloadTypes';
 
 function convertAccountBooleans(accounts: Account[]) {
     return accounts.map((account) => {
@@ -96,7 +96,7 @@ export async function confirmInitialAccount(
         .update(updatedValues);
 }
 
-const initializeIpcHandlers: AccountMethods = {
+const exposedMethods: AccountMethods = {
     getAll: getAllAccounts,
     getAccount,
     insertAccount,
@@ -106,4 +106,4 @@ const initializeIpcHandlers: AccountMethods = {
     removeInitialAccount,
     confirmInitialAccount,
 };
-export default initializeIpcHandlers;
+export default exposedMethods;

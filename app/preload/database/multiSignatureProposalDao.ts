@@ -7,7 +7,7 @@ import { multiSignatureProposalTable } from '~/constants/databaseNames.json';
 import { knex } from '~/database/knex';
 import { parse } from '~/utils/JSONHelper';
 import { max } from '~/utils/basicHelpers';
-import { MultiSignatureTransactionMethods } from '~/preloadTypes';
+import { MultiSignatureTransactionMethods } from '~/preload/preloadTypes';
 
 /**
  * Function for inserting a multi signature transaction proposal
@@ -42,9 +42,9 @@ async function getMaxOpenNonceOnAccount(address: string): Promise<bigint> {
     );
 }
 
-const initializeIpcHandlers: MultiSignatureTransactionMethods = {
+const exposedMethods: MultiSignatureTransactionMethods = {
     insert,
     update: updateEntry,
     getMaxOpenNonceOnAccount,
 };
-export default initializeIpcHandlers;
+export default exposedMethods;

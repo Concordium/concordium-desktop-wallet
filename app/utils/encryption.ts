@@ -1,5 +1,5 @@
 import { EncryptedData } from './types';
-import { DecryptionData, DecryptionResult } from '~/ipc/crypto';
+import { DecryptionData, DecryptionResult } from '~/preload/preloadTypes';
 
 /**
  * Encrypts the data using PBKDF2 to generate a key from the password, and

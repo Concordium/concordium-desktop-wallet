@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Listen, Listener } from '~/preloadTypes';
+import { Listen, Listener } from '~/preload/preloadTypes';
 
 // eslint-disable-next-line import/prefer-default-export
 export const useIpcRendererEvent: (

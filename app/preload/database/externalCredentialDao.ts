@@ -2,7 +2,7 @@ import { externalCredentialsTable } from '~/constants/databaseNames.json';
 import { ExternalCredential } from '~/database/types';
 import { knex } from '~/database/knex';
 import { MakeOptional } from '~/utils/types';
-import { ExternalCredentialMethods } from '~/preloadTypes';
+import { ExternalCredentialMethods } from '~/preload/preloadTypes';
 
 async function upsertExternalCredential(
     credential: MakeOptional<ExternalCredential, 'note'>
@@ -45,11 +45,11 @@ async function getAllExternalCredentials(): Promise<ExternalCredential[]> {
     return (await knex()).table(externalCredentialsTable).select();
 }
 
-const initializeIpcHandlers: ExternalCredentialMethods = {
+const exposedMethods: ExternalCredentialMethods = {
     upsertExternalCredential,
     upsertMultipleExternalCredentials,
     deleteExternalCredentials,
     getAllExternalCredentials,
 };
 
-export default initializeIpcHandlers;
+export default exposedMethods;

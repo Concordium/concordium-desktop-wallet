@@ -7,7 +7,7 @@ import {
     HttpMethods,
     GetTransactionsResult,
     HttpGetResponse,
-} from '~/preloadTypes';
+} from '~/preload/preloadTypes';
 
 function getWalletProxy() {
     const targetNet = getTargetNet();
@@ -78,7 +78,7 @@ async function getTransactions(
     return { transactions, full: count === limit };
 }
 
-const initializeIpcHandlers: HttpMethods = {
+const exposedMethods: HttpMethods = {
     get: httpsGet,
     getTransactions,
     getIdProviders: async () => {
@@ -87,4 +87,4 @@ const initializeIpcHandlers: HttpMethods = {
     },
 };
 
-export default initializeIpcHandlers;
+export default exposedMethods;

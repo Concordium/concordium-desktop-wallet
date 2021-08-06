@@ -1,7 +1,7 @@
 import { Setting } from '~/utils/types';
 import { settingsTable } from '~/constants/databaseNames.json';
 import { knex } from '~/database/knex';
-import { SettingsMethods } from '~/preloadTypes';
+import { SettingsMethods } from '~/preload/preloadTypes';
 
 async function updateEntry(setting: Setting) {
     return (await knex())(settingsTable)
@@ -9,7 +9,7 @@ async function updateEntry(setting: Setting) {
         .update(setting);
 }
 
-const initializeIpcHandlers: SettingsMethods = {
+const exposedMethods: SettingsMethods = {
     update: updateEntry,
 };
-export default initializeIpcHandlers;
+export default exposedMethods;

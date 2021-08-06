@@ -2,7 +2,7 @@ import { Knex } from 'knex';
 import { knex } from '~/database/knex';
 import { globalTable, genesisTable } from '~/constants/databaseNames.json';
 import { Global } from '~/utils/types';
-import { GenesisAndGlobalMethods } from '~/preloadTypes';
+import { GenesisAndGlobalMethods } from '~/preload/preloadTypes';
 
 async function setGenesis(genesisBlock: string, trx: Knex.Transaction) {
     const table = (await knex())(genesisTable).transacting(trx);
@@ -14,7 +14,7 @@ async function setGlobal(global: Global, trx: Knex.Transaction) {
     return table.insert(global);
 }
 
-const initializeIpcHandlers: GenesisAndGlobalMethods = {
+const exposedMethods: GenesisAndGlobalMethods = {
     setValue: async (genesisBlock: string, global: Global) => {
         const db = await knex();
         await db.transaction((trx) => {
@@ -27,4 +27,4 @@ const initializeIpcHandlers: GenesisAndGlobalMethods = {
         });
     },
 };
-export default initializeIpcHandlers;
+export default exposedMethods;

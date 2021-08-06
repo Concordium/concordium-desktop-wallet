@@ -6,7 +6,7 @@ import {
     walletTable,
 } from '~/constants/databaseNames.json';
 import { Credential, CredentialWithIdentityNumber } from '~/utils/types';
-import { CredentialMethods } from '~/preloadTypes';
+import { CredentialMethods } from '~/preload/preloadTypes';
 
 /**
  * Get all credentials for the account with the given account address. The identity
@@ -147,7 +147,7 @@ export async function hasExistingCredential(
     return credentials.some((cred) => cred.walletId === currentWalletId);
 }
 
-const initializeIpcHandlers: CredentialMethods = {
+const exposedMethods: CredentialMethods = {
     insert: insertCredential,
     delete: removeCredential,
     deleteForAccount: removeCredentialsOfAccount,
@@ -160,4 +160,4 @@ const initializeIpcHandlers: CredentialMethods = {
     hasDuplicateWalletId,
     hasExistingCredential,
 };
-export default initializeIpcHandlers;
+export default exposedMethods;

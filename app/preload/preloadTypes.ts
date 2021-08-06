@@ -22,7 +22,8 @@ import {
     IdentityProvider,
     IncomingTransaction,
 } from '~/utils/types';
-import { ExternalCredential, GetTransactionsOutput } from './database/types';
+import { ExternalCredential, GetTransactionsOutput } from '../database/types';
+import type LedgerCommands from './preloadLedgerTypes';
 
 export type { default as LedgerCommands } from './preloadLedgerTypes';
 
@@ -60,9 +61,19 @@ export type FileMethods = {
     openFileDialog: (opts: OpenDialogOptions) => Promise<OpenDialogReturnValue>;
 };
 
+export interface DecryptionData {
+    data: string;
+    error?: never;
+}
+interface DecryptionError {
+    data?: never;
+    error: any;
+}
+export type DecryptionResult = DecryptionData | DecryptionError;
+
 export type CryptoMethods = {
     encrypt: (data: string, password: string) => EncryptedData;
-    decrypt: (data: EncryptedData, password: string) => any;
+    decrypt: (data: EncryptedData, password: string) => DecryptionResult;
     sha256: (data: (Buffer | Uint8Array)[]) => Buffer;
 };
 
@@ -251,3 +262,19 @@ export type Database = {
     transaction: TransactionMethods;
     wallet: WalletMethods;
 };
+
+export interface WindowFunctions {
+    addListener: Listen;
+    removeListener: Listen;
+    once: Once;
+    grpc: GRPC;
+    cryptoMethods: CryptoMethods;
+    database: Database;
+    ledger: LedgerCommands;
+    files: FileMethods;
+    http: HttpMethods;
+    printElement: (body: string) => any;
+    writeImageToClipboard: (dataUrl: string) => void;
+    openUrl: (href: string) => any;
+    removeAllListeners: (channel: string) => void;
+}

@@ -4,8 +4,8 @@ import {
     SignedPublicKey,
     UnsignedCredentialDeploymentInformation,
 } from '~/utils/types';
-import { AppAndVersion } from './features/ledger/GetAppAndVersion';
-import { AccountPathInput } from './features/ledger/Path';
+import { AppAndVersion } from '../features/ledger/GetAppAndVersion';
+import { AccountPathInput } from '../features/ledger/Path';
 
 type ReturnBuffer = Promise<Buffer>;
 

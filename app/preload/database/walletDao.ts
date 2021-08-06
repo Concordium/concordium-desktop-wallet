@@ -1,7 +1,7 @@
 import { Hex, WalletEntry, WalletType } from '~/utils/types';
 import { knex } from '~/database/knex';
 import { walletTable } from '~/constants/databaseNames.json';
-import { WalletMethods } from '~/preloadTypes';
+import { WalletMethods } from '~/preload/preloadTypes';
 
 /**
  * Finds the primary key id for the wallet with the given identifier.
@@ -30,9 +30,9 @@ async function insertWallet(identifier: Hex, type: WalletType) {
     return (await table.insert({ identifier, type }))[0];
 }
 
-const initializeIpcHandlers: WalletMethods = {
+const exposedMethods: WalletMethods = {
     getWalletId,
     insertWallet,
 };
 
-export default initializeIpcHandlers;
+export default exposedMethods;

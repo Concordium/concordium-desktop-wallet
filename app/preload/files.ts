@@ -2,7 +2,7 @@ import AdmZip from 'adm-zip';
 import { ipcRenderer, OpenDialogOptions, SaveDialogOptions } from 'electron';
 import fs from 'fs';
 import { getDatabaseFilename } from '~/database/knexfile';
-import { SaveFileData, FileMethods } from '~/preloadTypes';
+import { SaveFileData, FileMethods } from '~/preload/preloadTypes';
 import ipcCommands from '~/constants/ipcCommands.json';
 
 /**
@@ -58,7 +58,7 @@ async function saveZipFile(files: SaveFileData[]) {
     return saveFile(saveFileDialog.filePath, zip.toBuffer());
 }
 
-const initializeIpcHandlers: FileMethods = {
+const exposedMethods: FileMethods = {
     databaseExists,
     // Provides access to save file dialog from renderer processes.
     saveFileDialog: (opts: SaveDialogOptions) =>
@@ -76,4 +76,4 @@ const initializeIpcHandlers: FileMethods = {
     saveZipFileDialog: saveZipFile,
 };
 
-export default initializeIpcHandlers;
+export default exposedMethods;

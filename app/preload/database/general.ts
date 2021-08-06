@@ -4,7 +4,7 @@ import { invalidateKnexSingleton, knex, setPassword } from '~/database/knex';
 import migrate from '~/database/migration';
 import { settingsTable } from '~/constants/databaseNames.json';
 import config from '~/database/knexfile';
-import { GeneralMethods } from '~/preloadTypes';
+import { GeneralMethods } from '~/preload/preloadTypes';
 
 /**
  * Checks the connection to the database by trying to select
@@ -47,7 +47,7 @@ async function rekeyDatabase(oldPassword: string, newPassword: string) {
     return true;
 }
 
-const initializeIpcHandlers: GeneralMethods = {
+const exposedMethods: GeneralMethods = {
     rekeyDatabase,
     checkAccess: checkDatabaseAccess,
     setPassword,
@@ -61,4 +61,4 @@ const initializeIpcHandlers: GeneralMethods = {
         return table.select();
     },
 };
-export default initializeIpcHandlers;
+export default exposedMethods;

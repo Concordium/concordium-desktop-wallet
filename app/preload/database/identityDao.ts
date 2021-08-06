@@ -14,7 +14,7 @@ import {
     Identity,
     IdentityStatus,
 } from '~/utils/types';
-import { IdentityMethods } from '~/preloadTypes';
+import { IdentityMethods } from '~/preload/preloadTypes';
 
 /**
  * Get the identity number to be used to create the next identity with
@@ -117,7 +117,7 @@ async function confirmIdentity(
     });
 }
 
-const initializeIpcHandlers: IdentityMethods = {
+const exposedMethods: IdentityMethods = {
     getNextIdentityNumber,
     insert: insertIdentity,
     update: updateIdentity,
@@ -127,4 +127,4 @@ const initializeIpcHandlers: IdentityMethods = {
     insertPendingIdentityAndInitialAccount,
 };
 
-export default initializeIpcHandlers;
+export default exposedMethods;

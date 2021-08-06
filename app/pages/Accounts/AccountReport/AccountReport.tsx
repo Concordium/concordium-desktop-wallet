@@ -27,7 +27,7 @@ import {
     containsEncrypted,
 } from './util';
 import styles from './AccountReport.module.scss';
-import { SaveFileData } from '~/preloadTypes';
+import type { SaveFileData } from '~/preload/preloadTypes';
 import saveFile from '~/utils/FileHelper';
 
 const decryptMessage = (name: string) =>

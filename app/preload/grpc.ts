@@ -2,7 +2,7 @@ import { setClientLocation, grpcCall } from '~/node/GRPCClient';
 import ConcordiumNodeClient from '~/node/ConcordiumNodeClient';
 import { ConsensusStatus } from '~/node/NodeApiTypes';
 import { JsonResponse } from '~/proto/concordium_p2p_rpc_pb';
-import { GRPC } from '~/preloadTypes';
+import { GRPC } from '~/preload/preloadTypes';
 
 async function getConsensusStatusAndCryptographicParameters(
     address: string,
@@ -41,7 +41,7 @@ async function performGrpcCall(command: string, input: Record<string, string>) {
     }
 }
 
-const initializeIpcHandlers: GRPC = {
+const exposedMethods: GRPC = {
     // Updates the location of the grpc endpoint.
     setLocation: async (address: string, port: string) => {
         return setClientLocation(address, port);
@@ -58,4 +58,4 @@ const initializeIpcHandlers: GRPC = {
     },
 };
 
-export default initializeIpcHandlers;
+export default exposedMethods;

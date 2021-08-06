@@ -8,7 +8,7 @@ import { transactionTable } from '~/constants/databaseNames.json';
 import { knex } from '~/database/knex';
 import { chunkArray, partition } from '~/utils/basicHelpers';
 import { GetTransactionsOutput } from '~/database/types';
-import { TransactionMethods } from '~/preloadTypes';
+import { TransactionMethods } from '~/preload/preloadTypes';
 
 async function updateTransaction(
     identifier: Record<string, unknown>,
@@ -115,7 +115,7 @@ export async function insertTransactions(
     return additions;
 }
 
-const initializeIpcHandlers: TransactionMethods = {
+const exposedMethods: TransactionMethods = {
     getPending: getPendingTransactions,
     hasPending: hasPendingTransactions,
     getTransactionsForAccount: getTransactionsOfAccount,
@@ -124,4 +124,4 @@ const initializeIpcHandlers: TransactionMethods = {
     insert: insertTransactions,
 };
 
-export default initializeIpcHandlers;
+export default exposedMethods;
