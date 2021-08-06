@@ -1,13 +1,25 @@
+import { credentials, Metadata } from '@grpc/grpc-js';
+import { ConcordiumNodeClient, AccountAddress } from '@concordium/node-sdk';
 import grpcMethods from '../constants/grpcMethods.json';
-import ConcordiumNodeClient from './ConcordiumNodeClient';
+import AdvancedConcordiumNodeClient from './ConcordiumNodeClient';
 
 const defaultDeadlineMs = 15000;
 let client: ConcordiumNodeClient;
+let advancedClient: AdvancedConcordiumNodeClient;
+const metadata = new Metadata();
+metadata.add('authentication', 'rpcadmin');
 
 export function setClientLocation(address: string, port: string) {
+    advancedClient = new AdvancedConcordiumNodeClient(
+        address,
+        parseInt(port, 10),
+        defaultDeadlineMs
+    );
     client = new ConcordiumNodeClient(
         address,
         parseInt(port, 10),
+        credentials.createInsecure(),
+        metadata,
         defaultDeadlineMs
     );
 }
@@ -15,12 +27,12 @@ export function setClientLocation(address: string, port: string) {
 export function grpcCall(name: string, input: Record<string, string>) {
     switch (name) {
         case grpcMethods.nodeInfo:
-            return client.getNodeInfo();
+            return advancedClient.getNodeInfo();
         case grpcMethods.getConsensusStatus:
             return client.getConsensusStatus();
         case grpcMethods.sendTransaction: {
             const { transactionPayload, networkId } = input;
-            return client.sendTransaction(
+            return advancedClient.sendTransaction(
                 Uint8Array.from(Buffer.from(transactionPayload, 'hex')),
                 parseInt(networkId, 10)
             );
@@ -34,7 +46,7 @@ export function grpcCall(name: string, input: Record<string, string>) {
             return client.getPeerList(Boolean(includeBootstrappers));
         }
         case grpcMethods.getNextAccountNonce: {
-            const { address } = input;
+            const address = new AccountAddress(input.address);
             return client.getNextAccountNonce(address);
         }
         case grpcMethods.getBlockSummary: {
@@ -51,10 +63,11 @@ export function grpcCall(name: string, input: Record<string, string>) {
         }
         case grpcMethods.getCryptographicParameters: {
             const { blockHashValue } = input;
-            return client.getCryptographicParameters(blockHashValue);
+            return advancedClient.getCryptographicParameters(blockHashValue);
         }
         case grpcMethods.getAccountInfo: {
-            const { address, blockHash } = input;
+            const { blockHash } = input;
+            const address = new AccountAddress(input.address);
             return client.getAccountInfo(address, blockHash);
         }
         default: {
