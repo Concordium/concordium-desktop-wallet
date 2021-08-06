@@ -27,7 +27,7 @@ async function print(body: string, printWindow: BrowserWindow) {
 
 export default function initializeIpcHandlers(printWindow: BrowserWindow) {
     // Returns the path to userdata.
-    ipcMain.handle(ipcCommands.getUserDataPath, async (_event) => {
+    ipcMain.handle(ipcCommands.getUserDataPath, async () => {
         return app.getPath('userData');
     });
 
