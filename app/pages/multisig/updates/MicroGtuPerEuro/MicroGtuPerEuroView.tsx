@@ -1,7 +1,6 @@
 import React from 'react';
+import { BlockSummary, ExchangeRate } from '@concordium/node-sdk';
 import Loading from '~/cross-app-components/Loading';
-import { BlockSummary } from '~/node/NodeApiTypes';
-import { ExchangeRate } from '~/utils/types';
 import { RelativeRateField } from '../../common/RelativeRateField';
 import { fromExchangeRate } from '../../common/RelativeRateField/util';
 import withChainData, { ChainData } from '../../common/withChainData';

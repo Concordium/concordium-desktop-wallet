@@ -21,6 +21,10 @@ export default function ShowReleaseSchedule({
     returnFunction,
 }: Props) {
     const { schedule } = accountInfo.accountReleaseSchedule;
+    const releaseSchedule = schedule.map((release) => ({
+        timestamp: release.timestamp.getTime().toString(),
+        amount: release.amount.toString(),
+    }));
 
     return (
         <Card className="flexColumn alignCenter relative pB0">
@@ -41,7 +45,7 @@ export default function ShowReleaseSchedule({
                 showIndex={false}
                 className={styles.releaseSchedule}
                 elementClassName={styles.releaseScheduleElement}
-                schedule={schedule}
+                schedule={releaseSchedule}
             />
             {schedule.length === 0 ? (
                 <h3 className="flex justifyCenter pB20 mT10">

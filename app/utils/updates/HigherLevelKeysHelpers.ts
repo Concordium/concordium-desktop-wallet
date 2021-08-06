@@ -1,4 +1,4 @@
-import { Keys } from '../../node/NodeApiTypes';
+import { Keys } from '@concordium/node-sdk';
 import {
     HigherLevelKeyUpdate,
     HigherLevelKeyUpdateType,

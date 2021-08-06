@@ -1,5 +1,6 @@
 /* eslint-disable import/prefer-default-export */
-import { Account, TransactionKindId, TransactionTypes } from './types';
+import { AccountTransactionType } from '@concordium/node-sdk';
+import { Account, TransactionTypes } from './types';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import { createProposalRoute } from '~/utils/routerHelper';
 import routes from '~/constants/routes.json';
@@ -12,13 +13,13 @@ export enum BakerSubRoutes {
     sign,
 }
 
-function isBakerTransaction(transactionKind: TransactionKindId) {
+function isBakerTransaction(transactionKind: AccountTransactionType) {
     switch (transactionKind) {
-        case TransactionKindId.Add_baker:
-        case TransactionKindId.Remove_baker:
-        case TransactionKindId.Update_baker_keys:
-        case TransactionKindId.Update_baker_stake:
-        case TransactionKindId.Update_baker_restake_earnings:
+        case AccountTransactionType.AddBaker:
+        case AccountTransactionType.RemoveBaker:
+        case AccountTransactionType.UpdateBakerKeys:
+        case AccountTransactionType.UpdateBakerStake:
+        case AccountTransactionType.UpdateBakerRestakeEarnings:
             return true;
         default:
             return false;
@@ -27,17 +28,17 @@ function isBakerTransaction(transactionKind: TransactionKindId) {
 
 export function getLocationAfterAccounts(
     url: string,
-    transactionKind: TransactionKindId
+    transactionKind: AccountTransactionType
 ) {
     switch (transactionKind) {
-        case TransactionKindId.Add_baker:
+        case AccountTransactionType.AddBaker:
             return `${url}/${BakerSubRoutes.stake}`;
-        case TransactionKindId.Remove_baker:
-        case TransactionKindId.Update_baker_keys:
+        case AccountTransactionType.RemoveBaker:
+        case AccountTransactionType.UpdateBakerKeys:
             return `${url}/${BakerSubRoutes.expiry}`;
-        case TransactionKindId.Update_baker_stake:
+        case AccountTransactionType.UpdateBakerStake:
             return `${url}/${BakerSubRoutes.stake}`;
-        case TransactionKindId.Update_baker_restake_earnings:
+        case AccountTransactionType.UpdateBakerRestakeEarnings:
             return `${url}/${BakerSubRoutes.restake}`;
         default:
             throw new Error('unknown transactionKind');
@@ -45,7 +46,7 @@ export function getLocationAfterAccounts(
 }
 
 export function createTransferWithAccountPathName(
-    transactionKind: TransactionKindId
+    transactionKind: AccountTransactionType
 ) {
     if (isBakerTransaction(transactionKind)) {
         return getLocationAfterAccounts(
@@ -63,7 +64,7 @@ export function createTransferWithAccountPathName(
 }
 
 export function createTransferWithAccountRoute(
-    transactionKind: TransactionKindId,
+    transactionKind: AccountTransactionType,
     account: Account
 ) {
     return {

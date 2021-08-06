@@ -1,9 +1,13 @@
 import {
+    BlockSummary,
+    ConsensusStatus,
+    NextAccountNonce,
+} from '@concordium/node-sdk';
+import {
     BoolResponse,
     JsonResponse,
     NodeInfoResponse,
 } from '../proto/concordium_p2p_rpc_pb';
-import { BlockSummary, ConsensusStatus, AccountNonce } from './NodeApiTypes';
 import { AccountInfo, Global, Versioned } from '../utils/types';
 import { intToString } from '../utils/JSONHelper';
 import grpcMethods from '../constants/grpcMethods.json';
@@ -72,7 +76,7 @@ export async function getTransactionStatus(
 
 export async function getNextAccountNonce(
     address: string
-): Promise<AccountNonce> {
+): Promise<NextAccountNonce> {
     const response = await sendPromise(grpcMethods.getNextAccountNonce, {
         address,
     });

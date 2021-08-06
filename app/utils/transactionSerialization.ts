@@ -1,8 +1,7 @@
 import { Buffer } from 'buffer/';
+import { AccountTransactionType, BlockItemKind } from '@concordium/node-sdk';
 import {
     AccountTransaction,
-    TransactionKindId as TransactionKind,
-    BlockItemKind,
     ScheduledTransferPayload,
     SimpleTransferPayload,
     SchedulePoint,
@@ -40,7 +39,7 @@ function serializeSimpleTransfer(payload: SimpleTransferPayload) {
     const size = 1 + 32 + 8;
     const serialized = new Uint8Array(size);
 
-    serialized[0] = TransactionKind.Simple_transfer;
+    serialized[0] = AccountTransactionType.SimpleTransfer;
     putBase58Check(serialized, 1, payload.toAddress);
     put(serialized, 32 + 1, encodeWord64(BigInt(payload.amount)));
     return Buffer.from(serialized);
@@ -52,7 +51,7 @@ export function serializeScheduledTransferPayloadBase(
     const size = 1 + 32 + 1;
     const initialPayload = new Uint8Array(size);
 
-    initialPayload[0] = TransactionKind.Transfer_with_schedule;
+    initialPayload[0] = AccountTransactionType.TransferWithSchedule;
     putBase58Check(initialPayload, 1, payload.toAddress);
     initialPayload[33] = payload.schedule.length;
     return Buffer.from(initialPayload);
@@ -77,14 +76,14 @@ function serializeTransferToEncypted(payload: TransferToEncryptedPayload) {
     const size = 1 + 8;
     const serialized = new Uint8Array(size);
 
-    serialized[0] = TransactionKind.Transfer_to_encrypted;
+    serialized[0] = AccountTransactionType.TransferToEncrypted;
     put(serialized, 1, encodeWord64(BigInt(payload.amount)));
     return Buffer.from(serialized);
 }
 
 function serializeUpdateCredentials(payload: UpdateAccountCredentialsPayload) {
     const transactionType = Buffer.alloc(1);
-    transactionType.writeUInt8(TransactionKind.Update_credentials, 0);
+    transactionType.writeUInt8(AccountTransactionType.UpdateCredentials, 0);
 
     const serializedNewCredentials = serializeList(
         payload.addedCredentials,
@@ -141,7 +140,7 @@ function serializeTransferToPublic(payload: TransferToPublicPayload) {
     const size = 1 + data.length + proof.length;
     const serialized = new Uint8Array(size);
 
-    serialized[0] = TransactionKind.Transfer_to_public;
+    serialized[0] = AccountTransactionType.TransferToPublic;
     put(serialized, 1, data);
     put(serialized, 1 + data.length, proof);
     return Buffer.from(serialized);
@@ -184,7 +183,7 @@ function serializeEncryptedTransfer(payload: EncryptedTransferPayload) {
     const size = 1 + data.length + proof.length;
     const serialized = new Uint8Array(size);
 
-    serialized[0] = TransactionKind.Encrypted_transfer;
+    serialized[0] = AccountTransactionType.EncryptedTransfer;
     put(serialized, 1, data);
     put(serialized, 1 + data.length, proof);
     return Buffer.from(serialized);
@@ -235,7 +234,7 @@ export function serializeAddBakerProofsStakeRestake(payload: AddBakerPayload) {
 
 export function serializeAddBaker(payload: AddBakerPayload) {
     return Buffer.concat([
-        Buffer.from(Uint8Array.of(TransactionKind.Add_baker)),
+        Buffer.from(Uint8Array.of(AccountTransactionType.AddBaker)),
         serializeBakerVerifyKeys(payload),
         serializeAddBakerProofsStakeRestake(payload),
     ]);
@@ -243,19 +242,19 @@ export function serializeAddBaker(payload: AddBakerPayload) {
 
 export function serializeUpdateBakerKeys(payload: UpdateBakerKeysPayload) {
     return Buffer.concat([
-        Buffer.from(Uint8Array.of(TransactionKind.Update_baker_keys)),
+        Buffer.from(Uint8Array.of(AccountTransactionType.UpdateBakerKeys)),
         serializeBakerVerifyKeys(payload),
         serializeBakerKeyProofs(payload),
     ]);
 }
 
 export function serializeRemoveBaker() {
-    return Buffer.from(Uint8Array.of(TransactionKind.Remove_baker));
+    return Buffer.from(Uint8Array.of(AccountTransactionType.RemoveBaker));
 }
 
 export function serializeUpdateBakerStake(payload: UpdateBakerStakePayload) {
     return Buffer.concat([
-        Buffer.from(Uint8Array.of(TransactionKind.Update_baker_stake)),
+        Buffer.from(Uint8Array.of(AccountTransactionType.UpdateBakerStake)),
         encodeWord64(BigInt(payload.stake)),
     ]);
 }
@@ -265,51 +264,51 @@ export function serializeUpdateBakerRestakeEarnings(
 ) {
     return Buffer.concat([
         Buffer.from(
-            Uint8Array.of(TransactionKind.Update_baker_restake_earnings)
+            Uint8Array.of(AccountTransactionType.UpdateBakerRestakeEarnings)
         ),
         serializeBoolean(payload.restakeEarnings),
     ]);
 }
 
 export function serializeTransferPayload(
-    kind: TransactionKind,
+    kind: AccountTransactionType,
     payload: TransactionPayload
 ): Buffer {
     switch (kind) {
-        case TransactionKind.Simple_transfer:
+        case AccountTransactionType.SimpleTransfer:
             return serializeSimpleTransfer(payload as SimpleTransferPayload);
-        case TransactionKind.Update_credentials:
+        case AccountTransactionType.UpdateCredentials:
             return serializeUpdateCredentials(
                 payload as UpdateAccountCredentialsPayload
             );
-        case TransactionKind.Transfer_with_schedule:
+        case AccountTransactionType.TransferWithSchedule:
             return serializeTransferWithSchedule(
                 payload as ScheduledTransferPayload
             );
-        case TransactionKind.Transfer_to_encrypted:
+        case AccountTransactionType.TransferToEncrypted:
             return serializeTransferToEncypted(
                 payload as TransferToEncryptedPayload
             );
-        case TransactionKind.Transfer_to_public:
+        case AccountTransactionType.TransferToPublic:
             return serializeTransferToPublic(
                 payload as TransferToPublicPayload
             );
-        case TransactionKind.Encrypted_transfer:
+        case AccountTransactionType.EncryptedTransfer:
             return serializeEncryptedTransfer(
                 payload as EncryptedTransferPayload
             );
-        case TransactionKind.Add_baker:
+        case AccountTransactionType.AddBaker:
             return serializeAddBaker(payload as AddBakerPayload);
-        case TransactionKind.Update_baker_keys:
+        case AccountTransactionType.UpdateBakerKeys:
             return serializeUpdateBakerKeys(payload as UpdateBakerKeysPayload);
 
-        case TransactionKind.Remove_baker:
+        case AccountTransactionType.RemoveBaker:
             return serializeRemoveBaker();
-        case TransactionKind.Update_baker_stake:
+        case AccountTransactionType.UpdateBakerStake:
             return serializeUpdateBakerStake(
                 payload as UpdateBakerStakePayload
             );
-        case TransactionKind.Update_baker_restake_earnings:
+        case AccountTransactionType.UpdateBakerRestakeEarnings:
             return serializeUpdateBakerRestakeEarnings(
                 payload as UpdateBakerRestakeEarningsPayload
             );

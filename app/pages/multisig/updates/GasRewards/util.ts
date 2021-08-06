@@ -1,4 +1,4 @@
-import { BlockSummary } from '~/node/NodeApiTypes';
+import { BlockSummary } from '@concordium/node-sdk';
 import { GasRewards } from '~/utils/types';
 import { rewardFractionResolution } from '~/constants/updateConstants.json';
 

@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
+import { AccountTransactionType, BlockSummary } from '@concordium/node-sdk';
 import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
-import { BlockSummary } from '~/node/NodeApiTypes';
 import {
     Account,
-    TransactionKindId,
     AccountTransaction,
     AddBakerPayload,
     Fraction,
@@ -88,7 +87,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
     ] = useTransactionExpiryState();
 
     const estimatedFee = useTransactionCostEstimate(
-        TransactionKindId.Add_baker,
+        AccountTransactionType.AddBaker,
         exchangeRate,
         account?.signatureThreshold
     );
@@ -136,7 +135,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
             createAddBakerTransaction(
                 account.address,
                 payload,
-                accountNonce.nonce,
+                accountNonce.nonce.toString(),
                 account.signatureThreshold,
                 expiryTime
             )
@@ -239,7 +238,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                                                 push(
                                                     getLocationAfterAccounts(
                                                         url,
-                                                        TransactionKindId.Add_baker
+                                                        AccountTransactionType.AddBaker
                                                     )
                                                 )
                                             )

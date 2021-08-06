@@ -2,12 +2,8 @@ import React from 'react';
 import { Redirect } from 'react-router';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import {
-    TransactionKindId,
-    Account,
-    AddressBookEntry,
-    Fraction,
-} from '~/utils/types';
+import { AccountTransactionType } from '@concordium/node-sdk';
+import { Account, AddressBookEntry, Fraction } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import { toMicroUnits } from '~/utils/gtu';
 import { stringify } from '~/utils/JSONHelper';
@@ -38,7 +34,7 @@ function ScheduleTransfer({
         return (
             <Redirect
                 to={createTransferWithAccountRoute(
-                    TransactionKindId.Transfer_with_schedule,
+                    AccountTransactionType.TransferWithSchedule,
                     account
                 )}
             />
@@ -66,7 +62,7 @@ function ScheduleTransfer({
             exitFunction={returnFunction}
             amountHeader="Send GTU with a schedule"
             senderAddress={account.address}
-            transactionKind={TransactionKindId.Simple_transfer}
+            transactionKind={AccountTransactionType.TransferWithSchedule}
         />
     );
 }

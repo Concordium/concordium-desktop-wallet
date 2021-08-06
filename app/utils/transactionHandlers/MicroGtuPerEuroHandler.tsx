@@ -1,4 +1,9 @@
 import React from 'react';
+import {
+    BlockSummary,
+    Authorizations,
+    ExchangeRate,
+} from '@concordium/node-sdk';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
 import MicroGtuPerEuroView from '~/pages/multisig/updates/MicroGtuPerEuro/MicroGtuPerEuroView';
@@ -7,10 +12,8 @@ import UpdateMicroGtuPerEuro, {
 } from '~/pages/multisig/updates/MicroGtuPerEuro/UpdateMicroGtuPerEuro';
 import { getReducedExchangeRate } from '../exchangeRateHelpers';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
-    ExchangeRate,
     UpdateInstruction,
     UpdateType,
     MultiSignatureTransaction,

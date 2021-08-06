@@ -2,15 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
+import { AccountTransactionType } from '@concordium/node-sdk';
 import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
-import {
-    Account,
-    TransactionKindId,
-    UpdateBakerRestakeEarnings,
-    Fraction,
-} from '~/utils/types';
+import { Account, UpdateBakerRestakeEarnings, Fraction } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
 import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
@@ -57,7 +53,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
     ] = useState<UpdateBakerRestakeEarnings>();
 
     const estimatedFee = useTransactionCostEstimate(
-        TransactionKindId.Update_baker_restake_earnings,
+        AccountTransactionType.UpdateBakerRestakeEarnings,
         exchangeRate,
         account?.signatureThreshold
     );
@@ -87,7 +83,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
             createUpdateBakerRestakeEarningsTransaction(
                 account.address,
                 payload,
-                accountNonce.nonce,
+                accountNonce.nonce.toString(),
                 account?.signatureThreshold,
                 expiryTime
             )
@@ -139,7 +135,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                                                 push(
                                                     getLocationAfterAccounts(
                                                         url,
-                                                        TransactionKindId.Update_baker_restake_earnings
+                                                        AccountTransactionType.UpdateBakerRestakeEarnings
                                                     )
                                                 )
                                             );

@@ -1,7 +1,7 @@
 import {
     Account,
-    TransactionKindString,
     TransactionStatus,
+    TransactionKindString,
     TransferTransaction,
 } from '~/utils/types';
 import { transactionTable } from '~/constants/databaseNames.json';

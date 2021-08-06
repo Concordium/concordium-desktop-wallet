@@ -4,13 +4,8 @@ import { Switch, Route, useLocation } from 'react-router-dom';
 import { push, replace } from 'connected-react-router';
 import clsx from 'clsx';
 import PlusIcon from '@resources/svg/plus.svg';
-import {
-    Account,
-    TransactionKindId,
-    AddressBookEntry,
-    Schedule,
-    Fraction,
-} from '~/utils/types';
+import { AccountTransactionType } from '@concordium/node-sdk';
+import { Account, AddressBookEntry, Schedule, Fraction } from '~/utils/types';
 import PickAmount from '../PickAmount';
 import Columns from '~/components/Columns';
 import routes from '~/constants/routes.json';
@@ -66,8 +61,8 @@ interface State {
 interface Props {
     exchangeRate: Fraction;
     transactionKind:
-        | TransactionKindId.Simple_transfer
-        | TransactionKindId.Transfer_with_schedule;
+        | AccountTransactionType.SimpleTransfer
+        | AccountTransactionType.TransferWithSchedule;
 }
 /**
  * This component controls the flow of creating a multisignature account transaction.
@@ -105,7 +100,9 @@ function CreateTransferProposal({
 
     useEffect(() => {
         if (account) {
-            if (transactionKind === TransactionKindId.Transfer_with_schedule) {
+            if (
+                transactionKind === AccountTransactionType.TransferWithSchedule
+            ) {
                 if (scheduleLength) {
                     setFee(
                         scheduledTransferCost(

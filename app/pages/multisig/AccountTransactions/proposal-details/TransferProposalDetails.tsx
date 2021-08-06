@@ -1,11 +1,6 @@
 import React from 'react';
-import {
-    Account,
-    AddressBookEntry,
-    TransactionKindId,
-    Schedule,
-    Fraction,
-} from '~/utils/types';
+import { AccountTransactionType } from '@concordium/node-sdk';
+import { Account, AddressBookEntry, Fraction, Schedule } from '~/utils/types';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import ScheduleList from '~/components/ScheduleList';
 import { AccountDetail, AmountDetail, Details, PlainDetail } from './shared';
@@ -13,8 +8,8 @@ import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryT
 
 interface Props {
     transactionType:
-        | TransactionKindId.Simple_transfer
-        | TransactionKindId.Transfer_with_schedule;
+        | AccountTransactionType.SimpleTransfer
+        | AccountTransactionType.TransferWithSchedule;
     account?: Account;
     amount?: string;
     recipient?: AddressBookEntry;
@@ -35,7 +30,7 @@ export default function TransferProposalDetails({
     amountError,
 }: Props) {
     const isScheduledTransfer =
-        transactionType === TransactionKindId.Transfer_with_schedule;
+        transactionType === AccountTransactionType.TransferWithSchedule;
 
     return (
         <Details>

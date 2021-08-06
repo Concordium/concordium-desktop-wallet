@@ -1,10 +1,10 @@
 import React from 'react';
+import { AccountTransactionType } from '@concordium/node-sdk';
 import {
     MultiSignatureTransactionStatus,
     SimpleTransfer,
     AccountTransaction,
     instanceOfSimpleTransfer,
-    TransactionKindId,
 } from '../types';
 import routes from '~/constants/routes.json';
 import TransferHandler from './TransferHandler';
@@ -46,7 +46,7 @@ export default class SimpleTransferHandler
         };
         return getNewLocation().replace(
             ':transactionKind',
-            `${TransactionKindId.Simple_transfer}`
+            `${AccountTransactionType.SimpleTransfer}`
         );
     }
 

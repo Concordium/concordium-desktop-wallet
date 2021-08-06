@@ -1,5 +1,4 @@
-import { BlockSummary } from '~/node/NodeApiTypes';
-import { ExchangeRate } from '~/utils/types';
+import { ExchangeRate, BlockSummary } from '@concordium/node-sdk';
 import { RelativeRateFieldProps } from '../../common/RelativeRateField';
 
 // eslint-disable-next-line import/prefer-default-export

@@ -1,10 +1,10 @@
 import React from 'react';
+import { AccountTransactionType } from '@concordium/node-sdk';
 import {
     MultiSignatureTransactionStatus,
     ScheduledTransfer,
     AccountTransaction,
     instanceOfScheduledTransfer,
-    TransactionKindId,
 } from '../types';
 import routes from '~/constants/routes.json';
 import TransferHandler from './TransferHandler';
@@ -51,7 +51,7 @@ export default class ScheduledTransferHandler
         };
         return getNewLocation().replace(
             ':transactionKind',
-            `${TransactionKindId.Transfer_with_schedule}`
+            `${AccountTransactionType.TransferWithSchedule}`
         );
     }
 

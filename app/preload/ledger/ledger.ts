@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer/';
 import EventEmitter from 'events';
+import { ExchangeRate } from '@concordium/node-sdk';
 import { parse } from '~/utils/JSONHelper';
 import {
     closeTransport,
@@ -12,7 +13,6 @@ import {
     PublicInformationForIp,
     UnsignedCredentialDeploymentInformation,
     UpdateInstruction,
-    ExchangeRate,
     TransactionFeeDistribution,
     FoundationAccount,
     MintDistribution,

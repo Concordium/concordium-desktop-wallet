@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import EditIcon from '@resources/svg/edit.svg';
+import { InitialCredentialDeploymentValues } from '@concordium/node-sdk';
 import CloseButton from '~/cross-app-components/CloseButton';
-import {
-    Account,
-    AccountInfo,
-    CredentialDeploymentInformation,
-} from '~/utils/types';
+import { Account, AccountInfo } from '~/utils/types';
 import { formatDate } from '~/utils/timeHelpers';
 import CopyButton from '~/components/CopyButton';
 import Card from '~/cross-app-components/Card';
@@ -26,8 +23,11 @@ import { identitiesSelector } from '~/features/IdentitySlice';
 
 import styles from './CredentialInformation.module.scss';
 
-interface CredentialOfAccount
-    extends Omit<CredentialDeploymentInformation, 'regId'> {
+type Credential = Omit<InitialCredentialDeploymentValues, 'regId'> & {
+    credId: string;
+};
+
+interface CredentialOfAccount extends Credential {
     isOwn: boolean;
     note: string | undefined;
 }
@@ -53,20 +53,21 @@ export default function CredentialInformation({
     const identities = useSelector(identitiesSelector);
 
     const credentialsOfAccount = Object.values(accountInfo.accountCredentials)
-        .map((o) => o.value.contents)
+        .map((o) => o.value)
         .map((cred) => {
-            let enrichedCred: CredentialOfAccount = {
-                ...cred,
+            const enrichedCred: CredentialOfAccount = {
+                ...cred.contents,
+                // The node returns the credId in the regId field for
+                // initial accounts, so we have to hack it a bit here.
+                // This can safely be removed, if the node is updated to
+                // be consistent and always use the credId field.
+                credId:
+                    cred.type === 'initial'
+                        ? cred.contents.regId
+                        : cred.contents.credId,
                 isOwn: false,
                 note: undefined,
             };
-            // The node returns the credId in the regId field for
-            // initial accounts, so we have to hack it a bit here.
-            // This can safely be removed, if the node is updated to
-            // be consistent and always use the credId field.
-            if (cred.regId) {
-                enrichedCred = { ...enrichedCred, credId: cred.regId };
-            }
 
             const existingOwnCredential = ownCredentials.find(
                 (c) => c.credId === enrichedCred.credId

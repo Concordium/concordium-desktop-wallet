@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
+import {
+    BlockSummary,
+    ConsensusStatus,
+    AccountTransactionType,
+} from '@concordium/node-sdk';
 import { getAccount } from '~/database/AccountDao';
-import { BlockSummary, ConsensusStatus } from '~/node/NodeApiTypes';
 import { getConsensusStatus } from '~/node/nodeRequests';
 import {
     fetchLastFinalizedBlockSummary,
@@ -15,13 +19,7 @@ import {
 } from './timeHelpers';
 import { getTransactionKindCost } from './transactionCosts';
 import { lookupName } from './transactionHelpers';
-import {
-    AccountInfo,
-    Amount,
-    Fraction,
-    TransactionKindId,
-    Account,
-} from './types';
+import { AccountInfo, Amount, Fraction, Account } from './types';
 
 /** Hook for looking up an account name from an address */
 export function useAccountName(address: string) {
@@ -62,7 +60,7 @@ export function useAccountInfo(address?: string) {
 
 /** Hook for estimating transaction cost */
 export function useTransactionCostEstimate(
-    kind: TransactionKindId,
+    kind: AccountTransactionType,
     exchangeRate: Fraction,
     signatureAmount?: number,
     payloadSize?: number
@@ -154,17 +152,17 @@ export function useCalcBakerStakeCooldownUntil() {
     const genesisTime = new Date(consensusStatus.genesisTime);
     const currentEpochIndex = getEpochIndexAt(
         now,
-        consensusStatus.epochDuration,
+        Number(consensusStatus.epochDuration),
         genesisTime
     );
     const nextEpochIndex = currentEpochIndex + 1;
 
     const cooldownUntilEpochIndex =
-        nextEpochIndex + chainParameters.bakerCooldownEpochs;
+        nextEpochIndex + Number(chainParameters.bakerCooldownEpochs);
 
     return epochDate(
         cooldownUntilEpochIndex,
-        consensusStatus.epochDuration,
+        Number(consensusStatus.epochDuration),
         genesisTime
     );
 }

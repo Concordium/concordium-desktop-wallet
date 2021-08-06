@@ -2,15 +2,11 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
+import { AccountTransactionType } from '@concordium/node-sdk';
 import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
-import {
-    Account,
-    TransactionKindId,
-    RemoveBaker,
-    Fraction,
-} from '~/utils/types';
+import { Account, RemoveBaker, Fraction } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
 import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
@@ -56,7 +52,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
     const cooldownUntil = useCalcBakerStakeCooldownUntil();
 
     const estimatedFee = useTransactionCostEstimate(
-        TransactionKindId.Remove_baker,
+        AccountTransactionType.RemoveBaker,
         exchangeRate,
         account?.signatureThreshold
     );
@@ -76,7 +72,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
         setTransaction(
             createRemoveBakerTransaction(
                 account.address,
-                accountNonce.nonce,
+                accountNonce.nonce.toString(),
                 account?.signatureThreshold,
                 expiryTime
             )
@@ -131,7 +127,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                                 push(
                                                     getLocationAfterAccounts(
                                                         url,
-                                                        TransactionKindId.Remove_baker
+                                                        AccountTransactionType.RemoveBaker
                                                     )
                                                 )
                                             );

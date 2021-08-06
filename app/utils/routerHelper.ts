@@ -1,10 +1,6 @@
+import { AccountTransactionType } from '@concordium/node-sdk';
 import routes from '../constants/routes.json';
-import {
-    TransactionTypes,
-    UpdateType,
-    TransactionKindId,
-    ExportKeyType,
-} from './types';
+import { TransactionTypes, UpdateType, ExportKeyType } from './types';
 
 export const selectedAddressBookEntryRoute = (address: string) =>
     routes.ADDRESSBOOK_SELECTED.replace(':address', address);
@@ -40,7 +36,7 @@ export const submittedProposalRoute = (proposalId: number) =>
 
 export function createProposalRoute(
     transactionType: TransactionTypes,
-    specificType: UpdateType | TransactionKindId
+    specificType: UpdateType | AccountTransactionType
 ) {
     if (transactionType === TransactionTypes.UpdateInstruction) {
         return routes.MULTISIGTRANSACTIONS_PROPOSAL.replace(

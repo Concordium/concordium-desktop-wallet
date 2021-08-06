@@ -1,4 +1,4 @@
-import { Authorization, Authorizations } from '../../../../node/NodeApiTypes';
+import { Authorization, Authorizations } from '@concordium/node-sdk';
 import {
     AccessStructure,
     AccessStructureEnum,
@@ -6,7 +6,7 @@ import {
     AuthorizationKeysUpdateType,
     KeyIndexWithStatus,
     KeyUpdateEntryStatus,
-} from '../../../../utils/types';
+} from '~/utils/types';
 
 export function getCurrentThresholds(
     authorizations: Authorizations

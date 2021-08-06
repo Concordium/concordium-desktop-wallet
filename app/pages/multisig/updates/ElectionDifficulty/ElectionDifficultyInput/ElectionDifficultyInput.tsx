@@ -31,7 +31,7 @@ const blockTimeError = 'Estimated block time above 1 day is disallowed';
 
 export interface ElectionDifficultyInputProps {
     label: string;
-    timePerSlot: number;
+    timePerSlot: bigint;
     value: number | undefined;
     disabled?: boolean;
     readOnly?: boolean;
@@ -59,8 +59,8 @@ export default function ElectionDifficultyInput({
             }
 
             try {
-                const msPerBlock = timePerSlot / Number(v);
-                return msToTimeParts(msPerBlock);
+                const msPerBlock = timePerSlot / BigInt(v);
+                return msToTimeParts(Number(msPerBlock));
             } catch {
                 return undefined;
             }

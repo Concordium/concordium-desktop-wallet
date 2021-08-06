@@ -2,14 +2,10 @@ import React, { useMemo, useCallback } from 'react';
 import { Redirect } from 'react-router';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
+import { AccountTransactionType } from '@concordium/node-sdk';
 import { stringify } from '../../utils/JSONHelper';
 import routes from '../../constants/routes.json';
-import {
-    AddressBookEntry,
-    Account,
-    TransactionKindId,
-    Fraction,
-} from '../../utils/types';
+import { AddressBookEntry, Account, Fraction } from '../../utils/types';
 import { toMicroUnits } from '../../utils/gtu';
 import locations from '../../constants/transferLocations.json';
 import { createSimpleTransferTransaction } from '../../utils/transactionHelpers';
@@ -35,7 +31,7 @@ function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
     const estimatedFee = useMemo(
         () =>
             getTransactionKindCost(
-                TransactionKindId.Simple_transfer,
+                AccountTransactionType.SimpleTransfer,
                 exchangeRate
             ),
         [exchangeRate]
@@ -89,7 +85,7 @@ function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
         return (
             <Redirect
                 to={createTransferWithAccountRoute(
-                    TransactionKindId.Simple_transfer,
+                    AccountTransactionType.SimpleTransfer,
                     account
                 )}
             />
@@ -103,7 +99,7 @@ function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
             exitFunction={() => dispatch(push(routes.ACCOUNTS))}
             amountHeader="Send GTU"
             senderAddress={account.address}
-            transactionKind={TransactionKindId.Simple_transfer}
+            transactionKind={AccountTransactionType.SimpleTransfer}
         />
     );
 }

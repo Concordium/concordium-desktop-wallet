@@ -1,4 +1,4 @@
-import { BlockSummary } from '~/node/NodeApiTypes';
+import { BlockSummary } from '@concordium/node-sdk';
 import { rewardFractionResolution } from '~/constants/updateConstants.json';
 import { RewardDistributionValue } from '../../common/RewardDistribution';
 

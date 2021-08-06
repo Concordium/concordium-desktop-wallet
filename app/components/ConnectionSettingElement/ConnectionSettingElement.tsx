@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { ConsensusStatus } from '@concordium/node-sdk';
 import { updateSettingEntry } from '~/features/SettingsSlice';
 import { globalSelector } from '~/features/GlobalSlice';
 import { Global, Setting, Versioned } from '~/utils/types';
@@ -10,7 +11,6 @@ import ConnectionStatusComponent, {
     Status,
 } from '~/components/ConnectionStatusComponent';
 import { JsonResponse } from '~/proto/concordium_p2p_rpc_pb';
-import { ConsensusStatus } from '~/node/NodeApiTypes';
 import getGenesis from '~/database/GenesisDao';
 import { displayTargetNet, getTargetNet, Net } from '~/utils/ConfigHelper';
 import genesisBlocks from '~/constants/genesis.json';

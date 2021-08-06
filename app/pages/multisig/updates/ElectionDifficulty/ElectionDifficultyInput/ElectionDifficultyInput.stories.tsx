@@ -26,6 +26,6 @@ const Template: Story<ElectionDifficultyInputProps> = (args) => {
 export const Primary = Template.bind({});
 Primary.args = {
     label: 'Election Difficulty',
-    timePerSlot: 250,
+    timePerSlot: 250n,
     value: 0.025,
 };

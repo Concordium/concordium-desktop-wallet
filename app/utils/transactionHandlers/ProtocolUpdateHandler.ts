@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer/';
+import { BlockSummary, Authorizations } from '@concordium/node-sdk';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
 import ProtocolUpdateView from '~/pages/multisig/updates/Protocol/ProtocolUpdateView';
@@ -6,7 +7,6 @@ import UpdateProtocol, {
     UpdateProtocolFields,
 } from '~/pages/multisig/updates/Protocol/UpdateProtocol';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isProtocolUpdate,

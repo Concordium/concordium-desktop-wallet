@@ -1,6 +1,6 @@
 import React from 'react';
+import { BlockSummary } from '@concordium/node-sdk';
 import Loading from '~/cross-app-components/Loading';
-import { BlockSummary } from '~/node/NodeApiTypes';
 import { BakerStakeThreshold } from '~/utils/types';
 import withChainData, { ChainData } from '../../common/withChainData';
 

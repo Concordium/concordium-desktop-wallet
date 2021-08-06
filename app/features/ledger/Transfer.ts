@@ -1,8 +1,8 @@
 import { Buffer } from 'buffer/';
+import { AccountTransactionType } from '@concordium/node-sdk';
 import { Transport } from './Transport';
 import {
     AccountTransaction,
-    TransactionKindId,
     SimpleTransfer,
     ScheduledTransfer,
     TransferToEncrypted,
@@ -63,7 +63,7 @@ async function signSimpleTransfer(
     transaction: SimpleTransfer
 ): Promise<Buffer> {
     const payload = serializeTransferPayload(
-        TransactionKindId.Simple_transfer,
+        AccountTransactionType.SimpleTransfer,
         transaction.payload
     );
 
@@ -97,7 +97,7 @@ async function signTransferToEncrypted(
     transaction: TransferToEncrypted
 ) {
     const payload = serializeTransferPayload(
-        TransactionKindId.Transfer_to_encrypted,
+        AccountTransactionType.TransferToEncrypted,
         transaction.payload
     );
 
@@ -135,7 +135,7 @@ async function signTransferToPublic(
     }
 
     const payload = serializeTransferPayload(
-        TransactionKindId.Transfer_to_public,
+        AccountTransactionType.TransferToPublic,
         transaction.payload
     );
 
@@ -148,7 +148,7 @@ async function signTransferToPublic(
     );
 
     const kind = Buffer.alloc(1);
-    kind.writeInt8(TransactionKindId.Transfer_to_public, 0);
+    kind.writeInt8(AccountTransactionType.TransferToPublic, 0);
 
     const data = Buffer.concat([pathAsBuffer(path), header, kind]);
 
@@ -208,7 +208,7 @@ async function signEncryptedTransfer(
     }
 
     const payload = serializeTransferPayload(
-        TransactionKindId.Encrypted_transfer,
+        AccountTransactionType.EncryptedTransfer,
         transaction.payload
     );
 
@@ -221,7 +221,7 @@ async function signEncryptedTransfer(
     );
 
     const kind = Buffer.alloc(1);
-    kind.writeInt8(TransactionKindId.Encrypted_transfer, 0);
+    kind.writeInt8(AccountTransactionType.EncryptedTransfer, 0);
 
     const data = Buffer.concat([
         pathAsBuffer(path),
@@ -288,7 +288,7 @@ async function signTransferWithSchedule(
     transaction: ScheduledTransfer
 ): Promise<Buffer> {
     const payload = serializeTransferPayload(
-        TransactionKindId.Transfer_with_schedule,
+        AccountTransactionType.TransferWithSchedule,
         transaction.payload
     );
 
@@ -354,7 +354,7 @@ async function signAddBaker(
     const part1 = Buffer.concat([
         pathAsBuffer(path),
         header,
-        Buffer.from(Uint8Array.of(TransactionKindId.Add_baker)),
+        Buffer.from(Uint8Array.of(AccountTransactionType.AddBaker)),
     ]);
 
     const part2 = serializeBakerVerifyKeys(transaction.payload);
@@ -396,7 +396,7 @@ async function signUpdateBakerKeys(
     const part1 = Buffer.concat([
         pathAsBuffer(path),
         header,
-        Buffer.from(Uint8Array.of(TransactionKindId.Update_baker_keys)),
+        Buffer.from(Uint8Array.of(AccountTransactionType.UpdateBakerKeys)),
     ]);
 
     const part2 = serializeBakerVerifyKeys(transaction.payload);
@@ -437,7 +437,7 @@ async function signRemoveBaker(
     const cdata = Buffer.concat([
         pathAsBuffer(path),
         header,
-        Buffer.from(Uint8Array.of(TransactionKindId.Remove_baker)),
+        Buffer.from(Uint8Array.of(AccountTransactionType.RemoveBaker)),
     ]);
 
     const p1 = 0x00;

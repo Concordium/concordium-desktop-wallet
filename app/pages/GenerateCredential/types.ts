@@ -1,4 +1,5 @@
-import { AttributeKey } from '~/utils/identityHelpers';
+import { AttributeKey } from '@concordium/node-sdk';
+
 import {
     AccountInfo,
     CredentialDeploymentInformation,

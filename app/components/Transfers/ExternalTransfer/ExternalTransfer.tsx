@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import PlusIcon from '@resources/svg/plus.svg';
+import { AccountTransactionType } from '@concordium/node-sdk';
 import PickRecipient from '../PickRecipient';
 import PickAmount from '../PickAmount';
 import FinalPage from '../FinalPage';
-import { TransactionKindId, AddressBookEntry, Fraction } from '~/utils/types';
+import { AddressBookEntry, Fraction } from '~/utils/types';
 import locations from '~/constants/transferLocations.json';
 import { TransferState } from '~/utils/transactionTypes';
 import TransferView from '../TransferView';
@@ -18,7 +19,7 @@ interface Props {
     estimatedFee?: Fraction;
     amountHeader: string;
     senderAddress: string;
-    transactionKind: TransactionKindId;
+    transactionKind: AccountTransactionType;
 }
 
 /**

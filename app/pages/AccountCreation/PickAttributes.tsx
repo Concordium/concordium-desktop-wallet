@@ -1,13 +1,13 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
+import { AttributeKey } from '@concordium/node-sdk';
 import routes from '~/constants/routes.json';
 import { Identity } from '~/utils/types';
 import IdentityCard from '~/components/IdentityCard';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
 import CardList from '~/cross-app-components/CardList';
-import { AttributeKey } from '~/utils/identityHelpers';
 import SelectIdentityAttributes from '~/components/SelectIdentityAttributes';
 
 import styles from './AccountCreation.module.scss';

@@ -1,10 +1,10 @@
 import React from 'react';
+import { VerifyKey } from '@concordium/node-sdk';
 import Loading from '~/cross-app-components/Loading';
 import {
     AccessStructure,
     AuthorizationKeysUpdate,
     KeyWithStatus,
-    VerifyKey,
 } from '~/utils/types';
 import withChainData, { ChainData } from '../../common/withChainData';
 import { generateStatusLabel } from './KeyUpdateEntry';

@@ -1,4 +1,5 @@
 import PromiseWorker from 'promise-worker';
+import { AccountEncryptedAmount } from '@concordium/node-sdk';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error : has no default export.
 import RustWorker, { BakerKeyVariants } from './rust.worker';
@@ -11,7 +12,6 @@ import {
     CredentialDeploymentDetails,
     CredentialDeploymentInformation,
     Global,
-    AccountEncryptedAmount,
     GenesisAccount,
     SignedIdRequest,
     UnsignedCredentialDeploymentInformation,
@@ -338,7 +338,7 @@ export async function makeTransferToPublicData(
         encryptedSelfAmount: accountEncryptedAmount.selfAmount,
         aggIndex:
             accountEncryptedAmount.startIndex +
-            accountEncryptedAmount.incomingAmounts.length,
+            BigInt(accountEncryptedAmount.incomingAmounts.length),
     };
 
     const transferToPublicData = await worker.postMessage({
@@ -364,7 +364,7 @@ export async function makeTransferToEncryptedData(
         encryptedSelfAmount: accountEncryptedAmount.selfAmount,
         aggIndex:
             accountEncryptedAmount.startIndex +
-            accountEncryptedAmount.incomingAmounts.length,
+            BigInt(accountEncryptedAmount.incomingAmounts.length),
     };
 
     const transferToSecretData = await worker.postMessage({
@@ -392,7 +392,7 @@ export async function makeEncryptedTransferData(
         encryptedSelfAmount: accountEncryptedAmount.selfAmount,
         aggIndex:
             accountEncryptedAmount.startIndex +
-            accountEncryptedAmount.incomingAmounts.length,
+            BigInt(accountEncryptedAmount.incomingAmounts.length),
     };
 
     const encryptedTransferData = await worker.postMessage({

@@ -1,17 +1,17 @@
+import {
+    Authorization,
+    Authorizations,
+    Keys,
+    VerifyKey,
+    KeysWithThreshold,
+    BlockSummary,
+} from '@concordium/node-sdk';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import {
     getGovernanceLevel1Path,
     getGovernanceLevel2Path,
     getGovernanceRootPath,
 } from '../../features/ledger/Path';
-import {
-    Authorization,
-    Authorizations,
-    BlockSummary,
-    Key,
-    Keys,
-    KeysWithThreshold,
-} from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isUpdateUsingLevel1Keys,
@@ -21,12 +21,11 @@ import {
     UpdateInstructionSignature,
     UpdateInstructionSignatureWithIndex,
     UpdateType,
-    VerifyKey,
 } from '../types';
 
 export interface AuthorizationKey {
     index: number;
-    key: Key;
+    key: VerifyKey;
 }
 
 /**
@@ -61,7 +60,7 @@ export function findKeySet(updateType: UpdateType, keys: Keys): VerifyKey[] {
  * @param verifyKey verification key to find the key with an index for
  */
 function findAuthorizationKeyIndex(
-    keys: Key[],
+    keys: VerifyKey[],
     authorization: Authorization,
     verifyKey: string
 ): AuthorizationKey | undefined {

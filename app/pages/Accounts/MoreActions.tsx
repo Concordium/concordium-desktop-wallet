@@ -2,7 +2,8 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Switch, Route } from 'react-router-dom';
-import { Account, AccountInfo, TransactionKindId } from '../../utils/types';
+import { AccountTransactionType } from '@concordium/node-sdk';
+import { Account, AccountInfo } from '~/utils/types';
 import routes from '../../constants/routes.json';
 import ShowAccountAddress from './ShowAccountAddress';
 import ShowReleaseSchedule from './ShowReleaseSchedule';
@@ -60,7 +61,7 @@ const items: MoreActionObject[] = [
     {
         name: 'Update credentials',
         location: createTransferWithAccountPathName(
-            TransactionKindId.Update_credentials
+            AccountTransactionType.UpdateCredentials
         ),
         isDisabled: (hasCredential, usedEncrypted) =>
             !hasCredential || usedEncrypted,
@@ -68,7 +69,7 @@ const items: MoreActionObject[] = [
     {
         name: 'Add baker',
         location: createTransferWithAccountPathName(
-            TransactionKindId.Add_baker
+            AccountTransactionType.AddBaker
         ),
         isDisabled: (hasCredential, _encrypted, isBaker) =>
             !hasCredential || isBaker,
@@ -76,7 +77,7 @@ const items: MoreActionObject[] = [
     {
         name: 'Remove baker',
         location: createTransferWithAccountPathName(
-            TransactionKindId.Remove_baker
+            AccountTransactionType.RemoveBaker
         ),
         isDisabled: (hasCredential, _encrypted, isBaker, bakerCooldown) =>
             !hasCredential || !isBaker || bakerCooldown,
@@ -84,7 +85,7 @@ const items: MoreActionObject[] = [
     {
         name: 'Update baker keys',
         location: createTransferWithAccountPathName(
-            TransactionKindId.Update_baker_keys
+            AccountTransactionType.UpdateBakerKeys
         ),
         isDisabled: (hasCredential, _encrypted, isBaker) =>
             !hasCredential || !isBaker,
@@ -92,7 +93,7 @@ const items: MoreActionObject[] = [
     {
         name: 'Update baker stake',
         location: createTransferWithAccountPathName(
-            TransactionKindId.Update_baker_stake
+            AccountTransactionType.UpdateBakerStake
         ),
         isDisabled: (hasCredential, _encrypted, isBaker, bakerCooldown) =>
             !hasCredential || !isBaker || bakerCooldown,
@@ -100,7 +101,7 @@ const items: MoreActionObject[] = [
     {
         name: 'Update baker restake earnings',
         location: createTransferWithAccountPathName(
-            TransactionKindId.Update_baker_restake_earnings
+            AccountTransactionType.UpdateBakerRestakeEarnings
         ),
         isDisabled: (hasCredential, _encrypted, isBaker) =>
             !hasCredential || !isBaker,

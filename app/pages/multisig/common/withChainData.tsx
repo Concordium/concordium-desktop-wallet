@@ -2,7 +2,7 @@
 import { push } from 'connected-react-router';
 import React, { ComponentType, useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { BlockSummary, ConsensusStatus } from '~/node/NodeApiTypes';
+import { BlockSummary, ConsensusStatus } from '@concordium/node-sdk';
 import { getConsensusStatus, getBlockSummary } from '~/node/nodeRequests';
 import routes from '~/constants/routes.json';
 import Execute from '../Execute';

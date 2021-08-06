@@ -1,8 +1,8 @@
 import clsx from 'clsx';
 import React, { useMemo } from 'react';
+import { AttributeKey } from '@concordium/node-sdk';
 import Card from '~/cross-app-components/Card';
 import {
-    AttributeKey,
     attributeNamesMap,
     formatAttributeValue,
     compareAttributes,

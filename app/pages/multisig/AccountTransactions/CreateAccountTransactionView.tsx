@@ -1,6 +1,6 @@
 import React from 'react';
 import { Redirect, useParams } from 'react-router';
-import { TransactionKindId } from '~/utils/types';
+import { AccountTransactionType } from '@concordium/node-sdk';
 import CreateTransferProposal from './CreateTransferProposal';
 
 import UpdateCredentialPage from './UpdateAccountCredentials/UpdateCredentialsPage';
@@ -16,23 +16,26 @@ function AccountTransactionRoutes(): JSX.Element {
     const { transactionKind: transactionKindRaw } = useParams<{
         transactionKind: string;
     }>();
-    const transactionKind: TransactionKindId = parseInt(transactionKindRaw, 10);
+    const transactionKind: AccountTransactionType = parseInt(
+        transactionKindRaw,
+        10
+    );
 
     switch (transactionKind) {
-        case TransactionKindId.Update_credentials:
+        case AccountTransactionType.UpdateCredentials:
             return <UpdateCredentialPage />;
-        case TransactionKindId.Simple_transfer:
-        case TransactionKindId.Transfer_with_schedule:
+        case AccountTransactionType.SimpleTransfer:
+        case AccountTransactionType.TransferWithSchedule:
             return <CreateTransferProposal transactionKind={transactionKind} />;
-        case TransactionKindId.Add_baker:
+        case AccountTransactionType.AddBaker:
             return <AddBaker />;
-        case TransactionKindId.Update_baker_keys:
+        case AccountTransactionType.UpdateBakerKeys:
             return <UpdateBakerKeys />;
-        case TransactionKindId.Remove_baker:
+        case AccountTransactionType.RemoveBaker:
             return <RemoveBaker />;
-        case TransactionKindId.Update_baker_stake:
+        case AccountTransactionType.UpdateBakerStake:
             return <UpdateBakerStake />;
-        case TransactionKindId.Update_baker_restake_earnings:
+        case AccountTransactionType.UpdateBakerRestakeEarnings:
             return <UpdateBakerRestakeEarnings />;
         default:
             throw new Error(`unsupported transaction type: ${transactionKind}`);

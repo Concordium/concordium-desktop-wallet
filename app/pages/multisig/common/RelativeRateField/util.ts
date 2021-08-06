@@ -1,7 +1,7 @@
 import { Validate } from 'react-hook-form';
 
+import { ExchangeRate } from '@concordium/node-sdk';
 import { isValidBigInt } from '~/utils/numberStringHelpers';
-import { ExchangeRate } from '~/utils/types';
 
 export type RelativeRateValue = {
     [P in keyof ExchangeRate]: string | undefined;

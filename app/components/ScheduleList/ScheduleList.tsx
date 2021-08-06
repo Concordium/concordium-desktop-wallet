@@ -4,7 +4,7 @@ import BinIcon from '@resources/svg/bin.svg';
 import Button from '~/cross-app-components/Button';
 import { displayAsGTU } from '~/utils/gtu';
 import { parseTime } from '~/utils/timeHelpers';
-import { Schedule, TimeStampUnit } from '~/utils/types';
+import { TimeStampUnit, Schedule } from '~/utils/types';
 import styles from './ScheduleList.module.scss';
 
 interface Props {

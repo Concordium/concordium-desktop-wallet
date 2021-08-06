@@ -1,4 +1,5 @@
 import React from 'react';
+import { BlockSummary, Authorizations } from '@concordium/node-sdk';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import TransactionFeeDistributionView from '../../pages/multisig/updates/TransactionFee/TransactionFeeDistributionView';
@@ -6,7 +7,6 @@ import UpdateTransactionFeeDistribution, {
     UpdateTransactionFeeDistributionFields,
 } from '../../pages/multisig/updates/TransactionFee/UpdateTransactionFeeDistribution';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isTransactionFeeDistribution,

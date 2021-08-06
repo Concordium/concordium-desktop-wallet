@@ -1,4 +1,5 @@
 import React from 'react';
+import { BlockSummary, Authorizations } from '@concordium/node-sdk';
 import {
     ElectionDifficultyField,
     toElectionDifficultyResolution,
@@ -8,7 +9,6 @@ import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import ElectionDifficultyView from '../../pages/multisig/updates/ElectionDifficulty/ElectionDifficultyView';
 import UpdateElectionDifficulty from '../../pages/multisig/updates/ElectionDifficulty/UpdateElectionDifficulty';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     ElectionDifficulty,

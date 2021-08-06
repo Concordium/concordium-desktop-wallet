@@ -1,9 +1,9 @@
 import { Buffer } from 'buffer/';
 import EventEmitter from 'events';
+import { AccountTransactionType } from '@concordium/node-sdk';
 import { Transport } from './Transport';
 import {
     UpdateAccountCredentials,
-    TransactionKindId,
     CredentialDeploymentInformation,
 } from '~/utils/types';
 import pathAsBuffer from './Path';
@@ -28,7 +28,7 @@ export default async function signUpdateCredentials(
     const ins = INS_UPDATE_CREDENTIALS;
 
     const payload = serializeTransferPayload(
-        TransactionKindId.Update_credentials,
+        AccountTransactionType.UpdateCredentials,
         transaction.payload
     );
 
@@ -51,7 +51,7 @@ export default async function signUpdateCredentials(
     const removedCredentialsLength = transaction.payload.removedCredIds.length;
 
     const kindAndAddedLength = Buffer.alloc(2);
-    kindAndAddedLength.writeUInt8(TransactionKindId.Update_credentials, 0);
+    kindAndAddedLength.writeUInt8(AccountTransactionType.UpdateCredentials, 0);
     kindAndAddedLength.writeUInt8(addedCredentialsLength, 1);
 
     let data = Buffer.concat([pathPrefix, header, kindAndAddedLength]);

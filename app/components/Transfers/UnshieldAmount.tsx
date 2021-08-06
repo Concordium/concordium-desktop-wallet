@@ -1,7 +1,8 @@
 import React from 'react';
+import { AccountTransactionType } from '@concordium/node-sdk';
 import routes from '~/constants/routes.json';
 import { createUnshieldAmountTransaction } from '~/utils/transactionHelpers';
-import { Account, TransactionKindId } from '~/utils/types';
+import { Account } from '~/utils/types';
 import InternalTransfer from './InternalTransfer';
 
 interface Props {
@@ -16,7 +17,7 @@ export default function UnshieldAmount({ account }: Props) {
         amountHeader: 'Unshield GTU',
         createTransaction: createUnshieldAmountTransaction,
         location: routes.ACCOUNTS_UNSHIELDAMOUNT,
-        transactionKind: TransactionKindId.Transfer_to_public,
+        transactionKind: AccountTransactionType.TransferToPublic,
     };
 
     return <InternalTransfer account={account} specific={specific} />;

@@ -3,12 +3,16 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
+import {
+    AccountTransactionType,
+    InitialCredentialDeploymentValues,
+    CredentialDeploymentValues,
+} from '@concordium/node-sdk';
 import Button from '~/cross-app-components/Button';
 import {
     Account,
     AccountInfo,
     CredentialDeploymentInformation,
-    TransactionKindId,
     Fraction,
     AddedCredential,
 } from '~/utils/types';
@@ -212,7 +216,10 @@ interface State {
 
 interface AccountInfoCredential {
     credentialIndex: number;
-    credential: CredentialDeploymentInformation;
+    credential: (
+        | InitialCredentialDeploymentValues
+        | CredentialDeploymentValues
+    ) & { credId: string };
 }
 
 interface Props {
@@ -225,7 +232,7 @@ interface Props {
  */
 function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
     const dispatch = useDispatch();
-    const transactionKind = TransactionKindId.Update_credentials;
+    const transactionKind = AccountTransactionType.UpdateCredentials;
 
     const { pathname, state } = useLocation<State>();
     const location = pathname.replace(`${transactionKind}`, ':transactionKind');
@@ -294,14 +301,18 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
             currentAccountInfo.accountCredentials
         ).map((accountCredential) => {
             const credentialIndex = parseInt(accountCredential[0], 10);
-            const cred = accountCredential[1].value.contents;
-            if (cred.regId) {
+            const cred = accountCredential[1].value;
+            if (cred.type === 'initial') {
+                // TODO: don't use literal
                 return {
                     credentialIndex,
-                    credential: { ...cred, credId: cred.regId },
+                    credential: {
+                        ...cred.contents,
+                        credId: cred.contents.regId,
+                    },
                 };
             }
-            return { credentialIndex, credential: cred };
+            return { credentialIndex, credential: cred.contents };
         });
         setCurrentCredentials(credentialsForAccount);
 
@@ -464,7 +475,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
         dispatch(
             push({
                 pathname: nextLocation,
-                state: TransactionKindId.Update_credentials,
+                state: AccountTransactionType.UpdateCredentials,
             })
         );
     }

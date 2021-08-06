@@ -6,12 +6,12 @@ import RejectedImage from '@resources/svg/warning-small.svg';
 import EditIcon from '@resources/svg/edit.svg';
 import CheckIcon from '@resources/svg/checkmark-blue.svg';
 import { useDispatch } from 'react-redux';
+import { AttributeKey } from '@concordium/node-sdk';
 import { Identity, IdentityObject, IdentityStatus } from '~/utils/types';
 import { formatDate } from '~/utils/timeHelpers';
 import Card from '~/cross-app-components/Card';
 import SidedRow from '../SidedRow';
 import {
-    AttributeKey,
     attributeNamesMap,
     formatAttributeValue,
     compareAttributes,

@@ -1,11 +1,12 @@
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import { AccountTransactionType } from '@concordium/node-sdk';
 import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
 } from '~/features/AccountSlice';
-import { TransactionKindId, AddressBookEntry, Fraction } from '~/utils/types';
+import { AddressBookEntry, Fraction } from '~/utils/types';
 import { getGTUSymbol } from '~/utils/gtu';
 import AddressBookEntryButton from '~/components/AddressBookEntryButton';
 import Button from '~/cross-app-components/Button';
@@ -27,7 +28,7 @@ interface Props {
     estimatedFee?: Fraction | undefined;
     toPickRecipient?(currentAmount: string): void;
     toConfirmTransfer(amount: string): void;
-    transactionKind: TransactionKindId;
+    transactionKind: AccountTransactionType;
 }
 
 interface PickAmountForm {
@@ -63,8 +64,8 @@ export default function PickAmount({
     function validate(amount: string) {
         if (
             [
-                TransactionKindId.Transfer_to_public,
-                TransactionKindId.Encrypted_transfer,
+                AccountTransactionType.TransferToPublic,
+                AccountTransactionType.EncryptedTransfer,
             ].includes(transactionKind)
         ) {
             return validateShieldedAmount(

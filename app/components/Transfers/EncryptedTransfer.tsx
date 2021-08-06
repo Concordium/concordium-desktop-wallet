@@ -1,14 +1,10 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
+import { AccountTransactionType } from '@concordium/node-sdk';
 import { stringify } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
-import {
-    AddressBookEntry,
-    Account,
-    TransactionKindId,
-    Fraction,
-} from '~/utils/types';
+import { AddressBookEntry, Account, Fraction } from '~/utils/types';
 import { toMicroUnits } from '~/utils/gtu';
 import locations from '~/constants/transferLocations.json';
 import { createEncryptedTransferTransaction } from '~/utils/transactionHelpers';
@@ -32,7 +28,7 @@ function EncryptedTransfer({ account, exchangeRate, nonce }: Props) {
     const estimatedFee = useMemo(
         () =>
             getTransactionKindCost(
-                TransactionKindId.Encrypted_transfer,
+                AccountTransactionType.EncryptedTransfer,
                 exchangeRate
             ),
         [exchangeRate]
@@ -89,7 +85,7 @@ function EncryptedTransfer({ account, exchangeRate, nonce }: Props) {
             exitFunction={() => dispatch(push(routes.ACCOUNTS))}
             amountHeader="Send shielded funds"
             senderAddress={account.address}
-            transactionKind={TransactionKindId.Encrypted_transfer}
+            transactionKind={AccountTransactionType.EncryptedTransfer}
         />
     );
 }

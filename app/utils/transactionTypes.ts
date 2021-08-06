@@ -1,12 +1,12 @@
 import type { Buffer } from 'buffer/';
 import { FieldValues } from 'react-hook-form';
-import { AccountPathInput } from '~/features/ledger/Path';
 import {
     Authorization,
     Authorizations,
     BlockSummary,
     ConsensusStatus,
-} from '../node/NodeApiTypes';
+} from '@concordium/node-sdk';
+import { AccountPathInput } from '~/features/ledger/Path';
 import {
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,

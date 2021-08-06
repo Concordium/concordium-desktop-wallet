@@ -1,9 +1,7 @@
+import { AttributeKey, Attributes, AttributesKeys } from '@concordium/node-sdk';
 import { formatDate } from './timeHelpers';
-import { ChosenAttributes, ChosenAttributesKeys } from './types';
 
 export const IDENTITY_NAME_MAX_LENGTH = 25;
-
-export type AttributeKey = keyof ChosenAttributes;
 
 export const attributeNamesMap: {
     [P in AttributeKey]: string;
@@ -68,7 +66,7 @@ const parseDocType = (docType: DocumentType) => {
 
 export const formatAttributeValue = (
     key: AttributeKey,
-    value: ChosenAttributes[typeof key]
+    value: Attributes[typeof key]
 ): string => {
     switch (key) {
         case 'idDocExpiresAt':
@@ -88,8 +86,5 @@ export function compareAttributes(
     AttributeTag1: AttributeKey,
     AttributeTag2: AttributeKey
 ) {
-    return (
-        ChosenAttributesKeys[AttributeTag1] -
-        ChosenAttributesKeys[AttributeTag2]
-    );
+    return AttributesKeys[AttributeTag1] - AttributesKeys[AttributeTag2];
 }

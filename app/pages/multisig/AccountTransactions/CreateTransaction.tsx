@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { AccountTransactionType } from '@concordium/node-sdk';
 import { toMicroUnits } from '~/utils/gtu';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import {
@@ -6,7 +7,6 @@ import {
     AddressBookEntry,
     AccountTransaction,
     Schedule,
-    TransactionKindId,
     Fraction,
 } from '~/utils/types';
 import { ensureNonce } from '~/components/Transfers/withNonce';
@@ -14,7 +14,7 @@ import Loading from '~/cross-app-components/Loading';
 import SignTransaction from './SignTransaction';
 
 interface Props {
-    transactionKind: TransactionKindId;
+    transactionKind: AccountTransactionType;
     account: Account;
     recipient: AddressBookEntry;
     estimatedFee?: Fraction;

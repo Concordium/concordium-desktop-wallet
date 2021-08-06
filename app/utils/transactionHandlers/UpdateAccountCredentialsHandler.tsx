@@ -1,11 +1,11 @@
 import React from 'react';
+import { AccountTransactionType } from '@concordium/node-sdk';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { AccountPathInput, getAccountPath } from '~/features/ledger/Path';
 import { AccountTransactionHandler } from '../transactionTypes';
 import {
     UpdateAccountCredentials,
     instanceOfUpdateAccountCredentials,
-    TransactionKindId,
 } from '../types';
 import routes from '~/constants/routes.json';
 import { noOp } from '../basicHelpers';
@@ -40,7 +40,7 @@ export default class UpdateAccountCredentialsHandler
         };
         return getNewLocation().replace(
             ':transactionKind',
-            `${TransactionKindId.Update_credentials}`
+            `${AccountTransactionType.UpdateCredentials}`
         );
     }
 

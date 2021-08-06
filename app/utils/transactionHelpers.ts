@@ -1,13 +1,13 @@
 import type { Buffer } from 'buffer/';
+import { AccountTransactionType } from '@concordium/node-sdk';
 import { findEntries } from '../database/AddressBookDao';
 import { getTransactionStatus } from '../node/nodeRequests';
 import { getDefaultExpiry, getNow, secondsSinceUnixEpoch } from './timeHelpers';
 import {
-    TransactionKindId,
+    TransactionStatus,
     TransferTransaction,
     SimpleTransfer,
     TransactionEvent,
-    TransactionStatus,
     ScheduledTransfer,
     EncryptedTransfer,
     Schedule,
@@ -59,7 +59,7 @@ export async function lookupName(address: string): Promise<string | undefined> {
 interface CreateAccountTransactionInput<T> {
     fromAddress: string;
     expiry: Date;
-    transactionKind: TransactionKindId;
+    transactionKind: AccountTransactionType;
     payload: T;
     estimatedEnergyAmount?: bigint;
     signatureAmount?: number;
@@ -123,7 +123,7 @@ export function createSimpleTransferTransaction(
     return createAccountTransaction({
         fromAddress,
         expiry,
-        transactionKind: TransactionKindId.Simple_transfer,
+        transactionKind: AccountTransactionType.SimpleTransfer,
         payload,
         signatureAmount,
         nonce,
@@ -149,12 +149,12 @@ export function createEncryptedTransferTransaction(
     return createAccountTransaction({
         fromAddress,
         expiry,
-        transactionKind: TransactionKindId.Encrypted_transfer,
+        transactionKind: AccountTransactionType.EncryptedTransfer,
         nonce,
         payload,
         // Supply the energy, so that the cost is not computed using the incomplete payload.
         estimatedEnergyAmount: getTransactionKindEnergy(
-            TransactionKindId.Encrypted_transfer
+            AccountTransactionType.EncryptedTransfer
         ),
     });
 }
@@ -171,7 +171,7 @@ export function createShieldAmountTransaction(
     return createAccountTransaction({
         fromAddress,
         expiry,
-        transactionKind: TransactionKindId.Transfer_to_encrypted,
+        transactionKind: AccountTransactionType.TransferToEncrypted,
         payload,
         nonce,
     });
@@ -189,11 +189,11 @@ export function createUnshieldAmountTransaction(
     return createAccountTransaction({
         fromAddress,
         expiry,
-        transactionKind: TransactionKindId.Transfer_to_public,
+        transactionKind: AccountTransactionType.TransferToPublic,
         payload,
         nonce,
         estimatedEnergyAmount: getTransactionKindEnergy(
-            TransactionKindId.Transfer_to_public
+            AccountTransactionType.TransferToPublic
         ), // Supply the energy, so that the cost is not computed using the incomplete payload.
     });
 }
@@ -276,7 +276,7 @@ export function createScheduledTransferTransaction(
     return createAccountTransaction({
         fromAddress,
         expiry,
-        transactionKind: TransactionKindId.Transfer_with_schedule,
+        transactionKind: AccountTransactionType.TransferWithSchedule,
         payload,
         nonce,
         signatureAmount,
@@ -305,7 +305,7 @@ export function createUpdateCredentialsTransaction(
     return createAccountTransaction({
         fromAddress,
         expiry,
-        transactionKind: TransactionKindId.Update_credentials,
+        transactionKind: AccountTransactionType.UpdateCredentials,
         payload,
         nonce,
         estimatedEnergyAmount: getUpdateAccountCredentialEnergy(
@@ -326,7 +326,7 @@ export function createAddBakerTransaction(
     return createAccountTransaction({
         fromAddress,
         expiry,
-        transactionKind: TransactionKindId.Add_baker,
+        transactionKind: AccountTransactionType.AddBaker,
         payload,
         nonce,
         signatureAmount,
@@ -343,7 +343,7 @@ export function createUpdateBakerKeysTransaction(
     return createAccountTransaction({
         fromAddress,
         expiry,
-        transactionKind: TransactionKindId.Update_baker_keys,
+        transactionKind: AccountTransactionType.UpdateBakerKeys,
         nonce,
         payload,
         signatureAmount,
@@ -359,7 +359,7 @@ export function createRemoveBakerTransaction(
     return createAccountTransaction({
         fromAddress,
         expiry,
-        transactionKind: TransactionKindId.Remove_baker,
+        transactionKind: AccountTransactionType.RemoveBaker,
         nonce,
         payload: {},
         signatureAmount,
@@ -376,7 +376,7 @@ export function createUpdateBakerStakeTransaction(
     return createAccountTransaction({
         fromAddress,
         expiry,
-        transactionKind: TransactionKindId.Update_baker_stake,
+        transactionKind: AccountTransactionType.UpdateBakerStake,
         nonce,
         payload,
         signatureAmount,
@@ -393,7 +393,7 @@ export function createUpdateBakerRestakeEarningsTransaction(
     return createAccountTransaction({
         fromAddress,
         expiry,
-        transactionKind: TransactionKindId.Update_baker_restake_earnings,
+        transactionKind: AccountTransactionType.UpdateBakerRestakeEarnings,
         nonce,
         payload,
         signatureAmount,

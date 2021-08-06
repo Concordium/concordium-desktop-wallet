@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer/';
+import { BlockItemKind, ExchangeRate } from '@concordium/node-sdk';
 import {
     encodeWord32,
     encodeWord64,
@@ -7,9 +8,7 @@ import {
 } from './serializationHelpers';
 import {
     BakerStakeThreshold,
-    BlockItemKind,
     ElectionDifficulty,
-    ExchangeRate,
     FoundationAccount,
     GasRewards,
     HigherLevelKeyUpdate,

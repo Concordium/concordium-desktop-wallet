@@ -2,16 +2,11 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
+import { AccountTransactionType, BlockSummary } from '@concordium/node-sdk';
 import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
-import { BlockSummary } from '~/node/NodeApiTypes';
-import {
-    Account,
-    TransactionKindId,
-    UpdateBakerStake,
-    Fraction,
-} from '~/utils/types';
+import { Account, UpdateBakerStake, Fraction } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
 import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
@@ -74,7 +69,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
     const [transaction, setTransaction] = useState<UpdateBakerStake>();
 
     const estimatedFee = useTransactionCostEstimate(
-        TransactionKindId.Update_baker_stake,
+        AccountTransactionType.UpdateBakerStake,
         exchangeRate,
         account?.signatureThreshold
     );
@@ -101,7 +96,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
             createUpdateBakerStakeTransaction(
                 account.address,
                 payload,
-                accountNonce.nonce,
+                accountNonce.nonce.toString(),
                 account?.signatureThreshold,
                 expiryTime
             )
@@ -154,7 +149,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                                                 push(
                                                     getLocationAfterAccounts(
                                                         url,
-                                                        TransactionKindId.Update_baker_stake
+                                                        AccountTransactionType.UpdateBakerStake
                                                     )
                                                 )
                                             );

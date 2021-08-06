@@ -2,8 +2,28 @@
 import type { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import type { HTMLAttributes } from 'react';
 import type { RegisterOptions } from 'react-hook-form';
+import {
+    AccountTransactionType,
+    Attributes,
+    AccountInfo as sdkAccountInfo,
+    VerifyKey,
+    ExchangeRate,
+} from '@concordium/node-sdk';
 import { RejectReason } from './node/RejectReasonHelper';
 import type { ExternalCredential, Genesis } from '~/database/types';
+
+export interface AccountInfo extends sdkAccountInfo {
+    accountBaker?: AccountBakerDetails;
+}
+
+// Statuses that a transaction can have.
+export enum TransactionStatus {
+    Finalized = 'finalized',
+    Committed = 'committed',
+    Failed = 'failed',
+    Rejected = 'rejected',
+    Pending = 'pending',
+}
 
 export type Dispatch = GenericDispatch<AnyAction>;
 
@@ -23,11 +43,6 @@ export interface Fraction {
 
 export enum SchemeId {
     Ed25519 = 0,
-}
-
-export interface VerifyKey {
-    schemeId: string;
-    verifyKey: Hex;
 }
 
 export interface SignedPublicKey {
@@ -50,34 +65,12 @@ export interface Typed<T> {
     contents: T;
 }
 
-// Reflects the attributes of an Identity, which describes
-// the owner of the identity.
-export enum ChosenAttributesKeys {
-    firstName,
-    lastName,
-    sex,
-    dob,
-    countryOfResidence,
-    nationality,
-    idDocType,
-    idDocNo,
-    idDocIssuer,
-    idDocIssuedAt,
-    idDocExpiresAt,
-    nationalIdNo,
-    taxIdNo,
-}
-
-export type ChosenAttributes = {
-    [P in keyof typeof ChosenAttributesKeys]: string;
-};
-
 // Contains the attributes of an identity.
 export interface AttributeList {
     createdAt: string;
     validTo: string;
     maxAccounts: number;
-    chosenAttributes: ChosenAttributes;
+    chosenAttributes: Attributes;
 }
 
 // Reflects the structure of an identity's IdentityObject
@@ -165,25 +158,6 @@ export enum TransactionKindString {
     RegisterData = 'registerData',
 }
 
-// The ids of the different types of an AccountTransaction.
-export enum TransactionKindId {
-    Deploy_module = 0,
-    Initialize_smart_contract_instance = 1,
-    Update_smart_contract_instance = 2,
-    Simple_transfer = 3,
-    Add_baker = 4,
-    Remove_baker = 5,
-    Update_baker_stake = 6,
-    Update_baker_restake_earnings = 7,
-    Update_baker_keys = 8,
-    Update_credential_keys = 13,
-    Encrypted_transfer = 16,
-    Transfer_to_encrypted = 17,
-    Transfer_to_public = 18,
-    Transfer_with_schedule = 19,
-    Update_credentials = 20,
-    Register_data = 21,
-}
 export interface SimpleTransferPayload {
     amount: string;
     toAddress: string;
@@ -290,7 +264,7 @@ export interface AccountTransaction<
     estimatedFee?: Fraction;
     cost?: string;
     expiry: bigint;
-    transactionKind: TransactionKindId;
+    transactionKind: AccountTransactionType;
     payload: PayloadType;
 }
 
@@ -306,13 +280,6 @@ export type UpdateBakerKeys = AccountTransaction<UpdateBakerKeysPayload>;
 export type RemoveBaker = AccountTransaction<RemoveBakerPayload>;
 export type UpdateBakerStake = AccountTransaction<UpdateBakerStakePayload>;
 export type UpdateBakerRestakeEarnings = AccountTransaction<UpdateBakerRestakeEarningsPayload>;
-
-// Types of block items, and their identifier numbers
-export enum BlockItemKind {
-    AccountTransactionKind = 0,
-    CredentialDeploymentKind = 1,
-    UpdateInstructionKind = 2,
-}
 
 export interface ChainArData {
     encIdCredPubShare: Hex;
@@ -442,15 +409,6 @@ export interface IdObjectRequest {
     // TODO: add remaining fields
 }
 
-// Statuses that a transaction can have.
-export enum TransactionStatus {
-    Finalized = 'finalized',
-    Committed = 'committed',
-    Failed = 'failed',
-    Rejected = 'rejected',
-    Pending = 'pending',
-}
-
 // Types of origins that a Transaction can have.
 export enum OriginType {
     Self = 'self',
@@ -486,20 +444,10 @@ export interface TransferTransactionWithNames extends TransferTransaction {
 
 export type EncryptedAmount = Hex;
 
-export interface AccountEncryptedAmount {
-    selfAmount: EncryptedAmount;
-    incomingAmounts: EncryptedAmount[];
-    startIndex: number;
-    numAggregated?: number;
-}
-
 export interface TypedCredentialDeploymentInformation {
     contents: CredentialDeploymentInformation;
     type: string;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AccountReleaseSchedule = any; // TODO
 
 interface AccountBakerDetails {
     restakeEarnings: boolean;
@@ -521,22 +469,6 @@ export type BakerPendingChange =
           change: 'RemoveBaker';
           epoch: number;
       };
-
-// Reflects the structure given by the node,
-// in a getAccountInforequest
-export interface AccountInfo {
-    accountAmount: string;
-    accountEncryptionKey: string;
-    accountThreshold: number;
-    accountReleaseSchedule: AccountReleaseSchedule;
-    accountBaker?: AccountBakerDetails;
-    accountEncryptedAmount: AccountEncryptedAmount;
-    accountCredentials: Record<
-        number,
-        Versioned<TypedCredentialDeploymentInformation>
-    >;
-    accountIndex: number;
-}
 
 // Reflects the type, which the account Release Schedule is comprised of.
 export interface ScheduleItem {
@@ -771,61 +703,65 @@ export function instanceOfAccountTransactionWithSignature(
 export function instanceOfSimpleTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is SimpleTransfer {
-    return object.transactionKind === TransactionKindId.Simple_transfer;
+    return object.transactionKind === AccountTransactionType.SimpleTransfer;
 }
 
 export function instanceOfTransferToEncrypted(
     object: AccountTransaction<TransactionPayload>
 ): object is TransferToEncrypted {
-    return object.transactionKind === TransactionKindId.Transfer_to_encrypted;
+    return (
+        object.transactionKind === AccountTransactionType.TransferToEncrypted
+    );
 }
 
 export function instanceOfTransferToPublic(
     object: AccountTransaction<TransactionPayload>
 ): object is TransferToPublic {
-    return object.transactionKind === TransactionKindId.Transfer_to_public;
+    return object.transactionKind === AccountTransactionType.TransferToPublic;
 }
 
 export function instanceOfEncryptedTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is EncryptedTransfer {
-    return object.transactionKind === TransactionKindId.Encrypted_transfer;
+    return object.transactionKind === AccountTransactionType.EncryptedTransfer;
 }
 
 export function instanceOfScheduledTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is ScheduledTransfer {
-    return object.transactionKind === TransactionKindId.Transfer_with_schedule;
+    return (
+        object.transactionKind === AccountTransactionType.TransferWithSchedule
+    );
 }
 
 export function instanceOfUpdateAccountCredentials(
     object: AccountTransaction<TransactionPayload>
 ): object is UpdateAccountCredentials {
-    return object.transactionKind === TransactionKindId.Update_credentials;
+    return object.transactionKind === AccountTransactionType.UpdateCredentials;
 }
 
 export function instanceOfAddBaker(
     object: AccountTransaction<TransactionPayload>
 ): object is AddBaker {
-    return object.transactionKind === TransactionKindId.Add_baker;
+    return object.transactionKind === AccountTransactionType.AddBaker;
 }
 
 export function instanceOfUpdateBakerKeys(
     object: AccountTransaction<TransactionPayload>
 ): object is UpdateBakerKeys {
-    return object.transactionKind === TransactionKindId.Update_baker_keys;
+    return object.transactionKind === AccountTransactionType.UpdateBakerKeys;
 }
 
 export function instanceOfRemoveBaker(
     object: AccountTransaction<TransactionPayload>
 ): object is AddBaker {
-    return object.transactionKind === TransactionKindId.Remove_baker;
+    return object.transactionKind === AccountTransactionType.RemoveBaker;
 }
 
 export function instanceOfUpdateBakerStake(
     object: AccountTransaction<TransactionPayload>
 ): object is UpdateBakerStake {
-    return object.transactionKind === TransactionKindId.Update_baker_stake;
+    return object.transactionKind === AccountTransactionType.UpdateBakerStake;
 }
 
 export function instanceOfUpdateBakerRestakeEarnings(
@@ -833,7 +769,7 @@ export function instanceOfUpdateBakerRestakeEarnings(
 ): object is UpdateBakerRestakeEarnings {
     return (
         object.transactionKind ===
-        TransactionKindId.Update_baker_restake_earnings
+        AccountTransactionType.UpdateBakerRestakeEarnings
     );
 }
 
@@ -978,8 +914,6 @@ export enum MultiSignatureMenuItems {
     SignTransaction = 'Sign transaction',
     ExportKey = 'Export public-key',
 }
-
-export type ExchangeRate = Fraction;
 
 /**
  * A reward fraction with a resolution of 1/100000, i.e. the

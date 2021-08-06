@@ -1,11 +1,11 @@
 import { Buffer } from 'buffer/';
 import EventEmitter from 'events';
+import { AttributesKeys, AttributeKey } from '@concordium/node-sdk';
 import { Transport } from './Transport';
 import {
     UnsignedCredentialDeploymentInformation,
     IdOwnershipProofs,
     CredentialDeploymentValues,
-    ChosenAttributesKeys,
 } from '~/utils/types';
 import {
     encodeWord64,
@@ -109,7 +109,7 @@ export async function signCredentialValues(
     const revealedAttributeTags: [number, string][] = Object.entries(
         credentialDeployment.policy.revealedAttributes
     ).map(([tagName, value]) => [
-        ChosenAttributesKeys[tagName as keyof typeof ChosenAttributesKeys],
+        AttributesKeys[tagName as AttributeKey],
         value,
     ]);
     revealedAttributeTags.sort((a, b) => a[0] - b[0]);

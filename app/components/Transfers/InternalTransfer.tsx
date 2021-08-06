@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useLocation } from 'react-router-dom';
+import { AccountTransactionType } from '@concordium/node-sdk';
 import { stringify } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
 import PickAmount from './PickAmount';
@@ -10,7 +11,6 @@ import {
     Account,
     TransferToEncrypted,
     TransferToPublic,
-    TransactionKindId,
     Fraction,
 } from '~/utils/types';
 import { toMicroUnits } from '~/utils/gtu';
@@ -24,7 +24,7 @@ interface Specific<T> {
     amountHeader: string;
     createTransaction: (address: string, amount: bigint, nonce: string) => T;
     location: string;
-    transactionKind: TransactionKindId;
+    transactionKind: AccountTransactionType;
 }
 
 interface Props<T> {

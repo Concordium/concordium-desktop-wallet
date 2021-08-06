@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Route, Switch, useRouteMatch } from 'react-router';
 import { FieldValues } from 'react-hook-form';
+import { BlockSummary, VerifyKey } from '@concordium/node-sdk';
 import Columns from '~/components/Columns/Columns';
-import { BlockSummary, Key } from '~/node/NodeApiTypes';
 import {
     AccessStructure,
     AccessStructureEnum,
@@ -12,7 +12,6 @@ import {
     KeyWithStatus,
     PublicKeyExportFormat,
     UpdateType,
-    VerifyKey,
 } from '~/utils/types';
 import styles from '../../common/MultiSignatureFlowPage.module.scss';
 import localStyles from './UpdateAuthorizationKeys.module.scss';
@@ -256,7 +255,7 @@ export default function UpdateAuthorizationKeys({
 
     function displayAccessStructure(
         accessStructure: AccessStructure,
-        keys: Key[]
+        keys: VerifyKey[]
     ) {
         return (
             <div key={accessStructure.type}>

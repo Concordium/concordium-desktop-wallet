@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Route, Switch, useRouteMatch } from 'react-router';
 import { FieldValues } from 'react-hook-form';
+import { BlockSummary, KeysWithThreshold } from '@concordium/node-sdk';
 import Columns from '~/components/Columns';
-import { BlockSummary, KeysWithThreshold } from '~/node/NodeApiTypes';
 import routes from '~/constants/routes.json';
 import styles from '../../common/MultiSignatureFlowPage.module.scss';
 import ProposeNewKey from './ProposeNewKey';

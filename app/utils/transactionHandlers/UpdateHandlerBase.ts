@@ -1,5 +1,5 @@
+import { Authorization, Authorizations } from '@concordium/node-sdk';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import { Authorization, Authorizations } from '~/node/NodeApiTypes';
 import {
     TransactionExportType,
     UpdateInstructionHandler,

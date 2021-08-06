@@ -1,13 +1,8 @@
 import { Buffer } from 'buffer/';
 import bs58check from 'bs58check';
 
-import {
-    VerifyKey,
-    YearMonth,
-    SchemeId,
-    CredentialDeploymentInformation,
-    ChosenAttributesKeys,
-} from './types';
+import { VerifyKey, AttributesKeys } from '@concordium/node-sdk';
+import { YearMonth, SchemeId, CredentialDeploymentInformation } from './types';
 
 export function putBase58Check(
     array: Uint8Array,
@@ -171,7 +166,7 @@ export function serializeCredentialDeploymentInformation(
         number,
         string
     ][] = revealedAttributes.map(([tagName, value]) => [
-        ChosenAttributesKeys[tagName as keyof typeof ChosenAttributesKeys],
+        AttributesKeys[tagName as keyof typeof AttributesKeys],
         value,
     ]);
     revealedAttributeTags

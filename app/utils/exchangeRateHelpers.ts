@@ -1,4 +1,4 @@
-import { ExchangeRate } from './types';
+import { ExchangeRate } from '@concordium/node-sdk';
 
 const getGCD = (a: bigint, b: bigint): bigint => (b ? getGCD(b, a % b) : a);
 

@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { AccountEncryptedAmount } from '@concordium/node-sdk';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
 // eslint-disable-next-line import/no-cycle
@@ -25,21 +26,19 @@ import {
 } from '../utils/rustInterface';
 import {
     AccountStatus,
-    TransactionStatus,
-    AccountEncryptedAmount,
     Account,
     AccountInfo,
     Dispatch,
     Global,
     Identity,
     TransactionKindString,
+    TransactionStatus,
 } from '../utils/types';
 import { getStatus } from '../utils/transactionHelpers';
 import {
     isValidAddress,
     getInitialEncryptedAmount,
 } from '../utils/accountHelpers';
-
 import { getAccountInfos, getAccountInfoOfAddress } from '../node/nodeHelpers';
 import { hasPendingTransactions } from '~/database/TransactionDao';
 
@@ -172,9 +171,11 @@ async function initializeGenesisAccount(
     accountInfo: AccountInfo
 ) {
     const localCredentials = await getCredentialsOfAccount(account.address);
-    const firstCredential = accountInfo.accountCredentials[0].value.contents;
+    const firstCredential = accountInfo.accountCredentials[0].value;
     const address = await getAddressFromCredentialId(
-        firstCredential.regId || firstCredential.credId
+        firstCredential.type === 'initial'
+            ? firstCredential.contents.regId
+            : firstCredential.contents.credId
     );
     const accountUpdate = {
         address,

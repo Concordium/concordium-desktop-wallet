@@ -28,7 +28,7 @@ export default function withNonce<TProps extends WithAccount>(
 
         useEffect(() => {
             getNextAccountNonce(account.address)
-                .then((accountNonce) => setNonce(accountNonce.nonce))
+                .then((accountNonce) => setNonce(accountNonce.nonce.toString()))
                 .catch(() => setShowError(true));
             // eslint-disable-next-line react-hooks/exhaustive-deps
         }, []);

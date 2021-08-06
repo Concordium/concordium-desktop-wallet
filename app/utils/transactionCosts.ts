@@ -1,8 +1,8 @@
+import { AccountTransactionType } from '@concordium/node-sdk';
 import {
     AccountTransaction,
     Fraction,
     instanceOfScheduledTransfer,
-    TransactionKindId,
     UpdateAccountCredentialsPayload,
 } from './types';
 import { serializeTransferPayload } from './transactionSerialization';
@@ -75,50 +75,50 @@ export function calculateCost(
     );
 }
 
-function getPayloadSizeEstimate(transactionKind: TransactionKindId) {
+function getPayloadSizeEstimate(transactionKind: AccountTransactionType) {
     switch (transactionKind) {
-        case TransactionKindId.Simple_transfer:
+        case AccountTransactionType.SimpleTransfer:
             return payloadSizeEstimate.SimpleTransfer;
-        case TransactionKindId.Encrypted_transfer:
+        case AccountTransactionType.EncryptedTransfer:
             return payloadSizeEstimate.EncryptedTransfer;
-        case TransactionKindId.Transfer_to_encrypted:
+        case AccountTransactionType.TransferToEncrypted:
             return payloadSizeEstimate.TransferToEncrypted;
-        case TransactionKindId.Transfer_to_public:
+        case AccountTransactionType.TransferToPublic:
             return payloadSizeEstimate.TransferToPublic;
-        case TransactionKindId.Add_baker:
+        case AccountTransactionType.AddBaker:
             return payloadSizeEstimate.AddBaker;
-        case TransactionKindId.Update_baker_keys:
+        case AccountTransactionType.UpdateBakerKeys:
             return payloadSizeEstimate.UpdateBakerKeys;
-        case TransactionKindId.Remove_baker:
+        case AccountTransactionType.RemoveBaker:
             return payloadSizeEstimate.RemoveBaker;
-        case TransactionKindId.Update_baker_stake:
+        case AccountTransactionType.UpdateBakerStake:
             return payloadSizeEstimate.UpdateBakerStake;
-        case TransactionKindId.Update_baker_restake_earnings:
+        case AccountTransactionType.UpdateBakerRestakeEarnings:
             return payloadSizeEstimate.UpdateBakerRestakeEarnings;
         default:
             throw new Error(`Unsupported transaction type: ${transactionKind}`);
     }
 }
 
-function getEnergyCostOfType(transactionKind: TransactionKindId) {
+function getEnergyCostOfType(transactionKind: AccountTransactionType) {
     switch (transactionKind) {
-        case TransactionKindId.Simple_transfer:
+        case AccountTransactionType.SimpleTransfer:
             return energyConstants.SimpleTransferCost;
-        case TransactionKindId.Encrypted_transfer:
+        case AccountTransactionType.EncryptedTransfer:
             return energyConstants.EncryptedTransferCost;
-        case TransactionKindId.Transfer_to_encrypted:
+        case AccountTransactionType.TransferToEncrypted:
             return energyConstants.TransferToEncryptedCost;
-        case TransactionKindId.Transfer_to_public:
+        case AccountTransactionType.TransferToPublic:
             return energyConstants.TransferToPublicCost;
-        case TransactionKindId.Add_baker:
+        case AccountTransactionType.AddBaker:
             return energyConstants.AddBaker;
-        case TransactionKindId.Update_baker_keys:
+        case AccountTransactionType.UpdateBakerKeys:
             return energyConstants.UpdateBakerKeys;
-        case TransactionKindId.Remove_baker:
+        case AccountTransactionType.RemoveBaker:
             return energyConstants.RemoveBaker;
-        case TransactionKindId.Update_baker_stake:
+        case AccountTransactionType.UpdateBakerStake:
             return energyConstants.UpdateBakerStake;
-        case TransactionKindId.Update_baker_restake_earnings:
+        case AccountTransactionType.UpdateBakerRestakeEarnings:
             return energyConstants.UpdateBakerRestakeEarnings;
         default:
             throw new Error(`Unsupported transaction type: ${transactionKind}`);
@@ -181,7 +181,7 @@ export function getTransactionEnergyCost(
  *  Given the signatureAmount and payloadSize, returns the energy cost of the transaction type.
  */
 export function getTransactionKindEnergy(
-    transactionKind: TransactionKindId,
+    transactionKind: AccountTransactionType,
     payloadSize: number = getPayloadSizeEstimate(transactionKind),
     signatureAmount = 1
 ): bigint {
@@ -199,7 +199,7 @@ export function getUpdateAccountCredentialEnergy(
     signatureAmount = 1
 ) {
     const payloadSize = serializeTransferPayload(
-        TransactionKindId.Update_credentials,
+        AccountTransactionType.UpdateCredentials,
         payload
     ).length;
 
@@ -229,7 +229,7 @@ function energyToCost(energy: bigint, exchangeRate: Fraction): Fraction {
  *  Given the signatureAmount and payloadSize, returns the estimated MicroGTU cost of the transaction type.
  */
 export function getTransactionKindCost(
-    transactionKind: TransactionKindId,
+    transactionKind: AccountTransactionType,
     energyToMicroGtu: Fraction,
     signatureAmount = 1,
     payloadSize: number = getPayloadSizeEstimate(transactionKind)

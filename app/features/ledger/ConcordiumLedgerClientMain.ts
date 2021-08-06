@@ -2,6 +2,7 @@
 import type HwTransport from '@ledgerhq/hw-transport';
 import { Buffer } from 'buffer/';
 import EventEmitter from 'events';
+import { ExchangeRate } from '@concordium/node-sdk';
 import { Transport, TransportImpl } from './Transport';
 import {
     getPublicKey,
@@ -19,7 +20,6 @@ import {
     AccountTransaction,
     BakerStakeThreshold,
     ElectionDifficulty,
-    ExchangeRate,
     FoundationAccount,
     GasRewards,
     MintDistribution,

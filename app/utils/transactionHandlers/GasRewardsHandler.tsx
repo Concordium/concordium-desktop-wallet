@@ -1,4 +1,5 @@
 import React from 'react';
+import { BlockSummary, Authorizations } from '@concordium/node-sdk';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
 import GasRewardsView from '~/pages/multisig/updates/GasRewards/GasRewardsView';
@@ -6,7 +7,6 @@ import UpdateGasRewards, {
     UpdateGasRewardsFields,
 } from '~/pages/multisig/updates/GasRewards/UpdateGasRewards';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     GasRewards,

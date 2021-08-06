@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { push } from 'connected-react-router';
 import { useDispatch } from 'react-redux';
 import { Switch, Route, useLocation, Redirect } from 'react-router-dom';
+import { AttributeKey } from '@concordium/node-sdk';
 import routes from '~/constants/routes.json';
-import { ChosenAttributes, Identity } from '~/utils/types';
+import { Identity } from '~/utils/types';
 import PageLayout from '~/components/PageLayout';
 import PickName from './PickName';
 import PickIdentity from './PickIdentity';
@@ -34,7 +35,7 @@ export default function AccountCreationPage(): JSX.Element {
     const [accountName, setAccountName] = useState('');
     const [identity, setIdentity] = useState<Identity | undefined>();
     const [chosenAttributes, setChosenAttributes] = useState<
-        Array<keyof ChosenAttributes>
+        Array<AttributeKey>
     >([]);
     const { pathname } = useLocation();
 

@@ -1,5 +1,4 @@
-import { BlockSummary } from '~/node/NodeApiTypes';
-import { ExchangeRate } from '~/utils/types';
+import { BlockSummary, ExchangeRate } from '@concordium/node-sdk';
 import { RelativeRateFieldProps } from '../../common/RelativeRateField';
 
 export const getCurrentValue = (blockSummary: BlockSummary): ExchangeRate =>

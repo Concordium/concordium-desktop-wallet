@@ -1,12 +1,9 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { AccountTransactionType } from '@concordium/node-sdk';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import { foundationTransactionsEnabledSelector } from '~/features/SettingsSlice';
-import {
-    TransactionTypes,
-    UpdateType,
-    TransactionKindId as TransactionKind,
-} from '~/utils/types';
+import { TransactionTypes, UpdateType } from '~/utils/types';
 import { createProposalRoute } from '~/utils/routerHelper';
 import { proposalsSelector } from '~/features/MultiSignatureSlice';
 import { expireProposals } from '~/utils/ProposalHelper';
@@ -89,47 +86,47 @@ const updateInstructionTypes: [TransactionTypes, UpdateType, string][] = [
 
 const accountTransactionTypes: [
     TransactionTypes,
-    UpdateType | TransactionKind,
+    UpdateType | AccountTransactionType,
     string
 ][] = [
     [
         TransactionTypes.AccountTransaction,
-        TransactionKind.Update_credentials,
+        AccountTransactionType.UpdateCredentials,
         'Update Account Credentials',
     ],
     [
         TransactionTypes.AccountTransaction,
-        TransactionKind.Simple_transfer,
+        AccountTransactionType.SimpleTransfer,
         'Send GTU',
     ],
     [
         TransactionTypes.AccountTransaction,
-        TransactionKind.Transfer_with_schedule,
+        AccountTransactionType.TransferWithSchedule,
         'Send GTU with a schedule',
     ],
     [
         TransactionTypes.AccountTransaction,
-        TransactionKind.Add_baker,
+        AccountTransactionType.AddBaker,
         'Add Baker',
     ],
     [
         TransactionTypes.AccountTransaction,
-        TransactionKind.Update_baker_keys,
+        AccountTransactionType.UpdateBakerKeys,
         'Update Baker Keys',
     ],
     [
         TransactionTypes.AccountTransaction,
-        TransactionKind.Remove_baker,
+        AccountTransactionType.RemoveBaker,
         'Remove Baker',
     ],
     [
         TransactionTypes.AccountTransaction,
-        TransactionKind.Update_baker_stake,
+        AccountTransactionType.UpdateBakerStake,
         'Update Baker Stake',
     ],
     [
         TransactionTypes.AccountTransaction,
-        TransactionKind.Update_baker_restake_earnings,
+        AccountTransactionType.UpdateBakerRestakeEarnings,
         'Update Baker Restake Earnings',
     ],
 ];

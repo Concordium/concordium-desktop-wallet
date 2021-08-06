@@ -1,6 +1,6 @@
+import { ConsensusStatus } from '@concordium/node-sdk';
 import { setClientLocation, grpcCall } from '~/node/GRPCClient';
 import ConcordiumNodeClient from '~/node/ConcordiumNodeClient';
-import { ConsensusStatus } from '~/node/NodeApiTypes';
 import { JsonResponse } from '~/proto/concordium_p2p_rpc_pb';
 import { GRPC } from '~/preload/preloadTypes';
 

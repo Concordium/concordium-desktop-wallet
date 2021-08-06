@@ -1,3 +1,4 @@
+import { AccountTransactionType } from '@concordium/node-sdk';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import {
     UpdateInstructionHandler,
@@ -6,7 +7,6 @@ import {
 } from '~/utils/transactionTypes';
 import {
     instanceOfUpdateInstruction,
-    TransactionKindId,
     AccountTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
@@ -44,41 +44,41 @@ import BakerHandler from './BakerHandler';
 import { parse } from '../JSONHelper';
 
 export function findAccountTransactionHandler(
-    transactionKind: TransactionKindId
+    transactionKind: AccountTransactionType
 ): AccountTransactionHandler<
     AccountTransaction,
     ConcordiumLedgerClient,
     Transaction
 > {
-    if (transactionKind === TransactionKindId.Update_credentials) {
+    if (transactionKind === AccountTransactionType.UpdateCredentials) {
         return new AccountHandlerTypeMiddleware(
             new UpdateAccountCredentialsHandler()
         );
     }
-    if (transactionKind === TransactionKindId.Simple_transfer) {
+    if (transactionKind === AccountTransactionType.SimpleTransfer) {
         return new AccountHandlerTypeMiddleware(new SimpleTransferHandler());
     }
-    if (transactionKind === TransactionKindId.Add_baker) {
+    if (transactionKind === AccountTransactionType.AddBaker) {
         return new AccountHandlerTypeMiddleware(
             new BakerHandler('Add Baker', instanceOfAddBaker)
         );
     }
-    if (transactionKind === TransactionKindId.Update_baker_keys) {
+    if (transactionKind === AccountTransactionType.UpdateBakerKeys) {
         return new AccountHandlerTypeMiddleware(
             new BakerHandler('Update Baker Keys', instanceOfUpdateBakerKeys)
         );
     }
-    if (transactionKind === TransactionKindId.Remove_baker) {
+    if (transactionKind === AccountTransactionType.RemoveBaker) {
         return new AccountHandlerTypeMiddleware(
             new BakerHandler('Remove Baker', instanceOfRemoveBaker)
         );
     }
-    if (transactionKind === TransactionKindId.Update_baker_stake) {
+    if (transactionKind === AccountTransactionType.UpdateBakerStake) {
         return new AccountHandlerTypeMiddleware(
             new BakerHandler('Update Baker Stake', instanceOfUpdateBakerStake)
         );
     }
-    if (transactionKind === TransactionKindId.Update_baker_restake_earnings) {
+    if (transactionKind === AccountTransactionType.UpdateBakerRestakeEarnings) {
         return new AccountHandlerTypeMiddleware(
             new BakerHandler(
                 'Update Baker Restake Earnings',
@@ -86,18 +86,18 @@ export function findAccountTransactionHandler(
             )
         );
     }
-    if (transactionKind === TransactionKindId.Encrypted_transfer) {
+    if (transactionKind === AccountTransactionType.EncryptedTransfer) {
         return new AccountHandlerTypeMiddleware(new EncryptedTransferHandler());
     }
-    if (transactionKind === TransactionKindId.Transfer_with_schedule) {
+    if (transactionKind === AccountTransactionType.TransferWithSchedule) {
         return new AccountHandlerTypeMiddleware(new ScheduledTransferHandler());
     }
-    if (transactionKind === TransactionKindId.Transfer_to_encrypted) {
+    if (transactionKind === AccountTransactionType.TransferToEncrypted) {
         return new AccountHandlerTypeMiddleware(
             new TransferToEncryptedHandler()
         );
     }
-    if (transactionKind === TransactionKindId.Transfer_to_public) {
+    if (transactionKind === AccountTransactionType.TransferToPublic) {
         return new AccountHandlerTypeMiddleware(new TransferToPublicHandler());
     }
     throw new Error(`Unsupported transaction type: ${transactionKind}`);

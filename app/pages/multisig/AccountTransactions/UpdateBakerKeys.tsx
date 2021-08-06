@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
+import { AccountTransactionType } from '@concordium/node-sdk';
 import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
 import {
     Account,
-    TransactionKindId,
     UpdateBakerKeysPayload,
     UpdateBakerKeys,
     Fraction,
@@ -65,7 +65,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
     const [transaction, setTransaction] = useState<UpdateBakerKeys>();
 
     const estimatedFee = useTransactionCostEstimate(
-        TransactionKindId.Update_baker_keys,
+        AccountTransactionType.UpdateBakerKeys,
         exchangeRate,
         account?.signatureThreshold
     );
@@ -110,7 +110,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
             createUpdateBakerKeysTransaction(
                 account.address,
                 payload,
-                accountNonce.nonce,
+                accountNonce.nonce.toString(),
                 account?.signatureThreshold,
                 expiryTime
             )
@@ -204,7 +204,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                                                 push(
                                                     getLocationAfterAccounts(
                                                         url,
-                                                        TransactionKindId.Update_baker_keys
+                                                        AccountTransactionType.UpdateBakerKeys
                                                     )
                                                 )
                                             );
