@@ -1,5 +1,6 @@
+/* eslint-disable */
 import { WindowFunctions } from './preload/preloadTypes';
 
 declare global {
-    type Window = WindowFunctions;
+    interface Window extends WindowFunctions {}
 }
