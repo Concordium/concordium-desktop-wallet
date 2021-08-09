@@ -1,13 +1,15 @@
-import { AttributeKey } from '~/utils/identityHelpers';
 import {
+    AttributeKeyName,
     AccountInfo,
     CredentialDeploymentInformation,
     EqualRecord,
     Identity,
+    CommitmentsRandomness,
 } from '~/utils/types';
 
 export interface CredentialBlob {
     credential: CredentialDeploymentInformation;
+    randomness: CommitmentsRandomness;
     identityId: number;
     credentialNumber: number;
     address: string;
@@ -18,7 +20,7 @@ export interface AccountForm {
     address: string;
     accountInfo: AccountInfo;
     accountName: string;
-    chosenAttributes: AttributeKey[];
+    chosenAttributes: AttributeKeyName[];
     credential: CredentialBlob;
 }
 

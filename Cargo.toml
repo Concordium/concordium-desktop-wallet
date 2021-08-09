@@ -20,7 +20,7 @@ wasm-bindgen = { version = "0.2.68", features = ["serde-serialize"] }
 
 libc = "0.2"
 pairing = "0.15"
-failure = "0.1"
+anyhow = "1.0"
 ed25519-dalek = {version = "=1.0.0", features = ["serde"] }
 hex = "0.4"
 ff = "0.5"
