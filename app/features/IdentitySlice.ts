@@ -6,13 +6,7 @@ import {
     insertIdentity,
     updateIdentity,
 } from '../database/IdentityDao';
-import {
-    Identity,
-    IdentityStatus,
-    IdentityObject,
-    IdentityProvider,
-    Dispatch,
-} from '../utils/types';
+import { Identity, IdentityStatus, Dispatch } from '../utils/types';
 
 interface IdentityState {
     identities: Identity[];
@@ -62,46 +56,6 @@ export const chosenIdentitySelector = (state: RootState) =>
 export async function loadIdentities(dispatch: Dispatch) {
     const identities: Identity[] = await getAllIdentities();
     dispatch(updateIdentities(identities));
-}
-
-export async function addPendingIdentity(
-    identityNumber: number,
-    dispatch: Dispatch,
-    identityName: string,
-    codeUri: string,
-    identityProvider: IdentityProvider,
-    randomness: string,
-    walletId: number
-) {
-    const identity = {
-        identityNumber,
-        name: identityName,
-        status: IdentityStatus.Pending,
-        codeUri,
-        identityProvider: JSON.stringify(identityProvider),
-        randomness,
-        walletId,
-    };
-    const identityId = await insertIdentity(identity);
-    loadIdentities(dispatch);
-    return identityId[0];
-}
-
-export async function confirmIdentity(
-    dispatch: Dispatch,
-    identityId: number,
-    identityObject: IdentityObject
-) {
-    await updateIdentity(identityId, {
-        status: IdentityStatus.Confirmed,
-        identityObject: JSON.stringify(identityObject),
-    });
-    await loadIdentities(dispatch);
-}
-
-export async function rejectIdentity(dispatch: Dispatch, identityId: number) {
-    await updateIdentity(identityId, { status: IdentityStatus.Rejected });
-    await loadIdentities(dispatch);
 }
 
 export async function importIdentities(
