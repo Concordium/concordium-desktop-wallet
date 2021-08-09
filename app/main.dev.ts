@@ -16,7 +16,7 @@ import log from 'electron-log';
 import ipcCommands from './constants/ipcCommands.json';
 import ipcRendererCommands from './constants/ipcRendererCommands.json';
 import initializeIpcHandlers from './ipc/http';
-import initializeLedgerIpcHandlers from './ipc/ledger';
+import initializeLedgerIpcHandlers from './ipc/ledger/ledger';
 import initializeCryptoIpcHandlers from './ipc/crypto';
 import initializeDatabaseGeneralIpcHandlers from './ipc/database/general';
 import initializeDatabaseAccountIpcHandlers from './ipc/database/accountDao';
@@ -79,6 +79,12 @@ const createWindow = async () => {
     }
 
     const titleSuffix = process.env.TARGET_NET || '';
+    const commonMainPreferences: Electron.WebPreferences = {
+        nodeIntegration: false,
+        contextIsolation: false,
+        worldSafeExecuteJavaScript: false,
+        webviewTag: true,
+    };
 
     /**
      * Do not change any of the webpreference settings without consulting the
@@ -101,15 +107,14 @@ const createWindow = async () => {
         webPreferences:
             process.env.NODE_ENV === 'development'
                 ? {
+                      ...commonMainPreferences,
                       preload: path.join(__dirname, 'preload.dev.js'),
-                      nodeIntegration: false,
-                      webviewTag: true,
                       devTools: true,
                   }
                 : {
+                      ...commonMainPreferences,
                       preload: path.join(__dirname, 'dist/preload.prod.js'),
-                      nodeIntegration: false,
-                      webviewTag: true,
+
                       devTools: false,
                   },
     });
@@ -154,6 +159,7 @@ const createWindow = async () => {
         webPreferences: {
             nodeIntegration: false,
             devTools: false,
+            contextIsolation: false,
         },
     });
 
