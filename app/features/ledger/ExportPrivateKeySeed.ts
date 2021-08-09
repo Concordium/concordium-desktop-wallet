@@ -1,13 +1,15 @@
 import { Buffer } from 'buffer/';
 import { Transport } from './Transport';
+import { PrivateKeySeeds } from '~/utils/types';
 
 const INS_EXPORT_PRIVATE_KEY_SEED = 0x05;
+const P1_PRF_KEY = 0;
+const P1_BOTH_KEYS = 1;
 
-async function getAccountPrivateKeySeed(
+export async function getPrivateKeySeeds(
     transport: Transport,
-    p1: number,
     identity: number
-) {
+): Promise<PrivateKeySeeds> {
     const data = Buffer.alloc(4);
     data.writeInt32BE(identity, 0);
 
@@ -16,35 +18,30 @@ async function getAccountPrivateKeySeed(
     const response = await transport.send(
         0xe0,
         INS_EXPORT_PRIVATE_KEY_SEED,
-        p1,
+        P1_BOTH_KEYS,
         p2,
         data
     );
-    const idCredSec = response.slice(0, 32);
-    const prfKey = response.slice(32, 64);
+    const prfKey = response.slice(0, 32);
+    const idCredSec = response.slice(32, 64);
     return { idCredSec, prfKey };
-}
-
-export async function getIdCredSec(
-    transport: Transport,
-    identity: number
-): Promise<Buffer> {
-    const { idCredSec } = await getAccountPrivateKeySeed(
-        transport,
-        0x01,
-        identity
-    );
-    return idCredSec;
 }
 
 export async function getPrfKey(
     transport: Transport,
     identity: number
 ): Promise<Buffer> {
-    const { prfKey } = await getAccountPrivateKeySeed(
-        transport,
-        0x01,
-        identity
+    const data = Buffer.alloc(4);
+    data.writeInt32BE(identity, 0);
+
+    const p2 = 0x00;
+
+    const response = await transport.send(
+        0xe0,
+        INS_EXPORT_PRIVATE_KEY_SEED,
+        P1_PRF_KEY,
+        p2,
+        data
     );
-    return prfKey;
+    return response.slice(0, 32);
 }

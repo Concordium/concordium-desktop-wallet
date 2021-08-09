@@ -2,7 +2,7 @@
     "getPublicKey": "LEDGER_GET_PUBLIC_KEY",
     "getPublicKeySilent": "LEDGER_GET_PUBLIC_KEY_SILENT",
     "getSignedPublicKey": "LEDGER_GET_SIGNED_PUBLIC_KEY",
-    "getIdCredSec": "LEDGER_GET_ID_CRED_SEC",
+    "getPrivateKeySeeds": "LEDGER_GET_PRIVATE_KEY_SEEDS",
     "getPrfKey": "LEDGER_GET_PRF_KEY",
     "signTransfer": "LEDGER_SIGN_TRANSFER",
     "signUpdateCredentialTransaction": "LEDGER_SIGN_UPDATE_CREDENTIAL_TRANSACTION",

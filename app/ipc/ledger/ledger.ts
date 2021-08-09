@@ -52,9 +52,9 @@ export default function initializeIpcHandlers(
     );
 
     ipcMain.handle(
-        ledgerIpcCommands.getIdCredSec,
+        ledgerIpcCommands.getPrivateKeySeeds,
         (_event, identity: number) => {
-            return getLedgerClient().getIdCredSec(identity);
+            return getLedgerClient().getPrivateKeySeeds(identity);
         }
     );
 

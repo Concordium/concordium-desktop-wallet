@@ -10,7 +10,7 @@ import {
 } from './GetPublicKey';
 import signTransfer from './Transfer';
 import signPublicInformationForIp from './PublicInformationForIp';
-import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
+import { getPrfKey, getPrivateKeySeeds } from './ExportPrivateKeySeed';
 import {
     signCredentialDeploymentOnNewAccount,
     signCredentialDeploymentOnExistingAccount,
@@ -107,8 +107,8 @@ export default class ConcordiumLedgerClientMain {
         return wrapResult(getSignedPublicKey, this.transport, path);
     }
 
-    getIdCredSec(identity: number): Promise<LedgerIpcMessage<Buffer>> {
-        return wrapResult(getIdCredSec, this.transport, identity);
+    getPrivateKeySeeds(identity: number) {
+        return wrapResult(getPrivateKeySeeds, this.transport, identity);
     }
 
     getPrfKey(identity: number): Promise<LedgerIpcMessage<Buffer>> {

@@ -26,10 +26,7 @@ const IPDetails = (info: PublicInformationForIp) => (
     <div className="textLeft">
         <p className="mT0">Please confirm details on ledger:</p>
         <p>
-            <b>Identity Credentials Public (IdCredPub):</b> {info.idCredPub}
-        </p>
-        <p>
-            <b>Registration ID (RegId):</b> {info.regId}
+            <b>Credential Identifier (CredId):</b> {info.regId}
         </p>
         <p>
             <b>Public key:</b> {info.publicKeys.keys[0].verifyKey}

@@ -35,11 +35,13 @@ async function getSecretsFromLedger(
     displayMessage: (message: string) => void,
     identityNumber: number
 ) {
-    displayMessage('Please confirm exporting PRF key on device');
-    const prfKeySeed = await ledger.getPrfKey(identityNumber);
-
-    displayMessage('Please confirm exporting IdCredSec on device');
-    const idCredSecSeed = await ledger.getIdCredSec(identityNumber);
+    displayMessage(
+        'Please confirm exporting private key to create credential from device'
+    );
+    const {
+        prfKey: prfKeySeed,
+        idCredSec: idCredSecSeed,
+    } = await ledger.getPrivateKeySeeds(identityNumber);
 
     const prfKey = prfKeySeed.toString('hex');
     const idCredSec = idCredSecSeed.toString('hex');

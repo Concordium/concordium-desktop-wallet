@@ -2,6 +2,7 @@
 import { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import { HTMLAttributes } from 'react';
 import { RegisterOptions } from 'react-hook-form';
+import { Buffer } from 'buffer/';
 import { RejectReason } from './node/RejectReasonHelper';
 import { ExternalCredential, Genesis } from '~/database/types';
 
@@ -1329,3 +1330,8 @@ export enum PrintErrorTypes {
     Failed = 'failed',
     NoPrinters = 'no valid printers available',
 }
+
+export type PrivateKeySeeds = {
+    idCredSec: Buffer;
+    prfKey: Buffer;
+};

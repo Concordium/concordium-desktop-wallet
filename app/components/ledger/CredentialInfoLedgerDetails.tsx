@@ -17,16 +17,14 @@ const CredentialInfoLedgerDetails = (props: Props) => (
             <b>Signature threshold:</b> {props.credentialPublicKeys.threshold}
         </p>
         <p>
-            <b>Registration ID credential (RegIdCred):</b> {props.credId}
-        </p>
-        <p>
-            <b>Identity provider:</b> {props.ipIdentity}
+            <b>Credential Identifier (CredId):</b> {props.credId}
         </p>
         <p>
             <b>Revocation threshold:</b> {props.revocationThreshold}
         </p>
         <p>
-            <b>Valid to:</b> {formatDate(props.policy.validTo)}
+            <b>Identity Valid atleast to (Id Valid to &gt;=):</b>{' '}
+            {formatDate(props.policy.validTo)}
         </p>
         <p>
             <b>Created at:</b> {formatDate(props.policy.createdAt)}

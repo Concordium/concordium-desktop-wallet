@@ -17,6 +17,7 @@ import {
     UpdateAccountCredentials,
     AuthorizationKeysUpdate,
     Hex,
+    PrivateKeySeeds,
 } from '~/utils/types';
 import { AccountPathInput } from './Path';
 import { AppAndVersion } from './GetAppAndVersion';
@@ -73,12 +74,18 @@ export default class ConcordiumLedgerClient {
         return unwrapLedgerIpcMessage(result);
     }
 
-    async getIdCredSec(identity: number): Promise<Buffer> {
-        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
-            ledgerIpcCommands.getIdCredSec,
+    async getPrivateKeySeeds(identity: number): Promise<PrivateKeySeeds> {
+        const result: LedgerIpcMessage<PrivateKeySeeds> = await window.ipcRenderer.invoke(
+            ledgerIpcCommands.getPrivateKeySeeds,
             identity
         );
-        return unwrapLedgerIpcMessage<Buffer>(result, Buffer.from);
+        return unwrapLedgerIpcMessage<PrivateKeySeeds>(
+            result,
+            ({ prfKey, idCredSec }) => ({
+                prfKey: Buffer.from(prfKey),
+                idCredSec: Buffer.from(idCredSec),
+            })
+        );
     }
 
     async getPrfKey(identity: number): Promise<Buffer> {
