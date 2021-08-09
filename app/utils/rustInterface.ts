@@ -238,7 +238,6 @@ export async function createCredentialInfo(
         signature: signature.toString('hex'),
         unsignedInfo: stringify(cdi),
     });
-    console.log(credentialDeploymentInfoString);
 
     displayMessage('Please wait');
     return { info: JSON.parse(credentialDeploymentInfoString), randomness };
