@@ -33,7 +33,7 @@ jobs:
             - name: Install rust
               if: steps.fetch-dependencies.outputs.cache-hit != 'true'
               run: |
-                  rustup default stable
+                  rustup default 1.53
 
             - name: Get linux packages
               if: steps.fetch-dependencies.outputs.cache-hit != 'true'
