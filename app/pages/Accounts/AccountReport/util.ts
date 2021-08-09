@@ -2,7 +2,6 @@ import {
     Account,
     TransferTransaction,
     TransactionKindString,
-    TransactionStatus,
     TransferTransactionWithNames,
 } from '~/utils/types';
 import {
@@ -118,12 +117,6 @@ function parseTransaction(
     );
     if (!isOutgoing) {
         fieldValues.cost = '';
-    }
-    if (
-        fieldValues.status === TransactionStatus.Finalized &&
-        !transaction.success
-    ) {
-        fieldValues.status = TransactionStatus.Failed;
     }
 
     return exportedFields.map((field) => fieldValues[getName(field)]);

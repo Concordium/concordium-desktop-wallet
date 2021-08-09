@@ -4,6 +4,7 @@ import ipcCommands from '../constants/ipcCommands.json';
 import { walletProxytransactionLimit } from '../constants/externalConstants.json';
 import { getTargetNet, Net } from '~/utils/ConfigHelper';
 import urls from '../constants/urls.json';
+import { intToString, parse } from '~/utils/JSONHelper';
 
 function getWalletProxy() {
     const targetNet = getTargetNet();
@@ -33,18 +34,22 @@ async function httpsGet(urlString: string, params: Record<string, string>) {
     }, 60000);
 
     const searchParams = new URLSearchParams(params);
-    const response = await axios.get(
-        `${urlString}?${searchParams.toString()}`,
-        {
-            cancelToken: source.token,
-            maxRedirects: 0,
-            validateStatus(status: number) {
-                // We also want to accept a 302 redirect, as that is used by the
-                // identity provider flow
-                return status >= 200 && status <= 302;
-            },
-        }
-    );
+    let urlGet: string;
+    if (Object.entries(params).length === 0) {
+        urlGet = urlString;
+    } else {
+        urlGet = `${urlString}?${searchParams.toString()}`;
+    }
+
+    const response = await axios.get(urlGet, {
+        cancelToken: source.token,
+        maxRedirects: 0,
+        validateStatus(status: number) {
+            // We also want to accept a 302 redirect, as that is used by the
+            // identity provider flow
+            return status >= 200 && status <= 302;
+        },
+    });
     clearTimeout(timeout);
 
     return JSON.stringify({
@@ -72,7 +77,10 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
         ipcCommands.getTransactions,
         async (_event, address: string, id: number) => {
             const response = await walletProxy.get(
-                `/v0/accTransactions/${address}?limit=${walletProxytransactionLimit}&from=${id}&includeRawRejectReason`
+                `/v0/accTransactions/${address}?limit=${walletProxytransactionLimit}&from=${id}&includeRawRejectReason`,
+                {
+                    transformResponse: (res) => parse(intToString(res, 'id')),
+                }
             );
             const { transactions, count, limit } = response.data;
             return { transactions, full: count === limit };

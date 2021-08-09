@@ -38,7 +38,7 @@ interface GetTransactionsOutput {
 
 export async function getTransactions(
     address: string,
-    id = 0
+    id = '0'
 ): Promise<GetTransactionsOutput> {
     return window.ipcRenderer.invoke(ipcCommands.getTransactions, address, id);
 }

@@ -7,7 +7,7 @@ import {
     YearMonth,
     SchemeId,
     CredentialDeploymentInformation,
-    ChosenAttributesKeys,
+    AttributeKey,
 } from './types';
 
 export function putBase58Check(
@@ -172,7 +172,7 @@ export function serializeCredentialDeploymentInformation(
         number,
         string
     ][] = revealedAttributes.map(([tagName, value]) => [
-        ChosenAttributesKeys[tagName as keyof typeof ChosenAttributesKeys],
+        AttributeKey[tagName as keyof typeof AttributeKey],
         value,
     ]);
     revealedAttributeTags
