@@ -470,7 +470,7 @@ async function importDuplicateWallets(
 
         const newIdentityId = identityInDatabase.id;
 
-        // If there is a naming conflict between the names, ask the user to resolve it.
+        // If there is a name conflict, resolve it.
         if (existingIdentity.name !== identityInDatabase.name) {
             const chosenName = await resolveConflict(
                 identityInDatabase.name,

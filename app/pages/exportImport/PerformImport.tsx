@@ -61,32 +61,30 @@ export async function importAddressBookEntries(
         await importAddressBookEntry(nonDuplicates);
     }
     const trueDuplicates = [];
-    if (duplicates.length > 0) {
-        for (const duplicate of duplicates) {
-            const { address } = duplicate;
-            const match = addressBook.find((abe) => abe.address === address);
-            if (!match) {
-                // eslint-disable-next-line no-continue
-                continue;
+    for (const duplicate of duplicates) {
+        const { address } = duplicate;
+        const match = addressBook.find((abe) => abe.address === address);
+        if (!match) {
+            // eslint-disable-next-line no-continue
+            continue;
+        }
+        const sameName = duplicate.name === match.name;
+        const sameNote = duplicate.note === match.note;
+        if (sameName && sameNote) {
+            trueDuplicates.push(duplicate);
+        } else {
+            const update: Partial<AddressBookEntry> = {};
+            if (!sameName) {
+                update.name = await resolveConflict(
+                    match.name,
+                    duplicate.name,
+                    { type: ConflictTypes.AddressbookName, address }
+                );
             }
-            const sameName = duplicate.name === match.name;
-            const sameNote = duplicate.note === match.note;
-            if (sameName && sameNote) {
-                trueDuplicates.push(duplicate);
-            } else {
-                const update: Partial<AddressBookEntry> = {};
-                if (!sameName) {
-                    update.name = await resolveConflict(
-                        match.name,
-                        duplicate.name,
-                        { type: ConflictTypes.AddressbookName, address }
-                    );
-                }
-                if (!sameNote) {
-                    update.note = match.note || duplicate.note;
-                }
-                updateAddressBookEntry(dispatch, address, update);
+            if (!sameNote) {
+                update.note = match.note || duplicate.note;
             }
+            updateAddressBookEntry(dispatch, address, update);
         }
     }
     return trueDuplicates;
@@ -269,10 +267,11 @@ export default function PerformImport({ location }: Props) {
             .map((account: Account) => (
                 <p key={account.address}>
                     {account.name}{' '}
-                    <span className="bodyLight">
-                        {messages[account.address] &&
-                            `(${messages[account.address]})`}
-                    </span>
+                    {messages[account.address] && (
+                        <span className="bodyLight textFaded">
+                            {messages[account.address]}
+                        </span>
+                    )}
                 </p>
             ));
 
@@ -339,16 +338,17 @@ export default function PerformImport({ location }: Props) {
                                                 className={styles.importSection}
                                             >
                                                 <h3 className="mB0">
-                                                    <b>ID:</b> {identity.name}
+                                                    <b>ID:</b> {identity.name}{' '}
+                                                    {messages[identity.id] && (
+                                                        <span className="bodyLight textFaded">
+                                                            {
+                                                                messages[
+                                                                    identity.id
+                                                                ]
+                                                            }
+                                                        </span>
+                                                    )}
                                                 </h3>
-                                                <p className="mT0 body3 bodyLight">
-                                                    {messages[identity.id] &&
-                                                        `(${
-                                                            messages[
-                                                                identity.id
-                                                            ]
-                                                        })`}
-                                                </p>
                                                 <div
                                                     className={
                                                         styles.importedAccounts
