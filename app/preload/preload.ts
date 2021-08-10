@@ -27,6 +27,7 @@ import initializeDatabaseMultiSignatureTransactionMethods from './database/multi
 import initializeDatabaseSettingsMethods from './database/settingsDao';
 import initializeDatabaseTransactionsMethods from './database/transactionsDao';
 import initializeDatabaseWalletMethods from './database/walletDao';
+import initializeLoggingMethods from './logging';
 
 import ipcCommands from '~/constants/ipcCommands.json';
 
@@ -55,6 +56,7 @@ const Exposed: EqualRecord<WindowFunctions> = {
     openUrl: 'openUrl',
     removeAllListeners: 'removeAllListeners',
     view: 'view',
+    log: 'log',
 };
 
 const eventEmitter = new EventEmitter();
@@ -116,6 +118,8 @@ contextBridge.exposeInMainWorld(
     initializeLedgerMethods(eventEmitter)
 );
 contextBridge.exposeInMainWorld(Exposed.http, initializeHttpMethods);
+
+contextBridge.exposeInMainWorld(Exposed.log, initializeLoggingMethods);
 
 // Gather all database relevant functions in the same subdomain
 const databaseMethods: Database = {

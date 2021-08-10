@@ -6,6 +6,9 @@ import { getAllAccounts } from '../database/AccountDao';
 function resumeAccountStatusPolling(account: Account, dispatch: Dispatch) {
     const { address, deploymentTransactionId } = account;
     if (!deploymentTransactionId) {
+        window.log.error(
+            `Unexpected missing deploymentTransactionId on ${account.address}.`
+        );
         throw new Error('Unexpected missing deploymentTransactionId');
     }
     return confirmAccount(dispatch, address, deploymentTransactionId);

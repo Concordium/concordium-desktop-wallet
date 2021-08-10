@@ -91,6 +91,9 @@ export async function resumeIdentityStatusPolling(
     const { name: identityName, codeUri: location, id } = identity;
     const initialAccount = await findInitialAccount(identity);
     if (!initialAccount) {
+        window.log.error(
+            `Unexpected missing initial account on ${identity.name}.`
+        );
         throw new Error('Unexpected missing initial account.');
     }
     const { name: accountName } = initialAccount;

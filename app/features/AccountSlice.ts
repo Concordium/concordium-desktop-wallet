@@ -295,7 +295,7 @@ export async function loadAccountInfos(
         } else {
             if (!accountInfo) {
                 throw new Error(
-                    'A confirmed account does not exist on the connected node. Please check that your node is up to date with the blockchain.'
+                    `A confirmed account (${account.name}) does not exist on the connected node. Please check that your node is up to date with the blockchain. Account Address: ${account.address}`
                 );
             }
             map[account.address] = accountInfo;

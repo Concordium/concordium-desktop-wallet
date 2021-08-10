@@ -12,6 +12,7 @@ const store = configuredStore();
 
 initMisc(store.dispatch);
 window.addListener.openRoute((_, route: string) => {
+    window.log.info(`Routed to${route}`);
     store.dispatch(push(route));
 });
 

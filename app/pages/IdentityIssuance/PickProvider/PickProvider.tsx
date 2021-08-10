@@ -64,7 +64,12 @@ export default function IdentityIssuanceChooseProvider({
     useEffect(() => {
         getIdentityProviders()
             .then((loadedProviders) => setProviders(loadedProviders))
-            .catch(() => onError('Unable to load identity providers'));
+            .catch((e) => {
+                window.log.warn(
+                    `Unable to load identity providers due to ${e.message}`
+                );
+                onError('Unable to load identity providers');
+            });
     }, [dispatch, onError]);
 
     // This is run in an effect, to prevent navigation if the component is unmounted

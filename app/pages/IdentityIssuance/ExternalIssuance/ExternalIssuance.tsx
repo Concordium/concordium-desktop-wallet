@@ -94,6 +94,7 @@ async function generateIdentity(
         loadIdentities(dispatch);
         loadAccounts(dispatch);
     } catch (e) {
+        window.log.error('Failed to create identity', { error: e });
         onError(`Failed to create identity due to ${e}`);
         // Rethrow this to avoid redirection;
         throw e;
@@ -104,7 +105,12 @@ async function generateIdentity(
         identityId,
         accountName,
         identityObjectLocation
-    ).catch(() => onError(`Failed to confirm identity`));
+    ).catch((e) => {
+        window.log.error(e, {
+            message: ' caused confirmation of Identity to fail.',
+        });
+        onError(`Failed to confirm identity`);
+    });
     return identityId;
 }
 
@@ -187,7 +193,7 @@ export default function ExternalIssuance({
                     })
                 );
             })
-            .catch(() => {});
+            .catch(window.log.warn);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 

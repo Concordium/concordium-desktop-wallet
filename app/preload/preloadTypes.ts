@@ -6,6 +6,7 @@ import {
     SaveDialogOptions,
     SaveDialogReturnValue,
 } from 'electron';
+import { Logger } from 'winston';
 import {
     Account,
     Identity,
@@ -270,6 +271,21 @@ export type Database = {
     wallet: WalletMethods;
 };
 
+export type LogExtra = {
+    message?: string;
+    error?: Error;
+};
+
+export type PutLog = (
+    ...inputs: [string] | [string, LogExtra] | [Error]
+) => Logger;
+
+export type LoggingMethods = {
+    info: PutLog;
+    warn: PutLog;
+    error: PutLog;
+};
+
 export interface WindowFunctions {
     addListener: Listen;
     removeListener: Listen;
@@ -281,6 +297,7 @@ export interface WindowFunctions {
     files: FileMethods;
     http: HttpMethods;
     view: BrowserViewMethods;
+    log: LoggingMethods;
     printElement: (body: string) => any;
     writeImageToClipboard: (dataUrl: string) => void;
     openUrl: (href: string) => any;

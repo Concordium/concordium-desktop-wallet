@@ -184,6 +184,10 @@ async function createUnsignedCredentialInfo(
             randomness,
         };
     } catch (e) {
+        window.log.error({
+            message: `Unsigned credential creation failed due to unexpected output${unsignedCredentialDeploymentInfoString}`,
+            error: e,
+        });
         throw new Error(
             `Unable to create unsigned credential due to unexpected output: ${unsignedCredentialDeploymentInfoString}`
         );

@@ -66,6 +66,9 @@ export default function IdentityIssuancePage(): JSX.Element {
                 />
             );
         }
+        window.log.warn(
+            'Unexpected missing identity Provider in IdentityIssuance.'
+        );
         throw new Error('Unexpected missing identity Provider!');
     }
 

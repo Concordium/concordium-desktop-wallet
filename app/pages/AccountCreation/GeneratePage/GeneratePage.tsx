@@ -72,14 +72,18 @@ export default function AccountCreationGenerate({
             }
         } catch (e) {
             removeFailed(dispatch, accountAddress);
-            throw new Error(
+            const error = new Error(
                 'We were unable to deploy the credential, because the node could not be reached.'
             );
+            window.log.error(error);
+            throw error;
         }
         removeFailed(dispatch, accountAddress);
-        throw new Error(
+        const error = new Error(
             'We were unable to deploy the credential, due to the node rejecting the transaction.'
         );
+        window.log.error(error);
+        throw error;
     }
 
     async function saveAccount(
@@ -118,7 +122,10 @@ export default function AccountCreationGenerate({
     useEffect(() => {
         getNextCredentialNumber(identity.id)
             .then(setCredentialNumber)
-            .catch(() => onError('Unable to read from database'));
+            .catch((e) => {
+                window.log.error(e, { message: ' Call to Database Failed.' });
+                onError('Unable to read from database');
+            });
     }, [identity.id]);
 
     const createAccount = useCallback(
@@ -129,9 +136,10 @@ export default function AccountCreationGenerate({
             ) => {
                 setMessage('Please wait');
                 if (!credentialNumber) {
-                    onError(
-                        'Missing credentialNumber, which is required. This is an internal error.'
-                    );
+                    const errorMessage =
+                        'Missing credentialNumber, which is required. This is an internal error.';
+                    window.log.error(errorMessage);
+                    onError(errorMessage);
                     return;
                 }
 
@@ -172,6 +180,9 @@ export default function AccountCreationGenerate({
                         })
                     );
                 } catch (e) {
+                    window.log.error(e, {
+                        message: ' caused creation of Account to fail.',
+                    });
                     onError(`Unable to create account due to ${e}`);
                 }
             };
@@ -183,9 +194,11 @@ export default function AccountCreationGenerate({
     async function checkWallet(ledger: ConcordiumLedgerClient) {
         const walletId = await pairWallet(ledger, dispatch);
         if (walletId !== identity.walletId) {
-            throw new Error(
+            const error = new Error(
                 'The chosen identity was not created using the connected wallet.'
             );
+            window.log.warn(error);
+            throw error;
         }
     }
 
