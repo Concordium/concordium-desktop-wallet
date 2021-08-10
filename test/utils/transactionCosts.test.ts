@@ -59,8 +59,6 @@ test('getTransactionKindEnergy with simple transfer', () => {
     ).toBeTruthy();
 });
 
-// TODO Figure out why Jest does not have the base58 dependency.
-
 test('getTransactionEnergyCost with scheduled transfer', async () => {
     const scheduleLength = 23;
     const transaction = getMockedScheduledTransfer(scheduleLength);
