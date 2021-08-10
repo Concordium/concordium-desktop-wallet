@@ -17,16 +17,10 @@ import {
     Hex,
 } from '~/utils/types';
 import { stringify } from '~/utils/JSONHelper';
+import { pipe } from '~/utils/basicHelpers';
 
 async function toBuffer(promisedBuffer: Promise<Buffer>): Promise<Buffer> {
     return Buffer.from(await promisedBuffer);
-}
-
-function pipe<A extends any[], B, C>(
-    a: (...args: A) => B,
-    b: (arg: B) => C
-): (...args: A) => C {
-    return (...args) => b(a(...args));
 }
 
 /**

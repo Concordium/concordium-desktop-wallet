@@ -52,7 +52,7 @@ export interface Typed<T> {
 
 // Reflects the attributes of an Identity, which describes
 // the owner of the identity.
-export enum ChosenAttributesKeys {
+export enum AttributeKey {
     firstName,
     lastName,
     sex,
@@ -68,8 +68,10 @@ export enum ChosenAttributesKeys {
     taxIdNo,
 }
 
+export type AttributeKeyName = keyof typeof AttributeKey;
+
 export type ChosenAttributes = {
-    [P in keyof typeof ChosenAttributesKeys]: string;
+    [P in keyof typeof AttributeKey]: string;
 };
 
 // Contains the attributes of an identity.
@@ -352,6 +354,16 @@ export interface CredentialDeploymentInformation
     proofs: Proofs;
 }
 
+type AttributesRandomness = Record<AttributeKey, string>;
+
+export interface CommitmentsRandomness {
+    idCredSecRand: string;
+    prfRand: string;
+    credCounterRand: string;
+    maxAccountsRand: string;
+    attributesRand: AttributesRandomness;
+}
+
 export interface Credential {
     accountAddress: string;
     credentialIndex?: number;
@@ -361,6 +373,7 @@ export interface Credential {
     walletId?: number;
     credId: Hex;
     policy: JSONString;
+    randomness?: JSONString;
 }
 
 export interface DeployedCredential extends Credential {

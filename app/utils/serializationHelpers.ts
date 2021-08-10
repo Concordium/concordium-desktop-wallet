@@ -1,12 +1,12 @@
 import { Buffer } from 'buffer/';
-import bs58check from 'bs58check';
+import { decode as bs58Decode } from 'bs58check';
 
 import {
     VerifyKey,
     YearMonth,
     SchemeId,
     CredentialDeploymentInformation,
-    ChosenAttributesKeys,
+    AttributeKey,
 } from './types';
 
 export function putBase58Check(
@@ -14,7 +14,7 @@ export function putBase58Check(
     startIndex: number,
     base58Sstring: string
 ) {
-    const decoded = bs58check.decode(base58Sstring);
+    const decoded = bs58Decode(base58Sstring);
     for (let i = 1; i < decoded.length; i += 1) {
         array[startIndex + i - 1] = decoded[i];
     }
@@ -22,7 +22,7 @@ export function putBase58Check(
 
 export function base58ToBuffer(base58Sstring: string): Buffer {
     // Remove the first check byte
-    return Buffer.from(bs58check.decode(base58Sstring).slice(1));
+    return Buffer.from(bs58Decode(base58Sstring).slice(1));
 }
 
 type Indexable = Buffer | Uint8Array;
@@ -171,7 +171,7 @@ export function serializeCredentialDeploymentInformation(
         number,
         string
     ][] = revealedAttributes.map(([tagName, value]) => [
-        ChosenAttributesKeys[tagName as keyof typeof ChosenAttributesKeys],
+        AttributeKey[tagName as keyof typeof AttributeKey],
         value,
     ]);
     revealedAttributeTags

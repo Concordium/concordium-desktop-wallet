@@ -100,6 +100,13 @@ const createWindow = async () => {
                   },
     });
 
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+        const urlPath = url.split('#')[1];
+        mainWindow?.webContents.send(ipcRendererCommands.openRoute, urlPath);
+
+        return { action: 'deny' };
+    });
+
     if (process.env.NODE_ENV === 'production') {
         mainWindow.loadURL(`file://${__dirname}/app.html`);
     } else {
