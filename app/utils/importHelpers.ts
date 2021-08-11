@@ -1,4 +1,5 @@
 /* eslint-disable no-await-in-loop */
+import { importExternalCredentials } from '~/features/CredentialSlice';
 import {
     getAccountsOfIdentity,
     insertAccount,
@@ -19,7 +20,18 @@ import {
     Identity,
     ValidationRules,
     WalletEntry,
+    Dispatch,
+    AddressBookEntry,
 } from './types';
+import { ExternalCredential } from '~/database/types';
+import {
+    updateAddressBookEntry,
+    importAddressBookEntry,
+} from '~/features/AddressBookSlice';
+
+const alreadyExistsMessage = 'Already exists';
+const replacesMessage = (name: string) => `Replaces name: ${name}`;
+const alreadyExistsAsMessage = (name: string) => `Already exists as: ${name}`;
 
 export interface HasWalletId {
     walletId?: number;
@@ -35,87 +47,43 @@ interface AttachedEntities {
     attachedAccounts: Account[];
 }
 
-export enum ConflictTypes {
-    // eslint-disable-next-line no-shadow
-    Account = 'account',
-    // eslint-disable-next-line no-shadow
-    Identity = 'identity',
-    AddressbookName = 'addressbook-name',
-}
+export type AddMessage = (id: string | number, message: string) => void;
 
-interface AccountMetadata {
-    type: ConflictTypes.Account;
-    account: Account;
-}
-
-interface IdentityMetadata {
-    type: ConflictTypes.Identity;
-    identity: Identity;
-}
-
-interface AddressbookMetadata {
-    type: ConflictTypes.AddressbookName;
-    address: string;
-}
-
-export type ConflictMetadata =
-    | AccountMetadata
-    | IdentityMetadata
-    | AddressbookMetadata;
-
-export type NameResolver = (
+/**
+ * Given two names of an account, and the account's address, determines the name to use.
+ * @returns An object containing the chosen name, and a message about the decision.
+ */
+export function resolveAccountNameConflict(
     existingName: string,
     importName: string,
-    metaData: ConflictMetadata
-) => string;
-
-export function resolveNameConflict(
-    existingName: string,
-    importName: string,
-    metaData: ConflictMetadata
+    address: string
 ) {
     let chosenName = existingName;
-    let identifier: string | number = '';
     let message = '';
 
-    function resolveAccountName(address: string) {
-        if (address.includes(existingName)) {
-            chosenName = importName;
-            message = `Replaces name: ${existingName}`;
-        } else {
-            message = `Already exists as: ${existingName}`;
-        }
+    if (address.includes(existingName)) {
+        chosenName = importName;
+        message = replacesMessage(existingName);
+    } else {
+        message = alreadyExistsAsMessage(existingName);
     }
-
-    switch (metaData.type) {
-        case ConflictTypes.Account: {
-            identifier = metaData.account.address;
-            resolveAccountName(metaData.account.address);
-            break;
-        }
-        case ConflictTypes.Identity: {
-            identifier = metaData.identity.id;
-            /*
-                if (metaData.identity.status === IdentityStatus.Recovered) {
-                    chosenName = importName;
-                    message = `Replaces Placeholder identity: ${existingName}`;
-                } else {
-                    message = `Already exists as: ${existingName}`;
-                }
-                */
-            message = `Already exists as: ${existingName}`;
-            break;
-        }
-        case ConflictTypes.AddressbookName: {
-            identifier = metaData.address;
-            resolveAccountName(metaData.address);
-            break;
-        }
-        default:
-            break;
-    }
-    return { chosenName, identifier, message };
+    return { chosenName, message };
 }
+
+/**
+ * Given two names of an identity, and the current identity object, determines the name to use.
+ * @returns An object containing the chosen name, and a message about the decision.
+ */
+export function resolveIdentityNameConflict(existingName: string) {
+    const chosenName = existingName;
+    const message = alreadyExistsAsMessage(existingName);
+    return { chosenName, message };
+}
+
+/**
+ * Addressbook name conflicts are resolved in the same way as accounts, currently.
+ */
+export const resolveAddressBookNameConflict = resolveAccountNameConflict;
 
 export function updateWalletIdReference<T extends HasWalletId>(
     importedWalletId: number,
@@ -245,6 +213,56 @@ async function insertNewIdentities(
 }
 
 /**
+ * Given a duplicate identity, resolves naming conflict, potentially updates the name, and adds message.
+ * @param importedIdentity: the identity from the imported data.
+ * @param localIdentity: the identity which already exists in the database.
+ */
+async function handleDuplicateIdentity(
+    importedIdentity: Identity,
+    localIdentity: Identity,
+    addMessage: AddMessage
+) {
+    const localName = localIdentity.name;
+    const localId = localIdentity.id;
+    if (importedIdentity.name !== localName) {
+        const { chosenName, message } = resolveIdentityNameConflict(localName);
+        addMessage(localId, message);
+        if (chosenName !== localName) {
+            updateIdentity(localId, { name: chosenName });
+        }
+    } else {
+        addMessage(localId, alreadyExistsMessage);
+    }
+}
+
+/**
+ * Given a duplicate account, resolves naming conflict, potentially updates the name, and adds message.
+ * @param account: the duplicate account from the imported data.
+ * @param existingAccount: the local object for the same account.
+ */
+function handleDuplicateAccount(
+    account: Account,
+    existingAccount: Account,
+    addMessage: AddMessage
+) {
+    const { address, name } = account;
+
+    if (name !== existingAccount.name) {
+        const { chosenName, message } = resolveAccountNameConflict(
+            existingAccount.name,
+            name,
+            address
+        );
+        addMessage(address, message);
+        if (chosenName !== existingAccount.name) {
+            updateAccount(address, { name: chosenName });
+        }
+    } else {
+        addMessage(address, alreadyExistsMessage);
+    }
+}
+
+/**
  * Inserts new accounts and credentials for an identity that has already been inserted into the
  * database, so that we have its up-to-date id, which can be used to update the identityId
  * on its accounts and credentials.
@@ -254,7 +272,7 @@ async function insertNewAccountsAndCredentials(
     identityId: number,
     accountsOnIdentity: Account[],
     credentialsOnIdentity: Credential[],
-    resolveConflict: NameResolver
+    addMessage: AddMessage
 ) {
     const existingAccounts = await getAccountsOfIdentity(identityId);
 
@@ -276,21 +294,16 @@ async function insertNewAccountsAndCredentials(
         await insertAccount(newAccountToInsert);
     }
 
-    // Check for name conflicts on existing accounts, and resolve them.
     for (const duplicate of duplicateAccounts) {
         const match = existingAccounts.find(
             (acc) => acc.address === duplicate.address
         );
-        if (match && duplicate.name !== match.name) {
-            const chosenName = await resolveConflict(
-                match.name,
-                duplicate.name,
-                { type: ConflictTypes.Account, account: match }
+        if (!match) {
+            throw new Error(
+                'Internal Error: Assumed duplicate account did not have a matching account among existing'
             );
-            if (chosenName !== match.name) {
-                updateAccount(duplicate.address, { name: chosenName });
-            }
         }
+        await handleDuplicateAccount(duplicate, match, addMessage);
     }
 
     // Only consider credentials that are not already in the database.
@@ -373,6 +386,7 @@ async function importNewWallets(
  * Import identities, accounts and credentials for the wallets that already exist in the database
  * with an identical logical id. This means that the walletId reference on the identities do not
  * have to be updated, as they are already correct in this special case.
+ * @param addMessage: Function to add a message for a specific account/identity. Used to indicate duplicates.
  */
 async function importDuplicateWallets(
     existingData: ExportData,
@@ -380,7 +394,7 @@ async function importDuplicateWallets(
     importedIdentities: Identity[],
     importedCredentials: Credential[],
     importedAccounts: Account[],
-    resolveConflict: NameResolver
+    addMessage: AddMessage
 ) {
     const {
         attachedIdentities,
@@ -422,11 +436,13 @@ async function importDuplicateWallets(
             attachedCredentials
         );
 
+        addMessage(identityId, alreadyExistsMessage);
+
         await insertNewAccountsAndCredentials(
             identityId,
             accountsOnIdentity,
             credentialsOnIdentity,
-            resolveConflict
+            addMessage
         );
     }
 
@@ -468,19 +484,11 @@ async function importDuplicateWallets(
             );
         }
 
-        const newIdentityId = identityInDatabase.id;
-
-        // If there is a name conflict, resolve it.
-        if (existingIdentity.name !== identityInDatabase.name) {
-            const chosenName = await resolveConflict(
-                identityInDatabase.name,
-                existingIdentity.name,
-                { type: ConflictTypes.Identity, identity: identityInDatabase }
-            );
-            if (chosenName !== identityInDatabase.name) {
-                updateIdentity(newIdentityId, { name: chosenName });
-            }
-        }
+        handleDuplicateIdentity(
+            existingIdentity,
+            identityInDatabase,
+            addMessage
+        );
 
         const {
             accountsOnIdentity,
@@ -492,10 +500,10 @@ async function importDuplicateWallets(
         );
 
         await insertNewAccountsAndCredentials(
-            newIdentityId,
+            identityInDatabase.id,
             accountsOnIdentity,
             credentialsOnIdentity,
-            resolveConflict
+            addMessage
         );
     }
 
@@ -511,6 +519,7 @@ async function importDuplicateWallets(
  * but with a different logical id. This consists of getting the logical id's that the wallets have
  * in the database, and updating the identities with this information. When this has been done, this
  * case has been reduced to the case for having duplicate wallets, which is invoked.
+ * @param addMessage: Function to add a message for a specific account/identity. Used to indicate duplicates.
  */
 async function importExistingWallets(
     existingWallets: WalletEntry[],
@@ -518,7 +527,7 @@ async function importExistingWallets(
     importedIdentities: Identity[],
     importedCredentials: Credential[],
     importedAccounts: Account[],
-    resolveConflict: NameResolver
+    addMessage: AddMessage
 ) {
     const { attachedIdentities } = findAttachedEntities(
         existingWallets,
@@ -561,7 +570,7 @@ async function importExistingWallets(
         identitiesWithUpdatedWalletIds,
         importedCredentials,
         importedAccounts,
-        resolveConflict
+        addMessage
     );
 }
 
@@ -575,7 +584,7 @@ export async function importWallets(
     importedIdentities: Identity[],
     importedAccounts: Account[],
     importedCredentials: Credential[],
-    resolveConflict: NameResolver
+    addMessage: AddMessage
 ) {
     const [
         duplicateWalletEntries,
@@ -594,7 +603,7 @@ export async function importWallets(
         importedIdentities,
         importedCredentials,
         importedAccounts,
-        resolveConflict
+        addMessage
     );
 
     // The wallets that are not exact duplicates of what is already present in the database, can
@@ -616,7 +625,7 @@ export async function importWallets(
         importedIdentities,
         importedCredentials,
         importedAccounts,
-        resolveConflict
+        addMessage
     );
     await importNewWallets(
         newWallets,
@@ -728,3 +737,80 @@ export const passwordValidationRules: ValidationRules = {
         message: 'Password has to be at least 6 characters',
     },
 };
+
+export function insertExternalCredentials(
+    importedCredentials: ExternalCredential[],
+    existingCredentials: ExternalCredential[]
+) {
+    const newExternalCredentials = [];
+    for (const externalCredential of importedCredentials) {
+        const match = existingCredentials.find(
+            (cred) => cred.credId === externalCredential.credId
+        );
+        if (!match) {
+            newExternalCredentials.push(externalCredential);
+        } else if (match.note !== externalCredential.note) {
+            const note = match.note || externalCredential.note;
+            newExternalCredentials.push({ ...externalCredential, note });
+        }
+    }
+    return importExternalCredentials(newExternalCredentials);
+}
+
+type AddressBookEntryKey = keyof AddressBookEntry;
+const addressBookFields: AddressBookEntryKey[] = ['address'];
+
+/**
+ * Imports addressbookentries, and resolves potential name and note conflicts.
+ * @param entries addressBookEntries that should be imported.
+ * @param addressBook the Addressbook, which contains the existing addressBookEntries.
+ * @param addMessage: Function to add a message for a specific account/identity. Used to indicate duplicates.
+ */
+export async function importAddressBookEntries(
+    dispatch: Dispatch,
+    entries: AddressBookEntry[],
+    addressBook: AddressBookEntry[],
+    addMessage: AddMessage
+): Promise<AddressBookEntry[]> {
+    const [nonDuplicates, duplicates] = partition(entries, (entry) =>
+        hasNoDuplicate(entry, addressBook, addressBookFields)
+    );
+    if (nonDuplicates.length > 0) {
+        await importAddressBookEntry(nonDuplicates);
+    }
+
+    const trueDuplicates = [];
+    // For duplicates we want to check if they are exact copies or if the name and/or note should be updated.
+    for (const duplicate of duplicates) {
+        const { address } = duplicate;
+        const match = addressBook.find((abe) => abe.address === address);
+        if (!match) {
+            // eslint-disable-next-line no-continue
+            continue;
+        }
+        const sameName = duplicate.name === match.name;
+        const sameNote = duplicate.note === match.note;
+        if (sameName && sameNote) {
+            trueDuplicates.push(duplicate);
+        } else {
+            const update: Partial<AddressBookEntry> = {};
+            if (!sameName) {
+                const {
+                    chosenName,
+                    message,
+                } = await resolveAddressBookNameConflict(
+                    match.name,
+                    duplicate.name,
+                    address
+                );
+                update.name = chosenName;
+                addMessage(address, message);
+            }
+            if (!sameNote) {
+                update.note = match.note || duplicate.note;
+            }
+            updateAddressBookEntry(dispatch, address, update);
+        }
+    }
+    return trueDuplicates;
+}
