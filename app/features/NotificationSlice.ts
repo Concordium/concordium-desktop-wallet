@@ -65,6 +65,9 @@ export function pushNotification(
     nextId += 1;
 
     if (autoRemoveSeconds) {
-        setInterval(() => dispatch(removeNotification(id)));
+        setTimeout(
+            () => dispatch(removeNotification(id)),
+            autoRemoveSeconds * 1000
+        );
     }
 }
