@@ -1,22 +1,23 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-enum NotificationLevel {
+export enum NotificationLevel {
     Info,
-    Warning,
     Error,
     Update,
 }
 
-type Notification =
-    | { level: NotificationLevel.Update }
-    | {
-          level: Exclude<NotificationLevel, NotificationLevel.Update>;
-          message: string;
-          autoRemoveSeconds?: number;
-      };
+interface UpdateNotification {
+    level: NotificationLevel.Update;
+}
+
+export interface Notification {
+    level: Exclude<NotificationLevel, NotificationLevel.Update>;
+    message: string;
+    autoRemoveSeconds?: number;
+}
 
 interface NotificationSliceState {
-    notifications: Notification[];
+    notifications: (UpdateNotification | Notification)[];
 }
 
 const notificationSlice = createSlice({
@@ -27,6 +28,9 @@ const notificationSlice = createSlice({
     reducers: {
         pushNotification(state, input: PayloadAction<Notification>) {
             state.notifications.push(input.payload);
+        },
+        triggerUpdateNotification(state) {
+            state.notifications.push({ level: NotificationLevel.Update });
         },
     },
 });
