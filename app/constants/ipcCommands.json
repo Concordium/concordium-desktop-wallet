@@ -3,5 +3,6 @@
     "openFileDialog": "OPEN_FILE_DIALOG",
     "saveFileDialog": "SAVE_FILE_DIALOG",
     "openUrl": "OPEN_URL",
+    "httpsGet": "HTTPS_GET",
     "getUserDataPath": "GET_USER_DATA_PATH"
 }

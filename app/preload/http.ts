@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { ipcRenderer } from 'electron';
 import { walletProxytransactionLimit } from '../constants/externalConstants.json';
 import { getTargetNet, Net } from '~/utils/ConfigHelper';
 import urls from '../constants/urls.json';
@@ -8,6 +9,7 @@ import {
     GetTransactionsResult,
     HttpGetResponse,
 } from '~/preload/preloadTypes';
+import ipcCommands from '~/constants/ipcCommands.json';
 
 function getWalletProxy() {
     const targetNet = getTargetNet();
@@ -31,36 +33,12 @@ async function httpsGet<T>(
     urlString: string,
     params: Record<string, string>
 ): Promise<HttpGetResponse<T>> {
-    // Setup timeout for axios (it's a little weird, as default timeout
-    // settings in axios only concern themselves with response timeout,
-    // not a connect timeout).
-    const source = axios.CancelToken.source();
-    const timeout = setTimeout(() => {
-        source.cancel();
-    }, 60000);
-
-    const searchParams = new URLSearchParams(params);
-    let urlGet: string;
-    if (Object.entries(params).length === 0) {
-        urlGet = urlString;
-    } else {
-        urlGet = `${urlString}?${searchParams.toString()}`;
-    }
-
-    const response = await axios.get(urlGet, {
-        cancelToken: source.token,
-        maxRedirects: 0,
-        // We also want to accept a 302 redirect, as that is used by the
-        // identity provider flow
-        validateStatus: (status: number) => status >= 200 && status <= 302,
-    });
-    clearTimeout(timeout);
-
-    return {
-        data: response.data,
-        headers: response.headers,
-        status: response.status,
-    };
+    const response = await ipcRenderer.invoke(
+        ipcCommands.httpsGet,
+        urlString,
+        params
+    );
+    return JSON.parse(response);
 }
 
 async function getTransactions(
