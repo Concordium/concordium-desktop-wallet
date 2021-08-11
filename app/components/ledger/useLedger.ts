@@ -11,6 +11,7 @@ import ledgerReducer, {
     pendingAction,
     loadingAction,
     disconnectAction,
+    outdatedAction,
     setStatusTextAction,
 } from './ledgerReducer';
 import { LedgerStatusType, LedgerSubmitHandler, LedgerCallback } from './util';
@@ -24,6 +25,7 @@ const { CONNECTED, ERROR, OPEN_APP, AWAITING_USER_INPUT } = LedgerStatusType;
 
 export enum LedgerSubscriptionAction {
     CONNECTED_SUBSCRIPTION,
+    OUTDATED,
     PENDING,
     RESET,
     ERROR_SUBSCRIPTION,
@@ -62,6 +64,9 @@ function useLedger(): {
                         return;
                     case LedgerSubscriptionAction.PENDING:
                         dispatch(pendingAction(OPEN_APP, deviceName));
+                        return;
+                    case LedgerSubscriptionAction.OUTDATED:
+                        dispatch(outdatedAction(deviceName));
                         return;
                     case LedgerSubscriptionAction.RESET:
                         dispatch(loadingAction());
