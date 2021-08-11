@@ -1,4 +1,4 @@
-import { ipcRenderer, contextBridge } from 'electron';
+import { ipcRenderer, contextBridge, Rectangle } from 'electron';
 import EventEmitter from 'events';
 import {
     openRoute,
@@ -30,7 +30,13 @@ import initializeDatabaseWalletMethods from './database/walletDao';
 
 import ipcCommands from '~/constants/ipcCommands.json';
 
-import { Listen, Database, Once, WindowFunctions } from './preloadTypes';
+import {
+    Listen,
+    Database,
+    Once,
+    WindowFunctions,
+    BrowserViewMethods,
+} from './preloadTypes';
 
 import type { EqualRecord } from '~/utils/types';
 
@@ -48,6 +54,7 @@ const Exposed: EqualRecord<WindowFunctions> = {
     writeImageToClipboard: 'writeImageToClipboard',
     openUrl: 'openUrl',
     removeAllListeners: 'removeAllListeners',
+    view: 'view',
 };
 
 const eventEmitter = new EventEmitter();
@@ -72,6 +79,16 @@ const onceImpl: Once = {
     onVerificationKeysConfirmed: (func) =>
         eventEmitter.once(onVerificationKeysConfirmed, func),
 };
+
+const browserViewImpl: BrowserViewMethods = {
+    createView: (location: string, rect: Rectangle) =>
+        ipcRenderer.invoke(ipcCommands.createView, location, rect),
+    removeView: () => ipcRenderer.invoke(ipcCommands.removeView),
+    resizeView: (rect: Rectangle) =>
+        ipcRenderer.invoke(ipcCommands.resizeView, rect),
+};
+
+contextBridge.exposeInMainWorld(Exposed.view, browserViewImpl);
 
 contextBridge.exposeInMainWorld(Exposed.removeAllListeners, (channel: string) =>
     ipcRenderer.removeAllListeners(channel)

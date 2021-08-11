@@ -10,7 +10,7 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserView, BrowserWindow } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import ipcRendererCommands from './constants/ipcRendererCommands.json';
@@ -29,6 +29,7 @@ export default class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 let printWindow: BrowserWindow | null = null;
+let browserView: BrowserView | null = null;
 
 if (process.env.NODE_ENV === 'production') {
     const sourceMapSupport = require('source-map-support');
@@ -65,7 +66,7 @@ const createWindow = async () => {
         nodeIntegration: false,
         contextIsolation: true,
         worldSafeExecuteJavaScript: false,
-        webviewTag: true,
+        webviewTag: false,
     };
 
     /**
@@ -151,7 +152,9 @@ const createWindow = async () => {
         },
     });
 
-    initializeIpcHandlers(printWindow);
+    browserView = new BrowserView();
+
+    initializeIpcHandlers(mainWindow, printWindow, browserView);
 
     // Remove this if your app does not use auto updates
     // eslint-disable-next-line

@@ -1,5 +1,13 @@
 import axios from 'axios';
-import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron';
+import {
+    app,
+    shell,
+    BrowserWindow,
+    ipcMain,
+    dialog,
+    BrowserView,
+    Rectangle,
+} from 'electron';
 import { PrintErrorTypes } from '~/utils/types';
 import ipcCommands from '~/constants/ipcCommands.json';
 
@@ -62,7 +70,38 @@ async function httpsGet(
     });
 }
 
-export default function initializeIpcHandlers(printWindow: BrowserWindow) {
+const redirectUri = 'ConcordiumRedirectToken';
+
+function createExternalView(
+    browserView: BrowserView,
+    window: BrowserWindow,
+    location: string,
+    rect: Rectangle
+) {
+    return new Promise((resolve, reject) => {
+        window.setBrowserView(browserView);
+        browserView.setBounds(rect);
+        browserView.webContents.loadURL(location);
+        browserView.webContents.once(
+            'did-navigate',
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            async (e: any) => {
+                const loc = e.url;
+                if (loc.includes(redirectUri)) {
+                    resolve(loc.substring(loc.indexOf('=') + 1));
+                } else if (e.httpResponseCode !== 200) {
+                    reject(new Error(`Unexpected response code: ${e}`));
+                }
+            }
+        );
+    });
+}
+
+export default function initializeIpcHandlers(
+    mainWindow: BrowserWindow,
+    printWindow: BrowserWindow,
+    browserView: BrowserView
+) {
     // Returns the path to userdata.
     ipcMain.handle(ipcCommands.getUserDataPath, async () => {
         return app.getPath('userData');
@@ -82,6 +121,18 @@ export default function initializeIpcHandlers(printWindow: BrowserWindow) {
         (_event, url: string, params: Record<string, string>) => {
             return httpsGet(url, params);
         }
+    );
+
+    ipcMain.handle(
+        ipcCommands.createView,
+        (_event, location: string, rect: Rectangle) =>
+            createExternalView(browserView, mainWindow, location, rect)
+    );
+    ipcMain.handle(ipcCommands.removeView, () =>
+        mainWindow.removeBrowserView(browserView)
+    );
+    ipcMain.handle(ipcCommands.resizeView, (_event, rect: Rectangle) =>
+        browserView.setBounds(rect)
     );
 
     // Provides access to save file dialog from renderer processes.

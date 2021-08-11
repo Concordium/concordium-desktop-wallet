@@ -2,6 +2,7 @@
 import {
     OpenDialogOptions,
     OpenDialogReturnValue,
+    Rectangle,
     SaveDialogOptions,
     SaveDialogReturnValue,
 } from 'electron';
@@ -249,6 +250,12 @@ export type WalletMethods = {
     insertWallet: (identifier: Hex, type: WalletType) => Promise<number>;
 };
 
+export type BrowserViewMethods = {
+    createView: (location: string, rect: Rectangle) => Promise<string>;
+    removeView: () => void;
+    resizeView: (rect: Rectangle) => void;
+};
+
 export type Database = {
     general: GeneralMethods;
     account: AccountMethods;
@@ -273,6 +280,7 @@ export interface WindowFunctions {
     ledger: LedgerCommands;
     files: FileMethods;
     http: HttpMethods;
+    view: BrowserViewMethods;
     printElement: (body: string) => any;
     writeImageToClipboard: (dataUrl: string) => void;
     openUrl: (href: string) => any;
