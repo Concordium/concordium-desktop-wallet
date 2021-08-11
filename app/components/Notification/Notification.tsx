@@ -8,16 +8,16 @@ import { NotificationLevel } from '~/features/NotificationSlice';
 import styles from './Notification.module.scss';
 
 const transition: Transition = {
-    ease: 'easeIn',
+    ease: 'backIn',
     duration: 0.2,
 };
 
 const transitionVariants: Variants = {
-    initial: { opacity: 0, transform: 'translate(100%, 0)' },
-    enter: { opacity: 1, transform: 'translate(0, 0)' },
+    initial: { opacity: 0, transform: 'translate(100%, 0%)' },
+    enter: { opacity: 1, transform: 'translate(0%, 0%)' },
     exit: {
         opacity: 0,
-        transform: 'translate(0, -100%)',
+        transform: 'translate(0%, -100%)',
         transition: { ease: 'easeOut' },
     },
 };
