@@ -2,9 +2,9 @@ import React from 'react';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
 import AddIdentityProviderView from '~/pages/multisig/updates/AddIdentityProvider/AddIdentityProviderView';
-import UpdateAddIdentityProvider, {
+import CreateAddIdentityProvider, {
     AddIdentityProviderFields,
-} from '~/pages/multisig/updates/AddIdentityProvider/UpdateAddIdentityProvider';
+} from '~/pages/multisig/updates/AddIdentityProvider/CreateAddIdentityProvider';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
@@ -22,7 +22,7 @@ const TYPE = 'Add Identity Provider';
 
 type TransactionType = UpdateInstruction<AddIdentityProvider>;
 
-export default class EuroPerEnergyHandler
+export default class AddIdentityProviderHandler
     extends UpdateHandlerBase<TransactionType>
     implements
         UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
@@ -105,5 +105,5 @@ export default class EuroPerEnergyHandler
         return authorizations.addIdentityProvider;
     }
 
-    update = UpdateAddIdentityProvider;
+    update = CreateAddIdentityProvider;
 }

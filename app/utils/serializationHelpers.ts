@@ -1,16 +1,18 @@
 import { Buffer } from 'buffer/';
-import bs58check from 'bs58check';
-import ipcCommands from '../constants/ipcCommands.json';
+import { decode as bs58Decode } from 'bs58check';
+import ipcCommands from '~/constants/ipcCommands.json';
 
 import {
     VerifyKey,
     YearMonth,
     SchemeId,
     CredentialDeploymentInformation,
-    ChosenAttributesKeys,
     Description,
     IpInfo,
     ArInfo,
+    SerializedDescription,
+    SerializedTextWithLength,
+    AttributeKey,
 } from './types';
 
 export function putBase58Check(
@@ -18,7 +20,7 @@ export function putBase58Check(
     startIndex: number,
     base58Sstring: string
 ) {
-    const decoded = bs58check.decode(base58Sstring);
+    const decoded = bs58Decode(base58Sstring);
     for (let i = 1; i < decoded.length; i += 1) {
         array[startIndex + i - 1] = decoded[i];
     }
@@ -26,7 +28,7 @@ export function putBase58Check(
 
 export function base58ToBuffer(base58Sstring: string): Buffer {
     // Remove the first check byte
-    return Buffer.from(bs58check.decode(base58Sstring).slice(1));
+    return Buffer.from(bs58Decode(base58Sstring).slice(1));
 }
 
 type Indexable = Buffer | Uint8Array;
@@ -175,7 +177,7 @@ export function serializeCredentialDeploymentInformation(
         number,
         string
     ][] = revealedAttributes.map(([tagName, value]) => [
-        ChosenAttributesKeys[tagName as keyof typeof ChosenAttributesKeys],
+        AttributeKey[tagName as keyof typeof AttributeKey],
         value,
     ]);
     revealedAttributeTags
@@ -194,20 +196,39 @@ export function serializeCredentialDeploymentInformation(
     return Buffer.concat(buffers);
 }
 
+function getSerializedTextWithLength(text: string): SerializedTextWithLength {
+    const encoded = Buffer.from(new TextEncoder().encode(text));
+    const serializedLength = encodeWord32(encoded.length);
+    return {
+        data: encoded,
+        length: serializedLength,
+    };
+}
+
 /**
- * Serializes a Description object.
+ * converts a Description object into a SerializedDescription.
  * (Which is used in IpInfo and ArInfo)
  */
-export function serializeDescription(description: Description) {
-    const buffers = [];
-    const parts = [description.name, description.url, description.description];
-    for (const part of parts) {
-        const encoded = Buffer.from(new TextEncoder().encode(part));
-        const serializedLength = encodeWord32(encoded.length);
-        buffers.push(serializedLength);
-        buffers.push(encoded);
-    }
-    return Buffer.concat(buffers);
+export function getSerializedDescription(
+    description: Description
+): SerializedDescription {
+    return {
+        name: getSerializedTextWithLength(description.name),
+        url: getSerializedTextWithLength(description.url),
+        description: getSerializedTextWithLength(description.description),
+    };
+}
+
+function serializeDescription(description: Description): Buffer {
+    const sd = getSerializedDescription(description);
+    return Buffer.concat([
+        sd.name.length,
+        sd.name.data,
+        sd.url.length,
+        sd.url.data,
+        sd.description.length,
+        sd.description.data,
+    ]);
 }
 
 /**
