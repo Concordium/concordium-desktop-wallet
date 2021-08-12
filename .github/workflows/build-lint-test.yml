@@ -1,0 +1,157 @@
+name: Build, lint and test
+
+on:
+    # Triggers the workflow on push or pull request events but only for the main branch
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+
+    # Allows us to run the workflow manually from the Actions tab
+    workflow_dispatch:
+
+jobs:
+    dependencies:
+        runs-on: ubuntu-20.04
+
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  submodules: 'recursive'
+
+            - name: Cache dependencies
+              id: fetch-dependencies
+              uses: actions/cache@v2
+              with:
+                  path: |
+                      **/node_modules
+                      **/dll
+                      **/pkg
+                      **/target
+                  key: ${{ runner.os }}-v2-${{ hashFiles('**/yarn.lock', '**/rust-src/') }}
+
+            - name: Install rust
+              if: steps.fetch-dependencies.outputs.cache-hit != 'true'
+              run: |
+                  rustup default 1.53
+
+            - name: Get linux packages
+              if: steps.fetch-dependencies.outputs.cache-hit != 'true'
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y libudev-dev libusb-1.0-0-dev rpm
+                  curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+            - uses: actions/setup-node@v2
+              if: steps.fetch-dependencies.outputs.cache-hit != 'true'
+              with:
+                  node-version: '14.16.0'
+
+            - name: Download dependencies
+              if: steps.fetch-dependencies.outputs.cache-hit != 'true'
+              run: yarn
+
+    build:
+        runs-on: ubuntu-20.04
+        needs: [dependencies]
+
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  submodules: 'recursive'
+            - uses: actions/setup-node@v2
+              with:
+                  node-version: '14.16.0'
+
+            - name: Get cached dependencies
+              uses: actions/cache@v2
+              with:
+                  path: |
+                      **/node_modules
+                      **/dll
+                      **/pkg
+                      **/target
+                  key: ${{ runner.os }}-v2-${{ hashFiles('**/yarn.lock', '**/rust-src/') }}
+
+            - name: Build proto
+              run: yarn build-proto
+
+            - name: Build
+              run: yarn build
+
+            - name: Save build artifacts in cache
+              uses: actions/cache@v2
+              with:
+                  path: |
+                      **/app/proto
+                      **/app/main.prod.js
+                      **/app/dist
+                  key: ${{ runner.os }}-v2-${{ hashFiles('**/app/proto/', '**/app/main.prod.js', '**/app/dist/') }}
+
+    lint:
+        runs-on: ubuntu-20.04
+        needs: [build]
+
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  submodules: 'recursive'
+            - uses: actions/setup-node@v2
+              with:
+                  node-version: '14.16.0'
+
+            - name: Get cached dependencies
+              uses: actions/cache@v2
+              with:
+                  path: |
+                      **/node_modules
+                      **/dll
+                      **/pkg
+                      **/target
+                  key: ${{ runner.os }}-v2-${{ hashFiles('**/yarn.lock', '**/rust-src/') }}
+
+            - name: Get build cache
+              uses: actions/cache@v2
+              with:
+                  path: |
+                      **/app/proto
+                      **/app/main.prod.js
+                      **/app/dist
+                  key: ${{ runner.os }}-v2-${{ hashFiles('**/app/proto/', '**/app/main.prod.js', '**/app/dist/') }}
+
+            - name: Lint
+              run: yarn lint
+
+    test:
+        runs-on: ubuntu-20.04
+        needs: [build]
+
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  submodules: 'recursive'
+            - uses: actions/setup-node@v2
+              with:
+                  node-version: '14.16.0'
+
+            - name: Get cached dependencies
+              uses: actions/cache@v2
+              with:
+                  path: |
+                      **/node_modules
+                      **/dll
+                      **/pkg
+                      **/target
+                  key: ${{ runner.os }}-v2-${{ hashFiles('**/yarn.lock', '**/rust-src/') }}
+
+            - name: Get build cache
+              uses: actions/cache@v2
+              with:
+                  path: |
+                      **/app/proto
+                      **/app/main.prod.js
+                      **/app/dist
+                  key: ${{ runner.os }}-v2-${{ hashFiles('**/app/proto/', '**/app/main.prod.js', '**/app/dist/') }}
+
+            - name: Test
+              run: yarn test

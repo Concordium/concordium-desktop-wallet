@@ -57,7 +57,8 @@ export default function ExportCredential({ onExported }: Props): JSX.Element {
                 credential.credentialNumber,
                 credential.identityId,
                 undefined,
-                credential.credential
+                credential.credential,
+                credential.randomness
             );
             const name = accountName || credential.address.substr(0, 8);
             const { address } = credential;
