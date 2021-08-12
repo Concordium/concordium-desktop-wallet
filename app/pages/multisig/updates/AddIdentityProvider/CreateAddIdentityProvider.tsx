@@ -1,19 +1,23 @@
 import React, { useCallback } from 'react';
-import { Validate, ValidationRule } from 'react-hook-form';
-
+import { Validate } from 'react-hook-form';
 import { EqualRecord, AddIdentityProvider, Description } from '~/utils/types';
-import { isHex, onlyDigitsNoLeadingZeroes } from '~/utils/basicHelpers';
 import Form from '~/components/Form';
 import { UpdateProps } from '~/utils/transactionTypes';
 import { useIdentityProviders } from '~/utils/dataHooks';
+import {
+    lengthRule,
+    validateHex,
+    mustBeANumber,
+    requiredMessage,
+    pasteHere,
+    enterHere,
+} from '../common/util';
 
 export type AddIdentityProviderFields = Omit<
     AddIdentityProvider,
     'ipDescription'
 > &
     Description;
-
-const cdiKeyLength = 64;
 
 const fieldNames: EqualRecord<AddIdentityProviderFields> = {
     name: 'name',
@@ -33,20 +37,8 @@ export const fieldDisplays = {
     ipCdiVerifyKey: 'CDI Verify Key:',
 };
 
-const requiredMessage = (name: string) => `${name} is required`;
-const pasteHere = (name: string) => `Paste ${name} here`;
-const enterHere = (name: string) => `Enter ${name} here`;
-
-const mustBeANumber: Validate = (v) =>
-    onlyDigitsNoLeadingZeroes(v) || 'Must be a valid number';
-
-const lengthRule: ValidationRule<number> = {
-    value: cdiKeyLength,
-    message: `${fieldDisplays.ipCdiVerifyKey} must be ${cdiKeyLength} characters`,
-};
-
-const validateHex: (name: string) => Validate = (name: string) => (v: string) =>
-    isHex(v) || `${name} must be HEX format`;
+const cdiKeyLength = 64;
+const cdiKeyRule = lengthRule(fieldDisplays.ipCdiVerifyKey, cdiKeyLength);
 
 /**
  * Component for creating an addIdentityProvider transaction.
@@ -122,8 +114,8 @@ export default function CreateAddIdentityProvider({
                 placeholder={pasteHere(fieldDisplays.ipCdiVerifyKey)}
                 rules={{
                     required: requiredMessage(fieldDisplays.ipCdiVerifyKey),
-                    minLength: lengthRule,
-                    maxLength: lengthRule,
+                    minLength: cdiKeyRule,
+                    maxLength: cdiKeyRule,
                     validate: validateHex(fieldDisplays.ipCdiVerifyKey),
                 }}
             />

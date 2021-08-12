@@ -2,9 +2,9 @@ import React from 'react';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
 import AddAnonymityRevokerView from '~/pages/multisig/updates/AddAnonymityRevoker/AddAnonymityRevokerView';
-import UpdateAddAnonymityRevoker, {
+import CreateAddAnonymityRevoker, {
     AddAnonymityRevokerFields,
-} from '~/pages/multisig/updates/AddAnonymityRevoker/UpdateAddAnonymityRevoker';
+} from '~/pages/multisig/updates/AddAnonymityRevoker/CreateAddAnonymityRevoker';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
@@ -103,5 +103,5 @@ export default class AddAnonymityRevokerHandler
         return authorizations.addAnonymityRevoker;
     }
 
-    update = UpdateAddAnonymityRevoker;
+    update = CreateAddAnonymityRevoker;
 }

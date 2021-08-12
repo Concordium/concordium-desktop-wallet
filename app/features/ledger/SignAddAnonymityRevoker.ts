@@ -1,7 +1,11 @@
 /* eslint-disable no-await-in-loop */
 import { Buffer } from 'buffer/';
 import { Transport } from './Transport';
-import { AddAnonymityRevoker, UpdateInstruction } from '../../utils/types';
+import {
+    AddAnonymityRevoker,
+    UpdateInstruction,
+    SerializedDescription,
+} from '../../utils/types';
 import pathAsBuffer from './Path';
 import {
     serializeUpdateHeader,
@@ -9,7 +13,7 @@ import {
 } from '../../utils/UpdateSerialization';
 import { chunkBuffer } from '../../utils/basicHelpers';
 import {
-    serializeDescription,
+    getSerializedDescription,
     encodeWord32,
     serializeArInfo,
 } from '~/utils/serializationHelpers';
@@ -29,7 +33,7 @@ export default async function signAddIdentityProviderTransaction(
 
     const serializedHeader = serializeUpdateHeader(updateHeaderWithPayloadSize);
     const serializedUpdateType = serializeUpdateType(transaction.type);
-    const serializedDescription = serializeDescription(
+    const serializedDescription = getSerializedDescription(
         transaction.payload.arDescription
     );
     const serializedArInfo = serializeArInfo(transaction.payload);
@@ -47,28 +51,34 @@ export default async function signAddIdentityProviderTransaction(
     ]);
     await transport.send(0xe0, INS_ADD_ANONYMITY_REVOKER, p1, p2, initialData);
 
-    // Send description
-    p1 = 0x01;
-    const descriptionLengthData = encodeWord32(serializedDescription.length);
-    await transport.send(
-        0xe0,
-        INS_ADD_ANONYMITY_REVOKER,
-        p1,
-        p2,
-        descriptionLengthData
-    );
-
-    // Stream the description bytes (maximum of 255 bytes per packet)
-    p1 = 0x02;
-    const descriptionChunks = chunkBuffer(serializedDescription, 255);
-    for (const chunk of descriptionChunks) {
+    for (const text of ['name', 'url', 'description']) {
+        // Send description
+        p1 = 0x01;
+        const descriptionLengthData =
+            serializedDescription[text as keyof SerializedDescription].length;
         await transport.send(
             0xe0,
             INS_ADD_ANONYMITY_REVOKER,
             p1,
             p2,
-            Buffer.from(chunk)
+            descriptionLengthData
         );
+
+        // Stream the description bytes (maximum of 255 bytes per packet)
+        p1 = 0x02;
+        const descriptionChunks = chunkBuffer(
+            serializedDescription[text as keyof SerializedDescription].data,
+            255
+        );
+        for (const chunk of descriptionChunks) {
+            await transport.send(
+                0xe0,
+                INS_ADD_ANONYMITY_REVOKER,
+                p1,
+                p2,
+                Buffer.from(chunk)
+            );
+        }
     }
 
     // Send public Key
