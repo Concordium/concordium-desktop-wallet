@@ -2,6 +2,7 @@ import winston, { LeveledLogMethod } from 'winston';
 import { ipcRenderer } from 'electron';
 import ipcCommands from '~/constants/ipcCommands.json';
 import { LoggingMethods, PutLog } from './preloadTypes';
+import { fileName, maxsize, maxFiles } from '~/constants/logConstants.json';
 
 const LogLevels = {
     error: 0,
@@ -13,16 +14,13 @@ const LogLevels = {
     // silly: 6,
 };
 
-const logFileName = 'info.log';
-
 const logger = winston.createLogger({
     levels: LogLevels,
     format: winston.format.combine(
         winston.format.json(),
         winston.format.errors({ stack: true }),
-        winston.format.prettyPrint(),
-        winston.format.colorize(),
-        winston.format.timestamp()
+        winston.format.timestamp(),
+        winston.format.prettyPrint()
     ),
     transports: [],
 });
@@ -33,6 +31,7 @@ if (process.env.NODE_ENV !== 'production') {
     logger.add(
         new winston.transports.Console({
             format: winston.format.simple(),
+            handleExceptions: true,
         })
     );
 }
@@ -42,7 +41,11 @@ ipcRenderer
     .then((userDataPath) =>
         logger.add(
             new winston.transports.File({
-                filename: `${userDataPath}/${logFileName}`,
+                filename: `${userDataPath}/${fileName}`,
+                maxsize,
+                maxFiles,
+                tailable: true,
+                handleExceptions: true,
             })
         )
     )

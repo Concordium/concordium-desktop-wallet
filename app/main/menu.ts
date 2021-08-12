@@ -7,6 +7,7 @@ import {
 import { licenseNotices, supportForum } from '~/constants/urls.json';
 import { openRoute } from '~/constants/ipcRendererCommands.json';
 import { TERMS } from '~/constants/routes.json';
+import exportLogs from './exportLogs';
 
 const isMac = process.platform === 'darwin';
 
@@ -32,6 +33,11 @@ export function createMenu(window: BrowserWindow) {
         {
             role: 'help',
             submenu: [
+                {
+                    label: 'Export logs',
+                    click: exportLogs,
+                },
+                { type: 'separator' },
                 {
                     label: 'Terms and Conditions',
                     click: () => {

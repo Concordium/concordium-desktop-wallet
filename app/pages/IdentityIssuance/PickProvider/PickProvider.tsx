@@ -70,7 +70,8 @@ export default function IdentityIssuanceChooseProvider({
                 );
                 onError('Unable to load identity providers');
             });
-    }, [dispatch, onError]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // This is run in an effect, to prevent navigation if the component is unmounted
     useEffect(() => {
