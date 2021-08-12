@@ -25,7 +25,7 @@ import {
     UpdateInstructionSignatureWithIndex,
     AuthorizationKeysUpdate,
     AccessStructure,
-    ArInfo,
+    AddAnonymityRevoker,
     AddIdentityProvider,
 } from './types';
 
@@ -46,6 +46,7 @@ export enum OnChainUpdateType {
     UpdateBakerStakeThreshold = 9,
     UpdateRootKeys = 10,
     UpdateLevel1Keys = 11,
+    // eslint-disable-next-line no-shadow
     AddAnonymityRevoker = 12,
     // eslint-disable-next-line no-shadow
     AddIdentityProvider = 13,
@@ -348,7 +349,9 @@ export function serializeAddIdentityProvider(
 /**
  * Serializes an AddAnonymityRevoker update's payload to bytes.
  */
-export function serializeAddAnonymityRevoker(addAnonymityRevoker: ArInfo) {
+export function serializeAddAnonymityRevoker(
+    addAnonymityRevoker: AddAnonymityRevoker
+) {
     const data = serializeArInfo(addAnonymityRevoker);
     const length = encodeWord32(data.length);
     return Buffer.concat([length, data]);
