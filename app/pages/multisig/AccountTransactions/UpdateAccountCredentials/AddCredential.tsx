@@ -19,6 +19,7 @@ import { hasDuplicateWalletId } from '~/database/CredentialDao';
 import Form from '~/components/Form';
 import { CredentialDetails, CredentialStatus } from './util';
 import { CREDENTIAL_NOTE_MAX_LENGTH } from '~/utils/credentialHelper';
+import { throwLoggedError } from '~/utils/basicHelpers';
 
 import styles from './UpdateAccountCredentials.module.scss';
 
@@ -57,7 +58,7 @@ export default function AddCredential({
     }, [showError]);
 
     if (!accountAddress) {
-        throw new Error('Unexpected missing account');
+        throwLoggedError('Unexpected missing account');
     }
 
     async function loadCredential(file: FileInputValue) {

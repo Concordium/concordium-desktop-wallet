@@ -60,6 +60,11 @@ export default function ExportCredential({ onExported }: Props): JSX.Element {
                 credential.credential,
                 credential.randomness
             );
+
+            window.log.info(
+                `Saved credential with credId: ${credential.credential.credId}`
+            );
+
             const name = accountName || credential.address.substr(0, 8);
             const { address } = credential;
 

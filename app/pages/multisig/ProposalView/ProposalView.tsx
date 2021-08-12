@@ -115,9 +115,8 @@ function ProposalView({ proposal }: ProposalViewProps) {
         setTransactionSignDigest,
     ] = useState<string>();
     useEffect(() => {
-        getTransactionSignDigest(transaction)
-            .then((digest) => setTransactionSignDigest(digest))
-            .catch(() => {});
+        const digest = getTransactionSignDigest(transaction);
+        setTransactionSignDigest(digest);
     }, [transaction]);
 
     function submitTransaction() {

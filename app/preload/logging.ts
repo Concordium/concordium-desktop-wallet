@@ -1,7 +1,7 @@
 import winston, { LeveledLogMethod } from 'winston';
 import { ipcRenderer } from 'electron';
 import ipcCommands from '~/constants/ipcCommands.json';
-import { LoggingMethods, LogExtra } from './preloadTypes';
+import { LoggingMethods, PutLog } from './preloadTypes';
 
 const LogLevels = {
     error: 0,
@@ -48,8 +48,9 @@ ipcRenderer
     )
     .catch(() => {});
 
-function log(f: LeveledLogMethod, first: string | Error, extra: LogExtra) {
-    return typeof first === 'string' ? f(first, extra) : f(first);
+function log(f: LeveledLogMethod, ...args: Parameters<PutLog>) {
+    const first = args[0];
+    return typeof first === 'string' ? f(first, args[1]) : f(first);
 }
 
 const methods: LoggingMethods = {

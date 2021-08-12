@@ -68,6 +68,12 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
         expiryTimeError,
     ] = useTransactionExpiryState();
 
+    useEffect(() => {
+        if (error) {
+            window.log.error(error);
+        }
+    }, [error]);
+
     const onCreateTransaction = async () => {
         if (account === undefined) {
             setError('Account is needed to make transaction');

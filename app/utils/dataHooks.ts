@@ -27,9 +27,7 @@ import {
 export function useAccountName(address: string) {
     const [name, setName] = useState<string | undefined>();
     useEffect(() => {
-        lookupName(address)
-            .then(setName)
-            .catch(() => {}); // lookupName will only reject if there is a problem with the database. In that case we ignore the error and just display the address only.
+        lookupName(address).then(setName).catch(window.log.error); // lookupName will only reject if there is a problem with the database. In that case we ignore the error and just display the address only.
     }, [address]);
     return name;
 }
@@ -40,7 +38,7 @@ export function useAccount(address: string) {
     useEffect(() => {
         getAccount(address)
             .then((a) => setAccount(a ?? null))
-            .catch(() => {});
+            .catch(window.log.error);
     }, [address]);
     return account;
 }
@@ -52,7 +50,7 @@ export function useAccountInfo(address?: string) {
         if (address) {
             getAccountInfoOfAddress(address)
                 .then(setAccountInfo)
-                .catch(() => {});
+                .catch(window.log.error);
         } else {
             setAccountInfo(undefined);
         }
@@ -88,7 +86,7 @@ export function useLastFinalizedBlockSummary() {
     useEffect(() => {
         fetchLastFinalizedBlockSummary()
             .then(setSummary)
-            .catch(() => {});
+            .catch(window.log.error);
     }, []);
     return summary;
 }
@@ -97,9 +95,7 @@ export function useLastFinalizedBlockSummary() {
 export function useConsensusStatus() {
     const [status, setStatus] = useState<ConsensusStatus>();
     useEffect(() => {
-        getConsensusStatus()
-            .then(setStatus)
-            .catch(() => {});
+        getConsensusStatus().then(setStatus).catch(window.log.error);
     }, []);
     return status;
 }

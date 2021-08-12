@@ -49,9 +49,19 @@ async function generateIdentity(
             redirectUri,
             idObjectRequest
         );
+
+        window.log.info(
+            `Identity Object Request sent. provider location:${identityProviderLocation}`
+        );
+
         identityObjectLocation = await window.view.createView(
             identityProviderLocation,
             rect
+        );
+
+        // Is this sensitive/should not be put into log?
+        window.log.info(
+            `Identity Object Location determined:${identityObjectLocation}`
         );
 
         // TODO This code still has an issue if the application fails before
@@ -91,6 +101,9 @@ async function generateIdentity(
             identity,
             initialAccount
         );
+
+        window.log.info('Saved identity object.');
+
         loadIdentities(dispatch);
         loadAccounts(dispatch);
     } catch (e) {

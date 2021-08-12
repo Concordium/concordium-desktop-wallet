@@ -2,14 +2,12 @@ import { Dispatch, Account, AccountStatus } from './types';
 import { confirmAccount } from '../features/AccountSlice';
 import { isInitialAccount } from './accountHelpers';
 import { getAllAccounts } from '../database/AccountDao';
+import { throwLoggedError } from './basicHelpers';
 
 function resumeAccountStatusPolling(account: Account, dispatch: Dispatch) {
     const { address, deploymentTransactionId } = account;
     if (!deploymentTransactionId) {
-        window.log.error(
-            `Unexpected missing deploymentTransactionId on ${account.address}.`
-        );
-        throw new Error('Unexpected missing deploymentTransactionId');
+        throwLoggedError('Unexpected missing deploymentTransactionId');
     }
     return confirmAccount(dispatch, address, deploymentTransactionId);
 }

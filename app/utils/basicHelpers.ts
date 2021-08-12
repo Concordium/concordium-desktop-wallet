@@ -174,3 +174,9 @@ export function pipe<A extends any[], B, C>(
 ): (...args: A) => C {
     return (...args) => b(a(...args));
 }
+
+export function throwLoggedError(message: string): never {
+    const error = new Error(message);
+    window.log.error(error);
+    throw error;
+}

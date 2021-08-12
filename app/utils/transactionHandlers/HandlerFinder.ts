@@ -42,6 +42,7 @@ import UpdateLevel2KeysUsingLevel1KeysHandler from './UpdateLevel2KeysWithLevel1
 import EncryptedTransferHandler from './EncryptedTransferHandler';
 import BakerHandler from './BakerHandler';
 import { parse } from '../JSONHelper';
+import { throwLoggedError } from '../basicHelpers';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -100,7 +101,7 @@ export function findAccountTransactionHandler(
     if (transactionKind === TransactionKindId.Transfer_to_public) {
         return new AccountHandlerTypeMiddleware(new TransferToPublicHandler());
     }
-    throw new Error(`Unsupported transaction type: ${transactionKind}`);
+    return throwLoggedError(`Unsupported transaction type: ${transactionKind}`);
 }
 
 export function findUpdateInstructionHandler(
@@ -168,7 +169,7 @@ export function findUpdateInstructionHandler(
                 new UpdateLevel2KeysUsingLevel1KeysHandler()
             );
         default:
-            throw new Error(`Unsupported transaction type: ${type}`);
+            return throwLoggedError(`Unsupported transaction type: ${type}`);
     }
 }
 
@@ -183,7 +184,7 @@ export function createUpdateInstructionHandler(
     state: TransactionInput | undefined
 ) {
     if (!state) {
-        throw new Error(
+        throwLoggedError(
             'No transaction handler was found. An invalid transaction has been received.'
         );
     }
@@ -194,5 +195,5 @@ export function createUpdateInstructionHandler(
     if (type === 'UpdateInstruction') {
         return findUpdateInstructionHandler(transactionObject.type);
     }
-    throw new Error('Account transaction support not yet implemented.');
+    return throwLoggedError('Account transaction support not yet implemented.');
 }

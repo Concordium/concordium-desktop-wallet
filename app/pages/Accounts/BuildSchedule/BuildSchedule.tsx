@@ -45,6 +45,7 @@ export default function BuildSchedule({ location }: Props) {
     const dispatch = useDispatch();
 
     if (!location.state) {
+        window.log.error('Build schedule loaded, missing state.');
         throw new Error('Unexpected missing state.');
     }
 

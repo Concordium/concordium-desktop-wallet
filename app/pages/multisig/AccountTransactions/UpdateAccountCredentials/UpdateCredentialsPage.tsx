@@ -24,7 +24,7 @@ import Columns from '~/components/Columns';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
 import { getUpdateCredentialsCost } from '~/utils/transactionCosts';
 import { useAccountInfo, useTransactionExpiryState } from '~/utils/dataHooks';
-import { collapseFraction } from '~/utils/basicHelpers';
+import { collapseFraction, throwLoggedError } from '~/utils/basicHelpers';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import LoadingComponent from '../LoadingComponent';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
@@ -85,7 +85,7 @@ function subTitle(currentLocation: string) {
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
             return 'Signature and Hardware Wallet';
         default:
-            throw new Error('unknown location');
+            return throwLoggedError('unknown location');
     }
 }
 
@@ -408,15 +408,15 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
 
     function renderCreateUpdate() {
         if (!newThreshold) {
-            throw new Error('Unexpected missing threshold');
+            throwLoggedError('Unexpected missing threshold');
         }
 
         if (!account) {
-            throw new Error('Unexpected missing account');
+            throwLoggedError('Unexpected missing account');
         }
 
         if (!expiryTime) {
-            throw new Error('Unexpected missing expiry');
+            throwLoggedError('Unexpected missing expiry');
         }
 
         const usedIndices: number[] = currentCredentials

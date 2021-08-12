@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
@@ -50,6 +50,7 @@ import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
+import { throwLoggedError } from '~/utils/basicHelpers';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
 
@@ -92,6 +93,12 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
         exchangeRate,
         account?.signatureThreshold
     );
+
+    useEffect(() => {
+        if (error) {
+            window.log.error(error);
+        }
+    }, [error]);
 
     const onGenerateKeys = () => {
         if (account === undefined) {
@@ -151,13 +158,13 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
             throw new Error(errorMessages.missingGlobal);
         }
         if (!account) {
-            throw new Error('Unexpected missing account');
+            throwLoggedError('Unexpected missing account');
         }
         if (transaction === undefined) {
-            throw new Error('unexpected missing transaction');
+            throwLoggedError('Unexpected missing transaction');
         }
         if (bakerKeys === undefined) {
-            throw new Error('unexpected missing bakerKeys');
+            throwLoggedError('Unexpected missing bakerKeys');
         }
 
         let signatures = {};
@@ -171,7 +178,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
         );
 
         if (proposal.id === undefined) {
-            throw new Error('unexpected undefined proposal id');
+            throwLoggedError('Unexpected undefined proposal id');
         }
 
         // Set the current proposal in the state to the one that was just generated.

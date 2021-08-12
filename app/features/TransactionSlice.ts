@@ -32,7 +32,7 @@ import {
 } from './AccountSlice';
 import AbortController from '~/utils/AbortController';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
-import { max } from '~/utils/basicHelpers';
+import { max, throwLoggedError } from '~/utils/basicHelpers';
 
 const updateTransactionInterval = 5000;
 
@@ -109,7 +109,7 @@ export async function decryptTransactions(
 
     const encryptedAmounts = encryptedTransfers.map((t) => {
         if (!t.encrypted) {
-            throw new Error('Unexpected missing field');
+            throwLoggedError('Unexpected missing field');
         }
         if (t.fromAddress === accountAddress) {
             return JSON.parse(t.encrypted).inputEncryptedAmount;
@@ -294,7 +294,7 @@ export async function confirmTransaction(
     let rejectReason;
     if (!success) {
         if (!event.result.rejectReason) {
-            throw new Error('Missing rejection reason in transaction event');
+            throwLoggedError('Missing rejection reason in transaction event');
         }
 
         rejectReason =

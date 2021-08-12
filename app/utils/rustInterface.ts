@@ -24,6 +24,7 @@ import { getDefaultExpiry, secondsSinceUnixEpoch } from './timeHelpers';
 import { getAccountPath } from '~/features/ledger/Path';
 import { stringify, parse } from './JSONHelper';
 import CredentialInfoLedgerDetails from '~/components/ledger/CredentialInfoLedgerDetails';
+import { throwLoggedError } from './basicHelpers';
 
 const rawWorker = new RustWorker();
 const worker = new PromiseWorker(rawWorker);
@@ -184,11 +185,7 @@ async function createUnsignedCredentialInfo(
             randomness,
         };
     } catch (e) {
-        window.log.error({
-            message: `Unsigned credential creation failed due to unexpected output${unsignedCredentialDeploymentInfoString}`,
-            error: e,
-        });
-        throw new Error(
+        return throwLoggedError(
             `Unable to create unsigned credential due to unexpected output: ${unsignedCredentialDeploymentInfoString}`
         );
     }
@@ -306,7 +303,7 @@ export async function createCredentialDetails(
             randomness,
         };
     } catch (e) {
-        throw new Error(
+        return throwLoggedError(
             `Unable to create signed credential due to unexpected output: ${credentialDeploymentInfoString}`
         );
     }

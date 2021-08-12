@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as crypto from 'crypto';
 import { CryptoMethods } from '~/preload/preloadTypes';
+import { throwLoggedError } from '~/utils/basicHelpers';
 import { EncryptedData } from '~/utils/types';
 
 const encoding = 'base64';
@@ -21,14 +22,18 @@ function getEncryptionMethodExport(method: string) {
     if (method === aes256EncryptionMethod) {
         return aes256EncryptionMethodExternal;
     }
-    throw new Error(`An unsupported encryption method was used: ${method}`);
+    return throwLoggedError(
+        `An unsupported encryption method was used: ${method}`
+    );
 }
 
 function getEncryptionMethodImport(method: string) {
     if (method === aes256EncryptionMethodExternal) {
         return aes256EncryptionMethod;
     }
-    throw new Error(`An unsupported encryption method was used: " ${method}`);
+    return throwLoggedError(
+        `An unsupported encryption method was used: " ${method}`
+    );
 }
 
 /**
@@ -39,7 +44,7 @@ function getKeyDerivationAlgorithmExport(algorithm: string) {
     if (algorithm === keyDerivationMethod) {
         return keyDerivationMethodExternal;
     }
-    throw new Error(
+    return throwLoggedError(
         `An unsupported key derivation algorithm was used: ${algorithm}`
     );
 }

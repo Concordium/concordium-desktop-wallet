@@ -16,6 +16,7 @@ import {
 import { hashSha256 } from './serializationHelpers';
 import { fetchLastFinalizedBlockSummary } from '~/node/nodeHelpers';
 import { attachKeyIndex } from '~/utils/updates/AuthorizationHelper';
+import { throwLoggedError } from './basicHelpers';
 
 /**
  * Given an update instruction, return the transaction hash.
@@ -47,12 +48,10 @@ export async function getUpdateInstructionTransactionHash(
  * Given a transaction, return the digest, which does not contain the signature
  * And can be used to create the signature
  */
-export default async function getTransactionSignDigest(
-    transaction: Transaction
-) {
+export default function getTransactionSignDigest(transaction: Transaction) {
     if (instanceOfUpdateInstruction(transaction)) {
         const handler = findUpdateInstructionHandler(transaction.type);
-        const updateHash = await hashSha256(
+        const updateHash = hashSha256(
             serializeUpdateInstructionHeaderAndPayload(
                 transaction,
                 handler.serializePayload(transaction)
@@ -60,9 +59,7 @@ export default async function getTransactionSignDigest(
         );
         return updateHash.toString('hex');
     }
-    const accountTransactionHash = await getAccountTransactionSignDigest(
-        transaction
-    );
+    const accountTransactionHash = getAccountTransactionSignDigest(transaction);
     return accountTransactionHash.toString('hex');
 }
 
@@ -80,7 +77,7 @@ export async function getTransactionHash(transaction: Transaction) {
         );
         return accountTransactionHash.toString('hex');
     }
-    throw new Error(
+    return throwLoggedError(
         'Unable to get hash for a transaction that is not an update instruction or an account transaction with a signature'
     );
 }

@@ -35,7 +35,9 @@ export default function PickAmount({
     validateAmount = validateTransferAmount,
 }: Props): JSX.Element {
     if (!account) {
-        throw new Error('Unexpected missing account');
+        const error = new Error('Unexpected missing account');
+        window.log.error(error);
+        throw error;
     }
 
     const accountInfo = useAccountInfo(account.address);

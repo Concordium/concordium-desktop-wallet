@@ -33,7 +33,6 @@ export default function AccountList() {
 
     useEffect(() => {
         load(dispatch).catch((e: Error) => {
-            window.log.error(e);
             setError(e.message);
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps

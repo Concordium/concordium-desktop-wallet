@@ -13,6 +13,7 @@ import startClient from '../node/nodeConnector';
 import { Dispatch } from './types';
 import settingKeys from '../constants/settingKeys.json';
 import { unlock } from '~/features/MiscSlice';
+import { throwLoggedError } from './basicHelpers';
 
 /**
  * Loads settings from the database into the store.
@@ -24,7 +25,7 @@ async function loadSettingsIntoStore(dispatch: Dispatch) {
         const { address, port } = JSON.parse(nodeLocationSetting.value);
         startClient(dispatch, address, port);
     } else {
-        throw new Error('Unable to find node location setting.');
+        throwLoggedError('Unable to find node location setting.');
     }
 
     return dispatch(updateSettings(settings));

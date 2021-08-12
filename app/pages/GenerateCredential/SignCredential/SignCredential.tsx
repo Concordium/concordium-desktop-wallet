@@ -51,13 +51,18 @@ export default function SignCredential({ onSigned }: Props): JSX.Element {
     const [credentialNumber, setCredentialNumber] = useState<number>();
     useEffect(() => {
         if (identity?.id === undefined) {
-            throw new Error(
+            const error = new Error(
                 'An identity has to be supplied. This is an internal error.'
             );
+            window.log.error(error);
+            throw error;
         }
         getNextCredentialNumber(identity.id)
             .then(setCredentialNumber)
             .catch(() => {
+                window.log.error(
+                    'getNextCredentialNumber call to database failed'
+                );
                 throw new Error('Unable to read from database.');
             });
     }, [identity?.id]);
@@ -69,47 +74,54 @@ export default function SignCredential({ onSigned }: Props): JSX.Element {
                 setMessage: (message: string | JSX.Element) => void
             ) => {
                 setMessage('Please wait');
+                let error;
                 if (!credentialNumber) {
-                    throw new Error(
+                    error = new Error(
                         'The credentialNumber has to be supplied. This is an internal error.'
                     );
-                }
-                if (!identity) {
-                    throw new Error(
+                } else if (!identity) {
+                    error = new Error(
                         'An identity has to be supplied. This is an internal error.'
                     );
                 } else if (!address) {
-                    throw new Error(
+                    error = new Error(
                         'An account adress has to be supplied. This is an internal error.'
                     );
                 } else if (!global) {
-                    throw new Error(errorMessages.missingGlobal);
+                    error = new Error(errorMessages.missingGlobal);
+                } else {
+                    const {
+                        info: credential,
+                        randomness,
+                    } = await createCredentialInfo(
+                        identity,
+                        credentialNumber,
+                        keys,
+                        global,
+                        chosenAttributes as string[],
+                        setMessage,
+                        ledger,
+                        address
+                    );
+                    const blob: CredentialBlob = {
+                        credential,
+                        randomness,
+                        address,
+                        credentialNumber,
+                        identityId: identity.id,
+                    };
+                    onChange(blob);
+                    onBlur();
+                    setMessage('Credential generated succesfully!');
+                    onSigned();
+                    return;
                 }
-
-                const {
-                    info: credential,
-                    randomness,
-                } = await createCredentialInfo(
-                    identity,
-                    credentialNumber,
-                    keys,
-                    global,
-                    chosenAttributes as string[],
-                    setMessage,
-                    ledger,
-                    address
-                );
-                const blob: CredentialBlob = {
-                    credential,
-                    randomness,
-                    address,
-                    credentialNumber,
-                    identityId: identity.id,
-                };
-                onChange(blob);
-                onBlur();
-                setMessage('Credential generated succesfully!');
-                onSigned();
+                if (error) {
+                    window.log.error(
+                        `Error occured before signing credential ${{ error }}`
+                    );
+                    throw error;
+                }
             };
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps

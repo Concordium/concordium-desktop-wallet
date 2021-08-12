@@ -43,9 +43,11 @@ export default function SettingsView() {
                     childSetting.name
                 );
                 if (!settingDisplayText) {
-                    throw new Error(
+                    const error = new Error(
                         'A setting without a display text was encountered.'
                     );
+                    window.log.error(error);
+                    throw error;
                 }
                 let warning: string | undefined;
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
@@ -42,6 +42,7 @@ import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
+import { throwLoggedError } from '~/utils/basicHelpers';
 
 const pageTitle = 'Multi Signature Transactions | Update Baker Keys';
 
@@ -75,6 +76,12 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
         setExpiryTime,
         expiryTimeError,
     ] = useTransactionExpiryState();
+
+    useEffect(() => {
+        if (error) {
+            window.log.error(error);
+        }
+    }, [error]);
 
     const onGenerateKeys = () => {
         if (account === undefined) {
@@ -119,13 +126,13 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
 
     const signingFunction = async (ledger?: ConcordiumLedgerClient) => {
         if (!account) {
-            throw new Error('unexpected missing account');
+            throwLoggedError('unexpected missing account');
         }
         if (transaction === undefined) {
-            throw new Error('unexpected missing transaction');
+            throwLoggedError('unexpected missing transaction');
         }
         if (bakerKeys === undefined) {
-            throw new Error('unexpected missing bakerKeys');
+            throwLoggedError('unexpected missing bakerKeys');
         }
 
         let signatures = {};
@@ -138,7 +145,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
             account.signatureThreshold
         );
         if (proposal.id === undefined) {
-            throw new Error('unexpected undefined proposal id');
+            throwLoggedError('unexpected undefined proposal id');
         }
 
         // Set the current proposal in the state to the one that was just generated.

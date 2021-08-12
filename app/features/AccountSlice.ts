@@ -42,6 +42,7 @@ import {
 
 import { getAccountInfos, getAccountInfoOfAddress } from '../node/nodeHelpers';
 import { hasPendingTransactions } from '~/database/TransactionDao';
+import { throwLoggedError } from '~/utils/basicHelpers';
 
 interface AccountState {
     accounts: Account[];
@@ -281,7 +282,7 @@ export async function loadAccountInfos(
         const { account, accountInfo } = accountInfos[i];
         if (account.status === AccountStatus.Genesis) {
             if (!accountInfo) {
-                throw new Error(
+                throwLoggedError(
                     `Genesis Account '${account.name}' not found on chain. Associated credId: ${account.address}` // account.address contains the placeholder credId
                 );
             }

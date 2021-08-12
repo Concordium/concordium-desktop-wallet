@@ -178,6 +178,7 @@ export default function AccountReport({ location }: Props) {
             // Send to main thread for saving the files as a single zip file.
             return window.files.saveZipFileDialog(filesToZip);
         } catch (e) {
+            window.log.error('Account report failed', { error: e });
             setShowError({
                 show: true,
                 header: 'Account Report was not saved.',

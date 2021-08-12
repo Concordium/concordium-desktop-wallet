@@ -25,6 +25,7 @@ import {
     upsertExternalCredential,
     upsertMultipleExternalCredentials,
 } from '~/database/ExternalCredentialDao';
+import { throwLoggedError } from '~/utils/basicHelpers';
 
 interface CredentialState {
     credentials: Credential[];
@@ -214,7 +215,7 @@ export async function initializeGenesisCredential(
             credential.credId
     );
     if (!credentialOnChain) {
-        throw new Error(
+        throwLoggedError(
             `Unexpected missing reference to genesis credential on chain, with credId: ${credential.credId}`
         );
     }

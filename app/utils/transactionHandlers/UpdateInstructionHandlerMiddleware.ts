@@ -13,6 +13,7 @@ import {
     instanceOfUpdateInstruction,
     Transaction,
 } from '~/utils/types';
+import { throwLoggedError } from '../basicHelpers';
 
 export default class UpdateInstructionHandlerTypeMiddleware<T>
     implements
@@ -40,7 +41,7 @@ export default class UpdateInstructionHandlerTypeMiddleware<T>
         if (instanceOfUpdateInstruction(transaction)) {
             return transaction;
         }
-        throw Error('Invalid transaction type was given as input.');
+        return throwLoggedError('Invalid transaction type was given as input.');
     }
 
     getFileNameForExport(

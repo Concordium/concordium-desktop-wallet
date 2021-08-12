@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
@@ -65,6 +65,12 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
         setExpiryTime,
         expiryTimeError,
     ] = useTransactionExpiryState();
+
+    useEffect(() => {
+        if (error) {
+            window.log.error(error);
+        }
+    }, [error]);
 
     const onCreateTransaction = async () => {
         if (account === undefined) {

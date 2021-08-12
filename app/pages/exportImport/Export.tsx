@@ -80,10 +80,12 @@ export default function Export() {
                 defaultPath: 'wallet-export.json',
             });
             if (completed) {
+                window.log.info('Export performed sucessfully');
                 setModalMessage('Export was successful');
                 setOpenConfirmationModal(true);
             }
         } catch (error) {
+            window.log.error('Export failed', { error });
             setModalMessage(
                 'Export was unsuccessful, We were unable to save to file.'
             );

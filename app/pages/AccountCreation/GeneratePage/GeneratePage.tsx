@@ -168,6 +168,9 @@ export default function AccountCreationGenerate({
                         randomness
                     );
                     await sendCredential(credentialDeploymentDetails);
+                    window.log.info(
+                        `Sent credential deployment to node with id: ${credentialDeploymentDetails.transactionId}`
+                    );
                     confirmAccount(
                         dispatch,
                         credentialDeploymentDetails.accountAddress,

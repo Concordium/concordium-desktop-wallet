@@ -105,20 +105,17 @@ export function HashRows({ transaction }: HashRowsProps) {
     const threshold = acc?.signatureThreshold ?? 0;
 
     useEffect(() => {
-        getAccountTransactionSignDigest(transaction)
-            .then((digest) => {
-                return setDigestToSign(digest.toString('hex'));
-            })
-            .catch(() => {});
+        const digest = getAccountTransactionSignDigest(transaction);
+        setDigestToSign(digest.toString('hex'));
         if (
             'signatures' in transaction &&
             Object.keys(transaction.signatures).length >= threshold
         ) {
-            getAccountTransactionHash(transaction, transaction.signatures)
-                .then((hash) => {
-                    return setTransactionHash(hash.toString('hex'));
-                })
-                .catch(() => {});
+            const hash = getAccountTransactionHash(
+                transaction,
+                transaction.signatures
+            );
+            setTransactionHash(hash.toString('hex'));
         }
     }, [transaction, threshold]);
 
@@ -180,11 +177,8 @@ const DigestToSignFooter = (transaction: AccountTransaction) => {
     const [digestToSign, setDigestToSign] = useState<string>();
 
     useEffect(() => {
-        getAccountTransactionSignDigest(transaction)
-            .then((digest) => {
-                return setDigestToSign(digest.toString('hex'));
-            })
-            .catch(() => {});
+        const digest = getAccountTransactionSignDigest(transaction);
+        return setDigestToSign(digest.toString('hex'));
     }, [transaction]);
 
     return (

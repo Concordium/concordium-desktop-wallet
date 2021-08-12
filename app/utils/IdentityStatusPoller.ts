@@ -17,6 +17,7 @@ import {
 } from '../database/IdentityDao';
 import { loadCredentials } from '~/features/CredentialSlice';
 import { loadAddressBook } from '~/features/AddressBookSlice';
+import { throwLoggedError } from './basicHelpers';
 
 /**
  * Poll the identity provider for an identity until the identity and initial account either
@@ -91,10 +92,9 @@ export async function resumeIdentityStatusPolling(
     const { name: identityName, codeUri: location, id } = identity;
     const initialAccount = await findInitialAccount(identity);
     if (!initialAccount) {
-        window.log.error(
+        throwLoggedError(
             `Unexpected missing initial account on ${identity.name}.`
         );
-        throw new Error('Unexpected missing initial account.');
     }
     const { name: accountName } = initialAccount;
     return confirmIdentityAndInitialAccount(

@@ -122,6 +122,7 @@ export default function IdentityIssuanceChooseProvider({
                         ledger,
                         IPDetails
                     );
+                    window.log.info('Created Identity Object Request.');
 
                     setNextLocationState({
                         ...idObj,
