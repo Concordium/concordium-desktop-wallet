@@ -191,8 +191,8 @@ export default function PerformImport({ location }: Props) {
                 <p key={account.address}>
                     {account.name}{' '}
                     {messages[account.address] && (
-                        <span className="bodyLight textFaded">
-                            {messages[account.address]}
+                        <span className="bodyLight textFaded mL10">
+                            ({messages[account.address]})
                         </span>
                     )}
                 </p>
@@ -208,7 +208,7 @@ export default function PerformImport({ location }: Props) {
         .map((entry: AddressBookEntry) => (
             <p key={entry.address} className={styles.importedAddress}>
                 {entry.name}{' '}
-                <span className="bodyLight">
+                <span className="bodyLight textFaded mL10">
                     {messages[entry.address] && `(${messages[entry.address]})`}
                 </span>
             </p>
@@ -260,15 +260,17 @@ export default function PerformImport({ location }: Props) {
                                                 key={identity.id}
                                                 className={styles.importSection}
                                             >
-                                                <h3 className="mB0">
+                                                <h3 className="mB10">
                                                     <b>ID:</b> {identity.name}{' '}
                                                     {messages[identity.id] && (
-                                                        <span className="bodyLight textFaded body3">
+                                                        <span className="bodyLight textFaded mL10">
+                                                            (
                                                             {
                                                                 messages[
                                                                     identity.id
                                                                 ]
                                                             }
+                                                            )
                                                         </span>
                                                     )}
                                                 </h3>
