@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { IpcMain } from 'electron';
 import { knex } from '~/database/knex';
 import {
     credentialsTable,
@@ -7,8 +6,15 @@ import {
     walletTable,
 } from '~/constants/databaseNames.json';
 import { Credential, CredentialWithIdentityNumber } from '~/utils/types';
-import ipcCommands from '~/constants/ipcCommands.json';
+import { CredentialMethods } from '~/preload/preloadTypes';
 
+/**
+ * Get all credentials for the account with the given account address. The identity
+ * number is joined in from the identity table, and the walletId is joined from
+ * the wallet table and augmented into the credential object.
+ * @param accountAddress address of the account to get the credentials for
+ * @returns an array of credentials for the given account, augmented with the identityNumber and walletId
+ */
 async function getCredentialsOfAccount(accountAddress: string) {
     const credentials = await (await knex())
         .select()
@@ -65,6 +71,10 @@ export async function getCredentials(): Promise<
     return credentials;
 }
 
+/**
+ * Get all credentials for the given identity id, i.e. exactly those credentials
+ * that refer to a specific identity.
+ */
 export async function getCredentialsForIdentity(
     identityId: number
 ): Promise<Credential[]> {
@@ -137,84 +147,17 @@ export async function hasExistingCredential(
     return credentials.some((cred) => cred.walletId === currentWalletId);
 }
 
-export default function initializeIpcHandlers(ipcMain: IpcMain) {
-    ipcMain.handle(
-        ipcCommands.database.credentials.insert,
-        async (_event, credential: Credential) => {
-            return insertCredential(credential);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.credentials.delete,
-        async (_event, credential: Credential) => {
-            return removeCredential(credential);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.credentials.deleteForAccount,
-        async (_event, accountAddress: string) => {
-            return removeCredentialsOfAccount(accountAddress);
-        }
-    );
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ipcMain.handle(ipcCommands.database.credentials.getAll, async (_event) => {
-        return getCredentials();
-    });
-
-    ipcMain.handle(
-        ipcCommands.database.credentials.getForIdentity,
-        async (_event, identityId: number) => {
-            return getCredentialsForIdentity(identityId);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.credentials.getForAccount,
-        async (_event, accountAddress: string) => {
-            return getCredentialsOfAccount(accountAddress);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.credentials.getNextNumber,
-        async (_event, identityId: number) => {
-            return getNextCredentialNumber(identityId);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.credentials.updateIndex,
-        async (_event, credId: string, credentialIndex: number | undefined) => {
-            return updateCredentialIndex(credId, credentialIndex);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.credentials.update,
-        async (_event, credId: string, updatedValues: Partial<Credential>) => {
-            return updateCredential(credId, updatedValues);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.credentials.hasDuplicateWalletId,
-        async (
-            _event,
-            accountAddress: string,
-            credId: string,
-            otherCredIds: string[]
-        ) => {
-            return hasDuplicateWalletId(accountAddress, credId, otherCredIds);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.credentials.hasExistingCredential,
-        async (_event, accountAddress: string, currentWalletId: number) => {
-            return hasExistingCredential(accountAddress, currentWalletId);
-        }
-    );
-}
+const exposedMethods: CredentialMethods = {
+    insert: insertCredential,
+    delete: removeCredential,
+    deleteForAccount: removeCredentialsOfAccount,
+    getAll: getCredentials,
+    getForIdentity: getCredentialsForIdentity,
+    getForAccount: getCredentialsOfAccount,
+    getNextNumber: getNextCredentialNumber,
+    updateIndex: updateCredentialIndex,
+    update: updateCredential,
+    hasDuplicateWalletId,
+    hasExistingCredential,
+};
+export default exposedMethods;

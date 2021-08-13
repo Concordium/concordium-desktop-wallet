@@ -7,7 +7,6 @@ import clsx from 'clsx';
 import CheckmarkIcon from '@resources/svg/checkmark-blue.svg';
 import { useTimeoutState } from '~/utils/hooks';
 import styles from './CopiableIdenticon.module.scss';
-import ipcCommands from '~/constants/ipcCommands.json';
 
 const imageWidth = 128;
 
@@ -36,10 +35,7 @@ export default function CopiableIdenticon({ data, setScreenshot }: Props) {
     }, [image, takeScreenshot, setScreenshot]);
 
     async function copyIdenticonToClipboard(dataUrl: string) {
-        await window.ipcRenderer.invoke(
-            ipcCommands.writeImageToClipboard,
-            dataUrl
-        );
+        window.writeImageToClipboard(dataUrl);
         return setShowCopied(true);
     }
 

@@ -1,4 +1,3 @@
-import { IpcMain } from 'electron';
 import {
     Account,
     TransactionKindString,
@@ -8,8 +7,8 @@ import {
 import { transactionTable } from '~/constants/databaseNames.json';
 import { knex } from '~/database/knex';
 import { chunkArray, partition } from '~/utils/basicHelpers';
-import ipcCommands from '~/constants/ipcCommands.json';
-import { GetTransactionsOutput } from '~/database/TransactionDao';
+import { GetTransactionsOutput } from '~/database/types';
+import { TransactionMethods } from '~/preload/preloadTypes';
 
 async function updateTransaction(
     identifier: Record<string, unknown>,
@@ -81,6 +80,11 @@ async function hasEncryptedTransactions(
     return Boolean(transaction);
 }
 
+/** Given a list of transactions, checks which already exists.
+ *  New transactions are added to the table, while duplicates are treated
+ *  as updates to the current transactions.
+ * @Return the list of new transactions.
+ * */
 export async function insertTransactions(
     transactions: Partial<TransferTransaction>[]
 ) {
@@ -111,56 +115,13 @@ export async function insertTransactions(
     return additions;
 }
 
-export default function initializeIpcHandlers(ipcMain: IpcMain) {
-    ipcMain.handle(
-        ipcCommands.database.transactions.getPending,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        async (_event) => {
-            return getPendingTransactions();
-        }
-    );
+const exposedMethods: TransactionMethods = {
+    getPending: getPendingTransactions,
+    hasPending: hasPendingTransactions,
+    getTransactionsForAccount: getTransactionsOfAccount,
+    hasEncryptedTransactions,
+    update: updateTransaction,
+    insert: insertTransactions,
+};
 
-    ipcMain.handle(
-        ipcCommands.database.transactions.hasPending,
-        async (_event, fromAddress: string) => {
-            return hasPendingTransactions(fromAddress);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.transactions.hasEncryptedTransactions,
-        async (_event, address: string, fromTime: string, toTime: string) => {
-            return hasEncryptedTransactions(address, fromTime, toTime);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.transactions.getTransactionsForAccount,
-        async (
-            _event,
-            account: Account,
-            filteredTypes: TransactionKindString[],
-            limit: number
-        ) => {
-            return getTransactionsOfAccount(account, filteredTypes, limit);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.transactions.update,
-        async (
-            _event,
-            identifier: Record<string, unknown>,
-            updatedValues: Partial<TransferTransaction>
-        ) => {
-            return updateTransaction(identifier, updatedValues);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.transactions.insert,
-        async (_event, transactions: Partial<TransferTransaction>[]) => {
-            return insertTransactions(transactions);
-        }
-    );
-}
+export default exposedMethods;

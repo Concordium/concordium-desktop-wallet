@@ -7,7 +7,6 @@ import PageLayout from '~/components/PageLayout';
 import initApplication from '~/utils/initialize';
 import { passwordValidators } from '~/utils/passwordHelpers';
 import routes from '~/constants/routes.json';
-import ipcCommands from '~/constants/ipcCommands.json';
 import homeStyles from '../Home.module.scss';
 import styles from './SelectPassword.module.scss';
 
@@ -24,11 +23,8 @@ export default function SelectPassword() {
 
     const handleSubmit: SubmitHandler<PasswordForm> = useCallback(
         async (values) => {
-            await window.ipcRenderer.invoke(
-                ipcCommands.database.setPassword,
-                values.password
-            );
-            await window.ipcRenderer.invoke(ipcCommands.database.migrate);
+            window.database.general.setPassword(values.password);
+            await window.database.general.migrate();
             await initApplication(dispatch);
             dispatch(push({ pathname: routes.HOME_PASSWORD_SET }));
         },

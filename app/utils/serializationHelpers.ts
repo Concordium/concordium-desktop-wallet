@@ -1,6 +1,5 @@
 import { Buffer } from 'buffer/';
 import { decode as bs58Decode } from 'bs58check';
-import ipcCommands from '~/constants/ipcCommands.json';
 
 import {
     VerifyKey,
@@ -56,7 +55,7 @@ export function encodeWord64(value: bigint): Buffer {
 }
 
 export async function hashSha256(...inputs: Indexable[]): Promise<Buffer> {
-    const hash = await window.ipcRenderer.invoke(ipcCommands.sha256, inputs);
+    const hash = window.cryptoMethods.sha256(inputs);
     return Buffer.from(hash);
 }
 
