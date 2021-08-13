@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { app } from 'electron';
+import { ipcRenderer } from 'electron';
 import getClient from './knexClient';
+import ipcCommands from '../constants/ipcCommands.json';
 
+// This function assumes that it is executed in the preload script.
 export async function getProductionFilename(): Promise<string> {
-    const userDataPath = app.getPath('userData');
+    const userDataPath = await ipcRenderer.invoke(ipcCommands.getUserDataPath);
     const productionDatabaseName = 'concordium-desktop-wallet-database.sqlite3';
     const productionDatabaseLocation = `${userDataPath}/${productionDatabaseName}`;
     return productionDatabaseLocation;

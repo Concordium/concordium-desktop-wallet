@@ -1,7 +1,7 @@
 use crate::{
     helpers::*,
 };
-use ps_sig::unknown_message::SigRetrievalRandomness;
+use ps_sig::SigRetrievalRandomness;
 use crypto_common::{types::KeyIndex, *};
 use curve_arithmetic::{Curve, Pairing};
 use std::collections::BTreeMap;
@@ -41,7 +41,7 @@ impl PublicInitialAccountData for InitialAccountDataWithSignature {
 impl InitialAccountDataWithSigning for InitialAccountDataWithSignature {
     fn sign_public_information_for_ip<C: Curve>(
         &self,
-        _: &PublicInformationForIP<C>,
+        _: &PublicInformationForIp<C>,
     ) -> BTreeMap<KeyIndex, AccountOwnershipSignature> {
         let mut signatures = BTreeMap::new();
         signatures.insert(KeyIndex(0), self.signature);

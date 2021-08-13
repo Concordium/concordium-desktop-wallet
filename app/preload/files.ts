@@ -1,8 +1,9 @@
 import AdmZip from 'adm-zip';
-import { IpcMain, dialog } from 'electron';
+import { ipcRenderer, OpenDialogOptions, SaveDialogOptions } from 'electron';
 import fs from 'fs';
-import ipcCommands from '~/constants/ipcCommands.json';
 import { getDatabaseFilename } from '~/database/knexfile';
+import { SaveFileData, FileMethods } from '~/preload/preloadTypes';
+import ipcCommands from '~/constants/ipcCommands.json';
 
 /**
  * Checks whether the database has already been created or not.
@@ -28,11 +29,6 @@ async function saveFile(filepath: string, data: string | Buffer) {
     });
 }
 
-export interface SaveFileData {
-    filename: string;
-    data: Buffer;
-}
-
 async function saveZipFile(files: SaveFileData[]) {
     const zip = new AdmZip();
     for (const file of files) {
@@ -45,7 +41,10 @@ async function saveZipFile(files: SaveFileData[]) {
         filters: [{ name: 'zip', extensions: ['zip'] }],
     };
 
-    const saveFileDialog = await dialog.showSaveDialog(opts);
+    const saveFileDialog = await ipcRenderer.invoke(
+        ipcCommands.saveFileDialog,
+        opts
+    );
     if (saveFileDialog.canceled) {
         return false;
     }
@@ -59,37 +58,22 @@ async function saveZipFile(files: SaveFileData[]) {
     return saveFile(saveFileDialog.filePath, zip.toBuffer());
 }
 
-export default function initializeIpcHandlers(ipcMain: IpcMain) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ipcMain.handle(ipcCommands.databaseExists, async (_event) => {
-        return databaseExists();
-    });
-
-    ipcMain.handle(
-        ipcCommands.saveFile,
-        async (_event, filepath: string, data: string | Buffer) => {
-            try {
-                await saveFile(filepath, data);
-                return true;
-            } catch {
-                return false;
-            }
-        }
-    );
-
+const exposedMethods: FileMethods = {
+    databaseExists,
     // Provides access to save file dialog from renderer processes.
-    ipcMain.handle(ipcCommands.saveFileDialog, async (_event, opts) => {
-        return dialog.showSaveDialog(opts);
-    });
-
-    ipcMain.handle(
-        ipcCommands.saveZipFileDialog,
-        async (_event, files: SaveFileData[]) => {
-            return saveZipFile(files);
+    saveFileDialog: (opts: SaveDialogOptions) =>
+        ipcRenderer.invoke(ipcCommands.saveFileDialog, opts),
+    openFileDialog: (opts: OpenDialogOptions) =>
+        ipcRenderer.invoke(ipcCommands.openFileDialog, opts),
+    saveFile: async (filepath: string, data: string | Buffer) => {
+        try {
+            await saveFile(filepath, data);
+            return true;
+        } catch {
+            return false;
         }
-    );
+    },
+    saveZipFileDialog: saveZipFile,
+};
 
-    ipcMain.handle(ipcCommands.openFileDialog, async (_event, opts) => {
-        return dialog.showOpenDialog(opts);
-    });
-}
+export default exposedMethods;

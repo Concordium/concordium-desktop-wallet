@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { ProtocolUpdate } from '~/utils/types';
-import ipcCommands from '~/constants/ipcCommands.json';
 
 interface Props {
     protocolUpdate: ProtocolUpdate;
@@ -17,12 +16,8 @@ export default function ProtocolUpdateView({ protocolUpdate }: Props) {
     );
 
     useEffect(() => {
-        window.ipcRenderer
-            .invoke(ipcCommands.sha256, [auxiliaryData])
-            .then((hash: Uint8Array) =>
-                setAuxiliaryDataHash(Buffer.from(hash).toString('hex'))
-            )
-            .catch(() => {});
+        const hash = window.cryptoMethods.sha256([auxiliaryData]);
+        setAuxiliaryDataHash(hash.toString('hex'));
     }, [auxiliaryData]);
 
     return (

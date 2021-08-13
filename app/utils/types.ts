@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { Dispatch as GenericDispatch, AnyAction } from 'redux';
-import { HTMLAttributes } from 'react';
-import { RegisterOptions } from 'react-hook-form';
+import type { Dispatch as GenericDispatch, AnyAction } from 'redux';
+import type { HTMLAttributes } from 'react';
+import type { RegisterOptions } from 'react-hook-form';
 import { RejectReason } from './node/RejectReasonHelper';
-import { ExternalCredential, Genesis } from '~/database/types';
+import type { ExternalCredential, Genesis } from '~/database/types';
 
 export type Dispatch = GenericDispatch<AnyAction>;
 
@@ -52,7 +52,7 @@ export interface Typed<T> {
 
 // Reflects the attributes of an Identity, which describes
 // the owner of the identity.
-export enum ChosenAttributesKeys {
+export enum AttributeKey {
     firstName,
     lastName,
     sex,
@@ -68,8 +68,10 @@ export enum ChosenAttributesKeys {
     taxIdNo,
 }
 
+export type AttributeKeyName = keyof typeof AttributeKey;
+
 export type ChosenAttributes = {
-    [P in keyof typeof ChosenAttributesKeys]: string;
+    [P in keyof typeof AttributeKey]: string;
 };
 
 // Contains the attributes of an identity.
@@ -352,6 +354,16 @@ export interface CredentialDeploymentInformation
     proofs: Proofs;
 }
 
+type AttributesRandomness = Record<AttributeKey, string>;
+
+export interface CommitmentsRandomness {
+    idCredSecRand: string;
+    prfRand: string;
+    credCounterRand: string;
+    maxAccountsRand: string;
+    attributesRand: AttributesRandomness;
+}
+
 export interface Credential {
     accountAddress: string;
     credentialIndex?: number;
@@ -361,6 +373,7 @@ export interface Credential {
     walletId?: number;
     credId: Hex;
     policy: JSONString;
+    randomness?: JSONString;
 }
 
 export interface DeployedCredential extends Credential {
