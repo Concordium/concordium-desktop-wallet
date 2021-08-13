@@ -54,6 +54,17 @@ export default reducer;
 
 export const { triggerUpdateNotification, removeNotification } = actions;
 
+/**
+ * Display notifications of different types.
+ *
+ * @example
+ * const dispatch = useDispatch();
+ *
+ * pushNotification(dispatch, { NotificationLevel.Info, message: 'Informative message' }, 5);
+ * pushNotification(dispatch, { NotificationLevel.Update });
+ *
+ * @returns function to close the notification programatically.
+ */
 export function pushNotification(
     dispatch: Dispatch,
     notification: Omit<Notification, 'id'>,
@@ -64,10 +75,11 @@ export function pushNotification(
 
     nextId += 1;
 
+    const close = () => dispatch(removeNotification(id));
+
     if (autoRemoveSeconds) {
-        setTimeout(
-            () => dispatch(removeNotification(id)),
-            autoRemoveSeconds * 1000
-        );
+        setTimeout(close, autoRemoveSeconds * 1000);
     }
+
+    return close;
 }
