@@ -59,9 +59,7 @@ export const { triggerUpdateNotification, removeNotification } = actions;
  *
  * @example
  * const dispatch = useDispatch();
- *
  * pushNotification(dispatch, { NotificationLevel.Info, message: 'Informative message' }, 5);
- * pushNotification(dispatch, { NotificationLevel.Update });
  *
  * @returns function to close the notification programatically.
  */

@@ -13,12 +13,12 @@ const transition: Transition = {
 };
 
 const transitionVariants: Variants = {
-    initial: { opacity: 0, transform: 'translate(100%, 0%)' },
-    enter: { opacity: 1, transform: 'translate(0%, 0%)' },
+    initial: { opacity: 0, transform: 'translateX(100%)' },
+    enter: { opacity: 1, transform: 'translateX(0%)' },
     exit: {
         opacity: 0,
-        transform: 'translate(0%, -100%)',
-        transition: { ease: 'easeOut' },
+        transform: 'translateX(100%)',
+        transition: { ease: [0.36, 0, 0.66, -0.56] },
     },
 };
 
