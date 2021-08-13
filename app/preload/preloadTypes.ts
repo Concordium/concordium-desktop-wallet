@@ -250,8 +250,13 @@ export type WalletMethods = {
     insertWallet: (identifier: Hex, type: WalletType) => Promise<number>;
 };
 
+type ViewResponse = {
+    error?: string;
+    result: string;
+};
+
 export type BrowserViewMethods = {
-    createView: (location: string, rect: Rectangle) => Promise<string>;
+    createView: (location: string, rect: Rectangle) => Promise<ViewResponse>;
     removeView: () => void;
     resizeView: (rect: Rectangle) => void;
 };

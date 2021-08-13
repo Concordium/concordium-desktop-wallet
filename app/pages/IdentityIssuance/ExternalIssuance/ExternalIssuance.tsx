@@ -49,10 +49,15 @@ async function generateIdentity(
             redirectUri,
             idObjectRequest
         );
-        identityObjectLocation = await window.view.createView(
+        const providerResult = await window.view.createView(
             identityProviderLocation,
             rect
         );
+
+        if (providerResult.error) {
+            throw new Error(providerResult.error);
+        }
+        identityObjectLocation = providerResult.result;
 
         // TODO This code still has an issue if the application fails before
         // inserting the pending identity and account, as the identity might exist
@@ -94,6 +99,7 @@ async function generateIdentity(
         loadIdentities(dispatch);
         loadAccounts(dispatch);
     } catch (e) {
+        window.view.removeView();
         onError(`Failed to create identity due to ${e}`);
         // Rethrow this to avoid redirection;
         throw e;
