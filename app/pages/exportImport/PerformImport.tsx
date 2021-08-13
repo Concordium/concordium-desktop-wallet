@@ -208,9 +208,11 @@ export default function PerformImport({ location }: Props) {
         .map((entry: AddressBookEntry) => (
             <p key={entry.address} className={styles.importedAddress}>
                 {entry.name}{' '}
-                <span className="bodyLight textFaded mL10">
-                    {messages[entry.address] && `(${messages[entry.address]})`}
-                </span>
+                {messages[entry.address] && (
+                    <span className="bodyLight textFaded mL10">
+                        ({messages[entry.address]})
+                    </span>
+                )}
             </p>
         ));
 
