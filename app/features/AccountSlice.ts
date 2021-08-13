@@ -376,16 +376,6 @@ export async function confirmInitialAccount(
     return loadAccounts(dispatch);
 }
 
-export async function rejectInitialAccount(
-    dispatch: Dispatch,
-    identityId: number
-) {
-    await updateInitialAccount(identityId, {
-        status: AccountStatus.Rejected,
-    });
-    return loadAccounts(dispatch);
-}
-
 // Attempts to confirm account by checking the status of the given transaction
 // (Which is assumed to be of the credentialdeployment)
 export async function confirmAccount(
