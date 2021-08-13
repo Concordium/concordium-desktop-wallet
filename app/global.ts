@@ -1,10 +1,6 @@
 /* eslint-disable */
-import { IpcRenderer } from 'electron';
+import { WindowFunctions } from './preload/preloadTypes';
 
 declare global {
-    interface Window {
-        ipcRenderer: IpcRenderer;
-    }
+    interface Window extends WindowFunctions {}
 }
-
-export const { ipcRenderer } = window;

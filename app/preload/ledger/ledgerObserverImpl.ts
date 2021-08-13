@@ -6,7 +6,7 @@ import type {
     DescriptorEvent,
     Subscription,
 } from '@ledgerhq/hw-transport';
-import { BrowserWindow } from 'electron';
+import EventEmitter from 'events';
 import ConcordiumLedgerClientMain from '../../features/ledger/ConcordiumLedgerClientMain';
 import { isConcordiumApp, isOutdated } from '../../components/ledger/util';
 import { LedgerSubscriptionAction } from '../../components/ledger/useLedger';
@@ -25,7 +25,7 @@ export default class LedgerObserverImpl implements LedgerObserver {
         return this.concordiumClient;
     }
 
-    async subscribeLedger(mainWindow: BrowserWindow): Promise<void> {
+    async subscribeLedger(mainWindow: EventEmitter): Promise<void> {
         if (!this.ledgerSubscription) {
             this.ledgerSubscription = TransportNodeHid.listen(
                 this.createLedgerObserver(mainWindow)
@@ -45,14 +45,14 @@ export default class LedgerObserverImpl implements LedgerObserver {
      * @param mainWindow the window that should receive events from the observer
      */
     createLedgerObserver(
-        mainWindow: BrowserWindow
+        mainWindow: EventEmitter
     ): Observer<DescriptorEvent<string>> {
         const ledgerObserver: Observer<DescriptorEvent<string>> = {
             complete: () => {
                 // This is expected to never trigger.
             },
             error: () => {
-                mainWindow.webContents.send(
+                mainWindow.emit(
                     ledgerIpcCommands.listenChannel,
                     LedgerSubscriptionAction.ERROR_SUBSCRIPTION
                 );
@@ -66,9 +66,12 @@ export default class LedgerObserverImpl implements LedgerObserver {
                         mainWindow,
                         transport
                     );
-
-                    const appAndVersionResult = await this.concordiumClient.getAppAndVersion();
-                    const appAndVersion = appAndVersionResult.result;
+                    let appAndVersion;
+                    try {
+                        appAndVersion = await this.concordiumClient.getAppAndVersion();
+                    } catch (e) {
+                        throw new Error('Unable to get current app');
+                    }
                     let action;
                     if (!appAndVersion) {
                         // We could not extract the version information.
@@ -84,7 +87,7 @@ export default class LedgerObserverImpl implements LedgerObserver {
                         action =
                             LedgerSubscriptionAction.CONNECTED_SUBSCRIPTION;
                     }
-                    mainWindow.webContents.send(
+                    mainWindow.emit(
                         ledgerIpcCommands.listenChannel,
                         action,
                         deviceName
@@ -93,7 +96,7 @@ export default class LedgerObserverImpl implements LedgerObserver {
                     if (this.concordiumClient) {
                         this.concordiumClient.closeTransport();
                     }
-                    mainWindow.webContents.send(
+                    mainWindow.emit(
                         ledgerIpcCommands.listenChannel,
                         LedgerSubscriptionAction.RESET
                     );

@@ -1,6 +1,6 @@
 module.exports = {
     preset: 'ts-jest',
-    testEnvironment: 'node',
+    testEnvironment: 'jsdom',
     testURL: 'http://localhost/',
     moduleNameMapper: {
         '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
@@ -11,6 +11,7 @@ module.exports = {
     moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json'],
     moduleDirectories: ['node_modules', 'app/node_modules'],
     setupFiles: ['./internals/scripts/CheckBuildsExist.js'],
+    setupFilesAfterEnv: ['./test/mockWindow.ts'],
     globals: {
         'ts-jest': {
             tsconfig: 'tsconfig.jest.json',

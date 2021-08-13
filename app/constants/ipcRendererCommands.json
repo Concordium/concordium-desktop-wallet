@@ -1,5 +1,5 @@
 {
-    "readyToShow": "ready-to-show",
-    "didFinishLoad": "did-finish-load",
-    "openRoute": "open-route"
+    "readyToShow": "readyToShow",
+    "didFinishLoad": "didFinishLoad",
+    "openRoute": "openRoute"
 }
