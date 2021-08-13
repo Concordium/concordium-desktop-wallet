@@ -24,6 +24,7 @@ export default function LedgerStatus({
             case LedgerStatusType.LOADING:
             case LedgerStatusType.AWAITING_USER_INPUT:
                 return <Loading inline className={styles.icon} />;
+            case LedgerStatusType.OUTDATED:
             case LedgerStatusType.ERROR:
                 return <ErrorIcon className={styles.icon} />;
             case LedgerStatusType.CONNECTED:

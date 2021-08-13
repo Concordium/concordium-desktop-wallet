@@ -1,17 +1,10 @@
-import { IdObjectRequest, IncomingTransaction, Versioned } from './types';
-import ipcCommands from '../constants/ipcCommands.json';
+import { IdObjectRequest, Versioned } from './types';
 import {
     DoneIdentityTokenContainer,
     IdentityProviderIdentityStatus,
     IdentityTokenContainer,
     ErrorIdentityTokenContainer,
 } from './id/types';
-
-interface HttpGetResponse<T> {
-    data: T;
-    headers: Record<string, string>;
-    status: number;
-}
 
 /**
  * Performs a HTTP get request using IPC to the main thread.
@@ -22,29 +15,16 @@ interface HttpGetResponse<T> {
 export async function httpGet<T>(
     urlString: string,
     params: Record<string, string> = {}
-): Promise<HttpGetResponse<T>> {
-    const response: string = await window.ipcRenderer.invoke(
-        ipcCommands.httpGet,
-        urlString,
-        params
-    );
-    return JSON.parse(response);
+) {
+    return window.http.get<T>(urlString, params);
 }
 
-interface GetTransactionsOutput {
-    transactions: IncomingTransaction[];
-    full: boolean;
-}
-
-export async function getTransactions(
-    address: string,
-    id = 0
-): Promise<GetTransactionsOutput> {
-    return window.ipcRenderer.invoke(ipcCommands.getTransactions, address, id);
+export async function getTransactions(address: string, id = '0') {
+    return window.http.getTransactions(address, id);
 }
 
 export async function getIdentityProviders() {
-    return window.ipcRenderer.invoke(ipcCommands.getIdProviders);
+    return window.http.getIdProviders();
 }
 
 /**
@@ -65,8 +45,12 @@ export async function performIdObjectRequest(
             idObjectRequest,
         }),
     };
-
-    const response = await httpGet(url, parameters);
+    let response;
+    try {
+        response = await httpGet(url, parameters);
+    } catch (e) {
+        throw new Error(`Unable to perform Id Object Request: ${e}`);
+    }
     if (response.status === 302) {
         const { location } = response.headers;
         if (!location) {

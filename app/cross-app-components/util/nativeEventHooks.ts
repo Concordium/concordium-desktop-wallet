@@ -1,15 +1,15 @@
 import { useEffect } from 'react';
-import { ipcRenderer } from '~/global';
+import { Listen, Listener } from '~/preload/preloadTypes';
 
 // eslint-disable-next-line import/prefer-default-export
 export const useIpcRendererEvent: (
-    ...args: Parameters<typeof ipcRenderer.on>
-) => void = (channel, listener) => {
+    channel: keyof Listen,
+    listener: Listener
+) => void = (channel: keyof Listen, listener: Listener) => {
     useEffect(() => {
-        window.ipcRenderer.on(channel, listener);
-
+        window.addListener[channel](listener);
         return () => {
-            window.ipcRenderer.off(channel, listener);
+            window.removeListener[channel](listener);
         };
     }, [channel, listener]);
 };
