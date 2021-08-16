@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import clsx from 'clsx';
-import PendingImage from '@resources/svg/pending-small.svg';
+import PendingImage from '@resources/svg/pending-arrows.svg';
 import SuccessImage from '@resources/svg/success-small.svg';
 import RejectedImage from '@resources/svg/warning-small.svg';
 import EditIcon from '@resources/svg/edit.svg';
@@ -52,7 +52,7 @@ function statusImage(status: IdentityStatus) {
         case IdentityStatus.Rejected:
             return <RejectedImage />;
         case IdentityStatus.Pending:
-            return <PendingImage height="20" />;
+            return <PendingImage height="24" />;
         default:
             return undefined;
     }

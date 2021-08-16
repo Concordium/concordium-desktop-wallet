@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import clsx from 'clsx';
-import PendingImage from '@resources/svg/pending-small.svg';
+import PendingImage from '@resources/svg/pending-arrows.svg';
 import SuccessImage from '@resources/svg/success.svg';
 import RejectedImage from '@resources/svg/warning.svg';
 import { isNodeUpToDate } from '~/node/nodeHelpers';
@@ -48,7 +48,7 @@ export default function NodeStatus(): JSX.Element {
         let status = Status.Unavailable;
         try {
             const upToDate = await isNodeUpToDate();
-            status = upToDate ? Status.Ready : Status.Ready;
+            status = upToDate ? Status.Ready : Status.CatchingUp;
         } catch {
             // do nothing, status defaults to unavailable.
         } finally {
