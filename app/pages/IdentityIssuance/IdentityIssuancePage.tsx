@@ -49,10 +49,10 @@ export default function IdentityIssuancePage(): JSX.Element {
 
     const [provider, setProvider] = useState<IdentityProvider | undefined>();
     const [initialAccountName, setInitialAccountName] = useState<string>(
-        state?.identityName || ''
+        state?.initialAccountName || ''
     );
     const [identityName, setIdentityName] = useState<string>(
-        state?.initialAccountName || ''
+        state?.identityName || ''
     );
 
     const [errorModalOpen, setErrorModalOpen] = useState(false);
