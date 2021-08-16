@@ -31,20 +31,10 @@ const identitySlice = createSlice({
         chooseIdentity: (state, input) => {
             state.chosenIdentityId = input.payload;
         },
-        removeIdentity: (state, input) => {
-            const removedIdentityId = input.payload;
-            state.identities = state.identities.filter(
-                (identity) => identity.id !== removedIdentityId
-            );
-        },
     },
 });
 
-export const {
-    updateIdentities,
-    chooseIdentity,
-    removeIdentity: removeIdentityInRedux,
-} = identitySlice.actions;
+export const { updateIdentities, chooseIdentity } = identitySlice.actions;
 
 export const identitiesSelector = (state: RootState) =>
     state.identities.identities;
@@ -77,7 +67,7 @@ export async function removeIdentityAndInitialAccount(
 ) {
     await removeIdentityAndInitialAccountInDatabase(identityId);
     await loadAccounts(dispatch);
-    return dispatch(removeIdentityInRedux(identityId));
+    return loadIdentities(dispatch);
 }
 
 export async function importIdentities(
