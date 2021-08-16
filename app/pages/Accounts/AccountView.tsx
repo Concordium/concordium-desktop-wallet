@@ -22,7 +22,7 @@ import AccountViewActions from './AccountViewActions';
 import { AccountStatus } from '~/utils/types';
 import AbortController from '~/utils/AbortController';
 import { noOp } from '~/utils/basicHelpers';
-import FailedIdentityModal from '~/components/FailedIdentityModal';
+import FailedInitialAccount from './FailedInitialAccount';
 
 // milliseconds between updates of the accountInfo
 const accountInfoUpdateInterval = 30000;
@@ -93,13 +93,7 @@ export default function AccountView() {
     }
 
     if (account.isInitial && accountInfo === undefined) {
-        return (
-            <FailedIdentityModal
-                identityId={account.identityId}
-                identityName={account.identityName || ''}
-                isRejected={account.status === AccountStatus.Rejected}
-            />
-        );
+        return <FailedInitialAccount account={account} />;
     }
 
     if (accountInfo === undefined) {

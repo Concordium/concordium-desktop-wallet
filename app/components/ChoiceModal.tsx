@@ -12,6 +12,7 @@ interface Props {
     actions: Action[];
     open: boolean;
     postAction(): void;
+    disableClose?: boolean;
 }
 
 export default function ChoiceModal({
@@ -20,10 +21,11 @@ export default function ChoiceModal({
     actions,
     open,
     postAction,
+    disableClose = false,
 }: Props) {
     const dispatch = useDispatch();
     return (
-        <Modal open={open}>
+        <Modal open={open} disableClose={disableClose}>
             <h3>{title}</h3>
             <p>{description}</p>
             <div className="flex justifySpaceBetween mT30">

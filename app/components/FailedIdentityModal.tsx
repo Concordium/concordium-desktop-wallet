@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { removeIdentityAndInitialAccount } from '~/features/IdentitySlice';
 import ChoiceModal from '~/components/ChoiceModal';
 import routes from '~/constants/routes.json';
 import { initialAccountNameSelector } from '~/features/AccountSlice';
+import { loadIdentities } from '~/features/IdentitySlice';
+import { updateIdentity } from '~/database/IdentityDao';
+import { IdentityStatus } from '~/utils/types';
 
 interface Props {
     identityId: number;
@@ -19,8 +21,8 @@ export default function FailedIdentityModal({
     identityName,
     isRejected,
 }: Props) {
-    const dispatch = useDispatch();
     const [modalOpen, setModalOpen] = useState(false);
+    const dispatch = useDispatch();
     const initialAccountName = useSelector(
         initialAccountNameSelector(identityId)
     );
@@ -33,15 +35,11 @@ export default function FailedIdentityModal({
         }
     }, [isRejected, setModalOpen]);
 
-    async function remove() {
-        await removeIdentityAndInitialAccount(dispatch, identityId);
-        setModalOpen(false);
-    }
-
     return (
         <ChoiceModal
+            disableClose
             title="The identity and initial account creation failed"
-            description={`Unfortunately something went wrong with your new identity (${identityName}) and initial account (${initialAccountName}). They will be removed from the list now, and you can either go back and try again, or try again later.`}
+            description={`Unfortunately something went wrong with your new identity (${identityName}) and initial account (${initialAccountName}). You can either go back and try again, or try again later. The identity and initial account can removed in the identity view.`}
             open={modalOpen}
             actions={[
                 {
@@ -56,7 +54,13 @@ export default function FailedIdentityModal({
                 },
                 { label: 'Later' },
             ]}
-            postAction={remove}
+            postAction={async () => {
+                await updateIdentity(identityId, {
+                    status: IdentityStatus.RejectedAndWarned,
+                });
+                await loadIdentities(dispatch);
+                setModalOpen(false);
+            }}
         />
     );
 }
