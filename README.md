@@ -4,8 +4,8 @@ This is the repository for the desktop wallet.
 
 You need the following to build and run the project:
 
--   Nodejs 12.18.3 (use NVM to target specific node version easily)
--   NPM 6.4.6 (comes automatically with node version above)
+-   Nodejs 14.16.0 (use NVM to target specific node version easily)
+-   NPM 6.14.11 (comes automatically with node version above)
 -   Yarn 1.x (https://classic.yarnpkg.com/en/docs/install)
 -   Python 2.x (https://www.python.org/downloads/)
 -   Rust (https://www.rust-lang.org/tools/install)
@@ -82,6 +82,15 @@ TARGET_NET=stagenet yarn start
 ```bash
 export TARGET_NET=stagenet
 yarn build-main-dev && yarn start-renderer-dev
+```
+
+## Targeting Ledger emulator (Speculos)
+
+It is possible to run the desktop wallet in development mode against a Ledger emulator (Speculos). Note
+that this is not safe and is only relevant for development.
+
+```bash
+LEDGER_EMULATOR_URL=http://emulator-ip-address:port yarn start
 ```
 
 ## Packaging for Production

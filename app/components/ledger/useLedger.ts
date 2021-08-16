@@ -11,23 +11,21 @@ import ledgerReducer, {
     pendingAction,
     loadingAction,
     disconnectAction,
+    outdatedAction,
     setStatusTextAction,
 } from './ledgerReducer';
-import {
-    LedgerStatusType,
-    instanceOfTransportStatusError,
-    LedgerSubmitHandler,
-    LedgerCallback,
-} from './util';
+import { LedgerStatusType, LedgerSubmitHandler, LedgerCallback } from './util';
 import { instanceOfClosedWhileSendingError } from '~/features/ledger/ClosedWhileSendingError';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import ledgerIpcCommands from '~/constants/ledgerIpcCommands.json';
 import { noOp } from '~/utils/basicHelpers';
+import { instanceOfTransportStatusError } from '~/features/ledger/TransportStatusError';
 
 const { CONNECTED, ERROR, OPEN_APP, AWAITING_USER_INPUT } = LedgerStatusType;
 
 export enum LedgerSubscriptionAction {
     CONNECTED_SUBSCRIPTION,
+    OUTDATED,
     PENDING,
     RESET,
     ERROR_SUBSCRIPTION,
@@ -58,15 +56,17 @@ function useLedger(): {
     const [subscribed, setSubscribed] = useState<boolean>();
 
     useEffect(() => {
-        window.ipcRenderer.on(
-            ledgerIpcCommands.listenChannel,
-            (_event, action: LedgerSubscriptionAction, deviceName: string) => {
+        window.addListener.ledgerChannel(
+            (action: LedgerSubscriptionAction, deviceName: string) => {
                 switch (action) {
                     case LedgerSubscriptionAction.ERROR_SUBSCRIPTION:
                         dispatch(errorAction());
                         return;
                     case LedgerSubscriptionAction.PENDING:
                         dispatch(pendingAction(OPEN_APP, deviceName));
+                        return;
+                    case LedgerSubscriptionAction.OUTDATED:
+                        dispatch(outdatedAction(deviceName));
                         return;
                     case LedgerSubscriptionAction.RESET:
                         dispatch(loadingAction());
@@ -85,16 +85,14 @@ function useLedger(): {
             }
         );
         return () => {
-            window.ipcRenderer.removeAllListeners(
-                ledgerIpcCommands.listenChannel
-            );
+            window.removeAllListeners(ledgerIpcCommands.listenChannel);
         };
     }, []);
 
     useEffect(() => {
         if (!subscribed) {
-            window.ipcRenderer
-                .invoke(ledgerIpcCommands.subscribe)
+            window.ledger
+                .subscribe()
                 .then(() => setSubscribed(true))
                 .catch(() => {});
         }
@@ -136,10 +134,8 @@ export default function ExternalHook(
     useEffect(() => {
         return function cleanup() {
             if (client) {
-                window.ipcRenderer
-                    .invoke(ledgerIpcCommands.closeTransport)
-                    .then(() => dispatch(cleanupAction()))
-                    .catch(() => {});
+                window.ledger.closeTransport();
+                dispatch(cleanupAction());
             }
         };
     }, [client, dispatch]);

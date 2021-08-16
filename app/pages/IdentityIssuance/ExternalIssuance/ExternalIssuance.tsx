@@ -1,9 +1,10 @@
-import React, { useState, useRef, RefObject, useLayoutEffect } from 'react';
+import React, { useEffect, useState, useLayoutEffect, useRef } from 'react';
+import type { Rectangle } from 'electron';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Redirect, useLocation } from 'react-router';
-import { addPendingIdentity } from '~/features/IdentitySlice';
-import { addPendingAccount } from '~/features/AccountSlice';
+import { loadIdentities } from '~/features/IdentitySlice';
+import { loadAccounts } from '~/features/AccountSlice';
 import routes from '~/constants/routes.json';
 import {
     IdentityProvider,
@@ -11,96 +12,94 @@ import {
     SignedIdRequest,
     IdObjectRequest,
     Versioned,
+    Identity,
+    IdentityStatus,
+    AccountStatus,
+    Account,
 } from '~/utils/types';
 import { confirmIdentityAndInitialAccount } from '~/utils/IdentityStatusPoller';
-import Loading from '~/cross-app-components/Loading';
-import ipcCommands from '../../../constants/ipcCommands.json';
 import { performIdObjectRequest } from '~/utils/httpRequests';
 
 import { getAddressFromCredentialId } from '~/utils/rustInterface';
 import generalStyles from '../IdentityIssuance.module.scss';
 import styles from './ExternalIssuance.module.scss';
+import { getInitialEncryptedAmount } from '~/utils/accountHelpers';
+import { insertPendingIdentityAndInitialAccount } from '~/database/IdentityDao';
+import { getElementRectangle } from '~/utils/htmlHelpers';
 
 const redirectUri = 'ConcordiumRedirectToken';
-
-async function getBody(url: string): Promise<string> {
-    return window.ipcRenderer.invoke(ipcCommands.httpGet, url);
-}
-
-/**
- *   This function puts a listener on the given iframeRef, and when it navigates (due to a redirect http response) it resolves,
- *   and returns the location, which was redirected to.
- */
-async function handleIdentityProviderLocation(
-    iframeRef: RefObject<HTMLIFrameElement>
-): Promise<string> {
-    return new Promise((resolve, reject) => {
-        if (!iframeRef.current) {
-            reject(new Error('Unexpected missing reference to webView.'));
-        } else {
-            iframeRef.current.addEventListener(
-                'did-navigate',
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                async (e: any) => {
-                    const loc = e.url;
-                    if (loc.includes(redirectUri)) {
-                        resolve(loc.substring(loc.indexOf('=') + 1));
-                    } else if (e.httpResponseCode !== 200) {
-                        reject(new Error(await getBody(e.url)));
-                    }
-                }
-            );
-        }
-    });
-}
 
 async function generateIdentity(
     idObjectRequest: Versioned<IdObjectRequest>,
     randomness: string,
     identityNumber: number,
-    setLocation: (location: string) => void,
     dispatch: Dispatch,
     provider: IdentityProvider,
     accountName: string,
     identityName: string,
     walletId: number,
-    iframeRef: RefObject<HTMLIFrameElement>,
-    onError: (message: string) => void
+    onError: (message: string) => void,
+    rect: Rectangle
 ): Promise<number> {
     let identityObjectLocation;
     let identityId;
     try {
-        const IdentityProviderLocation = await performIdObjectRequest(
+        const identityProviderLocation = await performIdObjectRequest(
             provider.metadata.issuanceStart,
             redirectUri,
             idObjectRequest
         );
-        setLocation(IdentityProviderLocation);
-        identityObjectLocation = await handleIdentityProviderLocation(
-            iframeRef
+        const providerResult = await window.view.createView(
+            identityProviderLocation,
+            rect
         );
 
-        // TODO: Handle the case where the app closes before we are able to save pendingIdentity
-        identityId = await addPendingIdentity(
+        if (providerResult.error) {
+            throw new Error(providerResult.error);
+        }
+        identityObjectLocation = providerResult.result;
+
+        // TODO This code still has an issue if the application fails before
+        // inserting the pending identity and account, as the identity might exist
+        // at the identity provider at this point. This requires a change to the
+        // identity providers, and cannot be fixed before that has been implemented.
+
+        const identity: Partial<Identity> = {
             identityNumber,
-            dispatch,
-            identityName,
-            identityObjectLocation,
-            provider,
+            name: identityName,
+            status: IdentityStatus.Pending,
+            codeUri: identityObjectLocation,
+            identityProvider: JSON.stringify(provider),
             randomness,
-            walletId
-        );
-        const address = await getAddressFromCredentialId(
+            walletId,
+        };
+
+        const accountAddress = await getAddressFromCredentialId(
             idObjectRequest.value.pubInfoForIp.regId
         );
-        await addPendingAccount(
-            dispatch,
-            accountName,
-            identityId,
-            true,
-            address
+
+        const initialAccount: Omit<Account, 'identityId'> = {
+            name: accountName,
+            status: AccountStatus.Pending,
+            address: accountAddress,
+            signatureThreshold: 1,
+            maxTransactionId: '0',
+            isInitial: true,
+            rewardFilter: '[]',
+            selfAmounts: getInitialEncryptedAmount(),
+            incomingAmounts: '[]',
+            totalDecrypted: '0',
+            deploymentTransactionId: undefined,
+        };
+
+        identityId = await insertPendingIdentityAndInitialAccount(
+            identity,
+            initialAccount
         );
+        loadIdentities(dispatch);
+        loadAccounts(dispatch);
     } catch (e) {
+        window.view.removeView();
         onError(`Failed to create identity due to ${e}`);
         // Rethrow this to avoid redirection;
         throw e;
@@ -136,11 +135,39 @@ export default function ExternalIssuance({
     const dispatch = useDispatch();
     const { state } = useLocation<ExternalIssuanceLocationState>();
 
-    const [location, setLocation] = useState<string>();
-    const iframeRef = useRef<HTMLIFrameElement>(null);
+    const [abortSignal] = useState(new AbortController());
+    const divRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        return () => {
+            // Remove BrowserView when leaving view;
+            window.view.removeView();
+            // Remove resize listener;
+            abortSignal.abort();
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+        const resize = () => {
+            const rect = getElementRectangle(divRef.current);
+            if (rect) {
+                window.view.resizeView(rect);
+            }
+        };
+        window.addEventListener('resize', resize, {
+            signal: abortSignal.signal,
+        } as AddEventListenerOptions);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useLayoutEffect(() => {
         if (!state) {
+            return;
+        }
+        const rect = getElementRectangle(divRef.current);
+        if (!rect) {
+            onError('Html Element not initialised');
             return;
         }
 
@@ -150,14 +177,13 @@ export default function ExternalIssuance({
             idObjectRequest,
             randomness,
             identityNumber,
-            setLocation,
             dispatch,
             provider,
             accountName,
             identityName,
             walletId,
-            iframeRef,
-            onError
+            onError,
+            rect
         )
             .then((identityId) => {
                 return dispatch(
@@ -175,22 +201,10 @@ export default function ExternalIssuance({
         return <Redirect to={routes.IDENTITIES} />;
     }
 
-    if (!location) {
-        return (
-            <>
-                <Loading text="Generating your identity" />
-            </>
-        );
-    }
-
     return (
         <>
             <h2 className={generalStyles.header}>Generating the Identity</h2>
-            <webview
-                ref={iframeRef}
-                className={styles.fullscreen}
-                src={location}
-            />
+            <div ref={divRef} className={styles.fullscreen} />
         </>
     );
 }

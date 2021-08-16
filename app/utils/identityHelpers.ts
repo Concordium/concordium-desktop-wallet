@@ -1,12 +1,10 @@
 import { formatDate } from './timeHelpers';
-import { ChosenAttributes, ChosenAttributesKeys } from './types';
+import { ChosenAttributes, AttributeKey, AttributeKeyName } from './types';
 
 export const IDENTITY_NAME_MAX_LENGTH = 25;
 
-export type AttributeKey = keyof ChosenAttributes;
-
 export const attributeNamesMap: {
-    [P in AttributeKey]: string;
+    [P in AttributeKeyName]: string;
 } = {
     countryOfResidence: 'Country of residence',
     firstName: 'First name',
@@ -67,7 +65,7 @@ const parseDocType = (docType: DocumentType) => {
 };
 
 export const formatAttributeValue = (
-    key: AttributeKey,
+    key: AttributeKeyName,
     value: ChosenAttributes[typeof key]
 ): string => {
     switch (key) {
@@ -85,11 +83,8 @@ export const formatAttributeValue = (
 };
 
 export function compareAttributes(
-    AttributeTag1: AttributeKey,
-    AttributeTag2: AttributeKey
+    AttributeTag1: AttributeKeyName,
+    AttributeTag2: AttributeKeyName
 ) {
-    return (
-        ChosenAttributesKeys[AttributeTag1] -
-        ChosenAttributesKeys[AttributeTag2]
-    );
+    return AttributeKey[AttributeTag1] - AttributeKey[AttributeTag2];
 }
