@@ -121,7 +121,12 @@
     "extraResources": [
       "./resources/**",
       "./app/database/migrations/*"
-    ]
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "soerenbf",
+      "repo": "concordium-desktop-wallet"
+    }
   },
   "repository": {
     "type": "git",
