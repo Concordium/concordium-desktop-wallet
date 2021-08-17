@@ -40,6 +40,7 @@
     "test-e2e": "node ./internals/scripts/CheckBuildsExist.js && cross-env NODE_ENV=test testcafe electron:./app ./test/e2e/HomePage.e2e.ts",
     "test-e2e-live": "node ./internals/scripts/CheckBuildsExist.js && cross-env NODE_ENV=test testcafe --live electron:./app ./test/e2e/HomePage.e2e.ts",
     "test-watch": "yarn test --watch",
+    "cbor": "ts-node --project scripts/migrations/tsconfig.json -r tsconfig-paths/register ./scripts/cbor.ts",
     "down": "ts-node --project scripts/migrations/tsconfig.json -r tsconfig-paths/register ./scripts/migrations/down.ts",
     "up": "ts-node --project scripts/migrations/tsconfig.json -r tsconfig-paths/register ./scripts/migrations/up.ts"
   },
@@ -246,6 +247,7 @@
     "axios": "^0.21.0",
     "bs58check": "^2.1.2",
     "buffer": "^6.0.3",
+    "cbor": "^8.0.0",
     "clsx": "^1.1.1",
     "connected-react-router": "^6.6.1",
     "electron": "12.0.12",
