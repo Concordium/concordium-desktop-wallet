@@ -42,7 +42,7 @@ function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
     );
 
     const toConfirmTransfer = useCallback(
-        async (amount: string, recipient: AddressBookEntry) => {
+        async (amount: string, recipient: AddressBookEntry, memo?: string) => {
             if (!recipient) {
                 throw new Error('Unexpected missing recipient');
             }
@@ -51,7 +51,8 @@ function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
                 account.address,
                 toMicroUnits(amount),
                 recipient.address,
-                nonce
+                nonce,
+                memo
             );
             transaction.estimatedFee = estimatedFee;
 

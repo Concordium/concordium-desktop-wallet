@@ -185,10 +185,15 @@ export enum TransactionKindId {
     Transfer_with_schedule = 19,
     Update_credentials = 20,
     Register_data = 21,
+    Simple_transfer_with_memo = 22,
+    Encrypted_transfer_with_memo = 23,
+    Transfer_with_schedule_with_memo = 24,
 }
+
 export interface SimpleTransferPayload {
     amount: string;
     toAddress: string;
+    memo?: string;
 }
 
 export interface EncryptedTransferPayload {
@@ -784,7 +789,10 @@ export function instanceOfAccountTransactionWithSignature(
 export function instanceOfSimpleTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is SimpleTransfer {
-    return object.transactionKind === TransactionKindId.Simple_transfer;
+    return [
+        TransactionKindId.Simple_transfer,
+        TransactionKindId.Simple_transfer_with_memo,
+    ].includes(object.transactionKind);
 }
 
 export function instanceOfTransferToEncrypted(

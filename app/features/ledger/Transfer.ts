@@ -46,6 +46,7 @@ import {
     base58ToBuffer,
 } from '../../utils/serializationHelpers';
 import { chunkBuffer, chunkArray } from '~/utils/basicHelpers';
+import { encodeAsCBOR } from '~/utils/cborHelper';
 
 const INS_SIMPLE_TRANSFER = 0x02;
 const INS_TRANSFER_TO_ENCRYPTED = 0x11;
@@ -57,13 +58,45 @@ const INS_REMOVE_BAKER = 0x14;
 const INS_UPDATE_BAKER_STAKE = 0x15;
 const INS_UPDATE_BAKER_RESTAKE_EARNINGS = 0x16;
 
+type Memo = string;
+
+async function sendMemo(
+    transport: Transport,
+    ins: number,
+    memo: Memo | undefined,
+    p1: number,
+    p2: number
+) {
+    if (!memo) {
+        throw new Error('Unexpected Missing memo');
+    }
+
+    const encodedMemo = encodeAsCBOR(memo);
+
+    let response;
+    const chunks = chunkBuffer(encodedMemo, 255);
+    for (const chunk of chunks) {
+        // eslint-disable-next-line  no-await-in-loop
+        response = await transport.send(0xe0, ins, p1, p2, Buffer.from(chunk));
+    }
+    if (!response) {
+        throw new Error('Unexpected missing response from ledger;');
+    }
+    const signature = response.slice(0, 64);
+    return signature;
+}
+
 async function signSimpleTransfer(
     transport: Transport,
     path: number[],
     transaction: SimpleTransfer
 ): Promise<Buffer> {
+    const withMemo =
+        transaction.transactionKind ===
+        TransactionKindId.Simple_transfer_with_memo;
+
     const payload = serializeTransferPayload(
-        TransactionKindId.Simple_transfer,
+        transaction.transactionKind,
         transaction.payload
     );
 
@@ -75,9 +108,15 @@ async function signSimpleTransfer(
         transaction.expiry
     );
 
-    const data = Buffer.concat([pathAsBuffer(path), header, payload]);
+    const payloadNoMemo = Buffer.concat([
+        Buffer.from(Uint8Array.of(transaction.transactionKind)),
+        base58ToBuffer(transaction.payload.toAddress),
+        encodeWord64(BigInt(transaction.payload.amount)),
+    ]);
 
-    const p1 = 0x00;
+    const data = Buffer.concat([pathAsBuffer(path), header, payloadNoMemo]);
+
+    const p1 = withMemo ? 0x01 : 0x00;
     const p2 = 0x00;
 
     const response = await transport.send(
@@ -87,8 +126,17 @@ async function signSimpleTransfer(
         p2,
         data
     );
-    const signature = response.slice(0, 64);
-    return signature;
+
+    if (withMemo) {
+        return sendMemo(
+            transport,
+            INS_SIMPLE_TRANSFER,
+            transaction.payload.memo,
+            0x02,
+            p2
+        );
+    }
+    return response.slice(0, 64);
 }
 
 async function signTransferToEncrypted(

@@ -55,6 +55,7 @@ export default class SimpleTransferHandler
         amount,
         recipient,
         signatureAmount,
+        memo,
         nonce,
         expiryTime,
     }: Partial<CreateTransactionInput>) {
@@ -73,6 +74,7 @@ export default class SimpleTransferHandler
             amount,
             recipient,
             nonce,
+            memo,
             signatureAmount,
             expiryTime
         );

@@ -136,6 +136,7 @@ export interface CreateTransactionInput {
     signatureAmount: number;
     nonce: string;
     expiryTime: Date;
+    memo: string;
 }
 
 /**

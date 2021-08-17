@@ -35,6 +35,7 @@ import {
     serializeCredentialDeploymentInformation,
     serializeBoolean,
 } from './serializationHelpers';
+import { encodeAsCBOR } from './cborHelper';
 
 function serializeSimpleTransfer(payload: SimpleTransferPayload) {
     const size = 1 + 32 + 8;
@@ -44,6 +45,17 @@ function serializeSimpleTransfer(payload: SimpleTransferPayload) {
     putBase58Check(serialized, 1, payload.toAddress);
     put(serialized, 32 + 1, encodeWord64(BigInt(payload.amount)));
     return Buffer.from(serialized);
+}
+
+function serializeSimpleTransferWithMemo(payload: SimpleTransferPayload) {
+    if (!payload.memo) {
+        throw new Error('Unexpected missing memo');
+    }
+
+    const standardPayload = serializeSimpleTransfer(payload);
+    standardPayload[0] = TransactionKind.Simple_transfer_with_memo;
+    const memo = encodeAsCBOR(payload.memo);
+    return Buffer.concat([standardPayload, memo]);
 }
 
 export function serializeScheduledTransferPayloadBase(
@@ -278,6 +290,10 @@ export function serializeTransferPayload(
     switch (kind) {
         case TransactionKind.Simple_transfer:
             return serializeSimpleTransfer(payload as SimpleTransferPayload);
+        case TransactionKind.Simple_transfer_with_memo:
+            return serializeSimpleTransferWithMemo(
+                payload as SimpleTransferPayload
+            );
         case TransactionKind.Update_credentials:
             return serializeUpdateCredentials(
                 payload as UpdateAccountCredentialsPayload

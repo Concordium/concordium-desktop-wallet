@@ -113,13 +113,25 @@ export function createSimpleTransferTransaction(
     amount: BigInt,
     toAddress: string,
     nonce: string,
+    memo?: string,
     signatureAmount = 1,
     expiry = getDefaultExpiry()
 ): SimpleTransfer {
     const payload = {
         toAddress,
         amount: amount.toString(),
+        memo,
     };
+    if (memo) {
+        return createAccountTransaction({
+            fromAddress,
+            expiry,
+            transactionKind: TransactionKindId.Simple_transfer_with_memo,
+            payload,
+            signatureAmount,
+            nonce,
+        });
+    }
     return createAccountTransaction({
         fromAddress,
         expiry,

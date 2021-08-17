@@ -13,7 +13,11 @@ import UpsertAddress from '../../UpsertAddress';
 import styles from './ExternalTransfer.module.scss';
 
 interface Props {
-    toConfirmTransfer(amount: string, recipient: AddressBookEntry): void;
+    toConfirmTransfer(
+        amount: string,
+        recipient: AddressBookEntry,
+        memo?: string
+    ): void;
     exitFunction(): void;
     estimatedFee?: Fraction;
     amountHeader: string;
@@ -61,6 +65,7 @@ export default function ExternalTransfer({
         >
             {subLocation === locations.pickAmount && (
                 <PickAmount
+                    withMemo
                     recipient={recipient}
                     header={amountHeader}
                     defaultAmount={amount}
@@ -70,11 +75,14 @@ export default function ExternalTransfer({
                         setAmount(currentAmount);
                         setSubLocation(locations.pickRecipient);
                     }}
-                    toConfirmTransfer={(currentAmount: string) => {
+                    toConfirmTransfer={(
+                        currentAmount: string,
+                        memo?: string
+                    ) => {
                         if (!recipient) {
                             throw new Error('Unexpected missing recipient');
                         }
-                        toConfirmTransfer(currentAmount, recipient);
+                        toConfirmTransfer(currentAmount, recipient, memo);
                     }}
                 />
             )}

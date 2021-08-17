@@ -26,13 +26,15 @@ interface Props {
     header: string;
     estimatedFee?: Fraction | undefined;
     toPickRecipient?(currentAmount: string): void;
-    toConfirmTransfer(amount: string): void;
+    toConfirmTransfer(amount: string, memo?: string): void;
     transactionKind: TransactionKindId;
+    withMemo?: boolean;
 }
 
 interface PickAmountForm {
     amount: string;
     recipient: string;
+    memo?: string;
 }
 
 /**
@@ -46,6 +48,7 @@ export default function PickAmount({
     toPickRecipient,
     toConfirmTransfer,
     transactionKind,
+    withMemo = false,
 }: Props) {
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
@@ -54,8 +57,8 @@ export default function PickAmount({
 
     const handleSubmit: SubmitHandler<PickAmountForm> = useCallback(
         (values) => {
-            const { amount } = values;
-            toConfirmTransfer(amount);
+            const { amount, memo } = values;
+            toConfirmTransfer(amount, memo);
         },
         [toConfirmTransfer]
     );
@@ -130,6 +133,13 @@ export default function PickAmount({
                             {form.errors?.recipient?.message}
                         </p>
                     </>
+                ) : null}
+                {withMemo ? (
+                    <Form.TextArea
+                        name="memo"
+                        label={<span className="h3">Memo</span>}
+                        placeholder="You can add a memo here"
+                    />
                 ) : null}
                 <Form.Submit as={Button} size="big">
                     Continue

@@ -103,6 +103,7 @@ function getPayloadSizeEstimate(transactionKind: TransactionKindId) {
 function getEnergyCostOfType(transactionKind: TransactionKindId) {
     switch (transactionKind) {
         case TransactionKindId.Simple_transfer:
+        case TransactionKindId.Simple_transfer_with_memo:
             return energyConstants.SimpleTransferCost;
         case TransactionKindId.Encrypted_transfer:
             return energyConstants.EncryptedTransferCost;
