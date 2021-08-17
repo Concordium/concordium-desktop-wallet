@@ -66,8 +66,7 @@ export async function removeIdentityAndInitialAccount(
     identityId: number
 ) {
     await removeIdentityAndInitialAccountInDatabase(identityId);
-    await loadAccounts(dispatch);
-    return loadIdentities(dispatch);
+    return Promise.all([loadAccounts(dispatch), loadIdentities(dispatch)]);
 }
 
 export async function importIdentities(
