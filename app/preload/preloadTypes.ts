@@ -275,6 +275,11 @@ export type Database = {
     wallet: WalletMethods;
 };
 
+export interface AutoUpdateMethods {
+    onUpdateAvailable: PutListener;
+    triggerUpdate: () => void;
+}
+
 export interface WindowFunctions {
     addListener: Listen;
     removeListener: Listen;
@@ -290,4 +295,5 @@ export interface WindowFunctions {
     writeImageToClipboard: (dataUrl: string) => void;
     openUrl: (href: string) => any;
     removeAllListeners: (channel: string) => void;
+    autoUpdate: AutoUpdateMethods;
 }
