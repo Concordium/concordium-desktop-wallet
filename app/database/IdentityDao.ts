@@ -10,7 +10,8 @@ export const {
     insert: insertIdentity,
     update: updateIdentity,
     getIdentitiesForWallet,
-    rejectIdentityAndDeleteInitialAccount,
-    confirmIdentity,
     insertPendingIdentityAndInitialAccount,
+    rejectIdentityAndInitialAccount,
+    removeIdentityAndInitialAccount,
+    confirmIdentity,
 } = window.database.identity;

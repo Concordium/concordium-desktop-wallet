@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
+import type { LocationDescriptorObject } from 'history';
 import type { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import type { HTMLAttributes } from 'react';
 import type { RegisterOptions } from 'react-hook-form';
@@ -93,6 +94,7 @@ export interface IdentityObject {
 export enum IdentityStatus {
     Confirmed = 'confirmed',
     Rejected = 'rejected',
+    RejectedAndWarned = 'rejectedAndWarned',
     Pending = 'pending',
     // eslint-disable-next-line no-shadow
     Genesis = 'genesis',
@@ -1209,7 +1211,7 @@ export interface TransactionEvent {
 
 export interface Action {
     label: string;
-    location?: string;
+    location?: LocationDescriptorObject | string;
 }
 
 export type ClassName = Pick<HTMLAttributes<HTMLElement>, 'className'>;

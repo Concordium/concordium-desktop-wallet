@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { Knex } from 'knex';
 import { knex } from '~/database/knex';
 import {
     identitiesTable,
@@ -6,6 +7,7 @@ import {
     credentialsTable,
     addressBookTable,
 } from '~/constants/databaseNames.json';
+import { removeInitialAccount } from './accountDao';
 import {
     Account,
     Credential,
@@ -49,17 +51,24 @@ async function getIdentitiesForWallet(walletId: number): Promise<Identity[]> {
     return (await knex()).select().table(identitiesTable).where({ walletId });
 }
 
+async function removeIdentity(id: number, trx: Knex.Transaction) {
+    const table = (await knex())(identitiesTable).transacting(trx);
+    return table.where({ id }).del();
+}
+
 /**
  * Transactionally sets an identity to 'Rejected' and deletes its corresponding
  * initial account.
  * @param identityId the identity to reject
  */
-async function rejectIdentityAndDeleteInitialAccount(identityId: number) {
+async function rejectIdentityAndInitialAccount(identityId: number) {
     (await knex()).transaction(async (trx) => {
         await trx(identitiesTable)
             .where({ id: identityId })
             .update({ status: IdentityStatus.Rejected });
-        await trx(accountsTable).where({ identityId, isInitial: 1 }).del();
+        await trx(accountsTable)
+            .where({ identityId, isInitial: 1 })
+            .update({ status: AccountStatus.Rejected });
     });
 }
 
@@ -117,12 +126,25 @@ async function confirmIdentity(
     });
 }
 
+async function removeIdentityAndInitialAccount(identityId: number) {
+    const db = await knex();
+    await db.transaction((trx) => {
+        removeInitialAccount(identityId, trx)
+            .then(() => {
+                return removeIdentity(identityId, trx);
+            })
+            .then(trx.commit)
+            .catch(trx.rollback);
+    });
+}
+
 const exposedMethods: IdentityMethods = {
     getNextIdentityNumber,
     insert: insertIdentity,
     update: updateIdentity,
     getIdentitiesForWallet,
-    rejectIdentityAndDeleteInitialAccount,
+    rejectIdentityAndInitialAccount,
+    removeIdentityAndInitialAccount,
     confirmIdentity,
     insertPendingIdentityAndInitialAccount,
 };
