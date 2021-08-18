@@ -65,9 +65,14 @@ export default function BuildSchedule({ location }: Props) {
     const estimatedFee = useMemo(
         () =>
             scheduleLength
-                ? scheduledTransferCost(parse(exchangeRate))(scheduleLength)
+                ? scheduledTransferCost(
+                      parse(exchangeRate),
+                      scheduleLength,
+                      1,
+                      memo
+                  )
                 : undefined,
-        [exchangeRate, scheduleLength]
+        [exchangeRate, memo, scheduleLength]
     );
 
     const [amountError, setAmountError] = useState<string>();

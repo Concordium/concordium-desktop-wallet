@@ -65,6 +65,7 @@ export function useTransactionCostEstimate(
     kind: TransactionKindId,
     exchangeRate: Fraction,
     signatureAmount?: number,
+    memo?: string,
     payloadSize?: number
 ) {
     return useMemo(
@@ -73,9 +74,10 @@ export function useTransactionCostEstimate(
                 kind,
                 exchangeRate,
                 signatureAmount,
+                memo,
                 payloadSize
             ),
-        [kind, exchangeRate, payloadSize, signatureAmount]
+        [kind, exchangeRate, payloadSize, signatureAmount, memo]
     );
 }
 

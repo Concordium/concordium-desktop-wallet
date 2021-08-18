@@ -5,8 +5,8 @@ import { encode } from 'cbor';
 export function encodeAsCBOR(value: string | number) {
     // Prefer saving as numbers:
     const asNumber = Number(value);
-    if (Number.isInteger(asNumber)) {
-        return Buffer.from(encode(Number(value)));
+    if (Number.isInteger(asNumber) && asNumber <= Number.MAX_SAFE_INTEGER) {
+        return Buffer.from(encode(asNumber));
     }
     return Buffer.from(encode(value));
 }

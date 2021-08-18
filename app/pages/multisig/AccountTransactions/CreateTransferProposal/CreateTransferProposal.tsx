@@ -111,8 +111,10 @@ function CreateTransferProposal({
                     setFee(
                         scheduledTransferCost(
                             exchangeRate,
-                            account.signatureThreshold
-                        )(scheduleLength)
+                            scheduleLength,
+                            account.signatureThreshold,
+                            memo
+                        )
                     );
                 } else {
                     setFee(undefined);
@@ -122,12 +124,13 @@ function CreateTransferProposal({
                     getTransactionKindCost(
                         transactionKind,
                         exchangeRate,
-                        account.signatureThreshold
+                        account.signatureThreshold,
+                        memo
                     )
                 );
             }
         }
-    }, [account, transactionKind, setFee, scheduleLength, exchangeRate]);
+    }, [account, transactionKind, setFee, scheduleLength, exchangeRate, memo]);
 
     const [amountError, setAmountError] = useState<string>();
     const accountInfo = useSelector(accountInfoSelector(account));

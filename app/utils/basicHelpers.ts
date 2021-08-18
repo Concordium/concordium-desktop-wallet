@@ -152,6 +152,16 @@ export function collapseFraction({ numerator, denominator }: Fraction): bigint {
     return 1n + quotient;
 }
 
+export function multiplyFraction(
+    { numerator, denominator }: Fraction,
+    factor: bigint | string
+): Fraction {
+    return {
+        numerator: numerator * BigInt(factor),
+        denominator,
+    };
+}
+
 /**
  * Returns the absolute value of the given bigint.
  */

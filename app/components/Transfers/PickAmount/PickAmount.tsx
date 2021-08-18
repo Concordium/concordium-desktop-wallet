@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import {
@@ -33,8 +33,8 @@ interface Props {
     toPickRecipient?(currentAmount: string, memo?: string): void;
     toConfirmTransfer(amount: string, memo?: string): void;
     transactionKind: TransactionKindId;
-    withMemo?: boolean;
     defaultMemo?: string;
+    setMemo?: (currentMemo?: string) => void;
 }
 
 interface PickAmountForm {
@@ -61,12 +61,20 @@ export default function PickAmount({
     toConfirmTransfer,
     transactionKind,
     defaultMemo,
-    withMemo = false,
+    setMemo,
 }: Props) {
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
     const form = useForm<PickAmountForm>({ mode: 'onTouched' });
-    const { errors } = form;
+    const { errors, watch } = form;
+
+    const currentMemo = watch(fieldNames.memo);
+    useEffect(() => {
+        if (setMemo) {
+            setMemo(currentMemo);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentMemo]);
 
     const handleSubmit: SubmitHandler<PickAmountForm> = useCallback(
         (values) => {
@@ -119,7 +127,7 @@ export default function PickAmount({
                     className={styles.estimatedFee}
                     estimatedFee={estimatedFee}
                 />
-                {withMemo ? (
+                {setMemo ? (
                     <Form.TextArea
                         name={fieldNames.memo}
                         className={styles.memoField}

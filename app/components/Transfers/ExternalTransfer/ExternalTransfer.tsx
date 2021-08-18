@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import PlusIcon from '@resources/svg/plus.svg';
 import PickRecipient from '../PickRecipient';
 import PickAmount from '../PickAmount';
 import FinalPage from '../FinalPage';
+import { getTransactionKindCost } from '~/utils/transactionCosts';
 import { TransactionKindId, AddressBookEntry, Fraction } from '~/utils/types';
 import locations from '~/constants/transferLocations.json';
 import { TransferState } from '~/utils/transactionTypes';
@@ -19,7 +20,7 @@ interface Props {
         memo?: string
     ): void;
     exitFunction(): void;
-    estimatedFee?: Fraction;
+    exchangeRate?: Fraction;
     amountHeader: string;
     senderAddress: string;
     transactionKind: TransactionKindId;
@@ -31,7 +32,7 @@ interface Props {
 export default function ExternalTransfer({
     toConfirmTransfer,
     amountHeader,
-    estimatedFee,
+    exchangeRate,
     exitFunction,
     senderAddress,
     transactionKind,
@@ -51,6 +52,13 @@ export default function ExternalTransfer({
 
     const [memo, setMemo] = useState<string | undefined>(location?.state?.memo);
 
+    const estimatedFee = useMemo(
+        () =>
+            exchangeRate &&
+            getTransactionKindCost(transactionKind, exchangeRate, 1, memo),
+        [exchangeRate, memo, transactionKind]
+    );
+
     function selectRecipient(entry: AddressBookEntry) {
         setRecipient(entry);
         setSubLocation(locations.pickAmount);
@@ -67,7 +75,7 @@ export default function ExternalTransfer({
         >
             {subLocation === locations.pickAmount && (
                 <PickAmount
-                    withMemo
+                    setMemo={setMemo}
                     recipient={recipient}
                     header={amountHeader}
                     defaultAmount={amount}
