@@ -42,6 +42,7 @@ import {
 } from './transactionCosts';
 import { toMicroUnits, isValidGTUString, displayAsGTU } from './gtu';
 import { getEncodedSize } from './cborHelper';
+import { maxMemoSize } from '~/constants/externalConstants.json';
 
 export async function lookupAddressBookEntry(
     address: string
@@ -608,6 +609,17 @@ export function validateBakerStake(
         return 'Insufficient funds';
     }
 
+    return undefined;
+}
+export function validateMemo(memo: string): string | undefined {
+    if (getEncodedSize(memo) > maxMemoSize) {
+        return `Memo is too large, encoded size must be at most ${maxMemoSize} bytes`;
+    }
+    // Check that the memo only contains ascii characters
+    // eslint-disable-next-line no-control-regex
+    if (/[^\u0000-\u007f]/.test(memo)) {
+        return 'Memo contains non-ascii characters';
+    }
     return undefined;
 }
 

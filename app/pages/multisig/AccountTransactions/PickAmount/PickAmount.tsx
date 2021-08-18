@@ -8,7 +8,6 @@ import { getGTUSymbol } from '~/utils/gtu';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import { useAccountInfo } from '~/utils/dataHooks';
 import GtuInput from '~/components/Form/GtuInput';
-import TextArea from '~/components/Form/TextArea';
 
 import styles from './PickAmount.module.scss';
 
@@ -17,8 +16,6 @@ interface Props {
     estimatedFee?: Fraction;
     amount: string | undefined;
     setAmount: (amount: string | undefined) => void;
-    memo?: string;
-    setMemo?: (amount: string | undefined) => void;
     validateAmount?: (
         amountToValidate: string,
         accountInfo: AccountInfo | undefined,
@@ -34,8 +31,6 @@ export default function PickAmount({
     account,
     setAmount,
     amount,
-    setMemo,
-    memo,
     estimatedFee,
     validateAmount = validateTransferAmount,
 }: Props): JSX.Element {
@@ -75,15 +70,6 @@ export default function PickAmount({
                 />
             </div>
             <ErrorMessage>{error}</ErrorMessage>
-            {setMemo && (
-                <TextArea
-                    value={memo}
-                    className="mT50"
-                    onChange={(event) => setMemo(event.target.value)}
-                    label={<span className="h3">Memo</span>}
-                    placeholder="You can add a memo here"
-                />
-            )}
         </div>
     );
 }

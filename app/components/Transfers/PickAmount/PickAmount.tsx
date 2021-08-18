@@ -19,6 +19,7 @@ import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import {
     validateTransferAmount,
     validateShieldedAmount,
+    validateMemo,
 } from '~/utils/transactionHelpers';
 import { collapseFraction } from '~/utils/basicHelpers';
 import transferStyles from '../Transfers.module.scss';
@@ -132,6 +133,7 @@ export default function PickAmount({
                         name={fieldNames.memo}
                         className={styles.memoField}
                         label={<span className="h3">Memo</span>}
+                        rules={{ validate: validateMemo }}
                         defaultValue={defaultMemo}
                         placeholder="You can add a memo here"
                     />

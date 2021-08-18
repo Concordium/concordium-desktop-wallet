@@ -33,12 +33,13 @@ import PickRecipient from '~/components/Transfers/PickRecipient';
 import { useTransactionExpiryState } from '~/utils/dataHooks';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { accountsSelector, accountInfoSelector } from '~/features/AccountSlice';
-import { amountAtDisposal } from '~/utils/transactionHelpers';
+import { amountAtDisposal, validateMemo } from '~/utils/transactionHelpers';
 import { collapseFraction } from '~/utils/basicHelpers';
 import { toMicroUnits, displayAsGTU } from '~/utils/gtu';
 
 import styles from './CreateTransferProposal.module.scss';
 import UpsertAddress from '~/components/UpsertAddress';
+import PickMemo from './PickMemo';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
@@ -276,12 +277,17 @@ function CreateTransferProposal({
                                             account={account}
                                             amount={amount}
                                             setAmount={setAmount}
-                                            memo={memo}
-                                            setMemo={setMemo}
                                             estimatedFee={estimatedFee}
                                         />
+                                        <PickMemo
+                                            memo={memo}
+                                            setMemo={setMemo}
+                                        />
                                         <Button
-                                            disabled={amount === undefined}
+                                            disabled={
+                                                amount === undefined ||
+                                                !!validateMemo(memo || '')
+                                            }
                                             className={styles.submitButton}
                                             onClick={() => continueAction()}
                                         >
