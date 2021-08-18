@@ -33,7 +33,9 @@ export default function Notifications() {
                         >
                             Update available
                             <Button
-                                onClick={window.autoUpdate.triggerUpdate}
+                                onClick={() =>
+                                    window.autoUpdate.triggerUpdate()
+                                }
                                 size="tiny"
                             >
                                 UPDATE
