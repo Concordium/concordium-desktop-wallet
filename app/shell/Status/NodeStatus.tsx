@@ -15,7 +15,7 @@ import styles from './Status.module.scss';
 const checkInterval = 15000;
 
 enum Status {
-    Testing = 'Pinging',
+    Pinging = 'Pinging',
     CatchingUp = 'Catching up',
     Ready = 'Ready',
     Unavailable = 'Unavailable',
@@ -38,13 +38,13 @@ export default function NodeStatus(): JSX.Element {
     const connectionSettings = useSelector(
         specificSettingSelector(settingKeys.nodeLocation)
     );
-    const [statusText, setStatusText] = useState<Status>(Status.Testing);
+    const [statusText, setStatusText] = useState<Status>(Status.Pinging);
 
     const setStatus = useCallback(async (controller: AbortController) => {
         if (controller.isAborted) {
             return;
         }
-        setStatusText(Status.Testing);
+        setStatusText(Status.Pinging);
         let status = Status.Unavailable;
         try {
             const upToDate = await isNodeUpToDate();
@@ -69,12 +69,13 @@ export default function NodeStatus(): JSX.Element {
     }, [connectionSettings?.value, setStatus]);
 
     const StatusImage = getStatusImage(statusText);
-    const s = StatusImage && (
-        <StatusImage height="15" className={styles.statusImage} />
-    );
+
     return (
         <div className={clsx(styles.nodeStatus)}>
-            <span>Node: {statusText}</span> {s}
+            <span>Node: {statusText}</span>{' '}
+            {StatusImage && (
+                <StatusImage height="15" className={styles.statusImage} />
+            )}
         </div>
     );
 }
