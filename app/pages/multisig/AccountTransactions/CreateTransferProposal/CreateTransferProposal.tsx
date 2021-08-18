@@ -87,6 +87,7 @@ function CreateTransferProposal({
 
     const [account, setAccount] = useState<Account | undefined>(state?.account);
     const [amount, setAmount] = useState<string | undefined>();
+    const [memo, setMemo] = useState<string | undefined>();
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>();
     const [
         expiryTime,
@@ -182,6 +183,7 @@ function CreateTransferProposal({
                 amount={amount}
                 account={account}
                 schedule={schedule}
+                memo={memo}
                 estimatedFee={estimatedFee}
                 expiryTime={expiryTime}
             />
@@ -232,6 +234,7 @@ function CreateTransferProposal({
                                 account={account}
                                 amount={amount}
                                 recipient={recipient}
+                                memo={memo}
                                 schedule={schedule}
                                 estimatedFee={estimatedFee}
                                 expiryTime={expiryTime}
@@ -270,6 +273,8 @@ function CreateTransferProposal({
                                             account={account}
                                             amount={amount}
                                             setAmount={setAmount}
+                                            memo={memo}
+                                            setMemo={setMemo}
                                             estimatedFee={estimatedFee}
                                         />
                                         <Button

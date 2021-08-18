@@ -6,6 +6,7 @@ import { displayAsGTU } from '~/utils/gtu';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
+import DisplayMemo from '~/components/DisplayMemo';
 
 import styles from './transferDetails.module.scss';
 
@@ -38,6 +39,7 @@ export default function DisplayEncryptedTransfer({
                 {displayAsGTU(transaction.payload.plainTransferAmount)}
             </p>
             <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
+            <DisplayMemo memo={transaction.payload.memo} />
             {Boolean(singleSigTransfer) || (
                 <DisplayTransactionExpiryTime
                     expiryTime={dateFromTimeStamp(transaction.expiry)}

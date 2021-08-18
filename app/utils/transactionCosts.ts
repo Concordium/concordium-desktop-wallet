@@ -75,7 +75,7 @@ export function calculateCost(
     );
 }
 
-function getPayloadSizeEstimate(transactionKind: TransactionKindId) {
+export function getPayloadSizeEstimate(transactionKind: TransactionKindId) {
     switch (transactionKind) {
         case TransactionKindId.Simple_transfer:
             return payloadSizeEstimate.SimpleTransfer;
@@ -106,6 +106,7 @@ function getEnergyCostOfType(transactionKind: TransactionKindId) {
         case TransactionKindId.Simple_transfer_with_memo:
             return energyConstants.SimpleTransferCost;
         case TransactionKindId.Encrypted_transfer:
+        case TransactionKindId.Encrypted_transfer_with_memo:
             return energyConstants.EncryptedTransferCost;
         case TransactionKindId.Transfer_to_encrypted:
             return energyConstants.TransferToEncryptedCost;

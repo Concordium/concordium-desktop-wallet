@@ -38,8 +38,10 @@ import {
     getTransactionEnergyCost,
     getTransactionKindEnergy,
     getUpdateAccountCredentialEnergy,
+    getPayloadSizeEstimate,
 } from './transactionCosts';
 import { toMicroUnits, isValidGTUString, displayAsGTU } from './gtu';
+import { getEncodedSize } from './cborHelper';
 
 export async function lookupAddressBookEntry(
     address: string
@@ -122,20 +124,13 @@ export function createSimpleTransferTransaction(
         amount: amount.toString(),
         memo,
     };
-    if (memo) {
-        return createAccountTransaction({
-            fromAddress,
-            expiry,
-            transactionKind: TransactionKindId.Simple_transfer_with_memo,
-            payload,
-            signatureAmount,
-            nonce,
-        });
-    }
+    const transactionKind = memo
+        ? TransactionKindId.Simple_transfer_with_memo
+        : TransactionKindId.Simple_transfer;
     return createAccountTransaction({
         fromAddress,
         expiry,
-        transactionKind: TransactionKindId.Simple_transfer,
+        transactionKind,
         payload,
         signatureAmount,
         nonce,
@@ -152,21 +147,28 @@ export function createEncryptedTransferTransaction(
     amount: bigint,
     toAddress: string,
     nonce: string,
+    memo?: string,
     expiry = getDefaultExpiry()
 ): EncryptedTransfer {
     const payload = {
         toAddress,
+        memo,
         plainTransferAmount: amount.toString(),
     };
+    const transactionKind = memo
+        ? TransactionKindId.Encrypted_transfer_with_memo
+        : TransactionKindId.Encrypted_transfer;
     return createAccountTransaction({
         fromAddress,
         expiry,
-        transactionKind: TransactionKindId.Encrypted_transfer,
+        transactionKind,
         nonce,
         payload,
         // Supply the energy, so that the cost is not computed using the incomplete payload.
         estimatedEnergyAmount: getTransactionKindEnergy(
-            TransactionKindId.Encrypted_transfer
+            transactionKind,
+            getPayloadSizeEstimate(TransactionKindId.Encrypted_transfer) +
+                getEncodedSize(memo)
         ),
     });
 }
@@ -277,18 +279,23 @@ export function createScheduledTransferTransaction(
     toAddress: string,
     schedule: Schedule,
     nonce: string,
+    memo?: string,
     signatureAmount = 1,
     expiry = getDefaultExpiry()
 ) {
     const payload = {
         toAddress,
         schedule,
+        memo,
     };
 
+    const transactionKind = memo
+        ? TransactionKindId.Transfer_with_schedule_with_memo
+        : TransactionKindId.Transfer_with_schedule;
     return createAccountTransaction({
         fromAddress,
         expiry,
-        transactionKind: TransactionKindId.Transfer_with_schedule,
+        transactionKind,
         payload,
         nonce,
         signatureAmount,

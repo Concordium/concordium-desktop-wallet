@@ -19,6 +19,7 @@ interface Props {
     recipient: AddressBookEntry;
     estimatedFee?: Fraction;
     amount: string;
+    memo?: string;
     schedule?: Schedule;
     nonce: string;
     expiryTime: Date;
@@ -29,6 +30,7 @@ function CreateTransaction({
     account,
     recipient,
     amount,
+    memo,
     schedule,
     estimatedFee,
     nonce,
@@ -45,6 +47,7 @@ function CreateTransaction({
             amount: toMicroUnits(amount),
             recipient: recipient.address,
             signatureAmount: account.signatureThreshold,
+            memo,
             expiryTime,
             schedule,
             nonce,
@@ -55,6 +58,7 @@ function CreateTransaction({
         account,
         amount,
         recipient,
+        memo,
         schedule,
         transactionKind,
         estimatedFee,

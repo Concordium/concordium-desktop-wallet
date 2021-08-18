@@ -10,3 +10,11 @@ export function encodeAsCBOR(value: string | number) {
     }
     return Buffer.from(encode(value));
 }
+
+export function getEncodedSize(value?: string | number) {
+    if (!value && value !== 0) {
+        return 0;
+    }
+    const encoded = encodeAsCBOR(value);
+    return encoded.length;
+}

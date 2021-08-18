@@ -49,6 +49,8 @@ export default function ExternalTransfer({
         location?.state?.recipient
     );
 
+    const [memo, setMemo] = useState<string | undefined>(location?.state?.memo);
+
     function selectRecipient(entry: AddressBookEntry) {
         setRecipient(entry);
         setSubLocation(locations.pickAmount);
@@ -69,20 +71,29 @@ export default function ExternalTransfer({
                     recipient={recipient}
                     header={amountHeader}
                     defaultAmount={amount}
+                    defaultMemo={memo}
                     estimatedFee={estimatedFee}
                     transactionKind={transactionKind}
-                    toPickRecipient={(currentAmount: string) => {
+                    toPickRecipient={(
+                        currentAmount: string,
+                        currentMemo?: string
+                    ) => {
+                        setMemo(currentMemo);
                         setAmount(currentAmount);
                         setSubLocation(locations.pickRecipient);
                     }}
                     toConfirmTransfer={(
                         currentAmount: string,
-                        memo?: string
+                        currentMemo?: string
                     ) => {
                         if (!recipient) {
                             throw new Error('Unexpected missing recipient');
                         }
-                        toConfirmTransfer(currentAmount, recipient, memo);
+                        toConfirmTransfer(
+                            currentAmount,
+                            recipient,
+                            currentMemo
+                        );
                     }}
                 />
             )}

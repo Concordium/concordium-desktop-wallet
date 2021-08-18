@@ -73,6 +73,7 @@ function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
                             state: {
                                 initialPage: locations.pickAmount,
                                 amount,
+                                memo,
                                 recipient,
                             },
                         },

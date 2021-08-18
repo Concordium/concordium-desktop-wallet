@@ -39,7 +39,7 @@ function EncryptedTransfer({ account, exchangeRate, nonce }: Props) {
     );
 
     const toConfirmTransfer = useCallback(
-        async (amount: string, recipient: AddressBookEntry) => {
+        async (amount: string, recipient: AddressBookEntry, memo?: string) => {
             if (!recipient) {
                 throw new Error('Unexpected missing recipient');
             }
@@ -48,7 +48,8 @@ function EncryptedTransfer({ account, exchangeRate, nonce }: Props) {
                 account.address,
                 toMicroUnits(amount),
                 recipient.address,
-                nonce
+                nonce,
+                memo
             );
             transaction.estimatedFee = estimatedFee;
 
@@ -69,6 +70,7 @@ function EncryptedTransfer({ account, exchangeRate, nonce }: Props) {
                             state: {
                                 initialPage: locations.pickAmount,
                                 amount,
+                                memo,
                                 recipient,
                             },
                         },

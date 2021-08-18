@@ -29,6 +29,7 @@ interface State {
     exchangeRate: string;
     nonce: string;
     defaults?: BuildScheduleDefaults;
+    memo?: string;
 }
 
 interface Props {
@@ -51,6 +52,7 @@ export default function BuildSchedule({ location }: Props) {
     const {
         account,
         amount,
+        memo,
         recipient,
         nonce,
         exchangeRate,
@@ -94,7 +96,8 @@ export default function BuildSchedule({ location }: Props) {
                 account.address,
                 recipient.address,
                 schedule,
-                nonce
+                nonce,
+                memo
             );
             transaction.estimatedFee = estimatedFee;
             const transactionJSON = stringify(transaction);
@@ -120,6 +123,7 @@ export default function BuildSchedule({ location }: Props) {
                                 defaults: recoverState,
                                 recipient,
                                 nonce,
+                                memo,
                                 exchangeRate,
                             },
                         },
@@ -144,7 +148,11 @@ export default function BuildSchedule({ location }: Props) {
                 dispatch(
                     push({
                         pathname: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
-                        state: { amount: microGtuToGtu(amount), recipient },
+                        state: {
+                            amount: microGtuToGtu(amount),
+                            recipient,
+                            memo,
+                        },
                     })
                 )
             }

@@ -255,8 +255,12 @@ async function signEncryptedTransfer(
         throw new Error('Unexpected missing payload data');
     }
 
+    const withMemo =
+        transaction.transactionKind ===
+        TransactionKindId.Encrypted_transfer_with_memo;
+
     const payload = serializeTransferPayload(
-        TransactionKindId.Encrypted_transfer,
+        transaction.transactionKind,
         transaction.payload
     );
 
@@ -269,7 +273,7 @@ async function signEncryptedTransfer(
     );
 
     const kind = Buffer.alloc(1);
-    kind.writeInt8(TransactionKindId.Encrypted_transfer, 0);
+    kind.writeInt8(transaction.transactionKind, 0);
 
     const data = Buffer.concat([
         pathAsBuffer(path),
@@ -278,7 +282,7 @@ async function signEncryptedTransfer(
         base58ToBuffer(transaction.payload.toAddress),
     ]);
 
-    let p1 = 0x00;
+    let p1 = withMemo ? 0x04 : 0x00;
     const p2 = 0x00;
 
     await transport.send(0xe0, INS_ENCRYPTED_TRANSFER, p1, p2, data);
@@ -323,11 +327,20 @@ async function signEncryptedTransfer(
             Buffer.from(chunks[i])
         );
     }
+
+    if (withMemo) {
+        return sendMemo(
+            transport,
+            INS_ENCRYPTED_TRANSFER,
+            transaction.payload.memo,
+            0x05,
+            p2
+        );
+    }
     if (!response) {
         throw new Error('Unexpected missing response from ledger;');
     }
-    const signature = response.slice(0, 64);
-    return signature;
+    return response.slice(0, 64);
 }
 
 async function signTransferWithSchedule(
@@ -335,8 +348,12 @@ async function signTransferWithSchedule(
     path: number[],
     transaction: ScheduledTransfer
 ): Promise<Buffer> {
+    const withMemo =
+        transaction.transactionKind ===
+        TransactionKindId.Transfer_with_schedule_with_memo;
+
     const payload = serializeTransferPayload(
-        TransactionKindId.Transfer_with_schedule,
+        transaction.transactionKind,
         transaction.payload
     );
 
@@ -348,13 +365,14 @@ async function signTransferWithSchedule(
         transaction.expiry
     );
 
-    const data = Buffer.concat([
-        pathAsBuffer(path),
-        header,
-        serializeScheduledTransferPayloadBase(transaction.payload),
-    ]);
+    const payloadBase = serializeScheduledTransferPayloadBase(
+        transaction.payload,
+        transaction.transactionKind
+    );
 
-    let p1 = 0x00;
+    const data = Buffer.concat([pathAsBuffer(path), header, payloadBase]);
+
+    let p1 = withMemo ? 0x02 : 0x00;
     const p2 = 0x00;
 
     await transport.send(0xe0, INS_TRANSFER_WITH_SCHEDULE, p1, p2, data);
@@ -365,23 +383,30 @@ async function signTransferWithSchedule(
 
     let response;
     const chunks = chunkArray(schedule.map(serializeSchedulePoint), 15); // 15 is the maximum amount we can fit
-    for (let i = 0; i < chunks.length; i += 1) {
+    for (const chunk of chunks) {
         // eslint-disable-next-line  no-await-in-loop
         response = await transport.send(
             0xe0,
             INS_TRANSFER_WITH_SCHEDULE,
             p1,
             p2,
-            Buffer.concat(chunks[i])
+            Buffer.concat(chunk)
         );
     }
 
+    if (withMemo) {
+        return sendMemo(
+            transport,
+            INS_TRANSFER_WITH_SCHEDULE,
+            transaction.payload.memo,
+            0x03,
+            p2
+        );
+    }
     if (!response) {
         throw new Error('Unexpected missing response from ledger;');
     }
-
-    const signature = response.slice(0, 64);
-    return signature;
+    return response.slice(0, 64);
 }
 
 async function signAddBaker(

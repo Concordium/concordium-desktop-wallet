@@ -204,6 +204,7 @@ export interface EncryptedTransferPayload {
     transferAmount?: EncryptedAmount;
     index?: string;
     proof?: string;
+    memo?: string;
 }
 
 export interface TransferToEncryptedPayload {
@@ -229,6 +230,7 @@ export type Schedule = SchedulePoint[];
 export interface ScheduledTransferPayload {
     schedule: Schedule;
     toAddress: string;
+    memo?: string;
 }
 
 export interface AddedCredential {
@@ -810,13 +812,19 @@ export function instanceOfTransferToPublic(
 export function instanceOfEncryptedTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is EncryptedTransfer {
-    return object.transactionKind === TransactionKindId.Encrypted_transfer;
+    return [
+        TransactionKindId.Encrypted_transfer,
+        TransactionKindId.Encrypted_transfer_with_memo,
+    ].includes(object.transactionKind);
 }
 
 export function instanceOfScheduledTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is ScheduledTransfer {
-    return object.transactionKind === TransactionKindId.Transfer_with_schedule;
+    return [
+        TransactionKindId.Transfer_with_schedule,
+        TransactionKindId.Transfer_with_schedule_with_memo,
+    ].includes(object.transactionKind);
 }
 
 export function instanceOfUpdateAccountCredentials(

@@ -62,6 +62,7 @@ export default class ScheduledTransferHandler
         signatureAmount,
         nonce,
         expiryTime,
+        memo,
     }: Partial<CreateTransactionInput>) {
         if (!sender || !recipient || !schedule || !nonce) {
             throw new Error(
@@ -73,6 +74,7 @@ export default class ScheduledTransferHandler
             recipient,
             schedule,
             nonce,
+            memo,
             signatureAmount,
             expiryTime
         );

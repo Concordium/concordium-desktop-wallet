@@ -5,7 +5,12 @@ import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
 } from '~/features/AccountSlice';
-import { TransactionKindId, AddressBookEntry, Fraction } from '~/utils/types';
+import {
+    TransactionKindId,
+    AddressBookEntry,
+    Fraction,
+    EqualRecord,
+} from '~/utils/types';
 import { getGTUSymbol } from '~/utils/gtu';
 import AddressBookEntryButton from '~/components/AddressBookEntryButton';
 import Button from '~/cross-app-components/Button';
@@ -25,17 +30,24 @@ interface Props {
     defaultAmount: string;
     header: string;
     estimatedFee?: Fraction | undefined;
-    toPickRecipient?(currentAmount: string): void;
+    toPickRecipient?(currentAmount: string, memo?: string): void;
     toConfirmTransfer(amount: string, memo?: string): void;
     transactionKind: TransactionKindId;
     withMemo?: boolean;
+    defaultMemo?: string;
 }
 
 interface PickAmountForm {
     amount: string;
     recipient: string;
-    memo?: string;
+    memo: string;
 }
+
+const fieldNames: EqualRecord<PickAmountForm> = {
+    amount: 'amount',
+    recipient: 'recipient',
+    memo: 'memo',
+};
 
 /**
  * Allows the user to enter an amount, and redirects to picking a recipient.
@@ -48,6 +60,7 @@ export default function PickAmount({
     toPickRecipient,
     toConfirmTransfer,
     transactionKind,
+    defaultMemo,
     withMemo = false,
 }: Props) {
     const account = useSelector(chosenAccountSelector);
@@ -91,7 +104,7 @@ export default function PickAmount({
                 <div className={styles.amountInputWrapper}>
                     {getGTUSymbol()}
                     <Form.GtuInput
-                        name="amount"
+                        name={fieldNames.amount}
                         defaultValue={defaultAmount}
                         rules={{
                             required: 'Amount Required',
@@ -106,11 +119,20 @@ export default function PickAmount({
                     className={styles.estimatedFee}
                     estimatedFee={estimatedFee}
                 />
+                {withMemo ? (
+                    <Form.TextArea
+                        name={fieldNames.memo}
+                        className={styles.memoField}
+                        label={<span className="h3">Memo</span>}
+                        defaultValue={defaultMemo}
+                        placeholder="You can add a memo here"
+                    />
+                ) : null}
                 {toPickRecipient ? (
                     <>
                         <div style={{ display: 'none' }}>
                             <Form.Checkbox
-                                name="recipient"
+                                name={fieldNames.recipient}
                                 rules={{
                                     required: 'Recipient Required',
                                 }}
@@ -122,7 +144,10 @@ export default function PickAmount({
                             className={styles.pickRecipient}
                             error={Boolean(form.errors?.recipient)}
                             onClick={() => {
-                                toPickRecipient(form.getValues('amount'));
+                                toPickRecipient(
+                                    form.getValues(fieldNames.amount),
+                                    form.getValues(fieldNames.memo)
+                                );
                             }}
                             title={
                                 recipient ? recipient.name : 'Select Recipient'
@@ -133,13 +158,6 @@ export default function PickAmount({
                             {form.errors?.recipient?.message}
                         </p>
                     </>
-                ) : null}
-                {withMemo ? (
-                    <Form.TextArea
-                        name="memo"
-                        label={<span className="h3">Memo</span>}
-                        placeholder="You can add a memo here"
-                    />
                 ) : null}
                 <Form.Submit as={Button} size="big">
                     Continue
