@@ -4,5 +4,6 @@
     "passwordSettings": "password",
     "password": "passwordSetting",
     "foundationTransactionsEnabled": "foundationTransactionsEnabled",
-    "nodeLocation": "nodeLocation"
+    "nodeLocation": "nodeLocation",
+    "showMemoWarning": "showMemoWarning"
 }

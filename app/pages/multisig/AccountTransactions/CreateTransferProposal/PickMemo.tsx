@@ -2,6 +2,7 @@ import React, { useState, useCallback, FormEvent } from 'react';
 import { validateMemo } from '~/utils/transactionHelpers';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import TextArea from '~/components/Form/TextArea';
+import MemoWarning from '~/components/MemoWarning';
 
 interface Props {
     memo?: string;
@@ -13,6 +14,7 @@ interface Props {
  */
 export default function PickMemo({ setMemo, memo }: Props): JSX.Element {
     const [error, setError] = useState<string>();
+    const [focused, setFocused] = useState<boolean>(false);
 
     const onMemoChange = useCallback(
         (event: FormEvent<HTMLTextAreaElement>) => {
@@ -35,8 +37,10 @@ export default function PickMemo({ setMemo, memo }: Props): JSX.Element {
                 value={memo || ''}
                 className="mT10"
                 onChange={onMemoChange}
+                onFocus={() => setFocused(true)}
                 placeholder="You can add a memo here"
             />
+            <MemoWarning open={focused} />
             <ErrorMessage>{error}</ErrorMessage>
         </>
     );

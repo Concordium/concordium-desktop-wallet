@@ -3,6 +3,7 @@ import { loadAllSettings, updateEntry } from '~/database/SettingsDao';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '~/store/store';
 import { Setting, Settings } from '~/utils/types';
+import settingKeys from '~/constants/settingKeys.json';
 
 interface SettingsState {
     settings: Settings[];
@@ -41,7 +42,7 @@ export const foundationTransactionsEnabledSelector = (
     state: RootState
 ): boolean => {
     const result = findSetting(
-        'foundationTransactionsEnabled',
+        settingKeys.foundationTransactionsEnabled,
         state.settings.settings
     );
     if (result && result.value === '1') {
@@ -49,6 +50,11 @@ export const foundationTransactionsEnabledSelector = (
     }
     return false;
 };
+
+export const showMemoWarningSelector = (state: RootState) => {
+    return findSetting(settingKeys.showMemoWarning, state.settings.settings);
+};
+
 export const { updateSettings } = settingsSlice.actions;
 
 /**

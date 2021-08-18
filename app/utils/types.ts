@@ -1225,11 +1225,6 @@ export interface TransactionEvent {
     cost: string;
 }
 
-export interface Action {
-    label: string;
-    location?: string;
-}
-
 export type ClassName = Pick<HTMLAttributes<HTMLElement>, 'className'>;
 
 export type ClassNameAndStyle = Pick<

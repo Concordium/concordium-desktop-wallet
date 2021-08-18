@@ -4,7 +4,13 @@ import { push } from 'connected-react-router';
 import clsx from 'clsx';
 import Modal from '~/cross-app-components/Modal';
 import Button from '~/cross-app-components/Button';
-import { Action } from '../utils/types';
+
+export interface Action {
+    label: string;
+    onPicked?: () => void;
+    location?: string;
+    inverted?: boolean;
+}
 
 interface Props {
     title: string;
@@ -12,6 +18,7 @@ interface Props {
     actions: Action[];
     open: boolean;
     postAction(): void;
+    disableClose?: boolean;
 }
 
 export default function ChoiceModal({
@@ -20,18 +27,23 @@ export default function ChoiceModal({
     actions,
     open,
     postAction,
+    disableClose = false,
 }: Props) {
     const dispatch = useDispatch();
     return (
-        <Modal open={open}>
+        <Modal disableClose={disableClose} open={open}>
             <h3>{title}</h3>
             <p>{description}</p>
             <div className="flex justifySpaceBetween mT30">
-                {actions.map(({ label, location }, i) => (
+                {actions.map(({ label, location, onPicked, inverted }, i) => (
                     <Button
+                        inverted={inverted}
                         className={clsx('flexChildFill', i !== 0 && 'mL30')}
                         key={label}
                         onClick={() => {
+                            if (onPicked) {
+                                onPicked();
+                            }
                             if (location) {
                                 dispatch(push(location));
                             }

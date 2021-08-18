@@ -22,6 +22,7 @@ const settingDisplayTexts = new Map<string, string>([
     [settingKeys.foundationTransactionsEnabled, 'Foundation transactions'],
     [settingKeys.nodeLocation, 'Node connection settings'],
     [settingKeys.password, 'Change wallet password'],
+    [settingKeys.showMemoWarning, 'Show memo warnings'],
 ]);
 
 export default function SettingsView() {

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import {
@@ -25,6 +25,7 @@ import { collapseFraction } from '~/utils/basicHelpers';
 import transferStyles from '../Transfers.module.scss';
 import styles from './PickAmount.module.scss';
 import ErrorMessage from '~/components/Form/ErrorMessage';
+import MemoWarning from '~/components/MemoWarning';
 
 interface Props {
     recipient?: AddressBookEntry | undefined;
@@ -66,6 +67,7 @@ export default function PickAmount({
 }: Props) {
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
+    const [memoFocused, setMemoFocused] = useState<boolean>(false);
     const form = useForm<PickAmountForm>({ mode: 'onTouched' });
     const { errors, watch } = form;
 
@@ -129,14 +131,18 @@ export default function PickAmount({
                     estimatedFee={estimatedFee}
                 />
                 {setMemo ? (
-                    <Form.TextArea
-                        name={fieldNames.memo}
-                        className={styles.memoField}
-                        label={<span className="h3">Memo</span>}
-                        rules={{ validate: validateMemo }}
-                        defaultValue={defaultMemo}
-                        placeholder="You can add a memo here"
-                    />
+                    <>
+                        <Form.TextArea
+                            name={fieldNames.memo}
+                            className={styles.memoField}
+                            label={<span className="h3">Memo</span>}
+                            onFocus={() => setMemoFocused(true)}
+                            rules={{ validate: validateMemo }}
+                            defaultValue={defaultMemo}
+                            placeholder="You can add a memo here"
+                        />
+                        <MemoWarning open={memoFocused} />
+                    </>
                 ) : null}
                 {toPickRecipient ? (
                     <>
