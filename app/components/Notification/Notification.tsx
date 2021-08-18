@@ -1,7 +1,9 @@
 import clsx from 'clsx';
 import React, { PropsWithChildren } from 'react';
-import CloseIcon from '@resources/svg/cross.svg';
 import { motion, Transition, Variants } from 'framer-motion';
+
+import CloseIcon from '@resources/svg/cross.svg';
+import { ClassName } from '~/utils/types';
 import Button from '~/cross-app-components/Button';
 import { NotificationLevel } from '~/features/NotificationSlice';
 
@@ -22,10 +24,11 @@ const transitionVariants: Variants = {
     },
 };
 
-type NotificationProps = PropsWithChildren<{
-    level: NotificationLevel;
-    onCloseClick(): void;
-}>;
+type NotificationProps = ClassName &
+    PropsWithChildren<{
+        level: NotificationLevel;
+        onCloseClick(): void;
+    }>;
 
 const modifier: Partial<Record<NotificationLevel, string>> = {
     [NotificationLevel.Error]: styles.error,
@@ -35,10 +38,11 @@ export default function Notification({
     children,
     level,
     onCloseClick,
+    className,
 }: NotificationProps) {
     return (
         <motion.div
-            className={clsx(styles.root, modifier[level])}
+            className={clsx(styles.root, modifier[level], className)}
             transition={transition}
             variants={transitionVariants}
             initial="initial"
