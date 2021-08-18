@@ -1,6 +1,6 @@
 /* eslint-disable import/prefer-default-export */
 import { Buffer } from 'buffer/';
-import { encode } from 'cbor';
+import { encode, decode } from 'cbor';
 
 export function encodeAsCBOR(value: string | number) {
     // Prefer saving as numbers:
@@ -9,6 +9,10 @@ export function encodeAsCBOR(value: string | number) {
         return Buffer.from(encode(asNumber));
     }
     return Buffer.from(encode(value));
+}
+
+export function decodeCBOR(value: string) {
+    return decode(Buffer.from(value, 'hex'));
 }
 
 export function getEncodedSize(value?: string | number) {

@@ -19,6 +19,7 @@ import {
 import { getScheduledTransferAmount } from './transactionHelpers';
 import { collapseFraction, abs } from './basicHelpers';
 import { stringify } from './JSONHelper';
+import { decodeCBOR } from './cborHelper';
 
 /*
  * Converts the given transaction into the structure, which is used in the database.
@@ -96,6 +97,11 @@ export function convertIncomingTransaction(
         ? TransactionStatus.Finalized
         : TransactionStatus.Failed;
 
+    let memo;
+    if (transaction.memo) {
+        memo = decodeCBOR(transaction.memo).toString();
+    }
+
     return {
         transactionKind,
         id: transaction.id,
@@ -110,6 +116,7 @@ export function convertIncomingTransaction(
         toAddress,
         rejectReason: transaction.details.rawRejectReason?.tag,
         status,
+        memo,
     };
 }
 
@@ -122,6 +129,7 @@ type TypeSpecific = Pick<
     | 'toAddress'
     | 'decryptedAmount'
     | 'encrypted'
+    | 'memo'
 >;
 
 // Helper function for converting Account Transaction to TransferTransaction.
@@ -133,6 +141,7 @@ function convertSimpleTransfer(transaction: SimpleTransfer): TypeSpecific {
         transactionKind: TransactionKindString.Transfer,
         subtotal: amount.toString(),
         toAddress: transaction.payload.toAddress,
+        memo: transaction.payload.memo,
     };
 }
 
@@ -202,6 +211,7 @@ function convertScheduledTransfer(
         subtotal: amount.toString(),
         schedule: JSON.stringify(transaction.payload.schedule),
         toAddress: transaction.payload.toAddress,
+        memo: transaction.payload.memo,
     };
 }
 
@@ -230,6 +240,7 @@ function convertEncryptedTransfer(
         decryptedAmount: amount.toString(),
         toAddress: transaction.payload.toAddress,
         encrypted,
+        memo: transaction.payload.memo,
     };
 }
 

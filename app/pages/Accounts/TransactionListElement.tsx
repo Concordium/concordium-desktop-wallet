@@ -214,6 +214,39 @@ function statusSymbol(status: TransactionStatus) {
     }
 }
 
+const memoTypes = [
+    TransactionKindString.Transfer,
+    TransactionKindString.EncryptedAmountTransfer,
+    TransactionKindString.TransferWithSchedule,
+];
+
+function showMemo(
+    memo: string | undefined,
+    showFullMessage: boolean,
+    transactionKind: TransactionKindString
+) {
+    if (!memo && showFullMessage && memoTypes.includes(transactionKind)) {
+        return (
+            <i className="body4 m0 mT5 textFaded">
+                The transaction contains no message
+            </i>
+        );
+    }
+    if (!memo) {
+        return null;
+    }
+    return (
+        <p
+            className={clsx(
+                'body4 m0 mT5 textFaded',
+                showFullMessage || styles.lineClamp
+            )}
+        >
+            {memo}
+        </p>
+    );
+}
+
 const onlyTime = Intl.DateTimeFormat(undefined, {
     timeStyle: 'medium',
     hourCycle: 'h24',
@@ -223,6 +256,7 @@ interface Props {
     transaction: TransferTransaction;
     onClick?: () => void;
     showDate?: boolean;
+    showFullMessage?: boolean;
 }
 
 /**
@@ -231,6 +265,7 @@ interface Props {
 function TransactionListElement({
     transaction,
     onClick,
+    showFullMessage = false,
     showDate = false,
 }: Props): JSX.Element {
     const account = useSelector(chosenAccountSelector);
@@ -306,6 +341,11 @@ function TransactionListElement({
                         : ''
                 }
             />
+            {showMemo(
+                transaction.memo,
+                showFullMessage,
+                transaction.transactionKind
+            )}
         </div>
     );
 }

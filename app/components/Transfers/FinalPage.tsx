@@ -7,6 +7,7 @@ import { parseTime } from '~/utils/timeHelpers';
 import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import ButtonNavLink from '~/components/ButtonNavLink';
+import DisplayMemo from '~/components/DisplayMemo';
 
 import {
     AddressBookEntry,
@@ -33,6 +34,7 @@ function getSpecificsHandler(transaction: AccountTransaction) {
     let amount;
     let title;
     let note;
+    let memo;
     if (instanceOfScheduledTransfer(transaction)) {
         title = 'Transfer submitted!';
         amount = getScheduledTransferAmount(transaction);
@@ -47,24 +49,27 @@ function getSpecificsHandler(transaction: AccountTransaction) {
                 )}
             </h3>
         );
+        memo = transaction.payload.memo;
     } else if (instanceOfTransferToPublic(transaction)) {
         title = 'Unshielding submitted!';
         amount = transaction.payload.transferAmount;
     } else if (instanceOfSimpleTransfer(transaction)) {
         title = 'Transfer submitted!';
         amount = transaction.payload.amount;
+        memo = transaction.payload.memo;
     } else if (instanceOfTransferToEncrypted(transaction)) {
         title = 'Shielding submitted!';
         amount = transaction.payload.amount;
     } else if (instanceOfEncryptedTransfer(transaction)) {
         title = 'Shielded transfer submitted!';
         amount = transaction.payload.plainTransferAmount;
+        memo = transaction.payload.memo;
     } else {
         throw new Error(
             `Unsupported transaction type - please implement: ${transaction}`
         );
     }
-    return { amount, title, note };
+    return { amount, title, note, memo };
 }
 
 function displayRecipient(recipient: AddressBookEntry) {
@@ -106,6 +111,8 @@ export default function FinalPage({ location }: Props): JSX.Element {
             />
             {handler.note}
             {displayRecipient(recipient)}
+
+            <DisplayMemo className="textCenter" memo={handler.memo} />
             <h3 className="textCenter mT10">
                 <b>Transaction hash:</b> {transactionHash}
             </h3>

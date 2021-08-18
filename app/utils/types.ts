@@ -497,6 +497,7 @@ export interface TransferTransaction {
     status: TransactionStatus;
     rejectReason?: RejectReason | string;
     decryptedAmount?: string;
+    memo?: string;
 }
 
 export interface TransferTransactionWithNames extends TransferTransaction {
@@ -1156,6 +1157,7 @@ export interface IncomingTransaction {
     transactionHash: Hex;
     subtotal?: Hex;
     cost?: Hex;
+    memo?: Hex;
 }
 
 export enum WalletType {
