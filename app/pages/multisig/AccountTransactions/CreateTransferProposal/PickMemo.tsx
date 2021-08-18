@@ -26,11 +26,15 @@ export default function PickMemo({ setMemo, memo }: Props): JSX.Element {
 
     return (
         <>
+            <p className="mT50">
+                You can add a message to your transactions. This step is
+                optional, and it will increase the transaction fee. Feel free to
+                leave it blank if you do not need it.
+            </p>
             <TextArea
                 value={memo || ''}
-                className="mT50"
+                className="mT10"
                 onChange={onMemoChange}
-                label={<span className="h3">Memo</span>}
                 placeholder="You can add a memo here"
             />
             <ErrorMessage>{error}</ErrorMessage>
