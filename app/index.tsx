@@ -5,6 +5,7 @@ import { push } from 'connected-react-router';
 import Root from './shell/Root';
 import { history, configuredStore } from './store/store';
 import { init as initMisc } from './features/MiscSlice';
+import { triggerUpdateNotification } from './features/NotificationSlice';
 
 import './styles/app.global.scss';
 
@@ -13,6 +14,10 @@ const store = configuredStore();
 initMisc(store.dispatch);
 window.addListener.openRoute((_, route: string) => {
     store.dispatch(push(route));
+});
+
+window.autoUpdate.onUpdateAvailable(() => {
+    store.dispatch(triggerUpdateNotification());
 });
 
 const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;

@@ -130,7 +130,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.com/Concordium/desktopwallet"
+    "url": "git+https://github.com/soerenbf/concordium-desktop-wallet"
   },
   "author": {
     "name": "Concordium Software",

@@ -17,9 +17,11 @@ autoUpdater.setFeedURL({
 });
 
 log.transports.file.level = 'info';
-autoUpdater.logger = log;
 
-function updateApplication() {
+autoUpdater.logger = log;
+autoUpdater.autoDownload = false;
+
+async function updateApplication() {
     /**
      * 1. Download update
      * 2. Verify hash against remote
@@ -27,7 +29,10 @@ function updateApplication() {
      * 4. Install and restart
      */
 
-    autoUpdater.downloadUpdate();
+    const r = await autoUpdater.downloadUpdate();
+    autoUpdater.logger?.info(JSON.stringify(r));
+
+    autoUpdater.quitAndInstall();
 }
 
 export default function initAutoUpdate(mainWindow: BrowserWindow) {

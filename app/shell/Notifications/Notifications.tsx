@@ -2,6 +2,7 @@ import { AnimatePresence } from 'framer-motion';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Notification from '~/components/Notification';
+import Button from '~/cross-app-components/Button';
 import Portal from '~/cross-app-components/Portal';
 import {
     NotificationLevel,
@@ -29,7 +30,15 @@ export default function Notifications() {
                             key={n.id}
                             level={n.level}
                             onCloseClick={() => handleClose(n.id)}
-                        />
+                        >
+                            Update available
+                            <Button
+                                onClick={window.autoUpdate.triggerUpdate}
+                                size="tiny"
+                            >
+                                UPDATE
+                            </Button>
+                        </Notification>
                     ) : (
                         <Notification
                             key={n.id}
