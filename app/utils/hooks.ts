@@ -68,6 +68,7 @@ export const useAsyncMemo = <ReturnType>(
     const [result, setResult] = useState<ReturnType>();
     useEffect(() => {
         getResult().then(setResult).catch(handleError);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     return result;
 };
