@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { exec } = require('child_process');
 const path = require('path');
@@ -15,7 +16,7 @@ if (process.platform === 'darwin') {
     ext = 'exe';
 }
 
-const fileToHash = path.resolve(
+const defaultFile = path.resolve(
     __dirname,
     `../${build.directories.output}/${name}-${version}.${ext}`
 );
@@ -29,18 +30,25 @@ const { argv } = yargs
     })
     .option('file', {
         alias: 'f',
-        description: 'File to perform digest on. Defaults to ',
+        description: 'File to perform digest on',
         type: 'string',
-        default: fileToHash,
+        default: defaultFile,
+    })
+    .option('verify', {
+        alias: 'v',
+        description: 'Verify with specified public key',
+        type: 'string',
     })
     .help()
     .alias('help', 'h');
 
-const hashOutFile = `${argv.file}.hash`;
+const fileToHash = argv.file;
+
+const hashOutFile = `${fileToHash}.hash`;
 const algorithm = 'sha256';
 
-// Produce sha256 checksum
-exec(`openssl dgst -${algorithm} ${argv.file}`, (err, stdout) => {
+// Produce file checksum
+exec(`openssl dgst -${algorithm} ${fileToHash}`, (err, stdout) => {
     if (err) {
         console.error('exec error', err);
         return;
@@ -52,12 +60,34 @@ exec(`openssl dgst -${algorithm} ${argv.file}`, (err, stdout) => {
     console.log('Wrote hash successfully to file:', hashOutFile);
 });
 
-const sigOutFile = `${argv.file}.sig`;
+const sigOutFile = `${fileToHash}.sig`;
 
-// Produce signature
+/**
+ * Function to verify the newly created signature against public key
+ *
+ * @param {string} pubKeyPath public key matching private key given in argv.key (--key).
+ */
+function verify(pubKeyPath) {
+    exec(
+        `openssl dgst -${algorithm} -verify ${pubKeyPath} -signature ${sigOutFile} ${fileToHash}`,
+        (_, stdout) => console.log(stdout)
+    );
+}
+
+/**
+ * Produce signature of file checksum.
+ *
+ * The signature can be verified by running the following command:
+ * openssl dgst -<hash-algorithm> -verify <pubkey-file> -signature <signature-file> <file>
+ * (e.g. openssl dgst -sha256 -verify ./Downloads/concordium-desktop-wallet.pem -signature ./Downloads/concordium-desktop-wallet-1.0.0.dmg.hash.sig ./Downloads/concordium-desktop-wallet-1.0.0.dmg)
+ */
 exec(
-    `openssl dgst -${algorithm} -sign ${argv.key} -out ${sigOutFile} ${argv.file}`,
+    `openssl dgst -${algorithm} -sign ${argv.key} -out ${sigOutFile} ${fileToHash}`,
     () => {
         console.log('Wrote sig successfully to file:', sigOutFile);
+
+        if (argv.verify) {
+            verify(argv.verify);
+        }
     }
 );
