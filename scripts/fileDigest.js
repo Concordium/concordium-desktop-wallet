@@ -1,16 +1,17 @@
 /* eslint-disable promise/always-return */
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-var-requires */
-const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const yargs = require('yargs');
 const https = require('https');
 const { promisify } = require('util');
+const exec = promisify(require('child_process').exec);
 
 const { build } = require('../package.json');
 const { version, name } = require('../app/package.json');
 
+// Configuration of command line arguments
 const { argv } = yargs
     .option('key', {
         alias: 'k',
@@ -43,23 +44,18 @@ const {
     skiprv,
 } = argv;
 
-const algorithm = 'sha256';
+const hashAlgorithm = 'sha256';
 
 // Produce file checksum
-function writeChecksum(file) {
-    exec(`openssl dgst -${algorithm} ${file}`, (err, stdout) => {
-        if (err) {
-            console.error('exec error', err);
-            return;
-        }
+async function writeChecksum(file) {
+    const { stdout } = await exec(`openssl dgst -${hashAlgorithm} ${file}`);
 
-        const hash = stdout.split('= ')[1];
-        const hashOutFile = `${file}.hash`;
+    const hash = stdout.split('= ')[1];
+    const hashOutFile = `${file}.hash`;
 
-        fs.writeFileSync(hashOutFile, hash);
+    fs.writeFileSync(hashOutFile, hash);
 
-        console.log('Wrote hash successfully to file:', hashOutFile);
-    });
+    console.log('Wrote hash successfully to file:', hashOutFile);
 }
 
 /**
@@ -69,7 +65,7 @@ function writeChecksum(file) {
  */
 async function verifySignature(pubKeyPath, file, sigFile) {
     const { stdout } = await promisify(exec)(
-        `openssl dgst -${algorithm} -verify ${pubKeyPath} -signature ${sigFile} ${file}`
+        `openssl dgst -${hashAlgorithm} -verify ${pubKeyPath} -signature ${sigFile} ${file}`
     );
 
     console.log(stdout);
@@ -96,6 +92,7 @@ function getRemotePubKey() {
         req.end();
     });
 }
+
 const tempDir = path.resolve(__dirname, '../temp');
 
 function getTempFile(filename) {
@@ -137,13 +134,19 @@ const executeWithTempFile = (
     removeTempFile(filename);
 };
 
-async function verifyRemote(file, sigOutFile) {
+/**
+ * Verify signature with remote (published) public key
+ *
+ * @param {*} file path to file to verify
+ * @param {*} sigFile path to file containing signature
+ */
+async function verifyRemote(file, sigFile) {
     console.log('\nRemote verification:');
 
     try {
         const content = await getRemotePubKey();
         await executeWithTempFile(content)((p) =>
-            verifySignature(p, file, sigOutFile)
+            verifySignature(p, file, sigFile)
         );
     } catch (err) {
         console.error(err);
@@ -161,7 +164,7 @@ async function writeSignature(file, shouldVerify = false) {
     const sigOutFile = `${file}.sig`;
 
     await promisify(exec)(
-        `openssl dgst -${algorithm} -sign ${publicKeyPath} -out ${sigOutFile} ${file}`
+        `openssl dgst -${hashAlgorithm} -sign ${publicKeyPath} -out ${sigOutFile} ${file}`
     );
 
     console.log('Wrote sig successfully to file:', sigOutFile);
