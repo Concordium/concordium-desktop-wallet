@@ -11,6 +11,11 @@ const exec = promisify(require('child_process').exec);
 const { build } = require('../package.json');
 const { version, name } = require('../app/package.json');
 
+/**
+ * This CLI relies on openssl under the hood to generate and verify hashes and signatures. As such, running the script in a shell that doesn'
+ * t have access to openssl CLI will fail.
+ */
+
 // Configuration of command line arguments
 const { argv } = yargs
     .option('key', {
