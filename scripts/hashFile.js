@@ -18,18 +18,16 @@ const fileToHash = path.resolve(
     __dirname,
     `../${build.directories.output}/${name}-${version}.${ext}`
 );
-const outFile = `${fileToHash}.hash`;
+const outFile = `${fileToHash}.sha256sum`;
 
-const algorithm = 'sha256';
-
-exec(`openssl dgst -${algorithm} ${fileToHash}`, (err, stdout, stderr) => {
+exec(`shasum -a 256 ${fileToHash}`, (err, stdout, stderr) => {
     if (err) {
         console.error('exec error', err);
         return;
     }
     console.log(stdout);
 
-    const hash = stdout.split('= ')[1];
+    const hash = stdout.split(' ')[0];
     fs.writeFileSync(outFile, hash);
 
     console.log('Wrote hash successfully to file:', outFile);
