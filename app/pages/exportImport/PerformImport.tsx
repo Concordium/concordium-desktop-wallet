@@ -17,45 +17,26 @@ import { loadIdentities, identitiesSelector } from '~/features/IdentitySlice';
 import { loadAccounts, accountsSelector } from '~/features/AccountSlice';
 import {
     loadAddressBook,
-    importAddressBookEntry,
     addressBookSelector,
 } from '~/features/AddressBookSlice';
 import {
     credentialsSelector,
     externalCredentialsSelector,
-    importExternalCredentials,
     loadCredentials,
     loadExternalCredentials,
 } from '~/features/CredentialSlice';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
-import { hasNoDuplicate, importWallets } from '~/utils/importHelpers';
-import { partition } from '~/utils/basicHelpers';
+import {
+    importWallets,
+    AddMessage,
+    insertExternalCredentials,
+    importAddressBookEntries,
+} from '~/utils/importHelpers';
 import PageLayout from '~/components/PageLayout';
 import Columns from '~/components/Columns';
 import styles from './ExportImport.module.scss';
 import { getAllWallets } from '~/database/WalletDao';
 import getGenesis from '~/database/GenesisDao';
-
-type AddressBookEntryKey = keyof AddressBookEntry;
-
-export const addressBookFields: AddressBookEntryKey[] = [
-    'name',
-    'address',
-    'note',
-];
-
-export async function importAddressBookEntries(
-    entries: AddressBookEntry[],
-    addressBook: AddressBookEntry[]
-): Promise<AddressBookEntry[]> {
-    const [nonDuplicates, duplicates] = partition(entries, (entry) =>
-        hasNoDuplicate(entry, addressBook, addressBookFields, ['note'])
-    );
-    if (nonDuplicates.length > 0) {
-        await importAddressBookEntry(nonDuplicates);
-    }
-    return duplicates;
-}
 
 interface Location {
     state: ExportData;
@@ -68,7 +49,8 @@ interface Props {
 async function performImport(
     importedData: ExportData,
     existingData: ExportData,
-    dispatch: Dispatch
+    dispatch: Dispatch,
+    addMessage: AddMessage
 ) {
     if (importedData.genesis) {
         const genesis = await getGenesis();
@@ -97,7 +79,8 @@ async function performImport(
             importedData.wallets,
             importedData.identities,
             importedData.accounts,
-            importedData.credentials
+            importedData.credentials,
+            addMessage
         );
     } catch (e) {
         window.log.error('Import of wallet failed', { error: e });
@@ -105,11 +88,13 @@ async function performImport(
             'The imported data is not compatible with existing data.'
         );
     }
-
+    let duplicateAddressBookEntries;
     try {
-        await importAddressBookEntries(
+        duplicateAddressBookEntries = await importAddressBookEntries(
+            dispatch,
             importedData.addressBook,
-            existingData.addressBook
+            existingData.addressBook,
+            addMessage
         );
     } catch (e) {
         window.log.error('Import of Address book failed', { error: e });
@@ -118,7 +103,13 @@ async function performImport(
         );
     }
 
-    await importExternalCredentials(importedData.externalCredentials);
+    // Older imports doesn't contain external credentials, so only add them if the field is present.
+    if (importedData.externalCredentials) {
+        await insertExternalCredentials(
+            importedData.externalCredentials,
+            existingData.externalCredentials
+        );
+    }
 
     window.log.info('Succesfully imported backup.');
 
@@ -127,6 +118,8 @@ async function performImport(
     await loadAddressBook(dispatch);
     await loadCredentials(dispatch);
     await loadExternalCredentials(dispatch);
+
+    return duplicateAddressBookEntries;
 }
 
 /**
@@ -144,11 +137,24 @@ export default function PerformImport({ location }: Props) {
     const credentials = useSelector(credentialsSelector);
     const externalCredentials = useSelector(externalCredentialsSelector);
 
+    const [
+        duplicateAddressBookEntries,
+        setDuplicateAddressBookEntries,
+    ] = useState<AddressBookEntry[]>([]);
+    const [messages, setMessages] = useState<Record<string | number, string>>(
+        {}
+    );
     const [error, setError] = useState<string>();
     const [started, setStarted] = useState(false);
 
     useEffect(() => {
         if (!started && importedData) {
+            const addMessage = (identifier: string | number, message: string) =>
+                setMessages((currentMessages) => {
+                    const newMap = { ...currentMessages };
+                    newMap[identifier] = message;
+                    return newMap;
+                });
             setStarted(true);
             performImport(
                 importedData,
@@ -160,8 +166,11 @@ export default function PerformImport({ location }: Props) {
                     externalCredentials,
                     wallets: [],
                 },
-                dispatch
-            ).catch((e) => setError(e.message));
+                dispatch,
+                addMessage
+            )
+                .then(setDuplicateAddressBookEntries)
+                .catch((e) => setError(e.message));
         }
     }, [
         importedData,
@@ -172,6 +181,7 @@ export default function PerformImport({ location }: Props) {
         addressBook,
         dispatch,
         started,
+        setMessages,
     ]);
 
     if (!importedData) {
@@ -182,16 +192,33 @@ export default function PerformImport({ location }: Props) {
         importedData.accounts
             .filter((account: Account) => account.identityId === identity.id)
             .map((account: Account) => (
-                <p key={account.address}>{account.name}</p>
+                <p key={account.address}>
+                    {account.name}{' '}
+                    {messages[account.address] && (
+                        <span className="bodyLight textFaded mL10">
+                            ({messages[account.address]})
+                        </span>
+                    )}
+                </p>
             ));
 
-    const AddressBookList = importedData.addressBook.map(
-        (entry: AddressBookEntry) => (
-            <p key={entry.address} className={styles.importedAddress}>
-                {entry.name}
-            </p>
+    const AddressBookList = importedData.addressBook
+        .filter(
+            (abe) =>
+                !duplicateAddressBookEntries.some(
+                    (dAbe) => abe.address === dAbe.address
+                )
         )
-    );
+        .map((entry: AddressBookEntry) => (
+            <p key={entry.address} className={styles.importedAddress}>
+                {entry.name}{' '}
+                {messages[entry.address] && (
+                    <span className="bodyLight textFaded mL10">
+                        ({messages[entry.address]})
+                    </span>
+                )}
+            </p>
+        ));
 
     return (
         <>
@@ -232,15 +259,26 @@ export default function PerformImport({ location }: Props) {
                         </Columns.Column>
                         <Columns.Column>
                             <div className={styles.importedList}>
-                                <div className="flexChildFill flexColumn justifyCenter">
+                                <div className={styles.importedListInner}>
                                     {importedData.identities.map(
                                         (identity: Identity) => (
                                             <div
                                                 key={identity.id}
                                                 className={styles.importSection}
                                             >
-                                                <h3>
-                                                    <b>ID:</b> {identity.name}
+                                                <h3 className="mB10">
+                                                    <b>ID:</b> {identity.name}{' '}
+                                                    {messages[identity.id] && (
+                                                        <span className="bodyLight textFaded mL10">
+                                                            (
+                                                            {
+                                                                messages[
+                                                                    identity.id
+                                                                ]
+                                                            }
+                                                            )
+                                                        </span>
+                                                    )}
                                                 </h3>
                                                 <div
                                                     className={
@@ -266,6 +304,20 @@ export default function PerformImport({ location }: Props) {
                                             Recipient accounts:
                                         </p>
                                         {AddressBookList}
+                                        {duplicateAddressBookEntries.length && (
+                                            <p>
+                                                (
+                                                {
+                                                    duplicateAddressBookEntries.length
+                                                }{' '}
+                                                recipient account
+                                                {duplicateAddressBookEntries.length >
+                                                1
+                                                    ? 's were not imported, as they'
+                                                    : ' was not imported, as it'}{' '}
+                                                already existed)
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             </div>

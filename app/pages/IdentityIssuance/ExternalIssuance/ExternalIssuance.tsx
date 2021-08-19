@@ -54,10 +54,16 @@ async function generateIdentity(
             `Identity Object Request sent. provider location:${identityProviderLocation}`
         );
 
-        identityObjectLocation = await window.view.createView(
+        const providerResult = await window.view.createView(
             identityProviderLocation,
             rect
         );
+
+        if (providerResult.error) {
+            throw new Error(providerResult.error);
+        }
+
+        identityObjectLocation = providerResult.result;
 
         // Is this sensitive/should not be put into log?
         window.log.info(
@@ -108,6 +114,7 @@ async function generateIdentity(
         loadAccounts(dispatch);
     } catch (e) {
         window.log.error('Failed to create identity', { error: e });
+        window.view.removeView();
         onError(`Failed to create identity due to ${e}`);
         // Rethrow this to avoid redirection;
         throw e;

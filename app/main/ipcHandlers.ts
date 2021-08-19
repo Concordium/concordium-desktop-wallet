@@ -86,22 +86,28 @@ function createExternalView(
     location: string,
     rect: Rectangle
 ) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         window.setBrowserView(browserView);
         browserView.setBounds(rect);
-        browserView.webContents.loadURL(location);
-        browserView.webContents.once(
-            'did-navigate',
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            async (e: any) => {
-                const loc = e.url;
-                if (loc.includes(redirectUri)) {
-                    resolve(loc.substring(loc.indexOf('=') + 1));
-                } else if (e.httpResponseCode !== 200) {
-                    reject(new Error(`Unexpected response code: ${e}`));
-                }
-            }
-        );
+        browserView.webContents
+            .loadURL(location)
+            .then(() =>
+                browserView.webContents.on(
+                    'did-navigate',
+                    async (_e, url, httpResponseCode, httpStatusText) => {
+                        if (url.includes(redirectUri)) {
+                            resolve({
+                                result: url.substring(url.indexOf('=') + 1),
+                            });
+                        } else {
+                            resolve({
+                                error: `Unexpected response code: ${httpResponseCode}. status: ${httpStatusText}`,
+                            });
+                        }
+                    }
+                )
+            )
+            .catch((e) => resolve({ error: e.message }));
     });
 }
 
