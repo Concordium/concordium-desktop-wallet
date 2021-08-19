@@ -20,15 +20,15 @@ const CredentialInfoLedgerDetails = (props: Props) => (
             <b>Credential Identifier (CredId):</b> {props.credId}
         </p>
         <p>
-            <b>Anonymity revocation threshold (AR threshold):</b>{' '}
-            {props.revocationThreshold}
+            <b>Anonymity Revocation threshold:</b> {props.revocationThreshold}{' '}
+            out of {Object.keys(props.arData).length}
         </p>
         <p>
             <b>Identity Valid atleast to (Id Valid to &gt;=):</b>{' '}
             {formatDate(props.policy.validTo)}
         </p>
         <p>
-            <b>Created at:</b> {formatDate(props.policy.createdAt)}
+            <b>Identity Created at:</b> {formatDate(props.policy.createdAt)}
         </p>
         {props.address && (
             <p>

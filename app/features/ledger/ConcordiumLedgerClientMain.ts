@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type HwTransport from '@ledgerhq/hw-transport';
 import { Buffer } from 'buffer/';
-import { BrowserWindow } from 'electron';
+import EventEmitter from 'events';
 import { Transport, TransportImpl } from './Transport';
 import {
     getPublicKey,
@@ -32,6 +32,7 @@ import {
     HigherLevelKeyUpdate,
     UpdateAccountCredentials,
     AuthorizationKeysUpdate,
+    PrivateKeySeeds,
 } from '~/utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
@@ -41,28 +42,6 @@ import signHigherLevelKeyUpdate from './SignHigherLevelKeyUpdate';
 import signUpdateCredentialTransaction from './SignUpdateCredentials';
 import signAuthorizationKeysUpdate from './SignAuthorizationKeysUpdate';
 import EmulatorTransport from './EmulatorTransport';
-
-export interface LedgerIpcMessage<T> {
-    result?: T;
-    error?: any;
-}
-
-async function wrapResult<T>(
-    call: (...input: any[]) => Promise<T>,
-    ...args: any[]
-): Promise<LedgerIpcMessage<T>> {
-    try {
-        const result: LedgerIpcMessage<T> = {
-            result: await call(...args),
-        };
-        return result;
-    } catch (e) {
-        const error: LedgerIpcMessage<T> = {
-            error: JSON.stringify(e),
-        };
-        return error;
-    }
-}
 
 /**
  * Concordium Ledger API.
@@ -76,9 +55,9 @@ async function wrapResult<T>(
 export default class ConcordiumLedgerClientMain {
     transport: Transport;
 
-    mainWindow: BrowserWindow;
+    eventEmitter: EventEmitter;
 
-    constructor(mainWindow: BrowserWindow, transport?: HwTransport) {
+    constructor(eventEmitter: EventEmitter, transport?: HwTransport) {
         if (transport) {
             this.transport = new TransportImpl(transport);
         } else {
@@ -86,62 +65,58 @@ export default class ConcordiumLedgerClientMain {
             // Only to be used for testing, as the emulator is not secure in any way.
             this.transport = new EmulatorTransport();
         }
-        this.mainWindow = mainWindow;
+        this.eventEmitter = eventEmitter;
     }
 
     closeTransport(): Promise<void> {
         return this.transport.close();
     }
 
-    getPublicKey(path: number[]): Promise<LedgerIpcMessage<Buffer>> {
-        return wrapResult(getPublicKey, this.transport, path);
+    getPublicKey(path: number[]): Promise<Buffer> {
+        return getPublicKey(this.transport, path);
     }
 
-    getPublicKeySilent(path: number[]): Promise<LedgerIpcMessage<Buffer>> {
-        return wrapResult(getPublicKeySilent, this.transport, path);
+    getPublicKeySilent(path: number[]): Promise<Buffer> {
+        return getPublicKeySilent(this.transport, path);
     }
 
-    getSignedPublicKey(
-        path: number[]
-    ): Promise<LedgerIpcMessage<SignedPublicKey>> {
-        return wrapResult(getSignedPublicKey, this.transport, path);
+    getSignedPublicKey(path: number[]): Promise<SignedPublicKey> {
+        return getSignedPublicKey(this.transport, path);
     }
 
-    getPrivateKeySeeds(identity: number) {
-        return wrapResult(getPrivateKeySeeds, this.transport, identity);
+    getPrivateKeySeeds(identity: number): Promise<PrivateKeySeeds> {
+        return getPrivateKeySeeds(this.transport, identity);
     }
 
-    getPrfKey(identity: number): Promise<LedgerIpcMessage<Buffer>> {
-        return wrapResult(getPrfKey, this.transport, identity);
+    getPrfKey(identity: number): Promise<Buffer> {
+        return getPrfKey(this.transport, identity);
     }
 
     signTransfer(
         transaction: AccountTransaction,
         path: number[]
-    ): Promise<LedgerIpcMessage<Buffer>> {
-        return wrapResult(signTransfer, this.transport, path, transaction);
+    ): Promise<Buffer> {
+        return signTransfer(this.transport, path, transaction);
     }
 
     signUpdateCredentialTransaction(
         transaction: UpdateAccountCredentials,
         path: number[]
-    ): Promise<LedgerIpcMessage<Buffer>> {
-        return wrapResult(
-            signUpdateCredentialTransaction,
+    ): Promise<Buffer> {
+        return signUpdateCredentialTransaction(
             this.transport,
             path,
             transaction,
-            this.mainWindow
+            this.eventEmitter
         );
     }
 
     signPublicInformationForIp(
         publicInfoForIp: PublicInformationForIp,
         accountPathInput: AccountPathInput
-    ): Promise<LedgerIpcMessage<Buffer>> {
+    ): Promise<Buffer> {
         const accountPath = getAccountPath(accountPathInput);
-        return wrapResult(
-            signPublicInformationForIp,
+        return signPublicInformationForIp(
             this.transport,
             accountPath,
             publicInfoForIp
@@ -152,9 +127,8 @@ export default class ConcordiumLedgerClientMain {
         credentialDeployment: UnsignedCredentialDeploymentInformation,
         address: string,
         path: number[]
-    ): Promise<LedgerIpcMessage<Buffer>> {
-        return wrapResult(
-            signCredentialDeploymentOnExistingAccount,
+    ): Promise<Buffer> {
+        return signCredentialDeploymentOnExistingAccount(
             this.transport,
             credentialDeployment,
             address,
@@ -166,9 +140,8 @@ export default class ConcordiumLedgerClientMain {
         credentialDeployment: UnsignedCredentialDeploymentInformation,
         expiry: bigint,
         path: number[]
-    ): Promise<LedgerIpcMessage<Buffer>> {
-        return wrapResult(
-            signCredentialDeploymentOnNewAccount,
+    ): Promise<Buffer> {
+        return signCredentialDeploymentOnNewAccount(
             this.transport,
             credentialDeployment,
             expiry,
@@ -180,9 +153,8 @@ export default class ConcordiumLedgerClientMain {
         transaction: UpdateInstruction<ExchangeRate>,
         serializedPayload: Buffer,
         path: number[]
-    ): Promise<LedgerIpcMessage<Buffer>> {
-        return wrapResult(
-            signUpdateTransaction,
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
             this.transport,
             0x06,
             path,
@@ -195,9 +167,8 @@ export default class ConcordiumLedgerClientMain {
         transaction: UpdateInstruction<ExchangeRate>,
         serializedPayload: Buffer,
         path: number[]
-    ): Promise<LedgerIpcMessage<Buffer>> {
-        return wrapResult(
-            signUpdateTransaction,
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
             this.transport,
             0x06,
             path,
@@ -210,9 +181,8 @@ export default class ConcordiumLedgerClientMain {
         transaction: UpdateInstruction<TransactionFeeDistribution>,
         serializedPayload: Buffer,
         path: number[]
-    ): Promise<LedgerIpcMessage<Buffer>> {
-        return wrapResult(
-            signUpdateTransaction,
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
             this.transport,
             0x22,
             path,
@@ -225,9 +195,8 @@ export default class ConcordiumLedgerClientMain {
         transaction: UpdateInstruction<FoundationAccount>,
         serializedPayload: Buffer,
         path: number[]
-    ): Promise<LedgerIpcMessage<Buffer>> {
-        return wrapResult(
-            signUpdateTransaction,
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
             this.transport,
             0x24,
             path,
@@ -240,9 +209,8 @@ export default class ConcordiumLedgerClientMain {
         transaction: UpdateInstruction<MintDistribution>,
         serializedPayload: Buffer,
         path: number[]
-    ): Promise<LedgerIpcMessage<Buffer>> {
-        return wrapResult(
-            signUpdateTransaction,
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
             this.transport,
             0x25,
             path,
@@ -255,9 +223,8 @@ export default class ConcordiumLedgerClientMain {
         transaction: UpdateInstruction<ProtocolUpdate>,
         serializedPayload: Buffer,
         path: number[]
-    ): Promise<LedgerIpcMessage<Buffer>> {
-        return wrapResult(
-            signUpdateProtocolTransaction,
+    ): Promise<Buffer> {
+        return signUpdateProtocolTransaction(
             this.transport,
             path,
             transaction,
@@ -269,9 +236,8 @@ export default class ConcordiumLedgerClientMain {
         transaction: UpdateInstruction<GasRewards>,
         serializedPayload: Buffer,
         path: number[]
-    ): Promise<LedgerIpcMessage<Buffer>> {
-        return wrapResult(
-            signUpdateTransaction,
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
             this.transport,
             0x23,
             path,
@@ -284,9 +250,8 @@ export default class ConcordiumLedgerClientMain {
         transaction: UpdateInstruction<BakerStakeThreshold>,
         serializedPayload: Buffer,
         path: number[]
-    ): Promise<LedgerIpcMessage<Buffer>> {
-        return wrapResult(
-            signUpdateTransaction,
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
             this.transport,
             0x27,
             path,
@@ -299,9 +264,8 @@ export default class ConcordiumLedgerClientMain {
         transaction: UpdateInstruction<ElectionDifficulty>,
         serializedPayload: Buffer,
         path: number[]
-    ): Promise<LedgerIpcMessage<Buffer>> {
-        return wrapResult(
-            signUpdateTransaction,
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
             this.transport,
             0x26,
             path,
@@ -315,9 +279,8 @@ export default class ConcordiumLedgerClientMain {
         serializedPayload: Buffer,
         path: number[],
         INS: number
-    ): Promise<LedgerIpcMessage<Buffer>> {
-        return wrapResult(
-            signHigherLevelKeyUpdate,
+    ): Promise<Buffer> {
+        return signHigherLevelKeyUpdate(
             this.transport,
             path,
             transaction,
@@ -331,9 +294,8 @@ export default class ConcordiumLedgerClientMain {
         serializedPayload: Buffer,
         path: number[],
         INS: number
-    ): Promise<LedgerIpcMessage<Buffer>> {
-        return wrapResult(
-            signAuthorizationKeysUpdate,
+    ): Promise<Buffer> {
+        return signAuthorizationKeysUpdate(
             this.transport,
             path,
             transaction,
@@ -342,7 +304,7 @@ export default class ConcordiumLedgerClientMain {
         );
     }
 
-    getAppAndVersion(): Promise<LedgerIpcMessage<AppAndVersion>> {
-        return wrapResult(getAppAndVersion, this.transport);
+    getAppAndVersion(): Promise<AppAndVersion> {
+        return getAppAndVersion(this.transport);
     }
 }

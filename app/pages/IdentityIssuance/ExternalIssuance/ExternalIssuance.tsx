@@ -1,4 +1,5 @@
-import React, { useState, useRef, RefObject, useLayoutEffect } from 'react';
+import React, { useEffect, useState, useLayoutEffect, useRef } from 'react';
+import type { Rectangle } from 'electron';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Redirect, useLocation } from 'react-router';
@@ -17,8 +18,6 @@ import {
     Account,
 } from '~/utils/types';
 import { confirmIdentityAndInitialAccount } from '~/utils/IdentityStatusPoller';
-import Loading from '~/cross-app-components/Loading';
-import ipcCommands from '../../../constants/ipcCommands.json';
 import { performIdObjectRequest } from '~/utils/httpRequests';
 
 import { getAddressFromCredentialId } from '~/utils/rustInterface';
@@ -26,52 +25,21 @@ import generalStyles from '../IdentityIssuance.module.scss';
 import styles from './ExternalIssuance.module.scss';
 import { getInitialEncryptedAmount } from '~/utils/accountHelpers';
 import { insertPendingIdentityAndInitialAccount } from '~/database/IdentityDao';
+import { getElementRectangle } from '~/utils/htmlHelpers';
 
 const redirectUri = 'ConcordiumRedirectToken';
-
-async function getBody(url: string): Promise<string> {
-    return window.ipcRenderer.invoke(ipcCommands.httpGet, url);
-}
-
-/**
- *   This function puts a listener on the given iframeRef, and when it navigates (due to a redirect http response) it resolves,
- *   and returns the location, which was redirected to.
- */
-async function handleIdentityProviderLocation(
-    iframeRef: RefObject<HTMLIFrameElement>
-): Promise<string> {
-    return new Promise((resolve, reject) => {
-        if (!iframeRef.current) {
-            reject(new Error('Unexpected missing reference to webView.'));
-        } else {
-            iframeRef.current.addEventListener(
-                'did-navigate',
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                async (e: any) => {
-                    const loc = e.url;
-                    if (loc.includes(redirectUri)) {
-                        resolve(loc.substring(loc.indexOf('=') + 1));
-                    } else if (e.httpResponseCode !== 200) {
-                        reject(new Error(await getBody(e.url)));
-                    }
-                }
-            );
-        }
-    });
-}
 
 async function generateIdentity(
     idObjectRequest: Versioned<IdObjectRequest>,
     randomness: string,
     identityNumber: number,
-    setLocation: (location: string) => void,
     dispatch: Dispatch,
     provider: IdentityProvider,
     accountName: string,
     identityName: string,
     walletId: number,
-    iframeRef: RefObject<HTMLIFrameElement>,
-    onError: (message: string) => void
+    onError: (message: string) => void,
+    rect: Rectangle
 ): Promise<number> {
     let identityObjectLocation;
     let identityId;
@@ -81,10 +49,15 @@ async function generateIdentity(
             redirectUri,
             idObjectRequest
         );
-        setLocation(identityProviderLocation);
-        identityObjectLocation = await handleIdentityProviderLocation(
-            iframeRef
+        const providerResult = await window.view.createView(
+            identityProviderLocation,
+            rect
         );
+
+        if (providerResult.error) {
+            throw new Error(providerResult.error);
+        }
+        identityObjectLocation = providerResult.result;
 
         // TODO This code still has an issue if the application fails before
         // inserting the pending identity and account, as the identity might exist
@@ -126,6 +99,7 @@ async function generateIdentity(
         loadIdentities(dispatch);
         loadAccounts(dispatch);
     } catch (e) {
+        window.view.removeView();
         onError(`Failed to create identity due to ${e}`);
         // Rethrow this to avoid redirection;
         throw e;
@@ -161,11 +135,39 @@ export default function ExternalIssuance({
     const dispatch = useDispatch();
     const { state } = useLocation<ExternalIssuanceLocationState>();
 
-    const [location, setLocation] = useState<string>();
-    const iframeRef = useRef<HTMLIFrameElement>(null);
+    const [abortSignal] = useState(new AbortController());
+    const divRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        return () => {
+            // Remove BrowserView when leaving view;
+            window.view.removeView();
+            // Remove resize listener;
+            abortSignal.abort();
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+        const resize = () => {
+            const rect = getElementRectangle(divRef.current);
+            if (rect) {
+                window.view.resizeView(rect);
+            }
+        };
+        window.addEventListener('resize', resize, {
+            signal: abortSignal.signal,
+        } as AddEventListenerOptions);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useLayoutEffect(() => {
         if (!state) {
+            return;
+        }
+        const rect = getElementRectangle(divRef.current);
+        if (!rect) {
+            onError('Html Element not initialised');
             return;
         }
 
@@ -175,14 +177,13 @@ export default function ExternalIssuance({
             idObjectRequest,
             randomness,
             identityNumber,
-            setLocation,
             dispatch,
             provider,
             accountName,
             identityName,
             walletId,
-            iframeRef,
-            onError
+            onError,
+            rect
         )
             .then((identityId) => {
                 return dispatch(
@@ -200,22 +201,10 @@ export default function ExternalIssuance({
         return <Redirect to={routes.IDENTITIES} />;
     }
 
-    if (!location) {
-        return (
-            <>
-                <Loading text="Generating your identity" />
-            </>
-        );
-    }
-
     return (
         <>
             <h2 className={generalStyles.header}>Generating the Identity</h2>
-            <webview
-                ref={iframeRef}
-                className={styles.fullscreen}
-                src={location}
-            />
+            <div ref={divRef} className={styles.fullscreen} />
         </>
     );
 }

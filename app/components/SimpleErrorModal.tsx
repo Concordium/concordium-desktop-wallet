@@ -6,10 +6,12 @@ export interface ModalErrorInput {
     show: boolean;
     header?: string;
     content?: string;
+    buttonText?: string;
 }
 
 interface Props extends ModalErrorInput {
     onClick: () => void;
+    disableClose?: boolean;
 }
 
 /**
@@ -20,14 +22,16 @@ export default function SimpleErrorModal({
     show,
     header,
     content,
+    buttonText = 'Okay',
+    disableClose = true,
     onClick,
 }: Props) {
     return (
-        <Modal open={show} disableClose>
+        <Modal open={show} disableClose={disableClose}>
             <h2>{header}</h2>
             <p>{content}</p>
             <Button className="mT40" onClick={onClick}>
-                Okay
+                {buttonText}
             </Button>
         </Modal>
     );

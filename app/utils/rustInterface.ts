@@ -16,6 +16,7 @@ import {
     SignedIdRequest,
     UnsignedCredentialDeploymentInformation,
     CreationKeys,
+    CommitmentsRandomness,
 } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
@@ -36,7 +37,7 @@ async function getSecretsFromLedger(
     identityNumber: number
 ) {
     displayMessage(
-        'Please confirm exporting private key to create credential from device'
+        'Please confirm exporting private keys to create credential from device'
     );
     const {
         prfKey: prfKeySeed,
@@ -65,7 +66,9 @@ export async function exportKeysFromLedger(
         displayMessage,
         identityNumber
     );
-    displayMessage('Please confirm exporting public key on device');
+    displayMessage(
+        `Please confirm exporting public key on device, for identity: ${identityNumber}, credential: ${credentialNumber}.`
+    );
     const publicKey = (await ledger.getPublicKey(path)).toString('hex');
     displayMessage(`Please confirm exported public key: ${publicKey}`);
     return { prfKey, idCredSec, publicKey };
@@ -177,17 +180,23 @@ async function createUnsignedCredentialInfo(
     });
 
     try {
+        const { cdi, randomness } = JSON.parse(
+            unsignedCredentialDeploymentInfoString
+        );
         return {
-            raw: unsignedCredentialDeploymentInfoString,
-            parsed: JSON.parse(
-                unsignedCredentialDeploymentInfoString
-            ) as UnsignedCredentialDeploymentInformation,
+            cdi: cdi as UnsignedCredentialDeploymentInformation,
+            randomness,
         };
     } catch (e) {
         throw new Error(
             `Unable to create unsigned credential due to unexpected output: ${unsignedCredentialDeploymentInfoString}`
         );
     }
+}
+
+interface WithRandomness<Info> {
+    info: Info;
+    randomness: CommitmentsRandomness;
 }
 
 /**
@@ -205,8 +214,8 @@ export async function createCredentialInfo(
     displayMessage: (message: string | JSX.Element) => void,
     ledger: ConcordiumLedgerClient,
     address: string
-): Promise<CredentialDeploymentInformation> {
-    const { raw, parsed } = await createUnsignedCredentialInfo(
+): Promise<WithRandomness<CredentialDeploymentInformation>> {
+    const { cdi, randomness } = await createUnsignedCredentialInfo(
         identity,
         credentialNumber,
         keys,
@@ -215,7 +224,7 @@ export async function createCredentialInfo(
         address
     );
 
-    displayMessage(CredentialInfoLedgerDetails({ ...parsed, address }));
+    displayMessage(CredentialInfoLedgerDetails({ ...cdi, address }));
     // Adding credential on an existing account
     const path = getAccountPath({
         identityIndex: identity.identityNumber,
@@ -223,7 +232,7 @@ export async function createCredentialInfo(
         signatureIndex: 0,
     });
     const signature = await ledger.signCredentialDeploymentOnExistingAccount(
-        parsed,
+        cdi,
         address,
         path
     );
@@ -231,11 +240,11 @@ export async function createCredentialInfo(
     const credentialDeploymentInfoString = await worker.postMessage({
         command: workerCommands.createCredentialInfo,
         signature: signature.toString('hex'),
-        unsignedInfo: raw,
+        unsignedInfo: stringify(cdi),
     });
 
     displayMessage('Please wait');
-    return JSON.parse(credentialDeploymentInfoString);
+    return { info: JSON.parse(credentialDeploymentInfoString), randomness };
 }
 
 /**
@@ -252,8 +261,8 @@ export async function createCredentialDetails(
     attributes: string[],
     displayMessage: (message: string | JSX.Element) => void,
     ledger: ConcordiumLedgerClient
-): Promise<CredentialDeploymentDetails> {
-    const { raw, parsed } = await createUnsignedCredentialInfo(
+): Promise<WithRandomness<CredentialDeploymentDetails>> {
+    const { cdi, randomness } = await createUnsignedCredentialInfo(
         identity,
         credentialNumber,
         keys,
@@ -261,7 +270,7 @@ export async function createCredentialDetails(
         attributes
     );
 
-    displayMessage(CredentialInfoLedgerDetails(parsed));
+    displayMessage(CredentialInfoLedgerDetails(cdi));
 
     // Adding credential on a new account
     const expiry = BigInt(secondsSinceUnixEpoch(getDefaultExpiry()));
@@ -271,14 +280,14 @@ export async function createCredentialDetails(
         signatureIndex: 0,
     });
     const signature = await ledger.signCredentialDeploymentOnNewAccount(
-        parsed,
+        cdi,
         expiry,
         path
     );
     const credentialDeploymentInfoString = await worker.postMessage({
         command: workerCommands.createCredentialDetails,
         signature: signature.toString('hex'),
-        unsignedInfo: raw,
+        unsignedInfo: stringify(cdi),
         expiry: stringify(expiry),
     });
 
@@ -288,10 +297,13 @@ export async function createCredentialDetails(
         const output = parse(credentialDeploymentInfoString);
 
         return {
-            credentialDeploymentInfoHex: output.hex,
-            accountAddress: output.address,
-            credentialDeploymentInfo: output.credInfo,
-            transactionId: output.hash,
+            info: {
+                credentialDeploymentInfoHex: output.hex,
+                accountAddress: output.address,
+                credentialDeploymentInfo: output.credInfo,
+                transactionId: output.hash,
+            },
+            randomness,
         };
     } catch (e) {
         throw new Error(

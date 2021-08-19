@@ -11,6 +11,7 @@ import MainLayout from '~/cross-app-components/MainLayout';
 import Routes from '../Routes';
 import Sidebar from '../Sidebar';
 import TermsAcceptanceGuard from '../TermsAcceptanceGuard';
+import Notifications from '../Notifications';
 
 import styles from './Root.module.scss';
 
@@ -31,6 +32,7 @@ const Root = ({ store, history }: Props) => (
                     <Routes />
                 </TermsAcceptanceGuard>
             </MainLayout>
+            <Notifications />
         </ConnectedRouter>
     </Provider>
 );

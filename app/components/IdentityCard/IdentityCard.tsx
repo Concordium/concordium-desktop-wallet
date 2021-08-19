@@ -6,12 +6,16 @@ import RejectedImage from '@resources/svg/warning-small.svg';
 import EditIcon from '@resources/svg/edit.svg';
 import CheckIcon from '@resources/svg/checkmark-blue.svg';
 import { useDispatch } from 'react-redux';
-import { Identity, IdentityObject, IdentityStatus } from '~/utils/types';
+import {
+    Identity,
+    IdentityObject,
+    IdentityStatus,
+    AttributeKeyName,
+} from '~/utils/types';
 import { formatDate } from '~/utils/timeHelpers';
 import Card from '~/cross-app-components/Card';
 import SidedRow from '../SidedRow';
 import {
-    AttributeKey,
     attributeNamesMap,
     formatAttributeValue,
     compareAttributes,
@@ -21,6 +25,7 @@ import Form from '../Form';
 import Button from '~/cross-app-components/Button';
 import { useUpdateEffect } from '~/utils/hooks';
 import { editIdentityName } from '~/features/IdentitySlice';
+import DeleteIdentity from './DeleteIdentity';
 
 import styles from './IdentityCard.module.scss';
 
@@ -33,7 +38,7 @@ interface Props {
     className?: string;
     onClick?: () => void;
     active?: boolean;
-    showAttributes?: boolean | AttributeKey[];
+    showAttributes?: boolean | AttributeKeyName[];
     /**
      * If true, allows editing name of identity inline. Defaults to false.
      */
@@ -45,6 +50,7 @@ function statusImage(status: IdentityStatus) {
     switch (status) {
         case IdentityStatus.Confirmed:
             return <SuccessImage />;
+        case IdentityStatus.RejectedAndWarned:
         case IdentityStatus.Rejected:
             return <RejectedImage />;
         case IdentityStatus.Pending:
@@ -105,7 +111,12 @@ function IdentityListElement({
                     ) : null}
                     {statusImage(identity.status)}
                     <span className={clsx(styles.rightAligned, 'body2')}>
-                        Identity
+                        {identity.status === IdentityStatus.RejectedAndWarned &&
+                        canEditName ? (
+                            <DeleteIdentity identity={identity} />
+                        ) : (
+                            'Identity'
+                        )}
                     </span>
                 </div>
                 <Form<EditIdentityForm>
@@ -167,21 +178,21 @@ function IdentityListElement({
                         .filter(
                             ([k]) =>
                                 showAttributes === true ||
-                                showAttributes.includes(k as AttributeKey)
+                                showAttributes.includes(k as AttributeKeyName)
                         )
                         .sort(([k1], [k2]) =>
                             compareAttributes(
-                                k1 as AttributeKey,
-                                k2 as AttributeKey
+                                k1 as AttributeKeyName,
+                                k2 as AttributeKeyName
                             )
                         )
                         .map(([k, v]) => (
                             <SidedRow
                                 className={styles.detailsRow}
                                 key={k}
-                                left={attributeNamesMap[k as AttributeKey]}
+                                left={attributeNamesMap[k as AttributeKeyName]}
                                 right={formatAttributeValue(
-                                    k as AttributeKey,
+                                    k as AttributeKeyName,
                                     v
                                 )}
                             />

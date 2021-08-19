@@ -7,7 +7,7 @@ import {
     partition,
     toCSV,
     collapseFraction,
-} from '../../app/utils/basicHelpers';
+} from '~/utils/basicHelpers';
 
 test('Partition should split booleans correctly', () => {
     const list = [true, false, false, true, true, false, false];
