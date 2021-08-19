@@ -86,7 +86,8 @@ export interface FilterOption {
 
 export function filterKind(kind: TransactionKindString): FilterOption {
     return {
-        label: transactionKindNames[kind],
+        // put an s to pluralize. (Assumes that no transaction name needs specific pluralization)
+        label: `${transactionKindNames[kind]}s`,
         key: kind,
         filter: (transaction: TransferTransaction) =>
             transaction.transactionKind === kind,
