@@ -8,7 +8,7 @@ import { selectedSettingRoute } from '~/utils/routerHelper';
 import styles from './Settings.module.scss';
 
 const settingsName = new Map<string, string>([
-    [settingKeys.multiSignatureSettings, 'Multi signature settings'],
+    [settingKeys.preferences, 'Preferences'],
     [settingKeys.nodeSettings, 'Node settings'],
     [settingKeys.passwordSettings, 'Change wallet password'],
 ]);

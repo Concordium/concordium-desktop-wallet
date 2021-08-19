@@ -7,12 +7,19 @@ import MemoWarning from '~/components/MemoWarning';
 interface Props {
     memo?: string;
     setMemo: (amount: string | undefined) => void;
+    shownMemoWarning: boolean;
+    setShownMemoWarning: (shown: boolean) => void;
 }
 
 /**
  * Allow the user to input a memo.
  */
-export default function PickMemo({ setMemo, memo }: Props): JSX.Element {
+export default function PickMemo({
+    setMemo,
+    memo,
+    shownMemoWarning,
+    setShownMemoWarning,
+}: Props): JSX.Element {
     const [error, setError] = useState<string>();
     const [focused, setFocused] = useState<boolean>(false);
 
@@ -40,7 +47,10 @@ export default function PickMemo({ setMemo, memo }: Props): JSX.Element {
                 onFocus={() => setFocused(true)}
                 placeholder="You can add a memo here"
             />
-            <MemoWarning open={focused} />
+            <MemoWarning
+                open={focused && !shownMemoWarning}
+                onClose={() => setShownMemoWarning(true)}
+            />
             <ErrorMessage>{error}</ErrorMessage>
         </>
     );

@@ -27,6 +27,13 @@ import styles from './PickAmount.module.scss';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import MemoWarning from '~/components/MemoWarning';
 
+interface MemoProps {
+    defaultMemo?: string;
+    setMemo: (currentMemo?: string) => void;
+    shownMemoWarning: boolean;
+    setShownMemoWarning: (shown: boolean) => void;
+}
+
 interface Props {
     recipient?: AddressBookEntry | undefined;
     defaultAmount: string;
@@ -35,8 +42,8 @@ interface Props {
     toPickRecipient?(currentAmount: string, memo?: string): void;
     toConfirmTransfer(amount: string, memo?: string): void;
     transactionKind: TransactionKindId;
-    defaultMemo?: string;
-    setMemo?: (currentMemo?: string) => void;
+    // presence determines whether to show memo input.
+    memo?: MemoProps;
 }
 
 interface PickAmountForm {
@@ -62,8 +69,7 @@ export default function PickAmount({
     toPickRecipient,
     toConfirmTransfer,
     transactionKind,
-    defaultMemo,
-    setMemo,
+    memo,
 }: Props) {
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
@@ -73,17 +79,14 @@ export default function PickAmount({
 
     const currentMemo = watch(fieldNames.memo);
     useEffect(() => {
-        if (setMemo) {
-            setMemo(currentMemo);
+        if (memo) {
+            memo.setMemo(currentMemo);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentMemo]);
 
     const handleSubmit: SubmitHandler<PickAmountForm> = useCallback(
-        (values) => {
-            const { amount, memo } = values;
-            toConfirmTransfer(amount, memo);
-        },
+        (values) => toConfirmTransfer(values.amount, values.memo),
         [toConfirmTransfer]
     );
 
@@ -130,7 +133,7 @@ export default function PickAmount({
                     className={styles.estimatedFee}
                     estimatedFee={estimatedFee}
                 />
-                {setMemo ? (
+                {memo ? (
                     <>
                         <Form.TextArea
                             name={fieldNames.memo}
@@ -138,10 +141,13 @@ export default function PickAmount({
                             label={<span className="h3">Memo</span>}
                             onFocus={() => setMemoFocused(true)}
                             rules={{ validate: validateMemo }}
-                            defaultValue={defaultMemo}
+                            defaultValue={memo.defaultMemo}
                             placeholder="You can add a memo here"
                         />
-                        <MemoWarning open={memoFocused} />
+                        <MemoWarning
+                            open={memoFocused && !memo.shownMemoWarning}
+                            onClose={() => memo.setShownMemoWarning(true)}
+                        />
                     </>
                 ) : null}
                 {toPickRecipient ? (

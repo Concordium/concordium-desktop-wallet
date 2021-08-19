@@ -1,5 +1,5 @@
 {
-    "multiSignatureSettings": "multisig",
+    "preferences": "preferences",
     "nodeSettings": "node",
     "passwordSettings": "password",
     "password": "passwordSetting",

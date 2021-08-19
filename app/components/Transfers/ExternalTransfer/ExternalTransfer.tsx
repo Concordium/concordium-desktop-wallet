@@ -51,6 +51,9 @@ export default function ExternalTransfer({
     );
 
     const [memo, setMemo] = useState<string | undefined>(location?.state?.memo);
+    const [shownMemoWarning, setShownMemoWarning] = useState<boolean>(
+        !!location?.state?.memo
+    );
 
     const estimatedFee = useMemo(
         () =>
@@ -75,11 +78,15 @@ export default function ExternalTransfer({
         >
             {subLocation === locations.pickAmount && (
                 <PickAmount
-                    setMemo={setMemo}
                     recipient={recipient}
                     header={amountHeader}
                     defaultAmount={amount}
-                    defaultMemo={memo}
+                    memo={{
+                        defaultMemo: memo,
+                        setMemo,
+                        shownMemoWarning,
+                        setShownMemoWarning,
+                    }}
                     estimatedFee={estimatedFee}
                     transactionKind={transactionKind}
                     toPickRecipient={(

@@ -9,6 +9,8 @@ import ConnectionSettingElement from '~/components/ConnectionSettingElement';
 import BooleanSetting from './BooleanSettingElement';
 import PasswordSettingElement from './PasswordSettingElement';
 
+import styles from './Settings.module.scss';
+
 // A static definition of warning messages, where the key matches the
 // setting name that the warning is for.
 const warningMessages = new Map<string, string>([
@@ -55,6 +57,7 @@ export default function SettingsView() {
                         warning = warningMessages.get(childSetting.name);
                         return (
                             <BooleanSetting
+                                className={styles.item}
                                 displayText={settingDisplayText}
                                 setting={childSetting}
                                 key={childSetting.name}
@@ -64,6 +67,7 @@ export default function SettingsView() {
                     case SettingTypeEnum.Connection:
                         return (
                             <ConnectionSettingElement
+                                className={styles.item}
                                 displayText={settingDisplayText}
                                 setting={childSetting}
                                 key={childSetting.name}
@@ -72,6 +76,7 @@ export default function SettingsView() {
                     case SettingTypeEnum.Password:
                         return (
                             <PasswordSettingElement
+                                className={styles.item}
                                 key={childSetting.name}
                                 displayText={settingDisplayText}
                             />

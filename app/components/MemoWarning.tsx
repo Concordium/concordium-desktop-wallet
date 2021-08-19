@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ChoiceModal, { Action } from '~/components/ChoiceModal';
 import {
@@ -8,11 +8,11 @@ import {
 
 interface Props {
     open: boolean;
+    onClose: () => void;
 }
 
-export default function MemoWarning({ open }: Props) {
+export default function MemoWarning({ open, onClose }: Props) {
     const dispatch = useDispatch();
-    const [alreadyOpened, setAlreadyOpened] = useState<boolean>(false);
     const showMemoWarning = useSelector(showMemoWarningSelector);
 
     if (showMemoWarning?.value !== '1') {
@@ -41,8 +41,8 @@ export default function MemoWarning({ open }: Props) {
 
         Adding a message will increase the transaction fee."
             actions={actions}
-            open={!alreadyOpened && open}
-            postAction={() => setAlreadyOpened(true)}
+            open={open}
+            postAction={onClose}
         />
     );
 }

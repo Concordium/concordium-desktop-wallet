@@ -89,6 +89,8 @@ function CreateTransferProposal({
     const [account, setAccount] = useState<Account | undefined>(state?.account);
     const [amount, setAmount] = useState<string | undefined>();
     const [memo, setMemo] = useState<string | undefined>();
+    const [shownMemoWarning, setShownMemoWarning] = useState<boolean>(false);
+
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>();
     const [
         expiryTime,
@@ -282,6 +284,10 @@ function CreateTransferProposal({
                                         <PickMemo
                                             memo={memo}
                                             setMemo={setMemo}
+                                            shownMemoWarning={shownMemoWarning}
+                                            setShownMemoWarning={
+                                                setShownMemoWarning
+                                            }
                                         />
                                         <Button
                                             disabled={
