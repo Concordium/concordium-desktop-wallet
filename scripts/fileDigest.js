@@ -11,19 +11,6 @@ const { promisify } = require('util');
 const { build } = require('../package.json');
 const { version, name } = require('../app/package.json');
 
-let ext = 'deb';
-
-if (process.platform === 'darwin') {
-    ext = 'dmg';
-} else if (process.platform === 'win32') {
-    ext = 'exe';
-}
-
-const defaultFile = path.resolve(
-    __dirname,
-    `../${build.directories.output}/${name}-${version}.${ext}`
-);
-
 const { argv } = yargs
     .option('key', {
         alias: 'k',
@@ -33,9 +20,8 @@ const { argv } = yargs
     })
     .option('file', {
         alias: 'f',
-        description: 'File to perform digest on',
+        description: '(Optional) File to perform digest on.',
         type: 'string',
-        default: defaultFile,
     })
     .option('verify', {
         alias: 'v',
@@ -50,39 +36,46 @@ const { argv } = yargs
     .help()
     .alias('help', 'h');
 
-const { file, key: publicKeyPath, verify: verifyKeyPath, skiprv } = argv;
+const {
+    file: inputFile,
+    key: publicKeyPath,
+    verify: verifyKeyPath,
+    skiprv,
+} = argv;
 
-const hashOutFile = `${file}.hash`;
 const algorithm = 'sha256';
 
 // Produce file checksum
-exec(`openssl dgst -${algorithm} ${file}`, (err, stdout) => {
-    if (err) {
-        console.error('exec error', err);
-        return;
-    }
+function writeChecksum(file) {
+    exec(`openssl dgst -${algorithm} ${file}`, (err, stdout) => {
+        if (err) {
+            console.error('exec error', err);
+            return;
+        }
 
-    const hash = stdout.split('= ')[1];
-    fs.writeFileSync(hashOutFile, hash);
+        const hash = stdout.split('= ')[1];
+        const hashOutFile = `${file}.hash`;
 
-    console.log('Wrote hash successfully to file:', hashOutFile);
-});
+        fs.writeFileSync(hashOutFile, hash);
 
-const sigOutFile = `${file}.sig`;
+        console.log('Wrote hash successfully to file:', hashOutFile);
+    });
+}
 
 /**
  * Function to verify the newly created signature against public key
  *
  * @param {string} pubKeyPath public key matching private key given in argv.key (--key).
  */
-async function verify(pubKeyPath) {
+async function verifySignature(pubKeyPath, file, sigFile) {
     const { stdout } = await promisify(exec)(
-        `openssl dgst -${algorithm} -verify ${pubKeyPath} -signature ${sigOutFile} ${file}`
+        `openssl dgst -${algorithm} -verify ${pubKeyPath} -signature ${sigFile} ${file}`
     );
 
     console.log(stdout);
 }
 
+// TODO: change this to the correct url.
 const remotePubKeyUrl =
     'https://gist.githubusercontent.com/soerenbf/089046aa95b7708cae1ec6c33dacf73d/raw/04b4da1f5e392ae2ff3e1aada5113b193eecb165/cdw-pubkey-test.pem';
 
@@ -144,12 +137,14 @@ const executeWithTempFile = (
     removeTempFile(filename);
 };
 
-async function verifyRemote() {
+async function verifyRemote(file, sigOutFile) {
     console.log('\nRemote verification:');
 
     try {
         const content = await getRemotePubKey();
-        await executeWithTempFile(content)((p) => verify(p));
+        await executeWithTempFile(content)((p) =>
+            verifySignature(p, file, sigOutFile)
+        );
     } catch (err) {
         console.error(err);
     }
@@ -162,15 +157,53 @@ async function verifyRemote() {
  * openssl dgst -<hash-algorithm> -verify <pubkey-file> -signature <signature-file> <file>
  * (e.g. openssl dgst -sha256 -verify ./Downloads/concordium-desktop-wallet.pem -signature ./Downloads/concordium-desktop-wallet-1.0.0.dmg.hash.sig ./Downloads/concordium-desktop-wallet-1.0.0.dmg)
  */
-exec(
-    `openssl dgst -${algorithm} -sign ${publicKeyPath} -out ${sigOutFile} ${file}`,
-    () => {
-        console.log('Wrote sig successfully to file:', sigOutFile);
+async function writeSignature(file, shouldVerify = false) {
+    const sigOutFile = `${file}.sig`;
 
-        if (verifyKeyPath) {
-            verify(verifyKeyPath);
-        } else if (!skiprv) {
-            verifyRemote();
-        }
+    await promisify(exec)(
+        `openssl dgst -${algorithm} -sign ${publicKeyPath} -out ${sigOutFile} ${file}`
+    );
+
+    console.log('Wrote sig successfully to file:', sigOutFile);
+
+    if (!shouldVerify) {
+        return;
     }
-);
+
+    if (verifyKeyPath) {
+        verifySignature(verifyKeyPath, file, sigOutFile);
+    } else if (!skiprv) {
+        verifyRemote(file, sigOutFile);
+    }
+}
+
+let extensions = build.linux.target;
+
+if (process.platform === 'darwin') {
+    extensions = ['dmg', 'zip'];
+} else if (process.platform === 'win32') {
+    extensions = ['exe'];
+}
+
+const filesToDigest = inputFile
+    ? [inputFile]
+    : extensions.map((e) =>
+          path.resolve(
+              __dirname,
+              `../${build.directories.output}/${name}-${version}.${e}`
+          )
+      );
+
+(async () => {
+    for (let i = 0; i < filesToDigest.length; i += 1) {
+        const file = filesToDigest[i];
+        const shouldVerify = i === filesToDigest.length - 1;
+
+        console.log('\nProcessing file:', file);
+
+        await Promise.all([
+            writeChecksum(file),
+            writeSignature(file, shouldVerify),
+        ]);
+    }
+})();
