@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import { AccountTransactionType } from '@concordium/node-sdk';
+import { AccountTransactionType } from '@concordium/node-sdk/lib/src/types';
 import { Account, TransactionTypes } from './types';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import { createProposalRoute } from '~/utils/routerHelper';

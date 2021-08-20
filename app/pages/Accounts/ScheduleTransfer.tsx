@@ -2,7 +2,7 @@ import React from 'react';
 import { Redirect } from 'react-router';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { AccountTransactionType } from '@concordium/node-sdk';
+import { AccountTransactionType } from '@concordium/node-sdk/lib/src/types';
 import { Account, AddressBookEntry, Fraction } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import { toMicroUnits } from '~/utils/gtu';

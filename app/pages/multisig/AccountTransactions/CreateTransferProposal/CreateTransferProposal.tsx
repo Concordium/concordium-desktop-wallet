@@ -4,7 +4,7 @@ import { Switch, Route, useLocation } from 'react-router-dom';
 import { push, replace } from 'connected-react-router';
 import clsx from 'clsx';
 import PlusIcon from '@resources/svg/plus.svg';
-import { AccountTransactionType } from '@concordium/node-sdk';
+import { AccountTransactionType } from '@concordium/node-sdk/lib/src/types';
 import { Account, AddressBookEntry, Schedule, Fraction } from '~/utils/types';
 import PickAmount from '../PickAmount';
 import Columns from '~/components/Columns';

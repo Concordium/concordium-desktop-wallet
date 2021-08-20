@@ -1,4 +1,4 @@
-import { AccountTransactionType } from '@concordium/node-sdk';
+import { AccountTransactionType } from '@concordium/node-sdk/lib/src/types';
 import routes from '../constants/routes.json';
 import { TransactionTypes, UpdateType, ExportKeyType } from './types';
 

@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer/';
 import EventEmitter from 'events';
-import { AccountTransactionType } from '@concordium/node-sdk';
+import { AccountTransactionType } from '@concordium/node-sdk/lib/src/types';
 import { Transport } from './Transport';
 import {
     UpdateAccountCredentials,

@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer/';
 import bs58check from 'bs58check';
 
-import { VerifyKey, AttributesKeys } from '@concordium/node-sdk';
+import { VerifyKey, AttributesKeys } from '@concordium/node-sdk/lib/src/types';
 import { YearMonth, SchemeId, CredentialDeploymentInformation } from './types';
 
 export function putBase58Check(

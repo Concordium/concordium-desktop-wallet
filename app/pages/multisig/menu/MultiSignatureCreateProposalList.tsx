@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { AccountTransactionType } from '@concordium/node-sdk';
+import { AccountTransactionType } from '@concordium/node-sdk/lib/src/types';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import { foundationTransactionsEnabledSelector } from '~/features/SettingsSlice';
 import { TransactionTypes, UpdateType } from '~/utils/types';

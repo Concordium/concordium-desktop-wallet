@@ -1,5 +1,5 @@
 import React from 'react';
-import { AccountTransactionType } from '@concordium/node-sdk';
+import { AccountTransactionType } from '@concordium/node-sdk/lib/src/types';
 import routes from '~/constants/routes.json';
 import { createUnshieldAmountTransaction } from '~/utils/transactionHelpers';
 import { Account } from '~/utils/types';

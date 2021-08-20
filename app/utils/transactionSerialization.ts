@@ -1,5 +1,8 @@
 import { Buffer } from 'buffer/';
-import { AccountTransactionType, BlockItemKind } from '@concordium/node-sdk';
+import {
+    AccountTransactionType,
+    BlockItemKind,
+} from '@concordium/node-sdk/lib/src/types';
 import {
     AccountTransaction,
     ScheduledTransferPayload,

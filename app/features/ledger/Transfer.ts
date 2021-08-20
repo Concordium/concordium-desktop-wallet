@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer/';
-import { AccountTransactionType } from '@concordium/node-sdk';
+import { AccountTransactionType } from '@concordium/node-sdk/lib/src/types';
 import { Transport } from './Transport';
 import {
     AccountTransaction,

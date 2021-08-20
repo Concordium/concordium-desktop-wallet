@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { AccountTransactionType } from '@concordium/node-sdk';
+import { AccountTransactionType } from '@concordium/node-sdk/lib/src/types';
 import { stringify } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
 import { AddressBookEntry, Account, Fraction } from '~/utils/types';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { AccountTransactionType } from '@concordium/node-sdk';
+import { AccountTransactionType } from '@concordium/node-sdk/lib/src/types';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { AccountPathInput, getAccountPath } from '~/features/ledger/Path';
 import { AccountTransactionHandler } from '../transactionTypes';

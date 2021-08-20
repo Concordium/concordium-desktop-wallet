@@ -8,7 +8,7 @@ import {
     AccountInfo as sdkAccountInfo,
     VerifyKey,
     ExchangeRate,
-} from '@concordium/node-sdk';
+} from '@concordium/node-sdk/lib/src/types';
 import { RejectReason } from './node/RejectReasonHelper';
 import type { ExternalCredential, Genesis } from '~/database/types';
 

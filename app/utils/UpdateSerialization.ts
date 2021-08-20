@@ -1,5 +1,8 @@
 import { Buffer } from 'buffer/';
-import { BlockItemKind, ExchangeRate } from '@concordium/node-sdk';
+import {
+    BlockItemKind,
+    ExchangeRate,
+} from '@concordium/node-sdk/lib/src/types';
 import {
     encodeWord32,
     encodeWord64,

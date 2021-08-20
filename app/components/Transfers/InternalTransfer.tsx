@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useLocation } from 'react-router-dom';
-import { AccountTransactionType } from '@concordium/node-sdk';
+import { AccountTransactionType } from '@concordium/node-sdk/lib/src/types';
 import { stringify } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
 import PickAmount from './PickAmount';

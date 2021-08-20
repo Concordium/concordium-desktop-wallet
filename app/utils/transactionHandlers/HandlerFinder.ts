@@ -1,4 +1,4 @@
-import { AccountTransactionType } from '@concordium/node-sdk';
+import { AccountTransactionType } from '@concordium/node-sdk/lib/src/types';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import {
     UpdateInstructionHandler,

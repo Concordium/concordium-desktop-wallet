@@ -1,5 +1,5 @@
 import React from 'react';
-import { AccountTransactionType } from '@concordium/node-sdk';
+import { AccountTransactionType } from '@concordium/node-sdk/lib/src/types';
 import { Account, AddressBookEntry, Fraction, Schedule } from '~/utils/types';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import ScheduleList from '~/components/ScheduleList';

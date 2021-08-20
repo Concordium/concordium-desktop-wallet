@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import PlusIcon from '@resources/svg/plus.svg';
-import { AccountTransactionType } from '@concordium/node-sdk';
+import { AccountTransactionType } from '@concordium/node-sdk/lib/src/types';
 import PickRecipient from '../PickRecipient';
 import PickAmount from '../PickAmount';
 import FinalPage from '../FinalPage';

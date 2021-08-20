@@ -1,6 +1,6 @@
 import React from 'react';
 import { Redirect, useParams } from 'react-router';
-import { AccountTransactionType } from '@concordium/node-sdk';
+import { AccountTransactionType } from '@concordium/node-sdk/lib/src/types';
 import CreateTransferProposal from './CreateTransferProposal';
 
 import UpdateCredentialPage from './UpdateAccountCredentials/UpdateCredentialsPage';

@@ -1,4 +1,8 @@
-import { AttributeKey, Attributes, AttributesKeys } from '@concordium/node-sdk';
+import {
+    AttributeKey,
+    Attributes,
+    AttributesKeys,
+} from '@concordium/node-sdk/lib/src/types';
 import { formatDate } from './timeHelpers';
 
 export const IDENTITY_NAME_MAX_LENGTH = 25;

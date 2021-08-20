@@ -7,7 +7,7 @@ import {
     AccountTransactionType,
     InitialCredentialDeploymentValues,
     CredentialDeploymentValues,
-} from '@concordium/node-sdk';
+} from '@concordium/node-sdk/lib/src/types';
 import Button from '~/cross-app-components/Button';
 import {
     Account,

@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Switch, Route } from 'react-router-dom';
-import { AccountTransactionType } from '@concordium/node-sdk';
+import { AccountTransactionType } from '@concordium/node-sdk/lib/src/types';
 import { Account, AccountInfo } from '~/utils/types';
 import routes from '../../constants/routes.json';
 import ShowAccountAddress from './ShowAccountAddress';

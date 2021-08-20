@@ -1,5 +1,5 @@
 import type { Buffer } from 'buffer/';
-import { AccountTransactionType } from '@concordium/node-sdk';
+import { AccountTransactionType } from '@concordium/node-sdk/lib/src/types';
 import { findEntries } from '../database/AddressBookDao';
 import { getTransactionStatus } from '../node/nodeRequests';
 import { getDefaultExpiry, getNow, secondsSinceUnixEpoch } from './timeHelpers';
