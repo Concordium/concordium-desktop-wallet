@@ -1,4 +1,9 @@
-import { intToString, parse, stringify } from '../../app/utils/JSONHelper';
+import {
+    intToString,
+    parse,
+    stringify,
+    toStringBigInts,
+} from '../../app/utils/JSONHelper';
 
 test('parse/stringify handles a number', () => {
     const x = 5;
@@ -53,4 +58,24 @@ test('intToString converts large numbers', () => {
     const parsed = JSON.parse(jsonConverted);
     expect(parsed.nonce).toBe('900719925474099212');
     expect(parsed.number).toBe(10);
+});
+
+test('toStringBigInts convert bigint', () => {
+    expect(toStringBigInts(1n)).toBe('1');
+});
+
+test('toStringBigInts convert does not convert number', () => {
+    expect(toStringBigInts(1)).toBe(1);
+});
+
+test('toStringBigInts convert bigint field', () => {
+    expect(toStringBigInts({ v: 1n })).toStrictEqual({ v: '1' });
+});
+
+test('toStringBigInts convert bigint in array', () => {
+    expect(toStringBigInts(['a', 1n])).toStrictEqual(['a', '1']);
+});
+
+test('toStringBigInts convert bigint field in array', () => {
+    expect(toStringBigInts([{ v: 1n }])).toStrictEqual([{ v: '1' }]);
 });

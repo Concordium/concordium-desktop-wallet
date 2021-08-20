@@ -1,3 +1,4 @@
+import { AccountTransactionType } from '@concordium/node-sdk/lib/src/types';
 import {
     getScheduledTransferPayloadSize,
     getTransactionEnergyCost,
@@ -8,7 +9,6 @@ import {
     transactionHeaderSize,
     energyConstants,
 } from '../../app/utils/transactionCosts';
-import { TransactionKindId } from '../../app/utils/types';
 import {
     createRegularIntervalSchedule,
     createScheduledTransferTransaction,
@@ -22,7 +22,7 @@ import {
 function getMockedScheduledTransfer(scheduleLength: number) {
     const address = '3UbdTrP5kcEioJRCyiCacAdpAYfyezPSVfrys8QDsHJUiVXjKf';
     const spy = jest.spyOn(NodeRequests, 'getNextAccountNonce');
-    spy.mockReturnValue(Promise.resolve({ nonce: '0' }));
+    spy.mockReturnValue(Promise.resolve({ nonce: 0n, allFinal: true }));
     return createScheduledTransferTransaction(
         address,
         address,
@@ -46,7 +46,7 @@ test('calculateCost should do A * numKeys + B * transactionSize + typeCost', () 
 });
 
 test('getTransactionKindEnergy with simple transfer', () => {
-    const transactionKind = TransactionKindId.Simple_transfer;
+    const transactionKind = AccountTransactionType.SimpleTransfer;
     const numKeys = 11;
     const payloadSize = 233;
     const transactionSize = BigInt(payloadSize) + transactionHeaderSize;

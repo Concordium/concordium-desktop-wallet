@@ -1,12 +1,12 @@
 import { credentials, Metadata, ServiceError } from '@grpc/grpc-js';
 import { P2PClient } from '~/proto/concordium_p2p_rpc_grpc_pb';
 import {
-    AccountAddress,
     BlockHash,
     Empty,
-    GetAddressInfoRequest,
     SendTransactionRequest,
-    TransactionHash,
+    BoolResponse,
+    NodeInfoResponse,
+    JsonResponse,
 } from '~/proto/concordium_p2p_rpc_pb';
 
 interface GRPCClient extends P2PClient {
@@ -69,64 +69,43 @@ export default class ConcordiumNodeClient {
         return request;
     }
 
-    getCryptographicParameters(blockHashValue: string) {
-        const blockHash = new BlockHash();
-        blockHash.setBlockHash(blockHashValue);
-        return this.sendRequest(
-            this.client.getCryptographicParameters,
-            blockHash
-        );
-    }
-
-    getConsensusStatus() {
-        return this.sendRequest(this.client.getConsensusStatus, new Empty());
-    }
-
-    sendTransaction(transactionPayload: Uint8Array, networkId = 100) {
+    async sendTransaction(transactionPayload: Uint8Array, networkId = 100) {
         const request = this.buildSendTransactionRequest(
             transactionPayload,
             networkId
         );
-        return this.sendRequest(this.client.sendTransaction, request);
-    }
-
-    getTransactionStatus(transactionId: string) {
-        const transactionHash = new TransactionHash();
-        transactionHash.setTransactionHash(transactionId);
-        return this.sendRequest(
-            this.client.getTransactionStatus,
-            transactionHash
+        const response = await this.sendRequest(
+            this.client.sendTransaction,
+            request
         );
+        return BoolResponse.deserializeBinary(response).getValue();
     }
 
-    getNextAccountNonce(address: string) {
-        const accountAddress = new AccountAddress();
-        accountAddress.setAccountAddress(address);
-        return this.sendRequest(
-            this.client.getNextAccountNonce,
-            accountAddress
-        );
-    }
-
-    /**
-     * Retrieves the block summary for the provided block hash from the node.
-     * @param blockHashValue the block hash to retrieve the block summary for
-     */
-    getBlockSummary(blockHashValue: string) {
+    async getCryptographicParameters(blockHashValue: string) {
         const blockHash = new BlockHash();
         blockHash.setBlockHash(blockHashValue);
-        return this.sendRequest(this.client.getBlockSummary, blockHash);
+        const response = await this.sendRequest(
+            this.client.getCryptographicParameters,
+            blockHash
+        );
+        return JSON.parse(JsonResponse.deserializeBinary(response).getValue());
     }
 
-    getAccountInfo(address: string, blockHash: string) {
-        const requestData = new GetAddressInfoRequest();
-        requestData.setAddress(address);
-        requestData.setBlockHash(blockHash);
-        return this.sendRequest(this.client.getAccountInfo, requestData);
+    // N.B. Stays until getCryptographicParameters can be replaced.
+    async getConsensusStatus() {
+        const response = await this.sendRequest(
+            this.client.getConsensusStatus,
+            new Empty()
+        );
+        return JSON.parse(JsonResponse.deserializeBinary(response).getValue());
     }
 
-    getNodeInfo() {
-        return this.sendRequest(this.client.nodeInfo, new Empty());
+    async getNodeInfo() {
+        const response = await this.sendRequest(
+            this.client.nodeInfo,
+            new Empty()
+        );
+        return NodeInfoResponse.deserializeBinary(response);
     }
 
     sendRequest<T, Response extends Serializable>(

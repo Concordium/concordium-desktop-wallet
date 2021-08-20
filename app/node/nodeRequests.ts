@@ -1,17 +1,3 @@
-import {
-    BlockSummary,
-    ConsensusStatus,
-    NextAccountNonce,
-} from '@concordium/node-sdk';
-import {
-    BoolResponse,
-    JsonResponse,
-    NodeInfoResponse,
-} from '../proto/concordium_p2p_rpc_pb';
-import { AccountInfo, Global, Versioned } from '../utils/types';
-import { intToString } from '../utils/JSONHelper';
-import grpcMethods from '../constants/grpcMethods.json';
-
 /**
  * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
  * The requests will be sent to the main thread, which will execute them.
@@ -24,102 +10,43 @@ export function setClientLocation(address: string, port: string) {
     return window.grpc.setLocation(address, port);
 }
 
-/**
- * Sends a command with GRPC to the node with the provided input.
- * @param command command to execute
- * @param input input for the command
- */
-async function sendPromise(
-    command: string,
-    input: Record<string, string> = {}
-): Promise<Uint8Array> {
-    const result = await window.grpc.call(command, input);
-    if (result.successful) {
-        return result.response;
-    }
-    throw result.error;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function wrapper<T extends any[], V>(
+    func: (...inputs: T) => Promise<V | undefined>,
+    getErrorMessage: (...inputs: T) => string
+): (...inputs: T) => Promise<V> {
+    return async (...inputs) => {
+        const result = await func(...inputs);
+        if (!result) {
+            throw new Error(getErrorMessage(...inputs));
+        }
+        return result;
+    };
 }
 
-/**
- * Executes the provided GRPC command towards the node with the provided
- * input.
- * @param command command to execute towards the node
- * @param input input for the command
- */
-async function sendPromiseParseResult(
-    command: string,
-    input?: Record<string, string>
-) {
-    const response = await sendPromise(command, input);
-    return JSON.parse(JsonResponse.deserializeBinary(response).getValue());
-}
-
-export async function sendTransaction(
+export function sendTransaction(
     transactionPayload: Uint8Array,
     networkId = 100
-): Promise<BoolResponse> {
-    const response = await sendPromise(grpcMethods.sendTransaction, {
-        transactionPayload: Buffer.from(transactionPayload).toString('hex'),
-        networkId: networkId.toString(),
-    });
-    return BoolResponse.deserializeBinary(response);
+) {
+    return window.grpc.sendTransaction(transactionPayload, networkId);
 }
 
-export async function getTransactionStatus(
-    transactionId: string
-): Promise<JsonResponse> {
-    const response = await sendPromise(grpcMethods.getTransactionStatus, {
-        transactionId,
-    });
-    return JsonResponse.deserializeBinary(response);
-}
+export const getBlockSummary = wrapper(
+    window.grpc.getBlockSummary,
+    (blockHash) => `unable to load blocksummary, on block: ${blockHash}`
+);
+export const getAccountInfo = wrapper(
+    window.grpc.getAccountInfo,
+    (address) => `unable to load accountInfo for ${address}`
+);
+export const getNextAccountNonce = wrapper(
+    window.grpc.getNextAccountNonce,
+    (address) => `Unable to fetch next nonce on address: ${address}`
+);
 
-export async function getNextAccountNonce(
-    address: string
-): Promise<NextAccountNonce> {
-    const response = await sendPromise(grpcMethods.getNextAccountNonce, {
-        address,
-    });
-    const json = JsonResponse.deserializeBinary(response).getValue();
-    return JSON.parse(intToString(json, 'nonce'));
-}
-
-/**
- * Retrieves the ConsensusStatus information from the node.
- */
-export function getConsensusStatus(): Promise<ConsensusStatus> {
-    return sendPromiseParseResult(grpcMethods.getConsensusStatus);
-}
-
-/**
- * Retrieves the block summary for the provided block hash from the node.
- * @param blockHashValue the block hash to retrieve the block summary for
- */
-export function getBlockSummary(blockHashValue: string): Promise<BlockSummary> {
-    return sendPromiseParseResult(grpcMethods.getBlockSummary, {
-        blockHashValue,
-    });
-}
-
-export function getAccountInfo(
-    address: string,
-    blockHash: string
-): Promise<AccountInfo> {
-    return sendPromiseParseResult(grpcMethods.getAccountInfo, {
-        address,
-        blockHash,
-    });
-}
-
-export async function getNodeInfo(): Promise<NodeInfoResponse> {
-    const response = await sendPromise(grpcMethods.nodeInfo);
-    return NodeInfoResponse.deserializeBinary(response);
-}
-
-export async function getCryptographicParameters(
-    blockHashValue: string
-): Promise<Versioned<Global>> {
-    return sendPromiseParseResult(grpcMethods.getCryptographicParameters, {
-        blockHashValue,
-    });
-}
+export const {
+    getTransactionStatus,
+    getConsensusStatus,
+    getNodeInfo,
+    getCryptographicParameters,
+} = window.grpc;

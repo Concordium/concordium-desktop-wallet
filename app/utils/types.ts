@@ -1132,16 +1132,6 @@ interface RejectReasonWithContents {
     contents: any;
 }
 
-interface EventResult {
-    outcome: string;
-    rejectReason?: RejectReasonWithContents;
-}
-
-export interface TransactionEvent {
-    result: EventResult;
-    cost: string;
-}
-
 export interface Action {
     label: string;
     location?: LocationDescriptorObject | string;

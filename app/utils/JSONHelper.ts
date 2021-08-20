@@ -40,3 +40,23 @@ export function intToString(jsonStruct: string, key: string) {
         `"${key}":"$1"`
     );
 }
+
+// Given any object/array, turn all bigint fields to strings;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function toStringBigInts(object: any): any {
+    if (Array.isArray(object)) {
+        return object.map(toStringBigInts);
+    }
+    if (typeof object === 'object' && object !== null) {
+        return Object.fromEntries(
+            Object.entries(object).map(([key, value]) => [
+                key,
+                toStringBigInts(value),
+            ])
+        );
+    }
+    if (typeof object === 'bigint') {
+        return object.toString();
+    }
+    return object;
+}

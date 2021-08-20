@@ -40,6 +40,7 @@ import {
 } from '../utils/accountHelpers';
 import { getAccountInfos, getAccountInfoOfAddress } from '../node/nodeHelpers';
 import { hasPendingTransactions } from '~/database/TransactionDao';
+import { toStringBigInts } from '~/utils/JSONHelper';
 
 interface AccountState {
     accounts: Account[];
@@ -298,15 +299,14 @@ export async function loadAccountInfos(
                 account,
                 accountInfo
             );
-            map[address] = accountInfo;
+            map[address] = toStringBigInts(accountInfo);
         } else {
             if (!accountInfo) {
                 throw new Error(
                     'A confirmed account does not exist on the connected node. Please check that your node is up to date with the blockchain.'
                 );
             }
-            map[account.address] = accountInfo;
-            // eslint-disable-next-line no-await-in-loop
+            map[account.address] = toStringBigInts(accountInfo);
             await updateAccountFromAccountInfo(dispatch, account, accountInfo);
         }
     }
@@ -332,7 +332,10 @@ export async function updateAccountInfo(account: Account, dispatch: Dispatch) {
     if (accountInfo && account.status === AccountStatus.Confirmed) {
         await updateAccountFromAccountInfo(dispatch, account, accountInfo);
         return dispatch(
-            updateAccountInfoEntry({ address: account.address, accountInfo })
+            updateAccountInfoEntry({
+                address: account.address,
+                accountInfo: toStringBigInts(accountInfo),
+            })
         );
     }
     return Promise.resolve();

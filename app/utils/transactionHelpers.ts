@@ -1,5 +1,8 @@
 import type { Buffer } from 'buffer/';
-import { AccountTransactionType } from '@concordium/node-sdk/lib/src/types';
+import {
+    AccountTransactionType,
+    TransactionSummary,
+} from '@concordium/node-sdk/lib/src/types';
 import { findEntries } from '~/database/AddressBookDao';
 import { getTransactionStatus } from '../node/nodeRequests';
 import { getDefaultExpiry, getNow, secondsSinceUnixEpoch } from './timeHelpers';
@@ -7,7 +10,6 @@ import {
     TransactionStatus,
     TransferTransaction,
     SimpleTransfer,
-    TransactionEvent,
     ScheduledTransfer,
     EncryptedTransfer,
     Schedule,
@@ -402,7 +404,7 @@ export function createUpdateBakerRestakeEarningsTransaction(
 
 export interface StatusResponse {
     status: TransactionStatus;
-    outcomes: Record<string, TransactionEvent>;
+    outcomes: Record<string, TransactionSummary>;
 }
 
 /**
@@ -419,24 +421,24 @@ export async function getStatus(
         const interval = setInterval(async () => {
             let response;
             try {
-                response = (
-                    await getTransactionStatus(transactionHash)
-                ).getValue();
+                response = await getTransactionStatus(transactionHash);
             } catch (err) {
                 // This happens if the node cannot be reached. Just wait for the next
                 // interval and try again.
                 return;
             }
-            if (response === 'null') {
+            if (!response) {
                 clearInterval(interval);
                 resolve({ status: TransactionStatus.Rejected, outcomes: {} });
                 return;
             }
 
-            const parsedResponse = JSON.parse(response);
-            if (parsedResponse.status === 'finalized') {
+            if (response.status === 'finalized') {
                 clearInterval(interval);
-                resolve(parsedResponse);
+                resolve({
+                    status: TransactionStatus.Finalized,
+                    outcomes: response.outcomes || {},
+                });
             }
         }, pollingIntervalMs);
     });
@@ -484,7 +486,7 @@ export function buildTransactionAccountSignature(
     return transactionAccountSignature;
 }
 
-export function isSuccessfulTransaction(event: TransactionEvent) {
+export function isSuccessfulTransaction(event: TransactionSummary) {
     return event.result.outcome === 'success';
 }
 

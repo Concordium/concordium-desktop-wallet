@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { TransactionSummary } from '@concordium/node-sdk';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
 import { getTransactions } from '../utils/httpRequests';
@@ -15,7 +16,6 @@ import {
     Account,
     AccountTransaction,
     Dispatch,
-    TransactionEvent,
     Global,
     TransferTransactionWithNames,
 } from '../utils/types';
@@ -286,24 +286,25 @@ export async function confirmTransaction(
     dispatch: Dispatch,
     transactionHash: string,
     blockHash: string,
-    event: TransactionEvent
+    event: TransactionSummary
 ) {
     const success = isSuccessfulTransaction(event);
     const { cost } = event;
 
     let rejectReason;
     if (!success) {
-        if (!event.result.rejectReason) {
+        // TransactionSummary.result: EventResult is missing rejectReason property. TODO: remove this type cast when dependency has been updated
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const rejectReasonContent = (event.result as any).rejectReason;
+        if (!rejectReasonContent) {
             throw new Error('Missing rejection reason in transaction event');
         }
 
         rejectReason =
-            RejectReason[
-                event.result.rejectReason.tag as keyof typeof RejectReason
-            ];
+            RejectReason[rejectReasonContent.tag as keyof typeof RejectReason];
         if (rejectReason === undefined) {
             // If the reject reason was not known, then just store it directly as a string anyway.
-            rejectReason = event.result.rejectReason.tag;
+            rejectReason = rejectReasonContent.tag;
         }
     }
 
