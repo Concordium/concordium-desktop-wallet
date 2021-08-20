@@ -332,6 +332,13 @@ export async function decryptAmounts(
     return JSON.parse(decryptedAmounts);
 }
 
+function getAggIndex(accountEncryptedAmount: AccountEncryptedAmount): string {
+    return (
+        BigInt(accountEncryptedAmount.startIndex) +
+        BigInt(accountEncryptedAmount.incomingAmounts.length)
+    ).toString();
+}
+
 export async function makeTransferToPublicData(
     amount: string,
     prfKey: string,
@@ -346,9 +353,7 @@ export async function makeTransferToPublicData(
         accountNumber,
         incomingAmounts: accountEncryptedAmount.incomingAmounts,
         encryptedSelfAmount: accountEncryptedAmount.selfAmount,
-        aggIndex:
-            accountEncryptedAmount.startIndex +
-            BigInt(accountEncryptedAmount.incomingAmounts.length),
+        aggIndex: getAggIndex(accountEncryptedAmount),
     };
 
     const transferToPublicData = await worker.postMessage({
@@ -372,9 +377,6 @@ export async function makeTransferToEncryptedData(
         accountNumber,
         incomingAmounts: accountEncryptedAmount.incomingAmounts,
         encryptedSelfAmount: accountEncryptedAmount.selfAmount,
-        aggIndex:
-            accountEncryptedAmount.startIndex +
-            BigInt(accountEncryptedAmount.incomingAmounts.length),
     };
 
     const transferToSecretData = await worker.postMessage({
@@ -400,11 +402,8 @@ export async function makeEncryptedTransferData(
         accountNumber,
         incomingAmounts: accountEncryptedAmount.incomingAmounts,
         encryptedSelfAmount: accountEncryptedAmount.selfAmount,
-        aggIndex:
-            accountEncryptedAmount.startIndex +
-            BigInt(accountEncryptedAmount.incomingAmounts.length),
+        aggIndex: getAggIndex(accountEncryptedAmount),
     };
-
     const encryptedTransferData = await worker.postMessage({
         command: workerCommands.createEncryptedTransferData,
         input: JSON.stringify(input),

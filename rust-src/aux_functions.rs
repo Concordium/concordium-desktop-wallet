@@ -359,7 +359,8 @@ pub fn create_sec_to_pub_aux(
 
     let incoming_amounts: Vec<EncryptedAmount<ExampleCurve>> = try_get(&v, "incomingAmounts")?;
     let self_amount: EncryptedAmount<ExampleCurve> = try_get(&v, "encryptedSelfAmount")?;
-    let agg_index: EncryptedAmountAggIndex = try_get(&v, "aggIndex")?;
+    let agg_index_value: String = try_get(&v, "aggIndex")?;
+    let agg_index = EncryptedAmountAggIndex{ index: agg_index_value.parse()? };
     let to_transfer: Amount = try_get(&v, "amount")?;
 
     let input_amount = incoming_amounts.iter().fold(self_amount, |acc, amount| encrypted_transfers::aggregate(&acc,amount));
@@ -478,7 +479,8 @@ pub fn create_encrypted_transfer_aux(
 
     let incoming_amounts: Vec<EncryptedAmount<ExampleCurve>> = try_get(&v, "incomingAmounts")?;
     let self_amount: EncryptedAmount<ExampleCurve> = try_get(&v, "encryptedSelfAmount")?;
-    let agg_index: EncryptedAmountAggIndex = try_get(&v, "aggIndex")?;
+    let agg_index_value: String = try_get(&v, "aggIndex")?;
+    let agg_index = EncryptedAmountAggIndex{ index: agg_index_value.parse()? };
     let to_transfer: Amount = try_get(&v, "amount")?;
 
     let input_amount = incoming_amounts.iter().fold(self_amount, |acc, amount| encrypted_transfers::aggregate(&acc,amount));

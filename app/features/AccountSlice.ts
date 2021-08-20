@@ -321,7 +321,12 @@ export async function updateAccountInfoOfAddress(
     dispatch: Dispatch
 ) {
     const accountInfo = await getAccountInfoOfAddress(address);
-    return dispatch(updateAccountInfoEntry({ address, accountInfo }));
+    return dispatch(
+        updateAccountInfoEntry({
+            address,
+            accountInfo: toStringBigInts(accountInfo),
+        })
+    );
 }
 
 /**
