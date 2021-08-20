@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-types */
+import type { LocationDescriptorObject } from 'history';
 import type { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import type { HTMLAttributes } from 'react';
 import type { RegisterOptions } from 'react-hook-form';
 import {
     AccountTransactionType,
     Attributes,
+    AttributeKey,
     AccountInfo as sdkAccountInfo,
     VerifyKey,
     ExchangeRate,
@@ -84,6 +86,7 @@ export interface IdentityObject {
 export enum IdentityStatus {
     Confirmed = 'confirmed',
     Rejected = 'rejected',
+    RejectedAndWarned = 'rejectedAndWarned',
     Pending = 'pending',
     // eslint-disable-next-line no-shadow
     Genesis = 'genesis',
@@ -319,6 +322,16 @@ export interface CredentialDeploymentInformation
     proofs: Proofs;
 }
 
+type AttributesRandomness = Record<AttributeKey, string>;
+
+export interface CommitmentsRandomness {
+    idCredSecRand: string;
+    prfRand: string;
+    credCounterRand: string;
+    maxAccountsRand: string;
+    attributesRand: AttributesRandomness;
+}
+
 export interface Credential {
     accountAddress: string;
     credentialIndex?: number;
@@ -328,6 +341,7 @@ export interface Credential {
     walletId?: number;
     credId: Hex;
     policy: JSONString;
+    randomness?: JSONString;
 }
 
 export interface DeployedCredential extends Credential {
@@ -1130,7 +1144,7 @@ export interface TransactionEvent {
 
 export interface Action {
     label: string;
-    location?: string;
+    location?: LocationDescriptorObject | string;
 }
 
 export type ClassName = Pick<HTMLAttributes<HTMLElement>, 'className'>;

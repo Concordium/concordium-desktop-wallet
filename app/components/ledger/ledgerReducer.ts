@@ -18,6 +18,7 @@ enum LedgerActionType {
     SET_STATUS_TEXT,
     FINISHED,
     CLEANUP,
+    OUTDATED,
 }
 
 interface PendingAction extends Action<LedgerActionType.PENDING> {
@@ -66,6 +67,15 @@ export const cleanupAction = (): CleanupAction => ({
     type: LedgerActionType.CLEANUP,
 });
 
+interface OutdatedAction extends Action<LedgerActionType.OUTDATED> {
+    deviceName: string;
+}
+
+export const outdatedAction = (deviceName: string): OutdatedAction => ({
+    type: LedgerActionType.OUTDATED,
+    deviceName,
+});
+
 interface ErrorAction extends Action<LedgerActionType.ERROR> {
     message?: string | JSX.Element;
 }
@@ -100,6 +110,7 @@ type LedgerAction =
     | ErrorAction
     | SetStatusTextAction
     | CleanupAction
+    | OutdatedAction
     | FinishedAction;
 
 function getStatusMessage(
@@ -119,6 +130,8 @@ function getStatusMessage(
             return `Please open the Concordium application on your ${deviceName}`;
         case LedgerStatusType.LOADING:
             return `Waiting for device`;
+        case LedgerStatusType.OUTDATED:
+            return `Your ${deviceName} is outdated. Please update the concordium application on your ${deviceName}.`;
         default:
             throw new Error('Unsupported status');
     }
@@ -134,7 +147,8 @@ const ledgerReducer: Reducer<LedgerReducerState, LedgerAction> = (
     a
 ) => {
     const deviceName =
-        (a as PendingAction | ConnectedAction).deviceName || s.deviceName;
+        (a as PendingAction | ConnectedAction | OutdatedAction).deviceName ||
+        s.deviceName;
 
     switch (a.type) {
         case LedgerActionType.PENDING:
@@ -172,6 +186,12 @@ const ledgerReducer: Reducer<LedgerReducerState, LedgerAction> = (
                 ...s,
                 status: LedgerStatusType.CONNECTED,
                 text: getStatusMessage(LedgerStatusType.CONNECTED, deviceName),
+            };
+        case LedgerActionType.OUTDATED:
+            return {
+                ...s,
+                status: LedgerStatusType.OUTDATED,
+                text: getStatusMessage(LedgerStatusType.OUTDATED, deviceName),
             };
         case LedgerActionType.CLEANUP: {
             const status =

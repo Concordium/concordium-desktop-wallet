@@ -7,8 +7,7 @@ export const {
     updateAccount,
     findAccounts,
     removeAccount,
-    removeInitialAccount,
-    confirmInitialAccount,
+    updateInitialAccount,
 } = window.database.account;
 
 /**

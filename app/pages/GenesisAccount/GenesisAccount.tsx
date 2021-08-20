@@ -166,7 +166,8 @@ function ConfirmAndExport({
                 credentialNumberIdentityId.credentialNumber,
                 credentialNumberIdentityId.identityId,
                 undefined,
-                credentialContent
+                credentialContent,
+                undefined
             );
             loadAccounts(dispatch);
             setHaveExported(true);

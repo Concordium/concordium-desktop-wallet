@@ -9,6 +9,7 @@ import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import {
     Identity,
     CredentialDeploymentDetails,
+    CommitmentsRandomness,
     CreationKeys,
     Dispatch,
 } from '~/utils/types';
@@ -87,7 +88,8 @@ export default function AccountCreationGenerate({
             accountAddress,
             transactionId,
         }: CredentialDeploymentDetails,
-        credNumber: number
+        credNumber: number,
+        randomness: CommitmentsRandomness
     ) {
         await addPendingAccount(
             dispatch,
@@ -103,7 +105,8 @@ export default function AccountCreationGenerate({
             credNumber,
             identity.id,
             0, // credentialIndex = 0 on original
-            credentialDeploymentInfo
+            credentialDeploymentInfo,
+            randomness
         );
     }
 
@@ -137,7 +140,10 @@ export default function AccountCreationGenerate({
                     return;
                 }
 
-                const credentialDeploymentDetails = await createCredentialDetails(
+                const {
+                    info: credentialDeploymentDetails,
+                    randomness,
+                } = await createCredentialDetails(
                     identity,
                     credentialNumber,
                     keys,
@@ -150,7 +156,8 @@ export default function AccountCreationGenerate({
                 try {
                     await saveAccount(
                         credentialDeploymentDetails,
-                        credentialNumber
+                        credentialNumber,
+                        randomness
                     );
                     await sendCredential(credentialDeploymentDetails);
                     confirmAccount(

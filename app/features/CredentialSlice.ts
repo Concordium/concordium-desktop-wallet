@@ -16,6 +16,7 @@ import {
     instanceOfDeployedCredential,
     AddedCredential,
     MakeOptional,
+    CommitmentsRandomness,
 } from '~/utils/types';
 import { ExternalCredential } from '~/database/types';
 import {
@@ -124,7 +125,8 @@ export async function insertNewCredential(
     credentialNumber: number,
     identityId: number,
     credentialIndex: number | undefined,
-    credential: Pick<CredentialDeploymentInformation, 'credId' | 'policy'>
+    credential: Pick<CredentialDeploymentInformation, 'credId' | 'policy'>,
+    randomness?: CommitmentsRandomness
 ) {
     const parsed = {
         credId: credential.credId,
@@ -133,6 +135,7 @@ export async function insertNewCredential(
         credentialNumber,
         identityId,
         credentialIndex,
+        randomness: randomness ? JSON.stringify(randomness) : undefined,
     };
     await insertCredential(parsed);
     return loadCredentials(dispatch);

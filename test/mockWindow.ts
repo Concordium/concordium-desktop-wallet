@@ -8,5 +8,6 @@ Object.defineProperty(window, 'database', {
         identity: {},
         addressBook: {},
         wallet: {},
+        externalCredential: {},
     })),
 });

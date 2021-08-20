@@ -65,6 +65,12 @@ export default function LedgerStatus(): JSX.Element {
             setStatusText('No wallet');
         } else if (
             hasBeenDisconnected &&
+            status === LedgerStatusType.OUTDATED
+        ) {
+            setDisconnected(false);
+            setStatusText('Wallet outdated');
+        } else if (
+            hasBeenDisconnected &&
             status === LedgerStatusType.CONNECTED
         ) {
             setDisconnected(false);
@@ -75,7 +81,13 @@ export default function LedgerStatus(): JSX.Element {
     }, [status]);
 
     return (
-        <div className={clsx(styles.body, isReady && styles.greenText)}>
+        <div
+            className={clsx(
+                styles.body,
+                isReady && styles.greenText,
+                status === LedgerStatusType.OUTDATED && styles.redText
+            )}
+        >
             {statusText}
         </div>
     );

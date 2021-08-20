@@ -1,14 +1,15 @@
 import { AttributeKey } from '@concordium/node-sdk';
-
 import {
     AccountInfo,
     CredentialDeploymentInformation,
     EqualRecord,
     Identity,
+    CommitmentsRandomness,
 } from '~/utils/types';
 
 export interface CredentialBlob {
     credential: CredentialDeploymentInformation;
+    randomness: CommitmentsRandomness;
     identityId: number;
     credentialNumber: number;
     address: string;

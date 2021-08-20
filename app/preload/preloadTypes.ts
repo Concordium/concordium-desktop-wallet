@@ -2,6 +2,7 @@
 import {
     OpenDialogOptions,
     OpenDialogReturnValue,
+    Rectangle,
     SaveDialogOptions,
     SaveDialogReturnValue,
 } from 'electron';
@@ -123,8 +124,7 @@ export type AccountMethods = {
         values: Partial<Account>
     ) => Promise<number>;
     findAccounts: (condition: Partial<Account>) => Promise<Account[]>;
-    removeInitialAccount: (identityNumber: number) => Promise<number>;
-    confirmInitialAccount: (
+    updateInitialAccount: (
         identityNumber: number,
         values: Partial<Account>
     ) => Promise<number>;
@@ -188,9 +188,8 @@ export type IdentityMethods = {
     insert: (identity: Partial<Identity> | Identity[]) => Promise<number[]>;
     update: (id: number, updatedValues: Partial<Identity>) => Promise<number>;
     getIdentitiesForWallet: (walletId: number) => Promise<Identity[]>;
-    rejectIdentityAndDeleteInitialAccount: (
-        identityId: number
-    ) => Promise<void>;
+    rejectIdentityAndInitialAccount: (identityId: number) => Promise<void>;
+    removeIdentityAndInitialAccount: (identityId: number) => Promise<void>;
     confirmIdentity: (
         identityId: number,
         identityObjectJson: string,
@@ -249,6 +248,17 @@ export type WalletMethods = {
     insertWallet: (identifier: Hex, type: WalletType) => Promise<number>;
 };
 
+type ViewResponse = {
+    error?: string;
+    result: string;
+};
+
+export type BrowserViewMethods = {
+    createView: (location: string, rect: Rectangle) => Promise<ViewResponse>;
+    removeView: () => void;
+    resizeView: (rect: Rectangle) => void;
+};
+
 export type Database = {
     general: GeneralMethods;
     account: AccountMethods;
@@ -273,6 +283,7 @@ export interface WindowFunctions {
     ledger: LedgerCommands;
     files: FileMethods;
     http: HttpMethods;
+    view: BrowserViewMethods;
     printElement: (body: string) => any;
     writeImageToClipboard: (dataUrl: string) => void;
     openUrl: (href: string) => any;
