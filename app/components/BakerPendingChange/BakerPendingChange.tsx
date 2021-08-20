@@ -1,8 +1,8 @@
 import React from 'react';
+import { BakerPendingChange } from '@concordium/node-sdk';
 import { useConsensusStatus } from '~/utils/dataHooks';
 import { displayAsGTU } from '~/utils/gtu';
 import { epochDate, getFormattedDateString } from '~/utils/timeHelpers';
-import { BakerPendingChange } from '~/utils/types';
 
 type PendingChangeProps = {
     pending: BakerPendingChange;

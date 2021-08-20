@@ -1,11 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+    AccountInfo,
+    BlockSummary,
+    ConsensusStatus,
+    NextAccountNonce,
+    TransactionStatus,
+    Versioned,
+} from '@concordium/node-sdk';
+import { PeerListResponse } from '@concordium/node-sdk/lib/grpc/concordium_p2p_rpc_pb';
+import {
     OpenDialogOptions,
     OpenDialogReturnValue,
     Rectangle,
     SaveDialogOptions,
     SaveDialogReturnValue,
 } from 'electron';
+import { NodeInfoResponse } from '~/proto/concordium_p2p_rpc_pb';
 import {
     Account,
     Identity,
@@ -24,6 +34,8 @@ import {
     IncomingTransaction,
     AccountAndCredentialPairs,
     TransactionFilter,
+    IpInfo,
+    ArInfo,
 } from '~/utils/types';
 import { ExternalCredential } from '../database/types';
 import type LedgerCommands from './preloadLedgerTypes';
@@ -48,9 +60,32 @@ export interface Once {
 }
 
 export type GRPC = {
-    call: (command: string, input: Record<string, string>) => Promise<any>;
     setLocation: (address: string, port: string) => void;
     nodeConsensusAndGlobal: (address: string, port: string) => Promise<any>;
+
+    getNodeInfo: () => Promise<NodeInfoResponse>;
+    sendTransaction: (
+        transactionPayload: Uint8Array,
+        networkId: number
+    ) => Promise<boolean>;
+    getCryptographicParameters: (
+        blockHash: string
+    ) => Promise<Versioned<Global>>;
+    getConsensusStatus: () => Promise<ConsensusStatus>;
+    getTransactionStatus: (
+        transactionId: string
+    ) => Promise<TransactionStatus | undefined>;
+    getNextAccountNonce: (
+        address: string
+    ) => Promise<NextAccountNonce | undefined>;
+    getBlockSummary: (blockHash: string) => Promise<BlockSummary | undefined>;
+    getAccountInfo: (
+        address: string,
+        blockHash: string
+    ) => Promise<AccountInfo | undefined>;
+    getIdentityProviders: (blockHash: string) => Promise<IpInfo[]>;
+    getAnonymityRevokers: (blockHash: string) => Promise<ArInfo[]>;
+    getPeerList: (includeBootstrappers: boolean) => Promise<PeerListResponse>;
 };
 
 export type FileMethods = {

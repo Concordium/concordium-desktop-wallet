@@ -47,12 +47,14 @@ const account: Account = {
 } as Account;
 
 const accountInfo: AccountInfo = {
+    accountNonce: 1n,
     accountCredentials: [{} as any],
-    accountAmount: `${1000n * microGTUPerGTU}`,
+    accountAmount: 1000n * microGTUPerGTU,
     accountReleaseSchedule: {
-        total: `${100n * microGTUPerGTU}`,
+        total: 100n * microGTUPerGTU,
+        schedule: [],
     },
-    accountIndex: 0,
+    accountIndex: 0n,
     accountThreshold: 1,
     accountEncryptionKey: '',
     accountEncryptedAmount: {} as any,

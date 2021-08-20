@@ -40,6 +40,7 @@ import { createAccount, isValidAddress } from '../utils/accountHelpers';
 import { getAccountInfos, getAccountInfoOfAddress } from '../node/nodeHelpers';
 import { hasPendingTransactions } from '~/database/TransactionDao';
 import { accountSimpleView, defaultAccount } from '~/database/PreferencesDao';
+import { toStringBigInts } from '~/utils/JSONHelper';
 
 export interface AccountState {
     simpleView: boolean;
@@ -267,9 +268,11 @@ async function initializeGenesisAccount(
     accountInfo: AccountInfo
 ) {
     const localCredentials = await getCredentialsOfAccount(account.address);
-    const firstCredential = accountInfo.accountCredentials[0].value.contents;
+    const firstCredential = accountInfo.accountCredentials[0].value;
     const address = await getAddressFromCredentialId(
-        firstCredential.regId || firstCredential.credId
+        firstCredential.type === 'initial'
+            ? firstCredential.contents.regId
+            : firstCredential.contents.credId
     );
     const accountUpdate = {
         address,
@@ -282,7 +285,7 @@ async function initializeGenesisAccount(
     } else {
         // The account does not already exists, so we can update the current entry.
         await updateAccount(account.address, accountUpdate);
-        await dispatch(
+        dispatch(
             updateAccountFields({
                 address: account.address,
                 updatedFields: accountUpdate,
@@ -337,7 +340,7 @@ async function updateAccountFromAccountInfo(
 
     if (Object.keys(accountUpdate).length > 0) {
         await updateAccount(account.address, accountUpdate);
-        await dispatch(
+        dispatch(
             updateAccountFields({
                 address: account.address,
                 updatedFields: accountUpdate,
@@ -387,15 +390,14 @@ export async function loadAccountInfos(
                 account,
                 accountInfo
             );
-            map[address] = accountInfo;
+            map[address] = toStringBigInts(accountInfo);
         } else {
             if (!accountInfo) {
                 throw new Error(
                     'A confirmed account does not exist on the connected node. Please check that your node is up to date with the blockchain.'
                 );
             }
-            map[account.address] = accountInfo;
-            // eslint-disable-next-line no-await-in-loop
+            map[account.address] = toStringBigInts(accountInfo);
             await updateAccountFromAccountInfo(dispatch, account, accountInfo);
         }
     }
@@ -424,7 +426,10 @@ export async function updateAccountInfo(account: Account, dispatch: Dispatch) {
     if (accountInfo && account.status === AccountStatus.Confirmed) {
         await updateAccountFromAccountInfo(dispatch, account, accountInfo);
         return dispatch(
-            updateAccountInfoEntry({ address: account.address, accountInfo })
+            updateAccountInfoEntry({
+                address: account.address,
+                accountInfo: toStringBigInts(accountInfo),
+            })
         );
     }
     return Promise.resolve();

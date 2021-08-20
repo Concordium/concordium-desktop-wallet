@@ -212,8 +212,9 @@ export async function initializeGenesisCredential(
         accountInfo.accountCredentials
     ).find(
         ([, cred]) =>
-            (cred.value.contents.credId || cred.value.contents.regId) ===
-            credential.credId
+            (cred.value.type === 'initial'
+                ? cred.value.contents.regId
+                : cred.value.contents.credId) === credential.credId
     );
     if (!credentialOnChain) {
         throw new Error(
@@ -243,25 +244,25 @@ export async function updateCredentialsStatus(
     accountInfo: AccountInfo
 ) {
     const localCredentials = await getCredentialsOfAccount(accountAddress);
-    const onChainCredentials: [
-        CredentialDeploymentInformation,
-        number
-    ][] = Object.entries(accountInfo.accountCredentials).map(
-        ([index, versioned]) => {
-            const { regId, credId, ...content } = versioned.value.contents;
-            return [
-                { ...content, credId: regId || credId },
-                parseInt(index, 10),
-            ];
-        }
-    );
+    const onChainCredentials = Object.entries(
+        accountInfo.accountCredentials
+    ).map(([index, versioned]) => {
+        const credId =
+            versioned.value.type === 'initial'
+                ? versioned.value.contents.regId
+                : versioned.value.contents.credId;
+        return {
+            ...versioned.value.contents,
+            credId,
+            credentialIndex: parseInt(index, 10),
+        };
+    });
     // Find any credentials, which have been removed from the account, and remove their (former) index.
     const removed = localCredentials.filter(
         (cred) =>
             instanceOfDeployedCredential(cred) &&
             !onChainCredentials.some(
-                ([onChainCredential]) =>
-                    cred.credId === onChainCredential.credId
+                (onChainCredential) => cred.credId === onChainCredential.credId
             )
     );
 
@@ -273,11 +274,10 @@ export async function updateCredentialsStatus(
     for (const cred of localCredentials) {
         if (!instanceOfDeployedCredential(cred)) {
             const onChainReference = onChainCredentials.find(
-                ([onChainCredential]) =>
-                    cred.credId === onChainCredential.credId
+                (onChainCredential) => cred.credId === onChainCredential.credId
             );
             if (onChainReference) {
-                const [, credentialIndex] = onChainReference;
+                const { credentialIndex } = onChainReference;
                 await updateCredentialIndex(
                     dispatch,
                     cred.credId,

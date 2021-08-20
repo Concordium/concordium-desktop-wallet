@@ -12,7 +12,7 @@ export default function UpdateElectionDifficulty({
 }: UpdateProps): JSX.Element | null {
     const currentElectionDifficulty =
         blockSummary.updates.chainParameters.electionDifficulty;
-    const { slotDuration } = consensusStatus;
+    const slotDuration = Number(consensusStatus.slotDuration);
     return (
         <>
             <ElectionDifficultyInput

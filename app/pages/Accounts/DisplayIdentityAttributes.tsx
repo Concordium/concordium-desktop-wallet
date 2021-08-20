@@ -1,16 +1,21 @@
 import React from 'react';
+import { InitialCredentialDeploymentValues } from '@concordium/node-sdk';
 import attributeNamesJson from '~/constants/attributeNames.json';
 import SidedRow from '~/components/SidedRow';
-import { AttributeKeyName, CredentialDeploymentValues } from '~/utils/types';
+import { AttributeKeyName } from '~/utils/types';
 import {
     formatAttributeValue,
     compareAttributes,
 } from '~/utils/identityHelpers';
 
+type Credential = Omit<InitialCredentialDeploymentValues, 'regId'> & {
+    credId: string;
+};
+
 const attributeNames: Record<string, string> = attributeNamesJson;
 
 interface Props {
-    credential: CredentialDeploymentValues;
+    credential: Credential;
 }
 
 /**
@@ -25,7 +30,7 @@ export default function DisplayIdentityAttributes({
 
     if (attributeKeys.length === 0) {
         return (
-            <div className="pT10" key={credential.credId || credential.regId}>
+            <div className="pT10" key={credential.credId}>
                 This credential has no identity data revealed
             </div>
         );

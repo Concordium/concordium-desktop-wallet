@@ -228,7 +228,7 @@ export default function SubmitTransfer({ location }: Props) {
         const transactionHash = transactionHashBuffer.toString('hex');
         const response = await sendTransaction(serializedTransaction);
 
-        if (response.getValue()) {
+        if (response) {
             const convertedTransaction = await addPendingTransaction(
                 transaction,
                 transactionHash

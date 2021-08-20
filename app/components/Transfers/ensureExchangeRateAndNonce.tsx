@@ -7,7 +7,7 @@ import withNonce from './withNonce';
 
 interface Extra {
     exchangeRate?: Fraction;
-    nonce?: string;
+    nonce?: bigint;
     account: Account;
 }
 

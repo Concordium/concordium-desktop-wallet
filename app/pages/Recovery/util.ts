@@ -103,7 +103,9 @@ function extractCredentialIndexAndPolicy(
         accountInfo.accountCredentials
     ).find(
         ([, cred]) =>
-            (cred.value.contents.credId || cred.value.contents.regId) === credId
+            (cred.value.type === 'initial'
+                ? cred.value.contents.regId
+                : cred.value.contents.credId) === credId
     );
 
     if (!credentialOnChain) {
@@ -146,10 +148,12 @@ async function recoverCredential(
         return undefined;
     }
 
-    const firstCredential = accountInfo.accountCredentials[0].value.contents;
-    const address = await getAddressFromCredentialId(
-        firstCredential.regId || firstCredential.credId
-    );
+    const firstCredential = accountInfo.accountCredentials[0].value;
+    const firstCredId =
+        firstCredential.type === 'initial'
+            ? firstCredential.contents.regId
+            : firstCredential.contents.credId;
+    const address = await getAddressFromCredentialId(firstCredId);
 
     const { credentialIndex, policy } = extractCredentialIndexAndPolicy(
         credId,

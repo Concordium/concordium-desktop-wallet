@@ -27,7 +27,7 @@ interface State {
     amount: string;
     recipient: AddressBookEntry;
     exchangeRate: string;
-    nonce: string;
+    nonce: bigint;
     defaults?: BuildScheduleDefaults;
     memo?: string;
 }

@@ -19,7 +19,7 @@ import { isMultiSig } from '~/utils/accountHelpers';
 interface Props {
     account: Account;
     exchangeRate: Fraction;
-    nonce: string;
+    nonce: bigint;
 }
 
 /**
