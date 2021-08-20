@@ -38,6 +38,7 @@ export async function confirmIdentityAndInitialAccount(
     // The identity provider failed the identity creation request. Clean up the
     // identity and account in the database and refresh the state.
     if (idObjectResponse.error) {
+        window.log.info(`Identity Issuance failed, id: ${identityId}`);
         await rejectIdentityAndInitialAccount(identityId);
         await loadIdentities(dispatch);
         await loadAccounts(dispatch);
@@ -65,6 +66,7 @@ export async function confirmIdentityAndInitialAccount(
         readOnly: true,
     };
 
+    window.log.info(`Identity Issuance Successful, id: ${identityId}`);
     await confirmIdentity(
         identityId,
         JSON.stringify(token.identityObject),

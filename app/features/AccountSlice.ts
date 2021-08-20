@@ -306,7 +306,6 @@ export async function loadAccountInfos(
                 );
             }
             map[account.address] = accountInfo;
-            // eslint-disable-next-line no-await-in-loop
             await updateAccountFromAccountInfo(dispatch, account, accountInfo);
         }
     }
@@ -385,13 +384,16 @@ export async function confirmAccount(
     transactionId: string
 ) {
     const response = await getStatus(transactionId);
+
     switch (response.status) {
         case TransactionStatus.Rejected:
+            window.log.warn('account creation was rejected.');
             await updateAccount(accountAddress, {
                 status: AccountStatus.Rejected,
             });
             break;
         case TransactionStatus.Finalized:
+            window.log.info('account creation was successful.');
             await updateAccount(accountAddress, {
                 status: AccountStatus.Confirmed,
             });
@@ -406,7 +408,9 @@ export async function confirmAccount(
             });
             break;
         default:
-            throw new Error('Unexpected status was returned by the poller!');
+            throwLoggedError(
+                `Unexpected status was returned by the poller: ${response.status}`
+            );
     }
     return loadAccounts(dispatch);
 }
@@ -421,7 +425,9 @@ export async function decryptAccountBalance(
     dispatch: Dispatch
 ) {
     if (!account.incomingAmounts) {
-        throw new Error('Unexpected missing field!');
+        throwLoggedError(
+            'Unexpected missing incoming amounts when decrypting!'
+        );
     }
     const encryptedAmounts = JSON.parse(account.incomingAmounts);
     encryptedAmounts.push(account.selfAmounts);

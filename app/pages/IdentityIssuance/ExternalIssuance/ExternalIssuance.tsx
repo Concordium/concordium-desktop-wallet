@@ -50,9 +50,7 @@ async function generateIdentity(
             idObjectRequest
         );
 
-        window.log.info(
-            `Identity Object Request sent. provider location:${identityProviderLocation}`
-        );
+        window.log.info(`Identity Object Request successful.`);
 
         const providerResult = await window.view.createView(
             identityProviderLocation,
@@ -65,10 +63,7 @@ async function generateIdentity(
 
         identityObjectLocation = providerResult.result;
 
-        // Is this sensitive/should not be put into log?
-        window.log.info(
-            `Identity Object Location determined:${identityObjectLocation}`
-        );
+        window.log.info(`Identity Object Location determined.`);
 
         // TODO This code still has an issue if the application fails before
         // inserting the pending identity and account, as the identity might exist
