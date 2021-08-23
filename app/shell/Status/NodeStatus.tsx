@@ -12,6 +12,7 @@ import settingKeys from '~/constants/settingKeys.json';
 import styles from './Status.module.scss';
 
 const checkInterval = 15000;
+const showPingTimeout = 1000;
 
 enum Status {
     Pinging = 'Pinging',
@@ -43,7 +44,10 @@ export default function NodeStatus(): JSX.Element {
         if (controller.isAborted) {
             return;
         }
-        setStatusText(Status.Pinging);
+        const setPingingTimeout = setTimeout(
+            () => setStatusText(Status.Pinging),
+            showPingTimeout
+        );
         let status = Status.Unavailable;
         try {
             const upToDate = await isNodeUpToDate();
@@ -51,6 +55,7 @@ export default function NodeStatus(): JSX.Element {
         } catch {
             // do nothing, status defaults to unavailable.
         } finally {
+            clearTimeout(setPingingTimeout);
             if (!controller.isAborted) {
                 setStatusText(status);
                 setTimeout(setStatus, checkInterval, controller);
