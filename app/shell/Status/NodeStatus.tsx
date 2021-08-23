@@ -6,7 +6,6 @@ import SuccessImage from '@resources/svg/success.svg';
 import RejectedImage from '@resources/svg/warning.svg';
 import { isNodeUpToDate } from '~/node/nodeHelpers';
 import AbortController from '~/utils/AbortController';
-import { noOp } from '~/utils/basicHelpers';
 import { specificSettingSelector } from '~/features/SettingsSlice';
 import settingKeys from '~/constants/settingKeys.json';
 
@@ -60,12 +59,9 @@ export default function NodeStatus(): JSX.Element {
     }, []);
 
     useEffect(() => {
-        if (setStatus) {
-            const controller = new AbortController();
-            setStatus(controller);
-            return () => controller.abort();
-        }
-        return noOp;
+        const controller = new AbortController();
+        setStatus(controller);
+        return () => controller.abort();
     }, [connectionSettings?.value, setStatus]);
 
     const StatusImage = getStatusImage(statusText);
