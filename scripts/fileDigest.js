@@ -146,7 +146,7 @@ const executeWithTempFile = (
  * @param {*} sigFile path to file containing signature
  */
 async function verifyRemote(file, sigFile) {
-    console.log('\nRemote verification:');
+    console.log('\nVerficiation of signature with remote public key:');
 
     try {
         const content = await getRemotePubKey();
