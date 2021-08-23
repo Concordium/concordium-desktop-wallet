@@ -43,12 +43,16 @@ async function getRemoteContent(url: string, binary = false) {
     return data;
 }
 
-function getSha256Sum(path: string): string {
+function getSha256Sum(path: string): Promise<string> {
     const sum = createHash('sha256');
     const stream = fs.createReadStream(path);
+
     stream.on('data', (data) => sum.update(data));
-    stream.on('end', () => resolve(sum.digest('hex')));
-    stream.on('error', reject);
+
+    return new Promise((resolve, reject) => {
+        stream.on('end', () => resolve(sum.digest('hex')));
+        stream.on('error', reject);
+    });
 }
 
 const releasesFeed =
@@ -73,7 +77,7 @@ async function verifyUpdate(
     mainWindow.webContents.send(logFromMain, 'Remote hash', remoteHash);
     mainWindow.webContents.send(logFromMain, 'Remote sig', remoteSig);
 
-    const localHash = getSha256Sum(filePath);
+    const localHash = await getSha256Sum(filePath);
 
     mainWindow.webContents.send(logFromMain, 'Local hash', localHash);
     mainWindow.webContents.send(
