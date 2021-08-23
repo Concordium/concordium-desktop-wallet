@@ -10,14 +10,14 @@ type ExampleCurve = G1;
 
 use rand::thread_rng;
 
-use anyhow::{Result, bail, anyhow};
+use anyhow::{Result, anyhow};
 use id::{
     account_holder::*,
     secret_sharing::Threshold,
     types::*,
     constants::{BaseField, AttributeKind},
 };
-use pedersen_scheme::value::Value;
+use pedersen_scheme::Value;
 
 type ExampleAttributeList = AttributeList<BaseField, AttributeKind>;
 

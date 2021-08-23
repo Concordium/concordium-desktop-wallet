@@ -60,7 +60,7 @@ function statusImage(status: IdentityStatus) {
     }
 }
 
-function getRightCorner(identity: Identity) {
+function getRightCorner(identity: Identity, canEditName: boolean) {
     if (identity.status === IdentityStatus.RejectedAndWarned && canEditName) {
         return <DeleteIdentity identity={identity} />;
     }
@@ -124,7 +124,7 @@ function IdentityListElement({
                     ) : null}
                     {statusImage(identity.status)}
                     <span className={clsx(styles.rightAligned, 'body2')}>
-                        {getRightCorner(identity)}
+                        {getRightCorner(identity, canEditName)}
                     </span>
                 </div>
                 <Form<EditIdentityForm>

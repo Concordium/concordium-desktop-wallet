@@ -596,7 +596,7 @@ pub fn calculate_cred_id(
     prf_key_seed: &str,
     cred_counter: u8,
     global_context: &str
-) -> Fallible<String> {
+) -> Result<String> {
     let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls_key(&prf_key_seed)?);
 
     let global_context = from_str(global_context)?;
