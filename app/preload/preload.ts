@@ -4,6 +4,7 @@ import {
     openRoute,
     readyToShow,
     didFinishLoad,
+    logFromMain,
 } from '~/constants/ipcRendererCommands.json';
 import {
     onAwaitVerificationKey,
@@ -66,6 +67,7 @@ const listenImpl: Listen = {
     readyToShow: (func) => ipcRenderer.on(readyToShow, func),
     didFinishLoad: (func) => ipcRenderer.on(didFinishLoad, func),
     ledgerChannel: (func) => eventEmitter.on(listenChannel, func),
+    logFromMain: (func) => ipcRenderer.on(logFromMain, func),
 };
 
 const removeListener: Listen = {
@@ -73,6 +75,7 @@ const removeListener: Listen = {
     readyToShow: (func) => ipcRenderer.off(readyToShow, func),
     didFinishLoad: (func) => ipcRenderer.off(didFinishLoad, func),
     ledgerChannel: (func) => eventEmitter.off(listenChannel, func),
+    logFromMain: (func) => ipcRenderer.off(logFromMain, func),
 };
 
 const onceImpl: Once = {

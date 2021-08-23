@@ -36,6 +36,7 @@ export interface Listen {
     readyToShow: PutListener;
     didFinishLoad: PutListener;
     ledgerChannel: PutListener;
+    logFromMain: PutListener;
 }
 
 export interface Once {

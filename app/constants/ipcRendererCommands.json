@@ -2,5 +2,6 @@
     "readyToShow": "readyToShow",
     "didFinishLoad": "didFinishLoad",
     "openRoute": "openRoute",
-    "updateAvailable": "updateAvailable"
+    "updateAvailable": "updateAvailable",
+    "logFromMain": "logFromMain"
 }

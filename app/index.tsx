@@ -15,11 +15,11 @@ initMisc(store.dispatch);
 window.addListener.openRoute((_, route: string) => {
     store.dispatch(push(route));
 });
+window.addListener.logFromMain((_, ...args: any[]) => console.log(...args));
 
 window.autoUpdate.onUpdateAvailable(() => {
     store.dispatch(triggerUpdateNotification());
 });
-
 const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
 
 document.addEventListener('DOMContentLoaded', () =>
