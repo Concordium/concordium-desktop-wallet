@@ -27,7 +27,7 @@ autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = false;
 
 interface RealUpdateInfo extends UpdateInfo {
-    downloadFile: string;
+    downloadedFile: string;
 }
 
 async function getRemoteContent(url: string, binary = false) {
