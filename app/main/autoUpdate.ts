@@ -2,6 +2,8 @@ import axios, { AxiosRequestConfig } from 'axios';
 import { ipcMain, BrowserWindow } from 'electron';
 import { autoUpdater, UpdateInfo } from 'electron-updater';
 import log from 'electron-log';
+import { createHash } from 'crypto';
+import fs from 'fs';
 
 import {
     updateAvailable,
@@ -37,9 +39,16 @@ async function getRemoteContent(url: string, binary = false) {
         options.responseType = 'arraybuffer';
     }
 
-    const res = await axios.get(url, options);
+    const { data } = await axios.get(url, options);
+    return data;
+}
 
-    return res.data;
+function getSha256Sum(path: string): string {
+    const sum = createHash('sha256');
+    const stream = fs.createReadStream(path);
+    stream.on('data', (data) => sum.update(data));
+    stream.on('end', () => resolve(sum.digest('hex')));
+    stream.on('error', reject);
 }
 
 const releasesFeed =
@@ -56,24 +65,25 @@ async function verifyUpdate(
      */
 
     const releaseUrl = `${releasesFeed}/${releaseName}/${fileName}`;
-    const hash = await getRemoteContent(`${releaseUrl}.hash`);
-    const sig = await getRemoteContent(`${releaseUrl}.sig`);
+    const remoteHash = await getRemoteContent(`${releaseUrl}.hash`);
+    const remoteSig = await getRemoteContent(`${releaseUrl}.sig`);
 
     mainWindow.webContents.send(logFromMain, 'Verify update -', filePath);
     mainWindow.webContents.send(logFromMain, 'release url: ', releaseUrl);
-    mainWindow.webContents.send(logFromMain, 'Hash', hash);
-    mainWindow.webContents.send(logFromMain, 'Sig', sig);
+    mainWindow.webContents.send(logFromMain, 'Remote hash', remoteHash);
+    mainWindow.webContents.send(logFromMain, 'Remote sig', remoteSig);
+
+    const localHash = getSha256Sum(filePath);
+
+    mainWindow.webContents.send(logFromMain, 'Local hash', localHash);
+    mainWindow.webContents.send(
+        logFromMain,
+        'Hash equality',
+        localHash === remoteHash
+    );
 
     return new Promise(() => {});
 }
-
-const updateApplication = async () => {
-    try {
-        await autoUpdater.downloadUpdate();
-    } catch {
-        // Show error notification...
-    }
-};
 
 const handleUpdateDownloaded = (mainWindow: BrowserWindow) => async (
     info: UpdateInfo
@@ -94,7 +104,7 @@ export default function initAutoUpdate(mainWindow: BrowserWindow) {
     );
     autoUpdater.on('update-downloaded', handleUpdateDownloaded(mainWindow));
 
-    ipcMain.handle(triggerAppUpdate, updateApplication);
+    ipcMain.handle(triggerAppUpdate, () => autoUpdater.downloadUpdate());
 
     autoUpdater.checkForUpdates();
 }
