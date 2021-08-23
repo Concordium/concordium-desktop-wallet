@@ -1,5 +1,5 @@
 import { ipcMain, BrowserWindow } from 'electron';
-import { autoUpdater } from 'electron-updater';
+import { autoUpdater, UpdateInfo } from 'electron-updater';
 import log from 'electron-log';
 
 import {
@@ -10,10 +10,10 @@ import { triggerAppUpdate } from '~/constants/ipcCommands.json';
 
 import { version } from '../package.json';
 
-const server = 'https://update.electronjs.org';
-const feed = `${server}/soerenbf/concordium-desktop-wallet/${process.platform}-${process.arch}/${version}/`;
+const updateServer = 'https://update.electronjs.org';
+const updateFeed = `${updateServer}/soerenbf/concordium-desktop-wallet/${process.platform}-${process.arch}/${version}/`;
 autoUpdater.setFeedURL({
-    url: feed,
+    url: updateFeed,
     provider: 'github',
     owner: 'soerenbf',
     repo: 'concordium-desktop-wallet',
@@ -37,7 +37,7 @@ async function verifyUpdate(filePath: string, mainWindow: BrowserWindow) {
     return new Promise(() => {});
 }
 
-const updateApplication = (mainWindow: BrowserWindow) => async () => {
+const updateApplication = async () => {
     /**
      * 1. Download update
      * 2. Verify hash against remote
@@ -46,10 +46,11 @@ const updateApplication = (mainWindow: BrowserWindow) => async () => {
      */
 
     try {
-        const updatePath: string = (await autoUpdater.downloadUpdate())[0];
-        autoUpdater.logger?.info(JSON.stringify(updatePath));
+        await autoUpdater.downloadUpdate();
+        // const updatePath: string = (await autoUpdater.downloadUpdate())[0];
+        // autoUpdater.logger?.info(JSON.stringify(updatePath));
 
-        await verifyUpdate(updatePath, mainWindow);
+        // await verifyUpdate(updatePath, mainWindow);
 
         // autoUpdater.quitAndInstall();
     } catch {
@@ -57,12 +58,19 @@ const updateApplication = (mainWindow: BrowserWindow) => async () => {
     }
 };
 
+const handleUpdateDownloaded = (mainWindow: BrowserWindow) => async (
+    info: UpdateInfo
+) => {
+    mainWindow.webContents.send(logFromMain, 'Update downlaoded:', info);
+};
+
 export default function initAutoUpdate(mainWindow: BrowserWindow) {
     autoUpdater.on('update-available', () =>
         mainWindow.webContents.send(updateAvailable)
     );
+    autoUpdater.on('update-downloaded', handleUpdateDownloaded);
 
-    ipcMain.handle(triggerAppUpdate, updateApplication(mainWindow));
+    ipcMain.handle(triggerAppUpdate, updateApplication);
 
     autoUpdater.checkForUpdates();
 }
