@@ -13,9 +13,8 @@ import {
     insertAccount,
     updateAccount,
     getAccount,
-    confirmInitialAccount as confirmInitialAccountInDatabase,
+    updateInitialAccount,
     removeAccount as removeAccountFromDatabase,
-    removeInitialAccount as removeInitialAccountInDatabase,
     findAccounts,
 } from '../database/AccountDao';
 import { getCredentialsOfAccount } from '~/database/CredentialDao';
@@ -92,6 +91,13 @@ export const accountsOfIdentitySelector = (identity: Identity) => (
     state.accounts.accounts.filter(
         (account) => account.identityId === identity.id
     );
+
+export const initialAccountNameSelector = (identityId: number) => (
+    state: RootState
+) =>
+    state.accounts.accounts.find(
+        (account) => account.identityId === identityId && account.isInitial
+    )?.name;
 
 export const accountsInfoSelector = (state: RootState) =>
     state.accounts.accountsInfo;
@@ -355,18 +361,10 @@ export async function confirmInitialAccount(
     identityId: number,
     accountAddress: string
 ) {
-    await confirmInitialAccountInDatabase(identityId, {
+    await updateInitialAccount(identityId, {
         status: AccountStatus.Confirmed,
         address: accountAddress,
     });
-    return loadAccounts(dispatch);
-}
-
-export async function removeInitialAccount(
-    dispatch: Dispatch,
-    identityId: number
-) {
-    await removeInitialAccountInDatabase(identityId);
     return loadAccounts(dispatch);
 }
 
@@ -454,7 +452,7 @@ export async function addExternalAccount(
         status: AccountStatus.Confirmed,
         address: accountAddress,
         signatureThreshold,
-        maxTransactionId: 0,
+        maxTransactionId: '0',
         isInitial: false,
         rewardFilter: '[]',
     };
@@ -479,7 +477,7 @@ export async function updateRewardFilter(
 export async function updateMaxTransactionId(
     dispatch: Dispatch,
     address: string,
-    maxTransactionId: number
+    maxTransactionId: string
 ) {
     const updatedFields = { maxTransactionId };
     updateAccount(address, updatedFields);

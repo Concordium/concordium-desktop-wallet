@@ -2,9 +2,8 @@
 @import './common';
 
 .transactionListHeader {
-    composes: thickBlueSeparator;
-    composes: fillCardPadding;
     composes: cardPadding;
+    composes: fillCardPadding;
     margin-top: -20px;
 
     button {
@@ -49,6 +48,10 @@
     padding-left: 30px;
 }
 
+.strikedThrough {
+    text-decoration: line-through;
+}
+
 .warning {
     position: absolute;
     margin: 5px -25px;
@@ -59,10 +62,22 @@
 }
 
 .checkmark {
+    position: relative;
+    top: 1px;
     margin-left: 5px;
-    margin-top: 5px;
 }
 
 .greenText {
     color: $color-success;
+}
+
+.transactionGroupHeader {
+    composes: fillCardPadding;
+    composes: cardPadding;
+    height: $thick-blue-separator-height;
+    font-size: 10px;
+    line-height: 12px;
+    display: flex;
+    align-items: center;
+    background-color: $color-light-blue;
 }

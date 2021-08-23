@@ -8,7 +8,7 @@ import styles from './LedgerStatus.module.scss';
 import { setCurrentWalletId } from '~/features/WalletSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getPairingPath } from '~/features/ledger/Path';
-import { getId } from '~/database/WalletDao';
+import { getWalletId } from '~/database/WalletDao';
 
 const listenerTimeout = 5000;
 
@@ -19,7 +19,7 @@ export default function LedgerStatus(): JSX.Element {
 
     const onWalletIdentifier = useCallback(
         async (walletIdentifier: string) => {
-            const walletId = await getId(walletIdentifier);
+            const walletId = await getWalletId(walletIdentifier);
             dispatch(setCurrentWalletId(walletId));
             if (!walletId) {
                 setStatusText('New device detected');
@@ -65,6 +65,12 @@ export default function LedgerStatus(): JSX.Element {
             setStatusText('No wallet');
         } else if (
             hasBeenDisconnected &&
+            status === LedgerStatusType.OUTDATED
+        ) {
+            setDisconnected(false);
+            setStatusText('Wallet outdated');
+        } else if (
+            hasBeenDisconnected &&
             status === LedgerStatusType.CONNECTED
         ) {
             setDisconnected(false);
@@ -75,7 +81,13 @@ export default function LedgerStatus(): JSX.Element {
     }, [status]);
 
     return (
-        <div className={clsx(styles.body, isReady && styles.greenText)}>
+        <div
+            className={clsx(
+                styles.body,
+                isReady && styles.greenText,
+                status === LedgerStatusType.OUTDATED && styles.redText
+            )}
+        >
             {statusText}
         </div>
     );

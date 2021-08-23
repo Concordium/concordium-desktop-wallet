@@ -4,7 +4,6 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import routes from '~/constants/routes.json';
 import PageLayout from '~/components/PageLayout';
-import ipcCommands from '~/constants/ipcCommands.json';
 import SelectPassword from './SelectPassword';
 import NewUserInit from './NewUserInit';
 import PasswordHasBeenSet from './PasswordHasBeenSet';
@@ -15,17 +14,15 @@ export default function HomePage() {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        window.ipcRenderer
-            .invoke(ipcCommands.databaseExists)
+        window.files
+            .databaseExists()
             .then(async (exists) => {
                 // Determine which page to show, based on whether we have database
                 // access or not.
                 if (!exists) {
                     dispatch(push({ pathname: routes.HOME_NEW_USER }));
                 } else {
-                    const databaseIsAccessible = await window.ipcRenderer.invoke(
-                        ipcCommands.database.checkAccess
-                    );
+                    const databaseIsAccessible = await window.database.general.checkAccess();
                     if (!databaseIsAccessible) {
                         // Either an invalid password has been set, or no password has been set
                         // yet, so let the user input a password.

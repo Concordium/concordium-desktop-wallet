@@ -4,13 +4,15 @@ import { useSelector } from 'react-redux';
 import DoubleCheckmarkIcon from '@resources/svg/double-grey-checkmark.svg';
 import CheckmarkIcon from '@resources/svg/grey-checkmark.svg';
 import Warning from '@resources/svg/warning.svg';
-import { parseTime } from '~/utils/timeHelpers';
-import { getGTUSymbol, displayAsGTU } from '~/utils/gtu';
+import { dateFromTimeStamp, parseTime } from '~/utils/timeHelpers';
+import { displayAsGTU } from '~/utils/gtu';
+
 import {
     TransferTransaction,
     TransactionStatus,
     TransactionKindString,
     TransferTransactionWithNames,
+    TimeStampUnit,
 } from '~/utils/types';
 import { chosenAccountSelector } from '~/features/AccountSlice';
 import { viewingShieldedSelector } from '~/features/TransactionSlice';
@@ -30,11 +32,23 @@ const isInternalTransfer = (transaction: TransferTransaction) =>
         TransactionKindString.TransferToPublic,
     ].includes(transaction.transactionKind);
 
+const strikeThroughAmount = (
+    transaction: TransferTransaction,
+    viewingShielded: boolean,
+    isOutgoing: boolean
+) =>
+    transaction.status === TransactionStatus.Rejected ||
+    (transaction.status === TransactionStatus.Failed && viewingShielded) ||
+    (transaction.status === TransactionStatus.Failed && !isOutgoing);
+
 const isGreen = (
     transaction: TransferTransaction,
     viewingShielded: boolean,
     isOutgoing: boolean
 ) => {
+    if (isFailed(transaction)) {
+        return false;
+    }
     const kind = transaction.transactionKind;
     if (TransactionKindString.TransferToEncrypted === kind) {
         return viewingShielded;
@@ -113,9 +127,8 @@ function parseShieldedAmount(
         }
         return buildCostFreeAmountString(BigInt(transaction.decryptedAmount));
     }
-    const negative = isOutgoing ? '-' : '';
     return {
-        amount: `${negative} ${getGTUSymbol()} ?`,
+        amount: '',
         amountFormula: '',
     };
 }
@@ -124,6 +137,11 @@ function parseAmount(transaction: TransferTransaction, isOutgoing: boolean) {
     if (isTransferKind(transaction.transactionKind)) {
         if (isOutgoing) {
             const cost = BigInt(transaction.cost || '0');
+
+            if (transaction.status === TransactionStatus.Failed) {
+                return buildCostString(cost);
+            }
+
             if (
                 transaction.transactionKind ===
                 TransactionKindString.EncryptedAmountTransfer
@@ -184,6 +202,7 @@ function statusSymbol(status: TransactionStatus) {
             return '';
         case TransactionStatus.Committed:
             return <CheckmarkIcon className={styles.checkmark} height="10" />;
+        case TransactionStatus.Failed:
         case TransactionStatus.Finalized:
             return (
                 <DoubleCheckmarkIcon className={styles.checkmark} height="10" />
@@ -195,27 +214,45 @@ function statusSymbol(status: TransactionStatus) {
     }
 }
 
+const onlyTime = Intl.DateTimeFormat(undefined, {
+    timeStyle: 'medium',
+    hourCycle: 'h24',
+}).format;
+
 interface Props {
     transaction: TransferTransaction;
     onClick?: () => void;
+    showDate?: boolean;
 }
 
 /**
  * Displays the given transaction basic information.
  */
-function TransactionListElement({ transaction, onClick }: Props): JSX.Element {
+function TransactionListElement({
+    transaction,
+    onClick,
+    showDate = false,
+}: Props): JSX.Element {
     const account = useSelector(chosenAccountSelector);
     const viewingShielded = useSelector(viewingShieldedSelector);
     if (!account) {
         throw new Error('Unexpected missing chosen account');
     }
     const isOutgoing = isOutgoingTransaction(transaction, account.address);
-    const time = parseTime(transaction.blockTime);
+    const time = showDate
+        ? parseTime(transaction.blockTime)
+        : onlyTime(
+              dateFromTimeStamp(transaction.blockTime, TimeStampUnit.seconds)
+          );
     const name = getName(transaction, isOutgoing);
     const amountParser = viewingShielded ? parseShieldedAmount : parseAmount;
     const { amount, amountFormula } = amountParser(transaction, isOutgoing);
 
     const failed = isFailed(transaction);
+    const notFinished = [
+        TransactionStatus.Committed,
+        TransactionStatus.Pending,
+    ].includes(transaction.status);
 
     return (
         <div
@@ -241,6 +278,11 @@ function TransactionListElement({ transaction, onClick }: Props): JSX.Element {
                     <p
                         className={clsx(
                             'mV0',
+                            strikeThroughAmount(
+                                transaction,
+                                viewingShielded,
+                                isOutgoing
+                            ) && styles.strikedThrough,
                             isGreen(transaction, viewingShielded, isOutgoing) &&
                                 styles.greenText
                         )}
@@ -259,12 +301,7 @@ function TransactionListElement({ transaction, onClick }: Props): JSX.Element {
                 right={
                     amountFormula
                         ? amountFormula.concat(
-                              ` ${
-                                  transaction.status !==
-                                  TransactionStatus.Finalized
-                                      ? ' (Estimated)'
-                                      : ''
-                              }`
+                              ` ${notFinished ? ' (Estimated)' : ''}`
                           )
                         : ''
                 }

@@ -1,5 +1,5 @@
 import { getCredentialsOfAccount } from '~/database/CredentialDao';
-import { getId } from '~/database/WalletDao';
+import { getWalletId } from '~/database/WalletDao';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getPairingPath } from '~/features/ledger/Path';
 import {
@@ -10,6 +10,7 @@ import {
     Identity,
     instanceOfCredentialWithIdentityNumber,
     instanceOfDeployedCredential,
+    CommitmentsRandomness,
 } from './types';
 
 /**
@@ -53,7 +54,7 @@ export default async function findLocalDeployedCredentialWithWallet(
     ledger: ConcordiumLedgerClient
 ): Promise<(CredentialWithIdentityNumber & DeployedCredential) | undefined> {
     const walletIdentifier = await ledger.getPublicKeySilent(getPairingPath());
-    const walletId = await getId(walletIdentifier.toString('hex'));
+    const walletId = await getWalletId(walletIdentifier.toString('hex'));
     if (walletId === undefined) {
         return undefined;
     }
@@ -66,7 +67,8 @@ export function createNewCredential(
     identityId: number,
     credentialIndex: number | undefined,
     credId: string,
-    policy: Policy
+    policy: Policy,
+    randomness?: CommitmentsRandomness
 ) {
     return {
         credId,
@@ -75,6 +77,7 @@ export function createNewCredential(
         credentialNumber,
         identityId,
         credentialIndex,
+        randomness: randomness ? JSON.stringify(randomness) : undefined,
     };
 }
 

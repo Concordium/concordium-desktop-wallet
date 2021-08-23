@@ -1,5 +1,5 @@
 import type { Buffer } from 'buffer/';
-import { findEntries } from '../database/AddressBookDao';
+import { findEntries } from '~/database/AddressBookDao';
 import { getTransactionStatus } from '../node/nodeRequests';
 import { getDefaultExpiry, getNow, secondsSinceUnixEpoch } from './timeHelpers';
 import {
@@ -452,9 +452,8 @@ export function getScheduledTransferAmount(
 }
 
 export function isFailed(transaction: TransferTransaction) {
-    return (
-        transaction.success === false ||
-        transaction.status === TransactionStatus.Rejected
+    return [TransactionStatus.Rejected, TransactionStatus.Failed].includes(
+        transaction.status
     );
 }
 

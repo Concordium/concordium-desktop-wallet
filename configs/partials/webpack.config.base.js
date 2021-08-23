@@ -85,6 +85,7 @@ module.exports = {
         new webpack.EnvironmentPlugin({
             NODE_ENV: 'production',
             TARGET_NET: '',
+            LEDGER_EMULATOR_URL: '',
         }),
         new WasmPackPlugin({
             crateDirectory: path.resolve(__dirname, '.'),

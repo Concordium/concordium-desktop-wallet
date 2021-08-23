@@ -88,7 +88,26 @@ export function createAccount(
         signatureThreshold,
         isInitial,
         deploymentTransactionId,
-        maxTransactionId: 0,
+        maxTransactionId: '0',
+        rewardFilter: '[]',
+        selfAmounts: ENCRYPTED_ZERO,
+        incomingAmounts: '[]',
+        totalDecrypted: '0',
+    };
+}
+
+export function createInitialAccount(
+    address: string,
+    status: AccountStatus,
+    name = address.substr(0, 8)
+): Omit<Account, 'identityId'> {
+    return {
+        name,
+        status,
+        address,
+        signatureThreshold: 1,
+        isInitial: true,
+        maxTransactionId: '0',
         rewardFilter: '[]',
         selfAmounts: ENCRYPTED_ZERO,
         incomingAmounts: '[]',
