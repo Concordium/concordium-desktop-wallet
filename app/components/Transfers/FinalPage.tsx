@@ -34,7 +34,7 @@ function getSpecificsHandler(transaction: AccountTransaction) {
     let title;
     let note;
     if (instanceOfScheduledTransfer(transaction)) {
-        title = 'Transfer submitted!';
+        title = 'Scheduled Transfer submitted!';
         amount = getScheduledTransferAmount(transaction);
         note = (
             <h3 className="textCenter">
@@ -48,13 +48,13 @@ function getSpecificsHandler(transaction: AccountTransaction) {
             </h3>
         );
     } else if (instanceOfTransferToPublic(transaction)) {
-        title = 'Unshielding submitted!';
+        title = 'Unshield amount submitted!';
         amount = transaction.payload.transferAmount;
     } else if (instanceOfSimpleTransfer(transaction)) {
         title = 'Transfer submitted!';
         amount = transaction.payload.amount;
     } else if (instanceOfTransferToEncrypted(transaction)) {
-        title = 'Shielding submitted!';
+        title = 'Shield amount submitted!';
         amount = transaction.payload.amount;
     } else if (instanceOfEncryptedTransfer(transaction)) {
         title = 'Shielded transfer submitted!';
