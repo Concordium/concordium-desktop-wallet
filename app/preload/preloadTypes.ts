@@ -30,6 +30,7 @@ export type { default as LedgerCommands } from './preloadLedgerTypes';
 
 export type Listener = (event: any, ...args: any[]) => void;
 type PutListener = (callback: Listener) => void;
+type PutListenerWithUnsub = (callback: Listener) => () => void;
 
 export interface Listen {
     openRoute: PutListener;
@@ -277,10 +278,10 @@ export type Database = {
 };
 
 export interface AutoUpdateMethods {
-    onUpdateAvailable: PutListener;
-    onUpdateDownloaded: PutListener;
-    onVerificationSuccess: PutListener;
-    onError: PutListener;
+    onUpdateAvailable: PutListenerWithUnsub;
+    onUpdateDownloaded: PutListenerWithUnsub;
+    onVerificationSuccess: PutListenerWithUnsub;
+    onError: PutListenerWithUnsub;
     triggerUpdate(): void;
     quitAndInstall(): void;
 }
