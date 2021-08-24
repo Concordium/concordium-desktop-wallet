@@ -107,8 +107,7 @@ function getVerificationFunctions(
 
 async function handleUpdateDownloaded(info: UpdateInfo) {
     const { verifyChecksum, verifySignature } = getVerificationFunctions(
-        info as RealUpdateInfo,
-        mainWindow
+        info as RealUpdateInfo
     );
 
     try {
