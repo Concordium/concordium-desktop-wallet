@@ -27,6 +27,7 @@ const transitionVariants: Variants = {
 type NotificationProps = ClassName &
     PropsWithChildren<{
         level: NotificationLevel;
+        disableClose?: boolean;
         onCloseClick(): void;
     }>;
 
@@ -37,6 +38,7 @@ const modifier: Partial<Record<NotificationLevel, string>> = {
 export default function Notification({
     children,
     level,
+    disableClose = false,
     onCloseClick,
     className,
 }: NotificationProps) {
@@ -49,9 +51,11 @@ export default function Notification({
             animate="enter"
             exit="exit"
         >
-            <Button clear className={styles.close} onClick={onCloseClick}>
-                <CloseIcon width="11" />
-            </Button>
+            {disableClose || (
+                <Button clear className={styles.close} onClick={onCloseClick}>
+                    <CloseIcon width="11" />
+                </Button>
+            )}
             {children}
         </motion.div>
     );
