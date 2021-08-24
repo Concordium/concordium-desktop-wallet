@@ -1,11 +1,10 @@
-import { AccountAddress, ConsensusStatus } from '@concordium/node-sdk';
+import { AccountAddress } from '@concordium/node-sdk';
 import {
     setClientLocation,
     getAdvancedClient,
     getClient,
 } from '~/node/GRPCClient';
 import ConcordiumNodeClient from '~/node/ConcordiumNodeClient';
-import { JsonResponse } from '~/proto/concordium_p2p_rpc_pb';
 import { GRPC } from '~/preload/preloadTypes';
 
 async function getConsensusStatusAndCryptographicParameters(
@@ -17,17 +16,14 @@ async function getConsensusStatusAndCryptographicParameters(
             address,
             Number.parseInt(port, 10)
         );
-        const consensusStatusSerialized = await nodeClient.getConsensusStatus();
-        const consensusStatus: ConsensusStatus = JSON.parse(
-            JsonResponse.deserializeBinary(consensusStatusSerialized).getValue()
-        );
+        const consensusStatus = await nodeClient.getConsensusStatus();
         const globalSerialized = await nodeClient.getCryptographicParameters(
             consensusStatus.lastFinalizedBlock
         );
         return {
             successful: true,
             response: {
-                consensus: consensusStatusSerialized,
+                consensus: consensusStatus,
                 global: globalSerialized,
             },
         };

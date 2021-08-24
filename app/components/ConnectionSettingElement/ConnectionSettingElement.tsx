@@ -10,7 +10,6 @@ import Form from '~/components/Form';
 import ConnectionStatusComponent, {
     Status,
 } from '~/components/ConnectionStatusComponent';
-import { JsonResponse } from '~/proto/concordium_p2p_rpc_pb';
 import getGenesis from '~/database/GenesisDao';
 import { displayTargetNet, getTargetNet, Net } from '~/utils/ConfigHelper';
 import genesisBlocks from '~/constants/genesis.json';
@@ -53,13 +52,8 @@ async function getConsensusAndGlobalFromNode(address: string, port: string) {
         );
     }
 
-    const consensusStatus: ConsensusStatus = JSON.parse(
-        JsonResponse.deserializeBinary(result.response.consensus).getValue()
-    );
-
-    const nodeVersionedGlobal: Versioned<Global> = JSON.parse(
-        JsonResponse.deserializeBinary(result.response.global).getValue()
-    );
+    const consensusStatus: ConsensusStatus = result.response.consensus;
+    const nodeVersionedGlobal: Versioned<Global> = result.response.global;
     const nodeGlobal = nodeVersionedGlobal.value;
 
     return { consensusStatus, nodeGlobal };
