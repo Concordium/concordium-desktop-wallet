@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import clsx from 'clsx';
 import { useDispatch } from 'react-redux';
+import SuccessImage from '@resources/svg/success.svg';
+import RejectedImage from '@resources/svg/warning.svg';
 import useLedger from '~/components/ledger/useLedger';
 import { LedgerStatusType } from '~/components/ledger/util';
 import { asyncNoOp } from '~/utils/basicHelpers';
@@ -8,22 +9,41 @@ import { setCurrentWalletId } from '~/features/WalletSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getPairingPath } from '~/features/ledger/Path';
 import { getWalletId } from '~/database/WalletDao';
-
-import styles from './Status.module.scss';
+import StatusPart from './StatusPart';
 
 const listenerTimeout = 5000;
+
+enum Status {
+    NoWallet = 'No wallet',
+    NewDevice = 'New Device',
+    OutDated = 'OutDated',
+    Connected = 'Connected',
+}
+
+function getStatusImage(status: Status) {
+    switch (status) {
+        case Status.NoWallet:
+        case Status.OutDated:
+            return RejectedImage;
+        case Status.NewDevice:
+        case Status.Connected:
+            return SuccessImage;
+        default:
+            return undefined;
+    }
+}
 
 export default function LedgerStatus(): JSX.Element {
     const dispatch = useDispatch();
     const [hasBeenDisconnected, setDisconnected] = useState(true);
-    const [statusText, setStatusText] = useState('');
+    const [statusText, setStatusText] = useState<Status>(Status.NoWallet);
 
     const onWalletIdentifier = useCallback(
         async (walletIdentifier: string) => {
             const walletId = await getWalletId(walletIdentifier);
             dispatch(setCurrentWalletId(walletId));
             if (!walletId) {
-                setStatusText('New device detected');
+                setStatusText(Status.NewDevice);
             }
         },
         [dispatch]
@@ -51,45 +71,37 @@ export default function LedgerStatus(): JSX.Element {
     );
 
     const callback = useCallback(
-        async (ledger: ConcordiumLedgerClient) => {
-            listen(ledger, onWalletIdentifier);
-        },
+        (ledger: ConcordiumLedgerClient) => listen(ledger, onWalletIdentifier),
         [listen, onWalletIdentifier]
     );
 
-    const { isReady, status, submitHandler } = useLedger(callback, asyncNoOp);
+    const { status, submitHandler } = useLedger(callback, asyncNoOp);
 
     useEffect(() => {
         if (status === LedgerStatusType.DISCONNECTED) {
             setDisconnected(true);
             dispatch(setCurrentWalletId(undefined));
-            setStatusText('No wallet');
+            setStatusText(Status.NoWallet);
         } else if (
             hasBeenDisconnected &&
             status === LedgerStatusType.OUTDATED
         ) {
             setDisconnected(false);
-            setStatusText('Wallet outdated');
+            setStatusText(Status.OutDated);
         } else if (
             hasBeenDisconnected &&
             status === LedgerStatusType.CONNECTED
         ) {
             setDisconnected(false);
-            setStatusText('Wallet connected');
+            setStatusText(Status.Connected);
             submitHandler();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status]);
 
+    const StatusImage = getStatusImage(statusText);
+
     return (
-        <div
-            className={clsx(
-                styles.body,
-                isReady && styles.greenText,
-                status === LedgerStatusType.OUTDATED && styles.redText
-            )}
-        >
-            {statusText}
-        </div>
+        <StatusPart name="HW Wallet:" status={statusText} Icon={StatusImage} />
     );
 }

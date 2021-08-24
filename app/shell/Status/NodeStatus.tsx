@@ -1,15 +1,14 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import clsx from 'clsx';
 import PendingImage from '@resources/svg/pending-arrows.svg';
 import SuccessImage from '@resources/svg/success.svg';
 import RejectedImage from '@resources/svg/warning.svg';
+import ScanningImage from '@resources/svg/scan.svg';
 import { isNodeUpToDate } from '~/node/nodeHelpers';
 import AbortController from '~/utils/AbortController';
 import { specificSettingSelector } from '~/features/SettingsSlice';
 import settingKeys from '~/constants/settingKeys.json';
-
-import styles from './Status.module.scss';
+import StatusPart from './StatusPart';
 
 const checkInterval = 15000;
 const showPingTimeout = 1000;
@@ -29,6 +28,8 @@ function getStatusImage(status: Status) {
             return RejectedImage;
         case Status.Ready:
             return SuccessImage;
+        case Status.Pinging:
+            return ScanningImage;
         default:
             return undefined;
     }
@@ -71,12 +72,5 @@ export default function NodeStatus(): JSX.Element {
 
     const StatusImage = getStatusImage(statusText);
 
-    return (
-        <div className={clsx(styles.nodeStatus)}>
-            <span>Node: {statusText}</span>{' '}
-            {StatusImage && (
-                <StatusImage height="15" className={styles.statusImage} />
-            )}
-        </div>
-    );
+    return <StatusPart name="Node:" status={statusText} Icon={StatusImage} />;
 }

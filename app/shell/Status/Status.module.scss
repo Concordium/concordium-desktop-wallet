@@ -1,33 +1,28 @@
 @import 'config/bundle';
 
-.nodeStatus,
-.body {
-    composes: body4 from global;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 10px 20px;
+.outer {
+    margin: 20px 25px 40px;
     border: 1px solid $color-grey;
-    padding: 10px 3px;
+    padding: 5px;
     border-radius: 7px;
 }
 
-.nodeStatus {
-    justify-content: space-around;
+.text {
+    display: flex;
+    flex-direction: column;
 }
 
-.greenText {
-    color: $color-success;
+.status,
+.name {
+    composes: body4 from global;
 }
 
-.redText {
-    color: $color-danger;
-}
+.part {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-.outer {
-    margin: 20px 0 40px;
-}
-
-.statusImage {
-    margin-right: -4px;
+    &:not(:last-of-type) {
+        margin-bottom: 10px;
+    }
 }
