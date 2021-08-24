@@ -5,10 +5,7 @@ import log from 'electron-log';
 import { createHash, createVerify, Verify } from 'crypto';
 import fs from 'fs';
 
-import {
-    updateAvailable,
-    logFromMain,
-} from '~/constants/ipcRendererCommands.json';
+import { updateAvailable } from '~/constants/ipcRendererCommands.json';
 import { triggerAppUpdate } from '~/constants/ipcCommands.json';
 
 import { version } from '../package.json';
@@ -70,10 +67,9 @@ function getVerifier(path: string): Promise<Verify> {
 const releasesFeed =
     'https://github.com/soerenbf/concordium-desktop-wallet/releases/download';
 
-const getVerificationFunctions = (
-    { downloadedFile: filePath, releaseName, path: fileName }: RealUpdateInfo, // UpdateInfo interface doesn't seem to be aligned with actual content.
-    mainWindow: BrowserWindow
-) => {
+function getVerificationFunctions(
+    { downloadedFile: filePath, releaseName, path: fileName }: RealUpdateInfo // UpdateInfo interface doesn't seem to be aligned with actual content.
+) {
     const releaseDir = `${releasesFeed}/${releaseName}`;
     const releasePath = `${releaseDir}/${fileName}`;
 
@@ -86,38 +82,30 @@ const getVerificationFunctions = (
 
             if (localHash !== remoteHash) {
                 throw new Error(
-                    'Local checksum of update does not match remote checksum.'
+                    `Local checksum of update does not match remote checksum (local: ${localHash}, remote: ${remoteHash}).`
                 );
             }
         },
         async verifySignature() {
             const [remoteSig, pubKey] = await Promise.all([
-                getRemoteContent(`${releasePath}.sig`),
+                getRemoteContent(`${releasePath}.sig`, true),
                 getRemoteContent(`${releaseDir}/pubkey.pem`),
             ]);
 
-            mainWindow.webContents.send(logFromMain, 'Remote sig', remoteSig);
-            mainWindow.webContents.send(logFromMain, 'Public key', pubKey);
-
             const verifier = await getVerifier(filePath);
-            const result = verifier.verify(pubKey, remoteSig);
+            const success = verifier.verify(
+                Buffer.from(pubKey, 'ascii'),
+                remoteSig
+            );
 
-            mainWindow.webContents.send(logFromMain, 'Verify sig', result);
-
-            return result;
+            if (!success) {
+                throw new Error('Signature verification failed.');
+            }
         },
     };
-};
+}
 
-const handleUpdateDownloaded = (mainWindow: BrowserWindow) => async (
-    info: UpdateInfo
-) => {
-    mainWindow.webContents.send(
-        logFromMain,
-        'Update downlaoded:',
-        JSON.stringify(info)
-    );
-
+async function handleUpdateDownloaded(info: UpdateInfo) {
     const { verifyChecksum, verifySignature } = getVerificationFunctions(
         info as RealUpdateInfo,
         mainWindow
@@ -125,17 +113,20 @@ const handleUpdateDownloaded = (mainWindow: BrowserWindow) => async (
 
     try {
         await Promise.all([verifyChecksum(), verifySignature()]);
-        // autoUpdater.quitAndInstall();
-    } catch {
-        // Handle error...
+
+        autoUpdater.quitAndInstall();
+    } catch (e) {
+        log.error('Could not update application due to:', e);
+
+        // TODO: show notification.
     }
-};
+}
 
 export default function initAutoUpdate(mainWindow: BrowserWindow) {
     autoUpdater.on('update-available', () =>
         mainWindow.webContents.send(updateAvailable)
     );
-    autoUpdater.on('update-downloaded', handleUpdateDownloaded(mainWindow));
+    autoUpdater.on('update-downloaded', handleUpdateDownloaded);
 
     ipcMain.handle(triggerAppUpdate, () => autoUpdater.downloadUpdate());
 
