@@ -13,6 +13,7 @@ import { AccountForm, CredentialBlob, fieldNames } from '../types';
 import { CreationKeys } from '~/utils/types';
 import errorMessages from '~/constants/errorMessages.json';
 import SimpleLedgerWithCreationKeys from '~/components/ledger/SimpleLedgerWithCreationKeys';
+import { throwLoggedError } from '~/utils/basicHelpers';
 
 import generalStyles from '../GenerateCredential.module.scss';
 import splitViewStyles from '../SplitViewRouter/SplitViewRouter.module.scss';
@@ -51,11 +52,9 @@ export default function SignCredential({ onSigned }: Props): JSX.Element {
     const [credentialNumber, setCredentialNumber] = useState<number>();
     useEffect(() => {
         if (identity?.id === undefined) {
-            const error = new Error(
+            throwLoggedError(
                 'An identity has to be supplied. This is an internal error.'
             );
-            window.log.error(error);
-            throw error;
         }
         getNextCredentialNumber(identity.id)
             .then(setCredentialNumber)
@@ -74,21 +73,20 @@ export default function SignCredential({ onSigned }: Props): JSX.Element {
                 setMessage: (message: string | JSX.Element) => void
             ) => {
                 setMessage('Please wait');
-                let error;
                 if (!credentialNumber) {
-                    error = new Error(
+                    throwLoggedError(
                         'The credentialNumber has to be supplied. This is an internal error.'
                     );
                 } else if (!identity) {
-                    error = new Error(
+                    throwLoggedError(
                         'An identity has to be supplied. This is an internal error.'
                     );
                 } else if (!address) {
-                    error = new Error(
+                    throwLoggedError(
                         'An account adress has to be supplied. This is an internal error.'
                     );
                 } else if (!global) {
-                    error = new Error(errorMessages.missingGlobal);
+                    throwLoggedError(errorMessages.missingGlobal);
                 } else {
                     const {
                         info: credential,
@@ -114,13 +112,6 @@ export default function SignCredential({ onSigned }: Props): JSX.Element {
                     onBlur();
                     setMessage('Credential generated succesfully!');
                     onSigned();
-                    return;
-                }
-                if (error) {
-                    window.log.error(
-                        `Error occured before signing credential ${{ error }}`
-                    );
-                    throw error;
                 }
             };
         },

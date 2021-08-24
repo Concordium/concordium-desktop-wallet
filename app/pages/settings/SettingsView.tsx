@@ -8,6 +8,7 @@ import { Setting, SettingTypeEnum } from '~/utils/types';
 import ConnectionSettingElement from '~/components/ConnectionSettingElement';
 import BooleanSetting from './BooleanSettingElement';
 import PasswordSettingElement from './PasswordSettingElement';
+import { throwLoggedError } from '~/utils/basicHelpers';
 
 // A static definition of warning messages, where the key matches the
 // setting name that the warning is for.
@@ -43,11 +44,9 @@ export default function SettingsView() {
                     childSetting.name
                 );
                 if (!settingDisplayText) {
-                    const error = new Error(
+                    throwLoggedError(
                         'A setting without a display text was encountered.'
                     );
-                    window.log.error(error);
-                    throw error;
                 }
                 let warning: string | undefined;
 

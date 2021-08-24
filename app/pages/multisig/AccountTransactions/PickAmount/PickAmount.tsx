@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import AccountCard from '~/components/AccountCard';
 import { Account, AccountInfo, Fraction } from '~/utils/types';
 import { validateTransferAmount } from '~/utils/transactionHelpers';
-import { collapseFraction } from '~/utils/basicHelpers';
+import { collapseFraction, throwLoggedError } from '~/utils/basicHelpers';
 import { getGTUSymbol } from '~/utils/gtu';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import { useAccountInfo } from '~/utils/dataHooks';
@@ -35,9 +35,7 @@ export default function PickAmount({
     validateAmount = validateTransferAmount,
 }: Props): JSX.Element {
     if (!account) {
-        const error = new Error('Unexpected missing account');
-        window.log.error(error);
-        throw error;
+        throwLoggedError('Unexpected missing account');
     }
 
     const accountInfo = useAccountInfo(account.address);

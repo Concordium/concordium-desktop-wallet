@@ -32,9 +32,7 @@ export default function AccountList() {
     const [error, setError] = useState<string>();
 
     useEffect(() => {
-        load(dispatch).catch((e: Error) => {
-            setError(e.message);
-        });
+        load(dispatch).catch((e: Error) => setError(e.message));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dispatch]);
 

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
 import routes from '~/constants/routes.json';
+
 import { createCredentialDetails } from '~/utils/rustInterface';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import {
@@ -33,6 +34,7 @@ import errorMessages from '~/constants/errorMessages.json';
 import { AccountCardView } from '~/components/AccountCard/AccountCard';
 import SimpleLedgerWithCreationKeys from '~/components/ledger/SimpleLedgerWithCreationKeys';
 import pairWallet from '~/utils/WalletPairing';
+import { throwLoggedError } from '~/utils/basicHelpers';
 
 import generalStyles from '../AccountCreation.module.scss';
 import styles from './GeneratePage.module.scss';
@@ -72,18 +74,14 @@ export default function AccountCreationGenerate({
             }
         } catch (e) {
             removeFailed(dispatch, accountAddress);
-            const error = new Error(
+            throwLoggedError(
                 'We were unable to deploy the credential, because the node could not be reached.'
             );
-            window.log.error(error);
-            throw error;
         }
         removeFailed(dispatch, accountAddress);
-        const error = new Error(
+        throwLoggedError(
             'We were unable to deploy the credential, due to the node rejecting the transaction.'
         );
-        window.log.error(error);
-        throw error;
     }
 
     async function saveAccount(
