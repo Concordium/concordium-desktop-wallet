@@ -12,8 +12,12 @@ const { build } = require('../package.json');
 const { version, name } = require('../app/package.json');
 
 /**
- * This CLI relies on openssl under the hood to generate and verify hashes and signatures. As such, running the script in a shell that doesn'
- * t have access to openssl CLI will fail.
+ * @description
+ * This CLI relies on openssl under the hood to generate and verify hashes and signatures.
+ * As such, running the script in a shell that doesn't have access to openssl CLI will fail.
+ *
+ * @example
+ * $ node ./scripts/fileDigest.js -k <path-to-private-key> [-f <path-to-file] [-v <path-to-public-key>] [--skiprv]
  */
 
 // Configuration of command line arguments
@@ -36,7 +40,7 @@ const { argv } = yargs
     })
     .option('skiprv', {
         description:
-            'Skips verification using remote public key. U seful if the used private key doesn\t match the current remote public key',
+            "Skips verification using remote public key. Useful if the used private key doesn't match the current remote public key",
         type: 'boolean',
     })
     .help()
