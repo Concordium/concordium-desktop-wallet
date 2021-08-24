@@ -127,7 +127,7 @@ const handleUpdateDownloaded = (mainWindow: BrowserWindow) => async (
         mainWindow.webContents.send(updateVerified);
     } catch (e) {
         log.error('Could not update application due to:', e);
-        mainWindow.webContents.send(updateError, e);
+        mainWindow.webContents.send(updateError, JSON.stringify(e));
     }
 };
 
