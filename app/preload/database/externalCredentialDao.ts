@@ -1,9 +1,8 @@
-import { IpcMain } from 'electron';
 import { externalCredentialsTable } from '~/constants/databaseNames.json';
 import { ExternalCredential } from '~/database/types';
 import { knex } from '~/database/knex';
-import ipcCommands from '~/constants/ipcCommands.json';
 import { MakeOptional } from '~/utils/types';
+import { ExternalCredentialMethods } from '~/preload/preloadTypes';
 
 async function upsertExternalCredential(
     credential: MakeOptional<ExternalCredential, 'note'>
@@ -46,36 +45,11 @@ async function getAllExternalCredentials(): Promise<ExternalCredential[]> {
     return (await knex()).table(externalCredentialsTable).select();
 }
 
-export default function initializeIpcHandlers(ipcMain: IpcMain) {
-    ipcMain.handle(
-        ipcCommands.database.externalCredentials.upsertExternalCredential,
-        async (
-            _event,
-            credential: MakeOptional<ExternalCredential, 'note'>
-        ) => {
-            return upsertExternalCredential(credential);
-        }
-    );
+const exposedMethods: ExternalCredentialMethods = {
+    upsertExternalCredential,
+    upsertMultipleExternalCredentials,
+    deleteExternalCredentials,
+    getAllExternalCredentials,
+};
 
-    ipcMain.handle(
-        ipcCommands.database.externalCredentials
-            .upsertMultipleExternalCredentials,
-        async (_event, creds: MakeOptional<ExternalCredential, 'note'>[]) => {
-            return upsertMultipleExternalCredentials(creds);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.externalCredentials.deleteExternalCredentials,
-        async (_event, credIds: string[]) => {
-            return deleteExternalCredentials(credIds);
-        }
-    );
-
-    ipcMain.handle(
-        ipcCommands.database.externalCredentials.getAllExternalCredentials,
-        async () => {
-            return getAllExternalCredentials();
-        }
-    );
-}
+export default exposedMethods;

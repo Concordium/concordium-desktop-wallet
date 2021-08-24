@@ -9,11 +9,9 @@ import Form from '~/components/Form';
 import ConnectionStatusComponent, {
     Status,
 } from '~/components/ConnectionStatusComponent';
-import ipcCommands from '~/constants/ipcCommands.json';
 import { JsonResponse } from '~/proto/concordium_p2p_rpc_pb';
 import { ConsensusStatus } from '~/node/NodeApiTypes';
 import getGenesis from '~/database/GenesisDao';
-import setGenesisAndGlobal from '~/database/DatabaseHelpers';
 import { displayTargetNet, getTargetNet, Net } from '~/utils/ConfigHelper';
 import genesisBlocks from '~/constants/genesis.json';
 
@@ -48,11 +46,7 @@ function isMatchingGenesisBlock(genesisBlockHash: string, targetNet: Net) {
  * node with the given address and port.
  */
 async function getConsensusAndGlobalFromNode(address: string, port: string) {
-    const result = await window.ipcRenderer.invoke(
-        ipcCommands.grpcNodeConsensusAndGlobal,
-        address,
-        port
-    );
+    const result = await window.grpc.nodeConsensusAndGlobal(address, port);
     if (!result.successful) {
         throw new Error(
             'The node consensus status and cryptographic parameters could not be retrieved'
@@ -133,7 +127,7 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
             }
 
             if (!global && !genesis) {
-                await setGenesisAndGlobal(
+                await window.database.genesisAndGlobal.setValue(
                     consensusStatus.genesisBlock,
                     nodeGlobal
                 );
