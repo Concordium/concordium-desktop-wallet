@@ -14,7 +14,7 @@ import { isInitialAccount } from './accountHelpers';
 import {
     confirmIdentity,
     getAllIdentities,
-    rejectIdentityAndDeleteInitialAccount,
+    rejectIdentityAndInitialAccount,
 } from '../database/IdentityDao';
 import { loadCredentials } from '~/features/CredentialSlice';
 import { loadAddressBook } from '~/features/AddressBookSlice';
@@ -38,7 +38,7 @@ export async function confirmIdentityAndInitialAccount(
     // The identity provider failed the identity creation request. Clean up the
     // identity and account in the database and refresh the state.
     if (idObjectResponse.error) {
-        await rejectIdentityAndDeleteInitialAccount(identityId);
+        await rejectIdentityAndInitialAccount(identityId);
         await loadIdentities(dispatch);
         await loadAccounts(dispatch);
         return;
