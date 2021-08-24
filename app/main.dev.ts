@@ -144,7 +144,10 @@ const createWindow = async () => {
     browserView = new BrowserView();
 
     initializeIpcHandlers(mainWindow, printWindow, browserView);
-    initAutoUpdate(mainWindow);
+
+    if (process.env.NODE_ENV === 'production') {
+        initAutoUpdate(mainWindow);
+    }
 };
 
 app.on('window-all-closed', () => {

@@ -5,8 +5,16 @@ import log from 'electron-log';
 import { createHash, createVerify, Verify } from 'crypto';
 import fs from 'fs';
 
-import { updateAvailable } from '~/constants/ipcRendererCommands.json';
-import { triggerAppUpdate } from '~/constants/ipcCommands.json';
+import {
+    updateAvailable,
+    updateDownloaded,
+    updateVerified,
+    updateError,
+} from '~/constants/ipcRendererCommands.json';
+import {
+    triggerAppUpdate,
+    quitAndInstallUpdate,
+} from '~/constants/ipcCommands.json';
 
 import { version } from '../package.json';
 
@@ -105,29 +113,32 @@ function getVerificationFunctions(
     };
 }
 
-async function handleUpdateDownloaded(info: UpdateInfo) {
+const handleUpdateDownloaded = (mainWindow: BrowserWindow) => async (
+    info: UpdateInfo
+) => {
+    mainWindow.webContents.send(updateDownloaded);
+
     const { verifyChecksum, verifySignature } = getVerificationFunctions(
         info as RealUpdateInfo
     );
 
     try {
         await Promise.all([verifyChecksum(), verifySignature()]);
-
-        autoUpdater.quitAndInstall();
+        mainWindow.webContents.send(updateVerified);
     } catch (e) {
         log.error('Could not update application due to:', e);
-
-        // TODO: show notification.
+        mainWindow.webContents.send(updateError, e);
     }
-}
+};
 
 export default function initAutoUpdate(mainWindow: BrowserWindow) {
     autoUpdater.on('update-available', () =>
         mainWindow.webContents.send(updateAvailable)
     );
-    autoUpdater.on('update-downloaded', handleUpdateDownloaded);
+    autoUpdater.on('update-downloaded', handleUpdateDownloaded(mainWindow));
 
     ipcMain.handle(triggerAppUpdate, () => autoUpdater.downloadUpdate());
+    ipcMain.handle(quitAndInstallUpdate, () => autoUpdater.quitAndInstall());
 
     autoUpdater.checkForUpdates();
 }

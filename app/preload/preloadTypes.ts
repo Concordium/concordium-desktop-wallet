@@ -278,7 +278,11 @@ export type Database = {
 
 export interface AutoUpdateMethods {
     onUpdateAvailable: PutListener;
-    triggerUpdate: () => void;
+    onUpdateDownloaded: PutListener;
+    onVerificationSuccess: PutListener;
+    onError: PutListener;
+    triggerUpdate(): void;
+    quitAndInstall(): void;
 }
 
 export interface WindowFunctions {

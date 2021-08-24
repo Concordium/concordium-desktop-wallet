@@ -3,5 +3,8 @@
     "didFinishLoad": "didFinishLoad",
     "openRoute": "openRoute",
     "updateAvailable": "updateAvailable",
-    "logFromMain": "logFromMain"
+    "logFromMain": "logFromMain",
+    "updateDownloaded": "updateDownloaded",
+    "updateVerified": "updateVerified",
+    "updateError": "updateError"
 }
