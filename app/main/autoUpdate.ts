@@ -69,8 +69,11 @@ async function verifyUpdate(
      */
 
     const releaseUrl = `${releasesFeed}/${releaseName}/${fileName}`;
-    const remoteHash = await getRemoteContent(`${releaseUrl}.hash`);
-    const remoteSig = await getRemoteContent(`${releaseUrl}.sig`);
+    const remoteHash = (await getRemoteContent(`${releaseUrl}.hash`)).trim();
+    const remoteSig = (await getRemoteContent(`${releaseUrl}.sig`)).trim();
+    /* const pubKey = (
+        await getRemoteContent(`${releasesFeed}/${releaseName}/pubkey.pem`)
+    ).trim(); */
 
     mainWindow.webContents.send(logFromMain, 'Verify update -', filePath);
     mainWindow.webContents.send(logFromMain, 'release url: ', releaseUrl);
@@ -83,7 +86,7 @@ async function verifyUpdate(
     mainWindow.webContents.send(
         logFromMain,
         'Hash equality',
-        localHash === remoteHash
+        localHash.trim() === remoteHash.trim()
     );
 
     return new Promise(() => {});
