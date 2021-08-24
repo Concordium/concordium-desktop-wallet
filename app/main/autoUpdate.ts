@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig } from 'axios';
 import { ipcMain, BrowserWindow } from 'electron';
 import { autoUpdater, UpdateInfo } from 'electron-updater';
 import log from 'electron-log';
-import { createHash } from 'crypto';
+import { createHash, createVerify, Verify } from 'crypto';
 import fs from 'fs';
 
 import {
@@ -55,42 +55,59 @@ function getSha256Sum(path: string): Promise<string> {
     });
 }
 
+function getVerifier(path: string): Promise<Verify> {
+    const verifier = createVerify('RSA-SHA256');
+    const stream = fs.createReadStream(path);
+
+    stream.on('data', (data) => verifier.update(data));
+
+    return new Promise((resolve, reject) => {
+        stream.on('end', () => resolve(verifier));
+        stream.on('error', reject);
+    });
+}
+
 const releasesFeed =
     'https://github.com/soerenbf/concordium-desktop-wallet/releases/download';
 
-async function verifyUpdate(
+const getVerificationFunctions = (
     { downloadedFile: filePath, releaseName, path: fileName }: RealUpdateInfo, // UpdateInfo interface doesn't seem to be aligned with actual content.
     mainWindow: BrowserWindow
-) {
-    /**
-     * 1. Get remote hash, sig, & pub key
-     * 2. Compute hash of file
-     * 3. Verify matching hash and signature
-     */
+) => {
+    const releaseDir = `${releasesFeed}/${releaseName}`;
+    const releasePath = `${releaseDir}/${fileName}`;
 
-    const releaseUrl = `${releasesFeed}/${releaseName}/${fileName}`;
-    const remoteHash = (await getRemoteContent(`${releaseUrl}.hash`)).trim();
-    const remoteSig = (await getRemoteContent(`${releaseUrl}.sig`)).trim();
-    /* const pubKey = (
-        await getRemoteContent(`${releasesFeed}/${releaseName}/pubkey.pem`)
-    ).trim(); */
+    return {
+        async verifyChecksum() {
+            const remoteHash = (
+                await getRemoteContent(`${releasePath}.hash`)
+            ).trim();
+            const localHash = await getSha256Sum(filePath);
 
-    mainWindow.webContents.send(logFromMain, 'Verify update -', filePath);
-    mainWindow.webContents.send(logFromMain, 'release url: ', releaseUrl);
-    mainWindow.webContents.send(logFromMain, 'Remote hash', remoteHash);
-    mainWindow.webContents.send(logFromMain, 'Remote sig', remoteSig);
+            if (localHash !== remoteHash) {
+                throw new Error(
+                    'Local checksum of update does not match remote checksum.'
+                );
+            }
+        },
+        async verifySignature() {
+            const [remoteSig, pubKey] = await Promise.all([
+                getRemoteContent(`${releasePath}.sig`),
+                getRemoteContent(`${releaseDir}/pubkey.pem`),
+            ]);
 
-    const localHash = await getSha256Sum(filePath);
+            mainWindow.webContents.send(logFromMain, 'Remote sig', remoteSig);
+            mainWindow.webContents.send(logFromMain, 'Public key', pubKey);
 
-    mainWindow.webContents.send(logFromMain, 'Local hash', localHash);
-    mainWindow.webContents.send(
-        logFromMain,
-        'Hash equality',
-        localHash.trim() === remoteHash.trim()
-    );
+            const verifier = await getVerifier(filePath);
+            const result = verifier.verify(pubKey, remoteSig);
 
-    return new Promise(() => {});
-}
+            mainWindow.webContents.send(logFromMain, 'Verify sig', result);
+
+            return result;
+        },
+    };
+};
 
 const handleUpdateDownloaded = (mainWindow: BrowserWindow) => async (
     info: UpdateInfo
@@ -101,8 +118,17 @@ const handleUpdateDownloaded = (mainWindow: BrowserWindow) => async (
         JSON.stringify(info)
     );
 
-    await verifyUpdate(info as RealUpdateInfo, mainWindow);
-    // autoUpdater.quitAndInstall();
+    const { verifyChecksum, verifySignature } = getVerificationFunctions(
+        info as RealUpdateInfo,
+        mainWindow
+    );
+
+    try {
+        await Promise.all([verifyChecksum(), verifySignature()]);
+        // autoUpdater.quitAndInstall();
+    } catch {
+        // Handle error...
+    }
 };
 
 export default function initAutoUpdate(mainWindow: BrowserWindow) {
