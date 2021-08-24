@@ -7,7 +7,6 @@ import initApplication from '~/utils/initialize';
 import routes from '~/constants/routes.json';
 import Form from '~/components/Form';
 import { useUpdateEffect } from '~/utils/hooks';
-import ipcCommands from '~/constants/ipcCommands.json';
 import styles from './Unlock.module.scss';
 
 interface UnlockForm extends FieldValues {
@@ -37,16 +36,9 @@ export default function Unlock() {
 
     const unlock = useCallback(
         async ({ password }: UnlockForm) => {
-            await window.ipcRenderer.invoke(
-                ipcCommands.database.setPassword,
-                password
-            );
-            await window.ipcRenderer.invoke(
-                ipcCommands.database.invalidateKnexSingleton
-            );
-            const dbMigrated = await window.ipcRenderer.invoke(
-                ipcCommands.database.migrate
-            );
+            window.database.general.setPassword(password);
+            window.database.general.invalidateKnexSingleton();
+            const dbMigrated = await window.database.general.migrate();
             if (dbMigrated) {
                 await initApplication(dispatch);
                 dispatch(push({ pathname: routes.ACCOUNTS }));

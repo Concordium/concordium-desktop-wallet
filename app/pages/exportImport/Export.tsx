@@ -72,7 +72,7 @@ export default function Export() {
             wallets,
             genesis,
         };
-        const encrypted = await encrypt(JSON.stringify(data), password);
+        const encrypted = encrypt(JSON.stringify(data), password);
 
         try {
             const completed = await saveFile(JSON.stringify(encrypted), {

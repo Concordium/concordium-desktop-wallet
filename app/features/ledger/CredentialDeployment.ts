@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer/';
-import { BrowserWindow } from 'electron';
+import EventEmitter from 'events';
 import { Transport } from './Transport';
 import {
     UnsignedCredentialDeploymentInformation,
@@ -23,7 +23,7 @@ export async function signCredentialValues(
     p2: number,
     onAwaitVerificationKeyConfirmation: boolean,
     onVerificationKeysConfirmed: boolean,
-    mainWindow?: BrowserWindow
+    eventEmitter?: EventEmitter
 ) {
     let p1 = 0x0a;
 
@@ -47,8 +47,8 @@ export async function signCredentialValues(
             serializeVerifyKey(verificationKey),
         ]);
 
-        if (onAwaitVerificationKeyConfirmation && mainWindow) {
-            mainWindow.webContents.send(
+        if (onAwaitVerificationKeyConfirmation && eventEmitter) {
+            eventEmitter.emit(
                 ledgerIpcCommands.onAwaitVerificationKey,
                 verificationKey.verifyKey
             );
@@ -58,10 +58,8 @@ export async function signCredentialValues(
         await transport.send(0xe0, ins, p1, p2, data);
     }
 
-    if (onVerificationKeysConfirmed && mainWindow) {
-        mainWindow.webContents.send(
-            ledgerIpcCommands.onVerificationKeysConfirmed
-        );
+    if (onVerificationKeysConfirmed && eventEmitter) {
+        eventEmitter.emit(ledgerIpcCommands.onVerificationKeysConfirmed);
     }
 
     const signatureThreshold = Buffer.from(Uint8Array.of(publicKeys.threshold));

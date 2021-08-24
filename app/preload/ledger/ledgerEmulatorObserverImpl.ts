@@ -1,5 +1,5 @@
-import { BrowserWindow } from 'electron';
 import axios from 'axios';
+import EventEmitter from 'events';
 import ConcordiumLedgerClientMain from '../../features/ledger/ConcordiumLedgerClientMain';
 import { isConcordiumApp } from '../../components/ledger/util';
 import { LedgerSubscriptionAction } from '../../components/ledger/useLedger';
@@ -23,7 +23,7 @@ export default class LedgerEmulatorObserverImpl implements LedgerObserver {
         return this.concordiumClient;
     }
 
-    async subscribeLedger(mainWindow: BrowserWindow): Promise<void> {
+    async subscribeLedger(eventEmitter: EventEmitter): Promise<void> {
         const speculosEmulator = axios.create({
             baseURL: process.env.LEDGER_EMULATOR_URL,
         });
@@ -43,14 +43,18 @@ export default class LedgerEmulatorObserverImpl implements LedgerObserver {
 
                 if (!this.isConnected) {
                     this.concordiumClient = new ConcordiumLedgerClientMain(
-                        mainWindow
+                        eventEmitter
                     );
 
-                    const appAndVersionResult = await this.concordiumClient.getAppAndVersion();
-                    const appAndVersion = appAndVersionResult.result;
+                    let appAndVersion;
+                    try {
+                        appAndVersion = await this.concordiumClient.getAppAndVersion();
+                    } catch (e) {
+                        throw new Error('Unable to get current app');
+                    }
                     if (!appAndVersion) {
                         // We could not extract the version information.
-                        mainWindow.webContents.send(
+                        eventEmitter.emit(
                             ledgerIpcCommands.listenChannel,
                             LedgerSubscriptionAction.RESET
                         );
@@ -58,7 +62,7 @@ export default class LedgerEmulatorObserverImpl implements LedgerObserver {
                     }
 
                     if (isConcordiumApp(appAndVersion)) {
-                        mainWindow.webContents.send(
+                        eventEmitter.emit(
                             ledgerIpcCommands.listenChannel,
                             LedgerSubscriptionAction.CONNECTED_SUBSCRIPTION,
                             'Ledger Emulator'
@@ -73,7 +77,7 @@ export default class LedgerEmulatorObserverImpl implements LedgerObserver {
                     if (this.concordiumClient) {
                         this.concordiumClient.closeTransport();
                     }
-                    mainWindow.webContents.send(
+                    eventEmitter.emit(
                         ledgerIpcCommands.listenChannel,
                         LedgerSubscriptionAction.RESET
                     );
