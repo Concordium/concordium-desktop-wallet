@@ -10,6 +10,7 @@
 -   Added an option to add an address book entry while creating a transfer transaction.
 -   Added an introductory screen to set up a node connection for first time users.
 -   It is now possible to remove a failed identity.
+-   Added logging, which can be exported from the application menu.
 
 ### Changed
 

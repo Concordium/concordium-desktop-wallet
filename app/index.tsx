@@ -16,11 +16,11 @@ window.addListener.openRoute((_, route: string) => {
     store.dispatch(push(route));
 });
 
-window.addEventListener('unhandledrejection', function (promiseRejectionEvent) {
+window.addEventListener('unhandledrejection', (promiseRejectionEvent) =>
     window.log.error('Uncaught rejection: ', {
         error: promiseRejectionEvent.reason.toString(),
-    });
-});
+    })
+);
 
 const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
 
