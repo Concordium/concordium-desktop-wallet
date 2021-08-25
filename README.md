@@ -141,4 +141,4 @@ yarn generate-verification-assets <path-to-private-key>
 
 By default, the script tries to generate a hash and sig file for all release binaries in `release/`. It also tries to verify the signature created with a public key, which is published separately.
 
-The script has a number of possible runtime arguments, which are documented in the underlying script file (`scripts/fileDigest.js).
+The script has a number of possible runtime arguments, which are documented in the underlying script file `scripts/fileDigest.js`.
