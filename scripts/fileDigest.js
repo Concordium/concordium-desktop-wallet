@@ -178,11 +178,11 @@ async function verifyRemote(file, sigFile) {
 
     try {
         const content = await getPublicKey();
-        await executeWithTempFile(content)((p) =>
-            verifySignature(p, file, sigFile)
+        await executeWithTempFile(content)((key) =>
+            verifySignature(key, file, sigFile)
         );
-    } catch (err) {
-        console.error(err);
+    } catch (e) {
+        console.error(e);
     }
 }
 
