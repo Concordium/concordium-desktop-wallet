@@ -128,10 +128,10 @@ export default function AppUpdateNotification(props: Props) {
             window.autoUpdate.onVerificationSuccess(() =>
                 setState({ status: UpdateStatus.Success })
             ),
-            window.autoUpdate.onError((e: string) =>
+            window.autoUpdate.onError((_, message: string) =>
                 setState({
                     status: UpdateStatus.Error,
-                    message: JSON.parse(e).message,
+                    message,
                 })
             ),
         ];
