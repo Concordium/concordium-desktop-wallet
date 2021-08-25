@@ -23,8 +23,9 @@ import { build } from '../../package.json';
 const updateServer = 'https://update.electronjs.org';
 const updateFeed = `${updateServer}/${build.publish.owner}/${build.publish.repo}/${process.platform}-${process.arch}/${version}/`;
 autoUpdater.setFeedURL({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ...(build.publish as any),
     url: updateFeed,
-    ...build.publish,
 });
 
 log.transports.file.level = 'info';
