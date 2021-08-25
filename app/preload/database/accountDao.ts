@@ -78,13 +78,15 @@ export async function removeAccount(accountAddress: string) {
         .del();
 }
 
-export async function removeInitialAccount(identityId: number) {
-    return (await knex())(accountsTable)
-        .where({ identityId, isInitial: 1 })
-        .del();
+export async function removeInitialAccount(
+    identityId: number,
+    trx: Knex.Transaction
+) {
+    const table = (await knex())(accountsTable).transacting(trx);
+    return table.where({ identityId, isInitial: 1 }).del();
 }
 
-export async function confirmInitialAccount(
+export async function updateInitialAccount(
     identityId: number,
     updatedValues: Partial<Account>
 ) {
@@ -103,7 +105,6 @@ const exposedMethods: AccountMethods = {
     updateAccount,
     findAccounts,
     removeAccount,
-    removeInitialAccount,
-    confirmInitialAccount,
+    updateInitialAccount,
 };
 export default exposedMethods;

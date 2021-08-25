@@ -223,15 +223,14 @@ async function handleDuplicateIdentity(
     addMessage: AddMessage
 ) {
     const localName = localIdentity.name;
-    const localId = localIdentity.id;
     if (importedIdentity.name !== localName) {
         const { chosenName, message } = resolveIdentityNameConflict(localName);
-        addMessage(localId, message);
+        addMessage(importedIdentity.id, message);
         if (chosenName !== localName) {
-            updateIdentity(localId, { name: chosenName });
+            updateIdentity(localIdentity.id, { name: chosenName });
         }
     } else {
-        addMessage(localId, alreadyExistsMessage);
+        addMessage(importedIdentity.id, alreadyExistsMessage);
     }
 }
 
