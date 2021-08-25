@@ -9,7 +9,7 @@ const { promisify } = require('util');
 const exec = promisify(require('child_process').exec);
 
 const { build } = require('../package.json');
-const { version, name } = require('../app/package.json');
+const app = require('../app/package.json');
 
 /**
  * @description
@@ -17,7 +17,8 @@ const { version, name } = require('../app/package.json');
  * As such, running the script in a shell that doesn't have access to openssl CLI will fail.
  *
  * @example
- * $ node ./scripts/fileDigest.js -k <path-to-private-key> [-f <path-to-file] [-v <path-to-public-key>] [--skiprv]
+ * $ node ./scripts/fileDigest.js -k <path-to-private-key> [-f <path-to-file] [--verify <path-to-public-key>] [--skiprv] \
+ *      [--win] [--mac] [--linux] [--all] [--dir <path-to-dir>] [--appVersion <app-version-number>]
  */
 
 // Configuration of command line arguments
@@ -33,14 +34,35 @@ const { argv } = yargs
         description: '(Optional) File to perform digest on.',
         type: 'string',
     })
+    .option('dir', {
+        description: '(Optional) Directory to find for files in.',
+        type: 'string',
+        default: path.resolve(__dirname, `../${build.directories.output}`),
+    })
+    .option('appVersion', {
+        description: '(Optional) App version to use for finding files.',
+        type: 'string',
+        default: app.version,
+    })
     .option('verify', {
-        alias: 'v',
-        description: 'Verify with specified public key',
+        description: '(Optional) Verify with specified public key',
         type: 'string',
     })
     .option('skiprv', {
         description:
-            "Skips verification using remote public key. Useful if the used private key doesn't match the current remote public key",
+            "(Optional) Skips verification using remote public key. Useful if the used private key doesn't match the current remote public key",
+        type: 'boolean',
+    })
+    .option('win', {
+        description: '(Optional) Include Windows targets as digest input',
+        type: 'boolean',
+    })
+    .option('mac', {
+        description: '(Optional) Include MacOS targets as digest input',
+        type: 'boolean',
+    })
+    .option('linux', {
+        description: '(Optional) Include Linux targets as digest input',
         type: 'boolean',
     })
     .help()
@@ -51,6 +73,11 @@ const {
     key: publicKeyPath,
     verify: verifyKeyPath,
     skiprv,
+    win,
+    mac,
+    linux,
+    dir,
+    appVersion,
 } = argv;
 
 const hashAlgorithm = 'sha256';
@@ -189,33 +216,53 @@ async function writeSignature(file, shouldVerify = false) {
     }
 }
 
-let extensions = build.linux.target;
+const linuxTargets = build.linux.target;
+const winTargets = ['exe'];
+const macTargets = ['dmg', 'zip'];
 
-if (process.platform === 'darwin') {
-    extensions = ['dmg', 'zip'];
-} else if (process.platform === 'win32') {
-    extensions = ['exe'];
+function getTargetsFromArgs() {
+    return [
+        [linux, linuxTargets],
+        [mac, macTargets],
+        [win, winTargets],
+    ]
+        .filter(([include]) => include)
+        .map(([, targets]) => targets)
+        .flat(2);
+}
+
+let extensions = [...linuxTargets, ...winTargets, ...macTargets];
+
+if (mac || win || linux) {
+    extensions = getTargetsFromArgs();
 }
 
 const filesToDigest = inputFile
     ? [inputFile]
-    : extensions.map((e) =>
-          path.resolve(
-              __dirname,
-              `../${build.directories.output}/${name}-${version}.${e}`
-          )
-      );
+    : extensions
+          .map((e) => path.resolve(dir, `${app.name}-${appVersion}.${e}`))
+          .filter(fs.existsSync);
 
 (async () => {
+    if (!filesToDigest.length) {
+        console.error(
+            'Found no files for specified runtime arguments in directory:',
+            dir
+        );
+    }
     for (let i = 0; i < filesToDigest.length; i += 1) {
         const file = filesToDigest[i];
         const shouldVerify = i === filesToDigest.length - 1;
 
         console.log('\nProcessing file:', file);
 
-        await Promise.all([
-            writeChecksum(file),
-            writeSignature(file, shouldVerify),
-        ]);
+        try {
+            await Promise.all([
+                writeChecksum(file),
+                writeSignature(file, shouldVerify),
+            ]);
+        } catch (e) {
+            console.error(e);
+        }
     }
 })();
