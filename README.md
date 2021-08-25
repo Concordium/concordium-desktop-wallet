@@ -16,8 +16,8 @@ You need the following to build and run the project:
 Clone the repo via git.
 
 ```bash
-git clone https://gitlab.com/Concordium/desktopwallet.git
-cd desktopwallet
+git clone https://github.com/Concordium/concordium-desktop-wallet.git
+cd concordium-desktop-wallet
 ```
 
 Make sure to initialize submodules:
@@ -128,3 +128,17 @@ The notarizing process can take a while, and for testing purposes it can be skip
 ```bash
 TARGET_NET=$NET yarn package-mac-no-notarize
 ```
+
+### Generating verification assets
+
+Users are encouraged to verify the integrity of a downloaded application binary before installation. To support this, we need to generate a **hash** and a **signature** for each binary released. This is done through a script located at `scripts/fileDigest.js`.
+
+The script needs a path to a private key to create the signature. This is specified as a parameter when running the script:
+
+```bash
+yarn generate-verification-assets <path-to-private-key>
+```
+
+By default, the script tries to generate a hash and sig file for all release binaries in `release/`. It also tries to verify the signature created with a public key, which is published separately.
+
+The script has a number of possible runtime arguments, which are documented in the underlying script file (`scripts/fileDigest.js).
