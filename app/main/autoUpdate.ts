@@ -15,16 +15,16 @@ import {
     triggerAppUpdate,
     quitAndInstallUpdate,
 } from '~/constants/ipcCommands.json';
+import { publicKeyUrl } from '~/constants/verification.json';
 
 import { version } from '../package.json';
+import { build } from '../../package.json';
 
 const updateServer = 'https://update.electronjs.org';
-const updateFeed = `${updateServer}/soerenbf/concordium-desktop-wallet/${process.platform}-${process.arch}/${version}/`;
+const updateFeed = `${updateServer}/${build.publish.owner}/${build.publish.repo}/${process.platform}-${process.arch}/${version}/`;
 autoUpdater.setFeedURL({
     url: updateFeed,
-    provider: 'github',
-    owner: 'soerenbf',
-    repo: 'concordium-desktop-wallet',
+    ...build.publish,
 });
 
 log.transports.file.level = 'info';
@@ -72,19 +72,17 @@ function getVerifier(path: string): Promise<Verify> {
     });
 }
 
-const releasesFeed =
-    'https://github.com/soerenbf/concordium-desktop-wallet/releases/download';
+const releasesFeed = `https://github.com/${build.publish.owner}/${build.publish.repo}/releases/download`;
 
 function getVerificationFunctions(
     { downloadedFile: filePath, releaseName, path: fileName }: RealUpdateInfo // UpdateInfo interface doesn't seem to be aligned with actual content.
 ) {
-    const releaseDir = `${releasesFeed}/${releaseName}`;
-    const releasePath = `${releaseDir}/${fileName}`;
+    const releaseFileUrl = `${releasesFeed}/${releaseName}/${fileName}`;
 
     return {
         async verifyChecksum() {
             const remoteHash = (
-                await getRemoteContent(`${releasePath}.hash`)
+                await getRemoteContent(`${releaseFileUrl}.hash`)
             ).trim();
             const localHash = await getSha256Sum(filePath);
 
@@ -96,8 +94,8 @@ function getVerificationFunctions(
         },
         async verifySignature() {
             const [remoteSig, pubKey] = await Promise.all([
-                getRemoteContent(`${releasePath}.sig`, true),
-                getRemoteContent(`${releaseDir}/pubkey.pem`),
+                getRemoteContent(`${releaseFileUrl}.sig`, true),
+                getRemoteContent(publicKeyUrl),
             ]);
 
             const verifier = await getVerifier(filePath);

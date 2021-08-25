@@ -10,6 +10,7 @@ const exec = promisify(require('child_process').exec);
 
 const { build } = require('../package.json');
 const app = require('../app/package.json');
+const { publicKeyUrl } = require('../app/constants/verification.json');
 
 /**
  * @description
@@ -107,13 +108,9 @@ async function verifySignature(pubKeyPath, file, sigFile) {
     console.log(stdout);
 }
 
-// TODO: change this to the correct url.
-const remotePubKeyUrl =
-    'https://gist.githubusercontent.com/soerenbf/089046aa95b7708cae1ec6c33dacf73d/raw/04b4da1f5e392ae2ff3e1aada5113b193eecb165/cdw-pubkey-test.pem';
-
-function getRemotePubKey() {
+function getPublicKey() {
     return new Promise((resolve, reject) => {
-        const req = https.get(remotePubKeyUrl, (res) => {
+        const req = https.get(publicKeyUrl, (res) => {
             let acc = '';
             res.on('data', (d) => {
                 acc += d.toString();
@@ -180,7 +177,7 @@ async function verifyRemote(file, sigFile) {
     console.log('\nVerification of signature with remote public key:');
 
     try {
-        const content = await getRemotePubKey();
+        const content = await getPublicKey();
         await executeWithTempFile(content)((p) =>
             verifySignature(p, file, sigFile)
         );
