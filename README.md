@@ -131,13 +131,15 @@ TARGET_NET=$NET yarn package-mac-no-notarize
 
 ### Generating verification assets
 
-Users are encouraged to verify the integrity of a downloaded application binary before installation. To support this, we need to generate a **hash** and a **signature** for each binary released. This is done through a script located at `scripts/fileDigest.js`.
+Users are encouraged to verify the integrity of a downloaded application binary before installation. To support this, we need to generate a **hash** and a **signature** for each binary released. Furthermore, automatic updates also rely on these assets for verification of each update being installed.
 
-The script needs a path to a private key to create the signature. This is specified as a parameter when running the script:
+To generate the assets, run:
 
 ```bash
 yarn generate-verification-assets <path-to-private-key>
 ```
+
+-   The private key used for this needs to match the public key published for verification, otherwise verification will not succeed.
 
 By default, the script tries to generate a hash and sig file for all release binaries in `release/`. It also tries to verify the signature created with a public key, which is published separately.
 
