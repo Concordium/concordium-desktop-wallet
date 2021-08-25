@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unused-prop-types */
 import React, {
     useState,
     useCallback,
@@ -9,9 +10,14 @@ import React, {
 } from 'react';
 
 import CogIcon from '@resources/svg/settings.svg';
+import ErrorIcon from '@resources/svg/logo-error.svg';
+import CheckmarkIcon from '@resources/svg/logo-checkmark.svg';
 import Button from '~/cross-app-components/Button';
 import { NotificationLevel } from '~/features/NotificationSlice';
-import Notification from '../Notification';
+import Loading from '~/cross-app-components/Loading';
+
+import Notification from './Notification';
+import Countdown from './Countdown';
 
 enum UpdateStatus {
     Available,
@@ -29,10 +35,10 @@ interface State {
     status: UpdateStatus;
     message?: string;
 }
-type ChildProps = Props &
-    Pick<State, 'message'> & {
-        setState: Dispatch<SetStateAction<State>>;
-    };
+
+interface ChildProps extends Props, State {
+    setState: Dispatch<SetStateAction<State>>;
+}
 
 const AvailableChild = ({ onUpdate, setState, onPostpone }: ChildProps) => {
     const update = useCallback(() => {
@@ -58,21 +64,57 @@ const AvailableChild = ({ onUpdate, setState, onPostpone }: ChildProps) => {
     );
 };
 
+const iconWidth = 60;
+
+const ProcessChild = ({ status }: ChildProps) => (
+    <>
+        <Loading inline iconWidth={iconWidth} />
+        <div className="mT10 textCenter">
+            {status === UpdateStatus.Downloading && 'Downloading update'}
+            {status === UpdateStatus.Verifying && 'Verifying update'}
+        </div>
+    </>
+);
+
+const SuccessChild = ({ onPostpone }: ChildProps) => {
+    function handleEnd() {
+        window.autoUpdate.quitAndInstall();
+        onPostpone();
+    }
+    return (
+        <>
+            <CheckmarkIcon width={iconWidth} height={iconWidth} />
+            <div className="mT10 textCenter">
+                Update verified. Restarting application in{' '}
+                <Countdown from={3} onEnd={handleEnd} />
+            </div>
+        </>
+    );
+};
+
+const ErrorChild = ({ message }: ChildProps) => (
+    <>
+        <ErrorIcon width={iconWidth} height={iconWidth} />
+        <div className="mT10 textCenter">{message}</div>
+    </>
+);
+
 const updateStatusMap: {
     [k in UpdateStatus]: ComponentType<ChildProps>;
 } = {
     [UpdateStatus.Available]: AvailableChild,
-    [UpdateStatus.Downloading]: AvailableChild,
-    [UpdateStatus.Verifying]: AvailableChild,
-    [UpdateStatus.Success]: AvailableChild,
-    [UpdateStatus.Error]: AvailableChild,
+    [UpdateStatus.Downloading]: ProcessChild,
+    [UpdateStatus.Verifying]: ProcessChild,
+    [UpdateStatus.Success]: SuccessChild,
+    [UpdateStatus.Error]: ErrorChild,
 };
 
 export default function AppUpdateNotification(props: Props) {
     const { onPostpone } = props;
-    const [{ status, message }, setState] = useState<State>({
+    const [state, setState] = useState<State>({
         status: UpdateStatus.Available,
     });
+    const { status } = state;
     const disableClose = useMemo(
         () => ![UpdateStatus.Available, UpdateStatus.Error].includes(status),
         [status]
@@ -106,7 +148,7 @@ export default function AppUpdateNotification(props: Props) {
             disableClose={disableClose}
             onCloseClick={onPostpone}
         >
-            <Child {...props} message={message} setState={setState} />
+            <Child {...props} {...state} setState={setState} />
         </Notification>
     );
 }

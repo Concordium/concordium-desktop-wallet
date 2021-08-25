@@ -10,6 +10,10 @@ export interface LoadingProps extends ClassName {
     // Position inline instead of center of parent element. Defaults to false.
     inline?: boolean;
     text?: string;
+    // Defaults to 100
+    iconWidth?: number;
+    // Defaults to same as iconWidth
+    iconHeight?: number;
 }
 
 /**
@@ -24,10 +28,16 @@ export default function Loading({
     className,
     inline = false,
     text,
+    iconWidth = 100,
+    iconHeight = iconWidth,
 }: LoadingProps): JSX.Element {
     return (
         <span className={clsx(styles.root, inline && styles.inline, className)}>
-            <LoadingIcon className={styles.icon} />
+            <LoadingIcon
+                className={styles.icon}
+                width={iconWidth}
+                height={iconHeight}
+            />
             {text && <div className={styles.text}>{text}</div>}
         </span>
     );

@@ -15,6 +15,7 @@ initMisc(store.dispatch);
 window.addListener.openRoute((_, route: string) => {
     store.dispatch(push(route));
 });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, no-console
 window.addListener.logFromMain((_, ...args: any[]) => console.log(...args));
 
 window.autoUpdate.onUpdateAvailable(() => {
