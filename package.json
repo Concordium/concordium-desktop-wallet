@@ -124,13 +124,13 @@
     ],
     "publish": {
       "provider": "github",
-      "owner": "soerenbf",
+      "owner": "Concordium",
       "repo": "concordium-desktop-wallet"
     }
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/soerenbf/concordium-desktop-wallet"
+    "url": "git+https://github.com/Concordium/concordium-desktop-wallet"
   },
   "author": {
     "name": "Concordium Software",
