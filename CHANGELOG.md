@@ -9,6 +9,7 @@
 -   It is now possible to rename accounts and identities.
 -   Added an option to add an address book entry while creating a transfer transaction.
 -   Added an introductory screen to set up a node connection for first time users.
+-   Application will now update automatically (Windows and MacOS)
 
 ### Changed
 
