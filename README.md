@@ -11,6 +11,14 @@ You need the following to build and run the project:
 -   Rust (https://www.rust-lang.org/tools/install)
 -   Wasm-pack (https://rustwasm.github.io/wasm-pack/installer/)
 
+### Ubuntu
+
+For ubuntu, a couple of extra dependencies are needed:
+
+-   libusb 1.0 (`sudo apt-get install libusb-1.0`)
+-   libudev-dev (`sudo apt-get install libudev-dev`)
+-   rpm (`sudo apt-get install rpm`)
+
 ## Install
 
 Clone the repo via git.
