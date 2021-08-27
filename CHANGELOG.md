@@ -11,6 +11,7 @@
 -   Added an introductory screen to set up a node connection for first time users.
 -   Now shows connected node status in side bar.
 -   It is now possible to remove a failed identity.
+-   Added reference (sessionId) on failed identities, for support.
 
 ### Changed
 

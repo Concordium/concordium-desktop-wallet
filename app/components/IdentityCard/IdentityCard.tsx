@@ -26,6 +26,7 @@ import Button from '~/cross-app-components/Button';
 import { useUpdateEffect } from '~/utils/hooks';
 import { editIdentityName } from '~/features/IdentitySlice';
 import DeleteIdentity from './DeleteIdentity';
+import FailedIdentityDetails from './FailedIdentityDetails';
 
 import styles from './IdentityCard.module.scss';
 
@@ -199,6 +200,10 @@ function IdentityListElement({
                         ))}
                 </div>
             )}
+            {showAttributes &&
+                identity.status === IdentityStatus.RejectedAndWarned && (
+                    <FailedIdentityDetails identity={identity} />
+                )}
         </Card>
     );
 }
