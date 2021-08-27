@@ -22,7 +22,7 @@ const transitionVariants: Variants = {
     },
 };
 
-type NotificationProps = PropsWithChildren<{
+export type NotificationProps = PropsWithChildren<{
     level: NotificationLevel;
     onCloseClick(): void;
 }>;

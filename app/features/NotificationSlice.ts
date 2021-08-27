@@ -1,9 +1,9 @@
 import { createSlice, Dispatch, PayloadAction } from '@reduxjs/toolkit';
 
 export enum NotificationLevel {
-    Info,
-    Error,
-    Update,
+    Info = 'info',
+    Error = 'error',
+    Update = 'update',
 }
 
 let nextId = 0;
