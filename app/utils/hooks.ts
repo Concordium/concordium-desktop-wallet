@@ -60,3 +60,15 @@ export const useTimeoutState = <TValue>(
 
     return [value, set];
 };
+
+export const useAsyncMemo = <ReturnType>(
+    getResult: () => Promise<ReturnType>,
+    handleError: (e: Error) => void = () => {}
+) => {
+    const [result, setResult] = useState<ReturnType>();
+    useEffect(() => {
+        getResult().then(setResult).catch(handleError);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+    return result;
+};
