@@ -20,17 +20,19 @@ export default function FailedIdentityDetails({
     const subject = `Reference: ${sessionId}`;
 
     return (
-        <div className={styles.details}>
-            <p>
+        <div className={clsx('body3', styles.details, styles.detailsRow)}>
+            <p className={styles.failedDetailsLine}>
                 Contact{' '}
                 <ExternalLink href={`mailto:${mail}?subject=${subject}`}>
                     {mail}
                 </ExternalLink>{' '}
                 for support.
             </p>
-            <p>Please provide the reference, when doing so.</p>
+            <p className={styles.failedDetailsLine}>
+                Please provide the reference, when doing so.
+            </p>
             <SidedRow
-                className={clsx('body2', styles.detailsRow)}
+                className={styles.failedDetailsLine}
                 left={`Reference: ${sessionId.substring(0, 8)}...`}
                 right={<CopyButton value={sessionId} />}
             />
