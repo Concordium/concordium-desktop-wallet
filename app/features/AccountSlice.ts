@@ -42,7 +42,7 @@ import {
 import { getAccountInfos, getAccountInfoOfAddress } from '../node/nodeHelpers';
 import { hasPendingTransactions } from '~/database/TransactionDao';
 
-interface AccountState {
+export interface AccountState {
     accounts: Account[];
     accountsInfo: Record<string, AccountInfo>;
     chosenAccountIndex: number;
