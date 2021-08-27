@@ -55,7 +55,9 @@ export default function FailedIdentityModal({
                 { label: 'Later' },
             ]}
             postAction={async () => {
-                window.log.info('removing failed identity');
+                window.log.info(
+                    `User has been warned of failed identity ${identityId}`
+                );
                 await updateIdentity(identityId, {
                     status: IdentityStatus.RejectedAndWarned,
                 });
