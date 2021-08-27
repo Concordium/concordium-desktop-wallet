@@ -1,9 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-const webpack = require('webpack');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { merge } = require('webpack-merge');
-const TerserPlugin = require('terser-webpack-plugin');
 const { baseConfig, assetsConfig, stylesConfig } = require('./partials');
 const CheckNodeEnv = require('../internals/scripts/CheckNodeEnv');
 const DeleteSourceMaps = require('../internals/scripts/DeleteSourceMaps');
