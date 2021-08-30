@@ -1,5 +1,4 @@
 import React, { AnchorHTMLAttributes, MouseEventHandler } from 'react';
-import ipcCommands from '~/constants/ipcCommands.json';
 
 const interceptClickEvent: MouseEventHandler<HTMLAnchorElement> = (e) => {
     const { currentTarget } = e;
@@ -8,7 +7,7 @@ const interceptClickEvent: MouseEventHandler<HTMLAnchorElement> = (e) => {
         const href = currentTarget.getAttribute('href');
 
         if (href) {
-            window.ipcRenderer.invoke(ipcCommands.openUrl, href);
+            window.openUrl(href);
         }
     }
 };

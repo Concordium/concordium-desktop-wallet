@@ -1,5 +1,3 @@
-import ipcCommands from '../constants/ipcCommands.json';
-
 /**
  * Opens an 'open file' prompt where the user can select a file to be read. The
  * file path for the chosen file is returned.
@@ -8,8 +6,7 @@ import ipcCommands from '../constants/ipcCommands.json';
 export async function openFileDestination(
     opts: Electron.OpenDialogOptions
 ): Promise<string> {
-    const openDialogValue: Electron.OpenDialogReturnValue = await window.ipcRenderer.invoke(
-        ipcCommands.openFileDialog,
+    const openDialogValue: Electron.OpenDialogReturnValue = await window.files.openFileDialog(
         opts
     );
 
@@ -36,8 +33,7 @@ export default async function saveFile(
     data: Buffer | string,
     opts: Electron.SaveDialogOptions
 ): Promise<boolean> {
-    const saveFileDialog: Electron.SaveDialogReturnValue = await window.ipcRenderer.invoke(
-        ipcCommands.saveFileDialog,
+    const saveFileDialog: Electron.SaveDialogReturnValue = await window.files.saveFileDialog(
         opts
     );
 
@@ -51,11 +47,7 @@ export default async function saveFile(
         );
     }
 
-    return window.ipcRenderer.invoke(
-        ipcCommands.saveFile,
-        saveFileDialog.filePath,
-        data
-    );
+    return window.files.saveFile(saveFileDialog.filePath, data);
 }
 
 /**
@@ -78,10 +70,6 @@ export async function saveMultipleFiles(
         return;
     }
     for (const [fileName, data] of datas) {
-        await window.ipcRenderer.invoke(
-            ipcCommands.saveFile,
-            `${fileLocation}/${fileName}`,
-            data
-        );
+        await window.files.saveFile(`${fileLocation}/${fileName}`, data);
     }
 }

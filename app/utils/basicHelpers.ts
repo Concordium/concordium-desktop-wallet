@@ -162,3 +162,15 @@ export function abs(value: bigint) {
 export function max(first: bigint, second: bigint) {
     return first > second ? first : second;
 }
+
+/**
+ * Given two function, this returns a function which is their composition.
+ * (a , b) => b ∘ a
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function pipe<A extends any[], B, C>(
+    a: (...args: A) => B,
+    b: (arg: B) => C
+): (...args: A) => C {
+    return (...args) => b(a(...args));
+}

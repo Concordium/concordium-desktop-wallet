@@ -5,8 +5,8 @@ import attributeNamesJson from '~/constants/attributeNames.json';
 import { chosenAccountInfoSelector } from '~/features/AccountSlice';
 import SidedRow from '~/components/SidedRow';
 import styles from './Accounts.module.scss';
+import { AttributeKeyName } from '~/utils/types';
 import {
-    AttributeKey,
     formatAttributeValue,
     compareAttributes,
 } from '~/utils/identityHelpers';
@@ -54,9 +54,9 @@ export default function DisplayIdentityAttributes(): JSX.Element | null {
                         className={styles.identityAttributesOfCredential}
                     >
                         {attributeKeys
-                            .map((k) => k as AttributeKey)
+                            .map((k) => k as AttributeKeyName)
                             .sort(compareAttributes)
-                            .map((attributeKey: AttributeKey) => (
+                            .map((attributeKey: AttributeKeyName) => (
                                 <SidedRow
                                     className={styles.identityAttribute}
                                     key={attributeKey}

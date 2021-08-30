@@ -20,7 +20,7 @@ module.exports = merge(baseConfig, {
 
     target: 'electron-main',
 
-    entry: './app/main.dev.ts',
+    entry: './app/main.ts',
 
     output: {
         path: fromRoot('./app'),

@@ -1,4 +1,5 @@
 const { default: TsconfigPathsPlugin } = require('tsconfig-paths-webpack-plugin');
+const path = require('path');
 const { baseConfig, assetsConfig, stylesConfig } = require('../configs/partials');
 const { pathToSvgAssets } = require('../configs/partials/webpack.config.assets');
 
@@ -19,7 +20,12 @@ module.exports = {
     const fileLoaderRule = config.module.rules.find(rule => rule.test.test('.svg'));
     fileLoaderRule.exclude = pathToSvgAssets;
 
-    config.resolve.plugins = [...(config.resolve.plugins || []), new TsconfigPathsPlugin({ extensions })]
+    config.resolve.plugins = [...(config.resolve.plugins || []), new TsconfigPathsPlugin({ extensions })];
+
+    const tsRule = baseConfig.module.rules.find(r => r.test.test('.ts'));
+    tsRule.use[1].options = {
+        configFile: path.resolve(__dirname, '../tsconfig.sb.json'),
+    };
 
     config.module.rules = [
       ...(config.module.rules || []),

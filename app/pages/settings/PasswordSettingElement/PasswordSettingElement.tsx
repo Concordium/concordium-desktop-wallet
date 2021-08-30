@@ -2,7 +2,6 @@ import React, { useCallback, useState } from 'react';
 import { SubmitHandler } from 'react-hook-form';
 import Form from '~/components/Form/Form';
 import Card from '~/cross-app-components/Card/Card';
-import ipcCommands from '../../../constants/ipcCommands.json';
 import { passwordValidators } from '~/utils/passwordHelpers';
 import styles from './PasswordSettingElement.module.scss';
 
@@ -35,20 +34,13 @@ export default function PasswordSettingElement({ displayText }: Props) {
             }
 
             // Re-key the database with the new password.
-            const rekeyed = await window.ipcRenderer.invoke(
-                ipcCommands.database.rekeyDatabase,
+            const rekeyed = await window.database.general.rekeyDatabase(
                 values.currentPassword,
                 values.password
             );
             if (rekeyed) {
-                await window.ipcRenderer.invoke(
-                    ipcCommands.database.setPassword,
-                    values.password
-                );
-                await window.ipcRenderer.invoke(
-                    ipcCommands.database.invalidateKnexSingleton,
-                    values.password
-                );
+                await window.database.general.setPassword(values.password);
+                await window.database.general.invalidateKnexSingleton();
                 setValidationError(undefined);
                 setSuccess('Your password was successfully updated');
                 setKeyingDatabase(false);

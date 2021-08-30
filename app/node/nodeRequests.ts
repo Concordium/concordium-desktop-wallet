@@ -2,12 +2,12 @@ import {
     BoolResponse,
     JsonResponse,
     NodeInfoResponse,
+    PeerListResponse,
 } from '../proto/concordium_p2p_rpc_pb';
 import { BlockSummary, ConsensusStatus, AccountNonce } from './NodeApiTypes';
 import { AccountInfo, Global, Versioned } from '../utils/types';
 import { intToString } from '../utils/JSONHelper';
 import grpcMethods from '../constants/grpcMethods.json';
-import ipcCommands from '../constants/ipcCommands.json';
 
 /**
  * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
@@ -18,11 +18,7 @@ import ipcCommands from '../constants/ipcCommands.json';
  * Updates the location of the node endpoint;
  */
 export function setClientLocation(address: string, port: string) {
-    return window.ipcRenderer.invoke(
-        ipcCommands.grpcSetLocation,
-        address,
-        port
-    );
+    return window.grpc.setLocation(address, port);
 }
 
 /**
@@ -34,11 +30,7 @@ async function sendPromise(
     command: string,
     input: Record<string, string> = {}
 ): Promise<Uint8Array> {
-    const result = await window.ipcRenderer.invoke(
-        ipcCommands.grpcCall,
-        command,
-        input
-    );
+    const result = await window.grpc.call(command, input);
     if (result.successful) {
         return result.response;
     }
@@ -119,6 +111,17 @@ export function getAccountInfo(
 export async function getNodeInfo(): Promise<NodeInfoResponse> {
     const response = await sendPromise(grpcMethods.nodeInfo);
     return NodeInfoResponse.deserializeBinary(response);
+}
+
+export async function getPeerList(
+    includeBootstrappers = false
+): Promise<PeerListResponse> {
+    const response = await sendPromise(grpcMethods.peerList, {
+        includeBootstrappers: includeBootstrappers
+            ? 'includeBootstrappers'
+            : '',
+    });
+    return PeerListResponse.deserializeBinary(response);
 }
 
 export async function getCryptographicParameters(

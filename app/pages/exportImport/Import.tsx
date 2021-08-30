@@ -38,14 +38,14 @@ export default function Import() {
     // Attempts to decrypt the file, using the given password
     // then parses/validates the data.
     // If it succeeds, redirect to PerformImport to finish importing.
-    async function decryptAndParseData(password: string) {
+    function decryptAndParseData(password: string) {
         if (!encryptedData) {
             fail('Unexpected missing data');
             return;
         }
         let decryptedData;
         try {
-            decryptedData = await decrypt(encryptedData, password);
+            decryptedData = decrypt(encryptedData, password);
         } catch (e) {
             fail('Unable to decrypt file');
             return;

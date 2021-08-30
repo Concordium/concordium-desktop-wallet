@@ -27,8 +27,7 @@ import {
     containsEncrypted,
 } from './util';
 import styles from './AccountReport.module.scss';
-import { SaveFileData } from '~/ipc/files';
-import ipcCommands from '~/constants/ipcCommands.json';
+import type { SaveFileData } from '~/preload/preloadTypes';
 import saveFile from '~/utils/FileHelper';
 
 const decryptMessage = (name: string) =>
@@ -177,10 +176,7 @@ export default function AccountReport({ location }: Props) {
             }
 
             // Send to main thread for saving the files as a single zip file.
-            return window.ipcRenderer.invoke(
-                ipcCommands.saveZipFileDialog,
-                filesToZip
-            );
+            return window.files.saveZipFileDialog(filesToZip);
         } catch (e) {
             setShowError({
                 show: true,
@@ -292,6 +288,7 @@ export default function AccountReport({ location }: Props) {
                                             filter={(account: Account) =>
                                                 !accounts.includes(account)
                                             }
+                                            messageWhenEmpty="All accounts have already been added"
                                         />
                                     </div>
                                 )}

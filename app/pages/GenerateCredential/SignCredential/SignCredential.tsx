@@ -86,7 +86,10 @@ export default function SignCredential({ onSigned }: Props): JSX.Element {
                     throw new Error(errorMessages.missingGlobal);
                 }
 
-                const credential = await createCredentialInfo(
+                const {
+                    info: credential,
+                    randomness,
+                } = await createCredentialInfo(
                     identity,
                     credentialNumber,
                     keys,
@@ -98,6 +101,7 @@ export default function SignCredential({ onSigned }: Props): JSX.Element {
                 );
                 const blob: CredentialBlob = {
                     credential,
+                    randomness,
                     address,
                     credentialNumber,
                     identityId: identity.id,

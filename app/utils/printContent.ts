@@ -1,4 +1,3 @@
-import ipcCommands from '../constants/ipcCommands.json';
 import { PrintErrorTypes } from './types';
 
 export default async function printContent(target: HTMLIFrameElement) {
@@ -9,9 +8,8 @@ export default async function printContent(target: HTMLIFrameElement) {
     let error;
 
     try {
-        error = await window.ipcRenderer.invoke(
-            ipcCommands.print,
-            encodeURI(windowToPrint.document.body.outerHTML)
+        error = await window.printElement(
+            encodeURIComponent(windowToPrint.document.body.outerHTML)
         );
     } catch (e) {
         throw new Error(`Failed to print due to: ${e.message}.`);

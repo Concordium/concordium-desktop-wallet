@@ -1,95 +1,11 @@
 {
-    "appGetPath": "APP_GET_PATH",
     "print": "PRINT",
     "openFileDialog": "OPEN_FILE_DIALOG",
     "saveFileDialog": "SAVE_FILE_DIALOG",
-    "saveZipFileDialog": "SAVE_ZIP_FILE_DIALOG",
-    "saveFile": "SAVE_FILE",
-    "writeImageToClipboard": "CLIPBOARD_WRITE_IMAGE",
-    "grpcSetLocation": "GRPC_SET_LOCATION",
-    "grpcCall": "GRPC_CALL",
-    "grpcNodeConsensusAndGlobal": "GRPC_NODE_CONSENSUS_GLOBAL",
     "openUrl": "OPEN_URL",
-    "httpGet": "HTTP_GET",
-    "getTransactions": "WALLET_PROXY_GET_TRANSACTIONS",
-    "getIdProviders": "WALLET_PROXY_GET_ID_PROVIDERS",
-    "sha256": "SHA_256",
-    "databaseExists": "DATABASE_EXISTS",
-    "encrypt": "ENCRYPT",
-    "decrypt": "DECRYPT",
-    "database": {
-        "dbSelectAll": "DB_SELECT_ALL",
-        "dbGetWalletId": "DB_GET_WALLET_ID",
-        "dbInsertWallet": "DB_INSERT_WALLET",
-        "migrate": "DB_MIGRATE",
-        "rekeyDatabase": "DB_REKEY_DATABASE",
-        "checkAccess": "DB_CHECK_ACCESS",
-        "setPassword": "DB_SET_PASSWORD",
-        "invalidateKnexSingleton": "DB_INVALIDATE_KNEX_SINGLETON",
-        "selectFirst": "DB_SELECT_FIRST",
-        "accounts": {
-            "getAll": "DB_ACCOUNTS_GET_ALL",
-            "getAccount": "DB_ACCOUNTS_GET_ACCOUNT",
-            "insertAccount": "DB_ACCOUNTS_INSERT",
-            "removeAccount": "DB_ACCOUNTS_REMOVE",
-            "updateAccount": "DB_ACCOUNTS_UPDATE",
-            "findAccounts": "DB_ACCOUNTS_FIND",
-            "removeInitialAccount": "DB_ACCOUNTS_REMOVE_INITIAL",
-            "confirmInitialAccount": "DB_ACCOUNTS_CONFIRM_INITIAL"
-        },
-        "addressBook": {
-            "getAll": "DB_ADDRESS_BOOK_GET_ALL",
-            "insert": "DB_ADDRESS_BOOK_INSERT",
-            "update": "DB_ADDRESS_BOOK_UPDATE",
-            "remove": "DB_ADDRESS_BOOK_REMOVE",
-            "findEntries": "DB_ADDRESS_BOOK_FIND"
-        },
-        "credentials": {
-            "insert": "DB_CREDENTIAL_INSERT",
-            "delete": "DB_CREDENTIAL_DELETE",
-            "deleteForAccount": "DB_CREDENTIAL_DELETE_FOR_ACCOUNT",
-            "getAll": "DB_CREDENTIAL_GET_ALL",
-            "getForIdentity": "DB_CREDENTIAL_GET_FOR_IDENTITY",
-            "getForAccount": "DB_CREDENTIAL_GET_FOR_ACCOUNT",
-            "getNextNumber": "DB_CREDENTIAL_GET_NEXT_NUMBER",
-            "updateIndex": "DB_CREDENTIAL_UPDATE_INDEX",
-            "update": "DB_CREDENTIAL_UPDATE",
-            "hasDuplicateWalletId": "DB_CREDENTIAL_HAS_DUPLICATE_WALLET_ID",
-            "hasExistingCredential": "DB_CREDENTIAL_HAS_EXISTING_CREDENTIAL"
-        },
-        "externalCredentials": {
-            "upsertExternalCredential": "DB_UPSERT_EXTERNAL_CREDENTIAL",
-            "upsertMultipleExternalCredentials": "DB_UPSERT_MULTIPLE_EXTERNAL_CREDENTIALS",
-            "deleteExternalCredentials": "DB_DELETE_EXTERNAL_CREDENTIALS",
-            "getAllExternalCredentials": "DB_GET_ALL_EXTERNAL_CREDENTIALS"
-        },
-        "identity": {
-            "getNextIdentityNumber": "DB_IDENTITY_GET_NEXT_IDENTITY_NUMBER",
-            "insert": "DB_IDENTITY_INSERT",
-            "update": "DB_IDENTITY_UPDATE",
-            "getIdentitiesForWallet": "DB_IDENTITY_GET_FOR_WALLET",
-            "rejectIdentityAndDeleteInitialAccount": "DB_IDENTITY_REJECT_IDENTITY_AND_INITIAL_ACCOUNT",
-            "confirmIdentity": "DB_IDENTITY_CONFIRM",
-            "insertPendingIdentityAndInitialAccount": "DB_IDENTITY_INSERT_PENDING_IDENTITY_AND_INITIAL_ACCOUNT"
-        },
-        "genesisAndGlobal": {
-            "setValue": "DB_GENESIS_AND_GLOBAL_SET"
-        },
-        "multiSignatureTransaction": {
-            "insert": "DB_MULTI_SIGNATURE_TRANSACTION_INSERT",
-            "update": "DB_MULTI_SIGNATURE_TRANSACTION_UPDATE",
-            "getMaxOpenNonceOnAccount": "DB_MULTI_SIGNATURE_TRANSACTION_MAX_NONCE_ON_OPEN"
-        },
-        "settings": {
-            "update": "DB_SETITNGS_UPDATE"
-        },
-        "transactions": {
-            "getPending": "DB_TRANSACTIONS_GET_PENDING",
-            "hasPending": "DB_TRANSACTIONS_HAS_PENDING",
-            "getTransactionsForAccount": "DB_TRANSACTIONS_GET_TRANSACTIONS_FOR_ACCOUNT",
-            "hasEncryptedTransactions": "DB_TRANSACTIONS_HAS_ENCRYPTED",
-            "update": "DB_TRANSACTIONS_UPDATE",
-            "insert": "DB_TRANSACTIONS_INSERT"
-        }
-    }
+    "httpsGet": "HTTPS_GET",
+    "createView": "CREATE_VIEW",
+    "removeView": "REMOVE_VIEW",
+    "resizeView": "RESIZE_VIEW",
+    "getUserDataPath": "GET_USER_DATA_PATH"
 }
