@@ -1,4 +1,5 @@
 {
+    "peerList": "peer-list",
     "nodeInfo": "node-info",
     "getConsensusStatus": "get-consensus-status",
     "sendTransaction": "send-transaction",

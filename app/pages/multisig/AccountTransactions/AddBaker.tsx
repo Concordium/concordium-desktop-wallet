@@ -244,6 +244,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                                                 )
                                             )
                                         }
+                                        messageWhenEmpty="There are no accounts that can become bakers"
                                     />
                                 </div>
                             </div>

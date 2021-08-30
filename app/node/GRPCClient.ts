@@ -29,6 +29,10 @@ export function grpcCall(name: string, input: Record<string, string>) {
             const { transactionId } = input;
             return client.getTransactionStatus(transactionId);
         }
+        case grpcMethods.peerList: {
+            const { includeBootstrappers } = input;
+            return client.getPeerList(Boolean(includeBootstrappers));
+        }
         case grpcMethods.getNextAccountNonce: {
             const { address } = input;
             return client.getNextAccountNonce(address);

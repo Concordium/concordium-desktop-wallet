@@ -2,7 +2,7 @@ import React, { useEffect, useState, SyntheticEvent } from 'react';
 import { useSelector } from 'react-redux';
 import clsx from 'clsx';
 import MultiSigIcon from '@resources/svg/multisig.svg';
-import PendingImage from '@resources/svg/pending-small.svg';
+import PendingImage from '@resources/svg/pending-arrows.svg';
 import RejectedImage from '@resources/svg/warning.svg';
 import ShieldImage from '@resources/svg/shield.svg';
 import BakerImage from '@resources/svg/baker.svg';
