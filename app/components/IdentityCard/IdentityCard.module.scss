@@ -59,6 +59,16 @@
     border-top: 1px solid $color-grey;
 }
 
+.failedDetailsLine {
+    text-align: left;
+    margin: 0;
+    font-size: $font-size-body3;
+
+    &:not(:last-child) {
+        padding-bottom: 10px;
+    }
+}
+
 .form,
 .name,
 .nameField {

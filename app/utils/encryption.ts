@@ -1,21 +1,13 @@
 import { EncryptedData } from './types';
-import ipcCommands from '../constants/ipcCommands.json';
-import { DecryptionData, DecryptionResult } from '~/ipc/crypto';
+import { DecryptionData, DecryptionResult } from '~/preload/preloadTypes';
 
 /**
  * Encrypts the data using PBKDF2 to generate a key from the password, and
  * AES-256 in CBC mode. The cipher text is returned along with the parameters
  * required to decrypt the file.
  */
-export async function encrypt(
-    data: string,
-    password: string
-): Promise<EncryptedData> {
-    const encryptedResult = await window.ipcRenderer.invoke(
-        ipcCommands.encrypt,
-        data,
-        password
-    );
+export function encrypt(data: string, password: string): EncryptedData {
+    const encryptedResult = window.cryptoMethods.encrypt(data, password);
     return encryptedResult;
 }
 
@@ -23,12 +15,11 @@ export async function encrypt(
  * Decrypts the data using the metadata in the file that was given as input
  * and the provided password.
  */
-export async function decrypt(
+export function decrypt(
     { cipherText, metadata }: EncryptedData,
     password: string
-): Promise<string> {
-    const decryptedResult: DecryptionResult = await window.ipcRenderer.invoke(
-        ipcCommands.decrypt,
+): string {
+    const decryptedResult: DecryptionResult = window.cryptoMethods.decrypt(
         { cipherText, metadata },
         password
     );

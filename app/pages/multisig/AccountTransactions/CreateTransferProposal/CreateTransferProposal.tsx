@@ -355,6 +355,7 @@ function CreateTransferProposal({
                                         chosenAccount={account}
                                         filter={isMultiSig}
                                         onAccountClicked={continueAction}
+                                        messageWhenEmpty="There are no accounts that require multiple signatures"
                                     />
                                 </div>
                             </Route>

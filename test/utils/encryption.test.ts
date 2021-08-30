@@ -1,4 +1,4 @@
-import { encrypt, decrypt } from '../../app/ipc/crypto';
+import { encrypt, decrypt } from '../../app/preload/crypto';
 
 test("Decrypt should be encrypt's inverse, if given the same password", () => {
     const clearText = 'test message';

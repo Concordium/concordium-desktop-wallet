@@ -56,9 +56,8 @@ function useLedger(): {
     const [subscribed, setSubscribed] = useState<boolean>();
 
     useEffect(() => {
-        window.ipcRenderer.on(
-            ledgerIpcCommands.listenChannel,
-            (_event, action: LedgerSubscriptionAction, deviceName: string) => {
+        window.addListener.ledgerChannel(
+            (action: LedgerSubscriptionAction, deviceName: string) => {
                 switch (action) {
                     case LedgerSubscriptionAction.ERROR_SUBSCRIPTION:
                         dispatch(errorAction());
@@ -86,16 +85,14 @@ function useLedger(): {
             }
         );
         return () => {
-            window.ipcRenderer.removeAllListeners(
-                ledgerIpcCommands.listenChannel
-            );
+            window.removeAllListeners(ledgerIpcCommands.listenChannel);
         };
     }, []);
 
     useEffect(() => {
         if (!subscribed) {
-            window.ipcRenderer
-                .invoke(ledgerIpcCommands.subscribe)
+            window.ledger
+                .subscribe()
                 .then(() => setSubscribed(true))
                 .catch(() => {});
         }
@@ -137,10 +134,8 @@ export default function ExternalHook(
     useEffect(() => {
         return function cleanup() {
             if (client) {
-                window.ipcRenderer
-                    .invoke(ledgerIpcCommands.closeTransport)
-                    .then(() => dispatch(cleanupAction()))
-                    .catch(() => {});
+                window.ledger.closeTransport();
+                dispatch(cleanupAction());
             }
         };
     }, [client, dispatch]);

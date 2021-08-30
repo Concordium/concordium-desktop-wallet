@@ -1,6 +1,5 @@
 import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import ipcCommands from '~/constants/ipcCommands.json';
 import ipcRendererCommands from '~/constants/ipcRendererCommands.json';
 import routes from '~/constants/routes.json';
 import ButtonNavLink from '~/components/ButtonNavLink';
@@ -10,6 +9,7 @@ import { termsUrlBase64 } from '~/utils/termsHelpers';
 import { noOp } from '~/utils/basicHelpers';
 import { useIpcRendererEvent } from '~/cross-app-components/util/nativeEventHooks';
 import { useWindowResize } from '~/cross-app-components/util/eventHooks';
+import type { Listen } from '~/preload/preloadTypes';
 
 import styles from './TermsPage.module.scss';
 
@@ -48,7 +48,7 @@ function interceptClickEvent(e: MouseEvent) {
         const href = target.getAttribute('href');
 
         if (href) {
-            window.ipcRenderer.invoke(ipcCommands.openUrl, href);
+            window.openUrl(href);
         }
     }
 }
@@ -79,8 +79,14 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
             height !== undefined ? Math.ceil(height).toString() : '';
     }, [frameEl]);
     useWindowResize(handleResize);
-    useIpcRendererEvent(ipcRendererCommands.readyToShow, handleResize);
-    useIpcRendererEvent(ipcRendererCommands.didFinishLoad, handleResize);
+    useIpcRendererEvent(
+        ipcRendererCommands.readyToShow as keyof Listen,
+        handleResize
+    );
+    useIpcRendererEvent(
+        ipcRendererCommands.didFinishLoad as keyof Listen,
+        handleResize
+    );
 
     const handleAccept = useCallback(() => {
         acceptTerms(dispatch);

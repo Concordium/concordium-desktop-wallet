@@ -602,6 +602,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                                             !hasEncryptedBalance(acc)
                                         }
                                         onAccountClicked={onContinue}
+                                        messageWhenEmpty="There are no accounts, which can update its credentials"
                                     />
                                 )}
                             />
