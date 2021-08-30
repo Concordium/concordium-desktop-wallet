@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import ShieldImage from '@resources/svg/shield.svg';
 import BakerImage from '@resources/svg/baker.svg';
+import ArrowIcon from '@resources/svg/back-arrow.svg';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
 import { displayAsGTU } from '~/utils/gtu';
@@ -13,6 +14,9 @@ import {
 import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
+    accountsSelector,
+    chosenAccountIndexSelector,
+    chooseAccount,
 } from '~/features/AccountSlice';
 import SidedRow from '~/components/SidedRow';
 import AccountName from './AccountName';
@@ -25,15 +29,38 @@ import styles from './AccountBalanceView.module.scss';
  */
 export default function AccountBalanceView(): JSX.Element | null {
     const dispatch = useDispatch();
+    const accounts = useSelector(accountsSelector);
     const account = useSelector(chosenAccountSelector);
+    const accountIndex = useSelector(chosenAccountIndexSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
     const viewingShielded = useSelector(viewingShieldedSelector);
+
+    const previousAccount = useCallback(() => {
+        const prevIndex = accountIndex - 1;
+
+        if (prevIndex < 0) {
+            dispatch(chooseAccount(accounts.length - 1));
+        } else {
+            dispatch(chooseAccount(prevIndex));
+        }
+    }, [accountIndex, accounts, dispatch]);
+
+    const nextAccount = useCallback(() => {
+        const nextIndex = accountIndex + 1;
+
+        if (nextIndex > accounts.length - 1) {
+            dispatch(chooseAccount(0));
+        } else {
+            dispatch(chooseAccount(nextIndex));
+        }
+    }, [accountIndex, accounts, dispatch]);
 
     if (!account || !accountInfo) {
         return null; // TODO: add display for pending account (which have no accountinfo)
     }
 
     const isMultiSig = Object.values(accountInfo.accountCredentials).length > 1;
+    const canChangeAccount = accounts.length > 1;
 
     if (isMultiSig && viewingShielded) {
         dispatch(setViewingShielded(false));
@@ -133,7 +160,24 @@ export default function AccountBalanceView(): JSX.Element | null {
 
     return (
         <Card className={styles.accountBalanceView}>
-            <AccountName name={account.name} address={account.address} />
+            <div
+                className={clsx(
+                    styles.accountNameWrapper,
+                    canChangeAccount && 'justifySpaceBetween'
+                )}
+            >
+                {canChangeAccount && (
+                    <Button clear onClick={previousAccount}>
+                        <ArrowIcon className={styles.prevAccountIcon} />
+                    </Button>
+                )}
+                <AccountName name={account.name} address={account.address} />
+                {canChangeAccount && (
+                    <Button clear onClick={nextAccount}>
+                        <ArrowIcon className={styles.nextAccountIcon} />
+                    </Button>
+                )}
+            </div>
             {buttons}
             {main}
         </Card>
