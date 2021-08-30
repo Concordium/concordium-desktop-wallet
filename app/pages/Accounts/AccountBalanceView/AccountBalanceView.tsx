@@ -107,7 +107,7 @@ export default function AccountBalanceView(): JSX.Element | null {
         main = (
             <>
                 <ShieldImage className={styles.backgroundImage} />
-                <h1 className={styles.shieldedAmount}>
+                <h1 className={clsx(styles.shieldedAmount, 'mV20')}>
                     {displayAsGTU(totalDecrypted)}
                     {account.allDecrypted || (
                         <>
@@ -135,7 +135,9 @@ export default function AccountBalanceView(): JSX.Element | null {
 
         main = (
             <>
-                <h1 className={styles.blueText}>{displayAsGTU(unShielded)}</h1>
+                <h1 className={clsx(styles.blueText, 'mV20')}>
+                    {displayAsGTU(unShielded)}
+                </h1>
                 <div className={styles.details}>
                     <SidedRow
                         className={clsx(styles.amountRow, 'mT0')}
