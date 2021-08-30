@@ -2,6 +2,7 @@
 import React from 'react';
 import { formatDate } from '~/utils/timeHelpers';
 import { UnsignedCredentialDeploymentInformation } from '~/utils/types';
+import DisplayHexString from './DisplayHexString';
 import PublicKeyDetails from './PublicKeyDetails';
 import DisplayAddress from '../DisplayAddress';
 
@@ -23,7 +24,7 @@ const CredentialInfoLedgerDetails = (props: Props) => (
         </p>
         <p>
             <b>Registration ID credential (RegIdCred):</b>
-            <PublicKeyDetails publicKey={props.credId} />
+            <DisplayHexString value={props.credId} />
         </p>
         <p>
             <b>Identity provider:</b> {props.ipIdentity}
