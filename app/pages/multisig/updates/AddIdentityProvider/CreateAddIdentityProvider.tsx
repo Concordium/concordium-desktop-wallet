@@ -69,7 +69,7 @@ export default function CreateAddIdentityProvider({
             <Form.TextArea
                 className="body1"
                 name={fieldNames.name}
-                label={`${fieldDisplays.name}:`}
+                label={fieldDisplays.name}
                 defaultValue={defaults.name || undefined}
                 placeholder={enterHere(fieldDisplays.name)}
                 rules={{ required: requiredMessage(fieldDisplays.name) }}
@@ -78,7 +78,7 @@ export default function CreateAddIdentityProvider({
                 className="body1"
                 name={fieldNames.url}
                 defaultValue={defaults.url || undefined}
-                label={`${fieldDisplays.url}:`}
+                label={fieldDisplays.url}
                 placeholder={enterHere(fieldDisplays.url)}
                 rules={{ required: requiredMessage(fieldDisplays.url) }}
             />
@@ -86,14 +86,14 @@ export default function CreateAddIdentityProvider({
                 className="body1"
                 name={fieldNames.description}
                 defaultValue={defaults.description || undefined}
-                label={`${fieldDisplays.description}:`}
+                label={fieldDisplays.description}
                 placeholder={enterHere(fieldDisplays.description)}
             />
             <Form.Input
                 className="body1"
                 name={fieldNames.ipIdentity}
                 defaultValue={defaults.ipIdentity || undefined}
-                label={`${fieldDisplays.ipIdentity}:`}
+                label={fieldDisplays.ipIdentity}
                 placeholder={enterHere(fieldDisplays.ipIdentity)}
                 rules={{
                     required: requiredMessage(fieldDisplays.ipIdentity),
@@ -107,7 +107,7 @@ export default function CreateAddIdentityProvider({
                 className="body1"
                 name={fieldNames.ipVerifyKey}
                 defaultValue={defaults.ipVerifyKey || undefined}
-                label={`${fieldDisplays.ipVerifyKey}:`}
+                label={fieldDisplays.ipVerifyKey}
                 placeholder={pasteHere(fieldDisplays.ipVerifyKey)}
                 rules={{
                     required: requiredMessage(fieldDisplays.ipVerifyKey),
@@ -118,7 +118,7 @@ export default function CreateAddIdentityProvider({
                 className="body1"
                 name={fieldNames.ipCdiVerifyKey}
                 defaultValue={defaults.ipCdiVerifyKey || undefined}
-                label={`${fieldDisplays.ipCdiVerifyKey}:`}
+                label={fieldDisplays.ipCdiVerifyKey}
                 placeholder={pasteHere(fieldDisplays.ipCdiVerifyKey)}
                 rules={{
                     required: requiredMessage(fieldDisplays.ipCdiVerifyKey),

@@ -58,7 +58,7 @@ export function encodeWord64(value: bigint): Buffer {
     return Buffer.from(new Uint8Array(arr));
 }
 
-export async function hashSha256(...inputs: Indexable[]): Promise<Buffer> {
+export function hashSha256(...inputs: Indexable[]): Buffer {
     const hash = window.cryptoMethods.sha256(inputs);
     return Buffer.from(hash);
 }
