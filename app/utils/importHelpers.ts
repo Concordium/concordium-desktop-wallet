@@ -33,6 +33,8 @@ import {
 const alreadyExistsMessage = 'Already exists';
 const replacesMessage = (name: string) => `Replaces name: ${name}`;
 const alreadyExistsAsMessage = (name: string) => `Already exists as: ${name}`;
+const replacesPlaceholderMessage = (name: string) =>
+    `Replaces Placeholder identity: ${name}`;
 
 export interface HasWalletId {
     walletId?: number;
@@ -75,9 +77,17 @@ export function resolveAccountNameConflict(
  * Given two names of an identity, and the current identity object, determines the name to use.
  * @returns An object containing the chosen name, and a message about the decision.
  */
-export function resolveIdentityNameConflict(existingName: string) {
-    const chosenName = existingName;
-    const message = alreadyExistsAsMessage(existingName);
+export function resolveIdentityNameConflict(
+    existingName: string,
+    importName: string,
+    existingIdentityStatus: IdentityStatus
+) {
+    let chosenName = existingName;
+    let message = alreadyExistsAsMessage(existingName);
+    if (existingIdentityStatus === IdentityStatus.Recovered) {
+        chosenName = importName;
+        message = replacesPlaceholderMessage(existingName);
+    }
     return { chosenName, message };
 }
 
@@ -177,7 +187,11 @@ async function handleDuplicateIdentity(
 ) {
     const localName = localIdentity.name;
     if (importedIdentity.name !== localName) {
-        const { chosenName, message } = resolveIdentityNameConflict(localName);
+        const { chosenName, message } = resolveIdentityNameConflict(
+            localName,
+            importedIdentity.name,
+            localIdentity.status
+        );
         addMessage(importedIdentity.id, message);
         if (chosenName !== localName) {
             updateIdentity(localIdentity.id, { name: chosenName });
@@ -534,7 +548,6 @@ async function importDuplicateWallets(
 
         handleDuplicateIdentity(importedIdentity, existingIdentity, addMessage);
 
-        // TODO: test if this is the correct id.
         await addAccountsAndCredentials(importedIdentity.id, existingId);
     }
 
