@@ -16,6 +16,7 @@ const CredentialInfoLedgerDetails = (props: Props) => (
         <p>
             <b>Public key:</b>
             <PublicKeyDetails
+                className="mV40"
                 publicKey={props.credentialPublicKeys.keys[0].verifyKey}
             />
         </p>
@@ -24,7 +25,7 @@ const CredentialInfoLedgerDetails = (props: Props) => (
         </p>
         <p>
             <b>Registration ID credential (RegIdCred):</b>
-            <DisplayHexString value={props.credId} />
+            <DisplayHexString className="mV40" value={props.credId} />
         </p>
         <p>
             <b>Identity provider:</b> {props.ipIdentity}

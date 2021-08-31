@@ -115,7 +115,10 @@ export default function ExportKeyView(): JSX.Element {
                         />
                     </PrintButton>
                     <h3>New {getKeyDisplay(keyType)}</h3>
-                    <PublicKeyDetails publicKey={signedPublicKey.key} />
+                    <PublicKeyDetails
+                        className="mV40"
+                        publicKey={signedPublicKey.key}
+                    />
                     <CopiableIdenticon
                         data={signedPublicKey.key}
                         setScreenshot={setImage}
