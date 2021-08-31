@@ -1,6 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import SendImage from '@resources/svg/paperplane.svg';
 import BracketsImage from '@resources/svg/brackets.svg';
 import UnshieldImage from '@resources/svg/unshield.svg';
@@ -14,6 +14,7 @@ import ButtonNavLink from '~/components/ButtonNavLink';
 import styles from './AccountViewAction.module.scss';
 import { Account, AccountInfo } from '~/utils/types';
 import Button from '~/cross-app-components/Button';
+import { toggleAccountView } from '~/features/AccountSlice';
 
 interface ActionObject {
     action: string | ((dispatch: Dispatch) => void);
@@ -26,8 +27,8 @@ interface ActionObject {
     isDisabled(hasCredential: boolean, isMultiSig: boolean): boolean;
 }
 
-const more: ActionObject = {
-    action: () => null,
+const changeView: ActionObject = {
+    action: (dispatch) => toggleAccountView(dispatch),
     label: 'Change view',
     Image: BracketsImage,
     imageClassName: 'mB15',
@@ -52,7 +53,7 @@ const shieldedActions: ActionObject[] = [
         height: 40,
         isDisabled: (hasCredential: boolean) => !hasCredential,
     },
-    more,
+    changeView,
 ];
 const unshieldedActions: ActionObject[] = [
     {
@@ -72,7 +73,7 @@ const unshieldedActions: ActionObject[] = [
         isDisabled: (hasCredential: boolean, isMultiSig: boolean) =>
             !hasCredential || isMultiSig,
     },
-    more,
+    changeView,
 ];
 
 function AccountViewAction({
@@ -90,6 +91,7 @@ function AccountViewAction({
     hasCredentials: boolean;
 }): JSX.Element {
     const disabled = isDisabled(hasCredentials, isMultiSig);
+    const dispatch = useDispatch();
 
     const body = (
         <>
@@ -121,6 +123,7 @@ function AccountViewAction({
             size="huge"
             inverted
             disabled={disabled}
+            onClick={() => action(dispatch)}
         >
             {body}
         </Button>

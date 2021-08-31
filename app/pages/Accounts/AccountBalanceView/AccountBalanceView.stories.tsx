@@ -19,6 +19,7 @@ const Template: Story<{ account: Account; accountInfo: AccountInfo }> = ({
     accountInfo,
 }) => {
     const accounts: AccountState = {
+        simpleView: true,
         accounts: [account, { ...account, name: 'Another' }],
         accountsInfo: { [account.address]: accountInfo },
         chosenAccountIndex: 0,

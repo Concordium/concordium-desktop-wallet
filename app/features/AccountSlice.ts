@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
 // eslint-disable-next-line import/no-cycle
@@ -41,23 +41,32 @@ import {
 
 import { getAccountInfos, getAccountInfoOfAddress } from '../node/nodeHelpers';
 import { hasPendingTransactions } from '~/database/TransactionDao';
+import {
+    getSimpleViewActive,
+    setSimpleViewActive,
+} from '~/utils/accountViewHelpers';
 
 export interface AccountState {
+    simpleView: boolean;
     accounts: Account[];
     accountsInfo: Record<string, AccountInfo>;
     chosenAccountIndex: number;
 }
 
 const initialState: AccountState = {
+    simpleView: getSimpleViewActive(),
     accounts: [],
     accountsInfo: {},
-    chosenAccountIndex: -1,
+    chosenAccountIndex: 0,
 };
 
 const accountsSlice = createSlice({
     name: 'accounts',
     initialState,
     reducers: {
+        simpleViewActive(state, input: PayloadAction<boolean>) {
+            state.simpleView = input.payload;
+        },
         chooseAccount: (state, input) => {
             state.chosenAccountIndex = input.payload;
         },
@@ -523,6 +532,12 @@ export async function editAccountName(
     await updateAddressBookEntry(dispatch, address, { name });
 
     return dispatch(updateAccountFields({ address, updatedFields }));
+}
+
+export function toggleAccountView(dispatch: Dispatch) {
+    const simpleViewActive = getSimpleViewActive();
+    setSimpleViewActive(!simpleViewActive);
+    dispatch(accountsSlice.actions.simpleViewActive(!simpleViewActive));
 }
 
 export default accountsSlice.reducer;
