@@ -1,19 +1,17 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Switch, Route } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
 } from '~/features/AccountSlice';
 import routes from '~/constants/routes.json';
-import EncryptedTransfer from '~/components/Transfers/EncryptedTransfer';
-import SimpleTransfer from '~/components/Transfers/SimpleTransfer';
-import ShieldAmount from '~/components/Transfers/ShieldAmount';
-import UnshieldAmount from '~/components/Transfers/UnshieldAmount';
+
 import TransferHistory from '../TransferHistory';
 import AccountBalanceView from '../AccountBalanceView';
 import AccountViewActions from '../AccountViewActions';
 import FailedInitialAccount from '../FailedInitialAccount';
+import BasicTransferRoutes from '../BasicTransferRoutes';
 
 /**
  * Detailed view of the chosen account and its transactions.
@@ -40,28 +38,12 @@ export default function AccountView() {
         <>
             <AccountBalanceView />
             <AccountViewActions account={account} accountInfo={accountInfo} />
-            <Switch>
-                <Route
-                    path={routes.ACCOUNTS_SIMPLETRANSFER}
-                    render={() => <SimpleTransfer account={account} />}
-                />
-                <Route
-                    path={routes.ACCOUNTS_SHIELDAMOUNT}
-                    render={() => <ShieldAmount account={account} />}
-                />
-                <Route
-                    path={routes.ACCOUNTS_ENCRYPTEDTRANSFER}
-                    render={() => <EncryptedTransfer account={account} />}
-                />
-                <Route
-                    path={routes.ACCOUNTS_UNSHIELDAMOUNT}
-                    render={() => <UnshieldAmount account={account} />}
-                />
+            <BasicTransferRoutes account={account}>
                 <Route
                     path={routes.ACCOUNTS}
                     render={() => <TransferHistory account={account} />}
                 />
-            </Switch>
+            </BasicTransferRoutes>
         </>
     );
 }
