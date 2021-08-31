@@ -7,17 +7,17 @@ interface Props {
     address: string;
     lineClassName?: string;
     outerClassName?: string;
+    lineLength?: number;
 }
-
-const lineLength = 10;
 
 export default function DisplayAddress({
     address,
     lineClassName,
     outerClassName,
+    lineLength = 10
 }: Props) {
     return (
-        <div className={clsx(outerClassName, 'textCenter')}>
+        <div className={clsx(outerClassName, 'textCenter mono')}>
             {chunkString(address, lineLength).map((text) => (
                 <p className={clsx(lineClassName, 'm0')} key={text}>
                     {text}

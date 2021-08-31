@@ -29,6 +29,7 @@ import {
 import styles from './AccountReport.module.scss';
 import type { SaveFileData } from '~/preload/preloadTypes';
 import saveFile from '~/utils/FileHelper';
+import DisplayAddress from '~/components/DisplayAddress';
 
 const decryptMessage = (name: string) =>
     `'${name}' has encrypted funds. To create a complete account report, we need to decrypt them. Otherwise this account will be skipped.`;
@@ -258,7 +259,7 @@ export default function AccountReport({ location }: Props) {
                                                     checked={currentFilters.some(
                                                         (currentFilter) =>
                                                             filterOption.key ===
-                                                            currentFilter.key
+                                                                currentFilter.key
                                                     )}
                                                     onChange={() =>
                                                         flipStatus(filterOption)
@@ -302,7 +303,7 @@ export default function AccountReport({ location }: Props) {
                                     >
                                         <Card
                                             className={
-                                                styles.AddAnotherAccountButton
+                                            styles.AddAnotherAccountButton
                                             }
                                         >
                                             <Button
@@ -318,18 +319,16 @@ export default function AccountReport({ location }: Props) {
                                                 <div
                                                     key={account.address}
                                                     className={
-                                                        styles.accountListElement
+                                                    styles.accountListElement
                                                     }
                                                 >
                                                     <div>
                                                         <p>{account.name}</p>
-                                                        <p
-                                                            className={
-                                                                styles.address
-                                                            }
-                                                        >
-                                                            {account.address}
-                                                        </p>
+                                                        <DisplayAddress
+                                                            outerClassName={styles.address}
+                                                            lineLength={25}
+                                                            address={account.address}
+                                                        />
                                                     </div>
                                                     <Button
                                                         size="tiny"
