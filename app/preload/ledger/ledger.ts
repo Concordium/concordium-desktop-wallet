@@ -153,7 +153,6 @@ export default function exposedMethods(
             serializedPayload: Buffer,
             keypath: number[]
         ) => {
-            console.log(transaction);
             return getLedgerClient().signAddIdentityProvider(
                 transaction,
                 serializedPayload,
