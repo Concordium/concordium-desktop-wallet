@@ -113,7 +113,8 @@ const items: MoreActionObject[] = [
  */
 export default function MoreActions({ account, accountInfo }: Props) {
     const dispatch = useDispatch();
-    const returnFunction = () => dispatch(push(routes.ACCOUNTS_MORE));
+    // const returnFunction = () => dispatch(push(routes.ACCOUNTS_MORE));
+    const returnFunction = () => null;
 
     const accountHasDeployedCredentials = useSelector(
         accountHasDeployedCredentialsSelector(account)

@@ -6,7 +6,6 @@ import {
     chosenAccountInfoSelector,
 } from '~/features/AccountSlice';
 import routes from '~/constants/routes.json';
-import MoreActions from '../MoreActions';
 import EncryptedTransfer from '~/components/Transfers/EncryptedTransfer';
 import SimpleTransfer from '~/components/Transfers/SimpleTransfer';
 import ShieldAmount from '~/components/Transfers/ShieldAmount';
@@ -42,15 +41,6 @@ export default function AccountView() {
             <AccountBalanceView />
             <AccountViewActions account={account} accountInfo={accountInfo} />
             <Switch>
-                <Route
-                    path={routes.ACCOUNTS_MORE}
-                    render={() => (
-                        <MoreActions
-                            account={account}
-                            accountInfo={accountInfo}
-                        />
-                    )}
-                />
                 <Route
                     path={routes.ACCOUNTS_SIMPLETRANSFER}
                     render={() => <SimpleTransfer account={account} />}
