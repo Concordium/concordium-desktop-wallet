@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import ShieldImage from '@resources/svg/shield.svg';
@@ -15,8 +15,8 @@ import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
     accountsSelector,
-    chosenAccountIndexSelector,
-    chooseAccount,
+    previousConfirmedAccount,
+    nextConfirmedAccount,
 } from '~/features/AccountSlice';
 import SidedRow from '~/components/SidedRow';
 import AccountName from './AccountName';
@@ -31,29 +31,8 @@ export default function AccountBalanceView(): JSX.Element | null {
     const dispatch = useDispatch();
     const accounts = useSelector(accountsSelector);
     const account = useSelector(chosenAccountSelector);
-    const accountIndex = useSelector(chosenAccountIndexSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
     const viewingShielded = useSelector(viewingShieldedSelector);
-
-    const previousAccount = useCallback(() => {
-        const prevIndex = accountIndex - 1;
-
-        if (prevIndex < 0) {
-            dispatch(chooseAccount(accounts.length - 1));
-        } else {
-            dispatch(chooseAccount(prevIndex));
-        }
-    }, [accountIndex, accounts, dispatch]);
-
-    const nextAccount = useCallback(() => {
-        const nextIndex = accountIndex + 1;
-
-        if (nextIndex > accounts.length - 1) {
-            dispatch(chooseAccount(0));
-        } else {
-            dispatch(chooseAccount(nextIndex));
-        }
-    }, [accountIndex, accounts, dispatch]);
 
     if (!account || !accountInfo) {
         return null; // TODO: add display for pending account (which have no accountinfo)
@@ -169,13 +148,19 @@ export default function AccountBalanceView(): JSX.Element | null {
                 )}
             >
                 {canChangeAccount && (
-                    <Button clear onClick={previousAccount}>
+                    <Button
+                        clear
+                        onClick={() => dispatch(previousConfirmedAccount())}
+                    >
                         <ArrowIcon className={styles.prevAccountIcon} />
                     </Button>
                 )}
                 <AccountName name={account.name} address={account.address} />
                 {canChangeAccount && (
-                    <Button clear onClick={nextAccount}>
+                    <Button
+                        clear
+                        onClick={() => dispatch(nextConfirmedAccount())}
+                    >
                         <ArrowIcon className={styles.nextAccountIcon} />
                     </Button>
                 )}

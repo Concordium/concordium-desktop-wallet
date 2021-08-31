@@ -53,6 +53,20 @@ export interface AccountState {
     chosenAccountIndex: number;
 }
 
+function getValidAccountsIncices(accounts: Account[]): number[] {
+    return accounts
+        .reduce(
+            (acc, cur, i) => [...acc, [i, cur]] as [number, Account][],
+            [] as [number, Account][]
+        )
+        .filter(([, acc]) =>
+            [AccountStatus.Confirmed, AccountStatus.Genesis].includes(
+                acc.status
+            )
+        )
+        .map(([i]) => i);
+}
+
 const initialState: AccountState = {
     simpleView: getSimpleViewActive(),
     accounts: [],
@@ -66,6 +80,30 @@ const accountsSlice = createSlice({
     reducers: {
         simpleViewActive(state, input: PayloadAction<boolean>) {
             state.simpleView = input.payload;
+        },
+        nextConfirmedAccount(state) {
+            const confirmedAccountsIndices = getValidAccountsIncices(
+                state.accounts
+            );
+
+            state.chosenAccountIndex =
+                confirmedAccountsIndices.find(
+                    (i) => i > state.chosenAccountIndex
+                ) ??
+                confirmedAccountsIndices.find(() => true) ??
+                state.chosenAccountIndex;
+        },
+        previousConfirmedAccount(state) {
+            const confirmedAccountsIndices = getValidAccountsIncices(
+                state.accounts
+            ).reverse();
+
+            state.chosenAccountIndex =
+                confirmedAccountsIndices.find(
+                    (i) => i < state.chosenAccountIndex
+                ) ??
+                confirmedAccountsIndices.find(() => true) ??
+                state.chosenAccountIndex;
         },
         chooseAccount: (state, input) => {
             state.chosenAccountIndex = input.payload;
@@ -132,6 +170,8 @@ export const {
     setAccountInfos,
     updateAccountInfoEntry,
     updateAccountFields,
+    nextConfirmedAccount,
+    previousConfirmedAccount,
 } = accountsSlice.actions;
 
 // Load accounts into state, and updates their infos
