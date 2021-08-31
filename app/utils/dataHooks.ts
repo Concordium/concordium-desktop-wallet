@@ -6,7 +6,7 @@ import {
     fetchLastFinalizedBlockSummary,
     getAccountInfoOfAddress,
 } from '../node/nodeHelpers';
-import { useCurrentTime } from './hooks';
+import { useCurrentTime, useAsyncMemo } from './hooks';
 import {
     epochDate,
     getDefaultExpiry,
@@ -81,27 +81,15 @@ export function useTransactionCostEstimate(
 
 /** Hook for fetching last finalized block summary */
 export function useLastFinalizedBlockSummary() {
-    const [summary, setSummary] = useState<{
+    return useAsyncMemo<{
         lastFinalizedBlockSummary: BlockSummary;
         consensusStatus: ConsensusStatus;
-    }>();
-    useEffect(() => {
-        fetchLastFinalizedBlockSummary()
-            .then(setSummary)
-            .catch(() => {});
-    }, []);
-    return summary;
+    }>(fetchLastFinalizedBlockSummary);
 }
 
 /** Hook for fetching consensus status */
 export function useConsensusStatus() {
-    const [status, setStatus] = useState<ConsensusStatus>();
-    useEffect(() => {
-        getConsensusStatus()
-            .then(setStatus)
-            .catch(() => {});
-    }, []);
-    return status;
+    return useAsyncMemo<ConsensusStatus>(getConsensusStatus);
 }
 
 /** Hook for fetching staked amount for a given account address, Returns undefined while loading and 0 if account is not a baker */

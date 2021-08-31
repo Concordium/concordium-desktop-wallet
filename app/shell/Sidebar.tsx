@@ -10,7 +10,7 @@ import Sidebar, { SidebarLink } from '~/cross-app-components/Sidebar';
 import routes from '~/constants/routes.json';
 import pkg from '~/package.json';
 
-import LedgerStatus from './LedgerStatus';
+import Status from './Status';
 import { RootState } from '~/store/store';
 
 const links: SidebarLink[] = [
@@ -51,9 +51,9 @@ export default function ConnectedSidebar() {
         (s: RootState) => !s.misc.unlocked || !s.misc.termsAccepted
     );
 
-    let ledgerStatus;
+    let statusComponents;
     if (!disabled) {
-        ledgerStatus = <LedgerStatus />;
+        statusComponents = <Status />;
     }
 
     return (
@@ -61,7 +61,7 @@ export default function ConnectedSidebar() {
             disabled={disabled}
             links={links}
             version={pkg.version}
-            child={ledgerStatus}
+            child={statusComponents}
         />
     );
 }
