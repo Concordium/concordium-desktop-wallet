@@ -259,7 +259,7 @@ export default function AccountReport({ location }: Props) {
                                                     checked={currentFilters.some(
                                                         (currentFilter) =>
                                                             filterOption.key ===
-                                                                currentFilter.key
+                                                            currentFilter.key
                                                     )}
                                                     onChange={() =>
                                                         flipStatus(filterOption)
@@ -303,7 +303,7 @@ export default function AccountReport({ location }: Props) {
                                     >
                                         <Card
                                             className={
-                                            styles.AddAnotherAccountButton
+                                                styles.AddAnotherAccountButton
                                             }
                                         >
                                             <Button
@@ -319,15 +319,19 @@ export default function AccountReport({ location }: Props) {
                                                 <div
                                                     key={account.address}
                                                     className={
-                                                    styles.accountListElement
+                                                        styles.accountListElement
                                                     }
                                                 >
                                                     <div>
                                                         <p>{account.name}</p>
                                                         <DisplayAddress
-                                                            outerClassName={styles.address}
+                                                            outerClassName={
+                                                                styles.address
+                                                            }
                                                             lineLength={25}
-                                                            address={account.address}
+                                                            address={
+                                                                account.address
+                                                            }
                                                         />
                                                     </div>
                                                     <Button

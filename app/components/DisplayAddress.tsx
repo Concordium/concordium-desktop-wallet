@@ -14,7 +14,7 @@ export default function DisplayAddress({
     address,
     lineClassName,
     outerClassName,
-    lineLength = 10
+    lineLength = 10,
 }: Props) {
     return (
         <div className={clsx(outerClassName, 'textCenter mono')}>
