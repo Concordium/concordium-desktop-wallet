@@ -1,5 +1,10 @@
 import { formatDate } from './timeHelpers';
-import { ChosenAttributes, AttributeKey, AttributeKeyName } from './types';
+import {
+    Identity,
+    ChosenAttributes,
+    AttributeKey,
+    AttributeKeyName,
+} from './types';
 
 export const IDENTITY_NAME_MAX_LENGTH = 25;
 
@@ -87,4 +92,9 @@ export function compareAttributes(
     AttributeTag2: AttributeKeyName
 ) {
     return AttributeKey[AttributeTag1] - AttributeKey[AttributeTag2];
+}
+
+export function getSessionId(identity: Identity) {
+    const hash = window.cryptoMethods.sha256([identity.codeUri]);
+    return Buffer.from(hash).toString('hex');
 }

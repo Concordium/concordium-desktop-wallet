@@ -288,6 +288,7 @@ export default function AccountReport({ location }: Props) {
                                             filter={(account: Account) =>
                                                 !accounts.includes(account)
                                             }
+                                            messageWhenEmpty="All accounts have already been added"
                                         />
                                     </div>
                                 )}
