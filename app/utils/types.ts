@@ -1212,6 +1212,10 @@ export interface TransactionEvent {
 
 export interface Action {
     label: string;
+    action(): void;
+}
+
+export interface LocationAction extends Pick<Action, 'label'> {
     location?: LocationDescriptorObject | string;
 }
 

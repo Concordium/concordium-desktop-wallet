@@ -11,6 +11,7 @@ function convertAccountBooleans(accounts: Account[]) {
             ...account,
             allDecrypted: Boolean(account.allDecrypted),
             isInitial: Boolean(account.isInitial),
+            isFavourite: Boolean(account.isFavourite),
         };
     });
 }

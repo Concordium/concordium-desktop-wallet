@@ -4,15 +4,21 @@ import { push } from 'connected-react-router';
 import clsx from 'clsx';
 import Modal from '~/cross-app-components/Modal';
 import Button from '~/cross-app-components/Button';
-import { Action } from '../utils/types';
+import { noOp } from '~/utils/basicHelpers';
+import { Action, LocationAction } from '../utils/types';
+
+function isAction(action: Action | LocationAction): action is Action {
+    return (action as Action).action !== undefined;
+}
 
 interface Props {
     title: string;
-    description: string;
-    actions: Action[];
+    description: string | JSX.Element;
+    actions: (Action | LocationAction)[];
     open: boolean;
-    postAction(): void;
+    postAction?(): void;
     disableClose?: boolean;
+    onClose?(): void;
 }
 
 export default function ChoiceModal({
@@ -20,28 +26,31 @@ export default function ChoiceModal({
     description,
     actions,
     open,
-    postAction,
+    postAction = noOp,
     disableClose = false,
+    onClose = noOp,
 }: Props) {
     const dispatch = useDispatch();
     return (
-        <Modal open={open} disableClose={disableClose}>
+        <Modal open={open} disableClose={disableClose} onClose={onClose}>
             <h3>{title}</h3>
             <p>{description}</p>
             <div className="flex justifySpaceBetween mT30">
-                {actions.map(({ label, location }, i) => (
+                {actions.map((a, i) => (
                     <Button
                         className={clsx('flexChildFill', i !== 0 && 'mL30')}
-                        key={label}
+                        key={a.label}
                         onClick={() => {
-                            if (location) {
+                            if (isAction(a)) {
+                                a.action();
+                            } else if (a.location) {
                                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                dispatch(push(location as any));
+                                dispatch(push(a.location as any));
                             }
                             postAction();
                         }}
                     >
-                        {label}
+                        {a.label}
                     </Button>
                 ))}
             </div>

@@ -116,8 +116,9 @@ const accountsSlice = createSlice({
         updateAccounts: (state, input) => {
             state.accounts = input.payload;
 
-            if (!state.chosenAccountAddress && state.accounts[0]) {
-                state.chosenAccountAddress = state.accounts[0].address;
+            if (!state.chosenAccountAddress) {
+                state.chosenAccountAddress =
+                    state.accounts.find((a) => a.isFavourite)?.address ?? '';
             }
         },
         setAccountInfos: (state, map) => {
@@ -590,8 +591,16 @@ export function toggleAccountView(dispatch: Dispatch) {
     dispatch(accountsSlice.actions.simpleViewActive(!simpleViewActive));
 }
 
-export function setFavouriteAccount(dispatch: Dispatch, address: string) {
-    console.log(address);
+export async function setFavouriteAccount(dispatch: Dispatch, address: string) {
+    const favAccounts = await window.database.account.findAccounts({
+        isFavourite: true,
+    });
+
+    favAccounts.forEach((a) =>
+        window.database.account.updateAccount(a.address, { isFavourite: false })
+    );
+    window.database.account.updateAccount(address, { isFavourite: true });
+
     loadAccounts(dispatch);
 }
 
