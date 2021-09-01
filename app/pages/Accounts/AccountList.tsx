@@ -4,12 +4,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     accountsSelector,
     chooseAccount,
-    chosenAccountIndexSelector,
     accountsInfoSelector,
+    chosenAccountSelector,
 } from '~/features/AccountSlice';
 import { setViewingShielded } from '~/features/TransactionSlice';
 import AccountCard from '~/components/AccountCard';
-import { Account } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import CardList from '~/cross-app-components/CardList';
 
@@ -20,7 +19,7 @@ export default function AccountList() {
     const dispatch = useDispatch();
     const accounts = useSelector(accountsSelector);
     const accountsInfo = useSelector(accountsInfoSelector);
-    const chosenIndex = useSelector(chosenAccountIndexSelector);
+    const chosenAccount = useSelector(chosenAccountSelector);
 
     if (!accounts || !accountsInfo) {
         return null;
@@ -28,15 +27,15 @@ export default function AccountList() {
 
     return (
         <CardList>
-            {accounts.map((account: Account, index: number) => (
+            {accounts.map((a) => (
                 <AccountCard
-                    key={account.address}
-                    active={index === chosenIndex}
-                    account={account}
-                    accountInfo={accountsInfo[account.address]}
+                    key={a.address}
+                    active={a.address === chosenAccount?.address}
+                    account={a}
+                    accountInfo={accountsInfo[a.address]}
                     onClick={(shielded) => {
                         dispatch(push(routes.ACCOUNTS));
-                        dispatch(chooseAccount(index));
+                        dispatch(chooseAccount(a.address));
                         dispatch(setViewingShielded(shielded));
                     }}
                 />

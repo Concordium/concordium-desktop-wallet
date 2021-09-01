@@ -4,7 +4,7 @@ import { Meta, Story } from '@storybook/react/types-6-0';
 
 import { AccountState } from '~/features/AccountSlice';
 import { StoreWrapper } from '~/store/store';
-import { Account, AccountInfo } from '~/utils/types';
+import { Account, AccountInfo, AccountStatus } from '~/utils/types';
 
 import AccountBalanceViewComponent from './AccountBalanceView';
 import { microGTUPerGTU } from '~/utils/gtu';
@@ -20,9 +20,9 @@ const Template: Story<{ account: Account; accountInfo: AccountInfo }> = ({
 }) => {
     const accounts: AccountState = {
         simpleView: true,
-        accounts: [account, { ...account, name: 'Another' }],
-        accountsInfo: { [account.address]: accountInfo },
-        chosenAccountIndex: 0,
+        accounts: [account, { ...account, name: 'Another', address: '234' }],
+        accountsInfo: { [account.address]: accountInfo, '234': accountInfo },
+        chosenAccountAddress: account.address,
     };
 
     return (
@@ -42,6 +42,7 @@ const account: Account = {
     totalDecrypted: '0',
     allDecrypted: true,
     name: 'Personal',
+    status: AccountStatus.Confirmed,
 } as Account;
 
 const accountInfo: AccountInfo = {

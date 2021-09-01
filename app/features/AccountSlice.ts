@@ -50,28 +50,29 @@ export interface AccountState {
     simpleView: boolean;
     accounts: Account[];
     accountsInfo: Record<string, AccountInfo>;
-    chosenAccountIndex: number;
+    chosenAccountAddress: string;
 }
 
-function getValidAccountsIncices(accounts: Account[]): number[] {
+type AccountByIndexTuple = [number, Account];
+
+function getValidAccountsIncices(accounts: Account[]): AccountByIndexTuple[] {
     return accounts
         .reduce(
-            (acc, cur, i) => [...acc, [i, cur]] as [number, Account][],
-            [] as [number, Account][]
+            (acc, cur, i) => [...acc, [i, cur]] as AccountByIndexTuple[],
+            [] as AccountByIndexTuple[]
         )
         .filter(([, acc]) =>
             [AccountStatus.Confirmed, AccountStatus.Genesis].includes(
                 acc.status
             )
-        )
-        .map(([i]) => i);
+        );
 }
 
 const initialState: AccountState = {
     simpleView: getSimpleViewActive(),
     accounts: [],
     accountsInfo: {},
-    chosenAccountIndex: 0,
+    chosenAccountAddress: '',
 };
 
 const accountsSlice = createSlice({
@@ -82,34 +83,42 @@ const accountsSlice = createSlice({
             state.simpleView = input.payload;
         },
         nextConfirmedAccount(state) {
+            const chosenIndex = state.accounts.findIndex(
+                (a) => a.address === state.chosenAccountAddress
+            );
             const confirmedAccountsIndices = getValidAccountsIncices(
                 state.accounts
             );
 
-            state.chosenAccountIndex =
-                confirmedAccountsIndices.find(
-                    (i) => i > state.chosenAccountIndex
-                ) ??
-                confirmedAccountsIndices.find(() => true) ??
-                state.chosenAccountIndex;
+            state.chosenAccountAddress =
+                confirmedAccountsIndices.find(([i]) => i > chosenIndex)?.[1]
+                    .address ??
+                confirmedAccountsIndices.find(() => true)?.[1].address ??
+                state.chosenAccountAddress;
         },
         previousConfirmedAccount(state) {
+            const chosenIndex = state.accounts.findIndex(
+                (a) => a.address === state.chosenAccountAddress
+            );
             const confirmedAccountsIndices = getValidAccountsIncices(
                 state.accounts
             ).reverse();
 
-            state.chosenAccountIndex =
-                confirmedAccountsIndices.find(
-                    (i) => i < state.chosenAccountIndex
-                ) ??
-                confirmedAccountsIndices.find(() => true) ??
-                state.chosenAccountIndex;
+            state.chosenAccountAddress =
+                confirmedAccountsIndices.find(([i]) => i < chosenIndex)?.[1]
+                    .address ??
+                confirmedAccountsIndices.find(() => true)?.[1].address ??
+                state.chosenAccountAddress;
         },
-        chooseAccount: (state, input) => {
-            state.chosenAccountIndex = input.payload;
+        chooseAccount: (state, input: PayloadAction<string>) => {
+            state.chosenAccountAddress = input.payload;
         },
         updateAccounts: (state, input) => {
             state.accounts = input.payload;
+
+            if (!state.chosenAccountAddress && state.accounts[0]) {
+                state.chosenAccountAddress = state.accounts[0].address;
+            }
         },
         setAccountInfos: (state, map) => {
             state.accountsInfo = map.payload;
@@ -153,13 +162,12 @@ export const accountsInfoSelector = (state: RootState) =>
     state.accounts.accountsInfo;
 
 export const chosenAccountSelector = (state: RootState) =>
-    state.accounts.accounts[state.accounts.chosenAccountIndex];
+    state.accounts.accounts.find(
+        (a) => a.address === state.accounts.chosenAccountAddress
+    );
 
 export const chosenAccountInfoSelector = (state: RootState) =>
     state.accounts.accountsInfo?.[chosenAccountSelector(state)?.address ?? ''];
-
-export const chosenAccountIndexSelector = (state: RootState) =>
-    state.accounts.chosenAccountIndex;
 
 export const accountInfoSelector = (account?: Account) => (state: RootState) =>
     state.accounts.accountsInfo?.[account?.address ?? ''];
