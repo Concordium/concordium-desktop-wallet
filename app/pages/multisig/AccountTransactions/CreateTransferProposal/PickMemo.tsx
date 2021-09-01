@@ -36,9 +36,9 @@ export default function PickMemo({
     return (
         <>
             <p className="mT50">
-                You can add a message to your transactions. This step is
-                optional, and it will increase the transaction fee. Feel free to
-                leave it blank if you do not need it.
+                You can add a memo to your transactions. This step is optional,
+                and it will increase the transaction fee. Feel free to leave it
+                blank if you do not need it.
             </p>
             <TextArea
                 value={memo || ''}

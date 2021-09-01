@@ -37,9 +37,9 @@ export default function MemoWarning({ open, onClose }: Props) {
         <ChoiceModal
             disableClose
             title="Transaction memos"
-            description="Transaction messages are public and visible to everyone on the blockchain. Any message sent with a transaction are permament, and will be visible forever, so be careful what you write in the message.
+            description="Transaction memos are public and visible to everyone on the blockchain. Any memo sent with a transaction is permament, and will be visible forever, so be careful what you write in the memo.
 
-        Adding a message will increase the transaction fee."
+        Adding a memo will increase the transaction fee."
             actions={actions}
             open={open}
             postAction={onClose}
