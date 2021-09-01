@@ -7,6 +7,15 @@
     flex-direction: column;
 }
 
+.inlineFlex {
+    display: inline-flex;
+}
+
+.inlineFlexColumn {
+    display: inline-flex;
+    flex-direction: column;
+}
+
 .justifyCenter {
     justify-content: center;
 }

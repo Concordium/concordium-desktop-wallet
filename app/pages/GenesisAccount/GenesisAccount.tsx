@@ -157,6 +157,7 @@ function ConfirmAndExport({
                 maxTransactionId: '0',
                 isInitial: false,
                 rewardFilter: '[]',
+                isFavourite: false,
             };
 
             importAccount(account);

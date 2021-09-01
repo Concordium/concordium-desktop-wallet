@@ -416,6 +416,7 @@ export async function addPendingAccount(
         selfAmounts: getInitialEncryptedAmount(),
         incomingAmounts: '[]',
         totalDecrypted: '0',
+        isFavourite: false,
     };
     await insertAccount(account);
     return loadAccounts(dispatch);
@@ -520,6 +521,7 @@ export async function addExternalAccount(
         maxTransactionId: '0',
         isInitial: false,
         rewardFilter: '[]',
+        isFavourite: false,
     };
     await insertAccount(account);
     return loadAccounts(dispatch);
@@ -586,6 +588,11 @@ export function toggleAccountView(dispatch: Dispatch) {
     const simpleViewActive = getSimpleViewActive();
     setSimpleViewActive(!simpleViewActive);
     dispatch(accountsSlice.actions.simpleViewActive(!simpleViewActive));
+}
+
+export function setFavouriteAccount(dispatch: Dispatch, address: string) {
+    console.log(address);
+    loadAccounts(dispatch);
 }
 
 export default accountsSlice.reducer;

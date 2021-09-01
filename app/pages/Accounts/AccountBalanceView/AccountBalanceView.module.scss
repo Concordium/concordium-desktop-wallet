@@ -57,7 +57,7 @@
 .bakerRow {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
+    margin-top: 25px;
 }
 
 .bakerImage {
@@ -159,4 +159,10 @@
             fill: $color-pale-blue;
         }
     }
+}
+
+.favouriteButton {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
 }
