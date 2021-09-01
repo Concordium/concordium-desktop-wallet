@@ -13,7 +13,7 @@ export async function getPrivateKeySeeds(
     const data = Buffer.alloc(4);
     data.writeInt32BE(identity, 0);
 
-    const p2 = 0x00;
+    const p2 = 0x01;
 
     const response = await transport.send(
         0xe0,
@@ -34,7 +34,7 @@ export async function getPrfKey(
     const data = Buffer.alloc(4);
     data.writeInt32BE(identity, 0);
 
-    const p2 = 0x00;
+    const p2 = 0x01;
 
     const response = await transport.send(
         0xe0,
