@@ -21,7 +21,7 @@ export function partition<T>(
  * @param str the string to check for hexadecimal
  */
 export function isHex(str: string): boolean {
-    return /^[A-F0-9]+$/i.test(str);
+    return /^[A-F0-9]+$/i.test(str) && str.length % 2 === 0;
 }
 
 /**
