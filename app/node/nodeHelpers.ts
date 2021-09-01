@@ -3,7 +3,9 @@ import {
     getAccountInfo,
     getCryptographicParameters,
     getBlockSummary,
+    getPeerList,
 } from './nodeRequests';
+import { PeerElement } from '../proto/concordium_p2p_rpc_pb';
 import { AccountInfo, Account, Global, Fraction } from '../utils/types';
 
 export interface AccountInfoPair {
@@ -77,4 +79,21 @@ export async function getEnergyToMicroGtuRate(): Promise<Fraction> {
         euroPerEnergy.numerator * microGTUPerEuro.numerator
     );
     return { numerator, denominator };
+}
+
+/**
+ * Check whether the node is up to date.
+ * N.B. that this is a heuristic guess, which assumes if more than half the peers are not synchronized with the node,
+ * the node is not up to date.
+ */
+export async function isNodeUpToDate() {
+    const peersQuery = await getPeerList();
+    const peers = peersQuery.getPeersList();
+
+    const pendingPeers = peers.filter(
+        (p) => p.getCatchupStatus() === PeerElement.CatchupStatus.PENDING
+    );
+    const halfOfThePeers = Math.floor(peers.length / 2);
+
+    return pendingPeers.length < halfOfThePeers;
 }

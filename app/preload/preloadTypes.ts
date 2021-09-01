@@ -77,7 +77,7 @@ export type DecryptionResult = DecryptionData | DecryptionError;
 export type CryptoMethods = {
     encrypt: (data: string, password: string) => EncryptedData;
     decrypt: (data: EncryptedData, password: string) => DecryptionResult;
-    sha256: (data: (Buffer | Uint8Array)[]) => Buffer;
+    sha256: (data: (string | Buffer | Uint8Array)[]) => Buffer;
 };
 
 export type GetTransactionsResult = {

@@ -120,7 +120,7 @@ export function decrypt(
     return data;
 }
 
-function hashSha256(data: (Buffer | Uint8Array)[]) {
+function hashSha256(data: (string | Buffer | Uint8Array)[]) {
     const hash = crypto.createHash('sha256');
     data.forEach((input) => hash.update(input));
     return hash.digest();
