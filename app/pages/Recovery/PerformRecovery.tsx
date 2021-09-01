@@ -170,7 +170,7 @@ export default function PerformRecovery({
                 identityNumber += 1;
             }
         } finally {
-            controller.onAborted();
+            controller.finish();
             loadAccounts(dispatch);
             loadIdentities(dispatch);
             loadAddressBook(dispatch);
