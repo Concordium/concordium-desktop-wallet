@@ -9,7 +9,7 @@ import styles from './TransferView.module.scss';
 interface Props {
     showBack: boolean;
     backOnClick?: () => void;
-    exitOnClick: () => void;
+    exitOnClick?: () => void;
     className?: string;
 }
 
@@ -36,7 +36,12 @@ export default function TransferView({
                 </Button>
             ) : null}
             {children}
-            <CloseButton className={styles.closeButton} onClick={exitOnClick} />
+            {exitOnClick && (
+                <CloseButton
+                    className={styles.closeButton}
+                    onClick={exitOnClick}
+                />
+            )}
         </Card>
     );
 }

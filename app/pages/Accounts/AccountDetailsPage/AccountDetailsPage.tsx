@@ -13,8 +13,8 @@ import AccountBalanceView from '../AccountBalanceView';
 import AccountPageLayout from '../AccountPageLayout';
 import AccountViewActions from '../AccountViewActions';
 import BasicTransferRoutes from '../BasicTransferRoutes';
-import BuildSchedule from '../BuildSchedule';
-import MoreActions from '../MoreActions';
+import MoreActions from './MoreActions';
+import BuildSchedule from './BuildSchedule';
 
 const { Master, Detail } = MasterDetailPageLayout;
 

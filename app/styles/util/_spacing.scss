@@ -1,6 +1,16 @@
 $spacings: (0, 5, 10, 20, 30, 40, 50, 100);
 $sides: (top, bottom, left, right);
 
+@mixin withFirstLastMods() {
+    &,
+    &\:notFirst:not(:first-of-type),
+    &\:notLast:not(:last-of-type),
+    &\:first:first-of-type,
+    &\:last:last-of-type {
+        @content;
+    }
+}
+
 /*
 Generates spacing utility classes based on tuples above:
 
@@ -38,10 +48,14 @@ pH50 = padding-left: 50px; padding-right: 50px;
     }
     @each $side in $sides {
         .m#{to-upper-case(str-slice($side, 0, 1))}#{$space} {
-            margin-#{$side}: #{$space}px;
+            @include withFirstLastMods() {
+                margin-#{$side}: #{$space}px;
+            }
         }
         .p#{to-upper-case(str-slice($side, 0, 1))}#{$space} {
-            padding-#{$side}: #{$space}px;
+            @include withFirstLastMods() {
+                padding-#{$side}: #{$space}px;
+            }
         }
     }
 }

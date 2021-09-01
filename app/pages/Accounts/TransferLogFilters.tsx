@@ -3,13 +3,10 @@ import { useDispatch } from 'react-redux';
 import { Account, TransactionKindString } from '~/utils/types';
 import Checkbox from '~/components/Form/Checkbox';
 import { updateRewardFilter } from '~/features/AccountSlice';
-import styles from './Accounts.module.scss';
-import CloseButton from '~/cross-app-components/CloseButton';
 import Card from '~/cross-app-components/Card';
 
 interface Props {
     account: Account;
-    returnFunction(): void;
 }
 
 const transactionFilters = [
@@ -24,7 +21,7 @@ const transactionFilters = [
 /**
  * Displays available transaction filters, and allows the user to activate/deactive them..
  */
-export default function TransferLogFilters({ account, returnFunction }: Props) {
+export default function TransferLogFilters({ account }: Props) {
     const dispatch = useDispatch();
     const rewardFilter = JSON.parse(account.rewardFilter);
 
@@ -47,10 +44,6 @@ export default function TransferLogFilters({ account, returnFunction }: Props) {
 
     return (
         <Card className="relative flexColumn justifyCenter pH50">
-            <CloseButton
-                className={styles.closeButton}
-                onClick={returnFunction}
-            />
             <h3 className="textCenter m0 mB20">Transfer Log Filters</h3>
             {transactionFilters.map(({ kind, display }) => (
                 <Checkbox

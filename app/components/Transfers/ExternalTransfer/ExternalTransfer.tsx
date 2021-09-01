@@ -14,7 +14,7 @@ import styles from './ExternalTransfer.module.scss';
 
 interface Props {
     toConfirmTransfer(amount: string, recipient: AddressBookEntry): void;
-    exitFunction(): void;
+    exitFunction?(): void;
     estimatedFee?: Fraction;
     amountHeader: string;
     senderAddress: string;

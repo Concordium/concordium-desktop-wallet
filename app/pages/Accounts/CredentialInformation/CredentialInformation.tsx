@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import EditIcon from '@resources/svg/edit.svg';
-import CloseButton from '~/cross-app-components/CloseButton';
 import {
     Account,
     AccountInfo,
@@ -35,17 +34,12 @@ interface CredentialOfAccount
 interface Props {
     account: Account;
     accountInfo: AccountInfo;
-    returnFunction(): void;
 }
 /**
  * Displays the account's deployed credential information and the
  * signature threshold for the account.
  */
-export default function CredentialInformation({
-    account,
-    accountInfo,
-    returnFunction,
-}: Props) {
+export default function CredentialInformation({ account, accountInfo }: Props) {
     const dispatch = useDispatch();
     const [showEditNote, setShowEditNote] = useState<string | undefined>();
     const externalCredentials = useSelector(externalCredentialsSelector);
@@ -97,10 +91,6 @@ export default function CredentialInformation({
                     Credentials on this account: {credentialsOfAccount.length}
                 </p>
                 <p>Signature threshold: {account.signatureThreshold}</p>
-                <CloseButton
-                    className={styles.closeButton}
-                    onClick={returnFunction}
-                />
             </div>
             <div className={styles.credentialList}>
                 {credentialsOfAccount.map((credential: CredentialOfAccount) => {
