@@ -6,6 +6,7 @@ import routes from '~/constants/routes.json';
 import DisplayFee from '~/components/DisplayFee';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
+import DisplayAddress from '../DisplayAddress';
 
 import styles from './transferDetails.module.scss';
 
@@ -28,10 +29,16 @@ export default function DisplaySimpleTransfer({
         <>
             <h5 className={styles.title}>From Account:</h5>
             <p className={styles.name}>{fromName}</p>
-            <p className={styles.address}>{transaction.sender}</p>
+            <DisplayAddress
+                address={transaction.sender}
+                lineClassName={styles.address}
+            />
             <h5 className={styles.title}>To Account:</h5>
             <p className={styles.name}>{to?.name}</p>
-            <p className={styles.address}>{transaction.payload.toAddress}</p>
+            <DisplayAddress
+                address={transaction.payload.toAddress}
+                lineClassName={styles.address}
+            />
             {to?.note && <p className={styles.note}>Note: {to?.note}</p>}
             <h5 className={styles.title}>Amount:</h5>
             <p className={styles.amount}>

@@ -10,6 +10,7 @@ import Card from '~/cross-app-components/Card';
 import styles from './Accounts.module.scss';
 import routes from '~/constants/routes.json';
 import IconButton from '~/cross-app-components/IconButton';
+import DisplayAddress from '~/components/DisplayAddress';
 
 interface Props {
     account: Account;
@@ -37,7 +38,12 @@ export default function ShowAccountAddress({ account, returnFunction }: Props) {
             <h3 className="m0">Address</h3>
             <QRCode className="m20" value={account.address} />
             <div className="flex">
-                <p className="body4 mL20">{account.address}</p>
+                <DisplayAddress
+                    outerClassName="mL20"
+                    lineClassName="body3"
+                    lineLength={25}
+                    address={account.address}
+                />
                 <CopyButton className="mL20" value={account.address} />
             </div>
         </Card>
