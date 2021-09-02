@@ -64,6 +64,9 @@ const accountsSlice = createSlice({
         setAccountInfos: (state, map) => {
             state.accountsInfo = map.payload;
         },
+        addToAccountInfos: (state, map) => {
+            state.accountsInfo = { ...state.accountsInfo, ...map.payload };
+        },
         updateAccountInfoEntry: (state, update) => {
             const { address, accountInfo } = update.payload;
             state.accountsInfo[address] = accountInfo;
@@ -120,6 +123,7 @@ export const {
     setAccountInfos,
     updateAccountInfoEntry,
     updateAccountFields,
+    addToAccountInfos,
 } = accountsSlice.actions;
 
 // Load accounts into state, and updates their infos
@@ -260,7 +264,8 @@ async function updateAccountFromAccountInfo(
 // AccountInfo state.
 export async function loadAccountInfos(
     accounts: Account[],
-    dispatch: Dispatch
+    dispatch: Dispatch,
+    resetInfo = true
 ) {
     const map: Record<string, AccountInfo> = {};
 
@@ -306,7 +311,10 @@ export async function loadAccountInfos(
             await updateAccountFromAccountInfo(dispatch, account, accountInfo);
         }
     }
-    return dispatch(setAccountInfos(map));
+    if (resetInfo) {
+        return dispatch(setAccountInfos(map));
+    }
+    return dispatch(addToAccountInfos(map));
 }
 
 /**

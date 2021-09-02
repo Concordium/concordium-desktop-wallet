@@ -27,7 +27,8 @@ export default function DisplayRecovery({ status, recoveredAccounts }: Props) {
         if (recoveredAccounts.length) {
             loadAccountInfos(
                 recoveredAccounts[recoveredAccounts.length - 1],
-                dispatch
+                dispatch,
+                false
             );
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
