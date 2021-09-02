@@ -41,9 +41,9 @@ interface Props {
     active?: boolean;
     showAttributes?: boolean | AttributeKeyName[];
     /**
-     * If true, allows editing name of identity inline. Defaults to false.
+     * If true, allows editing name of identity inline, and deleting it, if it has failed status. Defaults to false.
      */
-    canEditName?: boolean;
+    canEdit?: boolean;
 }
 
 // Returns the image corresponding to the given status.
@@ -61,8 +61,8 @@ function statusImage(status: IdentityStatus) {
     }
 }
 
-function getRightCorner(identity: Identity, canEditName: boolean) {
-    if (identity.status === IdentityStatus.RejectedAndWarned && canEditName) {
+function getRightCorner(identity: Identity, canEdit: boolean) {
+    if (identity.status === IdentityStatus.RejectedAndWarned && canEdit) {
         return <DeleteIdentity identity={identity} />;
     }
     if (identity.status === IdentityStatus.Recovered) {
@@ -79,8 +79,8 @@ function IdentityListElement({
     onClick,
     className,
     active = false,
+    canEdit = false,
     showAttributes = false,
-    canEditName = false,
 }: Props): JSX.Element {
     const [isEditing, setIsEditing] = useState(false);
     const dispatch = useDispatch();
@@ -89,8 +89,7 @@ function IdentityListElement({
         identity.identityObject
     )?.value;
 
-    // TODO: is this not flipped?
-    const isPlaceholder = identity.status !== IdentityStatus.Recovered;
+    const isRecovered = identity.status === IdentityStatus.Recovered;
 
     async function handleSubmit({ name }: EditIdentityForm) {
         await editIdentityName(dispatch, identity.id, name);
@@ -125,7 +124,7 @@ function IdentityListElement({
                     ) : null}
                     {statusImage(identity.status)}
                     <span className={clsx(styles.rightAligned, 'body2')}>
-                        {getRightCorner(identity, canEditName)}
+                        {getRightCorner(identity, canEdit)}
                     </span>
                 </div>
                 <Form<EditIdentityForm>
@@ -148,14 +147,14 @@ function IdentityListElement({
                         ) : (
                             <span
                                 style={{
-                                    marginRight: canEditName ? 2 : undefined, // To align as good as possible with input in edit mode.
+                                    marginRight: canEdit ? 2 : undefined, // To align as good as possible with input in edit mode.
                                 }}
                             >
                                 {identity.name}
                             </span>
                         )}
                     </h2>
-                    {canEditName &&
+                    {canEdit &&
                         (isEditing ? (
                             <Form.Submit className={styles.edit} clear>
                                 <CheckIcon />
@@ -172,17 +171,19 @@ function IdentityListElement({
                 </Form>
                 <div className="textFaded pH30">
                     {' '}
-                    {!isPlaceholder && identityObject
+                    {!isRecovered && identityObject
                         ? ` Expires on ${formatDate(
                               identityObject.attributeList.validTo
                           )} `
                         : undefined}
-                    {isPlaceholder &&
+                    {isRecovered && 'Identity from account recovery.'}
+                    <br />
+                    {isRecovered &&
                         showAttributes &&
-                        'Placeholder identities from account recoveries cannot be used to create new accounts.'}
+                        'This cannot be used to create new accounts.'}
                 </div>
             </div>
-            {showAttributes && !isPlaceholder && identityObject && (
+            {showAttributes && !isRecovered && identityObject && (
                 <div className={styles.details}>
                     {Object.entries(
                         identityObject.attributeList.chosenAttributes ?? {}
