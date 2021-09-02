@@ -7,7 +7,7 @@ import {
     addressBookTable,
     credentialsTable,
 } from '~/constants/databaseNames.json';
-import { Account, Credential } from '~/utils/types';
+import { Account, Identity, AccountAndCredentialPairs } from '~/utils/types';
 import { AccountMethods } from '~/preload/preloadTypes';
 
 function convertAccountBooleans(accounts: Account[]) {
@@ -103,36 +103,90 @@ export async function updateInitialAccount(
         .update(updatedValues);
 }
 
-/** Inserts the given account and credential transactionally
+/** Inserts the given account as part of a transaction
  * Also inserts a addressbookentry for the account, if it does not already exist.
  */
-async function insertAccountAndCredential(
+async function insertAccountTransactionally(
     account: Account,
-    credential: Credential,
-    note: string
+    note: string,
+    transaction: Knex.Transaction
 ) {
-    return (await knex()).transaction(async (t) => {
-        const abe = await t
+    const abe = await transaction
+        .table(addressBookTable)
+        .where({ address: account.address })
+        .first()
+        .select();
+    if (abe) {
+        await transaction
+            .table(accountsTable)
+            .insert({ ...account, name: abe.name });
+        await transaction
             .table(addressBookTable)
             .where({ address: account.address })
-            .first()
-            .select();
-        if (abe) {
-            await t.table(accountsTable).insert({ ...account, name: abe.name });
-            await t
-                .table(addressBookTable)
-                .where({ address: account.address })
-                .update({ readOnly: true });
-        } else {
-            await t.table(accountsTable).insert(account);
-            await t.table(addressBookTable).insert({
-                address: account.address,
-                name: account.name,
-                readOnly: true,
-                note,
-            });
+            .update({ readOnly: true });
+    } else {
+        await transaction.table(accountsTable).insert(account);
+        await transaction.table(addressBookTable).insert({
+            address: account.address,
+            name: account.name,
+            readOnly: true,
+            note,
+        });
+    }
+}
+
+/** Inserts accounts and credentials for a specific identity, from recovery.
+ * The identity is first inserted, and its given id is attached to the accounts and credentials.
+ */
+async function insertFromRecoveryNewIdentity(
+    recovered: AccountAndCredentialPairs,
+    identity: Omit<Identity, 'id'>
+) {
+    return (await knex()).transaction(async (transaction) => {
+        const identityId = (
+            await transaction.table(identitiesTable).insert(identity)
+        )[0];
+        for (const pair of recovered) {
+            const account = { ...pair.account, identityId };
+            const credential = { ...pair.credential, identityId };
+            const { address } = account;
+            const accountExists =
+                (
+                    await transaction
+                        .table(accountsTable)
+                        .where({ address })
+                        .select()
+                ).length > 0;
+            if (!accountExists) {
+                await insertAccountTransactionally(
+                    account,
+                    'Recovered account',
+                    transaction
+                );
+            }
+            await transaction.table(credentialsTable).insert(credential);
         }
-        await t.table(credentialsTable).insert(credential);
+    });
+}
+
+/** Inserts accounts and credentials for an existing identity, from recovery.
+ */
+async function insertFromRecoveryExistingIdentity(
+    recovered: AccountAndCredentialPairs
+) {
+    return (await knex()).transaction(async (transaction) => {
+        for (const { account, credential } of recovered) {
+            const { address } = account;
+            const accountExists = (await findAccounts({ address })).length > 0;
+            if (!accountExists) {
+                insertAccountTransactionally(
+                    account,
+                    'Recovered account',
+                    transaction
+                );
+            }
+            await transaction.table(credentialsTable).insert(credential);
+        }
     });
 }
 
@@ -144,6 +198,7 @@ const exposedMethods: AccountMethods = {
     findAccounts,
     removeAccount,
     updateInitialAccount,
-    insertAccountAndCredential,
+    insertFromRecoveryNewIdentity,
+    insertFromRecoveryExistingIdentity,
 };
 export default exposedMethods;

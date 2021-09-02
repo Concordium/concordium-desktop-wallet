@@ -1347,3 +1347,8 @@ export enum PrintErrorTypes {
     Failed = 'failed',
     NoPrinters = 'no valid printers available',
 }
+
+export type AccountAndCredentialPairs = {
+    account: Account;
+    credential: Credential;
+}[];

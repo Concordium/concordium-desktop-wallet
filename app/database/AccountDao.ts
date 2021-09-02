@@ -8,7 +8,8 @@ export const {
     findAccounts,
     removeAccount,
     updateInitialAccount,
-    insertAccountAndCredential,
+    insertFromRecoveryNewIdentity,
+    insertFromRecoveryExistingIdentity,
 } = window.database.account;
 
 /**

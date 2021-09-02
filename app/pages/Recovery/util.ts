@@ -1,13 +1,11 @@
 import { getAccountInfo } from '~/node/nodeRequests';
 import { getAddressFromCredentialId, getCredId } from '~/utils/rustInterface';
 import {
-    findAccounts,
-    insertAccountAndCredential,
+    insertFromRecoveryExistingIdentity,
+    insertFromRecoveryNewIdentity,
 } from '~/database/AccountDao';
 import { createNewCredential } from '~/utils/credentialHelper';
-import { importCredentials } from '~/features/CredentialSlice';
 import {
-    Account,
     AccountStatus,
     AccountInfo,
     Global,
@@ -15,10 +13,10 @@ import {
     Policy,
     IdentityObject,
     Versioned,
-    Credential,
+    AccountAndCredentialPairs,
+    Identity,
 } from '~/utils/types';
 import { getCurrentYearMonth } from '~/utils/timeHelpers';
-import { insertIdentity } from '~/database/IdentityDao';
 import { maxCredentialsOnAccount } from '~/constants/recoveryConstants.json';
 import { createAccount } from '~/utils/accountHelpers';
 import { getNextCredentialNumber } from '~/database/CredentialDao';
@@ -43,7 +41,7 @@ export function getRecoveredIdentityName(identityNumber: number) {
 export async function createRecoveredIdentity(
     walletId: number,
     identityNumber: number
-): Promise<number> {
+): Promise<Omit<Identity, 'id'>> {
     const createdAt = getCurrentYearMonth();
     const validTo = getCurrentYearMonth();
     const identityObject: Versioned<IdentityObject> = {
@@ -84,7 +82,7 @@ export async function createRecoveredIdentity(
         walletId,
     };
 
-    return (await insertIdentity(identity))[0];
+    return identity;
 }
 
 interface CredentialIndexAndPolicy {
@@ -180,11 +178,6 @@ async function recoverCredential(
     return { account, credential };
 }
 
-type AccountAndCredentialPairs = {
-    account: Account;
-    credential: Credential;
-}[];
-
 /**
  * Attempts to recover credentials on an existing identity.
  * @param prfKeySeed Seed of the prfKey of the identity.
@@ -229,35 +222,6 @@ export async function recoverCredentials(
 }
 
 /**
- * Given a list of account/credential pairs, imports them together, but only the accounts if they are non-duplicates.
- * @param recovered the account and credential pairs to be added.
- * @param identityId optional parameter, which replaces the identityId on accounts and credentials
- */
-export async function insertRecovered(
-    recovered: AccountAndCredentialPairs,
-    identityId?: number
-) {
-    for (const pair of recovered) {
-        let { account, credential } = pair;
-        if (identityId !== undefined) {
-            account = { ...account, identityId };
-            credential = { ...credential, identityId };
-        }
-        const { address } = account;
-        const accountExists = (await findAccounts({ address })).length > 0;
-        if (!accountExists) {
-            insertAccountAndCredential(
-                account,
-                credential,
-                'Recovered account'
-            );
-        } else {
-            importCredentials([credential]);
-        }
-    }
-}
-
-/**
  * Attempts to recover credentials on an identity.
  * @param prfKeySeed Seed of the prfKey of the identity.
  * @param blockHash block at which the function recover credentials.
@@ -284,7 +248,7 @@ export async function recoverFromIdentity(
     );
 
     if (recovered.length > 0 && !controller.isAborted) {
-        await insertRecovered(recovered);
+        await insertFromRecoveryExistingIdentity(recovered);
     }
     return recovered.map(({ account }) => account);
 }
@@ -315,15 +279,14 @@ export async function recoverNewIdentity(
         controller
     );
 
-    // If we have found any credentials, create an identity and add the credentials and accounts.
-    // N.B. It is sufficient to check credentials, because accounts are not found without credentials.
+    // If we have recovered credentials and accounts, create an identity and add the credentials and accounts.
     if (recovered.length && !controller.isAborted) {
-        const identityId = await createRecoveredIdentity(
+        const identity = await createRecoveredIdentity(
             walletId,
             identityNumber
         );
         if (recovered.length > 0) {
-            await insertRecovered(recovered, identityId);
+            await insertFromRecoveryNewIdentity(recovered, identity);
         }
     }
     return recovered.map(({ account }) => account);
