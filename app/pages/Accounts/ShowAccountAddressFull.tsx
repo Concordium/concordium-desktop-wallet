@@ -4,11 +4,13 @@ import QRCode from 'qrcode.react';
 import ShrinkIcon from '@resources/svg/shrink.svg';
 import { push } from 'connected-react-router';
 import { chosenAccountSelector } from '~/features/AccountSlice';
-import CopyButton from '../../components/CopyButton';
+import CopyButton from '~/components/CopyButton';
 import PageLayout from '~/components/PageLayout';
 import routes from '~/constants/routes.json';
-import styles from './Accounts.module.scss';
 import IconButton from '~/cross-app-components/IconButton';
+import AccountPageHeader from './AccountPageHeader';
+
+import styles from './Accounts.module.scss';
 
 /**
  * Displays the account's address, and allows the user to copy it.
@@ -24,7 +26,7 @@ export default function ShowAccountAddress() {
     return (
         <PageLayout>
             <PageLayout.Header>
-                <h1>Accounts</h1>
+                <AccountPageHeader />
             </PageLayout.Header>
             <PageLayout.Container
                 closeRoute={routes.ACCOUNTS}
