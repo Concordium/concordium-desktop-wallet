@@ -1,7 +1,9 @@
 import { getAccountInfo } from '~/node/nodeRequests';
 import { getAddressFromCredentialId, getCredId } from '~/utils/rustInterface';
-import { findAccounts } from '~/database/AccountDao';
-import { importAccount } from '~/features/AccountSlice';
+import {
+    findAccounts,
+    insertAccountAndCredential,
+} from '~/database/AccountDao';
 import { createNewCredential } from '~/utils/credentialHelper';
 import { importCredentials } from '~/features/CredentialSlice';
 import {
@@ -11,16 +13,16 @@ import {
     Global,
     IdentityStatus,
     Policy,
-    AddressBookEntry,
     IdentityObject,
     Versioned,
+    Credential,
 } from '~/utils/types';
 import { getCurrentYearMonth } from '~/utils/timeHelpers';
 import { insertIdentity } from '~/database/IdentityDao';
 import { maxCredentialsOnAccount } from '~/constants/recoveryConstants.json';
 import { createAccount } from '~/utils/accountHelpers';
 import { getNextCredentialNumber } from '~/database/CredentialDao';
-import { importAddressBookEntry } from '~/features/AddressBookSlice';
+import AbortController from '~/utils/AbortController';
 
 export enum Status {
     Initial = 'Waiting...',
@@ -178,6 +180,11 @@ async function recoverCredential(
     return { account, credential };
 }
 
+type AccountAndCredentialPairs = {
+    account: Account;
+    credential: Credential;
+}[];
+
 /**
  * Attempts to recover credentials on an existing identity.
  * @param prfKeySeed Seed of the prfKey of the identity.
@@ -192,10 +199,10 @@ export async function recoverCredentials(
     identityId: number,
     blockHash: string,
     global: Global,
+    controller: AbortController,
     startingCredNumber = 0
-) {
-    const credentials = [];
-    const accounts = [];
+): Promise<AccountAndCredentialPairs> {
+    const allRecovered = [];
     let credNumber = startingCredNumber;
     while (credNumber < maxCredentialsOnAccount) {
         const credId = await getCredId(prfKeySeed, credNumber, global);
@@ -207,39 +214,45 @@ export async function recoverCredentials(
             identityId
         );
 
+        if (controller.isAborted) {
+            return [];
+        }
+
         if (recovered) {
-            credentials.push(recovered.credential);
-            accounts.push(recovered.account);
+            allRecovered.push(recovered);
         }
         credNumber += 1;
     }
 
-    return { credentials, accounts };
+    return allRecovered;
 }
 
 /**
  * Imports a list of accounts, but only non-duplicates.
- * @param accounts the accounts to be added.
+ * @param recovered the account and credential pairs to be added.
  * @param addressBook the addressBook is used to check for duplicates.
+ * @param identityId optional parameter, which replaces the identityId on accounts and credentials
  */
-export async function addAccounts(
-    accounts: Account[],
-    addressBook: AddressBookEntry[]
+export async function insertRecovered(
+    recovered: AccountAndCredentialPairs,
+    identityId?: number
 ) {
-    for (const account of accounts) {
+    for (const pair of recovered) {
+        let { account, credential } = pair;
+        if (identityId !== undefined) {
+            account = { ...account, identityId };
+            credential = { ...credential, identityId };
+        }
         const { address } = account;
         const accountExists = (await findAccounts({ address })).length > 0;
         if (!accountExists) {
-            importAccount(account);
-            if (!addressBook.some((abe) => abe.address === address)) {
-                // TODO: Add this with the account transactionally
-                importAddressBookEntry({
-                    readOnly: true,
-                    name: account.name,
-                    address,
-                    note: 'Recovered account',
-                });
-            }
+            insertAccountAndCredential(
+                account,
+                credential,
+                'Recovered account'
+            );
+        } else {
+            importCredentials([credential]);
         }
     }
 }
@@ -258,25 +271,22 @@ export async function recoverFromIdentity(
     blockHash: string,
     global: Global,
     identityId: number,
-    addressBook: AddressBookEntry[]
+    controller: AbortController
 ) {
     const nextCredentialNumber = await getNextCredentialNumber(identityId);
-    const { credentials, accounts } = await recoverCredentials(
+    const recovered = await recoverCredentials(
         prfKeySeed,
         identityId,
         blockHash,
         global,
+        controller,
         nextCredentialNumber
     );
 
-    if (accounts.length > 0) {
-        await addAccounts(accounts, addressBook);
+    if (recovered.length > 0 && !controller.isAborted) {
+        await insertRecovered(recovered);
     }
-
-    if (credentials.length > 0) {
-        await importCredentials(credentials);
-    }
-    return accounts;
+    return recovered.map(({ account }) => account);
 }
 
 /**
@@ -295,33 +305,26 @@ export async function recoverNewIdentity(
     global: Global,
     identityNumber: number,
     walletId: number,
-    addressBook: AddressBookEntry[]
+    controller: AbortController
 ) {
-    const { credentials, accounts } = await recoverCredentials(
+    const recovered = await recoverCredentials(
         prfKeySeed,
         0,
         blockHash,
-        global
+        global,
+        controller
     );
 
     // If we have found any credentials, create an identity and add the credentials and accounts.
     // N.B. It is sufficient to check credentials, because accounts are not found without credentials.
-    if (credentials.length) {
+    if (recovered.length && !controller.isAborted) {
         const identityId = await createRecoveredIdentity(
             walletId,
             identityNumber
         );
-        await addAccounts(
-            accounts.map((acc) => {
-                return { ...acc, identityId };
-            }),
-            addressBook
-        );
-        await importCredentials(
-            credentials.map((cred) => {
-                return { ...cred, identityId };
-            })
-        );
+        if (recovered.length > 0) {
+            await insertRecovered(recovered, identityId);
+        }
     }
-    return accounts;
+    return recovered.map(({ account }) => account);
 }

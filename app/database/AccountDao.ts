@@ -8,6 +8,7 @@ export const {
     findAccounts,
     removeAccount,
     updateInitialAccount,
+    insertAccountAndCredential,
 } = window.database.account;
 
 /**

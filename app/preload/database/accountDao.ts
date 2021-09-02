@@ -1,8 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Knex } from 'knex';
 import { knex } from '~/database/knex';
-import { accountsTable, identitiesTable } from '~/constants/databaseNames.json';
-import { Account } from '~/utils/types';
+import {
+    accountsTable,
+    identitiesTable,
+    addressBookTable,
+    credentialsTable,
+} from '~/constants/databaseNames.json';
+import { Account, Credential } from '~/utils/types';
 import { AccountMethods } from '~/preload/preloadTypes';
 
 function convertAccountBooleans(accounts: Account[]) {
@@ -98,6 +103,39 @@ export async function updateInitialAccount(
         .update(updatedValues);
 }
 
+/** Inserts the given account and credential transactionally
+ * Also inserts a addressbookentry for the account, if it does not already exist.
+ */
+async function insertAccountAndCredential(
+    account: Account,
+    credential: Credential,
+    note: string
+) {
+    return (await knex()).transaction(async (t) => {
+        const abe = await t
+            .table(addressBookTable)
+            .where({ address: account.address })
+            .first()
+            .select();
+        if (abe) {
+            await t.table(accountsTable).insert({ ...account, name: abe.name });
+            await t
+                .table(addressBookTable)
+                .where({ address: account.address })
+                .update({ readOnly: true });
+        } else {
+            await t.table(accountsTable).insert(account);
+            await t.table(addressBookTable).insert({
+                address: account.address,
+                name: account.name,
+                readOnly: true,
+                note,
+            });
+        }
+        await t.table(credentialsTable).insert(credential);
+    });
+}
+
 const exposedMethods: AccountMethods = {
     getAll: getAllAccounts,
     getAccount,
@@ -106,5 +144,6 @@ const exposedMethods: AccountMethods = {
     findAccounts,
     removeAccount,
     updateInitialAccount,
+    insertAccountAndCredential,
 };
 export default exposedMethods;

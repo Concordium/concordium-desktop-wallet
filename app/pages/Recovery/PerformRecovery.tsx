@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
@@ -7,10 +7,7 @@ import { getlastFinalizedBlockHash } from '~/node/nodeHelpers';
 import { loadAccounts } from '~/features/AccountSlice';
 import { loadCredentials } from '~/features/CredentialSlice';
 import { globalSelector } from '~/features/GlobalSlice';
-import {
-    loadAddressBook,
-    addressBookSelector,
-} from '~/features/AddressBookSlice';
+import { loadAddressBook } from '~/features/AddressBookSlice';
 import { loadIdentities, identitiesSelector } from '~/features/IdentitySlice';
 import pairWallet from '~/utils/WalletPairing';
 import routes from '~/constants/routes.json';
@@ -22,12 +19,13 @@ import {
     getRecoveredIdentityName,
 } from './util';
 import { Account, StateUpdate } from '~/utils/types';
-import AbortController from '~/utils/AbortController';
 import Button from '~/cross-app-components/Button';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import ChoiceModal from '~/components/ChoiceModal';
 import { noOp } from '~/utils/basicHelpers';
 import { identitySpacesBetweenWarning } from '~/constants/recoveryConstants.json';
+import { useAsyncMemo } from '~/utils/hooks';
+import AbortController from '~/utils/AbortController';
 
 import styles from './Recovery.module.scss';
 
@@ -65,12 +63,27 @@ export default function PerformRecovery({
 }: Props) {
     const dispatch = useDispatch();
     const identities = useSelector(identitiesSelector);
-    const addressBook = useSelector(addressBookSelector);
     const global = useSelector(globalSelector);
-    const [controller] = useState(new AbortController());
     const [error, setError] = useState<string>();
     const [showStop, setShowStop] = useState<ShowStop>();
     const [recoveredTotal, setRecoveredTotal] = useState(0);
+    const [emptyIndices, setEmptyIndices] = useState(0);
+
+    const [controller] = useState(new AbortController());
+
+    const blockHash = useAsyncMemo(getlastFinalizedBlockHash, () =>
+        setError(errorMessages.unableToReachNode)
+    );
+
+    const findIdentity = useCallback(
+        (identityNumber: number, walletId: number) =>
+            identities.find(
+                (identity) =>
+                    identity.walletId === walletId &&
+                    identity.identityNumber === identityNumber
+            ),
+        [identities]
+    );
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => setStatus(Status.Initial), []);
@@ -88,7 +101,13 @@ export default function PerformRecovery({
     }
 
     useEffect(() => {
-        return () => controller.abort();
+        return () => {
+            controller.abort();
+            loadAccounts(dispatch);
+            loadIdentities(dispatch);
+            loadAddressBook(dispatch);
+            setStatus(undefined);
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -100,86 +119,71 @@ export default function PerformRecovery({
             setError(errorMessages.missingGlobal);
             return;
         }
-
-        const blockHash = await getlastFinalizedBlockHash();
+        if (!blockHash) {
+            setError('Current Blockhash has not been loaded yet');
+            return;
+        }
 
         const walletId = await pairWallet(ledger, dispatch);
-        const identitiesOfWallet = identities.filter(
-            (i) => i.walletId === walletId
+
+        const identityNumber = currentIdentityNumber;
+        setStatus(Status.WaitingForInput);
+        const prfKeySeed = await getPrfKeySeed(
+            ledger,
+            setLedgerMessage,
+            identityNumber
         );
-
-        const findIdentity = (identityNumber: number) =>
-            identitiesOfWallet.find(
-                (identity) => identity.identityNumber === identityNumber
+        setStatus(Status.Searching);
+        const identity = findIdentity(identityNumber, walletId);
+        let accounts: Account[];
+        if (identity) {
+            accounts = await recoverFromIdentity(
+                prfKeySeed,
+                blockHash,
+                global,
+                identity.id,
+                controller
             );
+            accounts.forEach((acc) => {
+                acc.identityName = identity.name;
+            });
+            setEmptyIndices(0);
+        } else {
+            accounts = await recoverNewIdentity(
+                prfKeySeed,
+                blockHash,
+                global,
+                identityNumber,
+                walletId,
+                controller
+            );
+            const identityName = getRecoveredIdentityName(identityNumber);
+            accounts.forEach((acc) => {
+                acc.identityName = identityName;
+            });
+        }
+        // We want to load credentials, to avoid all recovered accounts displaying readOnly symbols.
+        loadCredentials(dispatch);
 
-        let identityNumber = currentIdentityNumber;
-        try {
-            let emptyIndices = 0;
-            while (!controller.isAborted) {
-                if (
-                    emptyIndices > 0 &&
-                    emptyIndices % identitySpacesBetweenWarning === 0
-                ) {
-                    const stopped = await promptStop(emptyIndices);
-                    if (stopped) {
-                        break;
-                    }
-                }
-                setStatus(Status.WaitingForInput);
-                const prfKeySeed = await getPrfKeySeed(
-                    ledger,
-                    setLedgerMessage,
-                    identityNumber
-                );
-                setStatus(Status.Searching);
-                const identity = findIdentity(identityNumber);
-                let accounts: Account[];
-                if (identity) {
-                    emptyIndices = 0;
-                    accounts = await recoverFromIdentity(
-                        prfKeySeed,
-                        blockHash,
-                        global,
-                        identity.id,
-                        addressBook
-                    );
-                    accounts.forEach((acc) => {
-                        acc.identityName = identity.name;
-                    });
-                } else {
-                    accounts = await recoverNewIdentity(
-                        prfKeySeed,
-                        blockHash,
-                        global,
-                        identityNumber,
-                        walletId,
-                        addressBook
-                    );
-                    const identityName = getRecoveredIdentityName(
-                        identityNumber
-                    );
-                    accounts.forEach((acc) => {
-                        acc.identityName = identityName;
-                    });
-                    if (accounts.length) {
-                        emptyIndices = 0;
-                    } else {
-                        emptyIndices += 1;
-                    }
-                }
-                loadCredentials(dispatch);
-                setRecoveredTotal((n) => n + accounts.length);
-                setRecoveredAccounts((ra) => [accounts, ...ra]);
-                identityNumber += 1;
-            }
-        } finally {
+        if (controller.isAborted) {
             controller.finish();
-            loadAccounts(dispatch);
-            loadIdentities(dispatch);
-            loadAddressBook(dispatch);
-            setCurrentIdentityNumber(identityNumber);
-            setStatus(undefined);
+            return;
+        }
+
+        setRecoveredTotal((n) => n + accounts.length);
+        setRecoveredAccounts((ra) => [accounts, ...ra]);
+        setCurrentIdentityNumber((n) => n + 1);
+
+        if (identity || accounts.length) {
+            setEmptyIndices(0);
+        } else {
+            if (
+                emptyIndices > 0 &&
+                (emptyIndices + 1) % identitySpacesBetweenWarning === 0
+            ) {
+                await promptStop(emptyIndices);
+            }
+            setEmptyIndices((n) => n + 1);
         }
     }
 

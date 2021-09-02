@@ -128,6 +128,11 @@ export type AccountMethods = {
         identityNumber: number,
         values: Partial<Account>
     ) => Promise<number>;
+    insertAccountAndCredential: (
+        account: Account,
+        credential: Credential,
+        note: string
+    ) => void;
 };
 
 export type AddressBookMethods = {
