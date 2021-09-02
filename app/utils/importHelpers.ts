@@ -34,7 +34,7 @@ const alreadyExistsMessage = 'Already exists';
 const replacesMessage = (name: string) => `Replaces name: ${name}`;
 const alreadyExistsAsMessage = (name: string) => `Already exists as: ${name}`;
 const replacesPlaceholderMessage = (name: string) =>
-    `Replaces Placeholder identity: ${name}`;
+    `Replaces placeholder identity: ${name}`;
 
 export interface HasWalletId {
     walletId?: number;
@@ -298,8 +298,6 @@ async function insertNewAccountsAndCredentials(
  * each identity in the array will have their identityId reference updated to point to the
  * correct id for their identity, before they are also inserted into the database.
  *
- * Note that for new identities that there cannot be existing account or credentials, so we
- * can safely insert them without checking if they already exist.
  * @param newIdentities an array of new identities to be added to the database
  * @param attachedAccounts all accounts for the current wallet import, without any changes to their identityId
  * @param attachedCredentials all credentials for the current wallet import, without any changes to their identityId
@@ -324,7 +322,6 @@ async function insertNewIdentities(
             attachedCredentials
         );
 
-        // TODO: Find a nice way to avoid the unnecessary check on credentials
         await insertNewAccountsAndCredentials(
             newIdentityId,
             accountsOnIdentity,
@@ -417,18 +414,21 @@ async function importDuplicateWallets(
         importedAccounts
     );
 
-    async function addAccountsAndCredentials(oldId: number, newId: number) {
+    async function addAccountsAndCredentials(
+        oldIdentityId: number,
+        newIdentityId: number
+    ) {
         const {
             accountsOnIdentity,
             credentialsOnIdentity,
         } = findAccountsAndCredentialsOnIdentity(
-            oldId,
+            oldIdentityId,
             attachedAccounts,
             attachedCredentials
         );
 
         await insertNewAccountsAndCredentials(
-            newId,
+            newIdentityId,
             accountsOnIdentity,
             credentialsOnIdentity,
             addMessage
@@ -454,15 +454,17 @@ async function importDuplicateWallets(
     // check if there are new accounts or credentials and add them to the database.
     for (let i = 0; i < duplicateIdentities.length; i += 1) {
         const identityId = duplicateIdentities[i].id;
+        addMessage(identityId, alreadyExistsMessage);
         await addAccountsAndCredentials(identityId, identityId);
     }
 
     // The identities that are not duplicate can be partitioned into the set
-    // of identities that exist in the database, but with separate logical ids,
-    // and those identities that are entirely new to this database.
+    // of identities that exist in the database, but with separate logical ids or names,
+    // and those identities that are either entirely new to this database,
+    // or either it or the existing identity in the database is from recovery.
     const [
         existingIdentities,
-        nonExistingIdentities,
+        nonMatchingIdentities,
     ] = partition(nonDuplicateIdentities, (nonDuplicateIdentity) =>
         isDuplicate(nonDuplicateIdentity, existingData.identities, [
             'identityNumber',
@@ -471,13 +473,25 @@ async function importDuplicateWallets(
         ])
     );
 
+    // Partition the identities into the set of identities, where a recovered version is being imported, and the remaining identities.
+    const [recoveredIdentities, nonExistingIdentities] = partition(
+        nonMatchingIdentities,
+        (nonMatchingIdentity) =>
+            nonMatchingIdentity.status === IdentityStatus.Recovered &&
+            isDuplicate(nonMatchingIdentity, existingData.identities, [
+                'identityNumber',
+                'walletId',
+            ])
+    );
+
     // For the existing identities find the identityId that they now have, and update that on the associated
     // accounts and credentials before inserting them into the database. Note that we only have to insert
     // new accounts and credentials, as if they already exist in the database, then the import will not
     // carry new information that was not already present in the database.
-    for (let i = 0; i < existingIdentities.length; i += 1) {
-        const existingIdentity = existingIdentities[i];
-
+    // We concatenate the imported identities with recovered status, because we need to handle those the same way.
+    for (const existingIdentity of existingIdentities.concat(
+        recoveredIdentities
+    )) {
         // Find the identity id as it is in the database.
         const identityInDatabase = existingData.identities.find((ident) => {
             if (
@@ -507,9 +521,9 @@ async function importDuplicateWallets(
         );
     }
 
-    // We want to find the placeholder identities, whose real version are present.
+    // Partition the identities into the set of identities, where the version in the database is from the recovery, and set of identities that are entirely new to the database.
     const [
-        recoveredIdentities,
+        replacingIdentities,
         newIdentities,
     ] = partition(nonExistingIdentities, (nonExistingIdentity) =>
         isDuplicate(nonExistingIdentity, existingData.identities, [
@@ -517,9 +531,8 @@ async function importDuplicateWallets(
             'walletId',
         ])
     );
-    for (let i = 0; i < recoveredIdentities.length; i += 1) {
-        const importedIdentity = recoveredIdentities[i];
 
+    for (const importedIdentity of replacingIdentities) {
         // Find the identity as it is in the database.
         const existingIdentity = existingData.identities.find(
             (ident) =>
@@ -535,19 +548,17 @@ async function importDuplicateWallets(
 
         const existingId = existingIdentity.id;
 
-        if (importedIdentity.status !== IdentityStatus.Recovered) {
-            if (existingIdentity.status !== IdentityStatus.Recovered) {
-                throw new Error(
-                    'An existing and imported identity match on index only, but none of them are placeholders.'
-                );
-            }
-            const { id, ...properties } = importedIdentity;
-            // the identity in the database is a placeholder, so we should update it with the imported data.
-            updateIdentity(existingId, properties);
+        if (existingIdentity.status !== IdentityStatus.Recovered) {
+            throw new Error(
+                'An existing and imported identity match on index only, but none of them are placeholders.'
+            );
         }
 
-        handleDuplicateIdentity(importedIdentity, existingIdentity, addMessage);
+        const { id, ...properties } = importedIdentity;
+        // the identity in the database is from the recovery, so we should update it with the imported data.
+        updateIdentity(existingId, properties);
 
+        handleDuplicateIdentity(importedIdentity, existingIdentity, addMessage);
         await addAccountsAndCredentials(importedIdentity.id, existingId);
     }
 
