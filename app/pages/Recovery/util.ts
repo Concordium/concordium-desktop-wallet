@@ -191,8 +191,9 @@ type AccountAndCredentialPairs = {
  * @param identityId id of the identity.
  * @param blockHash block at which the function recover credentials.
  * @param global current global parameters.
+ * @param controller used to check if the flow has been interrupted.
  * @param startingCredNumber credentialNumber, from which to start attempting to recover credentials from.
- * @returns Returns an object containing the list of all recovered credentials and their accounts. The length of these lists are always the same, and each account matches the credential on the same index.
+ * @returns Returns a list of all recovered credentials and their accounts in pairs. (if Interrupted, the list is empty)
  */
 export async function recoverCredentials(
     prfKeySeed: string,
@@ -228,9 +229,8 @@ export async function recoverCredentials(
 }
 
 /**
- * Imports a list of accounts, but only non-duplicates.
+ * Given a list of account/credential pairs, imports them together, but only the accounts if they are non-duplicates.
  * @param recovered the account and credential pairs to be added.
- * @param addressBook the addressBook is used to check for duplicates.
  * @param identityId optional parameter, which replaces the identityId on accounts and credentials
  */
 export async function insertRecovered(
@@ -263,7 +263,7 @@ export async function insertRecovered(
  * @param blockHash block at which the function recover credentials.
  * @param global current global parameters.
  * @param identityId id of the identity.
- * @param addressBook the addressBook is used to check for duplicates when inserting new accounts.
+ * @param controller used to check if the flow has been interrupted.
  * @returns Returns the recovered accounts.
  */
 export async function recoverFromIdentity(
@@ -296,7 +296,7 @@ export async function recoverFromIdentity(
  * @param global current global parameters.
  * @param identityNumber identityNumber of the current wallet to recover from.
  * @param walletId id of the wallet to recover from.
- * @param addressBook the addressBook is used to check for duplicates when inserting new accounts.
+ * @param controller used to check if the flow has been interrupted.
  * @returns Returns the recovered accounts.
  */
 export async function recoverNewIdentity(
