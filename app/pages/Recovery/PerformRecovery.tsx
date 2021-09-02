@@ -73,7 +73,7 @@ export default function PerformRecovery({
     const [recoveredTotal, setRecoveredTotal] = useState(0);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    useEffect(() => setStatus(Status.initial), []);
+    useEffect(() => setStatus(Status.Initial), []);
 
     function promptStop(emptyCount: number) {
         return new Promise((resolve) => {
@@ -126,13 +126,13 @@ export default function PerformRecovery({
                         break;
                     }
                 }
-                setStatus(Status.waitingForInput);
+                setStatus(Status.WaitingForInput);
                 const prfKeySeed = await getPrfKeySeed(
                     ledger,
                     setLedgerMessage,
                     identityNumber
                 );
-                setStatus(Status.searching);
+                setStatus(Status.Searching);
                 const identity = findIdentity(identityNumber);
                 let accounts: Account[];
                 if (identity) {

@@ -14,7 +14,7 @@ import styles from './Recovery.module.scss';
  * Main Component for the account recovery algorithm.
  */
 export default function Recovery() {
-    const [status, setStatus] = useState<Status | undefined>(Status.initial);
+    const [status, setStatus] = useState<Status | undefined>(Status.Initial);
     const [recoveredAccounts, setRecoveredAccounts] = useState<Account[][]>([]);
     const [currentIdentityNumber, setCurrentIdentityNumber] = useState<number>(
         0

@@ -76,6 +76,7 @@ export default function ExportCredential({ onExported }: Props): JSX.Element {
                 );
             }
             if (!addressBook.some((abe) => abe.address === address)) {
+                // TODO: Add this with the account transactionally
                 addToAddressBook(dispatch, {
                     readOnly: true,
                     name,

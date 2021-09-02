@@ -42,10 +42,10 @@ export default function DisplayRecovery({ status, recoveredAccounts }: Props) {
         <div className={styles.recoveredDiv}>
             {status && (
                 <>
-                    <p className="bodyEmphasized textLeft">
+                    <p className="bodyEmphasized textLeft mB0">
                         Identity index {recoveredAccounts.length}:
                     </p>
-                    <p className="textLeft">{status}</p>
+                    <p className="textLeft mV5">{status}</p>
                 </>
             )}
             {recoveredAccounts.map((accounts, index) => {
@@ -57,24 +57,28 @@ export default function DisplayRecovery({ status, recoveredAccounts }: Props) {
                 );
                 return (
                     <>
-                        <p className="bodyEmphasized textLeft">
+                        <p className="bodyEmphasized textLeft mB0">
                             Identity index {identityNumber}:{' '}
                             {identity ? `(${identity.name})` : null}
                         </p>
-                        <p className="textLeft">
+                        <p className="textLeft mV5">
                             Done: Found {accounts.length}{' '}
                             {identity ? 'additional ' : null}account
                             {accounts.length === 1 || 's'}.
                         </p>
-                        <CardList>
-                            {accounts.map((account) => (
-                                <AccountCard
-                                    key={account.address}
-                                    accountInfo={accountsInfo[account.address]}
-                                    account={account}
-                                />
-                            ))}
-                        </CardList>
+                        {accounts.length ? (
+                            <CardList className="mT20">
+                                {accounts.map((account) => (
+                                    <AccountCard
+                                        key={account.address}
+                                        accountInfo={
+                                            accountsInfo[account.address]
+                                        }
+                                        account={account}
+                                    />
+                                ))}
+                            </CardList>
+                        ) : null}
                     </>
                 );
             })}

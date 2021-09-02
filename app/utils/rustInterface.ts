@@ -496,13 +496,13 @@ export function getAddressFromCredentialId(credId: string): Promise<string> {
 }
 
 export function getCredId(
-    prfKey: string,
+    prfKeySeed: string,
     credentialNumber: number,
     global: Global
 ): Promise<string> {
     return worker.postMessage({
         command: workerCommands.getCredId,
-        prfKey,
+        prfKey: prfKeySeed,
         credentialNumber,
         global: stringify(global),
     });
