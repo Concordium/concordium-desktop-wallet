@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import TabbedCard from '~/components/TabbedCard';
 import { transactionsSelector } from '~/features/TransactionSlice';
 import { Account, TransferTransaction } from '~/utils/types';
+import ShowAccountAddress from '../../ShowAccountAddress';
 import TransactionList from '../../TransactionList';
 import TransactionView from '../../TransactionView';
 
@@ -29,8 +30,6 @@ export default function TransfersAndAddress({ account }: Props) {
         }
     }, [chosenTransaction]);
 
-    const { address } = account;
-
     return (
         <TabbedCard>
             <TabbedCard.Tab
@@ -42,7 +41,7 @@ export default function TransfersAndAddress({ account }: Props) {
                     <TransactionView transaction={chosenTransaction} />
                 ) : (
                     <TransactionList
-                        transactions={transactions}
+                        transactions={transactions.slice(0, 10)}
                         onTransactionClick={setChosenTransaction}
                     />
                 )}
@@ -52,7 +51,7 @@ export default function TransfersAndAddress({ account }: Props) {
                 onClick={() => setActiveTab(2)}
                 isActive={activeTab === 2}
             >
-                {address}
+                <ShowAccountAddress account={account} />
             </TabbedCard.Tab>
         </TabbedCard>
     );

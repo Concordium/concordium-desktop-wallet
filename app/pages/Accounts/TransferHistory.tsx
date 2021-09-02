@@ -65,6 +65,8 @@ interface Props {
 }
 
 /**
+ * TODO: delete this component...
+ *
  * Contains view of the account's transactions,
  * detailed view of a chosen one, and
  * display of the account's revealedAttributes.
