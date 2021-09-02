@@ -7,11 +7,11 @@ import {
 } from '~/features/AccountSlice';
 import routes from '~/constants/routes.json';
 
-import TransferHistory from '../TransferHistory';
 import AccountBalanceView from '../AccountBalanceView';
 import AccountViewActions from '../AccountViewActions';
 import FailedInitialAccount from '../FailedInitialAccount';
 import BasicTransferRoutes from '../BasicTransferRoutes';
+import TransactionsAndAddress from './TransactionsAndAddress/TransactionsAndAddress';
 
 /**
  * Detailed view of the chosen account and its transactions.
@@ -41,7 +41,7 @@ export default function AccountView() {
             <BasicTransferRoutes account={account}>
                 <Route
                     path={routes.ACCOUNTS}
-                    render={() => <TransferHistory account={account} />}
+                    render={() => <TransactionsAndAddress account={account} />}
                 />
             </BasicTransferRoutes>
         </>

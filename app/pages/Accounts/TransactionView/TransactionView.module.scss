@@ -1,6 +1,13 @@
 @import 'config/bundle';
 @import '../common';
 
+.root {
+    composes: thickBlueSeparatorTop;
+    composes: fillCardPadding;
+    composes: cardPadding;
+    position: relative;
+}
+
 .errorMessage,
 .title {
     text-align: center;
@@ -14,8 +21,6 @@
 .title,
 .errorMessage,
 .listElement {
-    composes: fillCardPadding;
-    composes: cardPadding;
     composes: greySeparator;
 
     &:not(:last-child) {
@@ -32,6 +37,11 @@
 .listElement {
     padding-top: 10px;
     padding-bottom: 10px;
+}
+
+.listElement {
+    composes: fillCardPadding;
+    composes: cardPadding;
 }
 
 .listElement:last-child {

@@ -106,14 +106,7 @@ export default function TransferHistory({ account }: Props) {
         switch (location) {
             case locations.listTransactions:
                 if (chosenTransaction) {
-                    return (
-                        <TransactionView
-                            transaction={chosenTransaction}
-                            returnFunction={() =>
-                                setChosenTransaction(undefined)
-                            }
-                        />
-                    );
+                    return <TransactionView transaction={chosenTransaction} />;
                 }
                 if (!viewingShielded || account.allDecrypted) {
                     return (
@@ -121,9 +114,7 @@ export default function TransferHistory({ account }: Props) {
                             {header}
                             <TransactionList
                                 transactions={transactions}
-                                onTransactionClick={(transaction) => {
-                                    setChosenTransaction(transaction);
-                                }}
+                                onTransactionClick={setChosenTransaction}
                             />
                         </Card>
                     );

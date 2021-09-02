@@ -14,14 +14,6 @@
     font-size: $font-size-button2;
     font-weight: $font-weight-emphasized;
 
-    &:first-of-type {
-        padding-left: 29px;
-    }
-
-    &:last-of-type {
-        padding-right: 29px;
-    }
-
     &:disabled {
         color: $color-pale-blue;
     }

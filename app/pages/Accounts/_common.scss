@@ -29,6 +29,18 @@ $thick-blue-separator-height: 13px;
     }
 }
 
+.blueSeparatorTop {
+    &:not(:first-child) {
+        border-top: 5px solid $color-light-blue;
+    }
+}
+
+.thickBlueSeparatorTop {
+    &:not(:first-child) {
+        border-top: $thick-blue-separator-height solid $color-light-blue;
+    }
+}
+
 .closeButton {
     position: absolute;
     top: 20px;

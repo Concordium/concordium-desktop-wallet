@@ -2,9 +2,10 @@ import React, { ReactElement, useState } from 'react';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
 import TabbedCardTab, { TabbedCardTabProps } from './TabbedCardTab';
+import { ClassName } from '~/utils/types';
+import { noOp } from '~/utils/basicHelpers';
 
 import styles from './TabbedCard.module.scss';
-import { ClassName } from '~/utils/types';
 
 type TabChild = ReactElement<TabbedCardTabProps>;
 
@@ -21,16 +22,19 @@ function TabbedCard({ children, className }: Props) {
         <Card className={className}>
             <div className={styles.header}>
                 {tabs
-                    .map((t) => t.props.header)
-                    .map((h, i) => (
+                    .map((t) => t.props)
+                    .map(({ header, onClick = noOp, isActive }, i) => (
                         <Button
                             clear
                             className={styles.button}
-                            key={h}
-                            onClick={() => setActive(i)}
-                            disabled={i === active}
+                            key={header}
+                            onClick={() => {
+                                onClick();
+                                setActive(i);
+                            }}
+                            disabled={isActive ?? i === active}
                         >
-                            {h}
+                            {header}
                         </Button>
                     ))}
             </div>

@@ -31,7 +31,7 @@ const getGroupHeader = (d: Date): string => {
 
 interface Props {
     transactions: TransferTransaction[];
-    onTransactionClick: (transaction: TransferTransaction) => void;
+    onTransactionClick(transaction: TransferTransaction): void;
 }
 
 /**
@@ -39,8 +39,8 @@ interface Props {
  * function when a specific transaction is clicked.
  */
 function TransactionList({
-    onTransactionClick,
     transactions,
+    onTransactionClick,
 }: Props): JSX.Element | null {
     const more = useSelector(moreTransactionsSelector);
     const loading = useSelector(loadingTransactionsSelector);

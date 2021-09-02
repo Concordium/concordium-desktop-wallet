@@ -1,18 +1,21 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
+import { useSelector } from 'react-redux';
 import TransactionListElement from '../TransactionList/TransactionListElement';
-import { TransferTransactionWithNames, TransactionStatus } from '~/utils/types';
+import {
+    TransferTransactionWithNames,
+    TransactionStatus,
+    TransferTransaction,
+} from '~/utils/types';
 import { isFailed } from '~/utils/transactionHelpers';
-import CloseButton from '~/cross-app-components/CloseButton';
-import Card from '~/cross-app-components/Card';
 import SidedRow from '~/components/SidedRow';
 import CopyButton from '~/components/CopyButton';
 import { rejectReasonToDisplayText } from '~/utils/node/RejectReasonHelper';
+import { transactionsSelector } from '~/features/TransactionSlice';
 import styles from './TransactionView.module.scss';
 
 interface Props {
     transaction: TransferTransactionWithNames;
-    returnFunction: () => void;
 }
 
 interface CopiableListElementProps {
@@ -63,14 +66,26 @@ function displayRejectReason(transaction: TransferTransactionWithNames) {
 /**
  * Detailed view of the given transaction.
  */
-function TransactionView({ transaction, returnFunction }: Props) {
+function TransactionView({ transaction }: Props) {
+    const transactions = useSelector(transactionsSelector);
+    const [
+        chosenTransaction,
+        setChosenTransaction,
+    ] = useState<TransferTransaction>(transaction);
+
+    useEffect(() => {
+        if (chosenTransaction) {
+            const upToDateChosenTransaction = transactions.find(
+                (t) => t.transactionHash === chosenTransaction.transactionHash
+            );
+            if (upToDateChosenTransaction) {
+                setChosenTransaction(upToDateChosenTransaction);
+            }
+        }
+    }, [transactions, chosenTransaction, setChosenTransaction]);
+
     return (
-        <Card className="relative pB10">
-            <h3 className={styles.title}> Transaction Details </h3>
-            <CloseButton
-                className={styles.closeButton}
-                onClick={returnFunction}
-            />
+        <div className={styles.root}>
             <TransactionListElement transaction={transaction} showDate />
             {displayRejectReason(transaction)}
             {!!transaction.fromAddress && (
@@ -95,7 +110,7 @@ function TransactionView({ transaction, returnFunction }: Props) {
                 title="Block Hash"
                 value={transaction.blockHash || 'Awaiting finalization'}
             />
-        </Card>
+        </div>
     );
 }
 
