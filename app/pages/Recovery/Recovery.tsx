@@ -16,6 +16,9 @@ import styles from './Recovery.module.scss';
 export default function Recovery() {
     const [status, setStatus] = useState<Status | undefined>(Status.initial);
     const [recoveredAccounts, setRecoveredAccounts] = useState<Account[][]>([]);
+    const [currentIdentityNumber, setCurrentIdentityNumber] = useState<number>(
+        0
+    );
 
     return (
         <Columns className="flexChildFill" columnScroll>
@@ -25,16 +28,18 @@ export default function Recovery() {
                     <Switch>
                         <Route
                             path={routes.RECOVERY_COMPLETED}
-                            render={() => (
-                                <RecoveryCompleted
-                                    setRecoveredAccounts={setRecoveredAccounts}
-                                />
-                            )}
+                            render={() => <RecoveryCompleted />}
                         />
                         <Route
                             render={() => (
                                 <PerformRecovery
                                     setRecoveredAccounts={setRecoveredAccounts}
+                                    setCurrentIdentityNumber={
+                                        setCurrentIdentityNumber
+                                    }
+                                    currentIdentityNumber={
+                                        currentIdentityNumber
+                                    }
                                     setStatus={setStatus}
                                 />
                             )}

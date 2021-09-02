@@ -3,18 +3,13 @@ import { push } from 'connected-react-router';
 import { useDispatch } from 'react-redux';
 import routes from '~/constants/routes.json';
 import Button from '~/cross-app-components/Button';
-import { Account, StateUpdate } from '~/utils/types';
 
 import styles from './Recovery.module.scss';
-
-interface Props {
-    setRecoveredAccounts: StateUpdate<Account[][]>;
-}
 
 /**
  * Column, which is displayed after the recovery has finished.
  */
-export default function RecoveryCompleted({ setRecoveredAccounts }: Props) {
+export default function RecoveryCompleted() {
     const dispatch = useDispatch();
 
     return (
@@ -37,7 +32,6 @@ export default function RecoveryCompleted({ setRecoveredAccounts }: Props) {
             <Button
                 className={styles.topButton}
                 onClick={() => {
-                    setRecoveredAccounts([]);
                     dispatch(push(routes.RECOVERY_MAIN));
                 }}
             >

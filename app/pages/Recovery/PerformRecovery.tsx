@@ -45,6 +45,8 @@ async function getPrfKeySeed(
 interface Props {
     setRecoveredAccounts: StateUpdate<Account[][]>;
     setStatus: StateUpdate<Status | undefined>;
+    setCurrentIdentityNumber: StateUpdate<number>;
+    currentIdentityNumber: number;
 }
 
 interface ShowStop {
@@ -58,6 +60,8 @@ interface ShowStop {
 export default function PerformRecovery({
     setRecoveredAccounts,
     setStatus,
+    setCurrentIdentityNumber,
+    currentIdentityNumber,
 }: Props) {
     const dispatch = useDispatch();
     const identities = useSelector(identitiesSelector);
@@ -109,9 +113,9 @@ export default function PerformRecovery({
                 (identity) => identity.identityNumber === identityNumber
             );
 
+        let identityNumber = currentIdentityNumber;
         try {
             let emptyIndices = 0;
-            let identityNumber = 0;
             while (!controller.isAborted) {
                 if (
                     emptyIndices > 0 &&
@@ -166,7 +170,7 @@ export default function PerformRecovery({
                 }
                 loadCredentials(dispatch);
                 setRecoveredTotal((n) => n + accounts.length);
-                setRecoveredAccounts((ra) => [...ra, accounts]);
+                setRecoveredAccounts((ra) => [accounts, ...ra]);
                 identityNumber += 1;
             }
         } finally {
@@ -174,6 +178,7 @@ export default function PerformRecovery({
             loadAccounts(dispatch);
             loadIdentities(dispatch);
             loadAddressBook(dispatch);
+            setCurrentIdentityNumber(identityNumber);
             setStatus(undefined);
         }
     }
@@ -182,8 +187,9 @@ export default function PerformRecovery({
         () => (
             <>
                 <p>
-                    You have gone through {showStop?.emptyCount} empty indices
-                    in a row. Have you maybe found all your accounts?
+                    You have gone through {showStop?.emptyCount} identity
+                    indices, without any accounts, in a row. Perhaps you have
+                    already found all your accounts?
                 </p>
                 <p className="bodyEmphasized">
                     You found {recoveredTotal} accounts in total.
