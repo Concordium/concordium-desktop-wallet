@@ -1,17 +1,11 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Switch, Route } from 'react-router-dom';
 import { Account, AccountInfo, TransactionKindId } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
 import { createTransferWithAccountPathName } from '~/utils/accountRouterHelpers';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
-import ShowAccountAddress from '../ShowAccountAddress';
-import ShowReleaseSchedule from '../ShowReleaseSchedule';
-import ScheduleTransfer from '../ScheduleTransfer';
-import TransferLogFilters from '../TransferLogFilters';
-import CredentialInformation from '../CredentialInformation';
 
 interface Props {
     account: Account;
@@ -102,7 +96,7 @@ const items: MoreActionObject[] = [
     },
 ];
 
-function MoreActionsMenu({ account, accountInfo }: Props) {
+export default function MoreActions({ account, accountInfo }: Props) {
     const accountHasDeployedCredentials = useSelector(
         accountHasDeployedCredentialsSelector(account)
     );
@@ -140,37 +134,5 @@ function MoreActionsMenu({ account, accountInfo }: Props) {
                     );
                 })}
         </>
-    );
-}
-
-/**
- * Lists additional actions, for the account.
- * And controls the flow of those actions' pages.
- */
-export default function MoreActions({ account, accountInfo }: Props) {
-    return (
-        <Switch>
-            <Route path={routes.ACCOUNTS_MORE_ADDRESS}>
-                <ShowAccountAddress account={account} />
-            </Route>
-            <Route path={routes.ACCOUNTS_MORE_INSPECTRELEASESCHEDULE}>
-                <ShowReleaseSchedule accountInfo={accountInfo} />
-            </Route>
-            <Route path={routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER}>
-                <ScheduleTransfer account={account} />
-            </Route>
-            <Route path={routes.ACCOUNTS_MORE_TRANSFER_LOG_FILTERS}>
-                <TransferLogFilters account={account} />
-            </Route>
-            <Route path={routes.ACCOUNTS_MORE_CREDENTIAL_INFORMATION}>
-                <CredentialInformation
-                    account={account}
-                    accountInfo={accountInfo}
-                />
-            </Route>
-            <Route>
-                <MoreActionsMenu account={account} accountInfo={accountInfo} />
-            </Route>
-        </Switch>
     );
 }

@@ -13,6 +13,11 @@ import AccountBalanceView from '../AccountBalanceView';
 import AccountPageLayout from '../AccountPageLayout';
 import AccountViewActions from '../AccountViewActions';
 import BasicTransferRoutes from '../BasicTransferRoutes';
+import ShowAccountAddress from '../ShowAccountAddress';
+import ShowReleaseSchedule from '../ShowReleaseSchedule';
+import ScheduleTransfer from '../ScheduleTransfer';
+import TransferLogFilters from '../TransferLogFilters';
+import CredentialInformation from '../CredentialInformation';
 import MoreActions from './MoreActions';
 import BuildSchedule from './BuildSchedule';
 
@@ -42,6 +47,24 @@ export default function DetailsPage() {
                         path={routes.ACCOUNTS_SCHEDULED_TRANSFER}
                         component={BuildSchedule}
                     />
+                    <Route path={routes.ACCOUNTS_MORE_ADDRESS}>
+                        <ShowAccountAddress account={account} />
+                    </Route>
+                    <Route path={routes.ACCOUNTS_MORE_INSPECTRELEASESCHEDULE}>
+                        <ShowReleaseSchedule accountInfo={accountInfo} />
+                    </Route>
+                    <Route path={routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER}>
+                        <ScheduleTransfer account={account} />
+                    </Route>
+                    <Route path={routes.ACCOUNTS_MORE_TRANSFER_LOG_FILTERS}>
+                        <TransferLogFilters account={account} />
+                    </Route>
+                    <Route path={routes.ACCOUNTS_MORE_CREDENTIAL_INFORMATION}>
+                        <CredentialInformation
+                            account={account}
+                            accountInfo={accountInfo}
+                        />
+                    </Route>
                 </BasicTransferRoutes>
             </Detail>
         </AccountPageLayout>
