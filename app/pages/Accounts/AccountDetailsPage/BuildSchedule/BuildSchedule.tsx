@@ -139,7 +139,6 @@ export default function BuildSchedule({ location }: Props) {
         <TransferView
             className={styles.buildSchedule}
             showBack
-            exitOnClick={() => dispatch(push(routes.ACCOUNTS))}
             backOnClick={() =>
                 dispatch(
                     push({
