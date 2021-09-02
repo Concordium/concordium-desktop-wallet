@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import clsx from 'clsx';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
-import TransactionList from './TransactionList';
+import TransactionList from './TransactionList/TransactionList';
 import TransactionView from './TransactionView';
 import DisplayIdentityAttributes from './DisplayIdentityAttributes';
 import locations from '~/constants/transactionLocations.json';

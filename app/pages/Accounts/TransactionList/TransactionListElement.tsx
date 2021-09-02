@@ -23,8 +23,9 @@ import {
     isRewardKind,
     isOutgoingTransaction,
 } from '~/utils/transactionHelpers';
-import styles from './Transactions.module.scss';
 import transactionKindNames from '~/constants/transactionKindNames.json';
+
+import styles from '../Transactions.module.scss';
 
 const isInternalTransfer = (transaction: TransferTransaction) =>
     [

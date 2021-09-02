@@ -2,7 +2,7 @@ import React from 'react';
 import { TransferTransaction } from '~/utils/types';
 import TransactionListElement from './TransactionListElement';
 
-import styles from './Transactions.module.scss';
+import styles from '../Transactions.module.scss';
 
 interface Props {
     header: string;

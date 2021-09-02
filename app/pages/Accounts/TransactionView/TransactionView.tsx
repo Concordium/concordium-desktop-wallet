@@ -1,6 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
-import TransactionListElement from '../TransactionListElement';
+import TransactionListElement from '../TransactionList/TransactionListElement';
 import { TransferTransactionWithNames, TransactionStatus } from '~/utils/types';
 import { isFailed } from '~/utils/transactionHelpers';
 import CloseButton from '~/cross-app-components/CloseButton';
