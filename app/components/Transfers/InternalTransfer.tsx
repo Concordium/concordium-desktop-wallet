@@ -32,6 +32,7 @@ interface Props<T> {
     specific: Specific<T>;
     exchangeRate: Fraction;
     nonce: string;
+    disableClose?: boolean;
 }
 
 /**
@@ -42,6 +43,7 @@ function InternalTransfer<T extends TransferToPublic | TransferToEncrypted>({
     specific,
     exchangeRate,
     nonce,
+    disableClose = false,
 }: Props<T>) {
     const dispatch = useDispatch();
     const location = useLocation<TransferState>();
@@ -95,7 +97,9 @@ function InternalTransfer<T extends TransferToPublic | TransferToEncrypted>({
     return (
         <TransferView
             showBack={subLocation === locations.confirmTransfer}
-            exitOnClick={() => dispatch(push(routes.ACCOUNTS))}
+            exitOnClick={
+                disableClose ? undefined : () => dispatch(push(routes.ACCOUNTS))
+            }
             backOnClick={() => setSubLocation(locations.pickAmount)}
         >
             {subLocation === locations.pickAmount && (

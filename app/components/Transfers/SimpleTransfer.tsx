@@ -24,12 +24,18 @@ interface Props {
     account: Account;
     exchangeRate: Fraction;
     nonce: string;
+    disableClose?: boolean;
 }
 
 /**
  * Controls the flow of creating a simple transfer.
  */
-function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
+function SimpleTransfer({
+    account,
+    exchangeRate,
+    nonce,
+    disableClose = false,
+}: Props) {
     const dispatch = useDispatch();
 
     const estimatedFee = useMemo(
@@ -100,7 +106,9 @@ function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
         <ExternalTransfer
             estimatedFee={estimatedFee}
             toConfirmTransfer={toConfirmTransfer}
-            exitFunction={() => dispatch(push(routes.ACCOUNTS))}
+            exitFunction={
+                disableClose ? undefined : () => dispatch(push(routes.ACCOUNTS))
+            }
             amountHeader="Send GTU"
             senderAddress={account.address}
             transactionKind={TransactionKindId.Simple_transfer}

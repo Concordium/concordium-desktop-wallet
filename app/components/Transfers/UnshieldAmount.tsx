@@ -6,12 +6,16 @@ import InternalTransfer from './InternalTransfer';
 
 interface Props {
     account: Account;
+    disableClose?: boolean;
 }
 
 /**
  * Controls the flow of creating a transfer to public.
  */
-export default function UnshieldAmount({ account }: Props) {
+export default function UnshieldAmount({
+    account,
+    disableClose = false,
+}: Props) {
     const specific = {
         amountHeader: 'Unshield GTU',
         createTransaction: createUnshieldAmountTransaction,
@@ -19,5 +23,11 @@ export default function UnshieldAmount({ account }: Props) {
         transactionKind: TransactionKindId.Transfer_to_public,
     };
 
-    return <InternalTransfer account={account} specific={specific} />;
+    return (
+        <InternalTransfer
+            account={account}
+            specific={specific}
+            disableClose={disableClose}
+        />
+    );
 }
