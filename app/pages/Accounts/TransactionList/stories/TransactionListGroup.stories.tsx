@@ -19,10 +19,10 @@ export const SingleGroup = Template.bind({});
 SingleGroup.args = {
     header: 'Today',
     transactions: [
-        transactionBase,
-        transactionBase,
-        transactionBase,
-        transactionBase,
+        { ...transactionBase },
+        { ...transactionBase },
+        { ...transactionBase },
+        { ...transactionBase },
     ],
 };
 
@@ -31,9 +31,9 @@ const MultiGroupTemplate: Story<PropsOf<typeof TransactionListGroup>> = (
 ) => (
     <StoryContext>
         <TransactionListGroup {...args} />
-        <TransactionListGroup {...args} />
-        <TransactionListGroup {...args} />
-        <TransactionListGroup {...args} />
+        <TransactionListGroup {...args} header="Yesterday" />
+        <TransactionListGroup {...args} header="7 June" />
+        <TransactionListGroup {...args} header="19 may" />
     </StoryContext>
 );
 
@@ -41,9 +41,9 @@ export const MultipleGroups = MultiGroupTemplate.bind({});
 MultipleGroups.args = {
     header: 'Today',
     transactions: [
-        transactionBase,
-        transactionBase,
-        transactionBase,
-        transactionBase,
+        { ...transactionBase },
+        { ...transactionBase },
+        { ...transactionBase },
+        { ...transactionBase },
     ],
 };

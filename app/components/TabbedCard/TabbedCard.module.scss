@@ -1,0 +1,28 @@
+@import 'config/bundle';
+
+.header {
+    margin-top: -20px;
+    margin-left: -19px;
+    margin-right: -19px;
+    width: calc(100% + 38px);
+    display: flex;
+}
+
+.button {
+    padding: 10px;
+    flex: 1;
+    font-size: $font-size-button2;
+    font-weight: $font-weight-emphasized;
+
+    &:first-of-type {
+        padding-left: 29px;
+    }
+
+    &:last-of-type {
+        padding-right: 29px;
+    }
+
+    &:disabled {
+        color: $color-pale-blue;
+    }
+}
