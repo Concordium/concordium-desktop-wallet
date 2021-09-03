@@ -12,6 +12,8 @@ import AccountViewActions from '../AccountViewActions';
 import FailedInitialAccount from '../FailedInitialAccount';
 import BasicTransferRoutes from '../BasicTransferRoutes';
 import TransactionsAndAddress from './TransactionsAndAddress/TransactionsAndAddress';
+import DecryptComponent from '../DecryptComponent';
+import { viewingShieldedSelector } from '~/features/TransactionSlice';
 
 /**
  * Detailed view of the chosen account and its transactions.
@@ -20,6 +22,7 @@ import TransactionsAndAddress from './TransactionsAndAddress/TransactionsAndAddr
 export default function AccountView() {
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
+    const viewingShielded = useSelector(viewingShieldedSelector);
 
     if (account === undefined) {
         return null;
@@ -39,10 +42,13 @@ export default function AccountView() {
             <AccountBalanceView />
             <AccountViewActions account={account} accountInfo={accountInfo} />
             <BasicTransferRoutes account={account}>
-                <Route
-                    path={routes.ACCOUNTS}
-                    render={() => <TransactionsAndAddress account={account} />}
-                />
+                <Route path={routes.ACCOUNTS}>
+                    {viewingShielded && !account.allDecrypted ? (
+                        <DecryptComponent account={account} />
+                    ) : (
+                        <TransactionsAndAddress account={account} />
+                    )}
+                </Route>
             </BasicTransferRoutes>
         </>
     );
