@@ -34,7 +34,7 @@ async function getPrfKeySeed(
     setMessage: (message: string) => void,
     identityNumber: number
 ) {
-    setMessage('Please confirm export of PRF key');
+    setMessage('Please allow recovering credentials');
     const prfKeySeed = await ledger.getPrfKey(identityNumber);
     setMessage('Recovering credentials');
     return prfKeySeed.toString('hex');
@@ -234,8 +234,9 @@ export default function PerformRecovery({
             />
             <p>
                 Connect and unlock your Ledger device to get started. When
-                prompted, allow export of the PRF keys on the Ledger. The wallet
-                will then look for your accounts.
+                prompted, allow recovering credentials on the Ledger, for the
+                current identity index. The wallet will then look for your
+                accounts.
             </p>
             <div className={styles.ledgerDiv}>
                 <SimpleLedger

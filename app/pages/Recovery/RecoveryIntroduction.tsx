@@ -21,16 +21,17 @@ export default function RecoveryIntroduction() {
                 to create the accounts originally. Lost identities cannot be
                 recovered, as the identity object is not stored on the Ledger.
                 Instead you can go through each index on the Ledger where the
-                corresponding PRF key is stored, which can then be used to
+                data to create credentials are stored, which can then be used to
                 regain access to the accounts related to the given
                 identity/index.
             </p>
             <p>
                 This means that you have to allow the Desktop Wallet to access
-                the PRF key on each index on the Ledger device, to allow the
-                Desktop Wallet to look for your lost accounts. There might be
-                “empty” indices from failed identity creations, which means you
-                might have to go past a few indices with no accounts.
+                the data used to create the credentials, for each identity
+                index, on the Ledger device, to allow the Desktop Wallet to look
+                for your lost accounts. There might be “empty” indices from
+                failed identity creations, which means you might have to go past
+                a few indices with no accounts.
             </p>
             <p>
                 When you think you have found all your accounts, you can stop
