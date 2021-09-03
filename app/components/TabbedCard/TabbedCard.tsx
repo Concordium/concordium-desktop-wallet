@@ -14,16 +14,19 @@ interface Props extends ClassName {
 }
 
 function TabbedCard({ children, className }: Props) {
-    const [active, setActive] = useState(0);
-
     const tabs = React.Children.toArray(children) as TabChild[];
+    const initActiveTab =
+        tabs
+            .map<[TabChild, number]>((t, i) => [t, i])
+            .filter(([t]) => t.props.initActive)?.[0]?.[1] ?? 0;
+    const [active, setActive] = useState(initActiveTab);
 
     return (
         <Card className={className}>
             <div className={styles.header}>
                 {tabs
                     .map((t) => t.props)
-                    .map(({ header, onClick = noOp, isActive }, i) => (
+                    .map(({ header, onClick = noOp }, i) => (
                         <Button
                             clear
                             className={styles.button}
@@ -32,7 +35,7 @@ function TabbedCard({ children, className }: Props) {
                                 onClick();
                                 setActive(i);
                             }}
-                            disabled={isActive ?? i === active}
+                            disabled={i === active}
                         >
                             {header}
                         </Button>

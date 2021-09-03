@@ -8,11 +8,6 @@
     position: relative;
 }
 
-.errorMessage,
-.title {
-    text-align: center;
-}
-
 .errorMessage {
     color: $color-error;
     margin-bottom: 0;
@@ -28,8 +23,14 @@
     }
 }
 
+.title,
+.listElement {
+    composes: fillCardPadding;
+    composes: cardPadding;
+}
+
 .title {
-    padding-bottom: 20px;
+    composes: pV10 from global;
     margin-bottom: 0;
 }
 
@@ -39,13 +40,8 @@
     padding-bottom: 10px;
 }
 
-.listElement {
-    composes: fillCardPadding;
-    composes: cardPadding;
-}
-
 .listElement:last-child {
-    padding-bottom: 0;
+    margin-bottom: -19px;
 }
 
 .copiableListElementLeftSide {
@@ -58,4 +54,10 @@
     font-size: $font-size-body3;
     color: $color-text-faded;
     margin: 0;
+}
+
+.closeButton {
+    position: absolute;
+    top: 10px;
+    right: 20px;
 }

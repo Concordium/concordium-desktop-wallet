@@ -1,10 +1,11 @@
 import React from 'react';
-import { TransferTransaction } from '~/utils/types';
+import clsx from 'clsx';
+import { ClassName, TransferTransaction } from '~/utils/types';
 import TransactionListElement from './TransactionListElement';
 
 import styles from '../Transactions.module.scss';
 
-interface Props {
+interface Props extends ClassName {
     header: string;
     transactions: TransferTransaction[];
     onTransactionClick(transaction: TransferTransaction): void;
@@ -14,9 +15,10 @@ export default function TransactionListGroup({
     header,
     transactions,
     onTransactionClick,
+    className,
 }: Props) {
     return (
-        <section>
+        <section className={clsx(className)}>
             <header className={styles.transactionGroupHeader}>{header}</header>
             {transactions.map((transaction: TransferTransaction) => (
                 <TransactionListElement

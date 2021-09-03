@@ -47,19 +47,19 @@ export default function DetailsPage() {
                         path={routes.ACCOUNTS_SCHEDULED_TRANSFER}
                         component={BuildSchedule}
                     />
-                    <Route path={routes.ACCOUNTS_MORE_ADDRESS}>
-                        <ShowAccountAddress account={account} />
+                    <Route path={routes.ACCOUNTS_ADDRESS}>
+                        <ShowAccountAddress account={account} asCard />
                     </Route>
-                    <Route path={routes.ACCOUNTS_MORE_INSPECTRELEASESCHEDULE}>
+                    <Route path={routes.ACCOUNTS_INSPECTRELEASESCHEDULE}>
                         <ShowReleaseSchedule accountInfo={accountInfo} />
                     </Route>
-                    <Route path={routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER}>
+                    <Route path={routes.ACCOUNTS_CREATESCHEDULEDTRANSFER}>
                         <ScheduleTransfer account={account} />
                     </Route>
-                    <Route path={routes.ACCOUNTS_MORE_TRANSFER_LOG_FILTERS}>
+                    <Route path={routes.ACCOUNTS_TRANSFER_LOG_FILTERS}>
                         <TransferLogFilters account={account} />
                     </Route>
-                    <Route path={routes.ACCOUNTS_MORE_CREDENTIAL_INFORMATION}>
+                    <Route path={routes.ACCOUNTS_CREDENTIAL_INFORMATION}>
                         <CredentialInformation
                             account={account}
                             accountInfo={accountInfo}

@@ -24,13 +24,13 @@ export default function MoreActions({ account, accountInfo }: Props) {
         <>
             <ButtonNavLink
                 className="mB20:notLast flex"
-                to={routes.ACCOUNTS_MORE_TRANSFER_LOG_FILTERS}
+                to={routes.ACCOUNTS_TRANSFER_LOG_FILTERS}
             >
                 Transaction log
             </ButtonNavLink>
             <ButtonNavLink
                 className="mB20:notLast flexColumn justifyCenter"
-                to={routes.ACCOUNTS_MORE_ADDRESS}
+                to={routes.ACCOUNTS_ADDRESS}
             >
                 Account address
                 <br />
@@ -39,14 +39,14 @@ export default function MoreActions({ account, accountInfo }: Props) {
             {accountHasDeployedCredentials && (
                 <ButtonNavLink
                     className="mB20:notLast flex"
-                    to={routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER}
+                    to={routes.ACCOUNTS_CREATESCHEDULEDTRANSFER}
                 >
                     Send GTU with a schedule
                 </ButtonNavLink>
             )}
             <ButtonNavLink
                 className="mB20:notLast flex"
-                to={routes.ACCOUNTS_MORE_INSPECTRELEASESCHEDULE}
+                to={routes.ACCOUNTS_INSPECTRELEASESCHEDULE}
             >
                 Inspect release schedule
             </ButtonNavLink>
@@ -58,7 +58,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
             </ButtonNavLink>
             <ButtonNavLink
                 className="mB20:notLast flex"
-                to={routes.ACCOUNTS_MORE_CREDENTIAL_INFORMATION}
+                to={routes.ACCOUNTS_CREDENTIAL_INFORMATION}
             >
                 Credential Information
             </ButtonNavLink>

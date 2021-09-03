@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useRouteMatch } from 'react-router';
+import routes from '~/constants/routes.json';
 import TabbedCard from '~/components/TabbedCard';
 import { transactionsSelector } from '~/features/TransactionSlice';
 import { Account, TransferTransaction } from '~/utils/types';
@@ -13,32 +15,19 @@ interface Props {
 
 export default function TransfersAndAddress({ account }: Props) {
     const transactions = useSelector(transactionsSelector);
+    const addressRouteMatch = useRouteMatch(routes.ACCOUNTS_ADDRESS);
     const [chosenTransaction, setChosenTransaction] = useState<
         TransferTransaction | undefined
     >();
-    const [activeTab, setActiveTab] = useState<1 | 2 | undefined>(1);
-
-    useEffect(() => {
-        if (activeTab !== undefined) {
-            setChosenTransaction(undefined);
-        }
-    }, [activeTab]);
-
-    useEffect(() => {
-        if (chosenTransaction !== undefined) {
-            setActiveTab(undefined);
-        }
-    }, [chosenTransaction]);
 
     return (
         <TabbedCard>
-            <TabbedCard.Tab
-                header="Latest transactions"
-                onClick={() => setActiveTab(1)}
-                isActive={activeTab === 1 && chosenTransaction === undefined}
-            >
+            <TabbedCard.Tab header="Latest transactions">
                 {chosenTransaction ? (
-                    <TransactionView transaction={chosenTransaction} />
+                    <TransactionView
+                        transaction={chosenTransaction}
+                        onClose={() => setChosenTransaction(undefined)}
+                    />
                 ) : (
                     <TransactionList
                         transactions={transactions.slice(0, 10)}
@@ -48,8 +37,8 @@ export default function TransfersAndAddress({ account }: Props) {
             </TabbedCard.Tab>
             <TabbedCard.Tab
                 header="Account address"
-                onClick={() => setActiveTab(2)}
-                isActive={activeTab === 2}
+                onClick={() => setChosenTransaction(undefined)}
+                initActive={Boolean(addressRouteMatch)}
             >
                 <ShowAccountAddress account={account} />
             </TabbedCard.Tab>

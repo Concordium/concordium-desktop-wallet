@@ -71,6 +71,12 @@
     color: $color-success;
 }
 
+.transactionGroup {
+    &:last-child {
+        margin-bottom: -19px;
+    }
+}
+
 .transactionGroupHeader {
     composes: fillCardPadding;
     composes: cardPadding;

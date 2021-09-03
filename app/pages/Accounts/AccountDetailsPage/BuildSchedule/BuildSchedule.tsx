@@ -103,8 +103,7 @@ export default function BuildSchedule({ location }: Props) {
                     pathname: routes.SUBMITTRANSFER,
                     state: {
                         confirmed: {
-                            pathname:
-                                routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
+                            pathname: routes.ACCOUNTS_CREATESCHEDULEDTRANSFER,
                             state: {
                                 transaction: transactionJSON,
                                 account,
@@ -142,7 +141,7 @@ export default function BuildSchedule({ location }: Props) {
             backOnClick={() =>
                 dispatch(
                     push({
-                        pathname: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
+                        pathname: routes.ACCOUNTS_CREATESCHEDULEDTRANSFER,
                         state: { amount: microGtuToGtu(amount), recipient },
                     })
                 )

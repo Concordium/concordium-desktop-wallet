@@ -13,9 +13,11 @@ import CopyButton from '~/components/CopyButton';
 import { rejectReasonToDisplayText } from '~/utils/node/RejectReasonHelper';
 import { transactionsSelector } from '~/features/TransactionSlice';
 import styles from './TransactionView.module.scss';
+import CloseButton from '~/cross-app-components/CloseButton';
 
 interface Props {
     transaction: TransferTransactionWithNames;
+    onClose?(): void;
 }
 
 interface CopiableListElementProps {
@@ -39,7 +41,7 @@ function CopiableListElement({
                 <div className={styles.copiableListElementLeftSide}>
                     <p className={styles.copiableListElementTitle}>{title}</p>
                     {'\n'}
-                    <p className="body4">
+                    <p className="body4 m0 mT5">
                         {value} {note ? `(${note})` : undefined}
                     </p>
                 </div>
@@ -66,7 +68,7 @@ function displayRejectReason(transaction: TransferTransactionWithNames) {
 /**
  * Detailed view of the given transaction.
  */
-function TransactionView({ transaction }: Props) {
+function TransactionView({ transaction, onClose }: Props) {
     const transactions = useSelector(transactionsSelector);
     const [
         chosenTransaction,
@@ -86,6 +88,8 @@ function TransactionView({ transaction }: Props) {
 
     return (
         <div className={styles.root}>
+            <h3 className={styles.title}>Transaction details</h3>
+            <CloseButton className={styles.closeButton} onClick={onClose} />
             <TransactionListElement transaction={transaction} showDate />
             {displayRejectReason(transaction)}
             {!!transaction.fromAddress && (

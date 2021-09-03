@@ -1,14 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import groupBy from 'lodash.groupby';
+import clsx from 'clsx';
 import { TimeStampUnit, TransferTransaction } from '~/utils/types';
-import {
-    moreTransactionsSelector,
-    loadingTransactionsSelector,
-} from '~/features/TransactionSlice';
+import { loadingTransactionsSelector } from '~/features/TransactionSlice';
 import LoadingComponent from '~/cross-app-components/Loading';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import TransactionListGroup from './TransactionListGroup';
+
+import styles from '../Transactions.module.scss';
 
 const dateFormat = Intl.DateTimeFormat(undefined, { dateStyle: 'medium' })
     .format;
@@ -42,7 +42,6 @@ function TransactionList({
     transactions,
     onTransactionClick,
 }: Props): JSX.Element | null {
-    const more = useSelector(moreTransactionsSelector);
     const loading = useSelector(loadingTransactionsSelector);
     const [showLoading, setShowLoading] = useState(false);
 
@@ -83,7 +82,14 @@ function TransactionList({
 
     if (transactions.length === 0) {
         return (
-            <h3 className="flex justifyCenter pB20">
+            <h3
+                className={clsx(
+                    'flex justifyCenter mV0 pT20',
+                    styles.thickBlueSeparatorTop,
+                    styles.cardPadding,
+                    styles.fillCardPadding
+                )}
+            >
                 This balance has no transactions yet.
             </h3>
         );
@@ -93,17 +99,13 @@ function TransactionList({
         <>
             {Object.entries(transactionGroups).map(([h, ts]) => (
                 <TransactionListGroup
+                    className={styles.transactionGroup}
                     key={h}
                     header={h}
                     transactions={ts}
                     onTransactionClick={onTransactionClick}
                 />
             ))}
-            {more && (
-                <h3 className="flex justifyCenter mT10 pB10">
-                    Export to see older transactions
-                </h3>
-            )}
         </>
     );
 }

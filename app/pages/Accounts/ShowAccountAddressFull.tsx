@@ -29,19 +29,18 @@ export default function ShowAccountAddress() {
                 <AccountPageHeader />
             </PageLayout.Header>
             <PageLayout.Container
-                closeRoute={routes.ACCOUNTS}
                 disableBack
                 padding="vertical"
                 className={styles.showAddressContainer}
             >
                 <IconButton
                     className={styles.shrinkButton}
-                    onClick={() => dispatch(push(routes.ACCOUNTS_MORE_ADDRESS))}
+                    onClick={() => dispatch(push(routes.ACCOUNTS_ADDRESS))}
                 >
                     <ShrinkIcon width="25" />
                 </IconButton>
 
-                <h2 className="m0 mBauto">{account.name} - Address</h2>
+                <h2 className="m0 mBauto">Address: {account.name}</h2>
                 <QRCode className="mB50" size={512} value={account.address} />
                 <div className="flex mBauto">
                     <p className="body2 mL20">{account.address}</p>
