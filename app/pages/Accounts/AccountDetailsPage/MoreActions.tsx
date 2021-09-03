@@ -24,7 +24,8 @@ export default function MoreActions({ account, accountInfo }: Props) {
         <>
             <ButtonNavLink
                 className="mB20:notLast flex"
-                to={routes.ACCOUNTS_TRANSFER_LOG_FILTERS}
+                exact
+                to={routes.ACCOUNTS}
             >
                 Transaction log
             </ButtonNavLink>

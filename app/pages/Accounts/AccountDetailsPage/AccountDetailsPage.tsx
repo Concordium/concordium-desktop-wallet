@@ -56,14 +56,14 @@ export default function DetailsPage() {
                     <Route path={routes.ACCOUNTS_CREATESCHEDULEDTRANSFER}>
                         <ScheduleTransfer account={account} />
                     </Route>
-                    <Route path={routes.ACCOUNTS_TRANSFER_LOG_FILTERS}>
-                        <TransferLogFilters account={account} />
-                    </Route>
                     <Route path={routes.ACCOUNTS_CREDENTIAL_INFORMATION}>
                         <CredentialInformation
                             account={account}
                             accountInfo={accountInfo}
                         />
+                    </Route>
+                    <Route path={routes.ACCOUNTS}>
+                        <TransferLogFilters account={account} />
                     </Route>
                 </BasicTransferRoutes>
             </Detail>
