@@ -117,8 +117,10 @@ function parseShieldedAmount(
             );
         }
         if (
-            transaction.transactionKind ===
-            TransactionKindString.EncryptedAmountTransfer
+            [
+                TransactionKindString.EncryptedAmountTransfer,
+                TransactionKindString.EncryptedAmountTransferWithMemo,
+            ].includes(transaction.transactionKind)
         ) {
             return buildCostFreeAmountString(
                 BigInt(transaction.decryptedAmount),
@@ -143,8 +145,10 @@ function parseAmount(transaction: TransferTransaction, isOutgoing: boolean) {
             }
 
             if (
-                transaction.transactionKind ===
-                TransactionKindString.EncryptedAmountTransfer
+                [
+                    TransactionKindString.EncryptedAmountTransfer,
+                    TransactionKindString.EncryptedAmountTransferWithMemo,
+                ].includes(transaction.transactionKind)
             ) {
                 return {
                     amount: `${displayAsGTU(-cost)}`,
@@ -180,12 +184,15 @@ function parseAmount(transaction: TransferTransaction, isOutgoing: boolean) {
 function displayType(kind: TransactionKindString, failed: boolean) {
     switch (kind) {
         case TransactionKindString.TransferWithSchedule:
+        case TransactionKindString.TransferWithScheduleAndMemo:
             if (!failed) {
                 return <i className="mL10">(With schedule)</i>;
             }
             break;
         case TransactionKindString.EncryptedAmountTransfer:
+        case TransactionKindString.EncryptedAmountTransferWithMemo:
         case TransactionKindString.Transfer:
+        case TransactionKindString.TransferWithMemo:
             if (!failed) {
                 return '';
             }
@@ -216,8 +223,11 @@ function statusSymbol(status: TransactionStatus) {
 
 const memoTypes = [
     TransactionKindString.Transfer,
+    TransactionKindString.TransferWithMemo,
     TransactionKindString.EncryptedAmountTransfer,
+    TransactionKindString.EncryptedAmountTransferWithMemo,
     TransactionKindString.TransferWithSchedule,
+    TransactionKindString.TransferWithScheduleAndMemo,
 ];
 
 function showMemo(

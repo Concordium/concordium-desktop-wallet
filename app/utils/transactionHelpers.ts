@@ -626,10 +626,13 @@ export function validateMemo(memo: string): string | undefined {
 export function isTransferKind(kind: TransactionKindString) {
     switch (kind) {
         case TransactionKindString.Transfer:
+        case TransactionKindString.TransferWithMemo:
         case TransactionKindString.TransferToEncrypted:
         case TransactionKindString.TransferToPublic:
         case TransactionKindString.TransferWithSchedule:
+        case TransactionKindString.TransferWithScheduleAndMemo:
         case TransactionKindString.EncryptedAmountTransfer:
+        case TransactionKindString.EncryptedAmountTransferWithMemo:
             return true;
         default:
             return false;

@@ -136,12 +136,16 @@ type TypeSpecific = Pick<
 // Handles the fields of a simple transfer, which cannot be converted by the generic function .
 function convertSimpleTransfer(transaction: SimpleTransfer): TypeSpecific {
     const amount = BigInt(transaction.payload.amount);
+    const { memo } = transaction.payload;
+    const transactionKind = memo
+        ? TransactionKindString.TransferWithMemo
+        : TransactionKindString.Transfer;
 
     return {
-        transactionKind: TransactionKindString.Transfer,
+        transactionKind,
         subtotal: amount.toString(),
         toAddress: transaction.payload.toAddress,
-        memo: transaction.payload.memo,
+        memo,
     };
 }
 
@@ -205,13 +209,17 @@ function convertScheduledTransfer(
     transaction: ScheduledTransfer
 ): TypeSpecific {
     const amount = getScheduledTransferAmount(transaction);
+    const { memo } = transaction.payload;
+    const transactionKind = memo
+        ? TransactionKindString.TransferWithScheduleAndMemo
+        : TransactionKindString.TransferWithSchedule;
 
     return {
-        transactionKind: TransactionKindString.TransferWithSchedule,
+        transactionKind,
         subtotal: amount.toString(),
         schedule: JSON.stringify(transaction.payload.schedule),
         toAddress: transaction.payload.toAddress,
-        memo: transaction.payload.memo,
+        memo,
     };
 }
 
@@ -233,14 +241,17 @@ function convertEncryptedTransfer(
         newSelfEncryptedAmount: remainingEncryptedAmount,
         remainingDecryptedAmount,
     });
-
+    const { memo } = transaction.payload;
+    const transactionKind = memo
+        ? TransactionKindString.EncryptedAmountTransferWithMemo
+        : TransactionKindString.EncryptedAmountTransfer;
     return {
-        transactionKind: TransactionKindString.EncryptedAmountTransfer,
+        transactionKind,
         subtotal: '0',
         decryptedAmount: amount.toString(),
         toAddress: transaction.payload.toAddress,
         encrypted,
-        memo: transaction.payload.memo,
+        memo,
     };
 }
 

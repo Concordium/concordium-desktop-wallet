@@ -165,6 +165,9 @@ export enum TransactionKindString {
     TransferWithSchedule = 'transferWithSchedule',
     UpdateCredentials = 'updateCredentials',
     RegisterData = 'registerData',
+    TransferWithMemo = 'transferWithMemo',
+    EncryptedAmountTransferWithMemo = 'encryptedAmountTransferWithMemo',
+    TransferWithScheduleAndMemo = 'transferWithScheduleAndMemo',
 }
 
 // The ids of the different types of an AccountTransaction.
