@@ -19,6 +19,7 @@ interface Props {
     account?: Account;
     amount?: string;
     recipient?: AddressBookEntry;
+    allowMemo?: boolean;
     memo?: string;
     schedule?: Schedule;
     estimatedFee?: Fraction;
@@ -30,6 +31,7 @@ export default function TransferProposalDetails({
     account,
     amount,
     recipient,
+    allowMemo = false,
     memo,
     schedule,
     transactionType,
@@ -48,7 +50,7 @@ export default function TransferProposalDetails({
             {Boolean(amountError) && (
                 <p className="textError textCenter">{amountError}</p>
             )}
-            <DisplayMemo memo={memo} fallback="Optional" />
+            {allowMemo && <DisplayMemo memo={memo} fallback="Optional" />}
             <AccountDetail title="Recipient" value={recipient} />
             {isScheduledTransfer ? (
                 <PlainDetail

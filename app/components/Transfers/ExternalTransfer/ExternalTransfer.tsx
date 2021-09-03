@@ -10,6 +10,7 @@ import locations from '~/constants/transferLocations.json';
 import { TransferState } from '~/utils/transactionTypes';
 import TransferView from '../TransferView';
 import UpsertAddress from '../../UpsertAddress';
+import { useConsensusStatus } from '~/utils/dataHooks';
 
 import styles from './ExternalTransfer.module.scss';
 
@@ -38,6 +39,8 @@ export default function ExternalTransfer({
     transactionKind,
 }: Props) {
     const location = useLocation<TransferState>();
+
+    const consensusStatus = useConsensusStatus();
 
     const [subLocation, setSubLocation] = useState<string>(
         location?.state?.initialPage || locations.pickAmount
@@ -81,12 +84,16 @@ export default function ExternalTransfer({
                     recipient={recipient}
                     header={amountHeader}
                     defaultAmount={amount}
-                    memo={{
-                        defaultMemo: memo,
-                        setMemo,
-                        shownMemoWarning,
-                        setShownMemoWarning,
-                    }}
+                    memo={
+                        consensusStatus && consensusStatus.protocolVersion > 1
+                            ? {
+                                  defaultMemo: memo,
+                                  setMemo,
+                                  shownMemoWarning,
+                                  setShownMemoWarning,
+                              }
+                            : undefined
+                    }
                     estimatedFee={estimatedFee}
                     transactionKind={transactionKind}
                     toPickRecipient={(

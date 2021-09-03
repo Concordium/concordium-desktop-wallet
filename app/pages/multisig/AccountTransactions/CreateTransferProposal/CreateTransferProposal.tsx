@@ -30,8 +30,10 @@ import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import LoadingComponent from '../LoadingComponent';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import PickRecipient from '~/components/Transfers/PickRecipient';
-import { useTransactionExpiryState } from '~/utils/dataHooks';
-import { isMultiSig } from '~/utils/accountHelpers';
+import {
+    useTransactionExpiryState,
+    useConsensusStatus,
+} from '~/utils/dataHooks';
 import { accountsSelector, accountInfoSelector } from '~/features/AccountSlice';
 import { amountAtDisposal, validateMemo } from '~/utils/transactionHelpers';
 import { collapseFraction } from '~/utils/basicHelpers';
@@ -80,8 +82,11 @@ function CreateTransferProposal({
 }: Props): JSX.Element {
     const dispatch = useDispatch();
 
+    const consensusStatus = useConsensusStatus();
+    const allowMemo = consensusStatus && consensusStatus.protocolVersion > 1;
+
     const { pathname, state } = useLocation<State>();
-    const accounts = useSelector(accountsSelector).filter(isMultiSig);
+    const accounts = useSelector(accountsSelector);
     const location = pathname.replace(`${transactionKind}`, ':transactionKind');
 
     const handler = findAccountTransactionHandler(transactionKind);
@@ -240,6 +245,7 @@ function CreateTransferProposal({
                                 account={account}
                                 amount={amount}
                                 recipient={recipient}
+                                allowMemo={allowMemo}
                                 memo={memo}
                                 schedule={schedule}
                                 estimatedFee={estimatedFee}
@@ -281,14 +287,18 @@ function CreateTransferProposal({
                                             setAmount={setAmount}
                                             estimatedFee={estimatedFee}
                                         />
-                                        <PickMemo
-                                            memo={memo}
-                                            setMemo={setMemo}
-                                            shownMemoWarning={shownMemoWarning}
-                                            setShownMemoWarning={
-                                                setShownMemoWarning
-                                            }
-                                        />
+                                        {allowMemo && (
+                                            <PickMemo
+                                                memo={memo}
+                                                setMemo={setMemo}
+                                                shownMemoWarning={
+                                                    shownMemoWarning
+                                                }
+                                                setShownMemoWarning={
+                                                    setShownMemoWarning
+                                                }
+                                            />
+                                        )}
                                         <Button
                                             disabled={
                                                 amount === undefined ||
@@ -373,7 +383,6 @@ function CreateTransferProposal({
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
-                                        filter={isMultiSig}
                                         onAccountClicked={continueAction}
                                     />
                                 </div>
