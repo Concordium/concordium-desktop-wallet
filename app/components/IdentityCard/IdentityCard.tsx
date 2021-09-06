@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import clsx from 'clsx';
-import PendingImage from '@resources/svg/pending-small.svg';
+import PendingImage from '@resources/svg/pending-arrows.svg';
 import SuccessImage from '@resources/svg/success-small.svg';
 import RejectedImage from '@resources/svg/warning-small.svg';
 import EditIcon from '@resources/svg/edit.svg';
@@ -25,6 +25,8 @@ import Form from '../Form';
 import Button from '~/cross-app-components/Button';
 import { useUpdateEffect } from '~/utils/hooks';
 import { editIdentityName } from '~/features/IdentitySlice';
+import DeleteIdentity from './DeleteIdentity';
+import FailedIdentityDetails from './FailedIdentityDetails';
 
 import styles from './IdentityCard.module.scss';
 
@@ -49,10 +51,11 @@ function statusImage(status: IdentityStatus) {
     switch (status) {
         case IdentityStatus.Confirmed:
             return <SuccessImage />;
+        case IdentityStatus.RejectedAndWarned:
         case IdentityStatus.Rejected:
             return <RejectedImage />;
         case IdentityStatus.Pending:
-            return <PendingImage height="20" />;
+            return <PendingImage height="24" />;
         default:
             return undefined;
     }
@@ -109,7 +112,12 @@ function IdentityListElement({
                     ) : null}
                     {statusImage(identity.status)}
                     <span className={clsx(styles.rightAligned, 'body2')}>
-                        Identity
+                        {identity.status === IdentityStatus.RejectedAndWarned &&
+                        canEditName ? (
+                            <DeleteIdentity identity={identity} />
+                        ) : (
+                            'Identity'
+                        )}
                     </span>
                 </div>
                 <Form<EditIdentityForm>
@@ -192,6 +200,10 @@ function IdentityListElement({
                         ))}
                 </div>
             )}
+            {showAttributes &&
+                identity.status === IdentityStatus.RejectedAndWarned && (
+                    <FailedIdentityDetails identity={identity} />
+                )}
         </Card>
     );
 }

@@ -1,4 +1,5 @@
 import React from 'react';
+import type { LocationDescriptorObject } from 'history';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
@@ -8,7 +9,7 @@ import Button from '~/cross-app-components/Button';
 export interface Action {
     label: string;
     onPicked?: () => void;
-    location?: string;
+    location?: LocationDescriptorObject | string;
     inverted?: boolean;
 }
 
@@ -45,7 +46,8 @@ export default function ChoiceModal({
                                 onPicked();
                             }
                             if (location) {
-                                dispatch(push(location));
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                dispatch(push(location as any));
                             }
                             postAction();
                         }}

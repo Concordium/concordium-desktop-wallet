@@ -93,6 +93,7 @@ export interface IdentityObject {
 export enum IdentityStatus {
     Confirmed = 'confirmed',
     Rejected = 'rejected',
+    RejectedAndWarned = 'rejectedAndWarned',
     Pending = 'pending',
     // eslint-disable-next-line no-shadow
     Genesis = 'genesis',

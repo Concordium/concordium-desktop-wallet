@@ -9,6 +9,7 @@ import {
 import withChainData, { ChainData } from '../../common/withChainData';
 import { generateStatusLabel } from './KeyUpdateEntry';
 import { getAccessStructureTitle, removeRemovedKeys } from './util';
+import PublicKeyDetails from '~/components/ledger/PublicKeyDetails';
 import styles from './HigherLevelKeysView.module.scss';
 import localStyles from './UpdateAuthorizationKeys.module.scss';
 
@@ -59,9 +60,10 @@ function accessStructureView(
                     return (
                         <li className={styles.listItem} key={key.key.verifyKey}>
                             {generateStatusLabel(key.status)}
-                            <p className={styles.keyText}>
-                                {key.key.verifyKey}
-                            </p>
+                            <PublicKeyDetails
+                                className={styles.keyText}
+                                publicKey={key.key.verifyKey}
+                            />
                         </li>
                     );
                 })}
@@ -100,11 +102,12 @@ function AuthorizationKeysView({
                                 className={localStyles.listItem}
                                 key={key.verifyKey}
                             >
-                                <div className="flex alignCenter">
+                                <div className={localStyles.keyDiv}>
                                     <p className={localStyles.index}>{index}</p>
-                                    <p className={localStyles.keyText}>
-                                        {key.verifyKey}
-                                    </p>
+                                    <PublicKeyDetails
+                                        className={localStyles.keyText}
+                                        publicKey={key.verifyKey}
+                                    />
                                 </div>
                             </li>
                         );

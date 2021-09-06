@@ -19,11 +19,13 @@ exports.default = async function notarizing(context) {
     const appName = context.packager.appInfo.productFilename;
 
     try {
+        console.log('  • notarizing');
         return notarize({
             appBundleId: 'com.Concordium.Software.DesktopWallet',
             appPath: `${appOutDir}/${appName}.app`,
             appleId: process.env.APPLEID,
             appleIdPassword: process.env.APPLEIDPASS,
+            ascProvider: 'K762RM4LQ3',
         });
     } catch (e) {
         return e;

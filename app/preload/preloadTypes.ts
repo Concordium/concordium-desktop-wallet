@@ -75,7 +75,7 @@ export type DecryptionResult = DecryptionData | DecryptionError;
 export type CryptoMethods = {
     encrypt: (data: string, password: string) => EncryptedData;
     decrypt: (data: EncryptedData, password: string) => DecryptionResult;
-    sha256: (data: (Buffer | Uint8Array)[]) => Buffer;
+    sha256: (data: (string | Buffer | Uint8Array)[]) => Buffer;
 };
 
 export type GetTransactionsResult = {
@@ -124,8 +124,7 @@ export type AccountMethods = {
         values: Partial<Account>
     ) => Promise<number>;
     findAccounts: (condition: Partial<Account>) => Promise<Account[]>;
-    removeInitialAccount: (identityNumber: number) => Promise<number>;
-    confirmInitialAccount: (
+    updateInitialAccount: (
         identityNumber: number,
         values: Partial<Account>
     ) => Promise<number>;
@@ -189,9 +188,8 @@ export type IdentityMethods = {
     insert: (identity: Partial<Identity> | Identity[]) => Promise<number[]>;
     update: (id: number, updatedValues: Partial<Identity>) => Promise<number>;
     getIdentitiesForWallet: (walletId: number) => Promise<Identity[]>;
-    rejectIdentityAndDeleteInitialAccount: (
-        identityId: number
-    ) => Promise<void>;
+    rejectIdentityAndInitialAccount: (identityId: number) => Promise<void>;
+    removeIdentityAndInitialAccount: (identityId: number) => Promise<void>;
     confirmIdentity: (
         identityId: number,
         identityObjectJson: string,

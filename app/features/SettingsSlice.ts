@@ -21,8 +21,6 @@ const settingsSlice = createSlice({
     },
 });
 
-export const settingsSelector = (state: RootState) => state.settings.settings;
-
 /**
  * Searches the settings for a setting with the provided name.
  * @param name name of the setting to find
@@ -71,5 +69,11 @@ export async function updateSettingEntry(
     const settings = await loadAllSettings();
     dispatch(updateSettings(settings));
 }
+
+export const settingsSelector = (state: RootState) => state.settings.settings;
+
+export const specificSettingSelector = (settingName: string) => (
+    state: RootState
+) => findSetting(settingName, state.settings.settings);
 
 export default settingsSlice.reducer;

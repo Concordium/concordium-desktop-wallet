@@ -2,6 +2,7 @@ import {
     Account,
     TransferTransaction,
     TransactionKindString,
+    TransactionStatus,
     TransferTransactionWithNames,
 } from '~/utils/types';
 import {
@@ -22,6 +23,15 @@ function calculatePublicBalanceChange(
     transaction: TransferTransaction,
     isOutgoing: boolean
 ): string {
+    if (TransactionStatus.Rejected === transaction.status) {
+        return '0';
+    }
+    if (TransactionStatus.Failed === transaction.status) {
+        if (isOutgoing && transaction.cost) {
+            return `-${transaction.cost}`;
+        }
+        return '0';
+    }
     if (!isOutgoing) {
         return transaction.subtotal || '0';
     }
@@ -41,6 +51,13 @@ function calculateShieldedBalanceChange(
     transaction: TransferTransaction,
     isOutgoing: boolean
 ): string {
+    if (
+        [TransactionStatus.Failed, TransactionStatus.Rejected].includes(
+            transaction.status
+        )
+    ) {
+        return '0';
+    }
     if (isShieldedBalanceTransaction(transaction)) {
         if (!transaction.decryptedAmount) {
             return '?';
@@ -69,7 +86,8 @@ export interface FilterOption {
 
 export function filterKind(kind: TransactionKindString): FilterOption {
     return {
-        label: transactionKindNames[kind],
+        // put an s to pluralize. (Assumes that no transaction name needs specific pluralization)
+        label: `${transactionKindNames[kind]}s`,
         key: kind,
         filter: (transaction: TransferTransaction) =>
             transaction.transactionKind === kind,

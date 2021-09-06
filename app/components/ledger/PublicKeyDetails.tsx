@@ -1,21 +1,20 @@
 /* eslint-disable react/destructuring-assignment */
 import React from 'react';
-import { chunkString } from '~/utils/basicHelpers';
+import DisplayHexString from './DisplayHexString';
 
 interface Props {
-    publickey: string;
+    className?: string;
+    publicKey: string;
 }
 
-const lineLength = 18;
+const lineLength = 16;
 
-export default function PublicKeyDetails({ publickey }: Props) {
+export default function PublicKeyDetails({ className, publicKey }: Props) {
     return (
-        <div className="textCenter mV40">
-            {chunkString(publickey, lineLength).map((text) => (
-                <p className="m0" key={text}>
-                    {text}
-                </p>
-            ))}
-        </div>
+        <DisplayHexString
+            className={className}
+            value={publicKey}
+            lineLength={lineLength}
+        />
     );
 }

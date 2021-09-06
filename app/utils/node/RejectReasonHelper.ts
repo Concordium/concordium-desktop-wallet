@@ -125,7 +125,7 @@ export function rejectReasonToDisplayText(
         case RejectReason.InvalidEncryptedAmountTransferProof:
             return 'The shielded amount transfer has an invalid proof';
         case RejectReason.InvalidTransferToPublicProof:
-            return 'The shielding has an invalid proof';
+            return 'The unshield amount has an invalid proof';
         case RejectReason.EncryptedAmountSelfTransfer:
             return 'An shielded amount transfer from the account to itself is not allowed';
         case RejectReason.InvalidIndexOnEncryptedTransfer:

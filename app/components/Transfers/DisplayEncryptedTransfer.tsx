@@ -7,6 +7,7 @@ import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import DisplayMemo from '~/components/DisplayMemo';
+import DisplayAddress from '../DisplayAddress';
 
 import styles from './transferDetails.module.scss';
 
@@ -29,10 +30,16 @@ export default function DisplayEncryptedTransfer({
         <>
             <p className={styles.title}>From Account:</p>
             <p className={styles.name}>{fromName}</p>
-            <p className={styles.address}>{transaction.sender}</p>
+            <DisplayAddress
+                address={transaction.sender}
+                lineClassName={styles.address}
+            />
             <p className={styles.title}>To Account:</p>
             <p className={styles.name}>{to?.name}</p>
-            <p className={styles.address}>{transaction.payload.toAddress}</p>
+            <DisplayAddress
+                address={transaction.payload.toAddress}
+                lineClassName={styles.address}
+            />
             {to?.note && <p className={styles.note}>Note: {to?.note}</p>}
             <p className={styles.title}>Amount:</p>
             <p className={styles.amount}>

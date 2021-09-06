@@ -30,6 +30,7 @@ import {
 import styles from './AccountReport.module.scss';
 import type { SaveFileData } from '~/preload/preloadTypes';
 import saveFile from '~/utils/FileHelper';
+import DisplayAddress from '~/components/DisplayAddress';
 
 const decryptMessage = (name: string) =>
     `'${name}' has encrypted funds. To create a complete account report, we need to decrypt them. Otherwise this account will be skipped.`;
@@ -304,6 +305,7 @@ export default function AccountReport({ location }: Props) {
                                             filter={(account: Account) =>
                                                 !accounts.includes(account)
                                             }
+                                            messageWhenEmpty="All accounts have already been added"
                                         />
                                     </div>
                                 )}
@@ -338,13 +340,15 @@ export default function AccountReport({ location }: Props) {
                                                 >
                                                     <div>
                                                         <p>{account.name}</p>
-                                                        <p
-                                                            className={
+                                                        <DisplayAddress
+                                                            outerClassName={
                                                                 styles.address
                                                             }
-                                                        >
-                                                            {account.address}
-                                                        </p>
+                                                            lineLength={25}
+                                                            address={
+                                                                account.address
+                                                            }
+                                                        />
                                                     </div>
                                                     <Button
                                                         size="tiny"
