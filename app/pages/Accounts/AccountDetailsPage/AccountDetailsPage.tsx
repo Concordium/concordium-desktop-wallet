@@ -16,10 +16,10 @@ import BasicTransferRoutes from '../BasicTransferRoutes';
 import ShowAccountAddress from '../ShowAccountAddress';
 import ShowReleaseSchedule from '../ShowReleaseSchedule';
 import ScheduleTransfer from '../ScheduleTransfer';
-import TransferLogFilters from '../TransferLogFilters';
 import CredentialInformation from '../CredentialInformation';
 import MoreActions from './MoreActions';
 import BuildSchedule from './BuildSchedule';
+import TransactionLog from './TransactionLog';
 
 const { Master, Detail } = MasterDetailPageLayout;
 
@@ -63,7 +63,8 @@ export default function DetailsPage() {
                         />
                     </Route>
                     <Route path={routes.ACCOUNTS}>
-                        <TransferLogFilters account={account} />
+                        {/* <TransferLogFilters account={account} /> */}
+                        <TransactionLog />
                     </Route>
                 </BasicTransferRoutes>
             </Detail>
