@@ -118,7 +118,8 @@ const accountsSlice = createSlice({
 
             if (!state.chosenAccountAddress) {
                 state.chosenAccountAddress =
-                    state.accounts.find((a) => a.isFavourite)?.address ?? '';
+                    state.accounts.find((a) => a.isFavourite)?.address ??
+                    (state.accounts[0]?.address || '');
             }
         },
         setAccountInfos: (state, map) => {
