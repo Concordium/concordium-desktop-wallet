@@ -34,8 +34,15 @@ import {
     serializeList,
     serializeCredentialDeploymentInformation,
     serializeBoolean,
+    encodeWord16,
 } from './serializationHelpers';
 import { encodeAsCBOR } from './cborHelper';
+
+function serializeMemo(memo: string) {
+    const encoded = encodeAsCBOR(memo);
+    const length = encodeWord16(encoded.length);
+    return Buffer.concat([length, encoded]);
+}
 
 function serializeSimpleTransfer(payload: SimpleTransferPayload) {
     const size = 1 + 32 + 8;
@@ -52,10 +59,11 @@ function serializeSimpleTransferWithMemo(payload: SimpleTransferPayload) {
         throw new Error('Unexpected missing memo');
     }
 
-    const standardPayload = serializeSimpleTransfer(payload);
-    standardPayload[0] = TransactionKind.Simple_transfer_with_memo;
-    const memo = encodeAsCBOR(payload.memo);
-    return Buffer.concat([standardPayload, memo]);
+    const kind = putInt8(TransactionKind.Simple_transfer_with_memo);
+    const address = base58ToBuffer(payload.toAddress);
+    const memo = serializeMemo(payload.memo);
+    const amount = encodeWord64(BigInt(payload.amount));
+    return Buffer.concat([kind, address, memo, amount]);
 }
 
 export function serializeScheduledTransferPayloadBase(
@@ -92,10 +100,16 @@ function serializeTransferWithScheduleWithMemo(
     if (!payload.memo) {
         throw new Error('Unexpected missing memo');
     }
-    const standardPayload = serializeTransferWithSchedule(payload);
-    standardPayload[0] = TransactionKind.Transfer_with_schedule_with_memo;
-    const memo = encodeAsCBOR(payload.memo);
-    return Buffer.concat([standardPayload, memo]);
+    const kind = putInt8(TransactionKind.Transfer_with_schedule_with_memo);
+    const address = base58ToBuffer(payload.toAddress);
+    const memo = serializeMemo(payload.memo);
+    const scheduleLength = putInt8(payload.schedule.length);
+
+    return Buffer.concat(
+        [kind, address, memo, scheduleLength].concat(
+            payload.schedule.map(serializeSchedulePoint)
+        )
+    );
 }
 
 function serializeTransferToEncypted(payload: TransferToEncryptedPayload) {
@@ -187,9 +201,7 @@ export function serializeEncryptedTransferData(
         'hex'
     );
     const transferAmount = Buffer.from(payload.transferAmount, 'hex');
-    const serializedAddress: Buffer = Buffer.from(
-        base58ToBuffer(payload.toAddress)
-    );
+    const serializedAddress = base58ToBuffer(payload.toAddress);
 
     return Buffer.concat([
         serializedAddress,
@@ -219,10 +231,34 @@ function serializeEncryptedTransferWithMemo(payload: EncryptedTransferPayload) {
     if (!payload.memo) {
         throw new Error('Unexpected missing memo');
     }
-    const standardPayload = serializeEncryptedTransfer(payload);
-    standardPayload[0] = TransactionKind.Encrypted_transfer_with_memo;
-    const memo = encodeAsCBOR(payload.memo);
-    return Buffer.concat([standardPayload, memo]);
+    if (!payload.proof) {
+        throw new Error('unexpected missing proof of Shielded Transfer data');
+    }
+    if (
+        payload.index === undefined ||
+        !payload.remainingEncryptedAmount ||
+        !payload.transferAmount
+    ) {
+        throw new Error('unexpected missing data of Shielded Transfer data');
+    }
+
+    const proof = Buffer.from(payload.proof, 'hex');
+    const remainingEncryptedAmount = Buffer.from(
+        payload.remainingEncryptedAmount,
+        'hex'
+    );
+    const transferAmount = Buffer.from(payload.transferAmount, 'hex');
+    const serializedAddress = base58ToBuffer(payload.toAddress);
+
+    return Buffer.concat([
+        putInt8(TransactionKind.Encrypted_transfer_with_memo),
+        serializedAddress,
+        serializeMemo(payload.memo),
+        remainingEncryptedAmount,
+        transferAmount,
+        encodeWord64(BigInt(payload.index)),
+        proof,
+    ]);
 }
 
 export function serializeTransactionHeader(

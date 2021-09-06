@@ -1,6 +1,7 @@
 import { Buffer } from 'buffer/';
 import { Transport } from './Transport';
 import {
+    SimpleTransferWithMemo,
     AccountTransaction,
     TransactionKindId,
     SimpleTransfer,
@@ -23,6 +24,7 @@ import {
     instanceOfUpdateBakerStake,
     instanceOfUpdateBakerRestakeEarnings,
     UpdateBakerRestakeEarnings,
+    instanceOfSimpleTransferWithMemo,
 } from '~/utils/types';
 import {
     serializeTransactionHeader,
@@ -91,12 +93,8 @@ async function signSimpleTransfer(
     path: number[],
     transaction: SimpleTransfer
 ): Promise<Buffer> {
-    const withMemo =
-        transaction.transactionKind ===
-        TransactionKindId.Simple_transfer_with_memo;
-
     const payload = serializeTransferPayload(
-        transaction.transactionKind,
+        TransactionKindId.Simple_transfer,
         transaction.payload
     );
 
@@ -108,15 +106,9 @@ async function signSimpleTransfer(
         transaction.expiry
     );
 
-    const payloadNoMemo = Buffer.concat([
-        Buffer.from(Uint8Array.of(transaction.transactionKind)),
-        base58ToBuffer(transaction.payload.toAddress),
-        encodeWord64(BigInt(transaction.payload.amount)),
-    ]);
+    const data = Buffer.concat([pathAsBuffer(path), header, payload]);
 
-    const data = Buffer.concat([pathAsBuffer(path), header, payloadNoMemo]);
-
-    const p1 = withMemo ? 0x01 : 0x00;
+    const p1 = 0x00;
     const p2 = 0x00;
 
     const response = await transport.send(
@@ -126,16 +118,63 @@ async function signSimpleTransfer(
         p2,
         data
     );
+    const signature = response.slice(0, 64);
+    return signature;
+}
 
-    if (withMemo) {
-        return sendMemo(
-            transport,
-            INS_SIMPLE_TRANSFER,
-            transaction.payload.memo,
-            0x02,
-            p2
-        );
-    }
+async function signSimpleTransferWithMemo(
+    transport: Transport,
+    path: number[],
+    transaction: SimpleTransferWithMemo
+): Promise<Buffer> {
+    const payload = serializeTransferPayload(
+        TransactionKindId.Simple_transfer_with_memo,
+        transaction.payload
+    );
+
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+
+    const memoLength = encodeAsCBOR(transaction.payload.memo).length;
+
+    const initialPayload = Buffer.concat([
+        Buffer.from(Uint8Array.of(TransactionKindId.Simple_transfer_with_memo)),
+        base58ToBuffer(transaction.payload.toAddress),
+        encodeWord16(memoLength),
+    ]);
+
+    const data = Buffer.concat([pathAsBuffer(path), header, initialPayload]);
+
+    let p1 = 0x01;
+    const p2 = 0x00;
+
+    await transport.send(0xe0, INS_SIMPLE_TRANSFER, p1, p2, data);
+
+    p1 = 0x02;
+
+    await sendMemo(
+        transport,
+        INS_SIMPLE_TRANSFER,
+        transaction.payload.memo,
+        p1,
+        p2
+    );
+
+    p1 = 0x03;
+
+    const response = await transport.send(
+        0xe0,
+        INS_SIMPLE_TRANSFER,
+        p1,
+        p2,
+        encodeWord64(BigInt(transaction.payload.amount))
+    );
+
     return response.slice(0, 64);
 }
 
@@ -275,17 +314,33 @@ async function signEncryptedTransfer(
     const kind = Buffer.alloc(1);
     kind.writeInt8(transaction.transactionKind, 0);
 
-    const data = Buffer.concat([
+    let data = Buffer.concat([
         pathAsBuffer(path),
         header,
         kind,
         base58ToBuffer(transaction.payload.toAddress),
     ]);
 
+    if (withMemo) {
+        const { memo } = transaction.payload;
+        const memoLength = memo ? encodeAsCBOR(memo).length : 0;
+        data = Buffer.concat([data, encodeWord16(memoLength)]);
+    }
+
     let p1 = withMemo ? 0x04 : 0x00;
     const p2 = 0x00;
 
     await transport.send(0xe0, INS_ENCRYPTED_TRANSFER, p1, p2, data);
+
+    if (withMemo) {
+        await sendMemo(
+            transport,
+            INS_ENCRYPTED_TRANSFER,
+            transaction.payload.memo,
+            0x05,
+            p2
+        );
+    }
 
     p1 = 0x01;
     await transport.send(
@@ -328,15 +383,6 @@ async function signEncryptedTransfer(
         );
     }
 
-    if (withMemo) {
-        return sendMemo(
-            transport,
-            INS_ENCRYPTED_TRANSFER,
-            transaction.payload.memo,
-            0x05,
-            p2
-        );
-    }
     if (!response) {
         throw new Error('Unexpected missing response from ledger;');
     }
@@ -370,7 +416,12 @@ async function signTransferWithSchedule(
         transaction.transactionKind
     );
 
-    const data = Buffer.concat([pathAsBuffer(path), header, payloadBase]);
+    let data = Buffer.concat([pathAsBuffer(path), header, payloadBase]);
+    if (withMemo) {
+        const { memo } = transaction.payload;
+        const memoLength = memo ? encodeAsCBOR(memo).length : 0;
+        data = Buffer.concat([data, encodeWord16(memoLength)]);
+    }
 
     let p1 = withMemo ? 0x02 : 0x00;
     const p2 = 0x00;
@@ -378,6 +429,16 @@ async function signTransferWithSchedule(
     await transport.send(0xe0, INS_TRANSFER_WITH_SCHEDULE, p1, p2, data);
 
     const { schedule } = transaction.payload;
+
+    if (withMemo) {
+        await sendMemo(
+            transport,
+            INS_TRANSFER_WITH_SCHEDULE,
+            transaction.payload.memo,
+            0x03,
+            p2
+        );
+    }
 
     p1 = 0x01;
 
@@ -394,15 +455,6 @@ async function signTransferWithSchedule(
         );
     }
 
-    if (withMemo) {
-        return sendMemo(
-            transport,
-            INS_TRANSFER_WITH_SCHEDULE,
-            transaction.payload.memo,
-            0x03,
-            p2
-        );
-    }
     if (!response) {
         throw new Error('Unexpected missing response from ledger;');
     }
@@ -594,6 +646,9 @@ export default async function signTransfer(
     path: number[],
     transaction: AccountTransaction
 ): Promise<Buffer> {
+    if (instanceOfSimpleTransferWithMemo(transaction)) {
+        return signSimpleTransferWithMemo(transport, path, transaction);
+    }
     if (instanceOfSimpleTransfer(transaction)) {
         return signSimpleTransfer(transport, path, transaction);
     }

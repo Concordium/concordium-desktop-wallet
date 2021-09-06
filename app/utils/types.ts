@@ -308,7 +308,14 @@ export interface AccountTransaction<
 
 export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
 
+type WithMemo<Base extends {}> = Base & {
+    memo: string;
+};
+
 export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
+export type SimpleTransferWithMemo = AccountTransaction<
+    WithMemo<SimpleTransferPayload>
+>;
 export type EncryptedTransfer = AccountTransaction<EncryptedTransferPayload>;
 export type TransferToEncrypted = AccountTransaction<TransferToEncryptedPayload>;
 export type UpdateAccountCredentials = AccountTransaction<UpdateAccountCredentialsPayload>;
@@ -799,6 +806,13 @@ export function instanceOfSimpleTransfer(
         TransactionKindId.Simple_transfer,
         TransactionKindId.Simple_transfer_with_memo,
     ].includes(object.transactionKind);
+}
+export function instanceOfSimpleTransferWithMemo(
+    object: AccountTransaction<TransactionPayload>
+): object is SimpleTransferWithMemo {
+    return (
+        TransactionKindId.Simple_transfer_with_memo === object.transactionKind
+    );
 }
 
 export function instanceOfTransferToEncrypted(

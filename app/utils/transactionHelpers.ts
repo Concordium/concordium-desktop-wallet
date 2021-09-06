@@ -169,6 +169,7 @@ export function createEncryptedTransferTransaction(
         estimatedEnergyAmount: getTransactionKindEnergy(
             transactionKind,
             getPayloadSizeEstimate(TransactionKindId.Encrypted_transfer) +
+                2 +
                 getEncodedSize(memo)
         ),
     });
