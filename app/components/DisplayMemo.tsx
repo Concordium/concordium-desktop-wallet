@@ -10,7 +10,7 @@ interface Props {
 }
 
 /**
- * Displays a memo. If no memo is given, does not display anything.
+ * Displays a memo. If no memo is given, then the fallback is shown, if neither is given, then the component becomes null.
  */
 export default function DisplayMemo({ memo, fallback, className }: Props) {
     if (!memo && !fallback) {

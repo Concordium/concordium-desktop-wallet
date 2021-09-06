@@ -2,7 +2,11 @@
 import { Buffer } from 'buffer/';
 import { encode, decode } from 'cbor';
 
-export function encodeAsCBOR(value: string | number) {
+/**
+ * Given a string or number, return a buffer containing the value under cbor encoding.
+ * N.B. given a string, this will attempt to convert it to a number, to decrease the encoded size.
+ */
+export function encodeAsCBOR(value: string | number): Buffer {
     // Prefer saving as numbers:
     const asNumber = Number(value);
     if (Number.isInteger(asNumber) && asNumber <= Number.MAX_SAFE_INTEGER) {
@@ -11,6 +15,10 @@ export function encodeAsCBOR(value: string | number) {
     return Buffer.from(encode(value));
 }
 
+/**
+ * Decode cbot encoding.
+ * @param value is assumed to be a Hex string, containing cbor encoded bytes.
+ */
 export function decodeCBOR(value: string) {
     return decode(Buffer.from(value, 'hex'));
 }

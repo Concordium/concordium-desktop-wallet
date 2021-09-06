@@ -42,7 +42,7 @@ interface Props {
     toPickRecipient?(currentAmount: string, memo?: string): void;
     toConfirmTransfer(amount: string, memo?: string): void;
     transactionKind: TransactionKindId;
-    // presence determines whether to show memo input.
+    // Presence determines whether to show memo input.
     memo?: MemoProps;
 }
 

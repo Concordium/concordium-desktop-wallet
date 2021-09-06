@@ -190,7 +190,7 @@ export enum TransactionKindId {
     Register_data = 21,
     Simple_transfer_with_memo = 22,
     Encrypted_transfer_with_memo = 23,
-    Transfer_with_schedule_with_memo = 24,
+    Transfer_with_schedule_and_memo = 24,
 }
 
 export interface SimpleTransferPayload {
@@ -841,7 +841,7 @@ export function instanceOfScheduledTransfer(
 ): object is ScheduledTransfer {
     return [
         TransactionKindId.Transfer_with_schedule,
-        TransactionKindId.Transfer_with_schedule_with_memo,
+        TransactionKindId.Transfer_with_schedule_and_memo,
     ].includes(object.transactionKind);
 }
 

@@ -62,6 +62,10 @@ const INS_UPDATE_BAKER_RESTAKE_EARNINGS = 0x16;
 
 type Memo = string;
 
+/**
+ * Send memo to ledger for signing.
+ * N.B. This does not send the length of the memo, and the CBOR encoded string.
+ */
 async function sendMemo(
     transport: Transport,
     ins: number,
@@ -279,6 +283,9 @@ async function signTransferToPublic(
     return signature;
 }
 
+/**
+ * Can sign both regular encrypted transfers and encrypted transfers with memos.
+ */
 async function signEncryptedTransfer(
     transport: Transport,
     path: number[],
@@ -389,6 +396,9 @@ async function signEncryptedTransfer(
     return response.slice(0, 64);
 }
 
+/**
+ * Can sign both transfer with and withouts memos.
+ */
 async function signTransferWithSchedule(
     transport: Transport,
     path: number[],
@@ -396,7 +406,7 @@ async function signTransferWithSchedule(
 ): Promise<Buffer> {
     const withMemo =
         transaction.transactionKind ===
-        TransactionKindId.Transfer_with_schedule_with_memo;
+        TransactionKindId.Transfer_with_schedule_and_memo;
 
     const payload = serializeTransferPayload(
         transaction.transactionKind,

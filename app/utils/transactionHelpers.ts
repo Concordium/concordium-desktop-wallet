@@ -292,7 +292,7 @@ export function createScheduledTransferTransaction(
     };
 
     const transactionKind = memo
-        ? TransactionKindId.Transfer_with_schedule_with_memo
+        ? TransactionKindId.Transfer_with_schedule_and_memo
         : TransactionKindId.Transfer_with_schedule;
     return createAccountTransaction({
         fromAddress,
@@ -612,6 +612,7 @@ export function validateBakerStake(
 
     return undefined;
 }
+
 export function validateMemo(memo: string): string | undefined {
     if (getEncodedSize(memo) > maxMemoSize) {
         return `Memo is too large, encoded size must be at most ${maxMemoSize} bytes`;

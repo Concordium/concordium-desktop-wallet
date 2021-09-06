@@ -92,7 +92,7 @@ export function findAccountTransactionHandler(
                 new EncryptedTransferHandler()
             );
         case TransactionKindId.Transfer_with_schedule:
-        case TransactionKindId.Transfer_with_schedule_with_memo:
+        case TransactionKindId.Transfer_with_schedule_and_memo:
             return new AccountHandlerTypeMiddleware(
                 new ScheduledTransferHandler()
             );

@@ -11,6 +11,10 @@ interface Props {
     onClose: () => void;
 }
 
+/**
+ *  Modal to warn/inform the user about memos.
+ *  If the showMemoWarning setting is off, the modal will never appear;
+ */
 export default function MemoWarning({ open, onClose }: Props) {
     const dispatch = useDispatch();
     const showMemoWarning = useSelector(showMemoWarningSelector);
