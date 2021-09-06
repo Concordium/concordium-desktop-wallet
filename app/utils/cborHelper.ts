@@ -9,7 +9,13 @@ import { encode, decode } from 'cbor';
 export function encodeAsCBOR(value: string | number): Buffer {
     // Prefer saving as numbers:
     const asNumber = Number(value);
-    if (Number.isInteger(asNumber) && asNumber <= Number.MAX_SAFE_INTEGER) {
+    if (Number.isInteger(asNumber)) {
+        if (
+            asNumber >= Number.MAX_SAFE_INTEGER ||
+            asNumber <= Number.MIN_SAFE_INTEGER
+        ) {
+            throw new Error('Unsafe number given to CBOR encoder');
+        }
         return Buffer.from(encode(asNumber));
     }
     return Buffer.from(encode(value));

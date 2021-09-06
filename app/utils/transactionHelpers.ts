@@ -614,6 +614,14 @@ export function validateBakerStake(
 }
 
 export function validateMemo(memo: string): string | undefined {
+    const asNumber = Number(memo);
+    if (
+        Number.isInteger(asNumber) &&
+        (asNumber > Number.MAX_SAFE_INTEGER ||
+            asNumber < Number.MIN_SAFE_INTEGER)
+    ) {
+        return `Only numbers up to ${Number.MAX_SAFE_INTEGER} is supported.`;
+    }
     if (getEncodedSize(memo) > maxMemoSize) {
         return `Memo is too large, encoded size must be at most ${maxMemoSize} bytes`;
     }
