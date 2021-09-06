@@ -31,6 +31,7 @@ export default function Recovery() {
             loadIdentities(dispatch);
             loadAddressBook(dispatch);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
