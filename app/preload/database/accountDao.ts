@@ -7,7 +7,12 @@ import {
     addressBookTable,
     credentialsTable,
 } from '~/constants/databaseNames.json';
-import { Account, Identity, AccountAndCredentialPairs } from '~/utils/types';
+import {
+    Account,
+    Identity,
+    AccountAndCredentialPairs,
+    Credential,
+} from '~/utils/types';
 import { AccountMethods } from '~/preload/preloadTypes';
 
 function convertAccountBooleans(accounts: Account[]) {
@@ -135,6 +140,29 @@ async function insertAccountTransactionally(
     }
 }
 
+/**
+ * Inserts account (if it doesn't exist already) and the credential, as part of the given transaction.
+ */
+async function insertFromRecovery(
+    account: Account,
+    credential: Credential,
+    transaction: Knex.Transaction
+): Promise<void> {
+    const accountInDatabase = await transaction
+        .table(accountsTable)
+        .where({ address: account.address })
+        .first()
+        .select();
+    if (!accountInDatabase) {
+        await insertAccountTransactionally(
+            account,
+            'Recovered account',
+            transaction
+        );
+    }
+    await transaction.table(credentialsTable).insert(credential);
+}
+
 /** Inserts accounts and credentials for a specific identity, from recovery.
  * The identity is first inserted, and its given id is attached to the accounts and credentials.
  */
@@ -149,22 +177,7 @@ async function insertFromRecoveryNewIdentity(
         for (const pair of recovered) {
             const account = { ...pair.account, identityId };
             const credential = { ...pair.credential, identityId };
-            const { address } = account;
-            const accountExists =
-                (
-                    await transaction
-                        .table(accountsTable)
-                        .where({ address })
-                        .select()
-                ).length > 0;
-            if (!accountExists) {
-                await insertAccountTransactionally(
-                    account,
-                    'Recovered account',
-                    transaction
-                );
-            }
-            await transaction.table(credentialsTable).insert(credential);
+            await insertFromRecovery(account, credential, transaction);
         }
     });
 }
@@ -176,16 +189,7 @@ async function insertFromRecoveryExistingIdentity(
 ) {
     return (await knex()).transaction(async (transaction) => {
         for (const { account, credential } of recovered) {
-            const { address } = account;
-            const accountExists = (await findAccounts({ address })).length > 0;
-            if (!accountExists) {
-                insertAccountTransactionally(
-                    account,
-                    'Recovered account',
-                    transaction
-                );
-            }
-            await transaction.table(credentialsTable).insert(credential);
+            await insertFromRecovery(account, credential, transaction);
         }
     });
 }

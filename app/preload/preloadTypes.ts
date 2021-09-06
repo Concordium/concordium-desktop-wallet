@@ -132,10 +132,10 @@ export type AccountMethods = {
     insertFromRecoveryNewIdentity: (
         recovered: AccountAndCredentialPairs,
         identity: Omit<Identity, 'id'>
-    ) => void;
+    ) => Promise<void>;
     insertFromRecoveryExistingIdentity: (
         recovered: AccountAndCredentialPairs
-    ) => void;
+    ) => Promise<void>;
 };
 
 export type AddressBookMethods = {

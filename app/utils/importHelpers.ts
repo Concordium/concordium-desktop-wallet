@@ -177,8 +177,8 @@ function findAttachedEntities(
 
 /**
  * Given a duplicate identity, resolves naming conflict, potentially updates the name, and adds message.
- * @param importedIdentity: the identity from the imported data.
- * @param localIdentity: the identity which already exists in the database.
+ * @param importedIdentity the identity from the imported data.
+ * @param localIdentity the identity which already exists in the database.
  */
 async function handleDuplicateIdentity(
     importedIdentity: Identity,
@@ -203,8 +203,8 @@ async function handleDuplicateIdentity(
 
 /**
  * Given a duplicate account, resolves naming conflict, potentially updates the name, and adds message.
- * @param account: the duplicate account from the imported data.
- * @param existingAccount: the local object for the same account.
+ * @param account the duplicate account from the imported data.
+ * @param existingAccount the local object for the same account.
  */
 function handleDuplicateAccount(
     account: Account,
@@ -393,7 +393,7 @@ async function importNewWallets(
  * Import identities, accounts and credentials for the wallets that already exist in the database
  * with an identical logical id. This means that the walletId reference on the identities do not
  * have to be updated, as they are already correct in this special case.
- * @param addMessage: Function to add a message for a specific account/identity. Used to indicate duplicates.
+ * @param addMessage Function to add a message for a specific account/identity. Used to indicate duplicates.
  */
 async function importDuplicateWallets(
     existingData: ExportData,
@@ -575,7 +575,7 @@ async function importDuplicateWallets(
  * but with a different logical id. This consists of getting the logical id's that the wallets have
  * in the database, and updating the identities with this information. When this has been done, this
  * case has been reduced to the case for having duplicate wallets, which is invoked.
- * @param addMessage: Function to add a message for a specific account/identity. Used to indicate duplicates.
+ * @param addMessage Function to add a message for a specific account/identity. Used to indicate duplicates.
  */
 async function importExistingWallets(
     existingWallets: WalletEntry[],
@@ -821,7 +821,7 @@ const addressBookFields: AddressBookEntryKey[] = ['address'];
  * Imports addressbookentries, and resolves potential name and note conflicts.
  * @param entries addressBookEntries that should be imported.
  * @param addressBook the Addressbook, which contains the existing addressBookEntries.
- * @param addMessage: Function to add a message for a specific account/identity. Used to indicate duplicates.
+ * @param addMessage Function to add a message for a specific account/identity. Used to indicate duplicates.
  */
 export async function importAddressBookEntries(
     dispatch: Dispatch,

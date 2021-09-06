@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import { Switch, Route } from 'react-router-dom';
 import Columns from '~/components/Columns';
+import { loadAccounts } from '~/features/AccountSlice';
+import { loadAddressBook } from '~/features/AddressBookSlice';
+import { loadIdentities } from '~/features/IdentitySlice';
 import routes from '~/constants/routes.json';
 import { Account } from '~/utils/types';
 import PerformRecovery from './PerformRecovery';
@@ -14,11 +18,20 @@ import styles from './Recovery.module.scss';
  * Main Component for the account recovery algorithm.
  */
 export default function Recovery() {
+    const dispatch = useDispatch();
     const [status, setStatus] = useState<Status | undefined>(Status.Initial);
     const [recoveredAccounts, setRecoveredAccounts] = useState<Account[][]>([]);
     const [currentIdentityNumber, setCurrentIdentityNumber] = useState<number>(
         0
     );
+
+    useEffect(() => {
+        return () => {
+            loadAccounts(dispatch);
+            loadIdentities(dispatch);
+            loadAddressBook(dispatch);
+        };
+    }, []);
 
     return (
         <Columns className="flexChildFill" columnScroll>

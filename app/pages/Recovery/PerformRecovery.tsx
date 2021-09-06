@@ -4,11 +4,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getlastFinalizedBlockHash } from '~/node/nodeHelpers';
-import { loadAccounts } from '~/features/AccountSlice';
 import { loadCredentials } from '~/features/CredentialSlice';
 import { globalSelector } from '~/features/GlobalSlice';
-import { loadAddressBook } from '~/features/AddressBookSlice';
-import { loadIdentities, identitiesSelector } from '~/features/IdentitySlice';
+import { identitiesSelector } from '~/features/IdentitySlice';
 import pairWallet from '~/utils/WalletPairing';
 import routes from '~/constants/routes.json';
 import errorMessages from '~/constants/errorMessages.json';
@@ -103,9 +101,6 @@ export default function PerformRecovery({
     useEffect(() => {
         return () => {
             controller.abort();
-            loadAccounts(dispatch);
-            loadIdentities(dispatch);
-            loadAddressBook(dispatch);
             setStatus(undefined);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -173,6 +168,7 @@ export default function PerformRecovery({
         setRecoveredTotal((n) => n + accounts.length);
         setRecoveredAccounts((ra) => [accounts, ...ra]);
         setCurrentIdentityNumber((n) => n + 1);
+        setStatus(Status.Initial);
 
         if (identity || accounts.length) {
             setEmptyIndices(0);
