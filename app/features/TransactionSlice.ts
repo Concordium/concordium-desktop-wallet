@@ -186,8 +186,8 @@ export async function loadTransactions(
     const { transactions, more } = await getTransactionsOfAccount(
         account,
         booleanFilters,
-        fromDate,
-        toDate
+        fromDate ? new Date(fromDate) : undefined,
+        toDate ? new Date(toDate) : undefined
     );
 
     if (!controller?.isAborted) {

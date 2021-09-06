@@ -1,0 +1,8 @@
+@import '../../common';
+
+.root {
+    composes: fillCardPadding;
+    composes: thickBlueSeparatorTop;
+    padding-left: 39px;
+    padding-right: 39px;
+}

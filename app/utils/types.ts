@@ -168,10 +168,11 @@ export enum TransactionKindId {
 }
 
 export type BooleanFilters = { [P in TransactionKindString]?: boolean };
+type DateString = string;
 
 export interface RewardFilter extends BooleanFilters {
-    fromDate?: Date;
-    toDate?: Date;
+    fromDate?: DateString;
+    toDate?: DateString;
 }
 
 /**

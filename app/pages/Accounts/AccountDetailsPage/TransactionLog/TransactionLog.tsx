@@ -5,7 +5,7 @@ import { transactionsSelector } from '~/features/TransactionSlice';
 import { TransferTransaction } from '~/utils/types';
 import TransactionList from '../../TransactionList';
 import TransactionView from '../../TransactionView';
-import TransferLogFilters from '../../TransferLogFilters';
+import TransactionLogFilters from '../TransactionLogFilters/TransactionLogFilters';
 
 import styles from './TransactionLog.module.scss';
 
@@ -31,7 +31,7 @@ export default function TransactionLog() {
                 )}
             </TabbedCard.Tab>
             <TabbedCard.Tab header="Filters">
-                <TransferLogFilters />
+                <TransactionLogFilters />
             </TabbedCard.Tab>
         </TabbedCard>
     );
