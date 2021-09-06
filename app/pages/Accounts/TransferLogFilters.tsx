@@ -4,12 +4,13 @@ import { Account, TransactionKindString } from '~/utils/types';
 import Checkbox from '~/components/Form/Checkbox';
 import { updateRewardFilter } from '~/features/AccountSlice';
 import Card from '~/cross-app-components/Card';
+import { getBooleanFilters } from '~/utils/accountHelpers';
 
 interface Props {
     account: Account;
 }
 
-const transactionFilters = [
+const transactionFilters: { kind: TransactionKindString; display: string }[] = [
     { kind: TransactionKindString.BakingReward, display: 'Show baker rewards' },
     { kind: TransactionKindString.BlockReward, display: 'Show block rewards' },
     {
@@ -23,23 +24,21 @@ const transactionFilters = [
  */
 export default function TransferLogFilters({ account }: Props) {
     const dispatch = useDispatch();
-    const rewardFilter = JSON.parse(account.rewardFilter);
+    const { rewardFilter, address } = account;
+    const booleanFilters = getBooleanFilters(rewardFilter, true);
 
-    const setRewardFilter = useCallback(
-        (updatedKind: TransactionKindString) => {
-            if (rewardFilter.includes(updatedKind)) {
-                const withoutKind = [...rewardFilter];
-                withoutKind.splice(withoutKind.indexOf(updatedKind), 1);
-                updateRewardFilter(dispatch, account.address, withoutKind);
+    const updateFilter = useCallback(
+        (f: TransactionKindString) => {
+            const newFilter = { ...rewardFilter };
+            if (booleanFilters.includes(f)) {
+                newFilter[f] = false;
             } else {
-                updateRewardFilter(dispatch, account.address, [
-                    ...rewardFilter,
-                    updatedKind,
-                ]);
+                newFilter[f] = true;
             }
+
+            updateRewardFilter(dispatch, address, newFilter, true);
         },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [rewardFilter, account.address]
+        [booleanFilters, address, dispatch, rewardFilter]
     );
 
     return (
@@ -49,8 +48,8 @@ export default function TransferLogFilters({ account }: Props) {
                 <Checkbox
                     key={kind}
                     className="textRight mB10"
-                    checked={!rewardFilter.includes(kind)}
-                    onChange={() => setRewardFilter(kind)}
+                    checked={!booleanFilters.includes(kind)}
+                    onChange={() => updateFilter(kind)}
                 >
                     {display}
                 </Checkbox>

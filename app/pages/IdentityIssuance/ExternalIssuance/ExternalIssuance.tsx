@@ -85,7 +85,7 @@ async function generateIdentity(
             signatureThreshold: 1,
             maxTransactionId: '0',
             isInitial: true,
-            rewardFilter: '[]',
+            rewardFilter: {},
             selfAmounts: getInitialEncryptedAmount(),
             incomingAmounts: '[]',
             totalDecrypted: '0',

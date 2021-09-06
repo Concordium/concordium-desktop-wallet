@@ -227,6 +227,8 @@ export type TransactionMethods = {
     getTransactionsForAccount: (
         account: Account,
         filteredTypes: TransactionKindString[],
+        fromDate?: Date,
+        toDate?: Date,
         limit?: number
     ) => Promise<GetTransactionsOutput>;
     hasEncryptedTransactions: (

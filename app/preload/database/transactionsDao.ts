@@ -1,5 +1,6 @@
 import {
     Account,
+    TimeStampUnit,
     TransactionKindString,
     TransactionStatus,
     TransferTransaction,
@@ -40,15 +41,21 @@ async function hasPendingTransactions(fromAddress: string) {
 async function getTransactionsOfAccount(
     account: Account,
     filteredTypes: TransactionKindString[] = [],
+    fromDate?: Date,
+    toDate?: Date,
     limit = 100
 ): Promise<GetTransactionsOutput> {
     const { address } = account;
+    const from = (fromDate?.getTime() ?? 0) / TimeStampUnit.seconds;
+    const to = (toDate?.getTime() ?? Date.now()) / TimeStampUnit.seconds;
+
     const transactions = await (await knex())
         .select()
         .table(transactionTable)
         .whereNotIn('transactionKind', filteredTypes)
         .andWhere({ toAddress: address })
         .orWhere({ fromAddress: address })
+        .andWhereBetween('blockTime', [from.toString(), to.toString()])
         .orderBy('blockTime', 'desc')
         .orderBy('id', 'desc')
         .limit(limit + 1);

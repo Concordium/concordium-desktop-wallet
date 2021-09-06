@@ -1,6 +1,12 @@
 import { RegisterOptions, Validate } from 'react-hook-form';
 import bs58check from 'bs58check';
-import { Account, AccountInfo } from './types';
+import {
+    Account,
+    AccountInfo,
+    BooleanFilters,
+    RewardFilter,
+    TransactionKindString,
+} from './types';
 
 export const ACCOUNT_NAME_MAX_LENGTH = 25;
 export const ADDRESS_LENGTH = 50;
@@ -73,4 +79,27 @@ export function isMultiCred(accountInfo: AccountInfo): boolean {
 
 export function getInitialEncryptedAmount() {
     return ENCRYPTED_ZERO;
+}
+
+export function getBooleanFilters(
+    { fromDate, toDate, ...filters }: RewardFilter,
+    onlyActive = false
+): TransactionKindString[] {
+    const t: BooleanFilters = {};
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const k in TransactionKindString) {
+        if (!Object.prototype.hasOwnProperty.call(TransactionKindString, k)) {
+            // eslint-disable-next-line no-continue
+            continue;
+        }
+
+        const kind =
+            TransactionKindString[k as keyof typeof TransactionKindString];
+        t[kind] = filters[kind] ?? true;
+    }
+
+    return Object.entries(filters as BooleanFilters)
+        .filter(([, v]) => !onlyActive || v)
+        .map(([kind]) => kind as TransactionKindString);
 }

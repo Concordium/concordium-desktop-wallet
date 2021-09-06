@@ -31,7 +31,7 @@ import {
     Dispatch,
     Global,
     Identity,
-    TransactionKindString,
+    RewardFilter,
 } from '../utils/types';
 import { getStatus } from '../utils/transactionHelpers';
 import {
@@ -413,7 +413,7 @@ export async function addPendingAccount(
         maxTransactionId: '0',
         isInitial,
         deploymentTransactionId,
-        rewardFilter: '[]',
+        rewardFilter: {},
         selfAmounts: getInitialEncryptedAmount(),
         incomingAmounts: '[]',
         totalDecrypted: '0',
@@ -521,7 +521,7 @@ export async function addExternalAccount(
         signatureThreshold,
         maxTransactionId: '0',
         isInitial: false,
-        rewardFilter: '[]',
+        rewardFilter: {},
         isFavourite: false,
     };
     await insertAccount(account);
@@ -535,10 +535,15 @@ export async function importAccount(account: Account | Account[]) {
 export async function updateRewardFilter(
     dispatch: Dispatch,
     address: string,
-    rewardFilter: TransactionKindString[]
+    rewardFilter: RewardFilter,
+    persist: boolean
 ) {
-    const updatedFields = { rewardFilter: JSON.stringify(rewardFilter) };
-    updateAccount(address, updatedFields);
+    const updatedFields = { rewardFilter };
+
+    if (persist) {
+        updateAccount(address, updatedFields);
+    }
+
     return dispatch(updateAccountFields({ address, updatedFields }));
 }
 

@@ -125,29 +125,6 @@ export enum AccountStatus {
     Genesis = 'genesis',
 }
 
-/**
- * This Interface models the structure of the accounts stored in the database
- */
-
-export interface Account {
-    name: string;
-    address: Hex;
-    identityId: number;
-    identityName?: string;
-    identityNumber?: number;
-    status: AccountStatus;
-    signatureThreshold?: number;
-    totalDecrypted?: string;
-    allDecrypted?: boolean;
-    incomingAmounts?: string;
-    rewardFilter: string;
-    selfAmounts?: string;
-    maxTransactionId: string;
-    deploymentTransactionId?: string;
-    isInitial: boolean;
-    isFavourite: boolean;
-}
-
 export enum TransactionKindString {
     DeployModule = 'deployModule',
     InitContract = 'initContract',
@@ -189,6 +166,37 @@ export enum TransactionKindId {
     Update_credentials = 20,
     Register_data = 21,
 }
+
+export type BooleanFilters = { [P in TransactionKindString]?: boolean };
+
+export interface RewardFilter extends BooleanFilters {
+    fromDate?: Date;
+    toDate?: Date;
+}
+
+/**
+ * This Interface models the structure of the accounts stored in the database
+ */
+
+export interface Account {
+    name: string;
+    address: Hex;
+    identityId: number;
+    identityName?: string;
+    identityNumber?: number;
+    status: AccountStatus;
+    signatureThreshold?: number;
+    totalDecrypted?: string;
+    allDecrypted?: boolean;
+    incomingAmounts?: string;
+    rewardFilter: RewardFilter;
+    selfAmounts?: string;
+    maxTransactionId: string;
+    deploymentTransactionId?: string;
+    isInitial: boolean;
+    isFavourite: boolean;
+}
+
 export interface SimpleTransferPayload {
     amount: string;
     toAddress: string;

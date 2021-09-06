@@ -2,16 +2,19 @@
 import { Knex } from 'knex';
 import { knex } from '~/database/knex';
 import { accountsTable, identitiesTable } from '~/constants/databaseNames.json';
-import { Account } from '~/utils/types';
+import { Account, RewardFilter } from '~/utils/types';
 import { AccountMethods } from '~/preload/preloadTypes';
 
-function convertAccountBooleans(accounts: Account[]) {
+function parseAccount(accounts: Account[]): Account[] {
     return accounts.map((account) => {
         return {
             ...account,
             allDecrypted: Boolean(account.allDecrypted),
             isInitial: Boolean(account.isInitial),
             isFavourite: Boolean(account.isFavourite),
+            rewardFilter: JSON.parse(
+                account.rewardFilter as string
+            ) as RewardFilter,
         };
     });
 }
@@ -39,7 +42,7 @@ function selectAccounts(builder: Knex) {
 export async function getAllAccounts(): Promise<Account[]> {
     const accounts: Account[] = await selectAccounts(await knex());
 
-    return convertAccountBooleans(accounts);
+    return parseAccount(accounts);
 }
 
 export async function getAccount(
@@ -49,7 +52,7 @@ export async function getAccount(
         address,
     });
 
-    return convertAccountBooleans(accounts)[0];
+    return parseAccount(accounts)[0];
 }
 
 export async function insertAccount(account: Account | Account[]) {
@@ -60,9 +63,13 @@ export async function updateAccount(
     address: string,
     updatedValues: Partial<Account>
 ) {
-    return (await knex())(accountsTable)
-        .where({ address })
-        .update(updatedValues);
+    const dbValues: Record<string, unknown> = updatedValues;
+
+    if (updatedValues.rewardFilter) {
+        dbValues.rewardFilter = JSON.stringify(updatedValues.rewardFilter);
+    }
+
+    return (await knex())(accountsTable).where({ address }).update(dbValues);
 }
 
 export async function findAccounts(condition: Partial<Account>) {
@@ -70,7 +77,7 @@ export async function findAccounts(condition: Partial<Account>) {
         .select()
         .table(accountsTable)
         .where(condition);
-    return convertAccountBooleans(accounts);
+    return parseAccount(accounts);
 }
 
 export async function removeAccount(accountAddress: string) {

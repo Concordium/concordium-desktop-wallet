@@ -12,7 +12,7 @@ import {
 import { toCSV } from '~/utils/basicHelpers';
 import { isOutgoingTransaction, lookupName } from '~/utils/transactionHelpers';
 import exportTransactionFields from '~/constants/exportTransactionFields.json';
-import { dateFromTimeStamp, getISOFormat } from '~/utils/timeHelpers';
+import { getISOFormat } from '~/utils/timeHelpers';
 import { isShieldedBalanceTransaction } from '~/features/TransactionSlice';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
 import transactionKindNames from '~/constants/transactionKindNames.json';
@@ -175,15 +175,12 @@ export async function getAccountCSV(
     fromTime?: Date,
     toTime?: Date
 ) {
-    let { transactions } = await getTransactionsOfAccount(account, [], 1000000); // load from database
-    transactions = transactions.filter(
-        (transaction) =>
-            (!fromTime ||
-                dateFromTimeStamp(transaction.blockTime) > fromTime) &&
-            (!toTime || dateFromTimeStamp(transaction.blockTime) < toTime)
-    );
-    transactions = transactions.filter((transaction) =>
-        filterOptions.some((filterOption) => filterOption.filter(transaction))
+    const { transactions } = await getTransactionsOfAccount(
+        account,
+        filterOptions.map(({ key }) => key as TransactionKindString),
+        fromTime,
+        toTime,
+        1000000
     );
 
     const withNames: TransferTransactionWithNames[] = await Promise.all(

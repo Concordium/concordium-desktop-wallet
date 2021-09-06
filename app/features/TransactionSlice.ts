@@ -33,6 +33,7 @@ import {
 import AbortController from '~/utils/AbortController';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
 import { max } from '~/utils/basicHelpers';
+import { getBooleanFilters } from '~/utils/accountHelpers';
 
 const updateTransactionInterval = 5000;
 
@@ -179,9 +180,14 @@ export async function loadTransactions(
     if (showLoading) {
         dispatch(setLoadingTransactions(true));
     }
+
+    const { fromDate, toDate } = account.rewardFilter;
+    const booleanFilters = getBooleanFilters(account.rewardFilter, true);
     const { transactions, more } = await getTransactionsOfAccount(
         account,
-        JSON.parse(account.rewardFilter)
+        booleanFilters,
+        fromDate,
+        toDate
     );
 
     if (!controller?.isAborted) {
