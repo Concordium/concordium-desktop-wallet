@@ -1,19 +1,19 @@
 /* eslint-disable no-console */
 import cbor from 'cbor';
 
-const string = process.argv[2];
-
-function encode(s) {
-    console.log('----');
-    console.log(s);
-    const encoded = cbor.encode(s);
-    console.log(encoded);
+function encode(value) {
+    console.log('Input value:');
+    console.log(value);
+    const encoded = cbor.encode(value);
+    console.log('Hex encoded:');
     console.log(encoded.toString('hex'));
+    console.log('First byte of encoding, as binary:');
     console.log(encoded[0].toString(2));
 }
 
-encode(string);
-encode(-2);
-encode(18446744073709551615);
-encode(17446744073709551610);
-encode(BigInt('18446744073709551615'));
+if (process.argv.length < 3) {
+    console.log('Please provide input to encode!');
+} else {
+    const input = process.argv[2];
+    encode(input);
+}
