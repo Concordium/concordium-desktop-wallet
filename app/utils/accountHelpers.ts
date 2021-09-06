@@ -81,11 +81,12 @@ export function getInitialEncryptedAmount() {
     return ENCRYPTED_ZERO;
 }
 
-export function getBooleanFilters(
-    { fromDate, toDate, ...filters }: RewardFilter,
-    onlyActive = false
-): TransactionKindString[] {
-    const t: BooleanFilters = {};
+export function getActiveBooleanFilters({
+    fromDate,
+    toDate,
+    ...filters
+}: RewardFilter): TransactionKindString[] {
+    const fullFilter: BooleanFilters = {};
 
     // eslint-disable-next-line no-restricted-syntax
     for (const k in TransactionKindString) {
@@ -96,10 +97,10 @@ export function getBooleanFilters(
 
         const kind =
             TransactionKindString[k as keyof typeof TransactionKindString];
-        t[kind] = filters[kind] ?? true;
+        fullFilter[kind] = filters[kind] ?? true;
     }
 
-    return Object.entries(filters as BooleanFilters)
-        .filter(([, v]) => !onlyActive || v)
+    return Object.entries(fullFilter as BooleanFilters)
+        .filter(([, v]) => v)
         .map(([kind]) => kind as TransactionKindString);
 }

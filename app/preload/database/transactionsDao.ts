@@ -52,7 +52,7 @@ async function getTransactionsOfAccount(
     const transactions = await (await knex())
         .select()
         .table(transactionTable)
-        .whereNotIn('transactionKind', filteredTypes)
+        .whereIn('transactionKind', filteredTypes)
         .andWhere({ toAddress: address })
         .orWhere({ fromAddress: address })
         .andWhereBetween('blockTime', [from.toString(), to.toString()])

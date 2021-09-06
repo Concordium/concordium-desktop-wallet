@@ -33,7 +33,7 @@ import {
 import AbortController from '~/utils/AbortController';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
 import { max } from '~/utils/basicHelpers';
-import { getBooleanFilters } from '~/utils/accountHelpers';
+import { getActiveBooleanFilters } from '~/utils/accountHelpers';
 
 const updateTransactionInterval = 5000;
 
@@ -182,7 +182,7 @@ export async function loadTransactions(
     }
 
     const { fromDate, toDate } = account.rewardFilter;
-    const booleanFilters = getBooleanFilters(account.rewardFilter, true);
+    const booleanFilters = getActiveBooleanFilters(account.rewardFilter);
     const { transactions, more } = await getTransactionsOfAccount(
         account,
         booleanFilters,

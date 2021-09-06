@@ -90,7 +90,7 @@ function TransactionList({
                     styles.fillCardPadding
                 )}
             >
-                This balance has no transactions yet.
+                No transactions to show for account.
             </h3>
         );
     }
