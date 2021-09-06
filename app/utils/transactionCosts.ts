@@ -133,7 +133,7 @@ function getEnergyCostOfType(transactionKind: TransactionKindId) {
 
 export function getScheduledTransferPayloadSize(
     scheduleLength: number,
-    memoLength: number
+    memoLength?: number
 ) {
     return (
         // TransactionKind (Word8)
@@ -145,13 +145,14 @@ export function getScheduledTransferPayloadSize(
         // Amount (Word64) + Expiry (Word64)
         scheduleLength * 16 +
         // Memo
-        memoLength
+        (memoLength ? 2 + memoLength : 0)
     );
 }
 
 /**
  *  Given the signatureAmount and schedule length,
  * returns the energy cost of a scheduled transfer.
+ * Param memoLength
  */
 function getScheduledTransferEnergy(
     scheduleLength: number,
