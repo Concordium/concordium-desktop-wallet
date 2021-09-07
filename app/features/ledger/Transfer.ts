@@ -5,7 +5,6 @@ import {
     AccountTransaction,
     TransactionKindId,
     SimpleTransfer,
-    ScheduledTransfer,
     TransferToEncrypted,
     instanceOfSimpleTransfer,
     instanceOfScheduledTransfer,
@@ -25,14 +24,11 @@ import {
     UpdateBakerRestakeEarnings,
     instanceOfSimpleTransferWithMemo,
     instanceOfScheduledTransferWithMemo,
-    ScheduledTransferWithMemo,
     instanceOfEncryptedTransferWithMemo,
 } from '~/utils/types';
 import {
     serializeTransactionHeader,
     serializeTransferPayload,
-    serializeSchedulePoint,
-    serializeScheduledTransferPayloadBase,
     serializeTransferToPublicData,
     serializeAddBaker,
     serializeBakerVerifyKeys,
@@ -49,24 +45,26 @@ import {
     encodeWord64,
     base58ToBuffer,
 } from '../../utils/serializationHelpers';
-import { chunkBuffer, chunkArray } from '~/utils/basicHelpers';
+import { chunkBuffer } from '~/utils/basicHelpers';
 import { encodeAsCBOR } from '~/utils/cborHelper';
 import {
     signEncryptedTransfer,
     signEncryptedTransferWithMemo,
 } from './EncryptedTransfer';
+import {
+    signTransferWithSchedule,
+    signTransferWithScheduleAndMemo,
+} from './ScheduledTransfer';
 import sendMemo from './Memo';
 
 const INS_SIMPLE_TRANSFER = 0x02;
 const INS_TRANSFER_TO_ENCRYPTED = 0x11;
 const INS_TRANSFER_TO_PUBLIC = 0x12;
-const INS_TRANSFER_WITH_SCHEDULE = 0x03;
 const INS_ADD_OR_UPDATE_BAKER = 0x13;
 const INS_REMOVE_BAKER = 0x14;
 const INS_UPDATE_BAKER_STAKE = 0x15;
 const INS_UPDATE_BAKER_RESTAKE_EARNINGS = 0x16;
 const INS_SIMPLE_TRANSFER_WITH_MEMO = 0x32;
-const INS_TRANSFER_WITH_SCHEDULE_AND_MEMO = 0x34;
 
 async function signSimpleTransfer(
     transport: Transport,
@@ -249,122 +247,6 @@ async function signTransferToPublic(
             Buffer.from(chunks[i])
         );
     }
-    if (!response) {
-        throw new Error('Unexpected missing response from ledger;');
-    }
-    return response.slice(0, 64);
-}
-
-async function signTransferWithSchedule(
-    transport: Transport,
-    path: number[],
-    transaction: ScheduledTransfer
-): Promise<Buffer> {
-    const ins = INS_TRANSFER_WITH_SCHEDULE;
-
-    const payload = serializeTransferPayload(
-        transaction.transactionKind,
-        transaction.payload
-    );
-
-    const header = serializeTransactionHeader(
-        transaction.sender,
-        transaction.nonce,
-        transaction.energyAmount,
-        payload.length,
-        transaction.expiry
-    );
-
-    const payloadBase = serializeScheduledTransferPayloadBase(
-        transaction.payload,
-        transaction.transactionKind
-    );
-
-    const data = Buffer.concat([pathAsBuffer(path), header, payloadBase]);
-
-    let p1 = 0x00;
-    const p2 = 0x00;
-
-    await transport.send(0xe0, INS_TRANSFER_WITH_SCHEDULE, p1, p2, data);
-
-    const { schedule } = transaction.payload;
-
-    p1 = 0x01;
-
-    let response;
-    const chunks = chunkArray(schedule.map(serializeSchedulePoint), 15); // 15 is the maximum amount we can fit
-    for (const chunk of chunks) {
-        response = await transport.send(
-            0xe0,
-            ins,
-            p1,
-            p2,
-            Buffer.concat(chunk)
-        );
-    }
-
-    if (!response) {
-        throw new Error('Unexpected missing response from ledger;');
-    }
-    return response.slice(0, 64);
-}
-
-async function signTransferWithScheduleAndMemo(
-    transport: Transport,
-    path: number[],
-    transaction: ScheduledTransferWithMemo
-): Promise<Buffer> {
-    const ins = INS_TRANSFER_WITH_SCHEDULE_AND_MEMO;
-
-    const payload = serializeTransferPayload(
-        transaction.transactionKind,
-        transaction.payload
-    );
-
-    const header = serializeTransactionHeader(
-        transaction.sender,
-        transaction.nonce,
-        transaction.energyAmount,
-        payload.length,
-        transaction.expiry
-    );
-
-    const payloadBase = serializeScheduledTransferPayloadBase(
-        transaction.payload,
-        transaction.transactionKind
-    );
-
-    const { memo } = transaction.payload;
-    const data = Buffer.concat([
-        pathAsBuffer(path),
-        header,
-        payloadBase,
-        encodeWord16(encodeAsCBOR(memo).length),
-    ]);
-
-    let p1 = 0x02;
-    const p2 = 0x00;
-
-    await transport.send(0xe0, ins, p1, p2, data);
-
-    const { schedule } = transaction.payload;
-
-    p1 = 0x03;
-    await sendMemo(transport, ins, p1, p2, transaction.payload.memo);
-
-    p1 = 0x01;
-    let response;
-    const chunks = chunkArray(schedule.map(serializeSchedulePoint), 15); // 15 is the maximum amount we can fit
-    for (const chunk of chunks) {
-        response = await transport.send(
-            0xe0,
-            ins,
-            p1,
-            p2,
-            Buffer.concat(chunk)
-        );
-    }
-
     if (!response) {
         throw new Error('Unexpected missing response from ledger;');
     }

@@ -120,7 +120,11 @@ async function sendProof(
             Buffer.from(chunks[i])
         );
     }
-    return response;
+
+    if (!response) {
+        throw new Error('Unexpected missing response from ledger;');
+    }
+    return response.slice(0, 64);
 }
 
 export async function signEncryptedTransfer(
@@ -141,12 +145,7 @@ export async function signEncryptedTransfer(
         ins,
         transaction.payload
     );
-    const response = await sendProof(transport, ins, transaction.payload);
-
-    if (!response) {
-        throw new Error('Unexpected missing response from ledger;');
-    }
-    return response.slice(0, 64);
+    return sendProof(transport, ins, transaction.payload);
 }
 
 export async function signEncryptedTransferWithMemo(
@@ -175,10 +174,5 @@ export async function signEncryptedTransferWithMemo(
         ins,
         transaction.payload
     );
-    const response = await sendProof(transport, ins, transaction.payload);
-
-    if (!response) {
-        throw new Error('Unexpected missing response from ledger;');
-    }
-    return response.slice(0, 64);
+    return sendProof(transport, ins, transaction.payload);
 }
