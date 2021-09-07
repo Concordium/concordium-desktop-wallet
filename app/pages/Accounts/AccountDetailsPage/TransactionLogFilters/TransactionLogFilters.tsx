@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
@@ -23,8 +23,6 @@ import Button from '~/cross-app-components/Button';
 interface FilterForm
     extends Pick<
         RewardFilter,
-        | 'toDate'
-        | 'fromDate'
         | TransactionKindString.Transfer
         | TransactionKindString.TransferWithSchedule
         | TransactionKindString.TransferToEncrypted
@@ -35,6 +33,8 @@ interface FilterForm
         | TransactionKindString.BlockReward
         | TransactionKindString.UpdateCredentials
     > {
+    toDate?: Date;
+    fromDate?: Date;
     bakerTransactions?: boolean;
 }
 
@@ -80,7 +80,7 @@ const transactionFilters: {
         display: 'Shieldings',
     },
     {
-        field: TransactionKindString.TransferToEncrypted,
+        field: TransactionKindString.TransferToPublic,
         filter: TransactionKindString.TransferToPublic,
         display: 'Unshieldings',
     },
@@ -95,12 +95,12 @@ const transactionFilters: {
         display: 'Show finalization rewards',
     },
     {
-        field: TransactionKindString.TransferToEncrypted,
+        field: TransactionKindString.BakingReward,
         filter: TransactionKindString.BakingReward,
         display: 'Show baker rewards',
     },
     {
-        field: TransactionKindString.TransferToEncrypted,
+        field: TransactionKindString.BlockReward,
         filter: TransactionKindString.BlockReward,
         display: 'Show block rewards',
     },
@@ -135,24 +135,66 @@ export default function TransactionLogFilters() {
     const account = useSelector(chosenAccountSelector);
     const { rewardFilter = {}, address } = account ?? ({} as Account);
     const { fromDate: storedFromDate, toDate: storedToDate } = rewardFilter;
-    const form = useForm<FilterForm>();
 
     const booleanFilters = useMemo(
         () => getActiveBooleanFilters(rewardFilter),
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [...Object.values(rewardFilter)]
+        [rewardFilter]
     );
+
+    const defaultValues: FilterForm = useMemo<FilterForm>(
+        () => ({
+            toDate: storedToDate ? new Date(storedToDate) : undefined,
+            fromDate: storedFromDate ? new Date(storedFromDate) : undefined,
+            bakerTransactions: booleanFilters.includes(
+                TransactionKindString.AddBaker
+            ),
+            [TransactionKindString.Transfer]: booleanFilters.includes(
+                TransactionKindString.Transfer
+            ),
+            [TransactionKindString.TransferWithSchedule]: booleanFilters.includes(
+                TransactionKindString.TransferWithSchedule
+            ),
+            [TransactionKindString.TransferToEncrypted]: booleanFilters.includes(
+                TransactionKindString.TransferToEncrypted
+            ),
+            [TransactionKindString.TransferToPublic]: booleanFilters.includes(
+                TransactionKindString.TransferToPublic
+            ),
+            [TransactionKindString.EncryptedAmountTransfer]: booleanFilters.includes(
+                TransactionKindString.EncryptedAmountTransfer
+            ),
+            [TransactionKindString.FinalizationReward]: booleanFilters.includes(
+                TransactionKindString.FinalizationReward
+            ),
+            [TransactionKindString.BakingReward]: booleanFilters.includes(
+                TransactionKindString.BakingReward
+            ),
+            [TransactionKindString.BlockReward]: booleanFilters.includes(
+                TransactionKindString.BlockReward
+            ),
+            [TransactionKindString.UpdateCredentials]: booleanFilters.includes(
+                TransactionKindString.UpdateCredentials
+            ),
+        }),
+        [storedFromDate, storedToDate, booleanFilters]
+    );
+
+    const form = useForm<FilterForm>({ defaultValues });
+    const { reset, handleSubmit } = form;
 
     const submit = useCallback(
         (store: boolean) => (fields: FilterForm) => {
-            const newFilter = Object.entries(fields).reduce((acc, [k, v]) => {
+            const newFilter = (Object.entries(fields) as [
+                TransactionKindString,
+                boolean | (Date | undefined)
+            ][]).reduce((acc, [k, v]) => {
                 if (
                     ([
                         fieldNames.fromDate,
                         fieldNames.toDate,
                     ] as string[]).includes(k)
                 ) {
-                    return { ...acc, [k]: v.toString() };
+                    return { ...acc, [k]: (v as Date | undefined)?.toString() };
                 }
 
                 const transactionFilter = transactionFilters.find(
@@ -160,13 +202,13 @@ export default function TransactionLogFilters() {
                 )?.filter;
 
                 if (!transactionFilter || !isGroup(transactionFilter)) {
-                    return { ...acc, [k]: v };
+                    return { ...acc, [k]: v as boolean };
                 }
 
                 const group = transactionFilter.reduce(
                     (a, f) => ({
                         ...a,
-                        [f]: v,
+                        [f]: v as boolean,
                     }),
                     {} as Partial<RewardFilter>
                 );
@@ -176,9 +218,17 @@ export default function TransactionLogFilters() {
 
             updateRewardFilter(dispatch, address, newFilter, store);
         },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [...Object.values(rewardFilter), dispatch, address]
+        [rewardFilter, dispatch, address]
     );
+
+    const clear = useCallback(async () => {
+        await clearRewardFilters(dispatch, address);
+    }, [dispatch, address]);
+
+    useEffect(() => {
+        reset({ ...defaultValues });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [defaultValues]);
 
     if (!account) {
         return null;
@@ -188,55 +238,38 @@ export default function TransactionLogFilters() {
         <FormProvider {...form}>
             <section className={styles.root}>
                 <Form.Timestamp
-                    name={fieldNames.toDate}
+                    name={fieldNames.fromDate}
                     className="mT20"
                     label="From:"
-                    defaultValue={
-                        storedFromDate ? new Date(storedFromDate) : undefined
-                    }
                 />
                 <Form.Timestamp
                     name={fieldNames.toDate}
                     className="mT20"
                     label="To:"
-                    defaultValue={
-                        storedToDate ? new Date(storedToDate) : undefined
-                    }
                 />
                 <div className="m40 mB10 flexColumn">
-                    {transactionFilters.map(({ field, filter, display }) => {
-                        const firstFilter = isGroup(filter)
-                            ? filter[0]
-                            : filter;
-                        return (
-                            <Form.Checkbox
-                                name={field}
-                                size="large"
-                                key={field}
-                                className="textRight mB10"
-                                defaultChecked={booleanFilters.includes(
-                                    firstFilter
-                                )}
-                            >
-                                {display}
-                            </Form.Checkbox>
-                        );
-                    })}
-                    <Button
-                        className="mT20"
-                        onClick={() => clearRewardFilters(dispatch, address)}
-                    >
+                    {transactionFilters.map(({ field, display }) => (
+                        <Form.Checkbox
+                            name={field}
+                            size="large"
+                            key={field}
+                            className="textRight mB10"
+                        >
+                            {display}
+                        </Form.Checkbox>
+                    ))}
+                    <Button className="mT20" onClick={clear}>
                         Clear filters
                     </Button>
                     <Button
                         className="mT10"
-                        onClick={form.handleSubmit(submit(false))}
+                        onClick={handleSubmit(submit(false))}
                     >
                         Apply momentarily
                     </Button>
                     <Button
                         className="mT10"
-                        onClick={form.handleSubmit(submit(true))}
+                        onClick={handleSubmit(submit(true))}
                     >
                         Apply and save
                     </Button>
