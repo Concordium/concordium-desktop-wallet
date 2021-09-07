@@ -40,7 +40,6 @@
     "test-e2e": "node ./internals/scripts/CheckBuildsExist.js && cross-env NODE_ENV=test testcafe electron:./app ./test/e2e/HomePage.e2e.ts",
     "test-e2e-live": "node ./internals/scripts/CheckBuildsExist.js && cross-env NODE_ENV=test testcafe --live electron:./app ./test/e2e/HomePage.e2e.ts",
     "test-watch": "yarn test --watch",
-    "cbor": "ts-node --project scripts/migrations/tsconfig.json -r tsconfig-paths/register ./scripts/cbor.ts",
     "down": "ts-node --project scripts/migrations/tsconfig.json -r tsconfig-paths/register ./scripts/migrations/down.ts",
     "up": "ts-node --project scripts/migrations/tsconfig.json -r tsconfig-paths/register ./scripts/migrations/up.ts"
   },
