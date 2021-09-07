@@ -1,45 +1,117 @@
-// import React, { useCallback, useMemo, useState } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-// import { Account, RewardFilter, TransactionKindString } from '~/utils/types';
-import { Account, TransactionKindString } from '~/utils/types';
-import Checkbox from '~/components/Form/Checkbox';
+import { FormProvider, useForm } from 'react-hook-form';
+import {
+    Account,
+    EqualRecord,
+    NotOptional,
+    RewardFilter,
+    TransactionKindString,
+} from '~/utils/types';
 import {
     chosenAccountSelector,
+    clearRewardFilters,
     updateRewardFilter,
 } from '~/features/AccountSlice';
 import { getActiveBooleanFilters } from '~/utils/accountHelpers';
-// import InputTimestamp from '~/components/Form/InputTimestamp';
+
+import Form from '~/components/Form';
 
 import styles from './TransactionLogFilters.module.scss';
+import Button from '~/cross-app-components/Button';
+
+interface FilterForm
+    extends Pick<
+        RewardFilter,
+        | 'toDate'
+        | 'fromDate'
+        | TransactionKindString.Transfer
+        | TransactionKindString.TransferWithSchedule
+        | TransactionKindString.TransferToEncrypted
+        | TransactionKindString.TransferToPublic
+        | TransactionKindString.EncryptedAmountTransfer
+        | TransactionKindString.FinalizationReward
+        | TransactionKindString.BakingReward
+        | TransactionKindString.BlockReward
+        | TransactionKindString.UpdateCredentials
+    > {
+    bakerTransactions?: boolean;
+}
+
+const fieldNames: NotOptional<EqualRecord<FilterForm>> = {
+    toDate: 'toDate',
+    fromDate: 'fromDate',
+    [TransactionKindString.Transfer]: TransactionKindString.Transfer,
+    [TransactionKindString.TransferWithSchedule]:
+        TransactionKindString.TransferWithSchedule,
+    [TransactionKindString.TransferToEncrypted]:
+        TransactionKindString.TransferToEncrypted,
+    [TransactionKindString.TransferToPublic]:
+        TransactionKindString.TransferToPublic,
+    [TransactionKindString.EncryptedAmountTransfer]:
+        TransactionKindString.EncryptedAmountTransfer,
+    [TransactionKindString.FinalizationReward]:
+        TransactionKindString.FinalizationReward,
+    [TransactionKindString.BakingReward]: TransactionKindString.BakingReward,
+    [TransactionKindString.BlockReward]: TransactionKindString.BlockReward,
+    [TransactionKindString.UpdateCredentials]:
+        TransactionKindString.UpdateCredentials,
+    bakerTransactions: 'bakerTransactions',
+};
 
 const transactionFilters: {
-    kind: TransactionKindString | TransactionKindString[];
+    field: keyof FilterForm;
+    filter: TransactionKindString | TransactionKindString[];
     display: string;
 }[] = [
-    { kind: TransactionKindString.Transfer, display: 'Simple transfers' },
     {
-        kind: TransactionKindString.TransferWithSchedule,
+        field: TransactionKindString.Transfer,
+        filter: TransactionKindString.Transfer,
+        display: 'Simple transfers',
+    },
+    {
+        field: TransactionKindString.TransferWithSchedule,
+        filter: TransactionKindString.TransferWithSchedule,
         display: 'Scheduled transfers',
     },
-    { kind: TransactionKindString.TransferToEncrypted, display: 'Shieldings' },
-    { kind: TransactionKindString.TransferToPublic, display: 'Unshieldings' },
     {
-        kind: TransactionKindString.EncryptedAmountTransfer,
+        field: TransactionKindString.TransferToEncrypted,
+        filter: TransactionKindString.TransferToEncrypted,
+        display: 'Shieldings',
+    },
+    {
+        field: TransactionKindString.TransferToEncrypted,
+        filter: TransactionKindString.TransferToPublic,
+        display: 'Unshieldings',
+    },
+    {
+        field: TransactionKindString.EncryptedAmountTransfer,
+        filter: TransactionKindString.EncryptedAmountTransfer,
         display: 'Shielded transfer fees',
     },
     {
-        kind: TransactionKindString.FinalizationReward,
+        field: TransactionKindString.FinalizationReward,
+        filter: TransactionKindString.FinalizationReward,
         display: 'Show finalization rewards',
     },
-    { kind: TransactionKindString.BakingReward, display: 'Show baker rewards' },
-    { kind: TransactionKindString.BlockReward, display: 'Show block rewards' },
     {
-        kind: TransactionKindString.UpdateCredentials,
+        field: TransactionKindString.TransferToEncrypted,
+        filter: TransactionKindString.BakingReward,
+        display: 'Show baker rewards',
+    },
+    {
+        field: TransactionKindString.TransferToEncrypted,
+        filter: TransactionKindString.BlockReward,
+        display: 'Show block rewards',
+    },
+    {
+        field: TransactionKindString.UpdateCredentials,
+        filter: TransactionKindString.UpdateCredentials,
         display: 'Update account credentials',
     },
     {
-        kind: [
+        field: 'bakerTransactions',
+        filter: [
             TransactionKindString.AddBaker,
             TransactionKindString.RemoveBaker,
             TransactionKindString.UpdateBakerKeys,
@@ -62,14 +134,8 @@ export default function TransactionLogFilters() {
 
     const account = useSelector(chosenAccountSelector);
     const { rewardFilter = {}, address } = account ?? ({} as Account);
-    // const { fromDate: storedFromDate, toDate: storedToDate } = rewardFilter;
-
-    // const [fromDate, setFromDate] = useState<Date | undefined>(
-    //     storedFromDate ? new Date(storedFromDate) : undefined
-    // );
-    // const [toDate, setToDate] = useState<Date | undefined>(
-    //     storedToDate ? new Date(storedToDate) : undefined
-    // );
+    const { fromDate: storedFromDate, toDate: storedToDate } = rewardFilter;
+    const form = useForm<FilterForm>();
 
     const booleanFilters = useMemo(
         () => getActiveBooleanFilters(rewardFilter),
@@ -77,76 +143,105 @@ export default function TransactionLogFilters() {
         [...Object.values(rewardFilter)]
     );
 
-    const updateFilter = useCallback(
-        (filter: TransactionKindString | TransactionKindString[]) => {
-            const firstFilter = isGroup(filter) ? filter[0] : filter; // First filter in a group represents the rest.
-            const setActive = !booleanFilters.includes(firstFilter);
-            const filters = isGroup(filter) ? filter : [filter];
+    const submit = useCallback(
+        (store: boolean) => (fields: FilterForm) => {
+            const newFilter = Object.entries(fields).reduce((acc, [k, v]) => {
+                if (
+                    ([
+                        fieldNames.fromDate,
+                        fieldNames.toDate,
+                    ] as string[]).includes(k)
+                ) {
+                    return { ...acc, [k]: v.toString() };
+                }
 
-            const newFilter = { ...rewardFilter };
-            filters.forEach((f) => {
-                newFilter[f] = setActive;
-            });
+                const transactionFilter = transactionFilters.find(
+                    (t) => t.field === k
+                )?.filter;
 
-            updateRewardFilter(dispatch, address, newFilter, true);
+                if (!transactionFilter || !isGroup(transactionFilter)) {
+                    return { ...acc, [k]: v };
+                }
+
+                const group = transactionFilter.reduce(
+                    (a, f) => ({
+                        ...a,
+                        [f]: v,
+                    }),
+                    {} as Partial<RewardFilter>
+                );
+
+                return { ...acc, ...group };
+            }, rewardFilter);
+
+            updateRewardFilter(dispatch, address, newFilter, store);
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [address, dispatch, ...Object.values(rewardFilter)]
+        [...Object.values(rewardFilter), dispatch, address]
     );
-
-    // const updateDate = useCallback(
-    //     (
-    //         key: keyof Pick<RewardFilter, 'fromDate' | 'toDate'>,
-    //         date?: Date
-    //     ) => () => {
-    //         updateRewardFilter(
-    //             dispatch,
-    //             address,
-    //             { ...rewardFilter, [key]: date?.toString() },
-    //             true
-    //         );
-    //     },
-    //     // eslint-disable-next-line react-hooks/exhaustive-deps
-    //     [...Object.values(rewardFilter), address, dispatch]
-    // );
 
     if (!account) {
         return null;
     }
 
     return (
-        <section className={styles.root}>
-            {/* <InputTimestamp
-                className="pT20"
-                label="From:"
-                value={fromDate}
-                onChange={setFromDate}
-                onBlur={updateDate('fromDate', fromDate)}
-            />
-            <InputTimestamp
-                className="pT20"
-                label="To:"
-                value={toDate}
-                onChange={setToDate}
-                onBlur={updateDate('toDate', toDate)}
-            /> */}
-            <div className="p40">
-                {transactionFilters.map(({ kind, display }) => {
-                    const firstFilter = isGroup(kind) ? kind[0] : kind;
-
-                    return (
-                        <Checkbox
-                            size="large"
-                            key={firstFilter}
-                            className="textRight mB10"
-                            checked={booleanFilters.includes(firstFilter)}
-                            onChange={() => updateFilter(kind)}
-                        >
-                            {display}
-                        </Checkbox>
-                    );
-                })}
-            </div>
-        </section>
+        <FormProvider {...form}>
+            <section className={styles.root}>
+                <Form.Timestamp
+                    name={fieldNames.toDate}
+                    className="mT20"
+                    label="From:"
+                    defaultValue={
+                        storedFromDate ? new Date(storedFromDate) : undefined
+                    }
+                />
+                <Form.Timestamp
+                    name={fieldNames.toDate}
+                    className="mT20"
+                    label="To:"
+                    defaultValue={
+                        storedToDate ? new Date(storedToDate) : undefined
+                    }
+                />
+                <div className="m40 mB10 flexColumn">
+                    {transactionFilters.map(({ field, filter, display }) => {
+                        const firstFilter = isGroup(filter)
+                            ? filter[0]
+                            : filter;
+                        return (
+                            <Form.Checkbox
+                                name={field}
+                                size="large"
+                                key={field}
+                                className="textRight mB10"
+                                defaultChecked={booleanFilters.includes(
+                                    firstFilter
+                                )}
+                            >
+                                {display}
+                            </Form.Checkbox>
+                        );
+                    })}
+                    <Button
+                        className="mT20"
+                        onClick={() => clearRewardFilters(dispatch, address)}
+                    >
+                        Clear filters
+                    </Button>
+                    <Button
+                        className="mT10"
+                        onClick={form.handleSubmit(submit(false))}
+                    >
+                        Apply momentarily
+                    </Button>
+                    <Button
+                        className="mT10"
+                        onClick={form.handleSubmit(submit(true))}
+                    >
+                        Apply and save
+                    </Button>
+                </div>
+            </section>
+        </FormProvider>
     );
 }

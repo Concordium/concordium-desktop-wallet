@@ -30,6 +30,9 @@ pH50 = padding-left: 50px; padding-right: 50px;
     .p#{$space} {
         padding: #{$space}px;
     }
+}
+
+@each $space in $spacings {
     .mV#{$space} {
         margin-top: #{$space}px;
         margin-bottom: #{$space}px;
@@ -46,6 +49,9 @@ pH50 = padding-left: 50px; padding-right: 50px;
         padding-left: #{$space}px;
         padding-right: #{$space}px;
     }
+}
+
+@each $space in $spacings {
     @each $side in $sides {
         .m#{to-upper-case(str-slice($side, 0, 1))}#{$space} {
             @include withFirstLastMods() {

@@ -610,4 +610,8 @@ export async function setFavouriteAccount(dispatch: Dispatch, address: string) {
     loadAccounts(dispatch);
 }
 
+export function clearRewardFilters(dispatch: Dispatch, address: string) {
+    return updateRewardFilter(dispatch, address, {} as RewardFilter, true);
+}
+
 export default accountsSlice.reducer;
