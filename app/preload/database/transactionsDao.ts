@@ -53,12 +53,16 @@ async function getTransactionsOfAccount(
         .select()
         .table(transactionTable)
         .whereIn('transactionKind', filteredTypes)
-        .andWhere({ toAddress: address })
-        .orWhere({ fromAddress: address })
+        .andWhere((builder) => {
+            builder.where({ toAddress: address }).orWhere({
+                fromAddress: address,
+            });
+        })
         .andWhereBetween('blockTime', [from.toString(), to.toString()])
         .orderBy('blockTime', 'desc')
         .orderBy('id', 'desc')
         .limit(limit + 1);
+
     return {
         transactions: transactions.slice(0, limit),
         more: transactions.length > limit,
