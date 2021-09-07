@@ -44,6 +44,7 @@ import {
 import { toMicroUnits, isValidGTUString, displayAsGTU } from './gtu';
 import { getEncodedSize } from './cborHelper';
 import { maxMemoSize } from '~/constants/externalConstants.json';
+import { isASCII } from './basicHelpers';
 
 export async function lookupAddressBookEntry(
     address: string
@@ -185,6 +186,7 @@ export function createEncryptedTransferTransaction(
     const transactionKind = memo
         ? TransactionKindId.Encrypted_transfer_with_memo
         : TransactionKindId.Encrypted_transfer;
+
     return createAccountTransaction({
         fromAddress,
         expiry,
@@ -670,14 +672,13 @@ export function validateMemo(memo: string): string | undefined {
         (asNumber > Number.MAX_SAFE_INTEGER ||
             asNumber < Number.MIN_SAFE_INTEGER)
     ) {
-        return `Only numbers up to ${Number.MAX_SAFE_INTEGER} is supported.`;
+        return `Numbers greater than ${Number.MAX_SAFE_INTEGER} or smaller than ${Number.MIN_SAFE_INTEGER} are not supported..`;
     }
     if (getEncodedSize(memo) > maxMemoSize) {
         return `Memo is too large, encoded size must be at most ${maxMemoSize} bytes`;
     }
     // Check that the memo only contains ascii characters
-    // eslint-disable-next-line no-control-regex
-    if (/[^\u0000-\u007f]/.test(memo)) {
+    if (isASCII(memo)) {
         return 'Memo contains non-ascii characters';
     }
     return undefined;

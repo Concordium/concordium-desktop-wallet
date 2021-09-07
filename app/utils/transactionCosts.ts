@@ -78,9 +78,13 @@ export function calculateCost(
 }
 
 /**
-   Note that this function does not support scheduled transfers nor transfers with memos.
-   */
-export function getPayloadSizeEstimate(transactionKind: TransactionKindId) {
+ *  Given a transactionKind, return the size of a payload of the particular kind.
+ *  Note that this function does not support scheduled transfers nor transfers with memos, because their payload sizes are variable,
+ *  and will cause the fucntion to throw an error.
+ */
+export function getPayloadSizeEstimate(
+    transactionKind: TransactionKindId
+): number {
     switch (transactionKind) {
         case TransactionKindId.Simple_transfer:
             return payloadSizeEstimate.SimpleTransfer;
@@ -134,7 +138,7 @@ function getEnergyCostOfType(transactionKind: TransactionKindId) {
 
 export function getScheduledTransferPayloadSize(
     scheduleLength: number,
-    memoLength?: number
+    memoLength: number
 ) {
     return (
         // TransactionKind (Word8)
@@ -153,7 +157,7 @@ export function getScheduledTransferPayloadSize(
 /**
  *  Given the signatureAmount and schedule length,
  * returns the energy cost of a scheduled transfer.
- * Param memoLength
+ * @param memoLength if memo length is 0, it is assumed that the transaction is a regular scheduled transfer.
  */
 function getScheduledTransferEnergy(
     scheduleLength: number,

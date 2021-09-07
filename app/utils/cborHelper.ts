@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import { Buffer } from 'buffer/';
 import { encode, decode } from 'cbor';
 
@@ -11,8 +10,8 @@ export function encodeAsCBOR(value: string | number): Buffer {
     const asNumber = Number(value);
     if (Number.isInteger(asNumber)) {
         if (
-            asNumber >= Number.MAX_SAFE_INTEGER ||
-            asNumber <= Number.MIN_SAFE_INTEGER
+            asNumber > Number.MAX_SAFE_INTEGER ||
+            asNumber < Number.MIN_SAFE_INTEGER
         ) {
             throw new Error('Unsafe number given to CBOR encoder');
         }
@@ -29,10 +28,17 @@ export function decodeCBOR(value: string) {
     return decode(Buffer.from(value, 'hex'));
 }
 
-export function getEncodedSize(value?: string | number) {
+/**
+ * @return if no value or an illegal value is given, this returns 0. Otherwise returns the encoded size.
+ */
+export function getEncodedSize(value?: string | number): number {
     if (!value && value !== 0) {
         return 0;
     }
-    const encoded = encodeAsCBOR(value);
-    return encoded.length;
+    try {
+        const encoded = encodeAsCBOR(value);
+        return encoded.length;
+    } catch {
+        return 0;
+    }
 }

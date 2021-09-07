@@ -30,14 +30,13 @@ import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import LoadingComponent from '../LoadingComponent';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import PickRecipient from '~/components/Transfers/PickRecipient';
-import {
-    useTransactionExpiryState,
-    useConsensusStatus,
-} from '~/utils/dataHooks';
+import { useTransactionExpiryState } from '~/utils/dataHooks';
 import { accountsSelector, accountInfoSelector } from '~/features/AccountSlice';
 import { amountAtDisposal, validateMemo } from '~/utils/transactionHelpers';
 import { collapseFraction } from '~/utils/basicHelpers';
 import { toMicroUnits, displayAsGTU } from '~/utils/gtu';
+import { useAsyncMemo } from '~/utils/hooks';
+import { nodeSupportsMemo } from '~/node/nodeHelpers';
 
 import styles from './CreateTransferProposal.module.scss';
 import UpsertAddress from '~/components/UpsertAddress';
@@ -82,8 +81,7 @@ function CreateTransferProposal({
 }: Props): JSX.Element {
     const dispatch = useDispatch();
 
-    const consensusStatus = useConsensusStatus();
-    const allowMemo = consensusStatus && consensusStatus.protocolVersion > 1;
+    const allowMemo = useAsyncMemo(nodeSupportsMemo);
 
     const { pathname, state } = useLocation<State>();
     const accounts = useSelector(accountsSelector);

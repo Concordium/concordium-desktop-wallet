@@ -221,24 +221,24 @@ function statusSymbol(status: TransactionStatus) {
     }
 }
 
-const memoTypes = [
-    TransactionKindString.Transfer,
-    TransactionKindString.TransferWithMemo,
-    TransactionKindString.EncryptedAmountTransfer,
-    TransactionKindString.EncryptedAmountTransferWithMemo,
-    TransactionKindString.TransferWithSchedule,
-    TransactionKindString.TransferWithScheduleAndMemo,
-];
-
 function showMemo(
     memo: string | undefined,
-    showFullMessage: boolean,
+    showFullMemo: boolean,
     transactionKind: TransactionKindString
 ) {
-    if (!memo && showFullMessage && memoTypes.includes(transactionKind)) {
+    if (
+        !memo &&
+        showFullMemo &&
+        [
+            TransactionKindString.Transfer,
+            TransactionKindString.EncryptedAmountTransfer,
+            TransactionKindString.TransferWithSchedule,
+        ].includes(transactionKind)
+    ) {
+        // If we are fully showing the memo, and the type is one that has a memo version, but there is no memo:
         return (
             <i className="body4 m0 mT5 textFaded">
-                The transaction contains no message
+                The transaction contains no memo
             </i>
         );
     }
@@ -249,7 +249,7 @@ function showMemo(
         <p
             className={clsx(
                 'body4 m0 mT5 textFaded',
-                showFullMessage || styles.lineClamp
+                showFullMemo || styles.lineClamp
             )}
         >
             {memo}
@@ -266,7 +266,7 @@ interface Props {
     transaction: TransferTransaction;
     onClick?: () => void;
     showDate?: boolean;
-    showFullMessage?: boolean;
+    showFullMemo?: boolean;
 }
 
 /**
@@ -275,7 +275,7 @@ interface Props {
 function TransactionListElement({
     transaction,
     onClick,
-    showFullMessage = false,
+    showFullMemo = false,
     showDate = false,
 }: Props): JSX.Element {
     const account = useSelector(chosenAccountSelector);
@@ -353,7 +353,7 @@ function TransactionListElement({
             />
             {showMemo(
                 transaction.memo,
-                showFullMessage,
+                showFullMemo,
                 transaction.transactionKind
             )}
         </div>

@@ -10,7 +10,8 @@ import locations from '~/constants/transferLocations.json';
 import { TransferState } from '~/utils/transactionTypes';
 import TransferView from '../TransferView';
 import UpsertAddress from '../../UpsertAddress';
-import { useConsensusStatus } from '~/utils/dataHooks';
+import { useAsyncMemo } from '~/utils/hooks';
+import { nodeSupportsMemo } from '~/node/nodeHelpers';
 
 import styles from './ExternalTransfer.module.scss';
 
@@ -40,7 +41,7 @@ export default function ExternalTransfer({
 }: Props) {
     const location = useLocation<TransferState>();
 
-    const consensusStatus = useConsensusStatus();
+    const allowMemo = useAsyncMemo(nodeSupportsMemo);
 
     const [subLocation, setSubLocation] = useState<string>(
         location?.state?.initialPage || locations.pickAmount
@@ -85,7 +86,7 @@ export default function ExternalTransfer({
                     header={amountHeader}
                     defaultAmount={amount}
                     memo={
-                        consensusStatus && consensusStatus.protocolVersion > 1
+                        allowMemo
                             ? {
                                   defaultMemo: memo,
                                   setMemo,

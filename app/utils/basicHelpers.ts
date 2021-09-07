@@ -173,6 +173,11 @@ export function max(first: bigint, second: bigint) {
     return first > second ? first : second;
 }
 
+export function isASCII(value: string) {
+    // eslint-disable-next-line no-control-regex
+    return /[^\u0000-\u007f]/.test(value);
+}
+
 /**
  * Given two function, this returns a function which is their composition.
  * (a , b) => b ∘ a

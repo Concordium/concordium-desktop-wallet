@@ -20,7 +20,6 @@ export default async function sendMemo(
 
     const chunks = chunkBuffer(encodedMemo, 255);
     for (const chunk of chunks) {
-        // eslint-disable-next-line  no-await-in-loop
         await transport.send(0xe0, ins, p1, p2, Buffer.from(chunk));
     }
 }

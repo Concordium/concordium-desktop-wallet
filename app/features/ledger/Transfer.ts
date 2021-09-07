@@ -98,8 +98,7 @@ async function signSimpleTransfer(
         p2,
         data
     );
-    const signature = response.slice(0, 64);
-    return signature;
+    return response.slice(0, 64);
 }
 
 async function signSimpleTransferWithMemo(
@@ -188,8 +187,7 @@ async function signTransferToEncrypted(
         p2,
         data
     );
-    const signature = response.slice(0, 64);
-    return signature;
+    return response.slice(0, 64);
 }
 
 async function signTransferToPublic(
@@ -243,7 +241,6 @@ async function signTransferToPublic(
     let response;
     const chunks = chunkBuffer(proof, 255);
     for (let i = 0; i < chunks.length; i += 1) {
-        // eslint-disable-next-line  no-await-in-loop
         response = await transport.send(
             0xe0,
             INS_TRANSFER_TO_PUBLIC,
@@ -255,8 +252,7 @@ async function signTransferToPublic(
     if (!response) {
         throw new Error('Unexpected missing response from ledger;');
     }
-    const signature = response.slice(0, 64);
-    return signature;
+    return response.slice(0, 64);
 }
 
 async function signTransferWithSchedule(
@@ -298,7 +294,6 @@ async function signTransferWithSchedule(
     let response;
     const chunks = chunkArray(schedule.map(serializeSchedulePoint), 15); // 15 is the maximum amount we can fit
     for (const chunk of chunks) {
-        // eslint-disable-next-line  no-await-in-loop
         response = await transport.send(
             0xe0,
             ins,
@@ -361,7 +356,6 @@ async function signTransferWithScheduleAndMemo(
     let response;
     const chunks = chunkArray(schedule.map(serializeSchedulePoint), 15); // 15 is the maximum amount we can fit
     for (const chunk of chunks) {
-        // eslint-disable-next-line  no-await-in-loop
         response = await transport.send(
             0xe0,
             ins,

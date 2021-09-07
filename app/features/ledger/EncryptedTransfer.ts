@@ -112,7 +112,6 @@ async function sendProof(
     let response;
     const chunks = chunkBuffer(proof, 255);
     for (let i = 0; i < chunks.length; i += 1) {
-        // eslint-disable-next-line  no-await-in-loop
         response = await transport.send(
             0xe0,
             ins,

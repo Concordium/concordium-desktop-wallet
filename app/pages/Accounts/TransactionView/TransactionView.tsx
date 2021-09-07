@@ -74,7 +74,7 @@ function TransactionView({ transaction, returnFunction }: Props) {
             <TransactionListElement
                 transaction={transaction}
                 showDate
-                showFullMessage
+                showFullMemo
             />
             {displayRejectReason(transaction)}
             {!!transaction.fromAddress && (
