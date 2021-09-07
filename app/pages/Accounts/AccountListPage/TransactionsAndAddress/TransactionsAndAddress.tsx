@@ -9,6 +9,8 @@ import ShowAccountAddress from '../../ShowAccountAddress';
 import TransactionList from '../../TransactionList';
 import TransactionView from '../../TransactionView';
 
+import styles from '../../Transactions.module.scss';
+
 interface Props {
     account: Account;
 }
@@ -29,10 +31,12 @@ export default function TransfersAndAddress({ account }: Props) {
                         onClose={() => setChosenTransaction(undefined)}
                     />
                 ) : (
-                    <TransactionList
-                        transactions={transactions.slice(0, 10)}
-                        onTransactionClick={setChosenTransaction}
-                    />
+                    <div className={styles.fillCardPadding}>
+                        <TransactionList
+                            transactions={transactions.slice(0, 10)}
+                            onTransactionClick={setChosenTransaction}
+                        />
+                    </div>
                 )}
             </TabbedCard.Tab>
             <TabbedCard.Tab

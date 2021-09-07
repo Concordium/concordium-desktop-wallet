@@ -24,14 +24,22 @@ export default function TransactionLog() {
                         onClose={() => setChosenTransaction(undefined)}
                     />
                 ) : (
-                    <TransactionList
-                        transactions={transactions}
-                        onTransactionClick={setChosenTransaction}
-                    />
+                    <div className={styles.scroll}>
+                        <TransactionList
+                            transactions={transactions}
+                            onTransactionClick={setChosenTransaction}
+                        />
+                    </div>
                 )}
             </TabbedCard.Tab>
-            <TabbedCard.Tab header="Filters">
-                <TransactionLogFilters />
+            <TabbedCard.Tab
+                header="Filters"
+                onClick={() => setChosenTransaction(undefined)}
+            >
+                <div className={styles.scroll}>
+                    <div className={styles.bar} />
+                    <TransactionLogFilters />
+                </div>
             </TabbedCard.Tab>
         </TabbedCard>
     );

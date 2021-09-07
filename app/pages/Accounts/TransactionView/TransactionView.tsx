@@ -90,7 +90,11 @@ function TransactionView({ transaction, onClose }: Props) {
         <div className={styles.root}>
             <h3 className={styles.title}>Transaction details</h3>
             <CloseButton className={styles.closeButton} onClick={onClose} />
-            <TransactionListElement transaction={transaction} showDate />
+            <TransactionListElement
+                className={styles.fillCardPadding}
+                transaction={transaction}
+                showDate
+            />
             {displayRejectReason(transaction)}
             {!!transaction.fromAddress && (
                 <CopiableListElement

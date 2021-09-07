@@ -1,29 +1,7 @@
 @import 'config/bundle';
 @import './common';
 
-.transactionListHeader {
-    composes: cardPadding;
-    composes: fillCardPadding;
-    margin-top: -20px;
-
-    button {
-        width: 50%;
-        padding: 10px;
-    }
-}
-
-.transactionListHeaderNotChosen,
-.transactionListHeaderChosen {
-    font-size: $font-size-button2;
-    font-weight: $font-weight-emphasized;
-}
-
-.transactionListHeaderChosen {
-    color: $color-pale-blue;
-}
-
 .transactionListElement {
-    composes: fillCardPadding;
     position: relative;
     padding: 10px 20px;
 
@@ -78,7 +56,6 @@
 }
 
 .transactionGroupHeader {
-    composes: fillCardPadding;
     composes: cardPadding;
     height: $thick-blue-separator-height;
     font-size: 10px;
