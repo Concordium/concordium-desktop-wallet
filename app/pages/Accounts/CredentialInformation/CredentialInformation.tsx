@@ -90,7 +90,9 @@ export default function CredentialInformation({ account, accountInfo }: Props) {
                 <p className="mT0">
                     Credentials on this account: {credentialsOfAccount.length}
                 </p>
-                <p>Signature threshold: {account.signatureThreshold}</p>
+                <p className="mT5">
+                    Signature threshold: {account.signatureThreshold}
+                </p>
             </div>
             <div className={styles.credentialList}>
                 {credentialsOfAccount.map((credential: CredentialOfAccount) => {

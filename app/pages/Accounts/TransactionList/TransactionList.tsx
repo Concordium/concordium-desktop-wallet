@@ -86,8 +86,7 @@ function TransactionList({
                 className={clsx(
                     'flex justifyCenter mV0 pT20',
                     styles.thickBlueSeparatorTop,
-                    styles.cardPadding,
-                    styles.fillCardPadding
+                    styles.cardPadding
                 )}
             >
                 No transactions to show for account.

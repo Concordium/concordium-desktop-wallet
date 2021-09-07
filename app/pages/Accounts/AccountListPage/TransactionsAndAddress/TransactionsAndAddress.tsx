@@ -44,7 +44,10 @@ export default function TransfersAndAddress({ account }: Props) {
                 onClick={() => setChosenTransaction(undefined)}
                 initActive={Boolean(addressRouteMatch)}
             >
-                <ShowAccountAddress account={account} />
+                <ShowAccountAddress
+                    className={styles.thickBlueSeparatorTop}
+                    account={account}
+                />
             </TabbedCard.Tab>
         </TabbedCard>
     );

@@ -61,57 +61,48 @@ const fieldNames: NotOptional<EqualRecord<FilterForm>> = {
 
 const transactionFilters: {
     field: keyof FilterForm;
-    filter: TransactionKindString | TransactionKindString[];
+    group?: TransactionKindString[];
     display: string;
 }[] = [
     {
         field: TransactionKindString.Transfer,
-        filter: TransactionKindString.Transfer,
         display: 'Simple transfers',
     },
     {
         field: TransactionKindString.TransferWithSchedule,
-        filter: TransactionKindString.TransferWithSchedule,
         display: 'Scheduled transfers',
     },
     {
         field: TransactionKindString.TransferToEncrypted,
-        filter: TransactionKindString.TransferToEncrypted,
         display: 'Shieldings',
     },
     {
         field: TransactionKindString.TransferToPublic,
-        filter: TransactionKindString.TransferToPublic,
         display: 'Unshieldings',
     },
     {
         field: TransactionKindString.EncryptedAmountTransfer,
-        filter: TransactionKindString.EncryptedAmountTransfer,
         display: 'Shielded transfer fees',
     },
     {
         field: TransactionKindString.FinalizationReward,
-        filter: TransactionKindString.FinalizationReward,
         display: 'Show finalization rewards',
     },
     {
         field: TransactionKindString.BakingReward,
-        filter: TransactionKindString.BakingReward,
         display: 'Show baker rewards',
     },
     {
         field: TransactionKindString.BlockReward,
-        filter: TransactionKindString.BlockReward,
         display: 'Show block rewards',
     },
     {
         field: TransactionKindString.UpdateCredentials,
-        filter: TransactionKindString.UpdateCredentials,
         display: 'Update account credentials',
     },
     {
         field: 'bakerTransactions',
-        filter: [
+        group: [
             TransactionKindString.AddBaker,
             TransactionKindString.RemoveBaker,
             TransactionKindString.UpdateBakerKeys,
@@ -122,9 +113,17 @@ const transactionFilters: {
     },
 ];
 
-const isGroup = (
-    filter: TransactionKindString | TransactionKindString[]
-): filter is TransactionKindString[] => typeof filter !== 'string';
+const isDateField = (field: keyof FilterForm) =>
+    ([fieldNames.toDate, fieldNames.fromDate] as string[]).includes(field);
+
+const getGroupValues = (group: TransactionKindString[], v: boolean) =>
+    group.reduce(
+        (a, f) => ({
+            ...a,
+            [f]: v as boolean,
+        }),
+        {} as Partial<RewardFilter>
+    );
 
 /**
  * Displays available transaction filters, and allows the user to activate/deactive them..
@@ -134,49 +133,31 @@ export default function TransactionLogFilters() {
 
     const account = useSelector(chosenAccountSelector);
     const { rewardFilter = {}, address } = account ?? ({} as Account);
-    const { fromDate: storedFromDate, toDate: storedToDate } = rewardFilter;
+    const { fromDate, toDate } = rewardFilter;
 
     const booleanFilters = useMemo(
         () => getActiveBooleanFilters(rewardFilter),
         [rewardFilter]
     );
 
-    const defaultValues: FilterForm = useMemo<FilterForm>(
+    const defaultValues = useMemo<FilterForm>(
         () => ({
-            toDate: storedToDate ? new Date(storedToDate) : undefined,
-            fromDate: storedFromDate ? new Date(storedFromDate) : undefined,
+            ...Object.keys(fieldNames).reduce(
+                (acc, name) => ({
+                    ...acc,
+                    [name]: booleanFilters.includes(
+                        name as TransactionKindString
+                    ),
+                }),
+                {}
+            ),
+            toDate: toDate ? new Date(toDate) : undefined,
+            fromDate: fromDate ? new Date(fromDate) : undefined,
             bakerTransactions: booleanFilters.includes(
                 TransactionKindString.AddBaker
             ),
-            [TransactionKindString.Transfer]: booleanFilters.includes(
-                TransactionKindString.Transfer
-            ),
-            [TransactionKindString.TransferWithSchedule]: booleanFilters.includes(
-                TransactionKindString.TransferWithSchedule
-            ),
-            [TransactionKindString.TransferToEncrypted]: booleanFilters.includes(
-                TransactionKindString.TransferToEncrypted
-            ),
-            [TransactionKindString.TransferToPublic]: booleanFilters.includes(
-                TransactionKindString.TransferToPublic
-            ),
-            [TransactionKindString.EncryptedAmountTransfer]: booleanFilters.includes(
-                TransactionKindString.EncryptedAmountTransfer
-            ),
-            [TransactionKindString.FinalizationReward]: booleanFilters.includes(
-                TransactionKindString.FinalizationReward
-            ),
-            [TransactionKindString.BakingReward]: booleanFilters.includes(
-                TransactionKindString.BakingReward
-            ),
-            [TransactionKindString.BlockReward]: booleanFilters.includes(
-                TransactionKindString.BlockReward
-            ),
-            [TransactionKindString.UpdateCredentials]: booleanFilters.includes(
-                TransactionKindString.UpdateCredentials
-            ),
         }),
-        [storedFromDate, storedToDate, booleanFilters]
+        [fromDate, toDate, booleanFilters]
     );
 
     const form = useForm<FilterForm>({ defaultValues });
@@ -185,35 +166,22 @@ export default function TransactionLogFilters() {
     const submit = useCallback(
         (store: boolean) => (fields: FilterForm) => {
             const newFilter = (Object.entries(fields) as [
-                TransactionKindString,
+                keyof FilterForm,
                 boolean | (Date | undefined)
             ][]).reduce((acc, [k, v]) => {
-                if (
-                    ([
-                        fieldNames.fromDate,
-                        fieldNames.toDate,
-                    ] as string[]).includes(k)
-                ) {
+                if (isDateField(k)) {
                     return { ...acc, [k]: (v as Date | undefined)?.toString() };
                 }
 
-                const transactionFilter = transactionFilters.find(
+                const filterGroup = transactionFilters.find(
                     (t) => t.field === k
-                )?.filter;
+                )?.group;
 
-                if (!transactionFilter || !isGroup(transactionFilter)) {
+                if (!filterGroup) {
                     return { ...acc, [k]: v as boolean };
                 }
 
-                const group = transactionFilter.reduce(
-                    (a, f) => ({
-                        ...a,
-                        [f]: v as boolean,
-                    }),
-                    {} as Partial<RewardFilter>
-                );
-
-                return { ...acc, ...group };
+                return { ...acc, ...getGroupValues(filterGroup, v as boolean) };
             }, rewardFilter);
 
             updateRewardFilter(dispatch, address, newFilter, store);

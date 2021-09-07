@@ -1,6 +1,7 @@
 @import 'config/bundle';
 
 $thick-blue-separator-height: 13px;
+$tabbed-card-header-height: 38px;
 
 .fillCardPadding {
     margin-left: -19px;
@@ -38,7 +39,5 @@ $thick-blue-separator-height: 13px;
 }
 
 .thickBlueSeparatorTop {
-    &:not(:first-child) {
-        border-top: $thick-blue-separator-height solid $color-light-blue;
-    }
+    border-top: $thick-blue-separator-height solid $color-light-blue;
 }
