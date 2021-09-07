@@ -197,7 +197,6 @@ export enum TransactionKindId {
 export interface SimpleTransferPayload {
     amount: string;
     toAddress: string;
-    memo?: string;
 }
 
 export interface EncryptedTransferPayload {
@@ -208,7 +207,6 @@ export interface EncryptedTransferPayload {
     transferAmount?: EncryptedAmount;
     index?: string;
     proof?: string;
-    memo?: string;
 }
 
 export interface TransferToEncryptedPayload {
@@ -234,7 +232,6 @@ export type Schedule = SchedulePoint[];
 export interface ScheduledTransferPayload {
     schedule: Schedule;
     toAddress: string;
-    memo?: string;
 }
 
 export interface AddedCredential {
@@ -307,17 +304,19 @@ export interface AccountTransaction<
     payload: PayloadType;
 }
 
-export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
-
 type WithMemo<Base extends {}> = Base & {
     memo: string;
 };
+export type SimpleTransferWithMemoPayload = WithMemo<SimpleTransferPayload>;
+export type EncryptedTransferWithMemoPayload = WithMemo<EncryptedTransferPayload>;
+export type ScheduledTransferWithMemoPayload = WithMemo<ScheduledTransferPayload>;
 
 export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
-export type SimpleTransferWithMemo = AccountTransaction<
-    WithMemo<SimpleTransferPayload>
->;
+export type SimpleTransferWithMemo = AccountTransaction<SimpleTransferWithMemoPayload>;
 export type EncryptedTransfer = AccountTransaction<EncryptedTransferPayload>;
+export type EncryptedTransferWithMemo = AccountTransaction<EncryptedTransferWithMemoPayload>;
+export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
+export type ScheduledTransferWithMemo = AccountTransaction<ScheduledTransferWithMemoPayload>;
 export type TransferToEncrypted = AccountTransaction<TransferToEncryptedPayload>;
 export type UpdateAccountCredentials = AccountTransaction<UpdateAccountCredentialsPayload>;
 export type TransferToPublic = AccountTransaction<TransferToPublicPayload>;
@@ -803,10 +802,7 @@ export function instanceOfAccountTransactionWithSignature(
 export function instanceOfSimpleTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is SimpleTransfer {
-    return [
-        TransactionKindId.Simple_transfer,
-        TransactionKindId.Simple_transfer_with_memo,
-    ].includes(object.transactionKind);
+    return TransactionKindId.Simple_transfer === object.transactionKind;
 }
 export function instanceOfSimpleTransferWithMemo(
     object: AccountTransaction<TransactionPayload>
@@ -831,19 +827,31 @@ export function instanceOfTransferToPublic(
 export function instanceOfEncryptedTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is EncryptedTransfer {
-    return [
-        TransactionKindId.Encrypted_transfer,
-        TransactionKindId.Encrypted_transfer_with_memo,
-    ].includes(object.transactionKind);
+    return object.transactionKind === TransactionKindId.Encrypted_transfer;
+}
+
+export function instanceOfEncryptedTransferWithMemo(
+    object: AccountTransaction<TransactionPayload>
+): object is EncryptedTransferWithMemo {
+    return (
+        object.transactionKind ===
+        TransactionKindId.Encrypted_transfer_with_memo
+    );
 }
 
 export function instanceOfScheduledTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is ScheduledTransfer {
-    return [
-        TransactionKindId.Transfer_with_schedule,
-        TransactionKindId.Transfer_with_schedule_and_memo,
-    ].includes(object.transactionKind);
+    return object.transactionKind === TransactionKindId.Transfer_with_schedule;
+}
+
+export function instanceOfScheduledTransferWithMemo(
+    object: AccountTransaction<TransactionPayload>
+): object is ScheduledTransferWithMemo {
+    return (
+        object.transactionKind ===
+        TransactionKindId.Transfer_with_schedule_and_memo
+    );
 }
 
 export function instanceOfUpdateAccountCredentials(

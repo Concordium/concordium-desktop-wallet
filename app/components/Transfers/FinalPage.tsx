@@ -18,6 +18,9 @@ import {
     instanceOfTransferToPublic,
     instanceOfEncryptedTransfer,
     TimeStampUnit,
+    instanceOfScheduledTransferWithMemo,
+    instanceOfEncryptedTransferWithMemo,
+    instanceOfSimpleTransferWithMemo,
 } from '~/utils/types';
 
 interface State {
@@ -35,7 +38,18 @@ function getSpecificsHandler(transaction: AccountTransaction) {
     let title;
     let note;
     let memo;
-    if (instanceOfScheduledTransfer(transaction)) {
+    if (
+        instanceOfSimpleTransferWithMemo(transaction) ||
+        instanceOfScheduledTransferWithMemo(transaction) ||
+        instanceOfEncryptedTransferWithMemo(transaction)
+    ) {
+        memo = transaction.payload.memo;
+    }
+
+    if (
+        instanceOfScheduledTransfer(transaction) ||
+        instanceOfScheduledTransferWithMemo(transaction)
+    ) {
         title = 'Scheduled Transfer submitted!';
         amount = getScheduledTransferAmount(transaction);
         note = (
@@ -49,21 +63,24 @@ function getSpecificsHandler(transaction: AccountTransaction) {
                 )}
             </h3>
         );
-        memo = transaction.payload.memo;
     } else if (instanceOfTransferToPublic(transaction)) {
         title = 'Unshield amount submitted!';
         amount = transaction.payload.transferAmount;
-    } else if (instanceOfSimpleTransfer(transaction)) {
+    } else if (
+        instanceOfSimpleTransfer(transaction) ||
+        instanceOfSimpleTransferWithMemo(transaction)
+    ) {
         title = 'Transfer submitted!';
         amount = transaction.payload.amount;
-        memo = transaction.payload.memo;
     } else if (instanceOfTransferToEncrypted(transaction)) {
         title = 'Shield amount submitted!';
         amount = transaction.payload.amount;
-    } else if (instanceOfEncryptedTransfer(transaction)) {
+    } else if (
+        instanceOfEncryptedTransfer(transaction) ||
+        instanceOfEncryptedTransferWithMemo(transaction)
+    ) {
         title = 'Shielded transfer submitted!';
         amount = transaction.payload.plainTransferAmount;
-        memo = transaction.payload.memo;
     } else {
         throw new Error(
             `Unsupported transaction type - please implement: ${transaction}`

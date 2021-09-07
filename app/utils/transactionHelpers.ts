@@ -33,6 +33,7 @@ import {
     UpdateBakerStake,
     UpdateBakerRestakeEarnings,
     TransactionKindString,
+    SimpleTransferWithMemo,
 } from './types';
 import {
     getTransactionEnergyCost,
@@ -116,18 +117,43 @@ export function createSimpleTransferTransaction(
     amount: BigInt,
     toAddress: string,
     nonce: string,
-    memo?: string,
     signatureAmount = 1,
     expiry = getDefaultExpiry()
 ): SimpleTransfer {
     const payload = {
         toAddress,
         amount: amount.toString(),
+    };
+    const transactionKind = TransactionKindId.Simple_transfer;
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind,
+        payload,
+        signatureAmount,
+        nonce,
+    });
+}
+
+/**
+ *  Constructs a, simple transfer, transaction object,
+ * Given the fromAddress, toAddress and the amount.
+ */
+export function createSimpleTransferWithMemoTransaction(
+    fromAddress: string,
+    amount: BigInt,
+    toAddress: string,
+    nonce: string,
+    memo: string,
+    signatureAmount = 1,
+    expiry = getDefaultExpiry()
+): SimpleTransferWithMemo {
+    const payload = {
+        toAddress,
+        amount: amount.toString(),
         memo,
     };
-    const transactionKind = memo
-        ? TransactionKindId.Simple_transfer_with_memo
-        : TransactionKindId.Simple_transfer;
+    const transactionKind = TransactionKindId.Simple_transfer_with_memo;
     return createAccountTransaction({
         fromAddress,
         expiry,
@@ -281,7 +307,34 @@ export function createScheduledTransferTransaction(
     toAddress: string,
     schedule: Schedule,
     nonce: string,
-    memo?: string,
+    signatureAmount = 1,
+    expiry = getDefaultExpiry()
+) {
+    const payload = {
+        toAddress,
+        schedule,
+    };
+
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Transfer_with_schedule,
+        payload,
+        nonce,
+        signatureAmount,
+    });
+}
+
+/**
+ *  Constructs a, simple transfer, transaction object,
+ * Given the fromAddress, toAddress and the amount.
+ */
+export function createScheduledTransferWithMemoTransaction(
+    fromAddress: string,
+    toAddress: string,
+    schedule: Schedule,
+    nonce: string,
+    memo: string,
     signatureAmount = 1,
     expiry = getDefaultExpiry()
 ) {
@@ -291,13 +344,10 @@ export function createScheduledTransferTransaction(
         memo,
     };
 
-    const transactionKind = memo
-        ? TransactionKindId.Transfer_with_schedule_and_memo
-        : TransactionKindId.Transfer_with_schedule;
     return createAccountTransaction({
         fromAddress,
         expiry,
-        transactionKind,
+        transactionKind: TransactionKindId.Transfer_with_schedule_and_memo,
         payload,
         nonce,
         signatureAmount,

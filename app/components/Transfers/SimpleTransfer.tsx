@@ -12,7 +12,10 @@ import {
 } from '../../utils/types';
 import { toMicroUnits } from '../../utils/gtu';
 import locations from '../../constants/transferLocations.json';
-import { createSimpleTransferTransaction } from '../../utils/transactionHelpers';
+import {
+    createSimpleTransferTransaction,
+    createSimpleTransferWithMemoTransaction,
+} from '../../utils/transactionHelpers';
 import ExternalTransfer from '~/components/Transfers/ExternalTransfer';
 
 import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
@@ -38,13 +41,24 @@ function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
                 throw new Error('Unexpected missing recipient');
             }
 
-            const transaction = await createSimpleTransferTransaction(
-                account.address,
-                toMicroUnits(amount),
-                recipient.address,
-                nonce,
-                memo
-            );
+            let transaction;
+            if (memo) {
+                transaction = await createSimpleTransferWithMemoTransaction(
+                    account.address,
+                    toMicroUnits(amount),
+                    recipient.address,
+                    nonce,
+                    memo
+                );
+            } else {
+                transaction = await createSimpleTransferTransaction(
+                    account.address,
+                    toMicroUnits(amount),
+                    recipient.address,
+                    nonce
+                );
+            }
+
             transaction.estimatedFee = multiplyFraction(
                 exchangeRate,
                 transaction.energyAmount

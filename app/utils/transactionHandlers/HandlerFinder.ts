@@ -42,6 +42,9 @@ import UpdateLevel2KeysUsingLevel1KeysHandler from './UpdateLevel2KeysWithLevel1
 import EncryptedTransferHandler from './EncryptedTransferHandler';
 import BakerHandler from './BakerHandler';
 import { parse } from '../JSONHelper';
+import ScheduledTransferWithMemoHandler from './ScheduledTransferWithMemoHandler';
+import EncryptedTransferWithMemoHandler from './EncryptedTransferWithMemoHandler';
+import SimpleTransferWithMemoHandler from './SimpleTransferWithMemoHandler';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -56,9 +59,12 @@ export function findAccountTransactionHandler(
                 new UpdateAccountCredentialsHandler()
             );
         case TransactionKindId.Simple_transfer:
-        case TransactionKindId.Simple_transfer_with_memo:
             return new AccountHandlerTypeMiddleware(
                 new SimpleTransferHandler()
+            );
+        case TransactionKindId.Simple_transfer_with_memo:
+            return new AccountHandlerTypeMiddleware(
+                new SimpleTransferWithMemoHandler()
             );
         case TransactionKindId.Add_baker:
             return new AccountHandlerTypeMiddleware(
@@ -87,14 +93,20 @@ export function findAccountTransactionHandler(
                 )
             );
         case TransactionKindId.Encrypted_transfer:
-        case TransactionKindId.Encrypted_transfer_with_memo:
             return new AccountHandlerTypeMiddleware(
                 new EncryptedTransferHandler()
             );
+        case TransactionKindId.Encrypted_transfer_with_memo:
+            return new AccountHandlerTypeMiddleware(
+                new EncryptedTransferWithMemoHandler()
+            );
         case TransactionKindId.Transfer_with_schedule:
-        case TransactionKindId.Transfer_with_schedule_and_memo:
             return new AccountHandlerTypeMiddleware(
                 new ScheduledTransferHandler()
+            );
+        case TransactionKindId.Transfer_with_schedule_and_memo:
+            return new AccountHandlerTypeMiddleware(
+                new ScheduledTransferWithMemoHandler()
             );
         case TransactionKindId.Transfer_to_encrypted:
             return new AccountHandlerTypeMiddleware(

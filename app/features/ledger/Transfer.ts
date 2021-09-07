@@ -7,7 +7,6 @@ import {
     SimpleTransfer,
     ScheduledTransfer,
     TransferToEncrypted,
-    EncryptedTransfer,
     instanceOfSimpleTransfer,
     instanceOfScheduledTransfer,
     instanceOfTransferToEncrypted,
@@ -25,6 +24,9 @@ import {
     instanceOfUpdateBakerRestakeEarnings,
     UpdateBakerRestakeEarnings,
     instanceOfSimpleTransferWithMemo,
+    instanceOfScheduledTransferWithMemo,
+    ScheduledTransferWithMemo,
+    instanceOfEncryptedTransferWithMemo,
 } from '~/utils/types';
 import {
     serializeTransactionHeader,
@@ -49,48 +51,22 @@ import {
 } from '../../utils/serializationHelpers';
 import { chunkBuffer, chunkArray } from '~/utils/basicHelpers';
 import { encodeAsCBOR } from '~/utils/cborHelper';
+import {
+    signEncryptedTransfer,
+    signEncryptedTransferWithMemo,
+} from './EncryptedTransfer';
+import sendMemo from './Memo';
 
 const INS_SIMPLE_TRANSFER = 0x02;
 const INS_TRANSFER_TO_ENCRYPTED = 0x11;
 const INS_TRANSFER_TO_PUBLIC = 0x12;
 const INS_TRANSFER_WITH_SCHEDULE = 0x03;
-const INS_ENCRYPTED_TRANSFER = 0x10;
 const INS_ADD_OR_UPDATE_BAKER = 0x13;
 const INS_REMOVE_BAKER = 0x14;
 const INS_UPDATE_BAKER_STAKE = 0x15;
 const INS_UPDATE_BAKER_RESTAKE_EARNINGS = 0x16;
-
-type Memo = string;
-
-/**
- * Send memo to ledger for signing.
- * N.B. This does not send the length of the memo, and the CBOR encoded string.
- */
-async function sendMemo(
-    transport: Transport,
-    ins: number,
-    memo: Memo | undefined,
-    p1: number,
-    p2: number
-) {
-    if (!memo) {
-        throw new Error('Unexpected Missing memo');
-    }
-
-    const encodedMemo = encodeAsCBOR(memo);
-
-    let response;
-    const chunks = chunkBuffer(encodedMemo, 255);
-    for (const chunk of chunks) {
-        // eslint-disable-next-line  no-await-in-loop
-        response = await transport.send(0xe0, ins, p1, p2, Buffer.from(chunk));
-    }
-    if (!response) {
-        throw new Error('Unexpected missing response from ledger;');
-    }
-    const signature = response.slice(0, 64);
-    return signature;
-}
+const INS_SIMPLE_TRANSFER_WITH_MEMO = 0x32;
+const INS_TRANSFER_WITH_SCHEDULE_AND_MEMO = 0x34;
 
 async function signSimpleTransfer(
     transport: Transport,
@@ -157,23 +133,23 @@ async function signSimpleTransferWithMemo(
     let p1 = 0x01;
     const p2 = 0x00;
 
-    await transport.send(0xe0, INS_SIMPLE_TRANSFER, p1, p2, data);
+    await transport.send(0xe0, INS_SIMPLE_TRANSFER_WITH_MEMO, p1, p2, data);
 
     p1 = 0x02;
 
     await sendMemo(
         transport,
-        INS_SIMPLE_TRANSFER,
-        transaction.payload.memo,
+        INS_SIMPLE_TRANSFER_WITH_MEMO,
         p1,
-        p2
+        p2,
+        transaction.payload.memo
     );
 
     p1 = 0x03;
 
     const response = await transport.send(
         0xe0,
-        INS_SIMPLE_TRANSFER,
+        INS_SIMPLE_TRANSFER_WITH_MEMO,
         p1,
         p2,
         encodeWord64(BigInt(transaction.payload.amount))
@@ -283,130 +259,12 @@ async function signTransferToPublic(
     return signature;
 }
 
-/**
- * Can sign both regular encrypted transfers and encrypted transfers with memos.
- */
-async function signEncryptedTransfer(
-    transport: Transport,
-    path: number[],
-    transaction: EncryptedTransfer
-) {
-    if (!transaction.payload.proof) {
-        throw new Error('Unexpected missing proof');
-    }
-    if (
-        !transaction.payload.remainingEncryptedAmount ||
-        !transaction.payload.transferAmount
-    ) {
-        throw new Error('Unexpected missing payload data');
-    }
-
-    const withMemo =
-        transaction.transactionKind ===
-        TransactionKindId.Encrypted_transfer_with_memo;
-
-    const payload = serializeTransferPayload(
-        transaction.transactionKind,
-        transaction.payload
-    );
-
-    const header = serializeTransactionHeader(
-        transaction.sender,
-        transaction.nonce,
-        transaction.energyAmount,
-        payload.length,
-        transaction.expiry
-    );
-
-    const kind = Buffer.alloc(1);
-    kind.writeInt8(transaction.transactionKind, 0);
-
-    let data = Buffer.concat([
-        pathAsBuffer(path),
-        header,
-        kind,
-        base58ToBuffer(transaction.payload.toAddress),
-    ]);
-
-    if (withMemo) {
-        const { memo } = transaction.payload;
-        const memoLength = memo ? encodeAsCBOR(memo).length : 0;
-        data = Buffer.concat([data, encodeWord16(memoLength)]);
-    }
-
-    let p1 = withMemo ? 0x04 : 0x00;
-    const p2 = 0x00;
-
-    await transport.send(0xe0, INS_ENCRYPTED_TRANSFER, p1, p2, data);
-
-    if (withMemo) {
-        await sendMemo(
-            transport,
-            INS_ENCRYPTED_TRANSFER,
-            transaction.payload.memo,
-            0x05,
-            p2
-        );
-    }
-
-    p1 = 0x01;
-    await transport.send(
-        0xe0,
-        INS_ENCRYPTED_TRANSFER,
-        p1,
-        p2,
-        Buffer.concat([
-            Buffer.from(transaction.payload.remainingEncryptedAmount, 'hex'),
-        ])
-    );
-
-    p1 = 0x02;
-    const proof = Buffer.from(transaction.payload.proof, 'hex');
-
-    await transport.send(
-        0xe0,
-        INS_ENCRYPTED_TRANSFER,
-        p1,
-        p2,
-        Buffer.concat([
-            Buffer.from(transaction.payload.transferAmount, 'hex'),
-            encodeWord64(BigInt(transaction.payload.index)),
-            encodeWord16(proof.length),
-        ])
-    );
-
-    p1 = 0x03;
-
-    let response;
-    const chunks = chunkBuffer(proof, 255);
-    for (let i = 0; i < chunks.length; i += 1) {
-        // eslint-disable-next-line  no-await-in-loop
-        response = await transport.send(
-            0xe0,
-            INS_ENCRYPTED_TRANSFER,
-            p1,
-            p2,
-            Buffer.from(chunks[i])
-        );
-    }
-
-    if (!response) {
-        throw new Error('Unexpected missing response from ledger;');
-    }
-    return response.slice(0, 64);
-}
-
-/**
- * Can sign both transfer with and withouts memos.
- */
 async function signTransferWithSchedule(
     transport: Transport,
     path: number[],
     transaction: ScheduledTransfer
 ): Promise<Buffer> {
-    const withMemo =
-        transaction.transactionKind ===
-        TransactionKindId.Transfer_with_schedule_and_memo;
+    const ins = INS_TRANSFER_WITH_SCHEDULE;
 
     const payload = serializeTransferPayload(
         transaction.transactionKind,
@@ -426,29 +284,14 @@ async function signTransferWithSchedule(
         transaction.transactionKind
     );
 
-    let data = Buffer.concat([pathAsBuffer(path), header, payloadBase]);
-    if (withMemo) {
-        const { memo } = transaction.payload;
-        const memoLength = memo ? encodeAsCBOR(memo).length : 0;
-        data = Buffer.concat([data, encodeWord16(memoLength)]);
-    }
+    const data = Buffer.concat([pathAsBuffer(path), header, payloadBase]);
 
-    let p1 = withMemo ? 0x02 : 0x00;
+    let p1 = 0x00;
     const p2 = 0x00;
 
     await transport.send(0xe0, INS_TRANSFER_WITH_SCHEDULE, p1, p2, data);
 
     const { schedule } = transaction.payload;
-
-    if (withMemo) {
-        await sendMemo(
-            transport,
-            INS_TRANSFER_WITH_SCHEDULE,
-            transaction.payload.memo,
-            0x03,
-            p2
-        );
-    }
 
     p1 = 0x01;
 
@@ -458,7 +301,70 @@ async function signTransferWithSchedule(
         // eslint-disable-next-line  no-await-in-loop
         response = await transport.send(
             0xe0,
-            INS_TRANSFER_WITH_SCHEDULE,
+            ins,
+            p1,
+            p2,
+            Buffer.concat(chunk)
+        );
+    }
+
+    if (!response) {
+        throw new Error('Unexpected missing response from ledger;');
+    }
+    return response.slice(0, 64);
+}
+
+async function signTransferWithScheduleAndMemo(
+    transport: Transport,
+    path: number[],
+    transaction: ScheduledTransferWithMemo
+): Promise<Buffer> {
+    const ins = INS_TRANSFER_WITH_SCHEDULE_AND_MEMO;
+
+    const payload = serializeTransferPayload(
+        transaction.transactionKind,
+        transaction.payload
+    );
+
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+
+    const payloadBase = serializeScheduledTransferPayloadBase(
+        transaction.payload,
+        transaction.transactionKind
+    );
+
+    const { memo } = transaction.payload;
+    const data = Buffer.concat([
+        pathAsBuffer(path),
+        header,
+        payloadBase,
+        encodeWord16(encodeAsCBOR(memo).length),
+    ]);
+
+    let p1 = 0x02;
+    const p2 = 0x00;
+
+    await transport.send(0xe0, ins, p1, p2, data);
+
+    const { schedule } = transaction.payload;
+
+    p1 = 0x03;
+    await sendMemo(transport, ins, p1, p2, transaction.payload.memo);
+
+    p1 = 0x01;
+    let response;
+    const chunks = chunkArray(schedule.map(serializeSchedulePoint), 15); // 15 is the maximum amount we can fit
+    for (const chunk of chunks) {
+        // eslint-disable-next-line  no-await-in-loop
+        response = await transport.send(
+            0xe0,
+            ins,
             p1,
             p2,
             Buffer.concat(chunk)
@@ -665,11 +571,17 @@ export default async function signTransfer(
     if (instanceOfScheduledTransfer(transaction)) {
         return signTransferWithSchedule(transport, path, transaction);
     }
+    if (instanceOfScheduledTransferWithMemo(transaction)) {
+        return signTransferWithScheduleAndMemo(transport, path, transaction);
+    }
     if (instanceOfTransferToEncrypted(transaction)) {
         return signTransferToEncrypted(transport, path, transaction);
     }
     if (instanceOfTransferToPublic(transaction)) {
         return signTransferToPublic(transport, path, transaction);
+    }
+    if (instanceOfEncryptedTransferWithMemo(transaction)) {
+        return signEncryptedTransferWithMemo(transport, path, transaction);
     }
     if (instanceOfEncryptedTransfer(transaction)) {
         return signEncryptedTransfer(transport, path, transaction);

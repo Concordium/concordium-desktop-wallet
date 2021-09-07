@@ -8,6 +8,7 @@ import { Account, AddressBookEntry, Schedule } from '~/utils/types';
 import { displayAsGTU, microGtuToGtu } from '~/utils/gtu';
 import { collapseFraction } from '~/utils/basicHelpers';
 import {
+    createScheduledTransferWithMemoTransaction,
     createScheduledTransferTransaction,
     amountAtDisposal,
 } from '~/utils/transactionHelpers';
@@ -97,13 +98,23 @@ export default function BuildSchedule({ location }: Props) {
             if (amountError) {
                 return;
             }
-            const transaction = createScheduledTransferTransaction(
-                account.address,
-                recipient.address,
-                schedule,
-                nonce,
-                memo
-            );
+            let transaction;
+            if (memo) {
+                transaction = createScheduledTransferWithMemoTransaction(
+                    account.address,
+                    recipient.address,
+                    schedule,
+                    nonce,
+                    memo
+                );
+            } else {
+                transaction = createScheduledTransferTransaction(
+                    account.address,
+                    recipient.address,
+                    schedule,
+                    nonce
+                );
+            }
             transaction.estimatedFee = estimatedFee;
             const transactionJSON = stringify(transaction);
             dispatch(

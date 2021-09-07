@@ -2,6 +2,7 @@ import {
     AccountTransaction,
     Fraction,
     instanceOfScheduledTransfer,
+    instanceOfScheduledTransferWithMemo,
     TransactionKindId,
     UpdateAccountCredentialsPayload,
 } from './types';
@@ -183,7 +184,10 @@ export function getTransactionEnergyCost(
         transaction.payload
     ).length;
     let transactionTypeCost;
-    if (instanceOfScheduledTransfer(transaction)) {
+    if (
+        instanceOfScheduledTransfer(transaction) ||
+        instanceOfScheduledTransferWithMemo(transaction)
+    ) {
         transactionTypeCost =
             energyConstants.ScheduledTransferPerRelease *
             BigInt(transaction.payload.schedule.length);

@@ -20,6 +20,9 @@ import {
     BakerKeyProofs,
     UpdateBakerStakePayload,
     UpdateBakerRestakeEarningsPayload,
+    SimpleTransferWithMemoPayload,
+    ScheduledTransferWithMemoPayload,
+    EncryptedTransferWithMemoPayload,
 } from './types';
 import {
     encodeWord32,
@@ -51,11 +54,9 @@ function serializeSimpleTransfer(payload: SimpleTransferPayload) {
     return Buffer.concat([kind, address, amount]);
 }
 
-function serializeSimpleTransferWithMemo(payload: SimpleTransferPayload) {
-    if (!payload.memo) {
-        throw new Error('Unexpected missing memo');
-    }
-
+function serializeSimpleTransferWithMemo(
+    payload: SimpleTransferWithMemoPayload
+) {
     const kind = putInt8(TransactionKind.Simple_transfer_with_memo);
     const address = base58ToBuffer(payload.toAddress);
     const memo = serializeMemo(payload.memo);
@@ -88,11 +89,8 @@ function serializeTransferWithSchedule(payload: ScheduledTransferPayload) {
 }
 
 function serializeTransferWithScheduleWithMemo(
-    payload: ScheduledTransferPayload
+    payload: ScheduledTransferWithMemoPayload
 ) {
-    if (!payload.memo) {
-        throw new Error('Unexpected missing memo');
-    }
     const kind = putInt8(TransactionKind.Transfer_with_schedule_and_memo);
     const address = base58ToBuffer(payload.toAddress);
     const memo = serializeMemo(payload.memo);
@@ -219,10 +217,9 @@ function serializeEncryptedTransfer(payload: EncryptedTransferPayload) {
     ]);
 }
 
-function serializeEncryptedTransferWithMemo(payload: EncryptedTransferPayload) {
-    if (!payload.memo) {
-        throw new Error('Unexpected missing memo');
-    }
+function serializeEncryptedTransferWithMemo(
+    payload: EncryptedTransferWithMemoPayload
+) {
     if (!payload.proof) {
         throw new Error('unexpected missing proof of Shielded Transfer data');
     }
@@ -343,7 +340,7 @@ export function serializeTransferPayload(
             return serializeSimpleTransfer(payload as SimpleTransferPayload);
         case TransactionKind.Simple_transfer_with_memo:
             return serializeSimpleTransferWithMemo(
-                payload as SimpleTransferPayload
+                payload as SimpleTransferWithMemoPayload
             );
         case TransactionKind.Update_credentials:
             return serializeUpdateCredentials(
@@ -355,7 +352,7 @@ export function serializeTransferPayload(
             );
         case TransactionKind.Transfer_with_schedule_and_memo:
             return serializeTransferWithScheduleWithMemo(
-                payload as ScheduledTransferPayload
+                payload as ScheduledTransferWithMemoPayload
             );
         case TransactionKind.Transfer_to_encrypted:
             return serializeTransferToEncypted(
@@ -371,7 +368,7 @@ export function serializeTransferPayload(
             );
         case TransactionKind.Encrypted_transfer_with_memo:
             return serializeEncryptedTransferWithMemo(
-                payload as EncryptedTransferPayload
+                payload as EncryptedTransferWithMemoPayload
             );
         case TransactionKind.Add_baker:
             return serializeAddBaker(payload as AddBakerPayload);

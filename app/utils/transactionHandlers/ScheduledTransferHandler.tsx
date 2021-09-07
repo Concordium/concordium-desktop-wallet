@@ -22,7 +22,21 @@ import {
 
 type TransactionType = ScheduledTransfer;
 
-const TYPE = 'Send GTU with a schedule';
+export const TYPE = 'Send GTU with a schedule';
+
+export function getFileNameForExport(
+    transaction: ScheduledTransfer,
+    exportType: TransactionExportType
+) {
+    const sender = transaction.sender.substring(0, 6);
+    const receiver = transaction.payload.toAddress.substring(0, 6);
+    const amount = getScheduledTransferAmount(transaction);
+
+    return `${transaction.nonce.padStart(
+        3,
+        '0'
+    )}-scheduled-transfer-${amount}_${sender}-to-${receiver}_${exportType}.json`;
+}
 
 export default class ScheduledTransferHandler
     extends TransferHandler<TransactionType>
@@ -62,7 +76,6 @@ export default class ScheduledTransferHandler
         signatureAmount,
         nonce,
         expiryTime,
-        memo,
     }: Partial<CreateTransactionInput>) {
         if (!sender || !recipient || !schedule || !nonce) {
             throw new Error(
@@ -74,25 +87,12 @@ export default class ScheduledTransferHandler
             recipient,
             schedule,
             nonce,
-            memo,
             signatureAmount,
             expiryTime
         );
     }
 
-    getFileNameForExport(
-        transaction: ScheduledTransfer,
-        exportType: TransactionExportType
-    ) {
-        const sender = transaction.sender.substring(0, 6);
-        const receiver = transaction.payload.toAddress.substring(0, 6);
-        const amount = getScheduledTransferAmount(transaction);
-
-        return `${transaction.nonce.padStart(
-            3,
-            '0'
-        )}-scheduled-transfer-${amount}_${sender}-to-${receiver}_${exportType}.json`;
-    }
+    getFileNameForExport = getFileNameForExport;
 
     print(
         transaction: AccountTransaction,

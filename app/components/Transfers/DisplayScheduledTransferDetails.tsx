@@ -17,15 +17,18 @@ interface Props {
     transaction: ScheduledTransfer;
     fromName?: string;
     to?: AddressBookEntry;
+    memo?: string;
 }
 
 /**
  * Displays an overview of a scheduledTransfer.
+ * N.B. This can also display a scheduled transfer with memo, but this is done by passing the memo argument.
  */
 export default function DisplayScheduledTransfer({
     transaction,
     fromName,
     to,
+    memo,
 }: Props) {
     const amount = getScheduledTransferAmount(transaction);
     const singleSigTransfer = useRouteMatch(routes.SUBMITTRANSFER);
@@ -48,7 +51,7 @@ export default function DisplayScheduledTransfer({
             <h5 className={styles.title}>Amount:</h5>
             <p className={styles.amount}>{displayAsGTU(amount)}</p>
             <DisplayFee className={styles.fee} transaction={transaction} />
-            <DisplayMemo memo={transaction.payload.memo} />
+            <DisplayMemo memo={memo} />
             {Boolean(singleSigTransfer) || (
                 <DisplayTransactionExpiryTime
                     expiryTime={dateFromTimeStamp(transaction.expiry)}
