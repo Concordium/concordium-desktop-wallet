@@ -1,13 +1,13 @@
-import React, { ReactElement, useState } from 'react';
+import React, { FunctionComponentElement, useState } from 'react';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
-import TabbedCardTab, { TabbedCardTabProps } from './TabbedCardTab';
-import { ClassName } from '~/utils/types';
+import TabbedCardTab, { TabbedCardTabRef } from './TabbedCardTab';
+import { ClassName, PropsOf } from '~/utils/types';
 import { noOp } from '~/utils/basicHelpers';
 
 import styles from './TabbedCard.module.scss';
 
-type TabChild = ReactElement<TabbedCardTabProps>;
+type TabChild = FunctionComponentElement<PropsOf<typeof TabbedCardTab>>;
 
 interface Props extends ClassName {
     children: TabChild[];
@@ -20,6 +20,20 @@ function TabbedCard({ children, className }: Props) {
             .map<[TabChild, number]>((t, i) => [t, i])
             .filter(([t]) => t.props.initActive)?.[0]?.[1] ?? 0;
     const [active, setActive] = useState(initActiveTab);
+
+    tabs.forEach((t, i) => {
+        if (!t.ref) {
+            return;
+        }
+
+        const instance: TabbedCardTabRef = { focus: () => setActive(i) };
+
+        if (typeof t.ref === 'function') {
+            t.ref(instance);
+        } else {
+            (t.ref.current as TabbedCardTabRef) = instance;
+        }
+    });
 
     return (
         <Card className={className}>

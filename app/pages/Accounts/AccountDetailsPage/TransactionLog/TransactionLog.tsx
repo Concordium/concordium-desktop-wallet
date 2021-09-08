@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import TabbedCard from '~/components/TabbedCard';
+import { TabbedCardTabRef } from '~/components/TabbedCard/TabbedCardTab';
 import { transactionsSelector } from '~/features/TransactionSlice';
 import { TransferTransaction } from '~/utils/types';
 import TransactionList from '../../TransactionList';
@@ -14,10 +15,11 @@ export default function TransactionLog() {
     const [chosenTransaction, setChosenTransaction] = useState<
         TransferTransaction | undefined
     >();
+    const transactionsTabRef = useRef<TabbedCardTabRef>(null);
 
     return (
         <TabbedCard className={styles.root}>
-            <TabbedCard.Tab header="Transactions">
+            <TabbedCard.Tab header="Transactions" ref={transactionsTabRef}>
                 {chosenTransaction ? (
                     <TransactionView
                         transaction={chosenTransaction}
@@ -38,7 +40,11 @@ export default function TransactionLog() {
             >
                 <div className={styles.scroll}>
                     <div className={styles.bar} />
-                    <TransactionLogFilters />
+                    <TransactionLogFilters
+                        onUpdate={() => {
+                            transactionsTabRef.current?.focus();
+                        }}
+                    />
                 </div>
             </TabbedCard.Tab>
         </TabbedCard>

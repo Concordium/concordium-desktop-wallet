@@ -133,10 +133,14 @@ const getGroupValues = (group: TransactionKindString[], v: boolean) =>
 
 const pastDateValidator = allowOptional(pastDate('Date must be before today'));
 
+interface Props {
+    onUpdate(): void;
+}
+
 /**
  * Displays available transaction filters, and allows the user to activate/deactive them..
  */
-export default function TransactionLogFilters() {
+export default function TransactionLogFilters({ onUpdate }: Props) {
     const dispatch = useDispatch();
 
     const account = useSelector(chosenAccountSelector);
@@ -176,7 +180,7 @@ export default function TransactionLogFilters() {
     const { fromDate: fromDateValue } = watch([fieldNames.fromDate]);
 
     const submit = useCallback(
-        (store: boolean) => (fields: FilterForm) => {
+        (store: boolean) => async (fields: FilterForm) => {
             const newFilter = (Object.entries(fields) as [
                 keyof FilterForm,
                 boolean | (Date | undefined)
@@ -196,16 +200,21 @@ export default function TransactionLogFilters() {
                 return { ...acc, ...getGroupValues(filterGroup, v as boolean) };
             }, rewardFilter);
 
-            updateRewardFilter(dispatch, address, newFilter, store);
+            await updateRewardFilter(dispatch, address, newFilter, store);
+
+            onUpdate();
         },
-        [rewardFilter, dispatch, address]
+        [rewardFilter, dispatch, address, onUpdate]
     );
 
     const clear = useCallback(async () => {
         await clearRewardFilters(dispatch, address);
+
         fromDateRef.current?.clear();
         toDateRef.current?.clear();
-    }, [dispatch, address]);
+
+        onUpdate();
+    }, [dispatch, address, onUpdate]);
 
     useEffect(() => {
         reset({ ...defaultValues });

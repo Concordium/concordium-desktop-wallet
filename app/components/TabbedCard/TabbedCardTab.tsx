@@ -1,4 +1,8 @@
-import React, { PropsWithChildren } from 'react';
+import React, { forwardRef, PropsWithChildren } from 'react';
+
+export interface TabbedCardTabRef {
+    focus(): void;
+}
 
 export type TabbedCardTabProps = PropsWithChildren<{
     header: string;
@@ -6,6 +10,11 @@ export type TabbedCardTabProps = PropsWithChildren<{
     onClick?(): void;
 }>;
 
-export default function TabbedCardTab({ children }: TabbedCardTabProps) {
-    return <>{children}</>;
-}
+// eslint-disable-next-line react/display-name
+const TabbedCardTab = forwardRef<TabbedCardTabRef, TabbedCardTabProps>(
+    ({ children }) => {
+        return <>{children}</>;
+    }
+);
+
+export default TabbedCardTab;
