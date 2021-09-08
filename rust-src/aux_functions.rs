@@ -591,3 +591,17 @@ pub fn get_address_from_cred_id(cred_id: &str) -> Result<String> {
     let cred_id_parsed: ExampleCurve = base16_decode_string(cred_id)?;
     Ok(AccountAddress::new(&cred_id_parsed).to_string())
 }
+
+pub fn calculate_cred_id(
+    prf_key_seed: &str,
+    cred_counter: u8,
+    global_context: &str
+) -> Result<String> {
+    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls_key(&prf_key_seed)?);
+
+    let global_context = from_str(global_context)?;
+
+    let cred_id = generate_cred_id::<ExampleCurve>(&prf_key, cred_counter, &global_context)?;
+
+    Ok(base16_encode_string(&cred_id))
+}

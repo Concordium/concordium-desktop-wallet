@@ -22,7 +22,7 @@ export default function IdentityView() {
                 identityName={identity.name}
                 isRejected={identity.status === IdentityStatus.Rejected}
             />
-            <IdentityCard identity={identity} showAttributes canEditName />
+            <IdentityCard identity={identity} showAttributes canEdit />
         </>
     );
 }

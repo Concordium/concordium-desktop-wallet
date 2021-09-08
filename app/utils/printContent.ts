@@ -9,7 +9,7 @@ export default async function printContent(target: HTMLIFrameElement) {
 
     try {
         error = await window.printElement(
-            encodeURI(windowToPrint.document.body.outerHTML)
+            encodeURIComponent(windowToPrint.document.body.outerHTML)
         );
     } catch (e) {
         throw new Error(`Failed to print due to: ${e.message}.`);

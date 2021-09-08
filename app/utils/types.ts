@@ -97,6 +97,7 @@ export enum IdentityStatus {
     Rejected = 'rejected',
     RejectedAndWarned = 'rejectedAndWarned',
     Pending = 'pending',
+    Recovered = 'recovered',
     // eslint-disable-next-line no-shadow
     Genesis = 'genesis',
 }
@@ -1276,6 +1277,8 @@ export type PolymorphicComponentProps<
     Props = {}
 > = InheritableElementProps<C, Props & AsProp<C>>;
 
+export type StateUpdate<Type> = React.Dispatch<React.SetStateAction<Type>>;
+
 export enum TransactionTypes {
     UpdateInstruction,
     AccountTransaction,
@@ -1350,3 +1353,8 @@ export type PrivateKeySeeds = {
     idCredSec: Buffer;
     prfKey: Buffer;
 };
+
+export type AccountAndCredentialPairs = {
+    account: Account;
+    credential: Credential;
+}[];

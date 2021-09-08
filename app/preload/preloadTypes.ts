@@ -22,6 +22,7 @@ import {
     WalletType,
     IdentityProvider,
     IncomingTransaction,
+    AccountAndCredentialPairs,
 } from '~/utils/types';
 import { ExternalCredential, GetTransactionsOutput } from '../database/types';
 import type LedgerCommands from './preloadLedgerTypes';
@@ -75,7 +76,7 @@ export type DecryptionResult = DecryptionData | DecryptionError;
 export type CryptoMethods = {
     encrypt: (data: string, password: string) => EncryptedData;
     decrypt: (data: EncryptedData, password: string) => DecryptionResult;
-    sha256: (data: (Buffer | Uint8Array)[]) => Buffer;
+    sha256: (data: (string | Buffer | Uint8Array)[]) => Buffer;
 };
 
 export type GetTransactionsResult = {
@@ -128,6 +129,13 @@ export type AccountMethods = {
         identityNumber: number,
         values: Partial<Account>
     ) => Promise<number>;
+    insertFromRecoveryNewIdentity: (
+        recovered: AccountAndCredentialPairs,
+        identity: Omit<Identity, 'id'>
+    ) => Promise<void>;
+    insertFromRecoveryExistingIdentity: (
+        recovered: AccountAndCredentialPairs
+    ) => Promise<void>;
 };
 
 export type AddressBookMethods = {

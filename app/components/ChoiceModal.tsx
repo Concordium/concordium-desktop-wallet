@@ -1,4 +1,5 @@
 import React from 'react';
+import { LocationDescriptorObject } from 'history';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
@@ -8,10 +9,10 @@ import { Action } from '../utils/types';
 
 interface Props {
     title: string;
-    description: string;
+    description: string | JSX.Element;
     actions: Action[];
     open: boolean;
-    postAction(): void;
+    postAction(location?: string | LocationDescriptorObject<unknown>): void;
     disableClose?: boolean;
 }
 
@@ -38,7 +39,7 @@ export default function ChoiceModal({
                                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                 dispatch(push(location as any));
                             }
-                            postAction();
+                            postAction(location);
                         }}
                     >
                         {label}

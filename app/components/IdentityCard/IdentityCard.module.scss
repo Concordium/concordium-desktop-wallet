@@ -31,6 +31,7 @@
 }
 
 .topRow {
+    min-height: 1.2em;
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -59,6 +60,16 @@
     border-top: 1px solid $color-grey;
 }
 
+.failedDetailsLine {
+    text-align: left;
+    margin: 0;
+    font-size: $font-size-body3;
+
+    &:not(:last-child) {
+        padding-bottom: 10px;
+    }
+}
+
 .form,
 .name,
 .nameField {
@@ -72,6 +83,7 @@
 }
 
 .name {
+    font-weight: $font-weight-regular;
     padding: 0 40px;
     margin-bottom: 0;
 }

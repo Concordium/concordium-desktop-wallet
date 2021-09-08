@@ -2,6 +2,7 @@ import {
     BoolResponse,
     JsonResponse,
     NodeInfoResponse,
+    PeerListResponse,
 } from '../proto/concordium_p2p_rpc_pb';
 import { BlockSummary, ConsensusStatus, AccountNonce } from './NodeApiTypes';
 import { AccountInfo, Global, Versioned } from '../utils/types';
@@ -110,6 +111,17 @@ export function getAccountInfo(
 export async function getNodeInfo(): Promise<NodeInfoResponse> {
     const response = await sendPromise(grpcMethods.nodeInfo);
     return NodeInfoResponse.deserializeBinary(response);
+}
+
+export async function getPeerList(
+    includeBootstrappers = false
+): Promise<PeerListResponse> {
+    const response = await sendPromise(grpcMethods.peerList, {
+        includeBootstrappers: includeBootstrappers
+            ? 'includeBootstrappers'
+            : '',
+    });
+    return PeerListResponse.deserializeBinary(response);
 }
 
 export async function getCryptographicParameters(

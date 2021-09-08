@@ -3,6 +3,7 @@ import React, { ReactNode } from 'react';
 import { getGTUSymbol } from '~/utils/gtu';
 import { AddressBookEntry, Account } from '~/utils/types';
 import styles from './ProposalDetails.module.scss';
+import DisplayAddress from '~/components/DisplayAddress';
 
 const placeholder = <p className={styles.placeholder}>To be determined</p>;
 
@@ -10,10 +11,15 @@ const formatValue = (text: ReactNode) => <p className={styles.value}>{text}</p>;
 export const formatNote = (text: ReactNode) => (
     <p className={styles.note}>{text}</p>
 );
+
 const formatAccount = (account: Account | AddressBookEntry) => (
     <>
         {formatValue(account.name)}
-        {formatNote(account.address)}
+        <DisplayAddress
+            outerClassName={styles.note}
+            lineClassName="body4 textFaded"
+            address={account.address}
+        />
         {'note' in account && formatNote(account.note)}
     </>
 );

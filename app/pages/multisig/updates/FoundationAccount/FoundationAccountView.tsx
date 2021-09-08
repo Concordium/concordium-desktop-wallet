@@ -3,6 +3,7 @@ import React from 'react';
 import Loading from '~/cross-app-components/Loading';
 import { FoundationAccount } from '~/utils/types';
 import withChainData, { ChainData } from '../../common/withChainData';
+import DisplayAddress from '~/components/DisplayAddress';
 
 import styles from './FoundationAccount.module.scss';
 import { getCurrentValue } from './util';
@@ -28,15 +29,19 @@ export default withChainData(function FoundationAccountView({
         <>
             <div>
                 <h5 className="mB0">Current foundation account address:</h5>
-                <div className={clsx(styles.accountAddress, 'textFaded')}>
-                    {currentFoundationAccount}
-                </div>
+                <DisplayAddress
+                    outerClassName="mT5"
+                    lineClassName={clsx(styles.accountAddress, 'textFaded')}
+                    address={currentFoundationAccount}
+                />
             </div>
             <div>
                 <h5 className="mB0">New foundation account address:</h5>
-                <div className={styles.accountAddress}>
-                    {foundationAccount.address}
-                </div>
+                <DisplayAddress
+                    outerClassName="mT5"
+                    lineClassName={styles.accountAddress}
+                    address={foundationAccount.address}
+                />
             </div>
         </>
     );
