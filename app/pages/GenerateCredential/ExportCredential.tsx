@@ -51,6 +51,7 @@ export default function ExportCredential({ onExported }: Props): JSX.Element {
             )}.json`,
         });
         if (success && !hasExported) {
+            // TODO: Add account, credential and addressBookEntry transactionally
             insertNewCredential(
                 dispatch,
                 credential.address,
@@ -83,7 +84,6 @@ export default function ExportCredential({ onExported }: Props): JSX.Element {
                     note: 'Shared account',
                 });
             }
-
             setHasExported(true);
             onExported(true);
         }

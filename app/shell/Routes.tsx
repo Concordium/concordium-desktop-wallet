@@ -18,6 +18,7 @@ import genesisAccount from '../pages/GenesisAccount/GenesisAccount';
 import TermsPage from '../pages/TermsPage';
 import DefaultPage from '~/pages/Home/DefaultPage';
 import SettingsRouter from '~/pages/settings/SettingsRouter';
+import RecoveryPage from '~/pages/Recovery/RecoveryPage';
 
 export default function Routes(): JSX.Element {
     return (
@@ -44,6 +45,7 @@ export default function Routes(): JSX.Element {
                 path={routes.MULTISIGTRANSACTIONS}
                 component={MultiSignatureRouter}
             />
+            <Route path={routes.RECOVERY} component={RecoveryPage} />
             <Route path={routes.SETTINGS} component={SettingsRouter} />
             <Route path={routes.TERMS} component={TermsPage} />
             <Route path={routes.HOME} component={HomePage} />

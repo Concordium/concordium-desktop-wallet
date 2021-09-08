@@ -22,6 +22,7 @@ import {
     WalletType,
     IdentityProvider,
     IncomingTransaction,
+    AccountAndCredentialPairs,
 } from '~/utils/types';
 import { ExternalCredential, GetTransactionsOutput } from '../database/types';
 import type LedgerCommands from './preloadLedgerTypes';
@@ -128,6 +129,13 @@ export type AccountMethods = {
         identityNumber: number,
         values: Partial<Account>
     ) => Promise<number>;
+    insertFromRecoveryNewIdentity: (
+        recovered: AccountAndCredentialPairs,
+        identity: Omit<Identity, 'id'>
+    ) => Promise<void>;
+    insertFromRecoveryExistingIdentity: (
+        recovered: AccountAndCredentialPairs
+    ) => Promise<void>;
 };
 
 export type AddressBookMethods = {

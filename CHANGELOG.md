@@ -13,6 +13,7 @@
 -   It is now possible to remove a failed identity.
 -   Added reference (sessionId) on failed identities, for support.
 -   Added support for memo transactions.
+-   Added algorithm to recover lost accounts and credentials.
 
 ### Changed
 
