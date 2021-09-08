@@ -40,6 +40,7 @@ export interface ConsensusStatus {
     slotDuration: number;
     transactionsPerBlockEMA: number;
     transactionsPerBlockEMSD: number;
+    protocolVersion: number;
 }
 
 interface UpdateQueue {

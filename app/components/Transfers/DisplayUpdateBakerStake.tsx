@@ -6,6 +6,7 @@ import styles from './transferDetails.module.scss';
 import { displayAsGTU } from '~/utils/gtu';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
+import DisplayAddress from '../DisplayAddress';
 
 interface Props {
     transaction: UpdateBakerStake;
@@ -20,7 +21,10 @@ export default function DisplayUpdateBakerStake({ transaction }: Props) {
         <>
             <p className={styles.title}>From Account:</p>
             <p className={styles.name}>{senderName}</p>
-            <p className={styles.address}>{transaction.sender}</p>
+            <DisplayAddress
+                address={transaction.sender}
+                lineClassName={styles.address}
+            />
             <p className={styles.title}>New staked amount:</p>
             <p className={styles.amount}>
                 {displayAsGTU(transaction.payload.stake)}

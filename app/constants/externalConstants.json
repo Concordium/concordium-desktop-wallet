@@ -1,3 +1,4 @@
 {
+    "maxMemoSize": 256,
     "walletProxytransactionLimit": 1000
 }

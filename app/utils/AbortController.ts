@@ -13,7 +13,9 @@ export default class AbortController {
      * the function is not actually stopped before isAborted is false again.
      */
     abort() {
-        this.isAborted = true;
+        if (!this.isReady) {
+            this.isAborted = true;
+        }
     }
 
     /**
@@ -24,16 +26,9 @@ export default class AbortController {
     }
 
     /**
-     * The controlled function should call this, when is finishes normally
+     * The controlled function should call this, when it finishes.
      */
     finish() {
-        this.isReady = true;
-    }
-
-    /**
-     * The controlled function should call this, when is acknowledges that it has been aborted
-     */
-    onAborted() {
         this.isReady = true;
         this.isAborted = false;
     }

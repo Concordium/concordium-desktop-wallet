@@ -41,9 +41,9 @@ interface Props {
     active?: boolean;
     showAttributes?: boolean | AttributeKeyName[];
     /**
-     * If true, allows editing name of identity inline. Defaults to false.
+     * If true, allows editing name of identity inline, and deleting it, if it has failed status. Defaults to false.
      */
-    canEditName?: boolean;
+    canEdit?: boolean;
 }
 
 // Returns the image corresponding to the given status.
@@ -61,6 +61,16 @@ function statusImage(status: IdentityStatus) {
     }
 }
 
+function getRightCorner(identity: Identity, canEdit: boolean) {
+    if (identity.status === IdentityStatus.RejectedAndWarned && canEdit) {
+        return <DeleteIdentity identity={identity} />;
+    }
+    if (identity.status === IdentityStatus.Recovered) {
+        return null;
+    }
+    return 'Identity';
+}
+
 /**
  * Displays the information of the Identity.
  */
@@ -69,8 +79,8 @@ function IdentityListElement({
     onClick,
     className,
     active = false,
+    canEdit = false,
     showAttributes = false,
-    canEditName = false,
 }: Props): JSX.Element {
     const [isEditing, setIsEditing] = useState(false);
     const dispatch = useDispatch();
@@ -78,6 +88,8 @@ function IdentityListElement({
     const identityObject: IdentityObject | null = JSON.parse(
         identity.identityObject
     )?.value;
+
+    const isRecovered = identity.status === IdentityStatus.Recovered;
 
     async function handleSubmit({ name }: EditIdentityForm) {
         await editIdentityName(dispatch, identity.id, name);
@@ -112,19 +124,14 @@ function IdentityListElement({
                     ) : null}
                     {statusImage(identity.status)}
                     <span className={clsx(styles.rightAligned, 'body2')}>
-                        {identity.status === IdentityStatus.RejectedAndWarned &&
-                        canEditName ? (
-                            <DeleteIdentity identity={identity} />
-                        ) : (
-                            'Identity'
-                        )}
+                        {getRightCorner(identity, canEdit)}
                     </span>
                 </div>
                 <Form<EditIdentityForm>
                     onSubmit={handleSubmit}
                     className={styles.form}
                 >
-                    <h1 className={styles.name}>
+                    <h2 className={styles.name}>
                         {isEditing ? (
                             <Form.InlineInput
                                 name="name"
@@ -140,14 +147,14 @@ function IdentityListElement({
                         ) : (
                             <span
                                 style={{
-                                    marginRight: canEditName ? 2 : undefined, // To align as good as possible with input in edit mode.
+                                    marginRight: canEdit ? 2 : undefined, // To align as good as possible with input in edit mode.
                                 }}
                             >
                                 {identity.name}
                             </span>
                         )}
-                    </h1>
-                    {canEditName &&
+                    </h2>
+                    {canEdit &&
                         (isEditing ? (
                             <Form.Submit className={styles.edit} clear>
                                 <CheckIcon />
@@ -162,16 +169,21 @@ function IdentityListElement({
                             </Button>
                         ))}
                 </Form>
-                <div className="textFaded">
+                <div className="textFaded pH30">
                     {' '}
-                    {identityObject
+                    {!isRecovered && identityObject
                         ? ` Expires on ${formatDate(
                               identityObject.attributeList.validTo
                           )} `
                         : undefined}
+                    {isRecovered && 'Identity from account recovery.'}
+                    <br />
+                    {isRecovered &&
+                        showAttributes &&
+                        'This cannot be used to create new accounts.'}
                 </div>
             </div>
-            {showAttributes && identityObject && (
+            {showAttributes && !isRecovered && identityObject && (
                 <div className={styles.details}>
                     {Object.entries(
                         identityObject.attributeList.chosenAttributes ?? {}

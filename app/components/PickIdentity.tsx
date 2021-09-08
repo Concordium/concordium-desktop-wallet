@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { ClassName, Identity } from '~/utils/types';
-import {
-    confirmedIdentitiesSelector,
-    confirmedAndGenesisIdentitiesSelector,
-} from '~/features/IdentitySlice';
+import { confirmedIdentitiesSelector } from '~/features/IdentitySlice';
 import IdentityCard from '~/components/IdentityCard';
 import CardList from '~/cross-app-components/CardList';
 
 interface Props extends ClassName {
     chosenIdentity?: Identity;
     setIdentity(identity: Identity): void;
-    withGenesisIdentities?: boolean;
 }
 
 /**
@@ -21,12 +17,8 @@ export default function PickIdentity({
     chosenIdentity,
     setIdentity,
     className,
-    withGenesisIdentities = true,
 }: Props): JSX.Element {
-    const selector = withGenesisIdentities
-        ? confirmedAndGenesisIdentitiesSelector
-        : confirmedIdentitiesSelector;
-    const identities = useSelector(selector);
+    const identities = useSelector(confirmedIdentitiesSelector);
 
     const [chosenIndex, setChosenIndex] = useState<number | undefined>();
 

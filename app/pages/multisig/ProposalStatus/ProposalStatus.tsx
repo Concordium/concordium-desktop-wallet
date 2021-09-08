@@ -1,7 +1,9 @@
 import React, { useMemo } from 'react';
 import {
     instanceOfScheduledTransfer,
+    instanceOfScheduledTransferWithMemo,
     instanceOfSimpleTransfer,
+    instanceOfSimpleTransferWithMemo,
     instanceOfUpdateInstruction,
     instanceOfUpdateAccountCredentials,
     MultiSignatureTransaction,
@@ -46,6 +48,8 @@ export default function ProposalStatus({
 
     if (
         instanceOfSimpleTransfer(parsed) ||
+        instanceOfSimpleTransferWithMemo(parsed) ||
+        instanceOfScheduledTransferWithMemo(parsed) ||
         instanceOfScheduledTransfer(parsed)
     ) {
         return (

@@ -169,6 +169,13 @@ export const displayStatus = (status: MultiSignatureTransactionStatus) => (
     </tr>
 );
 
+export const displayMemo = (memo: string) => (
+    <tr>
+        <td>Memo</td>
+        <td>{memo}</td>
+    </tr>
+);
+
 export const displayExpiry = (expiry: bigint) => (
     <tr>
         <td>Expires on</td>

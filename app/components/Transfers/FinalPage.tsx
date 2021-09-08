@@ -7,6 +7,7 @@ import { parseTime } from '~/utils/timeHelpers';
 import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import ButtonNavLink from '~/components/ButtonNavLink';
+import DisplayMemo from '~/components/DisplayMemo';
 
 import {
     AddressBookEntry,
@@ -17,6 +18,9 @@ import {
     instanceOfTransferToPublic,
     instanceOfEncryptedTransfer,
     TimeStampUnit,
+    instanceOfScheduledTransferWithMemo,
+    instanceOfEncryptedTransferWithMemo,
+    instanceOfSimpleTransferWithMemo,
 } from '~/utils/types';
 
 interface State {
@@ -33,7 +37,19 @@ function getSpecificsHandler(transaction: AccountTransaction) {
     let amount;
     let title;
     let note;
-    if (instanceOfScheduledTransfer(transaction)) {
+    let memo;
+    if (
+        instanceOfSimpleTransferWithMemo(transaction) ||
+        instanceOfScheduledTransferWithMemo(transaction) ||
+        instanceOfEncryptedTransferWithMemo(transaction)
+    ) {
+        memo = transaction.payload.memo;
+    }
+
+    if (
+        instanceOfScheduledTransfer(transaction) ||
+        instanceOfScheduledTransferWithMemo(transaction)
+    ) {
         title = 'Scheduled Transfer submitted!';
         amount = getScheduledTransferAmount(transaction);
         note = (
@@ -50,13 +66,19 @@ function getSpecificsHandler(transaction: AccountTransaction) {
     } else if (instanceOfTransferToPublic(transaction)) {
         title = 'Unshield amount submitted!';
         amount = transaction.payload.transferAmount;
-    } else if (instanceOfSimpleTransfer(transaction)) {
+    } else if (
+        instanceOfSimpleTransfer(transaction) ||
+        instanceOfSimpleTransferWithMemo(transaction)
+    ) {
         title = 'Transfer submitted!';
         amount = transaction.payload.amount;
     } else if (instanceOfTransferToEncrypted(transaction)) {
         title = 'Shield amount submitted!';
         amount = transaction.payload.amount;
-    } else if (instanceOfEncryptedTransfer(transaction)) {
+    } else if (
+        instanceOfEncryptedTransfer(transaction) ||
+        instanceOfEncryptedTransferWithMemo(transaction)
+    ) {
         title = 'Shielded transfer submitted!';
         amount = transaction.payload.plainTransferAmount;
     } else {
@@ -64,7 +86,7 @@ function getSpecificsHandler(transaction: AccountTransaction) {
             `Unsupported transaction type - please implement: ${transaction}`
         );
     }
-    return { amount, title, note };
+    return { amount, title, note, memo };
 }
 
 function displayRecipient(recipient: AddressBookEntry) {
@@ -106,6 +128,8 @@ export default function FinalPage({ location }: Props): JSX.Element {
             />
             {handler.note}
             {displayRecipient(recipient)}
+
+            <DisplayMemo className="textCenter" memo={handler.memo} />
             <h3 className="textCenter mT10">
                 <b>Transaction hash:</b> {transactionHash}
             </h3>

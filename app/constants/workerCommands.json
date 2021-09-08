@@ -9,6 +9,7 @@
     "createEncryptedTransferData": "createEncryptedTransferData",
     "generateBakerKeys": "generateBakerKeys",
     "getAddressFromCredId": "getAddressFromCredId",
+    "getCredId": "getCredId",
     "createTransferToEncryptedData": "createTransferToEncryptedData",
     "createTransferToPublicData": "createTransferToPublicData"
 }

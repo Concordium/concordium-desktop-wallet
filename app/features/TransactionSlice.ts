@@ -97,8 +97,10 @@ export async function decryptTransactions(
 ) {
     const encryptedTransfers = transactions.filter(
         (t) =>
-            t.transactionKind ===
-                TransactionKindString.EncryptedAmountTransfer &&
+            [
+                TransactionKindString.EncryptedAmountTransfer,
+                TransactionKindString.EncryptedAmountTransferWithMemo,
+            ].includes(t.transactionKind) &&
             t.decryptedAmount === null &&
             t.status === TransactionStatus.Finalized
     );
@@ -144,8 +146,10 @@ function isUnshieldedBalanceTransaction(
     currentAddress: string
 ) {
     return !(
-        transaction.transactionKind ===
-            TransactionKindString.EncryptedAmountTransfer &&
+        [
+            TransactionKindString.EncryptedAmountTransfer,
+            TransactionKindString.EncryptedAmountTransferWithMemo,
+        ].includes(transaction.transactionKind) &&
         transaction.fromAddress !== currentAddress
     );
 }
@@ -158,6 +162,7 @@ export function isShieldedBalanceTransaction(
 ) {
     switch (transaction.transactionKind) {
         case TransactionKindString.EncryptedAmountTransfer:
+        case TransactionKindString.EncryptedAmountTransferWithMemo:
         case TransactionKindString.TransferToEncrypted:
         case TransactionKindString.TransferToPublic:
             return true;
@@ -225,7 +230,7 @@ export async function updateTransactions(
 ) {
     async function updateSubroutine(maxId: bigint) {
         if (controller.isAborted) {
-            controller.onAborted();
+            controller.finish();
             return;
         }
         const result = await fetchTransactions(account.address, maxId);
@@ -243,7 +248,7 @@ export async function updateTransactions(
         }
 
         if (controller.isAborted) {
-            controller.onAborted();
+            controller.finish();
             return;
         }
         if (maxId !== result.newMaxId) {
