@@ -33,7 +33,7 @@ async function getPrfKeySeed(
     identityNumber: number
 ) {
     setMessage('Please allow recovering credentials');
-    const prfKeySeed = await ledger.getPrfKey(identityNumber);
+    const prfKeySeed = await ledger.getPrfKey(identityNumber, true);
     setMessage('Recovering credentials');
     return prfKeySeed.toString('hex');
 }
