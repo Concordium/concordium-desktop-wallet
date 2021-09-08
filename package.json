@@ -246,6 +246,7 @@
     "axios": "^0.21.0",
     "bs58check": "^2.1.2",
     "buffer": "^6.0.3",
+    "cbor": "^8.0.0",
     "caniuse-lite": "^1.0.30001251",
     "clsx": "^1.1.1",
     "connected-react-router": "^6.6.1",

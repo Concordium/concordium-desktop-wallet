@@ -18,6 +18,7 @@ import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
 import DecryptModal, { DecryptModalInput } from '../DecryptModal';
+import transactionKindNames from '~/constants/transactionKindNames.json';
 
 import {
     FilterOption,
@@ -35,11 +36,26 @@ const decryptMessage = (name: string) =>
     `'${name}' has encrypted funds. To create a complete account report, we need to decrypt them. Otherwise this account will be skipped.`;
 
 const transactionTypeFilters: FilterOption[] = [
-    filterKind(TransactionKindString.Transfer),
-    filterKind(TransactionKindString.TransferWithSchedule),
+    filterKindGroup(transactionKindNames[TransactionKindString.Transfer], [
+        TransactionKindString.Transfer,
+        TransactionKindString.TransferWithMemo,
+    ]),
+    filterKindGroup(
+        transactionKindNames[TransactionKindString.TransferWithSchedule],
+        [
+            TransactionKindString.TransferWithSchedule,
+            TransactionKindString.TransferWithScheduleAndMemo,
+        ]
+    ),
+    filterKindGroup(
+        transactionKindNames[TransactionKindString.EncryptedAmountTransfer],
+        [
+            TransactionKindString.EncryptedAmountTransfer,
+            TransactionKindString.EncryptedAmountTransferWithMemo,
+        ]
+    ),
     filterKind(TransactionKindString.TransferToPublic),
     filterKind(TransactionKindString.TransferToEncrypted),
-    filterKind(TransactionKindString.EncryptedAmountTransfer),
     filterKind(TransactionKindString.FinalizationReward),
     filterKind(TransactionKindString.BakingReward),
     filterKind(TransactionKindString.BlockReward),

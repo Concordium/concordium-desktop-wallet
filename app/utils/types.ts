@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import type { LocationDescriptorObject } from 'history';
 import type { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import type { HTMLAttributes } from 'react';
 import type { RegisterOptions } from 'react-hook-form';
@@ -168,6 +167,9 @@ export enum TransactionKindString {
     TransferWithSchedule = 'transferWithSchedule',
     UpdateCredentials = 'updateCredentials',
     RegisterData = 'registerData',
+    TransferWithMemo = 'transferWithMemo',
+    EncryptedAmountTransferWithMemo = 'encryptedAmountTransferWithMemo',
+    TransferWithScheduleAndMemo = 'transferWithScheduleAndMemo',
 }
 
 // The ids of the different types of an AccountTransaction.
@@ -188,7 +190,11 @@ export enum TransactionKindId {
     Transfer_with_schedule = 19,
     Update_credentials = 20,
     Register_data = 21,
+    Simple_transfer_with_memo = 22,
+    Encrypted_transfer_with_memo = 23,
+    Transfer_with_schedule_and_memo = 24,
 }
+
 export interface SimpleTransferPayload {
     amount: string;
     toAddress: string;
@@ -299,10 +305,19 @@ export interface AccountTransaction<
     payload: PayloadType;
 }
 
-export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
+type WithMemo<Base extends {}> = Base & {
+    memo: string;
+};
+export type SimpleTransferWithMemoPayload = WithMemo<SimpleTransferPayload>;
+export type EncryptedTransferWithMemoPayload = WithMemo<EncryptedTransferPayload>;
+export type ScheduledTransferWithMemoPayload = WithMemo<ScheduledTransferPayload>;
 
 export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
+export type SimpleTransferWithMemo = AccountTransaction<SimpleTransferWithMemoPayload>;
 export type EncryptedTransfer = AccountTransaction<EncryptedTransferPayload>;
+export type EncryptedTransferWithMemo = AccountTransaction<EncryptedTransferWithMemoPayload>;
+export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
+export type ScheduledTransferWithMemo = AccountTransaction<ScheduledTransferWithMemoPayload>;
 export type TransferToEncrypted = AccountTransaction<TransferToEncryptedPayload>;
 export type UpdateAccountCredentials = AccountTransaction<UpdateAccountCredentialsPayload>;
 export type TransferToPublic = AccountTransaction<TransferToPublicPayload>;
@@ -493,6 +508,7 @@ export interface TransferTransaction {
     status: TransactionStatus;
     rejectReason?: RejectReason | string;
     decryptedAmount?: string;
+    memo?: string;
 }
 
 export interface TransferTransactionWithNames extends TransferTransaction {
@@ -787,7 +803,14 @@ export function instanceOfAccountTransactionWithSignature(
 export function instanceOfSimpleTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is SimpleTransfer {
-    return object.transactionKind === TransactionKindId.Simple_transfer;
+    return TransactionKindId.Simple_transfer === object.transactionKind;
+}
+export function instanceOfSimpleTransferWithMemo(
+    object: AccountTransaction<TransactionPayload>
+): object is SimpleTransferWithMemo {
+    return (
+        TransactionKindId.Simple_transfer_with_memo === object.transactionKind
+    );
 }
 
 export function instanceOfTransferToEncrypted(
@@ -808,10 +831,28 @@ export function instanceOfEncryptedTransfer(
     return object.transactionKind === TransactionKindId.Encrypted_transfer;
 }
 
+export function instanceOfEncryptedTransferWithMemo(
+    object: AccountTransaction<TransactionPayload>
+): object is EncryptedTransferWithMemo {
+    return (
+        object.transactionKind ===
+        TransactionKindId.Encrypted_transfer_with_memo
+    );
+}
+
 export function instanceOfScheduledTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is ScheduledTransfer {
     return object.transactionKind === TransactionKindId.Transfer_with_schedule;
+}
+
+export function instanceOfScheduledTransferWithMemo(
+    object: AccountTransaction<TransactionPayload>
+): object is ScheduledTransferWithMemo {
+    return (
+        object.transactionKind ===
+        TransactionKindId.Transfer_with_schedule_and_memo
+    );
 }
 
 export function instanceOfUpdateAccountCredentials(
@@ -1117,6 +1158,7 @@ export interface TransactionDetails {
     inputEncryptedAmount?: EncryptedAmount;
     type: TransactionKindString;
     outcome: string;
+    memo?: Hex;
 }
 
 export interface TransactionOrigin {
@@ -1208,11 +1250,6 @@ interface EventResult {
 export interface TransactionEvent {
     result: EventResult;
     cost: string;
-}
-
-export interface Action {
-    label: string;
-    location?: LocationDescriptorObject | string;
 }
 
 export type ClassName = Pick<HTMLAttributes<HTMLElement>, 'className'>;

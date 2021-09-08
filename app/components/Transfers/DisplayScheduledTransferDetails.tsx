@@ -8,6 +8,7 @@ import DisplayFee from '~/components/DisplayFee';
 import ScheduleList from '~/components/ScheduleList';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
+import DisplayMemo from '~/components/DisplayMemo';
 import DisplayAddress from '../DisplayAddress';
 
 import styles from './transferDetails.module.scss';
@@ -16,15 +17,18 @@ interface Props {
     transaction: ScheduledTransfer;
     fromName?: string;
     to?: AddressBookEntry;
+    memo?: string;
 }
 
 /**
  * Displays an overview of a scheduledTransfer.
+ * N.B. This can also display a scheduled transfer with memo, but this is done by passing the memo argument.
  */
 export default function DisplayScheduledTransfer({
     transaction,
     fromName,
     to,
+    memo,
 }: Props) {
     const amount = getScheduledTransferAmount(transaction);
     const singleSigTransfer = useRouteMatch(routes.SUBMITTRANSFER);
@@ -47,6 +51,7 @@ export default function DisplayScheduledTransfer({
             <h5 className={styles.title}>Amount:</h5>
             <p className={styles.amount}>{displayAsGTU(amount)}</p>
             <DisplayFee className={styles.fee} transaction={transaction} />
+            <DisplayMemo memo={memo} />
             {Boolean(singleSigTransfer) || (
                 <DisplayTransactionExpiryTime
                     expiryTime={dateFromTimeStamp(transaction.expiry)}
