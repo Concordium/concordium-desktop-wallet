@@ -1157,6 +1157,7 @@ export interface TransactionDetails {
     inputEncryptedAmount?: EncryptedAmount;
     type: TransactionKindString;
     outcome: string;
+    memo?: Hex;
 }
 
 export interface TransactionOrigin {
@@ -1183,7 +1184,6 @@ export interface IncomingTransaction {
     transactionHash: Hex;
     subtotal?: Hex;
     cost?: Hex;
-    memo?: Hex;
 }
 
 export enum WalletType {

@@ -104,12 +104,12 @@ export function convertIncomingTransaction(
         : TransactionStatus.Failed;
 
     let memo;
-    if (transaction.memo) {
+    if (transaction.details.memo) {
         // The memo from the proxy is a "hex-encoded byte array".
         try {
-            memo = decodeCBOR(transaction.memo).toString();
+            memo = decodeCBOR(transaction.details.memo).toString();
         } catch {
-            memo = transaction.memo;
+            memo = transaction.details.memo;
         }
     }
 
