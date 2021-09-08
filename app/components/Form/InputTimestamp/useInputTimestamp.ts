@@ -1,5 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useCallback, useMemo, useEffect } from 'react';
+import {
+    useCallback,
+    useMemo,
+    useEffect,
+    useImperativeHandle,
+    Ref,
+} from 'react';
 import { useForm, Validate } from 'react-hook-form';
 import {
     dateFromDateParts,
@@ -13,6 +19,7 @@ import {
     hasAllParts,
     isEqual,
     PartialDateParts,
+    InputTimestampRef,
 } from './util';
 
 /**
@@ -24,10 +31,11 @@ import {
  */
 export default function useInputTimestamp(
     value: Date | undefined,
-    onChange: (v?: Date) => void
+    onChange: (v?: Date) => void,
+    ref: Ref<InputTimestampRef> | undefined
 ) {
     const f = useForm<Partial<DateParts>>({ mode: 'onTouched' });
-    const { watch, setValue, trigger, formState } = f;
+    const { watch, setValue, trigger, formState, reset } = f;
     const fields = watch();
 
     const setFormattedValue = useCallback(
@@ -55,6 +63,14 @@ export default function useInputTimestamp(
         );
         // To work around object identity comparison fo "parts"
     }, [JSON.stringify(parts), setFormattedValue]);
+
+    useImperativeHandle(
+        ref,
+        () => ({
+            clear: () => reset({}),
+        }),
+        []
+    );
 
     const fireOnChange = useCallback(() => {
         if (!hasAllParts(fields)) {

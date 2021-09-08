@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
@@ -24,6 +24,7 @@ import {
     minDate,
     pastDate,
 } from '~/components/Form/util/validation';
+import { InputTimestampRef } from '~/components/Form/InputTimestamp/util';
 
 interface FilterForm
     extends Pick<
@@ -142,6 +143,9 @@ export default function TransactionLogFilters() {
     const { rewardFilter = {}, address } = account ?? ({} as Account);
     const { fromDate, toDate } = rewardFilter;
 
+    const fromDateRef = useRef<InputTimestampRef>(null);
+    const toDateRef = useRef<InputTimestampRef>(null);
+
     const booleanFilters = useMemo(
         () => getActiveBooleanFilters(rewardFilter),
         [rewardFilter]
@@ -199,6 +203,8 @@ export default function TransactionLogFilters() {
 
     const clear = useCallback(async () => {
         await clearRewardFilters(dispatch, address);
+        fromDateRef.current?.clear();
+        toDateRef.current?.clear();
     }, [dispatch, address]);
 
     useEffect(() => {
@@ -227,6 +233,7 @@ export default function TransactionLogFilters() {
                             pastDate: pastDateValidator,
                         },
                     }}
+                    ref={fromDateRef}
                 />
                 <Form.Timestamp
                     name={fieldNames.toDate}
@@ -248,6 +255,7 @@ export default function TransactionLogFilters() {
                             },
                         },
                     }}
+                    ref={toDateRef}
                 />
                 <div className="m40 mB10 flexColumn">
                     {transactionFilters.map(({ field, display }) => (

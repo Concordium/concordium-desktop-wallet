@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import clsx from 'clsx';
-import React, { useCallback } from 'react';
+import React, { forwardRef, useCallback } from 'react';
 
 import { isDefined, noOp } from '../../../utils/basicHelpers';
 import { CommonInputProps } from '../common';
 import ErrorMessage from '../ErrorMessage';
-import { fieldNames } from './util';
+import { fieldNames, InputTimestampRef } from './util';
 import InputTimestampField from './InputTimestampField';
 import useInputTimestamp from './useInputTimestamp';
 import InputTimestampContext from './InputTimestampContext';
@@ -98,109 +98,119 @@ export interface InputTimestampProps extends CommonInputProps, ClassName {
  * ...
  * <InputTimestamp label="Timestamp" value={date} onChange={setDate} />
  */
-export default function InputTimestamp({
-    label,
-    error,
-    value,
-    errorMessages = defaultErrorMessages,
-    isInvalid: externalInvalid = false,
-    onChange,
-    onBlur = noOp,
-    className,
-    autoComplete = AutoCompleteMode.ON,
-}: InputTimestampProps): JSX.Element {
-    const { form, fireOnChange, validateDate } = useInputTimestamp(
-        value,
-        onChange
-    );
-    const formHasValue = !!Object.values(form.watch()).find((v) => v);
+// eslint-disable-next-line react/display-name
+const InputTimestamp = forwardRef<InputTimestampRef, InputTimestampProps>(
+    (
+        {
+            label,
+            error,
+            value,
+            errorMessages = defaultErrorMessages,
+            isInvalid: externalInvalid = false,
+            onChange,
+            onBlur = noOp,
+            className,
+            autoComplete = AutoCompleteMode.ON,
+        },
+        ref
+    ): JSX.Element => {
+        const { form, fireOnChange, validateDate } = useInputTimestamp(
+            value,
+            onChange,
+            ref
+        );
+        const formHasValue = !!Object.values(form.watch()).find((v) => v);
 
-    const handleBlur = useCallback(() => {
-        if (!value && formHasValue) {
-            const autoCompleteDate = autoCompleteStrategies[autoComplete](
-                form.getValues()
-            );
-            onChange(autoCompleteDate);
-        }
+        const handleBlur = useCallback(() => {
+            if (!value && formHasValue) {
+                const autoCompleteDate = autoCompleteStrategies[autoComplete](
+                    form.getValues()
+                );
+                onChange(autoCompleteDate);
+            }
 
-        onBlur();
-    }, [onBlur, form, autoComplete, value, onChange, formHasValue]);
-    const { isFocused, setIsFocused } = useMultiFieldFocus(handleBlur);
+            onBlur();
+        }, [onBlur, form, autoComplete, value, onChange, formHasValue]);
+        const { isFocused, setIsFocused } = useMultiFieldFocus(handleBlur);
 
-    const internalInvalid =
-        !!Object.values(form.errors).filter(isDefined)[0] && formHasValue;
-    const invalid = internalInvalid || externalInvalid;
+        const internalInvalid =
+            !!Object.values(form.errors).filter(isDefined)[0] && formHasValue;
+        const invalid = internalInvalid || externalInvalid;
 
-    const firstFormError =
-        form.errors?.year ??
-        form.errors?.month ??
-        form.errors?.date ??
-        form.errors?.hours ??
-        form.errors?.minutes ??
-        form.errors?.seconds;
-    const errorMessage =
-        errorMessages[firstFormError?.ref?.name as keyof DateParts] || error;
+        const firstFormError =
+            form.errors?.year ??
+            form.errors?.month ??
+            form.errors?.date ??
+            form.errors?.hours ??
+            form.errors?.minutes ??
+            form.errors?.seconds;
+        const errorMessage =
+            errorMessages[firstFormError?.ref?.name as keyof DateParts] ||
+            error;
 
-    return (
-        <div className={clsx(styles.root, className)}>
-            <Label className="mB5">{label}</Label>
-            <div
-                className={clsx(
-                    styles.input,
-                    isFocused && styles.inputFocused,
-                    invalid && styles.inputInvalid
-                )}
-            >
-                <InputTimestampContext.Provider
-                    value={{ ...form, setIsFocused, fireOnChange }}
+        return (
+            <div className={clsx(styles.root, className)}>
+                <Label className="mB5">{label}</Label>
+                <div
+                    className={clsx(
+                        styles.input,
+                        isFocused && styles.inputFocused,
+                        invalid && styles.inputInvalid
+                    )}
                 >
-                    <InputTimestampField
-                        className={styles.year}
-                        name={fieldNames.year}
-                        placeholder="YYYY"
-                        rules={{ min: 100, max: 9999 }}
-                    />
-                    -
-                    <InputTimestampField
-                        className={styles.field}
-                        name={fieldNames.month}
-                        placeholder="MM"
-                        rules={{ min: 1, max: 12 }}
-                    />
-                    -
-                    <InputTimestampField
-                        className={styles.field}
-                        name={fieldNames.date}
-                        placeholder="DD"
-                        rules={{
-                            validate: validateDate,
-                            max: 31,
-                        }}
-                    />
-                    <span>at</span>
-                    <InputTimestampField
-                        className={styles.field}
-                        name={fieldNames.hours}
-                        placeholder="HH"
-                        rules={{ max: 23 }}
-                    />
-                    :
-                    <InputTimestampField
-                        className={styles.field}
-                        name={fieldNames.minutes}
-                        placeholder="MM"
-                        rules={{ max: 59 }}
-                    />
-                    :
-                    <InputTimestampField
-                        className={styles.field}
-                        name={fieldNames.seconds}
-                        placeholder="SS"
-                        rules={{ max: 59 }}
-                    />
-                </InputTimestampContext.Provider>
+                    <InputTimestampContext.Provider
+                        value={{ ...form, setIsFocused, fireOnChange }}
+                    >
+                        <InputTimestampField
+                            className={styles.year}
+                            name={fieldNames.year}
+                            placeholder="YYYY"
+                            rules={{ min: 100, max: 9999 }}
+                        />
+                        -
+                        <InputTimestampField
+                            className={styles.field}
+                            name={fieldNames.month}
+                            placeholder="MM"
+                            rules={{ min: 1, max: 12 }}
+                        />
+                        -
+                        <InputTimestampField
+                            className={styles.field}
+                            name={fieldNames.date}
+                            placeholder="DD"
+                            rules={{
+                                validate: validateDate,
+                                max: 31,
+                            }}
+                        />
+                        <span>at</span>
+                        <InputTimestampField
+                            className={styles.field}
+                            name={fieldNames.hours}
+                            placeholder="HH"
+                            rules={{ max: 23 }}
+                        />
+                        :
+                        <InputTimestampField
+                            className={styles.field}
+                            name={fieldNames.minutes}
+                            placeholder="MM"
+                            rules={{ max: 59 }}
+                        />
+                        :
+                        <InputTimestampField
+                            className={styles.field}
+                            name={fieldNames.seconds}
+                            placeholder="SS"
+                            rules={{ max: 59 }}
+                        />
+                    </InputTimestampContext.Provider>
+                </div>
+                <ErrorMessage>{invalid && errorMessage}</ErrorMessage>
             </div>
-            <ErrorMessage>{invalid && errorMessage}</ErrorMessage>
-        </div>
-    );
-}
+        );
+    }
+);
+
+export default InputTimestamp;
