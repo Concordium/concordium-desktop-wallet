@@ -67,7 +67,9 @@ export async function exportKeysFromLedger(
         identityNumber
     );
     displayMessage(
-        `Please confirm exporting public key on device, for identity: ${identityNumber}, credential: ${credentialNumber}.`
+        `Please confirm exporting
+public key on device,
+for identity: ${identityNumber}, credential: ${credentialNumber}.`
     );
     const publicKey = (await ledger.getPublicKey(path)).toString('hex');
     displayMessage(`Please confirm exported public key: ${publicKey}`);
