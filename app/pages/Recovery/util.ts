@@ -17,7 +17,7 @@ import {
     Identity,
 } from '~/utils/types';
 import { getCurrentYearMonth } from '~/utils/timeHelpers';
-import { maxCredentialsOnAccount } from '~/constants/recoveryConstants.json';
+import { maxCredentialsOnIdentity } from '~/constants/recoveryConstants.json';
 import { createAccount } from '~/utils/accountHelpers';
 import { getNextCredentialNumber } from '~/database/CredentialDao';
 import AbortController from '~/utils/AbortController';
@@ -198,7 +198,7 @@ export async function recoverCredentials(
 ): Promise<AccountAndCredentialPairs> {
     const allRecovered = [];
     let credNumber = startingCredNumber;
-    while (credNumber < maxCredentialsOnAccount) {
+    while (credNumber < maxCredentialsOnIdentity) {
         const credId = await getCredId(prfKeySeed, credNumber, global);
 
         const recovered = await recoverCredential(
