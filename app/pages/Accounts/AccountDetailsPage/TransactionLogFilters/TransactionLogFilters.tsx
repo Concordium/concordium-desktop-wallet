@@ -19,6 +19,11 @@ import Form from '~/components/Form';
 
 import styles from './TransactionLogFilters.module.scss';
 import Button from '~/cross-app-components/Button';
+import {
+    allowOptional,
+    minDate,
+    pastDate,
+} from '~/components/Form/util/validation';
 
 interface FilterForm
     extends Pick<
@@ -125,6 +130,8 @@ const getGroupValues = (group: TransactionKindString[], v: boolean) =>
         {} as Partial<RewardFilter>
     );
 
+const pastDateValidator = allowOptional(pastDate('Date must be before today'));
+
 /**
  * Displays available transaction filters, and allows the user to activate/deactive them..
  */
@@ -161,7 +168,8 @@ export default function TransactionLogFilters() {
     );
 
     const form = useForm<FilterForm>({ defaultValues });
-    const { reset, handleSubmit } = form;
+    const { reset, handleSubmit, watch, trigger } = form;
+    const { fromDate: fromDateValue } = watch([fieldNames.fromDate]);
 
     const submit = useCallback(
         (store: boolean) => (fields: FilterForm) => {
@@ -198,6 +206,11 @@ export default function TransactionLogFilters() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [defaultValues]);
 
+    useEffect(() => {
+        trigger(fieldNames.toDate);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fromDateValue]);
+
     if (!account) {
         return null;
     }
@@ -209,11 +222,32 @@ export default function TransactionLogFilters() {
                     name={fieldNames.fromDate}
                     className="mT20"
                     label="From:"
+                    rules={{
+                        validate: {
+                            pastDate: pastDateValidator,
+                        },
+                    }}
                 />
                 <Form.Timestamp
                     name={fieldNames.toDate}
                     className="mT20"
                     label="To:"
+                    rules={{
+                        validate: {
+                            pastDate: pastDateValidator,
+                            minToDate(v?: Date) {
+                                if (!v || !fromDateValue) {
+                                    return true;
+                                }
+                                return allowOptional(
+                                    minDate(
+                                        fromDateValue,
+                                        ' Must be after date specified in first date field'
+                                    )
+                                )(v);
+                            },
+                        },
+                    }}
                 />
                 <div className="m40 mB10 flexColumn">
                     {transactionFilters.map(({ field, display }) => (
