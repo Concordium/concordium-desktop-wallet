@@ -672,7 +672,7 @@ export function validateMemo(memo: string): string | undefined {
         (asNumber > Number.MAX_SAFE_INTEGER ||
             asNumber < Number.MIN_SAFE_INTEGER)
     ) {
-        return `Numbers greater than ${Number.MAX_SAFE_INTEGER} or smaller than ${Number.MIN_SAFE_INTEGER} are not supported..`;
+        return `Numbers greater than ${Number.MAX_SAFE_INTEGER} or smaller than ${Number.MIN_SAFE_INTEGER} are not supported`;
     }
     if (getEncodedSize(memo) > maxMemoSize) {
         return `Memo is too large, encoded size must be at most ${maxMemoSize} bytes`;
