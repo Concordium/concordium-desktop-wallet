@@ -36,9 +36,7 @@ async function getSecretsFromLedger(
     displayMessage: (message: string) => void,
     identityNumber: number
 ) {
-    displayMessage(
-        'Please confirm exporting private keys to create credential from device'
-    );
+    displayMessage('Please accept to create credential on device');
     const {
         prfKey: prfKeySeed,
         idCredSec: idCredSecSeed,
