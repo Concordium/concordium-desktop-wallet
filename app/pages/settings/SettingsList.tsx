@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import routes from '~/constants/routes.json';
 import { settingsSelector } from '~/features/SettingsSlice';
 import settingKeys from '~/constants/settingKeys.json';
 import ButtonNavLink from '~/components/ButtonNavLink';
@@ -27,6 +28,9 @@ export default function SettingsList() {
                     {settingsName.get(setting.type)}
                 </ButtonNavLink>
             ))}
+            <ButtonNavLink className={styles.item} to={routes.RECOVERY}>
+                Recover existing accounts
+            </ButtonNavLink>
         </>
     );
 }

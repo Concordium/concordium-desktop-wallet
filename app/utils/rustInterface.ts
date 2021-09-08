@@ -494,3 +494,16 @@ export function getAddressFromCredentialId(credId: string): Promise<string> {
         credId,
     });
 }
+
+export function getCredId(
+    prfKeySeed: string,
+    credentialNumber: number,
+    global: Global
+): Promise<string> {
+    return worker.postMessage({
+        command: workerCommands.getCredId,
+        prfKey: prfKeySeed,
+        credentialNumber,
+        global: stringify(global),
+    });
+}

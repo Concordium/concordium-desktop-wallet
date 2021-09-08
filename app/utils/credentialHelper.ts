@@ -3,12 +3,14 @@ import { getWalletId } from '~/database/WalletDao';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getPairingPath } from '~/features/ledger/Path';
 import {
+    Policy,
     Credential,
     CredentialWithIdentityNumber,
     DeployedCredential,
     Identity,
     instanceOfCredentialWithIdentityNumber,
     instanceOfDeployedCredential,
+    CommitmentsRandomness,
 } from './types';
 
 /**
@@ -57,6 +59,26 @@ export default async function findLocalDeployedCredentialWithWallet(
         return undefined;
     }
     return findLocalDeployedCredential(walletId, accountAddress);
+}
+
+export function createNewCredential(
+    accountAddress: string,
+    credentialNumber: number,
+    identityId: number,
+    credentialIndex: number | undefined,
+    credId: string,
+    policy: Policy,
+    randomness?: CommitmentsRandomness
+) {
+    return {
+        credId,
+        policy: JSON.stringify(policy),
+        accountAddress,
+        credentialNumber,
+        identityId,
+        credentialIndex,
+        randomness: randomness ? JSON.stringify(randomness) : undefined,
+    };
 }
 
 export const CREDENTIAL_NOTE_MAX_LENGTH = 100;
