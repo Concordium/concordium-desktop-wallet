@@ -1,19 +1,30 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import clsx from 'clsx';
-import React from 'react';
+import React, { useCallback } from 'react';
 
-import { isDefined } from '../../../utils/basicHelpers';
+import { isDefined, noOp } from '../../../utils/basicHelpers';
 import { CommonInputProps } from '../common';
 import ErrorMessage from '../ErrorMessage';
 import { fieldNames } from './util';
 import InputTimestampField from './InputTimestampField';
 import useInputTimestamp from './useInputTimestamp';
 import InputTimestampContext from './InputTimestampContext';
-
-import styles from './InputTimestamp.module.scss';
 import useMultiFieldFocus from '../common/useMultiFieldFocus';
-import { DateParts } from '~/utils/timeHelpers';
+import {
+    dateFromDateParts,
+    DateParts,
+    datePartsFromDate,
+} from '~/utils/timeHelpers';
 import { ClassName } from '~/utils/types';
 import Label from '~/components/Label';
+
+import styles from './InputTimestamp.module.scss';
+
+// TODO: maybe add PAST and FUTURE as well if suitable.
+enum AutoCompleteMode {
+    OFF = 'off',
+    ON = 'on',
+}
 
 type TimestampErrorMessages = DateParts;
 
@@ -24,6 +35,38 @@ const defaultErrorMessages: TimestampErrorMessages = {
     hours: 'Invalid hours value',
     minutes: 'Invalid minutes value',
     seconds: 'Invalid seconds value',
+};
+
+const autoCompleteStrategies: {
+    [P in AutoCompleteMode]: (parts: Partial<DateParts>) => Date | undefined;
+} = {
+    [AutoCompleteMode.OFF]: () => undefined,
+    [AutoCompleteMode.ON]: (parts) => {
+        const now = new Date();
+        let baseDate: Date = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate(),
+            0,
+            0,
+            0
+        );
+
+        if (parts.date || parts.month || parts.year) {
+            baseDate = new Date(now.getFullYear(), 0, 1, 0, 0, 0);
+        }
+
+        const baseParts = datePartsFromDate(baseDate)!;
+
+        return dateFromDateParts({
+            year: parts.year || baseParts.year,
+            month: parts.month || baseParts.month,
+            date: parts.date || baseParts.date,
+            hours: parts.hours || baseParts.hours,
+            minutes: parts.minutes || baseParts.minutes,
+            seconds: parts.seconds || baseParts.seconds,
+        });
+    },
 };
 
 export interface InputTimestampProps extends CommonInputProps, ClassName {
@@ -43,6 +86,7 @@ export interface InputTimestampProps extends CommonInputProps, ClassName {
      * Error messages object to supply custom error messages for internal field errors.
      */
     errorMessages?: TimestampErrorMessages;
+    autoComplete?: AutoCompleteMode;
 }
 
 /**
@@ -59,22 +103,43 @@ export default function InputTimestamp({
     error,
     value,
     errorMessages = defaultErrorMessages,
-    isInvalid = false,
+    isInvalid: externalInvalid = false,
     onChange,
-    onBlur,
+    onBlur = noOp,
     className,
+    autoComplete = AutoCompleteMode.ON,
 }: InputTimestampProps): JSX.Element {
     const { form, fireOnChange, validateDate } = useInputTimestamp(
         value,
         onChange
     );
-    const { isFocused, setIsFocused } = useMultiFieldFocus(onBlur);
+    const formHasValue = !!Object.values(form.watch()).find((v) => v);
 
-    const firstFormError = Object.values(form.errors).filter(isDefined)[0];
+    const handleBlur = useCallback(() => {
+        if (!value && formHasValue) {
+            const autoCompleteDate = autoCompleteStrategies[autoComplete](
+                form.getValues()
+            );
+            onChange(autoCompleteDate);
+        }
+
+        onBlur();
+    }, [onBlur, form, autoComplete, value, onChange, formHasValue]);
+    const { isFocused, setIsFocused } = useMultiFieldFocus(handleBlur);
+
+    const internalInvalid =
+        !!Object.values(form.errors).filter(isDefined)[0] && formHasValue;
+    const invalid = internalInvalid || externalInvalid;
+
+    const firstFormError =
+        form.errors?.year ??
+        form.errors?.month ??
+        form.errors?.date ??
+        form.errors?.hours ??
+        form.errors?.minutes ??
+        form.errors?.seconds;
     const errorMessage =
         errorMessages[firstFormError?.ref?.name as keyof DateParts] || error;
-    const invalid =
-        !!Object.values(form.errors).filter(isDefined)[0] || isInvalid;
 
     return (
         <div className={clsx(styles.root, className)}>
@@ -135,7 +200,7 @@ export default function InputTimestamp({
                     />
                 </InputTimestampContext.Provider>
             </div>
-            <ErrorMessage>{errorMessage}</ErrorMessage>
+            <ErrorMessage>{invalid && errorMessage}</ErrorMessage>
         </div>
     );
 }

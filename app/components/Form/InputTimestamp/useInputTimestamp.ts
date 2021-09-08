@@ -32,7 +32,10 @@ export default function useInputTimestamp(
 
     const setFormattedValue = useCallback(
         (name: keyof DateParts, v?: string) => {
-            setValue(name, datePartFormatters[name](v));
+            setValue(name, datePartFormatters[name](v), {
+                shouldValidate: true,
+                shouldDirty: true,
+            });
         },
         [setValue]
     );
