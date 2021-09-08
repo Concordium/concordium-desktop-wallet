@@ -30,7 +30,8 @@ export default function DisplayRecovery({ status, recoveredAccounts }: Props) {
     useEffect(() => {
         if (recoveredAccounts.length) {
             loadAccountInfos(
-                recoveredAccounts[recoveredAccounts.length - 1],
+                // The list is built up in reverse, so the new accounts are in position 0.
+                recoveredAccounts[0],
                 dispatch,
                 false
             );
