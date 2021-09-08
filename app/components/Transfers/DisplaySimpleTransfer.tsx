@@ -6,6 +6,7 @@ import routes from '~/constants/routes.json';
 import DisplayFee from '~/components/DisplayFee';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
+import DisplayMemo from '~/components/DisplayMemo';
 import DisplayAddress from '../DisplayAddress';
 
 import styles from './transferDetails.module.scss';
@@ -14,15 +15,18 @@ interface Props {
     transaction: SimpleTransfer;
     fromName?: string;
     to?: AddressBookEntry;
+    memo?: string;
 }
 
 /**
  * Displays an overview of a simple transfer.
+ * N.B. This can also display a simple transfer with memo, but this is done by passing the memo argument.
  */
 export default function DisplaySimpleTransfer({
     transaction,
     fromName,
     to,
+    memo,
 }: Props) {
     const singleSigTransfer = useRouteMatch(routes.SUBMITTRANSFER);
     return (
@@ -45,6 +49,7 @@ export default function DisplaySimpleTransfer({
                 {displayAsGTU(transaction.payload.amount)}
             </p>
             <DisplayFee className={styles.fee} transaction={transaction} />
+            <DisplayMemo memo={memo} />
             {Boolean(singleSigTransfer) || (
                 <DisplayTransactionExpiryTime
                     expiryTime={dateFromTimeStamp(transaction.expiry)}

@@ -18,6 +18,7 @@ import {
     HashRows,
     standardTableHeader,
     displayExpiry,
+    displayMemo,
 } from '~/utils/printUtility';
 import { parseTime } from '~/utils/timeHelpers';
 import { displayAsGTU } from '~/utils/gtu';
@@ -29,6 +30,7 @@ interface Props {
     image?: string;
     fromName?: string;
     toName?: string;
+    memo?: string;
 }
 
 /**
@@ -41,6 +43,7 @@ function PrintFormatScheduledTransfer({
     status,
     fromName,
     toName,
+    memo,
 }: Props) {
     const amount = getScheduledTransferAmount(transaction);
     const body = (
@@ -54,6 +57,7 @@ function PrintFormatScheduledTransfer({
                     {totalWithdrawn(amount, transaction)}
                     {displayAmount(amount)}
                     {fee(transaction)}
+                    {memo ? displayMemo(memo) : null}
                     {displayStatus(status)}
                     {status === MultiSignatureTransactionStatus.Open &&
                         displayExpiry(transaction.expiry)}

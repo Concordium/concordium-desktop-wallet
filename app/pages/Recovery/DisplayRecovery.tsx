@@ -57,7 +57,7 @@ export default function DisplayRecovery({ status, recoveredAccounts }: Props) {
                         i.walletId === walletId
                 );
                 return (
-                    <>
+                    <React.Fragment key={identityNumber}>
                         <p className="bodyEmphasized textLeft mB0">
                             Identity index {identityNumber}:{' '}
                             {identity ? `(${identity.name})` : null}
@@ -80,7 +80,7 @@ export default function DisplayRecovery({ status, recoveredAccounts }: Props) {
                                 ))}
                             </CardList>
                         ) : null}
-                    </>
+                    </React.Fragment>
                 );
             })}
         </div>

@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import {
     AccountTransaction,
     instanceOfSimpleTransfer,
+    instanceOfSimpleTransferWithMemo,
     instanceOfTransferToEncrypted,
     instanceOfTransferToPublic,
     instanceOfScheduledTransfer,
+    instanceOfScheduledTransferWithMemo,
     instanceOfEncryptedTransfer,
+    instanceOfEncryptedTransferWithMemo,
     instanceOfUpdateAccountCredentials,
     instanceOfAddBaker,
     instanceOfRemoveBaker,
@@ -52,7 +55,6 @@ export default function AccountTransactionDetails({ transaction }: Props) {
                 .catch(() => {}); // lookupAddressBookEntry will only reject if there is a problem with the database. In that case we ignore the error and just display the address only.
         }
     });
-
     if (instanceOfSimpleTransfer(transaction)) {
         return (
             <DisplaySimpleTransfer
@@ -62,12 +64,32 @@ export default function AccountTransactionDetails({ transaction }: Props) {
             />
         );
     }
+    if (instanceOfSimpleTransferWithMemo(transaction)) {
+        return (
+            <DisplaySimpleTransfer
+                transaction={transaction}
+                to={to}
+                fromName={fromName}
+                memo={transaction.payload.memo}
+            />
+        );
+    }
     if (instanceOfEncryptedTransfer(transaction)) {
         return (
             <DisplayEncryptedTransfer
                 transaction={transaction}
                 to={to}
                 fromName={fromName}
+            />
+        );
+    }
+    if (instanceOfEncryptedTransferWithMemo(transaction)) {
+        return (
+            <DisplayEncryptedTransfer
+                transaction={transaction}
+                to={to}
+                fromName={fromName}
+                memo={transaction.payload.memo}
             />
         );
     }
@@ -103,6 +125,16 @@ export default function AccountTransactionDetails({ transaction }: Props) {
                 transaction={transaction}
                 to={to}
                 fromName={fromName}
+            />
+        );
+    }
+    if (instanceOfScheduledTransferWithMemo(transaction)) {
+        return (
+            <DisplayScheduleTransfer
+                transaction={transaction}
+                to={to}
+                fromName={fromName}
+                memo={transaction.payload.memo}
             />
         );
     }

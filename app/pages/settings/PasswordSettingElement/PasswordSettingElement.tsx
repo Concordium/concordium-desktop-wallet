@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import clsx from 'clsx';
 import { SubmitHandler } from 'react-hook-form';
 import Form from '~/components/Form/Form';
 import Card from '~/cross-app-components/Card/Card';
@@ -6,6 +7,7 @@ import { passwordValidators } from '~/utils/passwordHelpers';
 import styles from './PasswordSettingElement.module.scss';
 
 interface Props {
+    className?: string;
     displayText: string;
 }
 
@@ -17,7 +19,10 @@ interface PasswordInput {
 
 type PasswordForm = PasswordInput;
 
-export default function PasswordSettingElement({ displayText }: Props) {
+export default function PasswordSettingElement({
+    displayText,
+    className,
+}: Props) {
     const [validationError, setValidationError] = useState<string>();
     const [success, setSuccess] = useState<string>();
     const [keyingDatabase, setKeyingDatabase] = useState(false);
@@ -54,7 +59,7 @@ export default function PasswordSettingElement({ displayText }: Props) {
     );
 
     return (
-        <Card className={styles.top}>
+        <Card className={clsx(className, styles.top)}>
             <h3 className="mB0">{displayText}</h3>
             <Form onSubmit={handleSubmit}>
                 <Form.Input
