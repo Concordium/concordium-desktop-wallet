@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import clsx from 'clsx';
-import React, { forwardRef, useEffect } from 'react';
+import React, { forwardRef, useCallback } from 'react';
 
-import { isDefined, noOp } from '../../../utils/basicHelpers';
+import { isDefined, noOp } from '~/utils/basicHelpers';
 import { CommonInputProps } from '../common';
 import ErrorMessage from '../ErrorMessage';
 import { fieldNames, InputTimestampRef } from './util';
@@ -119,12 +119,10 @@ const InputTimestamp = forwardRef<InputTimestampRef, InputTimestampProps>(
             onChange,
             ref
         );
-        const formHasValue = !!Object.values(form.watch()).find((v) => v);
+        const formHasValue = !!Object.values(form.getValues()).find((v) => v);
 
-        const { isFocused, setIsFocused } = useMultiFieldFocus(onBlur);
-
-        useEffect(() => {
-            if (!isFocused && !value && formHasValue) {
+        const handleBlur = useCallback(() => {
+            if (!value && formHasValue) {
                 const autoCompleteDate = autoCompleteStrategies[autoComplete](
                     form.getValues()
                 );
@@ -132,8 +130,8 @@ const InputTimestamp = forwardRef<InputTimestampRef, InputTimestampProps>(
             }
 
             onBlur();
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [isFocused]);
+        }, [autoComplete, form, formHasValue, onBlur, onChange, value]);
+        const { isFocused, setIsFocused } = useMultiFieldFocus(handleBlur);
 
         const internalInvalid =
             !!Object.values(form.errors).filter(isDefined)[0] && formHasValue;
