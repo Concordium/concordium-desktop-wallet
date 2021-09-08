@@ -105,7 +105,12 @@ export function convertIncomingTransaction(
 
     let memo;
     if (transaction.memo) {
-        memo = decodeCBOR(transaction.memo).toString();
+        // The memo from the proxy is a "hex-encoded byte array".
+        try {
+            memo = decodeCBOR(transaction.memo).toString();
+        } catch {
+            memo = transaction.memo;
+        }
     }
 
     return {
