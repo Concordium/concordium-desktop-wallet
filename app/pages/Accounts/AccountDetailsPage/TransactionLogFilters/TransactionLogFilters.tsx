@@ -277,23 +277,19 @@ export default function TransactionLogFilters({ onUpdate }: Props) {
                             {display}
                         </Form.Checkbox>
                     ))}
-                    <Button className="mT20" onClick={clear}>
-                        Clear filters
-                    </Button>
-                    <Button
-                        className="mT10"
-                        onClick={handleSubmit(submit(false))}
-                    >
-                        Apply momentarily
-                    </Button>
-                    <Button
-                        className="mT10"
-                        onClick={handleSubmit(submit(true))}
-                    >
-                        Apply and save
-                    </Button>
                 </div>
             </section>
+            <footer className={styles.footer}>
+                <Button size="tiny" onClick={handleSubmit(submit(false))}>
+                    Apply
+                </Button>
+                <Button size="tiny" onClick={handleSubmit(submit(true))}>
+                    Save
+                </Button>
+                <Button size="tiny" onClick={clear}>
+                    Clear
+                </Button>
+            </footer>
         </FormProvider>
     );
 }

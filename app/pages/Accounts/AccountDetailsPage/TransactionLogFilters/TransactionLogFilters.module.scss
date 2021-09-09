@@ -1,4 +1,28 @@
+@import 'config/bundle';
+
 .root {
     padding-left: 39px;
     padding-right: 39px;
+}
+
+.footer {
+    border-top: 1px solid $color-light-grey;
+    padding: 15px 19px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: sticky;
+    bottom: -19px;
+    margin: 30px 20px -19px;
+    background-color: $color-white;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+
+    > * {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 20px;
+        }
+    }
 }
