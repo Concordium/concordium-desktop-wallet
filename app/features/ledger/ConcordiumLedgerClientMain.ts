@@ -10,7 +10,11 @@ import {
 } from './GetPublicKey';
 import signTransfer from './Transfer';
 import signPublicInformationForIp from './PublicInformationForIp';
-import { getPrfKey, getPrivateKeySeeds } from './ExportPrivateKeySeed';
+import {
+    getPrfKeyDecrypt,
+    getPrivateKeySeeds,
+    getPrfKeyRecovery,
+} from './ExportPrivateKeySeed';
 import {
     signCredentialDeploymentOnNewAccount,
     signCredentialDeploymentOnExistingAccount,
@@ -88,8 +92,12 @@ export default class ConcordiumLedgerClientMain {
         return getPrivateKeySeeds(this.transport, identity);
     }
 
-    getPrfKey(identity: number, forRecovery?: boolean): Promise<Buffer> {
-        return getPrfKey(this.transport, identity, forRecovery);
+    getPrfKeyDecrypt(identity: number): Promise<Buffer> {
+        return getPrfKeyDecrypt(this.transport, identity);
+    }
+
+    getPrfKeyRecovery(identity: number): Promise<Buffer> {
+        return getPrfKeyRecovery(this.transport, identity);
     }
 
     signTransfer(

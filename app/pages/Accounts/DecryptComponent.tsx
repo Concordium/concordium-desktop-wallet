@@ -56,7 +56,9 @@ export default function DecryptComponent({ account, onDecrypt }: Props) {
         const { credentialNumber } = credential;
 
         setMessage('Please accept decrypt on device');
-        const prfKeySeed = await ledger.getPrfKey(credential.identityNumber);
+        const prfKeySeed = await ledger.getPrfKeyDecrypt(
+            credential.identityNumber
+        );
         setMessage('Please wait');
         const prfKey = prfKeySeed.toString('hex');
 

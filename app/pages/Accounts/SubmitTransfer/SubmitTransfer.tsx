@@ -72,7 +72,9 @@ async function attachCompletedPayload(
     accountInfo: AccountInfo
 ) {
     if (instanceOfTransferToEncrypted(transaction)) {
-        const prfKeySeed = await ledger.getPrfKey(credential.identityNumber);
+        const prfKeySeed = await ledger.getPrfKeyDecrypt(
+            credential.identityNumber
+        );
         const data = await makeTransferToEncryptedData(
             transaction.payload.amount,
             prfKeySeed.toString('hex'),
@@ -90,7 +92,9 @@ async function attachCompletedPayload(
         return { ...transaction, payload };
     }
     if (instanceOfTransferToPublic(transaction)) {
-        const prfKeySeed = await ledger.getPrfKey(credential.identityNumber);
+        const prfKeySeed = await ledger.getPrfKeyDecrypt(
+            credential.identityNumber
+        );
         const data = await makeTransferToPublicData(
             transaction.payload.transferAmount,
             prfKeySeed.toString('hex'),
@@ -112,7 +116,9 @@ async function attachCompletedPayload(
         instanceOfEncryptedTransfer(transaction) ||
         instanceOfEncryptedTransferWithMemo(transaction)
     ) {
-        const prfKeySeed = await ledger.getPrfKey(credential.identityNumber);
+        const prfKeySeed = await ledger.getPrfKeyDecrypt(
+            credential.identityNumber
+        );
         const receiverAccountInfo = await getAccountInfoOfAddress(
             transaction.payload.toAddress
         );

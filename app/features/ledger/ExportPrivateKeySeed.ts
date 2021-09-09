@@ -26,14 +26,21 @@ export async function getPrivateKeySeeds(
     return { idCredSec, prfKey };
 }
 
-export async function getPrfKey(
+export async function getPrfKeyDecrypt(
     transport: Transport,
-    identity: number,
-    forRecovery = false
+    identity: number
+): Promise<Buffer> {
+    const response = await requestKeys(transport, P1_PRF_KEY, identity);
+    return response.slice(0, 32);
+}
+
+export async function getPrfKeyRecovery(
+    transport: Transport,
+    identity: number
 ): Promise<Buffer> {
     const response = await requestKeys(
         transport,
-        forRecovery ? P1_PRF_KEY_RECOVERY : P1_PRF_KEY,
+        P1_PRF_KEY_RECOVERY,
         identity
     );
     return response.slice(0, 32);

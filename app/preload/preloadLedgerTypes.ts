@@ -28,7 +28,8 @@ type LedgerCommands = {
     getPublicKeySilent: (keypath: number[]) => ReturnBuffer;
     getSignedPublicKey: (keypath: number[]) => Promise<SignedPublicKey>;
     getPrivateKeySeeds: (identity: number) => Promise<PrivateKeySeeds>;
-    getPrfKey: (identity: number, forRecovery?: boolean) => ReturnBuffer;
+    getPrfKeyDecrypt: (identity: number) => ReturnBuffer;
+    getPrfKeyRecovery: (identity: number) => ReturnBuffer;
     signTransfer: (
         transactionAsJson: string,
         keypath: number[]
