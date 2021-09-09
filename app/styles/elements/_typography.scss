@@ -78,8 +78,15 @@ h6,
     font-weight: $font-weight-regular;
 }
 
-.bodyEmphasized {
+.bodyEmphasized,
+em {
     font-weight: $font-weight-emphasized;
+    font-style: normal;
+}
+
+.bodyBold,
+b {
+    font-weight: $font-weight-bold;
 }
 
 .textLeft {

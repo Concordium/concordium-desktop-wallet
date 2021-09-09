@@ -39,7 +39,7 @@ export default function BooleanSetting({
 
     const toggleCheckbox = (
         <Switch defaultChecked={setting.value === '1'} onClick={handleClick}>
-            <span className="body1">{displayText}</span>
+            <span className="body2">{displayText}</span>
         </Switch>
     );
 

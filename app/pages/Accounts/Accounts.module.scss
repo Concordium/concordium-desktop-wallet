@@ -1,18 +1,11 @@
 @import 'config/bundle';
 @import './common';
 
-.identityAttributesOfCredential {
-    composes: blueSeparator;
-    margin-left: -19px;
-    width: calc(100% + 38px);
-}
-
 .releaseScheduleListHeader,
 .releaseSchedule {
     width: calc(100% + 40px);
 }
 
-.identityAttribute,
 .releaseScheduleElement {
     composes: greySeparator;
     padding: 10px 20px;

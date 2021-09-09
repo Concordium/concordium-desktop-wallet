@@ -24,6 +24,7 @@ import {
 import { identitiesSelector } from '~/features/IdentitySlice';
 
 import styles from './CredentialInformation.module.scss';
+import DisplayIdentityAttributes from '../DisplayIdentityAttributes';
 
 interface CredentialOfAccount
     extends Omit<CredentialDeploymentInformation, 'regId'> {
@@ -46,7 +47,7 @@ export default function CredentialInformation({ account, accountInfo }: Props) {
     const ownCredentials = useSelector(credentialsSelector);
     const identities = useSelector(identitiesSelector);
 
-    const credentialsOfAccount = Object.values(accountInfo.accountCredentials)
+    const credentials = Object.values(accountInfo.accountCredentials)
         .map((o) => o.value.contents)
         .map((cred) => {
             let enrichedCred: CredentialOfAccount = {
@@ -85,99 +86,86 @@ export default function CredentialInformation({ account, accountInfo }: Props) {
     };
 
     return (
-        <Card className="relative pB0">
+        <Card className="relative pB0 pT10">
             <div className={styles.header}>
                 <p className="mT0">
-                    Credentials on this account: {credentialsOfAccount.length}
+                    Credentials on this account: {credentials.length}
                 </p>
                 <p className="mT5">
                     Signature threshold: {account.signatureThreshold}
                 </p>
             </div>
             <div className={styles.credentialList}>
-                {credentialsOfAccount.map((credential: CredentialOfAccount) => {
-                    const { policy } = credential;
-                    return (
-                        <div
-                            className={styles.listElement}
-                            key={credential.credId}
-                        >
-                            <SidedRow
-                                className={styles.listElementRow}
-                                left="Credential ID:"
-                                right={
-                                    <>
-                                        <CopyButton
-                                            className={styles.copy}
-                                            value={credential.credId}
+                {credentials.map((c: CredentialOfAccount) => (
+                    <div className={styles.listElement} key={c.credId}>
+                        <SidedRow
+                            className={styles.listElementRow}
+                            left="Credential ID:"
+                            right={
+                                <>
+                                    <CopyButton
+                                        className={styles.copy}
+                                        value={c.credId}
+                                    />
+                                    {c.credId.substring(0, 8)}
+                                </>
+                            }
+                        />
+                        <SidedRow
+                            className={styles.noteRow}
+                            left="Note:"
+                            right={
+                                <>
+                                    {c.isOwn || (
+                                        <InputModal
+                                            open={showEditNote === c.credId}
+                                            onOpen={() =>
+                                                setShowEditNote(c.credId)
+                                            }
+                                            onClose={() =>
+                                                setShowEditNote(undefined)
+                                            }
+                                            trigger={
+                                                <Button
+                                                    className={styles.editNote}
+                                                    clear
+                                                >
+                                                    <EditIcon />
+                                                </Button>
+                                            }
+                                            title="Set note for credential"
+                                            buttonText="Submit"
+                                            placeholder="Add note"
+                                            buttonOnClick={submitNote(c.credId)}
+                                            defaultValue={c.note}
+                                            validationRules={{
+                                                maxLength: {
+                                                    value: CREDENTIAL_NOTE_MAX_LENGTH,
+                                                    message: `Cannot be longer than ${CREDENTIAL_NOTE_MAX_LENGTH} characters`,
+                                                },
+                                            }}
                                         />
-                                        {credential.credId.substring(0, 8)}
-                                    </>
-                                }
-                            />
-                            <SidedRow
-                                className={styles.noteRow}
-                                left="Note:"
-                                right={
-                                    <>
-                                        {credential.isOwn || (
-                                            <InputModal
-                                                open={
-                                                    showEditNote ===
-                                                    credential.credId
-                                                }
-                                                onOpen={() =>
-                                                    setShowEditNote(
-                                                        credential.credId
-                                                    )
-                                                }
-                                                onClose={() =>
-                                                    setShowEditNote(undefined)
-                                                }
-                                                trigger={
-                                                    <Button
-                                                        className={
-                                                            styles.editNote
-                                                        }
-                                                        clear
-                                                    >
-                                                        <EditIcon />
-                                                    </Button>
-                                                }
-                                                title="Set note for credential"
-                                                buttonText="Submit"
-                                                placeholder="Add note"
-                                                buttonOnClick={submitNote(
-                                                    credential.credId
-                                                )}
-                                                defaultValue={credential.note}
-                                                validationRules={{
-                                                    maxLength: {
-                                                        value: CREDENTIAL_NOTE_MAX_LENGTH,
-                                                        message: `Cannot be longer than ${CREDENTIAL_NOTE_MAX_LENGTH} characters`,
-                                                    },
-                                                }}
-                                            />
-                                        )}
-                                        {credential.note || (
-                                            <i>No note for credential</i>
-                                        )}
-                                    </>
-                                }
-                            />
-                            <SidedRow
-                                className={styles.listElementRow}
-                                left="Date of Creation:"
-                                right={formatDate(policy.createdAt)}
-                            />
-                            <SidedRow
-                                className={styles.listElementRow}
-                                left="Valid to:"
-                                right={formatDate(policy.validTo)}
-                            />
+                                    )}
+                                    {c.note || <i>No note for credential</i>}
+                                </>
+                            }
+                        />
+                        <SidedRow
+                            className={styles.listElementRow}
+                            left="Date of Creation:"
+                            right={formatDate(c.policy.createdAt)}
+                        />
+                        <SidedRow
+                            className={styles.listElementRow}
+                            left="Valid to:"
+                            right={formatDate(c.policy.validTo)}
+                        />
+                        <div className={styles.attributesRow}>
+                            <em>Revealed attributes:</em>
+                            <DisplayIdentityAttributes credential={c} />
                         </div>
-                    );
-                })}
+                    </div>
+                ))}
             </div>
         </Card>
     );
