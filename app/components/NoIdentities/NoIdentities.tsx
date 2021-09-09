@@ -24,7 +24,8 @@ export default function NoIdentities() {
                 start using the Concordium blockchain. You can either request a
                 new identity and an initial account from an identity provider,
                 or if you already have an identity and account, you can import
-                it.
+                it from a file. If you do not have a backup file, you can
+                recover your accounts using the Ledger device.
             </p>
             <footer className="pH30 flex justifySpaceBetween">
                 <Button
@@ -38,6 +39,12 @@ export default function NoIdentities() {
                     onClick={() => dispatch(push(routes.IDENTITYISSUANCE))}
                 >
                     Request new
+                </Button>
+                <Button
+                    className={styles.button}
+                    onClick={() => dispatch(push(routes.RECOVERY))}
+                >
+                    Recover existing
                 </Button>
             </footer>
         </Card>

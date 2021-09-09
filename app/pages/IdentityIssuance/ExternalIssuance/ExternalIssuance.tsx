@@ -23,7 +23,7 @@ import { performIdObjectRequest } from '~/utils/httpRequests';
 import { getAddressFromCredentialId } from '~/utils/rustInterface';
 import generalStyles from '../IdentityIssuance.module.scss';
 import styles from './ExternalIssuance.module.scss';
-import { getInitialEncryptedAmount } from '~/utils/accountHelpers';
+import { createInitialAccount } from '~/utils/accountHelpers';
 import { insertPendingIdentityAndInitialAccount } from '~/database/IdentityDao';
 import { getElementRectangle } from '~/utils/htmlHelpers';
 
@@ -78,19 +78,14 @@ async function generateIdentity(
             idObjectRequest.value.pubInfoForIp.regId
         );
 
-        const initialAccount: Omit<Account, 'identityId'> = {
-            name: accountName,
-            status: AccountStatus.Pending,
-            address: accountAddress,
-            signatureThreshold: 1,
-            maxTransactionId: '0',
-            isInitial: true,
-            rewardFilter: {},
-            selfAmounts: getInitialEncryptedAmount(),
-            incomingAmounts: '[]',
-            totalDecrypted: '0',
-            deploymentTransactionId: undefined,
-        };
+        const initialAccount: Omit<
+            Account,
+            'identityId'
+        > = createInitialAccount(
+            accountAddress,
+            AccountStatus.Pending,
+            accountName
+        );
 
         identityId = await insertPendingIdentityAndInitialAccount(
             identity,

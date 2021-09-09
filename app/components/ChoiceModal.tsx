@@ -1,11 +1,21 @@
 import React from 'react';
+import type { LocationDescriptorObject } from 'history';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
 import Modal from '~/cross-app-components/Modal';
 import Button from '~/cross-app-components/Button';
 import { noOp } from '~/utils/basicHelpers';
-import { Action, LocationAction } from '../utils/types';
+
+export interface Action {
+    label: string;
+    inverted?: boolean;
+    action(): void;
+}
+
+export interface LocationAction extends Omit<Action, 'action'> {
+    location?: LocationDescriptorObject | string;
+}
 
 function isAction(action: Action | LocationAction): action is Action {
     return (action as Action).action !== undefined;
@@ -16,7 +26,7 @@ interface Props {
     description: string | JSX.Element;
     actions: (Action | LocationAction)[];
     open: boolean;
-    postAction?(): void;
+    postAction?(location?: string | LocationDescriptorObject): void;
     disableClose?: boolean;
     onClose?(): void;
 }
@@ -32,22 +42,24 @@ export default function ChoiceModal({
 }: Props) {
     const dispatch = useDispatch();
     return (
-        <Modal open={open} disableClose={disableClose} onClose={onClose}>
+        <Modal disableClose={disableClose} open={open} onClose={onClose}>
             <h3>{title}</h3>
             <p>{description}</p>
             <div className="flex justifySpaceBetween mT30">
                 {actions.map((a, i) => (
                     <Button
+                        inverted={a.inverted}
                         className={clsx('flexChildFill', i !== 0 && 'mL30')}
                         key={a.label}
                         onClick={() => {
                             if (isAction(a)) {
                                 a.action();
+                                postAction();
                             } else if (a.location) {
                                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                 dispatch(push(a.location as any));
+                                postAction(a.location);
                             }
-                            postAction();
                         }}
                     >
                         {a.label}

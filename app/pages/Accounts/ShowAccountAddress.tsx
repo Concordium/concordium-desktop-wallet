@@ -8,6 +8,7 @@ import ExpandIcon from '@resources/svg/expand.svg';
 import Card from '~/cross-app-components/Card';
 import routes from '~/constants/routes.json';
 import IconButton from '~/cross-app-components/IconButton';
+import DisplayAddress from '~/components/DisplayAddress';
 
 import { Account, ClassName } from '../../utils/types';
 import CopyButton from '../../components/CopyButton';
@@ -46,7 +47,12 @@ export default function ShowAccountAddress({
             </IconButton>
             <QRCode className="m20" value={account.address} size={200} />
             <div className="flex">
-                <p className="body4 mL20">{account.address}</p>
+                <DisplayAddress
+                    outerClassName="mL20"
+                    lineClassName="body3"
+                    lineLength={25}
+                    address={account.address}
+                />
                 <CopyButton className="mL20" value={account.address} />
             </div>
         </Component>

@@ -9,6 +9,7 @@ import PageLayout from '~/components/PageLayout';
 import routes from '~/constants/routes.json';
 import IconButton from '~/cross-app-components/IconButton';
 import AccountPageHeader from './AccountPageHeader';
+import DisplayAddress from '~/components/DisplayAddress';
 
 import styles from './Accounts.module.scss';
 
@@ -43,7 +44,11 @@ export default function ShowAccountAddress() {
                 <h2 className="m0 mBauto">Address: {account.name}</h2>
                 <QRCode className="mB50" size={512} value={account.address} />
                 <div className="flex mBauto">
-                    <p className="body2 mL20">{account.address}</p>
+                    <DisplayAddress
+                        outerClassName="body2 mL20"
+                        lineLength={25}
+                        address={account.address}
+                    />
                     <CopyButton className="mL20" value={account.address} />
                 </div>
             </PageLayout.Container>

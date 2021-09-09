@@ -19,7 +19,18 @@ import PrintFormatSimpleTransfer from '~/components/PrintFormat/SimpleTransfer';
 
 type TransactionType = SimpleTransfer;
 
-const TYPE = 'Send GTU';
+export const TYPE = 'Send GTU with a schedule';
+
+export function getFileNameForExport(
+    transaction: TransactionType,
+    exportType: TransactionExportType
+) {
+    const sender = transaction.sender.substring(0, 6);
+    const receiver = transaction.payload.toAddress.substring(0, 6);
+    const { amount } = transaction.payload;
+
+    return `transfer-${amount}_${sender}-to-${receiver}_${exportType}.json`;
+}
 
 export default class SimpleTransferHandler
     extends TransferHandler<TransactionType>
@@ -60,12 +71,7 @@ export default class SimpleTransferHandler
     }: Partial<CreateTransactionInput>) {
         if (!sender || !recipient || amount === undefined || !nonce) {
             throw new Error(
-                `Unexpected Missing input: ${{
-                    sender,
-                    amount,
-                    recipient,
-                    nonce,
-                }}`
+                `Unexpected Missing input: ${sender}, ${amount}, ${recipient}, ${nonce}`
             );
         }
         return createSimpleTransferTransaction(
@@ -78,16 +84,7 @@ export default class SimpleTransferHandler
         );
     }
 
-    getFileNameForExport(
-        transaction: SimpleTransfer,
-        exportType: TransactionExportType
-    ) {
-        const sender = transaction.sender.substring(0, 6);
-        const receiver = transaction.payload.toAddress.substring(0, 6);
-        const { amount } = transaction.payload;
-
-        return `transfer-${amount}_${sender}-to-${receiver}_${exportType}.json`;
-    }
+    getFileNameForExport = getFileNameForExport;
 
     print(
         transaction: AccountTransaction,

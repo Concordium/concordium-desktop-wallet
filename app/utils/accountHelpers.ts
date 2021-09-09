@@ -6,6 +6,7 @@ import {
     BooleanFilters,
     RewardFilter,
     TransactionKindString,
+    AccountStatus,
 } from './types';
 
 export const ACCOUNT_NAME_MAX_LENGTH = 25;
@@ -77,8 +78,48 @@ export function isMultiCred(accountInfo: AccountInfo): boolean {
     return Object.values(accountInfo.accountCredentials).length > 1;
 }
 
-export function getInitialEncryptedAmount() {
-    return ENCRYPTED_ZERO;
+export function createAccount(
+    identityId: number,
+    address: string,
+    status: AccountStatus,
+    name = address.substr(0, 8),
+    signatureThreshold = 1,
+    isInitial = false,
+    deploymentTransactionId?: string
+): Account {
+    return {
+        name,
+        identityId,
+        status,
+        address,
+        signatureThreshold,
+        isInitial,
+        deploymentTransactionId,
+        maxTransactionId: '0',
+        rewardFilter: {},
+        selfAmounts: ENCRYPTED_ZERO,
+        incomingAmounts: '[]',
+        totalDecrypted: '0',
+    };
+}
+
+export function createInitialAccount(
+    address: string,
+    status: AccountStatus,
+    name = address.substr(0, 8)
+): Omit<Account, 'identityId'> {
+    return {
+        name,
+        status,
+        address,
+        signatureThreshold: 1,
+        isInitial: true,
+        maxTransactionId: '0',
+        rewardFilter: {},
+        selfAmounts: ENCRYPTED_ZERO,
+        incomingAmounts: '[]',
+        totalDecrypted: '0',
+    };
 }
 
 export function getActiveBooleanFilters({

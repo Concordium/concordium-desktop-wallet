@@ -14,6 +14,7 @@ import {
     UpdateType,
     VerifyKey,
 } from '~/utils/types';
+import PublicKeyDetails from '~/components/ledger/PublicKeyDetails';
 import styles from '../../common/MultiSignatureFlowPage.module.scss';
 import localStyles from './UpdateAuthorizationKeys.module.scss';
 import { KeyUpdateEntry } from './KeyUpdateEntry';
@@ -332,7 +333,7 @@ export default function UpdateAuthorizationKeys({
                                             className={localStyles.listItem}
                                             key={key.verifyKey}
                                         >
-                                            <div className="flex alignCenter">
+                                            <div className={localStyles.keyDiv}>
                                                 <p
                                                     className={
                                                         localStyles.index
@@ -340,13 +341,12 @@ export default function UpdateAuthorizationKeys({
                                                 >
                                                     {index}
                                                 </p>
-                                                <p
+                                                <PublicKeyDetails
                                                     className={
                                                         localStyles.keyText
                                                     }
-                                                >
-                                                    {key.verifyKey}
-                                                </p>
+                                                    publicKey={key.verifyKey}
+                                                />
                                             </div>
                                         </li>
                                     );

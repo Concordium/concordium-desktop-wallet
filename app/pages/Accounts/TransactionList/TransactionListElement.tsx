@@ -119,8 +119,10 @@ function parseShieldedAmount(
             );
         }
         if (
-            transaction.transactionKind ===
-            TransactionKindString.EncryptedAmountTransfer
+            [
+                TransactionKindString.EncryptedAmountTransfer,
+                TransactionKindString.EncryptedAmountTransferWithMemo,
+            ].includes(transaction.transactionKind)
         ) {
             return buildCostFreeAmountString(
                 BigInt(transaction.decryptedAmount),
@@ -145,8 +147,10 @@ function parseAmount(transaction: TransferTransaction, isOutgoing: boolean) {
             }
 
             if (
-                transaction.transactionKind ===
-                TransactionKindString.EncryptedAmountTransfer
+                [
+                    TransactionKindString.EncryptedAmountTransfer,
+                    TransactionKindString.EncryptedAmountTransferWithMemo,
+                ].includes(transaction.transactionKind)
             ) {
                 return {
                     amount: `${displayAsGTU(-cost)}`,
@@ -182,12 +186,15 @@ function parseAmount(transaction: TransferTransaction, isOutgoing: boolean) {
 function displayType(kind: TransactionKindString, failed: boolean) {
     switch (kind) {
         case TransactionKindString.TransferWithSchedule:
+        case TransactionKindString.TransferWithScheduleAndMemo:
             if (!failed) {
                 return <i className="mL10">(With schedule)</i>;
             }
             break;
         case TransactionKindString.EncryptedAmountTransfer:
+        case TransactionKindString.EncryptedAmountTransferWithMemo:
         case TransactionKindString.Transfer:
+        case TransactionKindString.TransferWithMemo:
             if (!failed) {
                 return '';
             }
@@ -216,6 +223,42 @@ function statusSymbol(status: TransactionStatus) {
     }
 }
 
+function showMemo(
+    memo: string | undefined,
+    showFullMemo: boolean,
+    transactionKind: TransactionKindString
+) {
+    if (
+        !memo &&
+        showFullMemo &&
+        [
+            TransactionKindString.Transfer,
+            TransactionKindString.EncryptedAmountTransfer,
+            TransactionKindString.TransferWithSchedule,
+        ].includes(transactionKind)
+    ) {
+        // If we are fully showing the memo, and the type is one that has a memo version, but there is no memo:
+        return (
+            <i className="body4 m0 mT5 textFaded">
+                The transaction contains no memo
+            </i>
+        );
+    }
+    if (!memo) {
+        return null;
+    }
+    return (
+        <p
+            className={clsx(
+                'body4 m0 mT5 textFaded',
+                showFullMemo || styles.lineClamp
+            )}
+        >
+            {memo}
+        </p>
+    );
+}
+
 const onlyTime = Intl.DateTimeFormat(undefined, {
     timeStyle: 'medium',
     hourCycle: 'h24',
@@ -225,6 +268,7 @@ interface Props extends ClassName {
     transaction: TransferTransaction;
     onClick?: () => void;
     showDate?: boolean;
+    showFullMemo?: boolean;
 }
 
 /**
@@ -233,6 +277,7 @@ interface Props extends ClassName {
 function TransactionListElement({
     transaction,
     onClick,
+    showFullMemo = false,
     showDate = false,
     className,
 }: Props): JSX.Element {
@@ -310,6 +355,11 @@ function TransactionListElement({
                         : ''
                 }
             />
+            {showMemo(
+                transaction.memo,
+                showFullMemo,
+                transaction.transactionKind
+            )}
         </div>
     );
 }

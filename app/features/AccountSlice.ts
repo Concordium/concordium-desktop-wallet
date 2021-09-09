@@ -35,10 +35,7 @@ import {
     Hex,
 } from '../utils/types';
 import { getStatus } from '../utils/transactionHelpers';
-import {
-    isValidAddress,
-    getInitialEncryptedAmount,
-} from '../utils/accountHelpers';
+import { createAccount, isValidAddress } from '../utils/accountHelpers';
 
 import { getAccountInfos, getAccountInfoOfAddress } from '../node/nodeHelpers';
 import { hasPendingTransactions } from '~/database/TransactionDao';
@@ -126,6 +123,9 @@ const accountsSlice = createSlice({
         setFavouriteAccount(state, input: PayloadAction<Hex | undefined>) {
             state.favouriteAccount = input.payload;
         },
+        addToAccountInfos: (state, map) => {
+            state.accountsInfo = { ...state.accountsInfo, ...map.payload };
+        },
         updateAccountInfoEntry: (state, update) => {
             const { address, accountInfo } = update.payload;
             state.accountsInfo[address] = accountInfo;
@@ -188,6 +188,7 @@ export const {
     updateAccountFields,
     nextConfirmedAccount,
     previousConfirmedAccount,
+    addToAccountInfos,
 } = accountsSlice.actions;
 
 // Load accounts into state, and updates their infos
@@ -348,7 +349,8 @@ async function updateAccountFromAccountInfo(
 // AccountInfo state.
 export async function loadAccountInfos(
     accounts: Account[],
-    dispatch: Dispatch
+    dispatch: Dispatch,
+    resetInfo = true
 ) {
     const map: Record<string, AccountInfo> = {};
 
@@ -394,7 +396,10 @@ export async function loadAccountInfos(
             await updateAccountFromAccountInfo(dispatch, account, accountInfo);
         }
     }
-    return dispatch(setAccountInfos(map));
+    if (resetInfo) {
+        return dispatch(setAccountInfos(map));
+    }
+    return dispatch(addToAccountInfos(map));
 }
 
 /**
@@ -431,20 +436,15 @@ export async function addPendingAccount(
     accountAddress = '',
     deploymentTransactionId: string | undefined = undefined
 ) {
-    const account: Account = {
-        name: accountName,
+    const account = createAccount(
         identityId,
-        status: AccountStatus.Pending,
-        address: accountAddress,
-        signatureThreshold: 1,
-        maxTransactionId: '0',
+        accountAddress,
+        AccountStatus.Pending,
+        accountName,
+        undefined,
         isInitial,
-        deploymentTransactionId,
-        rewardFilter: {},
-        selfAmounts: getInitialEncryptedAmount(),
-        incomingAmounts: '[]',
-        totalDecrypted: '0',
-    };
+        deploymentTransactionId
+    );
     await insertAccount(account);
     return loadAccounts(dispatch);
 }

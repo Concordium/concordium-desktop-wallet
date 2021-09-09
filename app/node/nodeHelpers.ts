@@ -97,3 +97,12 @@ export async function isNodeUpToDate() {
 
     return pendingPeers.length < halfOfThePeers;
 }
+
+/**
+ * Check whether the node supports memo transactions.
+ * memo transactions were added in protocolVersion 2.
+ */
+export async function nodeSupportsMemo() {
+    const consensusStatus = await getConsensusStatus();
+    return consensusStatus.protocolVersion >= 2;
+}

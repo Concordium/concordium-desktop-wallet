@@ -94,6 +94,7 @@ function TransactionView({ transaction, onClose }: Props) {
                 className={styles.fillCardPadding}
                 transaction={transaction}
                 showDate
+                showFullMemo
             />
             {displayRejectReason(transaction)}
             {!!transaction.fromAddress && (

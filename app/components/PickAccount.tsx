@@ -23,6 +23,7 @@ interface Props {
         account: Account,
         info?: AccountInfo
     ) => ReactNode | undefined;
+    messageWhenEmpty: string;
 }
 
 /**
@@ -34,6 +35,7 @@ export default function PickAccount({
     filter = () => true,
     isDisabled,
     onAccountClicked = noOp,
+    messageWhenEmpty,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const accounts = useSelector(accountsSelector);
@@ -63,6 +65,10 @@ export default function PickAccount({
             );
         }
     }, [accounts, dispatch, loaded]);
+
+    if (filtered.length === 0) {
+        return <h2>{messageWhenEmpty}</h2>;
+    }
 
     return (
         <>

@@ -7,6 +7,7 @@ import styles from './transferDetails.module.scss';
 import PublicKey from '~/pages/multisig/common/PublicKey/PublicKey';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
+import DisplayAddress from '../DisplayAddress';
 
 interface Props {
     transaction: AddBaker;
@@ -21,7 +22,10 @@ export default function DisplayAddBaker({ transaction }: Props) {
         <>
             <h5 className={styles.title}>From Account:</h5>
             <p className={styles.name}>{senderName}</p>
-            <p className={styles.address}>{transaction.sender}</p>
+            <DisplayAddress
+                address={transaction.sender}
+                lineClassName={styles.address}
+            />
             <h5 className={styles.title}>Staked amount:</h5>
             <p className={styles.amount}>
                 {displayAsGTU(transaction.payload.bakingStake)}

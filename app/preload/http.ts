@@ -46,7 +46,7 @@ async function getTransactions(
     id: string
 ): Promise<GetTransactionsResult> {
     const response = await walletProxy.get(
-        `/v0/accTransactions/${address}?limit=${walletProxytransactionLimit}&from=${id}&includeRawRejectReason`,
+        `/v1/accTransactions/${address}?limit=${walletProxytransactionLimit}&from=${id}&includeRawRejectReason`,
         {
             transformResponse: (res) => parse(intToString(res, 'id')),
         }

@@ -149,6 +149,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                                         filter={(_, info) =>
                                             info?.accountBaker !== undefined
                                         }
+                                        messageWhenEmpty="There are no baker accounts "
                                         onAccountClicked={() => {
                                             dispatch(
                                                 push(
