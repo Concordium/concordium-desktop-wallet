@@ -21,7 +21,7 @@ export interface GetTransactionsOutput {
 
 export enum PreferenceKey {
     FAVOURITE_ACCOUNT = 'favouriteAccount',
-    ACCOUNT_PAGE_DETAIL = 'accountPageDetail',
+    ACCOUNT_PAGE_SIMPLE = 'accountPageSimple',
 }
 
 export interface Preference {

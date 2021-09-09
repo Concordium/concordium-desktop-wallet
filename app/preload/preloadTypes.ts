@@ -228,7 +228,7 @@ export interface PreferenceAccessor<V = string> {
 
 export interface PreferencesMethods {
     favouriteAccount: PreferenceAccessor<Hex>;
-    accountDetailedView: PreferenceAccessor<boolean>;
+    accountSimpleView: PreferenceAccessor<boolean>;
 }
 
 export type SettingsMethods = {

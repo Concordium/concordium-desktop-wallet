@@ -41,10 +41,6 @@ import {
 
 import { getAccountInfos, getAccountInfoOfAddress } from '../node/nodeHelpers';
 import { hasPendingTransactions } from '~/database/TransactionDao';
-import {
-    getSimpleViewActive,
-    setSimpleViewActive,
-} from '~/utils/accountViewHelpers';
 
 export interface AccountState {
     simpleView: boolean;
@@ -69,7 +65,7 @@ function getValidAccountsIncices(accounts: Account[]): AccountByIndexTuple[] {
 }
 
 const initialState: AccountState = {
-    simpleView: getSimpleViewActive(),
+    simpleView: true,
     accounts: [],
     accountsInfo: {},
     chosenAccountAddress: '',
@@ -189,6 +185,18 @@ export async function loadAccounts(dispatch: Dispatch) {
     const accounts: Account[] = await getAllAccounts();
     dispatch(updateAccounts(accounts.reverse()));
     return accounts;
+}
+
+async function loadSimpleViewActive(dispatch: Dispatch) {
+    const simpleViewActive = await window.database.preferences.accountSimpleView.get();
+    dispatch(accountsSlice.actions.simpleViewActive(simpleViewActive));
+}
+
+export function initAccounts(dispatch: Dispatch) {
+    return Promise.all([
+        loadAccounts(dispatch),
+        loadSimpleViewActive(dispatch),
+    ]);
 }
 
 // given an account and the accountEncryptedAmount from the accountInfo
@@ -591,10 +599,11 @@ export async function editAccountName(
     return dispatch(updateAccountFields({ address, updatedFields }));
 }
 
-export function toggleAccountView(dispatch: Dispatch) {
-    const simpleViewActive = getSimpleViewActive();
-    setSimpleViewActive(!simpleViewActive);
-    dispatch(accountsSlice.actions.simpleViewActive(!simpleViewActive));
+export async function toggleAccountView(dispatch: Dispatch) {
+    const simpleViewActive = await window.database.preferences.accountSimpleView.get();
+
+    await window.database.preferences.accountSimpleView.set(!simpleViewActive);
+    return loadSimpleViewActive(dispatch);
 }
 
 export async function setFavouriteAccount(dispatch: Dispatch, address: string) {
