@@ -1,6 +1,5 @@
 /* eslint-disable react/destructuring-assignment */
 import React from 'react';
-import { formatDate } from '~/utils/timeHelpers';
 import { UnsignedCredentialDeploymentInformation } from '~/utils/types';
 import PublicKeyDetails from './PublicKeyDetails';
 import DisplayAddress from '../DisplayAddress';
@@ -29,12 +28,6 @@ const CredentialInfoLedgerDetails = (props: Props) => (
                 {Object.keys(props.arData).length}
             </p>
         </div>
-        <p>
-            <b>Identity Valid to:</b> {formatDate(props.policy.validTo)}
-        </p>
-        <p>
-            <b>Identity Created at:</b> {formatDate(props.policy.createdAt)}
-        </p>
         {props.address && (
             <>
                 <b>Account address:</b>
