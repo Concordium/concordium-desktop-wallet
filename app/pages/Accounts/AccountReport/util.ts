@@ -17,8 +17,6 @@ import { isShieldedBalanceTransaction } from '~/features/TransactionSlice';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
 import transactionKindNames from '~/constants/transactionKindNames.json';
 
-type Filter = (transaction: TransferTransaction) => boolean;
-
 function calculatePublicBalanceChange(
     transaction: TransferTransaction,
     isOutgoing: boolean
@@ -79,7 +77,7 @@ function calculateShieldedBalanceChange(
 }
 
 export interface FilterOption {
-    filter: Filter;
+    kinds: TransactionKindString[];
     label: string;
     key: string;
 }
@@ -89,8 +87,7 @@ export function filterKind(kind: TransactionKindString): FilterOption {
         // put an s to pluralize. (Assumes that no transaction name needs specific pluralization)
         label: `${transactionKindNames[kind]}s`,
         key: kind,
-        filter: (transaction: TransferTransaction) =>
-            transaction.transactionKind === kind,
+        kinds: [kind],
     };
 }
 
@@ -101,8 +98,7 @@ export function filterKindGroup(
     return {
         label,
         key: label,
-        filter: (transaction: TransferTransaction) =>
-            kinds.includes(transaction.transactionKind),
+        kinds,
     };
 }
 
@@ -177,7 +173,7 @@ export async function getAccountCSV(
 ) {
     const { transactions } = await getTransactionsOfAccount(
         account,
-        filterOptions.map(({ key }) => key as TransactionKindString),
+        filterOptions.flatMap(({ kinds }) => kinds),
         fromTime,
         toTime,
         1000000

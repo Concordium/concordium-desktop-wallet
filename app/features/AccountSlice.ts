@@ -122,6 +122,10 @@ const accountsSlice = createSlice({
         },
         setFavouriteAccount(state, input: PayloadAction<Hex | undefined>) {
             state.favouriteAccount = input.payload;
+
+            if (input.payload) {
+                state.chosenAccountAddress = input.payload;
+            }
         },
         addToAccountInfos: (state, map) => {
             state.accountsInfo = { ...state.accountsInfo, ...map.payload };
