@@ -72,10 +72,18 @@ const transactionFilters: {
 }[] = [
     {
         field: TransactionKindString.Transfer,
+        group: [
+            TransactionKindString.Transfer,
+            TransactionKindString.TransferWithMemo,
+        ],
         display: 'Simple transfers',
     },
     {
         field: TransactionKindString.TransferWithSchedule,
+        group: [
+            TransactionKindString.TransferWithSchedule,
+            TransactionKindString.TransferWithScheduleAndMemo,
+        ],
         display: 'Scheduled transfers',
     },
     {
@@ -88,6 +96,10 @@ const transactionFilters: {
     },
     {
         field: TransactionKindString.EncryptedAmountTransfer,
+        group: [
+            TransactionKindString.EncryptedAmountTransfer,
+            TransactionKindString.EncryptedAmountTransferWithMemo,
+        ],
         display: 'Shielded transfer fees',
     },
     {
