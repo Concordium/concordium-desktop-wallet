@@ -5,10 +5,12 @@ import FavouriteIcon from '@resources/svg/star-filled.svg';
 import NotFavouriteIcon from '@resources/svg/star-outline.svg';
 import clsx from 'clsx';
 import Button from '~/cross-app-components/Button';
-import { setFavouriteAccount } from '~/features/AccountSlice';
+import {
+    favouriteAccountSelector,
+    setFavouriteAccount,
+} from '~/features/AccountSlice';
 import { Account, ClassName } from '~/utils/types';
 import ChoiceModal from '~/components/ChoiceModal';
-import { RootState } from '~/store/store';
 
 interface Props extends ClassName {
     account: Account;
@@ -16,20 +18,19 @@ interface Props extends ClassName {
 
 export default function AccountFavouriteButton({ account, className }: Props) {
     const dispatch = useDispatch();
-    const fav = useSelector((s: RootState) =>
-        s.accounts.accounts.find((a) => a.isFavourite)
-    );
+    const favAccount = useSelector(favouriteAccountSelector);
     const [showPrompt, setShowPrompt] = useState(false);
-    const { isFavourite, address, name } = account;
+    const { address, name } = account;
+    const isFavourite = favAccount?.address === address;
     const Icon = isFavourite ? FavouriteIcon : NotFavouriteIcon;
 
     const setFavourite = useCallback(() => {
-        if (fav) {
+        if (favAccount) {
             setShowPrompt(true);
         } else {
             setFavouriteAccount(dispatch, address);
         }
-    }, [fav, dispatch, address]);
+    }, [favAccount, dispatch, address]);
 
     const close = () => setShowPrompt(false);
 
@@ -40,8 +41,9 @@ export default function AccountFavouriteButton({ account, className }: Props) {
                 title="Set new default account?"
                 description={
                     <>
-                        <b>{fav?.name}</b> is currently set as your default
-                        account. Do you want to change default account to
+                        <b>{favAccount?.name}</b> is currently set as your
+                        default account. Do you want to change default account
+                        to
                         <br />
                         <br />
                         <b>{name}</b>?

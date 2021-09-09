@@ -32,6 +32,7 @@ import {
     Global,
     Identity,
     RewardFilter,
+    Hex,
 } from '../utils/types';
 import { getStatus } from '../utils/transactionHelpers';
 import {
@@ -47,6 +48,7 @@ export interface AccountState {
     accounts: Account[];
     accountsInfo: Record<string, AccountInfo>;
     chosenAccountAddress: string;
+    favouriteAccount: string | undefined;
 }
 
 type AccountByIndexTuple = [number, Account];
@@ -69,6 +71,7 @@ const initialState: AccountState = {
     accounts: [],
     accountsInfo: {},
     chosenAccountAddress: '',
+    favouriteAccount: undefined,
 };
 
 const accountsSlice = createSlice({
@@ -114,12 +117,14 @@ const accountsSlice = createSlice({
 
             if (!state.chosenAccountAddress) {
                 state.chosenAccountAddress =
-                    state.accounts.find((a) => a.isFavourite)?.address ??
-                    (state.accounts[0]?.address || '');
+                    state.favouriteAccount || state.accounts[0]?.address || '';
             }
         },
         setAccountInfos: (state, map) => {
             state.accountsInfo = map.payload;
+        },
+        setFavouriteAccount(state, input: PayloadAction<Hex | undefined>) {
+            state.favouriteAccount = input.payload;
         },
         updateAccountInfoEntry: (state, update) => {
             const { address, accountInfo } = update.payload;
@@ -170,6 +175,11 @@ export const chosenAccountInfoSelector = (state: RootState) =>
 export const accountInfoSelector = (account?: Account) => (state: RootState) =>
     state.accounts.accountsInfo?.[account?.address ?? ''];
 
+export const favouriteAccountSelector = (state: RootState) =>
+    state.accounts.accounts.find(
+        (a) => a.address === state.accounts.favouriteAccount
+    );
+
 export const {
     chooseAccount,
     updateAccounts,
@@ -189,13 +199,21 @@ export async function loadAccounts(dispatch: Dispatch) {
 
 async function loadSimpleViewActive(dispatch: Dispatch) {
     const simpleViewActive = await window.database.preferences.accountSimpleView.get();
-    dispatch(accountsSlice.actions.simpleViewActive(simpleViewActive));
+    dispatch(accountsSlice.actions.simpleViewActive(simpleViewActive ?? true));
+}
+
+async function loadFavouriteAccount(dispatch: Dispatch) {
+    const favouriteAccount = await window.database.preferences.favouriteAccount.get();
+    dispatch(
+        accountsSlice.actions.setFavouriteAccount(favouriteAccount ?? undefined)
+    );
 }
 
 export function initAccounts(dispatch: Dispatch) {
     return Promise.all([
         loadAccounts(dispatch),
         loadSimpleViewActive(dispatch),
+        loadFavouriteAccount(dispatch),
     ]);
 }
 
@@ -426,7 +444,6 @@ export async function addPendingAccount(
         selfAmounts: getInitialEncryptedAmount(),
         incomingAmounts: '[]',
         totalDecrypted: '0',
-        isFavourite: false,
     };
     await insertAccount(account);
     return loadAccounts(dispatch);
@@ -531,7 +548,6 @@ export async function addExternalAccount(
         maxTransactionId: '0',
         isInitial: false,
         rewardFilter: {},
-        isFavourite: false,
     };
     await insertAccount(account);
     return loadAccounts(dispatch);
@@ -607,16 +623,8 @@ export async function toggleAccountView(dispatch: Dispatch) {
 }
 
 export async function setFavouriteAccount(dispatch: Dispatch, address: string) {
-    const favAccounts = await window.database.account.findAccounts({
-        isFavourite: true,
-    });
-
-    favAccounts.forEach((a) =>
-        window.database.account.updateAccount(a.address, { isFavourite: false })
-    );
-    window.database.account.updateAccount(address, { isFavourite: true });
-
-    loadAccounts(dispatch);
+    await window.database.preferences.favouriteAccount.set(address);
+    loadFavouriteAccount(dispatch);
 }
 
 export function clearRewardFilters(dispatch: Dispatch, address: string) {

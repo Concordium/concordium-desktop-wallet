@@ -20,12 +20,10 @@ const Template: Story<{ account: Account; accountInfo: AccountInfo }> = ({
 }) => {
     const accounts: AccountState = {
         simpleView: true,
-        accounts: [
-            account,
-            { ...account, name: 'Another', address: '234', isFavourite: false },
-        ],
+        accounts: [account, { ...account, name: 'Another', address: '234' }],
         accountsInfo: { [account.address]: accountInfo, '234': accountInfo },
         chosenAccountAddress: account.address,
+        favouriteAccount: account.address,
     };
 
     return (
@@ -46,7 +44,6 @@ const account: Account = {
     allDecrypted: true,
     name: 'Personal',
     status: AccountStatus.Confirmed,
-    isFavourite: true,
 } as Account;
 
 const accountInfo: AccountInfo = {

@@ -11,7 +11,6 @@ function parseAccount(accounts: Account[]): Account[] {
             ...account,
             allDecrypted: Boolean(account.allDecrypted),
             isInitial: Boolean(account.isInitial),
-            isFavourite: Boolean(account.isFavourite),
             rewardFilter: JSON.parse(
                 account.rewardFilter as string
             ) as RewardFilter,

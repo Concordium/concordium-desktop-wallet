@@ -23,11 +23,7 @@ import {
     IdentityProvider,
     IncomingTransaction,
 } from '~/utils/types';
-import {
-    ExternalCredential,
-    GetTransactionsOutput,
-    Preference,
-} from '../database/types';
+import { ExternalCredential, GetTransactionsOutput } from '../database/types';
 import type LedgerCommands from './preloadLedgerTypes';
 
 export type { default as LedgerCommands } from './preloadLedgerTypes';
@@ -222,7 +218,7 @@ export type MultiSignatureTransactionMethods = {
 };
 
 export interface PreferenceAccessor<V = string> {
-    get(): Promise<V>;
+    get(): Promise<V | null>;
     set(v: V): Promise<void>;
 }
 

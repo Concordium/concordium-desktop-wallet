@@ -90,7 +90,6 @@ async function generateIdentity(
             incomingAmounts: '[]',
             totalDecrypted: '0',
             deploymentTransactionId: undefined,
-            isFavourite: false,
         };
 
         identityId = await insertPendingIdentityAndInitialAccount(

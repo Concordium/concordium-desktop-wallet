@@ -1,19 +1,19 @@
 import { knex } from '~/database/knex';
-import { PreferenceKey } from '~/database/types';
+import { Preference, PreferenceKey } from '~/database/types';
 import { preferencesTable } from '~/constants/databaseNames.json';
 import { Hex } from '~/utils/types';
 import { PreferenceAccessor, PreferencesMethods } from '../preloadTypes';
 
-async function getPreference(key: PreferenceKey): Promise<string> {
+async function getPreference(key: PreferenceKey): Promise<Preference> {
     return (await knex())
-        .table(preferenceTable)
+        .table(preferencesTable)
         .select(`${preferencesTable}.value`)
         .where({ key })
         .first();
 }
 async function setPreference(key: PreferenceKey, value: string) {
     return (await knex())
-        .table(preferenceTable)
+        .table(preferencesTable)
         .where({ key })
         .update({ value });
 }
@@ -27,7 +27,12 @@ function buildAccessor<V = string>(
 
     return {
         async get() {
-            return parse(await getPreference(key)) as V;
+            const { value } = await getPreference(key);
+
+            if (!value) {
+                return null;
+            }
+            return parse(value) as V;
         },
         async set(value: V) {
             await setPreference(key, serialize(value));

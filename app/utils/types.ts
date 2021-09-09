@@ -195,7 +195,6 @@ export interface Account {
     maxTransactionId: string;
     deploymentTransactionId?: string;
     isInitial: boolean;
-    isFavourite: boolean;
 }
 
 export interface SimpleTransferPayload {
