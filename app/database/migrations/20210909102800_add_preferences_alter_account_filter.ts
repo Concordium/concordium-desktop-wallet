@@ -15,7 +15,7 @@ export async function up(knex: Knex): Promise<void> {
         { key: PreferenceKey.FAVOURITE_ACCOUNT, value: null },
         {
             key: PreferenceKey.ACCOUNT_PAGE_SIMPLE,
-            value: JSON.stringify(false),
+            value: JSON.stringify(true),
         },
     ];
 
