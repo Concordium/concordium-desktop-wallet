@@ -20,7 +20,7 @@ import {
 
 const INS_ADD_ANONYMITY_REVOKER = 0x2c;
 
-export default async function signAddIdentityProviderTransaction(
+export default async function signAddAnonymityRevokerTransaction(
     transport: Transport,
     path: number[],
     transaction: UpdateInstruction<AddAnonymityRevoker>,
