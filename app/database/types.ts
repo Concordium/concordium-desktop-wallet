@@ -18,3 +18,13 @@ export interface GetTransactionsOutput {
     transactions: TransferTransaction[];
     more: boolean;
 }
+
+export enum PreferenceKey {
+    FAVOURITE_ACCOUNT = 'favouriteAccount',
+    ACCOUNT_PAGE_DETAIL = 'accountPageDetail',
+}
+
+export interface Preference {
+    key: PreferenceKey;
+    value: string | null;
+}

@@ -7,6 +7,7 @@
     "globalTable": "global",
     "identitiesTable": "identities",
     "multiSignatureProposalTable": "multi_signature_proposal",
+    "preferencesTable": "preferences",
     "walletTable": "wallet",
     "transactionTable": "transactions",
     "settingsTable": "setting",
