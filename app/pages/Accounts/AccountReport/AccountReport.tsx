@@ -270,7 +270,8 @@ export default function AccountReport({ location }: Props) {
                                         {transactionTypeFilters.map(
                                             (filterOption) => (
                                                 <Checkbox
-                                                    className="m10"
+                                                    className="mT10:notFirst"
+                                                    size="large"
                                                     key={filterOption.key}
                                                     checked={currentFilters.some(
                                                         (currentFilter) =>

@@ -53,7 +53,10 @@ export default function MoreActions({ account, accountInfo }: Props) {
             </ButtonNavLink>
             <ButtonNavLink
                 className="mB20:notLast flex"
-                to={routes.ACCOUNT_REPORT}
+                to={{
+                    pathname: routes.ACCOUNT_REPORT,
+                    state: { account },
+                }}
             >
                 Export account reports
             </ButtonNavLink>
