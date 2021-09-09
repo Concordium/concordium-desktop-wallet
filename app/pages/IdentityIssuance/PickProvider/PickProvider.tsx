@@ -26,16 +26,15 @@ import pairWallet from '~/utils/WalletPairing';
 const IPDetails = (info: PublicInformationForIp) => (
     <div className="textLeft">
         <p className="mT0">Please confirm details on ledger:</p>
-        <p>
+        <div>
             <b>Public key:</b>
             <PublicKeyDetails
                 className="mV40"
                 publicKey={info.publicKeys.keys[0].verifyKey}
             />
-        </p>
+        </div>
         <p>
-            <b>Signature Threshold (Sig Threshold):</b>{' '}
-            {info.publicKeys.threshold}
+            <b>Signature Threshold:</b> {info.publicKeys.threshold}
         </p>
     </div>
 );
