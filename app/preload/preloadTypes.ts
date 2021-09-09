@@ -23,7 +23,11 @@ import {
     IdentityProvider,
     IncomingTransaction,
 } from '~/utils/types';
-import { ExternalCredential, GetTransactionsOutput } from '../database/types';
+import {
+    ExternalCredential,
+    GetTransactionsOutput,
+    Preference,
+} from '../database/types';
 import type LedgerCommands from './preloadLedgerTypes';
 
 export type { default as LedgerCommands } from './preloadLedgerTypes';
@@ -217,6 +221,16 @@ export type MultiSignatureTransactionMethods = {
     getMaxOpenNonceOnAccount: (address: string) => Promise<bigint>;
 };
 
+export interface PreferenceAccessor<V = string> {
+    get(): Promise<V>;
+    set(v: V): Promise<void>;
+}
+
+export interface PreferencesMethods {
+    favouriteAccount: PreferenceAccessor<Hex>;
+    accountDetailedView: PreferenceAccessor<boolean>;
+}
+
 export type SettingsMethods = {
     update: (setting: Setting) => Promise<number>;
 };
@@ -270,6 +284,7 @@ export type Database = {
     identity: IdentityMethods;
     genesisAndGlobal: GenesisAndGlobalMethods;
     multiSignatureTransaction: MultiSignatureTransactionMethods;
+    preferences: PreferencesMethods;
     settings: SettingsMethods;
     transaction: TransactionMethods;
     wallet: WalletMethods;
