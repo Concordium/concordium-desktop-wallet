@@ -118,6 +118,7 @@ export default function PerformRecovery({
             setError('Current Blockhash has not been loaded yet');
             return;
         }
+        controller.start();
 
         const walletId = await pairWallet(ledger, dispatch);
 
@@ -181,6 +182,7 @@ export default function PerformRecovery({
             }
             setEmptyIndices((n) => n + 1);
         }
+        controller.finish();
     }
 
     const description = useMemo(
@@ -216,6 +218,7 @@ export default function PerformRecovery({
                 onClick={() => dispatch(push(routes.IDENTITIES))}
             />
             <ChoiceModal
+                disableClose
                 description={description}
                 actions={[
                     { label: 'Look for more' },
