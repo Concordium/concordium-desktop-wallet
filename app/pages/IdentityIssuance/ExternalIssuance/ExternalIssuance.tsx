@@ -29,6 +29,17 @@ import { getElementRectangle } from '~/utils/htmlHelpers';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
+/**
+ * Performs the identity creation flow with an identity provider.
+ * 1. Send the identity object request to the identity provider.
+ * 1. Extract the Location from the HTTP 302 Found returned by the identity provider.
+ * 1. Open browser view at the Location extracted.
+ * 1. The user goes through the steps defined by the identity provider within the browser window.
+ * Eventually the identity provider returns with an HTTP 302 Found with the location used to
+ * poll for the identity.
+ * 1. Update the local database with the identity and initial account.
+ * 1. Start polling for the identity to resolve the status of the identity and the initial account.
+ */
 async function generateIdentity(
     idObjectRequest: Versioned<IdObjectRequest>,
     randomness: string,
@@ -44,16 +55,24 @@ async function generateIdentity(
     let identityObjectLocation;
     let identityId;
     try {
+        // Initiate the identity creation process by sending the identity object request
+        // to the identity provider. The identity provider will return with an HTTP 302 Found
+        // indicating where we should open the browser view to perform the identity creation
+        // process.
         const identityProviderLocation = await performIdObjectRequest(
             provider.metadata.issuanceStart,
             redirectUri,
             idObjectRequest
         );
+
+        // Open a browser view at the received location. The user will be using the
+        // browser view to perform the identity creation process at the identity provider.
+        // The identity provider will, at the end of the process, return an HTTP 302 Found
+        // that points to the location where the identity can be polled for.
         const providerResult = await window.view.createView(
             identityProviderLocation,
             rect
         );
-
         if (providerResult.error) {
             throw new Error(providerResult.error);
         }

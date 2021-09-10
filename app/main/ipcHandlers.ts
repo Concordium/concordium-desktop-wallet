@@ -71,6 +71,7 @@ async function httpsGet(
 }
 
 const redirectUri = 'ConcordiumRedirectToken';
+const codeUriKey = 'code_uri=';
 
 function createExternalView(
     browserView: BrowserView,
@@ -85,15 +86,16 @@ function createExternalView(
             .loadURL(location)
             .then(() =>
                 browserView.webContents.on(
-                    'did-navigate',
-                    async (_e, url, httpResponseCode, httpStatusText) => {
+                    'will-redirect',
+                    async (event, url) => {
+                        // If the redirect contains the location of the identity, then do not
+                        // follow it, but extract the URL and return it.
                         if (url.includes(redirectUri)) {
+                            event.preventDefault();
                             resolve({
-                                result: url.substring(url.indexOf('=') + 1),
-                            });
-                        } else {
-                            resolve({
-                                error: `Unexpected response code: ${httpResponseCode}. status: ${httpStatusText}`,
+                                result: url.substring(
+                                    url.indexOf(codeUriKey) + codeUriKey.length
+                                ),
                             });
                         }
                     }
