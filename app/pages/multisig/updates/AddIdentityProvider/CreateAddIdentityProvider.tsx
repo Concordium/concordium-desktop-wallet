@@ -108,6 +108,7 @@ export default function CreateAddIdentityProvider({
                 name={fieldNames.ipVerifyKey}
                 defaultValue={defaults.ipVerifyKey || undefined}
                 label={fieldDisplays.ipVerifyKey}
+                spellCheck={false}
                 placeholder={pasteHere(fieldDisplays.ipVerifyKey)}
                 rules={{
                     required: requiredMessage(fieldDisplays.ipVerifyKey),
@@ -119,6 +120,7 @@ export default function CreateAddIdentityProvider({
                 name={fieldNames.ipCdiVerifyKey}
                 defaultValue={defaults.ipCdiVerifyKey || undefined}
                 label={fieldDisplays.ipCdiVerifyKey}
+                spellCheck={false}
                 placeholder={pasteHere(fieldDisplays.ipCdiVerifyKey)}
                 rules={{
                     required: requiredMessage(fieldDisplays.ipCdiVerifyKey),
