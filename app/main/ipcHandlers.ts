@@ -136,9 +136,12 @@ export default function initializeIpcHandlers(
         (_event, location: string, rect: Rectangle) =>
             createExternalView(browserView, mainWindow, location, rect)
     );
-    ipcMain.handle(ipcCommands.removeView, () =>
-        mainWindow.removeBrowserView(browserView)
-    );
+    ipcMain.handle(ipcCommands.removeView, () => {
+        // Load a blank page to prevent flashing of a previous identity
+        // provider page.
+        browserView.webContents.loadURL('about:blank');
+        mainWindow.removeBrowserView(browserView);
+    });
     ipcMain.handle(ipcCommands.resizeView, (_event, rect: Rectangle) =>
         browserView.setBounds(rect)
     );
