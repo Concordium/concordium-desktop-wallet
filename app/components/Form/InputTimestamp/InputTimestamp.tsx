@@ -165,6 +165,7 @@ const InputTimestamp = forwardRef<InputTimestampRef, InputTimestampProps>(
                             className={styles.year}
                             name={fieldNames.year}
                             placeholder="YYYY"
+                            autoNext={4}
                             rules={{ min: 100, max: 9999 }}
                         />
                         -
@@ -172,6 +173,7 @@ const InputTimestamp = forwardRef<InputTimestampRef, InputTimestampProps>(
                             className={styles.field}
                             name={fieldNames.month}
                             placeholder="MM"
+                            autoNext={2}
                             rules={{ min: 1, max: 12 }}
                         />
                         -
@@ -179,16 +181,18 @@ const InputTimestamp = forwardRef<InputTimestampRef, InputTimestampProps>(
                             className={styles.field}
                             name={fieldNames.date}
                             placeholder="DD"
+                            autoNext={2}
                             rules={{
                                 validate: validateDate,
                                 max: 31,
                             }}
                         />
-                        <span>at</span>
+                        at
                         <InputTimestampField
                             className={styles.field}
                             name={fieldNames.hours}
                             placeholder="HH"
+                            autoNext={2}
                             rules={{ max: 23 }}
                         />
                         :
@@ -196,6 +200,7 @@ const InputTimestamp = forwardRef<InputTimestampRef, InputTimestampProps>(
                             className={styles.field}
                             name={fieldNames.minutes}
                             placeholder="MM"
+                            autoNext={2}
                             rules={{ max: 59 }}
                         />
                         :

@@ -2,7 +2,6 @@ import clsx from 'clsx';
 import React, {
     ChangeEventHandler,
     FocusEventHandler,
-    forwardRef,
     InputHTMLAttributes,
     useCallback,
     useContext,
@@ -27,6 +26,10 @@ interface InputTimestampFieldProps extends InputProps {
      * Validation rules of field.
      */
     rules?: RegisterOptions;
+    /**
+     * Automatically go to next field on number length defined.
+     */
+    autoNext?: number;
 }
 
 /**
@@ -34,12 +37,16 @@ interface InputTimestampFieldProps extends InputProps {
  * Used in \<InputTimeStamp /\> as part of what makes up the entire Input.
  *
  * @example
- * <TimeStampField className={styles.field} name={fieldNames.hours} placeholder="HH" rules={{ max: 23 }} onFieldFormatted={fireOnChange} />
+ * <InputTimestampField className={styles.field} name={fieldNames.hours} placeholder="HH" rules={{ max: 23 }}  />
  */
-const InputTimestampField = forwardRef<
-    HTMLInputElement,
-    InputTimestampFieldProps
->(({ name, className, placeholder, onChange, rules }, ref) => {
+const InputTimestampField = ({
+    name,
+    className,
+    placeholder,
+    onChange,
+    rules,
+    autoNext,
+}: InputTimestampFieldProps) => {
     const {
         control,
         setValue,
@@ -65,20 +72,28 @@ const InputTimestampField = forwardRef<
 
     const handleChange: ChangeEventHandler<HTMLInputElement> = useCallback(
         (e) => {
+            const el = e.currentTarget;
+            if (
+                el.value.length !== value.length &&
+                el.value.length === autoNext &&
+                autoNext !== undefined
+            ) {
+                (el.nextElementSibling as HTMLInputElement | null)?.focus();
+            }
+
             formOnChange(e);
             if (onChange) {
                 onChange(e);
             }
         },
-        [formOnChange, onChange]
+        [formOnChange, onChange, value, autoNext]
     );
 
     return (
         <input
             className={clsx(className, errors[name] && styles.fieldInvalid)}
             name={n}
-            ref={ref}
-            type="string"
+            type="number"
             placeholder={placeholder}
             value={value}
             onBlur={handleBlur}
@@ -86,6 +101,6 @@ const InputTimestampField = forwardRef<
             onFocus={() => setIsFocused(true)}
         />
     );
-});
+};
 
 export default InputTimestampField;
