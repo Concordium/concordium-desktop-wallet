@@ -19,9 +19,33 @@ interface Props {
     recipient: AddressBookEntry;
     estimatedFee?: Fraction;
     amount: string;
+    memo?: string;
     schedule?: Schedule;
     nonce: string;
     expiryTime: Date;
+}
+
+function transformToMemoKind(
+    transactionKind: TransactionKindId,
+    memo?: string
+): TransactionKindId {
+    if (memo) {
+        switch (transactionKind) {
+            case TransactionKindId.Simple_transfer:
+            case TransactionKindId.Simple_transfer_with_memo:
+                return TransactionKindId.Simple_transfer_with_memo;
+            case TransactionKindId.Transfer_with_schedule:
+            case TransactionKindId.Transfer_with_schedule_and_memo:
+                return TransactionKindId.Transfer_with_schedule_and_memo;
+            case TransactionKindId.Encrypted_transfer:
+            case TransactionKindId.Encrypted_transfer_with_memo:
+                return TransactionKindId.Encrypted_transfer_with_memo;
+            default:
+                throw new Error('unexpected transactionkind with memo');
+        }
+    } else {
+        return transactionKind;
+    }
 }
 
 function CreateTransaction({
@@ -29,6 +53,7 @@ function CreateTransaction({
     account,
     recipient,
     amount,
+    memo,
     schedule,
     estimatedFee,
     nonce,
@@ -39,12 +64,15 @@ function CreateTransaction({
     >();
 
     useEffect(() => {
-        const handler = findAccountTransactionHandler(transactionKind);
+        const handler = findAccountTransactionHandler(
+            transformToMemoKind(transactionKind, memo)
+        );
         const t = handler.createTransaction({
             sender: account.address,
             amount: toMicroUnits(amount),
             recipient: recipient.address,
             signatureAmount: account.signatureThreshold,
+            memo,
             expiryTime,
             schedule,
             nonce,
@@ -55,6 +83,7 @@ function CreateTransaction({
         account,
         amount,
         recipient,
+        memo,
         schedule,
         transactionKind,
         estimatedFee,

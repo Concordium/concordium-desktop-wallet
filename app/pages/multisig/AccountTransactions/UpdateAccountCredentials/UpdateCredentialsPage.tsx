@@ -39,6 +39,7 @@ import {
 import { getNoteForOwnCredential } from '~/utils/credentialHelper';
 import { identitiesSelector } from '~/features/IdentitySlice';
 import { CredentialDetails, CredentialStatus } from './util';
+import DisplayAddress from '~/components/DisplayAddress';
 
 import styles from './UpdateAccountCredentials.module.scss';
 
@@ -96,7 +97,13 @@ function displayAccount(account: Account | undefined) {
             <h2 className="mV0">
                 {account ? account.name : 'Choose an account on the right'}
             </h2>
-            <p className="textFaded mB40 mT5 body4">{account?.address}</p>
+            {account ? (
+                <DisplayAddress
+                    outerClassName="mB5 mT5"
+                    lineClassName="textFaded body4"
+                    address={account?.address}
+                />
+            ) : null}
         </>
     );
 }
@@ -595,6 +602,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                                             !hasEncryptedBalance(acc)
                                         }
                                         onAccountClicked={onContinue}
+                                        messageWhenEmpty="There are no accounts, which can update its credentials"
                                     />
                                 )}
                             />

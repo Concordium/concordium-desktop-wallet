@@ -49,7 +49,7 @@ export default async function signUpdateProtocolTransaction(
     // Stream the message bytes (maximum of 255 bytes per packet)
     p1 = 0x02;
     const messageChunks = chunkBuffer(
-        serializedProtocolUpdate.message.message,
+        serializedProtocolUpdate.message.data,
         255
     );
     for (let i = 0; i < messageChunks.length; i += 1) {
@@ -77,7 +77,7 @@ export default async function signUpdateProtocolTransaction(
     // Stream the specification URL bytes (maximum of 255 bytes per packet)
     p1 = 0x02;
     const urlChunks = chunkBuffer(
-        serializedProtocolUpdate.specificationUrl.message,
+        serializedProtocolUpdate.specificationUrl.data,
         255
     );
     for (let i = 0; i < urlChunks.length; i += 1) {

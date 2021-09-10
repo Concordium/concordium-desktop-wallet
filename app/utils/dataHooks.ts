@@ -8,7 +8,7 @@ import {
     getAccountInfoOfAddress,
     fetchLastFinalizedAnonymityRevokers,
 } from '../node/nodeHelpers';
-import { useCurrentTime } from './hooks';
+import { useCurrentTime, useAsyncMemo } from './hooks';
 import {
     epochDate,
     getDefaultExpiry,
@@ -69,6 +69,7 @@ export function useTransactionCostEstimate(
     kind: TransactionKindId,
     exchangeRate: Fraction,
     signatureAmount?: number,
+    memo?: string,
     payloadSize?: number
 ) {
     return useMemo(
@@ -77,35 +78,24 @@ export function useTransactionCostEstimate(
                 kind,
                 exchangeRate,
                 signatureAmount,
+                memo,
                 payloadSize
             ),
-        [kind, exchangeRate, payloadSize, signatureAmount]
+        [kind, exchangeRate, payloadSize, signatureAmount, memo]
     );
 }
 
 /** Hook for fetching last finalized block summary */
 export function useLastFinalizedBlockSummary() {
-    const [summary, setSummary] = useState<{
+    return useAsyncMemo<{
         lastFinalizedBlockSummary: BlockSummary;
         consensusStatus: ConsensusStatus;
-    }>();
-    useEffect(() => {
-        fetchLastFinalizedBlockSummary()
-            .then(setSummary)
-            .catch(() => {});
-    }, []);
-    return summary;
+    }>(fetchLastFinalizedBlockSummary);
 }
 
 /** Hook for fetching consensus status */
 export function useConsensusStatus() {
-    const [status, setStatus] = useState<ConsensusStatus>();
-    useEffect(() => {
-        getConsensusStatus()
-            .then(setStatus)
-            .catch(() => {});
-    }, []);
-    return status;
+    return useAsyncMemo<ConsensusStatus>(getConsensusStatus);
 }
 
 /** Hook for fetching identity providers */

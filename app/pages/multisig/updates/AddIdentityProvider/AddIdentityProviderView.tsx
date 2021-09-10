@@ -1,8 +1,8 @@
+import { Buffer } from 'buffer/';
 import React, { useState, useEffect } from 'react';
 import { AddIdentityProvider } from '~/utils/types';
 import { hashSha256 } from '~/utils/serializationHelpers';
 import { fieldDisplays } from './CreateAddIdentityProvider';
-import { noOp } from '~/utils/basicHelpers';
 
 interface Props {
     addIdentityProvider: AddIdentityProvider;
@@ -14,12 +14,14 @@ interface Props {
 export default function AddIdentityProviderView({
     addIdentityProvider,
 }: Props) {
-    const [hash, setHash] = useState<string>('');
+    const [ipVerifyKeyHash, setIpVerifyKeyHash] = useState<string>('');
 
     useEffect(() => {
-        hashSha256(Buffer.from(addIdentityProvider.ipVerifyKey, 'hex'))
-            .then((h) => setHash(h.toString('hex')))
-            .catch(noOp);
+        setIpVerifyKeyHash(
+            hashSha256(
+                Buffer.from(addIdentityProvider.ipVerifyKey, 'hex')
+            ).toString('hex')
+        );
     }, [addIdentityProvider.ipVerifyKey]);
 
     return (
@@ -41,12 +43,12 @@ export default function AddIdentityProviderView({
                 {addIdentityProvider.ipIdentity}
             </div>
             <div className="body1">
-                <h5 className="mB0">{fieldDisplays.ipVerifyKey} Hash</h5>
-                {hash}
-            </div>
-            <div className="body1">
                 <h5 className="mB0">{fieldDisplays.ipVerifyKey}</h5>
                 {addIdentityProvider.ipVerifyKey}
+            </div>
+            <div className="body1">
+                <h5 className="mB0">{fieldDisplays.ipVerifyKey} Hash</h5>
+                {ipVerifyKeyHash}
             </div>
             <div className="body1">
                 <h5 className="mB0">{fieldDisplays.ipCdiVerifyKey}</h5>

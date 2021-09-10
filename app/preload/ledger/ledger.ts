@@ -1,6 +1,5 @@
 import { Buffer } from 'buffer/';
 import EventEmitter from 'events';
-import { parse } from '~/utils/JSONHelper';
 import {
     closeTransport,
     getLedgerClient,
@@ -41,8 +40,7 @@ export default function exposedMethods(
         getIdCredSec: (identity: number) =>
             getLedgerClient().getIdCredSec(identity),
         getPrfKey: (identity: number) => getLedgerClient().getPrfKey(identity),
-        signTransfer: (transactionAsJson: string, keypath: number[]) => {
-            const transaction: AccountTransaction = parse(transactionAsJson);
+        signTransfer: (transaction: AccountTransaction, keypath: number[]) => {
             return getLedgerClient().signTransfer(transaction, keypath);
         },
         signPublicInformationForIp: (
@@ -55,12 +53,9 @@ export default function exposedMethods(
             );
         },
         signUpdateCredentialTransaction: (
-            transactionAsJson: string,
+            transaction: UpdateAccountCredentials,
             path: number[]
         ) => {
-            const transaction: UpdateAccountCredentials = parse(
-                transactionAsJson
-            );
             return getLedgerClient().signUpdateCredentialTransaction(
                 transaction,
                 path
@@ -79,23 +74,20 @@ export default function exposedMethods(
         },
         signCredentialDeploymentOnNewAccount: (
             credentialDeployment: UnsignedCredentialDeploymentInformation,
-            expiry: string,
+            expiry: bigint,
             keypath: number[]
         ) => {
             return getLedgerClient().signCredentialDeploymentOnNewAccount(
                 credentialDeployment,
-                parse(expiry),
+                expiry,
                 keypath
             );
         },
         signMicroGtuPerEuro: (
-            transactionAsJson: string,
+            transaction: UpdateInstruction<ExchangeRate>,
             serializedPayload: Buffer,
             keypath: number[]
         ) => {
-            const transaction: UpdateInstruction<ExchangeRate> = parse(
-                transactionAsJson
-            );
             return getLedgerClient().signMicroGtuPerEuro(
                 transaction,
                 serializedPayload,
@@ -103,13 +95,10 @@ export default function exposedMethods(
             );
         },
         signEuroPerEnergy: (
-            transactionAsJson: string,
+            transaction: UpdateInstruction<ExchangeRate>,
             serializedPayload: Buffer,
             keypath: number[]
         ) => {
-            const transaction: UpdateInstruction<ExchangeRate> = parse(
-                transactionAsJson
-            );
             return getLedgerClient().signEuroPerEnergy(
                 transaction,
                 serializedPayload,
@@ -117,13 +106,10 @@ export default function exposedMethods(
             );
         },
         signTransactionFeeDistribution: (
-            transactionAsJson: string,
+            transaction: UpdateInstruction<TransactionFeeDistribution>,
             serializedPayload: Buffer,
             keypath: number[]
         ) => {
-            const transaction: UpdateInstruction<TransactionFeeDistribution> = parse(
-                transactionAsJson
-            );
             return getLedgerClient().signTransactionFeeDistribution(
                 transaction,
                 serializedPayload,
@@ -131,13 +117,10 @@ export default function exposedMethods(
             );
         },
         signFoundationAccount: (
-            transactionAsJson: string,
+            transaction: UpdateInstruction<FoundationAccount>,
             serializedPayload: Buffer,
             keypath: number[]
         ) => {
-            const transaction: UpdateInstruction<FoundationAccount> = parse(
-                transactionAsJson
-            );
             return getLedgerClient().signFoundationAccount(
                 transaction,
                 serializedPayload,
@@ -145,13 +128,10 @@ export default function exposedMethods(
             );
         },
         signMintDistribution: (
-            transactionAsJson: string,
+            transaction: UpdateInstruction<MintDistribution>,
             serializedPayload: Buffer,
             keypath: number[]
         ) => {
-            const transaction: UpdateInstruction<MintDistribution> = parse(
-                transactionAsJson
-            );
             return getLedgerClient().signMintDistribution(
                 transaction,
                 serializedPayload,
@@ -159,13 +139,10 @@ export default function exposedMethods(
             );
         },
         signProtocolUpdate: (
-            transactionAsJson: string,
+            transaction: UpdateInstruction<ProtocolUpdate>,
             serializedPayload: Buffer,
             keypath: number[]
         ) => {
-            const transaction: UpdateInstruction<ProtocolUpdate> = parse(
-                transactionAsJson
-            );
             return getLedgerClient().signProtocolUpdate(
                 transaction,
                 serializedPayload,
@@ -173,13 +150,10 @@ export default function exposedMethods(
             );
         },
         signAddAnonymityRevoker: (
-            transactionAsJson: string,
+            transaction: UpdateInstruction<AddAnonymityRevoker>,
             serializedPayload: Buffer,
             keypath: number[]
         ) => {
-            const transaction: UpdateInstruction<AddAnonymityRevoker> = parse(
-                transactionAsJson
-            );
             return getLedgerClient().signAddAnonymityRevoker(
                 transaction,
                 serializedPayload,
@@ -187,13 +161,10 @@ export default function exposedMethods(
             );
         },
         signAddIdentityProvider: (
-            transactionAsJson: string,
+            transaction: UpdateInstruction<AddIdentityProvider>,
             serializedPayload: Buffer,
             keypath: number[]
         ) => {
-            const transaction: UpdateInstruction<AddIdentityProvider> = parse(
-                transactionAsJson
-            );
             return getLedgerClient().signAddIdentityProvider(
                 transaction,
                 serializedPayload,
@@ -201,13 +172,10 @@ export default function exposedMethods(
             );
         },
         signGasRewards: (
-            transactionAsJson: string,
+            transaction: UpdateInstruction<GasRewards>,
             serializedPayload: Buffer,
             keypath: number[]
         ) => {
-            const transaction: UpdateInstruction<GasRewards> = parse(
-                transactionAsJson
-            );
             return getLedgerClient().signGasRewards(
                 transaction,
                 serializedPayload,
@@ -215,13 +183,10 @@ export default function exposedMethods(
             );
         },
         signBakerStakeThreshold: (
-            transactionAsJson: string,
+            transaction: UpdateInstruction<BakerStakeThreshold>,
             serializedPayload: Buffer,
             keypath: number[]
         ) => {
-            const transaction: UpdateInstruction<BakerStakeThreshold> = parse(
-                transactionAsJson
-            );
             return getLedgerClient().signBakerStakeThreshold(
                 transaction,
                 serializedPayload,
@@ -229,13 +194,10 @@ export default function exposedMethods(
             );
         },
         signElectionDifficulty: (
-            transactionAsJson: string,
+            transaction: UpdateInstruction<ElectionDifficulty>,
             serializedPayload: Buffer,
             keypath: number[]
         ) => {
-            const transaction: UpdateInstruction<ElectionDifficulty> = parse(
-                transactionAsJson
-            );
             return getLedgerClient().signElectionDifficulty(
                 transaction,
                 serializedPayload,
@@ -243,14 +205,11 @@ export default function exposedMethods(
             );
         },
         signHigherLevelKeysUpdate: (
-            transactionAsJson: string,
+            transaction: UpdateInstruction<HigherLevelKeyUpdate>,
             serializedPayload: Buffer,
             keypath: number[],
             INS: number
         ) => {
-            const transaction: UpdateInstruction<HigherLevelKeyUpdate> = parse(
-                transactionAsJson
-            );
             return getLedgerClient().signHigherLevelKeysUpdate(
                 transaction,
                 serializedPayload,
@@ -259,14 +218,11 @@ export default function exposedMethods(
             );
         },
         signAuthorizationKeysUpdate: (
-            transactionAsJson: string,
+            transaction: UpdateInstruction<AuthorizationKeysUpdate>,
             serializedPayload: Buffer,
             keypath: number[],
             INS: number
         ) => {
-            const transaction: UpdateInstruction<AuthorizationKeysUpdate> = parse(
-                transactionAsJson
-            );
             return getLedgerClient().signAuthorizationKeysUpdate(
                 transaction,
                 serializedPayload,

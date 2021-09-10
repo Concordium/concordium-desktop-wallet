@@ -45,6 +45,9 @@ import AddAnonymityRevokerHandler from './AddAnonymityRevokerHandler';
 import EncryptedTransferHandler from './EncryptedTransferHandler';
 import BakerHandler from './BakerHandler';
 import { parse } from '../JSONHelper';
+import ScheduledTransferWithMemoHandler from './ScheduledTransferWithMemoHandler';
+import EncryptedTransferWithMemoHandler from './EncryptedTransferWithMemoHandler';
+import SimpleTransferWithMemoHandler from './SimpleTransferWithMemoHandler';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -53,57 +56,72 @@ export function findAccountTransactionHandler(
     ConcordiumLedgerClient,
     Transaction
 > {
-    if (transactionKind === TransactionKindId.Update_credentials) {
-        return new AccountHandlerTypeMiddleware(
-            new UpdateAccountCredentialsHandler()
-        );
+    switch (transactionKind) {
+        case TransactionKindId.Update_credentials:
+            return new AccountHandlerTypeMiddleware(
+                new UpdateAccountCredentialsHandler()
+            );
+        case TransactionKindId.Simple_transfer:
+            return new AccountHandlerTypeMiddleware(
+                new SimpleTransferHandler()
+            );
+        case TransactionKindId.Simple_transfer_with_memo:
+            return new AccountHandlerTypeMiddleware(
+                new SimpleTransferWithMemoHandler()
+            );
+        case TransactionKindId.Add_baker:
+            return new AccountHandlerTypeMiddleware(
+                new BakerHandler('Add Baker', instanceOfAddBaker)
+            );
+        case TransactionKindId.Update_baker_keys:
+            return new AccountHandlerTypeMiddleware(
+                new BakerHandler('Update Baker Keys', instanceOfUpdateBakerKeys)
+            );
+        case TransactionKindId.Remove_baker:
+            return new AccountHandlerTypeMiddleware(
+                new BakerHandler('Remove Baker', instanceOfRemoveBaker)
+            );
+        case TransactionKindId.Update_baker_stake:
+            return new AccountHandlerTypeMiddleware(
+                new BakerHandler(
+                    'Update Baker Stake',
+                    instanceOfUpdateBakerStake
+                )
+            );
+        case TransactionKindId.Update_baker_restake_earnings:
+            return new AccountHandlerTypeMiddleware(
+                new BakerHandler(
+                    'Update Baker Restake Earnings',
+                    instanceOfUpdateBakerRestakeEarnings
+                )
+            );
+        case TransactionKindId.Encrypted_transfer:
+            return new AccountHandlerTypeMiddleware(
+                new EncryptedTransferHandler()
+            );
+        case TransactionKindId.Encrypted_transfer_with_memo:
+            return new AccountHandlerTypeMiddleware(
+                new EncryptedTransferWithMemoHandler()
+            );
+        case TransactionKindId.Transfer_with_schedule:
+            return new AccountHandlerTypeMiddleware(
+                new ScheduledTransferHandler()
+            );
+        case TransactionKindId.Transfer_with_schedule_and_memo:
+            return new AccountHandlerTypeMiddleware(
+                new ScheduledTransferWithMemoHandler()
+            );
+        case TransactionKindId.Transfer_to_encrypted:
+            return new AccountHandlerTypeMiddleware(
+                new TransferToEncryptedHandler()
+            );
+        case TransactionKindId.Transfer_to_public:
+            return new AccountHandlerTypeMiddleware(
+                new TransferToPublicHandler()
+            );
+        default:
+            throw new Error(`Unsupported transaction type: ${transactionKind}`);
     }
-    if (transactionKind === TransactionKindId.Simple_transfer) {
-        return new AccountHandlerTypeMiddleware(new SimpleTransferHandler());
-    }
-    if (transactionKind === TransactionKindId.Add_baker) {
-        return new AccountHandlerTypeMiddleware(
-            new BakerHandler('Add Baker', instanceOfAddBaker)
-        );
-    }
-    if (transactionKind === TransactionKindId.Update_baker_keys) {
-        return new AccountHandlerTypeMiddleware(
-            new BakerHandler('Update Baker Keys', instanceOfUpdateBakerKeys)
-        );
-    }
-    if (transactionKind === TransactionKindId.Remove_baker) {
-        return new AccountHandlerTypeMiddleware(
-            new BakerHandler('Remove Baker', instanceOfRemoveBaker)
-        );
-    }
-    if (transactionKind === TransactionKindId.Update_baker_stake) {
-        return new AccountHandlerTypeMiddleware(
-            new BakerHandler('Update Baker Stake', instanceOfUpdateBakerStake)
-        );
-    }
-    if (transactionKind === TransactionKindId.Update_baker_restake_earnings) {
-        return new AccountHandlerTypeMiddleware(
-            new BakerHandler(
-                'Update Baker Restake Earnings',
-                instanceOfUpdateBakerRestakeEarnings
-            )
-        );
-    }
-    if (transactionKind === TransactionKindId.Encrypted_transfer) {
-        return new AccountHandlerTypeMiddleware(new EncryptedTransferHandler());
-    }
-    if (transactionKind === TransactionKindId.Transfer_with_schedule) {
-        return new AccountHandlerTypeMiddleware(new ScheduledTransferHandler());
-    }
-    if (transactionKind === TransactionKindId.Transfer_to_encrypted) {
-        return new AccountHandlerTypeMiddleware(
-            new TransferToEncryptedHandler()
-        );
-    }
-    if (transactionKind === TransactionKindId.Transfer_to_public) {
-        return new AccountHandlerTypeMiddleware(new TransferToPublicHandler());
-    }
-    throw new Error(`Unsupported transaction type: ${transactionKind}`);
 }
 
 export function findUpdateInstructionHandler(

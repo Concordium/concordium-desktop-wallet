@@ -11,6 +11,7 @@ import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import styles from './transferDetails.module.scss';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
+import DisplayAddress from '../DisplayAddress';
 
 interface Props {
     transaction: TransferToEncrypted | TransferToPublic;
@@ -44,7 +45,10 @@ export default function DisplayInternalTransfer({
             <h2>{transactionDetails.title}</h2>
             <h5 className={styles.title}>From Account:</h5>
             <p className={styles.name}>{fromName}</p>
-            <p className={styles.address}>{transaction.sender}</p>
+            <DisplayAddress
+                address={transaction.sender}
+                lineClassName={styles.address}
+            />
             <h5 className={styles.title}>Amount:</h5>
             <p className={styles.amount}>
                 {displayAsGTU(transactionDetails.amount)}

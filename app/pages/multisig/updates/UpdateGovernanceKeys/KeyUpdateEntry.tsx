@@ -1,6 +1,8 @@
 import React from 'react';
+import clsx from 'clsx';
 import Button from '~/cross-app-components/Button';
 import { KeyUpdateEntryStatus, KeyWithStatus } from '~/utils/types';
+import PublicKeyDetails from '~/components/ledger/PublicKeyDetails';
 import styles from './KeyUpdateEntry.module.scss';
 
 export interface KeyUpdateEntryProps {
@@ -61,17 +63,29 @@ export function KeyUpdateEntry({ keyInput, updateKey }: KeyUpdateEntryProps) {
         <>
             <li className={styles.listItem}>
                 {generateStatusLabel(keyInput.status)}
-                <div className="flex alignCenter">
-                    {updateKey && (
-                        <Button
-                            size="tiny"
-                            onClick={() => updateKey(updateKeyStatus(keyInput))}
-                            className={styles.button}
-                        >
-                            {generateButtonText(keyInput.status)}
-                        </Button>
+                <div
+                    className={clsx(
+                        'flex alignCenter justifyCenter',
+                        updateKey && styles.appendage
                     )}
-                    <p className={styles.keyText}>{keyInput.key.verifyKey}</p>
+                >
+                    {updateKey && (
+                        <div className="flex flexChildFill">
+                            <Button
+                                size="tiny"
+                                onClick={() =>
+                                    updateKey(updateKeyStatus(keyInput))
+                                }
+                                className={styles.button}
+                            >
+                                {generateButtonText(keyInput.status)}
+                            </Button>
+                        </div>
+                    )}
+                    <PublicKeyDetails
+                        className={styles.keyText}
+                        publicKey={keyInput.key.verifyKey}
+                    />
                 </div>
             </li>
         </>

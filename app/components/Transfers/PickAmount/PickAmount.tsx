@@ -1,11 +1,16 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
 } from '~/features/AccountSlice';
-import { TransactionKindId, AddressBookEntry, Fraction } from '~/utils/types';
+import {
+    TransactionKindId,
+    AddressBookEntry,
+    Fraction,
+    EqualRecord,
+} from '~/utils/types';
 import { getGTUSymbol } from '~/utils/gtu';
 import AddressBookEntryButton from '~/components/AddressBookEntryButton';
 import Button from '~/cross-app-components/Button';
@@ -14,26 +19,44 @@ import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import {
     validateTransferAmount,
     validateShieldedAmount,
+    validateMemo,
 } from '~/utils/transactionHelpers';
 import { collapseFraction } from '~/utils/basicHelpers';
 import transferStyles from '../Transfers.module.scss';
 import styles from './PickAmount.module.scss';
 import ErrorMessage from '~/components/Form/ErrorMessage';
+import MemoWarning from '~/components/MemoWarning';
+
+interface MemoProps {
+    defaultMemo?: string;
+    setMemo: (currentMemo?: string) => void;
+    shownMemoWarning: boolean;
+    setShownMemoWarning: (shown: boolean) => void;
+}
 
 interface Props {
     recipient?: AddressBookEntry | undefined;
     defaultAmount: string;
     header: string;
     estimatedFee?: Fraction | undefined;
-    toPickRecipient?(currentAmount: string): void;
-    toConfirmTransfer(amount: string): void;
+    toPickRecipient?(currentAmount: string, memo?: string): void;
+    toConfirmTransfer(amount: string, memo?: string): void;
     transactionKind: TransactionKindId;
+    // Presence determines whether to show memo input.
+    memo?: MemoProps;
 }
 
 interface PickAmountForm {
     amount: string;
     recipient: string;
+    memo: string;
 }
+
+const fieldNames: EqualRecord<PickAmountForm> = {
+    amount: 'amount',
+    recipient: 'recipient',
+    memo: 'memo',
+};
 
 /**
  * Allows the user to enter an amount, and redirects to picking a recipient.
@@ -46,17 +69,24 @@ export default function PickAmount({
     toPickRecipient,
     toConfirmTransfer,
     transactionKind,
+    memo,
 }: Props) {
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
+    const [memoFocused, setMemoFocused] = useState<boolean>(false);
     const form = useForm<PickAmountForm>({ mode: 'onTouched' });
-    const { errors } = form;
+    const { errors, watch } = form;
+
+    const currentMemo = watch(fieldNames.memo);
+    useEffect(() => {
+        if (memo) {
+            memo.setMemo(currentMemo);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentMemo]);
 
     const handleSubmit: SubmitHandler<PickAmountForm> = useCallback(
-        (values) => {
-            const { amount } = values;
-            toConfirmTransfer(amount);
-        },
+        (values) => toConfirmTransfer(values.amount, values.memo),
         [toConfirmTransfer]
     );
 
@@ -88,7 +118,7 @@ export default function PickAmount({
                 <div className={styles.amountInputWrapper}>
                     {getGTUSymbol()}
                     <Form.GtuInput
-                        name="amount"
+                        name={fieldNames.amount}
                         defaultValue={defaultAmount}
                         rules={{
                             required: 'Amount Required',
@@ -103,11 +133,28 @@ export default function PickAmount({
                     className={styles.estimatedFee}
                     estimatedFee={estimatedFee}
                 />
+                {memo ? (
+                    <>
+                        <Form.TextArea
+                            name={fieldNames.memo}
+                            className={styles.memoField}
+                            label={<span className="h3">Memo</span>}
+                            onFocus={() => setMemoFocused(true)}
+                            rules={{ validate: validateMemo }}
+                            defaultValue={memo.defaultMemo}
+                            placeholder="You can add a memo here"
+                        />
+                        <MemoWarning
+                            open={memoFocused && !memo.shownMemoWarning}
+                            onClose={() => memo.setShownMemoWarning(true)}
+                        />
+                    </>
+                ) : null}
                 {toPickRecipient ? (
                     <>
                         <div style={{ display: 'none' }}>
                             <Form.Checkbox
-                                name="recipient"
+                                name={fieldNames.recipient}
                                 rules={{
                                     required: 'Recipient Required',
                                 }}
@@ -119,7 +166,10 @@ export default function PickAmount({
                             className={styles.pickRecipient}
                             error={Boolean(form.errors?.recipient)}
                             onClick={() => {
-                                toPickRecipient(form.getValues('amount'));
+                                toPickRecipient(
+                                    form.getValues(fieldNames.amount),
+                                    form.getValues(fieldNames.memo)
+                                );
                             }}
                             title={
                                 recipient ? recipient.name : 'Select Recipient'

@@ -2,10 +2,12 @@ import {
     AccountTransaction,
     Fraction,
     instanceOfScheduledTransfer,
+    instanceOfScheduledTransferWithMemo,
     TransactionKindId,
     UpdateAccountCredentialsPayload,
 } from './types';
 import { serializeTransferPayload } from './transactionSerialization';
+import { getEncodedSize } from '~/utils/cborHelper';
 
 /**
  * These constants should be kept consistent with:
@@ -75,7 +77,14 @@ export function calculateCost(
     );
 }
 
-function getPayloadSizeEstimate(transactionKind: TransactionKindId) {
+/**
+ *  Given a transactionKind, return the size of a payload of the particular kind.
+ *  Note that this function does not support scheduled transfers nor transfers with memos, because their payload sizes are variable,
+ *  and will cause the fucntion to throw an error.
+ */
+export function getPayloadSizeEstimate(
+    transactionKind: TransactionKindId
+): number {
     switch (transactionKind) {
         case TransactionKindId.Simple_transfer:
             return payloadSizeEstimate.SimpleTransfer;
@@ -103,8 +112,10 @@ function getPayloadSizeEstimate(transactionKind: TransactionKindId) {
 function getEnergyCostOfType(transactionKind: TransactionKindId) {
     switch (transactionKind) {
         case TransactionKindId.Simple_transfer:
+        case TransactionKindId.Simple_transfer_with_memo:
             return energyConstants.SimpleTransferCost;
         case TransactionKindId.Encrypted_transfer:
+        case TransactionKindId.Encrypted_transfer_with_memo:
             return energyConstants.EncryptedTransferCost;
         case TransactionKindId.Transfer_to_encrypted:
             return energyConstants.TransferToEncryptedCost;
@@ -125,24 +136,38 @@ function getEnergyCostOfType(transactionKind: TransactionKindId) {
     }
 }
 
-export function getScheduledTransferPayloadSize(scheduleLength: number) {
+export function getScheduledTransferPayloadSize(
+    scheduleLength: number,
+    memoLength: number
+) {
     return (
-        1 + // TransactionKind (Word8)
-        32 + // Receiver Address (FBS 32)
-        1 + // ScheduleLength (Word8)
-        scheduleLength * 16
-    ); // Amount (Word64) + Expiry (Word64)
+        // TransactionKind (Word8)
+        1 +
+        // Receiver Address (FBS 32)
+        32 +
+        // ScheduleLength (Word8)
+        1 +
+        // Amount (Word64) + Expiry (Word64)
+        scheduleLength * 16 +
+        // Memo
+        (memoLength ? 2 + memoLength : 0)
+    );
 }
 
 /**
  *  Given the signatureAmount and schedule length,
  * returns the energy cost of a scheduled transfer.
+ * @param memoLength if memo length is 0, it is assumed that the transaction is a regular scheduled transfer.
  */
 function getScheduledTransferEnergy(
     scheduleLength: number,
-    signatureAmount = 1
+    signatureAmount: number,
+    memoLength: number
 ): bigint {
-    const payloadSize = getScheduledTransferPayloadSize(scheduleLength);
+    const payloadSize = getScheduledTransferPayloadSize(
+        scheduleLength,
+        memoLength
+    );
     return calculateCost(
         BigInt(signatureAmount),
         BigInt(payloadSize),
@@ -163,7 +188,10 @@ export function getTransactionEnergyCost(
         transaction.payload
     ).length;
     let transactionTypeCost;
-    if (instanceOfScheduledTransfer(transaction)) {
+    if (
+        instanceOfScheduledTransfer(transaction) ||
+        instanceOfScheduledTransferWithMemo(transaction)
+    ) {
         transactionTypeCost =
             energyConstants.ScheduledTransferPerRelease *
             BigInt(transaction.payload.schedule.length);
@@ -232,11 +260,12 @@ export function getTransactionKindCost(
     transactionKind: TransactionKindId,
     energyToMicroGtu: Fraction,
     signatureAmount = 1,
+    memo?: string,
     payloadSize: number = getPayloadSizeEstimate(transactionKind)
 ): Fraction {
     const energy = getTransactionKindEnergy(
         transactionKind,
-        payloadSize,
+        payloadSize + getEncodedSize(memo),
         signatureAmount
     );
     return energyToCost(energy, energyToMicroGtu);
@@ -261,15 +290,16 @@ export default function getTransactionCost(
  */
 export function scheduledTransferCost(
     energyToMicroGtu: Fraction,
-    signatureAmount = 1
-): (scheduleLength: number) => Fraction {
-    return (scheduleLength: number) => {
-        const energy = getScheduledTransferEnergy(
-            scheduleLength,
-            signatureAmount
-        );
-        return energyToCost(energy, energyToMicroGtu);
-    };
+    scheduleLength: number,
+    signatureAmount = 1,
+    memo?: string
+): Fraction {
+    const energy = getScheduledTransferEnergy(
+        scheduleLength,
+        signatureAmount,
+        getEncodedSize(memo)
+    );
+    return energyToCost(energy, energyToMicroGtu);
 }
 
 export function getUpdateCredentialsCost(

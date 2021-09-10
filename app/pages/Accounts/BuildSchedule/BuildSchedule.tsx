@@ -8,6 +8,7 @@ import { Account, AddressBookEntry, Schedule } from '~/utils/types';
 import { displayAsGTU, microGtuToGtu } from '~/utils/gtu';
 import { collapseFraction } from '~/utils/basicHelpers';
 import {
+    createScheduledTransferWithMemoTransaction,
     createScheduledTransferTransaction,
     amountAtDisposal,
 } from '~/utils/transactionHelpers';
@@ -29,6 +30,7 @@ interface State {
     exchangeRate: string;
     nonce: string;
     defaults?: BuildScheduleDefaults;
+    memo?: string;
 }
 
 interface Props {
@@ -51,6 +53,7 @@ export default function BuildSchedule({ location }: Props) {
     const {
         account,
         amount,
+        memo,
         recipient,
         nonce,
         exchangeRate,
@@ -63,9 +66,14 @@ export default function BuildSchedule({ location }: Props) {
     const estimatedFee = useMemo(
         () =>
             scheduleLength
-                ? scheduledTransferCost(parse(exchangeRate))(scheduleLength)
+                ? scheduledTransferCost(
+                      parse(exchangeRate),
+                      scheduleLength,
+                      1,
+                      memo
+                  )
                 : undefined,
-        [exchangeRate, scheduleLength]
+        [exchangeRate, memo, scheduleLength]
     );
 
     const [amountError, setAmountError] = useState<string>();
@@ -90,12 +98,23 @@ export default function BuildSchedule({ location }: Props) {
             if (amountError) {
                 return;
             }
-            const transaction = createScheduledTransferTransaction(
-                account.address,
-                recipient.address,
-                schedule,
-                nonce
-            );
+            let transaction;
+            if (memo) {
+                transaction = createScheduledTransferWithMemoTransaction(
+                    account.address,
+                    recipient.address,
+                    schedule,
+                    nonce,
+                    memo
+                );
+            } else {
+                transaction = createScheduledTransferTransaction(
+                    account.address,
+                    recipient.address,
+                    schedule,
+                    nonce
+                );
+            }
             transaction.estimatedFee = estimatedFee;
             const transactionJSON = stringify(transaction);
             dispatch(
@@ -120,6 +139,7 @@ export default function BuildSchedule({ location }: Props) {
                                 defaults: recoverState,
                                 recipient,
                                 nonce,
+                                memo,
                                 exchangeRate,
                             },
                         },
@@ -144,7 +164,11 @@ export default function BuildSchedule({ location }: Props) {
                 dispatch(
                     push({
                         pathname: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
-                        state: { amount: microGtuToGtu(amount), recipient },
+                        state: {
+                            amount: microGtuToGtu(amount),
+                            recipient,
+                            memo,
+                        },
                     })
                 )
             }

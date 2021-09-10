@@ -143,3 +143,15 @@ pub fn get_address_from_cred_id_ext(
         Err(e) => format!("unable to create genesis account due to: {}", e),
     }
 }
+
+#[wasm_bindgen(js_name = getCredId)]
+pub fn calculate_cred_id_ext(
+    prf_key_seed: &str,
+    cred_counter: u8,
+    global_context: &str
+) -> String {
+    match calculate_cred_id(prf_key_seed, cred_counter, global_context) {
+        Ok(s) => s,
+        Err(e) => format!("unable to calculate credId due to: {}", e),
+    }
+}

@@ -59,7 +59,7 @@ export function encodeWord64(value: bigint): Buffer {
     return Buffer.from(new Uint8Array(arr));
 }
 
-export async function hashSha256(...inputs: Indexable[]): Promise<Buffer> {
+export function hashSha256(...inputs: Indexable[]): Buffer {
     const hash = window.cryptoMethods.sha256(inputs);
     return Buffer.from(hash);
 }
@@ -195,6 +195,10 @@ export function serializeCredentialDeploymentInformation(
     return Buffer.concat(buffers);
 }
 
+/**
+ *  Given a string, return a serializedTextWithLength object.
+ * N.B. This function assumes the text length can fit into a uint32, and the length buffer will always have a length of 4 bytes.
+ */
 function getSerializedTextWithLength(text: string): SerializedTextWithLength {
     const encoded = Buffer.from(new TextEncoder().encode(text));
     const serializedLength = encodeWord32(encoded.length);

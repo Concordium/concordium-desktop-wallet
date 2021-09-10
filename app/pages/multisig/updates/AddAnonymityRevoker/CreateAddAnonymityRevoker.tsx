@@ -99,6 +99,7 @@ export default function UpdateAddAnonymityRevoker({
                 defaultValue={defaults.arPublicKey || undefined}
                 label={`${fieldDisplays.arPublicKey}:`}
                 placeholder={pasteHere(fieldDisplays.arPublicKey)}
+                spellCheck={false}
                 rules={{
                     required: requiredMessage(fieldDisplays.arPublicKey),
                     minLength: arLengthRule,

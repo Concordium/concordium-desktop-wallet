@@ -9,7 +9,11 @@
 -   It is now possible to rename accounts and identities.
 -   Added an option to add an address book entry while creating a transfer transaction.
 -   Added an introductory screen to set up a node connection for first time users.
+-   Now shows connected node status in side bar.
 -   It is now possible to remove a failed identity.
+-   Added reference (sessionId) on failed identities, for support.
+-   Added support for memo transactions.
+-   Added algorithm to recover lost accounts and credentials.
 
 ### Changed
 

@@ -45,13 +45,18 @@ function ScheduleTransfer({
         );
     }
 
-    function toBuildSchedule(amount: string, recipient: AddressBookEntry) {
+    function toBuildSchedule(
+        amount: string,
+        recipient: AddressBookEntry,
+        memo?: string
+    ) {
         dispatch(
             push({
                 pathname: routes.ACCOUNTS_SCHEDULED_TRANSFER,
                 state: {
                     account,
                     nonce,
+                    memo,
                     amount: toMicroUnits(amount).toString(),
                     recipient,
                     exchangeRate: stringify(exchangeRate),

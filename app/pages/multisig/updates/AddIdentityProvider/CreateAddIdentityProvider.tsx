@@ -1,5 +1,7 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Validate } from 'react-hook-form';
+import { hashSha256 } from '~/utils/serializationHelpers';
+
 import { EqualRecord, AddIdentityProvider, Description } from '~/utils/types';
 import Form from '~/components/Form';
 import { UpdateProps } from '~/utils/transactionTypes';
@@ -12,6 +14,8 @@ import {
     pasteHere,
     enterHere,
 } from '../common/util';
+import styles from './addIdentityProvider.module.scss';
+import { isHex } from '~/utils/basicHelpers';
 
 export type AddIdentityProviderFields = Omit<
     AddIdentityProvider,
@@ -56,12 +60,14 @@ export default function CreateAddIdentityProvider({
         [identityProviders]
     );
 
+    const [ipVerifyKeyHash, setIpVerifyKeyHash] = useState<string>('');
+
     return (
         <>
             <Form.TextArea
                 className="body1"
                 name={fieldNames.name}
-                label={`${fieldDisplays.name}:`}
+                label={fieldDisplays.name}
                 defaultValue={defaults.name || undefined}
                 placeholder={enterHere(fieldDisplays.name)}
                 rules={{ required: requiredMessage(fieldDisplays.name) }}
@@ -70,7 +76,7 @@ export default function CreateAddIdentityProvider({
                 className="body1"
                 name={fieldNames.url}
                 defaultValue={defaults.url || undefined}
-                label={`${fieldDisplays.url}:`}
+                label={fieldDisplays.url}
                 placeholder={enterHere(fieldDisplays.url)}
                 rules={{ required: requiredMessage(fieldDisplays.url) }}
             />
@@ -78,14 +84,14 @@ export default function CreateAddIdentityProvider({
                 className="body1"
                 name={fieldNames.description}
                 defaultValue={defaults.description || undefined}
-                label={`${fieldDisplays.description}:`}
+                label={fieldDisplays.description}
                 placeholder={enterHere(fieldDisplays.description)}
             />
             <Form.Input
                 className="body1"
                 name={fieldNames.ipIdentity}
                 defaultValue={defaults.ipIdentity || undefined}
-                label={`${fieldDisplays.ipIdentity}:`}
+                label={fieldDisplays.ipIdentity}
                 placeholder={enterHere(fieldDisplays.ipIdentity)}
                 rules={{
                     required: requiredMessage(fieldDisplays.ipIdentity),
@@ -96,21 +102,41 @@ export default function CreateAddIdentityProvider({
                 }}
             />
             <Form.TextArea
-                className="body1"
+                className={styles.ipVerifyKey}
                 name={fieldNames.ipVerifyKey}
                 defaultValue={defaults.ipVerifyKey || undefined}
-                label={`${fieldDisplays.ipVerifyKey}:`}
+                label={fieldDisplays.ipVerifyKey}
+                rows={1}
+                noAutoScale
+                spellCheck={false}
                 placeholder={pasteHere(fieldDisplays.ipVerifyKey)}
+                onChange={(e) => {
+                    const key = e.target.value;
+                    if (isHex(key)) {
+                        setIpVerifyKeyHash(
+                            hashSha256(Buffer.from(key, 'hex')).toString('hex')
+                        );
+                    } else {
+                        setIpVerifyKeyHash('');
+                    }
+                }}
                 rules={{
                     required: requiredMessage(fieldDisplays.ipVerifyKey),
                     validate: validateHex(fieldDisplays.ipVerifyKey),
                 }}
             />
+            {ipVerifyKeyHash && (
+                <div className="body1">
+                    <h5 className="mB0">{fieldDisplays.ipVerifyKey} Hash</h5>
+                    {ipVerifyKeyHash}
+                </div>
+            )}
             <Form.TextArea
                 className="body1"
                 name={fieldNames.ipCdiVerifyKey}
                 defaultValue={defaults.ipCdiVerifyKey || undefined}
-                label={`${fieldDisplays.ipCdiVerifyKey}:`}
+                label={fieldDisplays.ipCdiVerifyKey}
+                spellCheck={false}
                 placeholder={pasteHere(fieldDisplays.ipCdiVerifyKey)}
                 rules={{
                     required: requiredMessage(fieldDisplays.ipCdiVerifyKey),

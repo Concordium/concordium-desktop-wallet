@@ -27,6 +27,7 @@ import {
     AccessStructure,
     AddAnonymityRevoker,
     AddIdentityProvider,
+    SerializedTextWithLength,
 } from './types';
 
 /**
@@ -52,11 +53,6 @@ export enum OnChainUpdateType {
     AddIdentityProvider = 13,
 }
 
-export interface SerializedString {
-    length: Buffer;
-    message: Buffer;
-}
-
 /**
  * Interface for the serialization of a protocol update split into its
  * different parts required to correctly stream it in parts to the Ledger.
@@ -64,8 +60,8 @@ export interface SerializedString {
 export interface SerializedProtocolUpdate {
     serialization: Buffer;
     payloadLength: Buffer;
-    message: SerializedString;
-    specificationUrl: SerializedString;
+    message: SerializedTextWithLength;
+    specificationUrl: SerializedTextWithLength;
     transactionHash: Buffer;
     auxiliaryData: Buffer;
 }
@@ -262,7 +258,7 @@ export function serializeMintDistribution(mintDistribution: MintDistribution) {
  * what can be handled safely in a number value.
  * @param input the string to serialize
  */
-export function serializeUtf8String(input: string): SerializedString {
+export function serializeUtf8String(input: string): SerializedTextWithLength {
     // A UTF-8 character can take up to 4 bytes per character.
     if (input.length > Number.MAX_SAFE_INTEGER / 4) {
         throw new Error(`The string was too long: ${input.length}`);
@@ -270,7 +266,7 @@ export function serializeUtf8String(input: string): SerializedString {
 
     const encoded = Buffer.from(new TextEncoder().encode(input));
     const serializedLength = encodeWord64(BigInt(encoded.length));
-    return { length: serializedLength, message: encoded };
+    return { length: serializedLength, data: encoded };
 }
 
 /**
@@ -295,9 +291,9 @@ export function serializeProtocolUpdate(
 
     const payloadLength: bigint =
         BigInt(8) +
-        BigInt(encodedMessage.message.length) +
+        BigInt(encodedMessage.data.length) +
         BigInt(8) +
-        BigInt(encodedSpecificationUrl.message.length) +
+        BigInt(encodedSpecificationUrl.data.length) +
         BigInt(specificationHash.length) +
         BigInt(auxiliaryData.length);
 
@@ -306,9 +302,9 @@ export function serializeProtocolUpdate(
     const serialization = Buffer.concat([
         serializedPayloadLength,
         encodedMessage.length,
-        encodedMessage.message,
+        encodedMessage.data,
         encodedSpecificationUrl.length,
-        encodedSpecificationUrl.message,
+        encodedSpecificationUrl.data,
         specificationHash,
         auxiliaryData,
     ]);
