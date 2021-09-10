@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
+import type { Buffer } from 'buffer/';
 import type { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import type { HTMLAttributes } from 'react';
 import type { RegisterOptions } from 'react-hook-form';
@@ -1392,6 +1393,11 @@ export enum PrintErrorTypes {
     Failed = 'failed',
     NoPrinters = 'no valid printers available',
 }
+
+export type PrivateKeySeeds = {
+    idCredSec: Buffer;
+    prfKey: Buffer;
+};
 
 export type AccountAndCredentialPairs = {
     account: Account;

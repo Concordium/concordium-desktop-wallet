@@ -15,6 +15,7 @@ import {
     UpdateAccountCredentials,
     AuthorizationKeysUpdate,
     Hex,
+    PrivateKeySeeds,
 } from '~/utils/types';
 import { stringify } from '~/utils/JSONHelper';
 import { pipe } from '~/utils/basicHelpers';
@@ -37,9 +38,19 @@ export default class ConcordiumLedgerClient {
 
     getSignedPublicKey = window.ledger.getSignedPublicKey;
 
-    getIdCredSec = pipe(window.ledger.getIdCredSec, toBuffer);
+    async getPrivateKeySeeds(identity: number): Promise<PrivateKeySeeds> {
+        const result: PrivateKeySeeds = await window.ledger.getPrivateKeySeeds(
+            identity
+        );
+        return {
+            prfKey: Buffer.from(result.prfKey),
+            idCredSec: Buffer.from(result.idCredSec),
+        };
+    }
 
-    getPrfKey = pipe(window.ledger.getPrfKey, toBuffer);
+    getPrfKeyDecrypt = pipe(window.ledger.getPrfKeyDecrypt, toBuffer);
+
+    getPrfKeyRecovery = pipe(window.ledger.getPrfKeyRecovery, toBuffer);
 
     signPublicInformationForIp = pipe(
         window.ledger.signPublicInformationForIp,
