@@ -19,7 +19,7 @@ import PrintFormatSimpleTransfer from '~/components/PrintFormat/SimpleTransfer';
 
 type TransactionType = SimpleTransfer;
 
-export const TYPE = 'Send GTU with a schedule';
+export const TYPE = 'Send GTU';
 
 export function getFileNameForExport(
     transaction: TransactionType,
