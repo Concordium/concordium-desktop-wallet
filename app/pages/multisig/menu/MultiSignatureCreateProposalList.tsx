@@ -85,6 +85,11 @@ const updateInstructionTypes: [TransactionTypes, UpdateType, string][] = [
         UpdateType.UpdateLevel2KeysUsingLevel1Keys,
         'Update level 2 keys using level 1 keys',
     ],
+    [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.AddIdentityProvider,
+        'Add identity provider',
+    ],
 ];
 
 const accountTransactionTypes: [
