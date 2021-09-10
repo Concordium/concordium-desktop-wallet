@@ -12,7 +12,9 @@ export type TabbedCardTabProps = PropsWithChildren<{
 
 // eslint-disable-next-line react/display-name
 const TabbedCardTab = forwardRef<TabbedCardTabRef, TabbedCardTabProps>(
-    ({ children }) => {
+    // Following disable is needed to remove console warning about wrong use of forwardRef function.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ({ children }, _ref) => {
         return <>{children}</>;
     }
 );
