@@ -1,11 +1,13 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Validate, ValidationRule } from 'react-hook-form';
+import { hashSha256 } from '~/utils/serializationHelpers';
 
 import { EqualRecord, AddIdentityProvider, Description } from '~/utils/types';
 import { isHex, onlyDigitsNoLeadingZeroes } from '~/utils/basicHelpers';
 import Form from '~/components/Form';
 import { UpdateProps } from '~/utils/transactionTypes';
 import { useIdentityProviders } from '~/utils/dataHooks';
+import styles from './addIdentityProvider.module.scss';
 
 export type AddIdentityProviderFields = Omit<
     AddIdentityProvider,
@@ -64,6 +66,8 @@ export default function CreateAddIdentityProvider({
         [identityProviders]
     );
 
+    const [ipVerifyKeyHash, setIpVerifyKeyHash] = useState<string>('');
+
     return (
         <>
             <Form.TextArea
@@ -104,17 +108,35 @@ export default function CreateAddIdentityProvider({
                 }}
             />
             <Form.TextArea
-                className="body1"
+                className={styles.ipVerifyKey}
                 name={fieldNames.ipVerifyKey}
                 defaultValue={defaults.ipVerifyKey || undefined}
                 label={fieldDisplays.ipVerifyKey}
+                rows={1}
+                noAutoScale
                 spellCheck={false}
                 placeholder={pasteHere(fieldDisplays.ipVerifyKey)}
+                onChange={(e) => {
+                    const key = e.target.value;
+                    if (isHex(key)) {
+                        setIpVerifyKeyHash(
+                            hashSha256(Buffer.from(key, 'hex')).toString('hex')
+                        );
+                    } else {
+                        setIpVerifyKeyHash('');
+                    }
+                }}
                 rules={{
                     required: requiredMessage(fieldDisplays.ipVerifyKey),
                     validate: validateHex(fieldDisplays.ipVerifyKey),
                 }}
             />
+            {ipVerifyKeyHash && (
+                <div className="body1">
+                    <h5 className="mB0">{fieldDisplays.ipVerifyKey} Hash</h5>
+                    {ipVerifyKeyHash}
+                </div>
+            )}
             <Form.TextArea
                 className="body1"
                 name={fieldNames.ipCdiVerifyKey}
