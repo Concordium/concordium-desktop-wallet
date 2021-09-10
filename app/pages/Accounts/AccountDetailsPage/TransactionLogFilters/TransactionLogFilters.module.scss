@@ -1,13 +1,8 @@
 @import 'config/bundle';
 
-.root {
-    padding-left: 39px;
-    padding-right: 39px;
-}
-
 .footer {
     border-top: 1px solid $color-light-grey;
-    padding: 15px 19px;
+    padding: 15px 20px;
     display: flex;
     justify-content: center;
     align-items: center;
