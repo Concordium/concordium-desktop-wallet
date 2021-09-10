@@ -593,6 +593,17 @@ export interface Description {
     description: string;
 }
 
+export interface SerializedTextWithLength {
+    data: Buffer;
+    length: Buffer;
+}
+
+export interface SerializedDescription {
+    name: SerializedTextWithLength;
+    url: SerializedTextWithLength;
+    description: SerializedTextWithLength;
+}
+
 // Identity Provider information
 export interface IpInfo {
     ipIdentity: number;
@@ -726,7 +737,8 @@ export type UpdateInstructionPayload =
     | BakerStakeThreshold
     | ElectionDifficulty
     | HigherLevelKeyUpdate
-    | AuthorizationKeysUpdate;
+    | AuthorizationKeysUpdate
+    | AddIdentityProvider;
 
 // An actual signature, which goes into an account transaction.
 export type Signature = Hex;
@@ -773,6 +785,7 @@ export enum UpdateType {
     UpdateLevel1KeysUsingLevel1Keys,
     UpdateLevel2KeysUsingRootKeys,
     UpdateLevel2KeysUsingLevel1Keys,
+    AddIdentityProvider,
 }
 
 export enum RootKeysUpdateTypes {
@@ -910,6 +923,12 @@ export function isExchangeRate(
         UpdateType.UpdateMicroGTUPerEuro === transaction.type ||
         UpdateType.UpdateEuroPerEnergy === transaction.type
     );
+}
+
+export function isAddIdentityProvider(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<AddIdentityProvider> {
+    return UpdateType.AddIdentityProvider === transaction.type;
 }
 
 export function isTransactionFeeDistribution(
@@ -1053,6 +1072,8 @@ export type ExchangeRate = Fraction;
  * only contains the numerator value.
  */
 export type RewardFraction = Word32;
+
+export type AddIdentityProvider = IpInfo;
 
 export interface TransactionFeeDistribution {
     baker: RewardFraction;
