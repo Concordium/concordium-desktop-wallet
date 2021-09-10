@@ -41,7 +41,7 @@ const arLengthRule = lengthRule(fieldDisplays.arPublicKey, publicKeyLength);
 /**
  * Component for creating an addIdentityProvider transaction.
  */
-export default function UpdateAddAnonymityRevoker({
+export default function CreateAddAnonymityRevoker({
     defaults,
 }: UpdateProps): JSX.Element | null {
     const anonymityRevokers = useAnonymityRevokers();
