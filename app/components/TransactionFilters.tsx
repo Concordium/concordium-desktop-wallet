@@ -141,7 +141,7 @@ const getGroupValues = (group: TransactionKindString[], v: boolean) =>
 
 const pastDateValidator = allowOptional(pastDate('Date must be before today'));
 
-type Callback = (filter: RewardFilter) => Promise<void>;
+type Callback = (filter: RewardFilter) => Promise<unknown>;
 
 export interface TransactionFiltersRef {
     submit(cb: Callback): void;
@@ -149,7 +149,7 @@ export interface TransactionFiltersRef {
 }
 
 interface TransactionFiltersProps {
-    values: RewardFilter;
+    values?: RewardFilter;
 }
 
 /**
@@ -161,14 +161,14 @@ interface TransactionFiltersProps {
  * const ref = useRef<TransactionFiltersRef>(null);
  * const [values, setValues] = useState<RewardFilter>({});
  * ...
- * <TransactionFilters ref={ref} values={values} />
+ * <TransactionFilters ref={ref} />
  * <Button onClick={() => ref.current?.submit(setValues)}>Apply</Button>
  * <Button onClick={() => ref.current?.clear(setValues)}>Clear</Button>
  */
 const TransactionFilters = forwardRef<
     TransactionFiltersRef,
     TransactionFiltersProps
->(({ values }, ref) => {
+>(({ values = {} }, ref) => {
     const { fromDate, toDate } = values;
 
     const fromDateRef = useRef<InputTimestampRef>(null);

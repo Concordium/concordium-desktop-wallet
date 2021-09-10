@@ -4,6 +4,7 @@ import {
     TransactionKindString,
     TransactionStatus,
     TransferTransactionWithNames,
+    RewardFilter,
 } from '~/utils/types';
 import {
     getTransactionsOfAccount,
@@ -14,7 +15,10 @@ import { isOutgoingTransaction, lookupName } from '~/utils/transactionHelpers';
 import exportTransactionFields from '~/constants/exportTransactionFields.json';
 import { getISOFormat } from '~/utils/timeHelpers';
 import { isShieldedBalanceTransaction } from '~/features/TransactionSlice';
-import { hasEncryptedBalance } from '~/utils/accountHelpers';
+import {
+    getActiveBooleanFilters,
+    hasEncryptedBalance,
+} from '~/utils/accountHelpers';
 import transactionKindNames from '~/constants/transactionKindNames.json';
 
 function calculatePublicBalanceChange(
@@ -76,32 +80,6 @@ function calculateShieldedBalanceChange(
     }
 }
 
-export interface FilterOption {
-    kinds: TransactionKindString[];
-    label: string;
-    key: string;
-}
-
-export function filterKind(kind: TransactionKindString): FilterOption {
-    return {
-        // put an s to pluralize. (Assumes that no transaction name needs specific pluralization)
-        label: `${transactionKindNames[kind]}s`,
-        key: kind,
-        kinds: [kind],
-    };
-}
-
-export function filterKindGroup(
-    label: string,
-    kinds: TransactionKindString[]
-): FilterOption {
-    return {
-        label,
-        key: label,
-        kinds,
-    };
-}
-
 const getName = (i: string[]) => i[0];
 const getLabel = (i: string[]) => i[1];
 const exportedFields = Object.entries(exportTransactionFields);
@@ -136,27 +114,25 @@ function parseTransaction(
     return exportedFields.map((field) => fieldValues[getName(field)]);
 }
 
-function showingShieldedTransfers(filters: FilterOption[]) {
-    return filters.some(
-        (filter) => filter.key === TransactionKindString.EncryptedAmountTransfer
+function showingShieldedTransfers(filters: RewardFilter) {
+    return getActiveBooleanFilters(filters).includes(
+        TransactionKindString.EncryptedAmountTransfer
     );
 }
 
 export async function containsEncrypted(
     account: Account,
-    filterOptions: FilterOption[],
-    fromTime?: Date,
-    toTime?: Date
+    filters: RewardFilter
 ) {
-    if (
-        !showingShieldedTransfers(filterOptions) ||
-        !hasEncryptedBalance(account)
-    ) {
+    if (!showingShieldedTransfers(filters) || !hasEncryptedBalance(account)) {
         return false;
     }
 
-    const fromBlockTime = fromTime ? fromTime.getTime() : Date.now();
-    const toBlockTime = toTime ? toTime.getTime() : 0;
+    const { fromDate, toDate } = filters;
+
+    const fromBlockTime = fromDate ? new Date(fromDate).getTime() : Date.now();
+    const toBlockTime = toDate ? new Date(toDate).getTime() : 0;
+
     return hasEncryptedTransactions(
         account.address,
         (fromBlockTime / 1000).toString(),
@@ -165,17 +141,13 @@ export async function containsEncrypted(
 }
 
 // Updates transactions of the account, and returns them as a csv string.
-export async function getAccountCSV(
-    account: Account,
-    filterOptions: FilterOption[],
-    fromTime?: Date,
-    toTime?: Date
-) {
+export async function getAccountCSV(account: Account, filter: RewardFilter) {
+    const { fromDate, toDate } = filter;
     const { transactions } = await getTransactionsOfAccount(
         account,
-        filterOptions.flatMap(({ kinds }) => kinds),
-        fromTime,
-        toTime,
+        getActiveBooleanFilters(filter),
+        fromDate ? new Date(fromDate) : undefined,
+        toDate ? new Date(toDate) : undefined,
         1000000
     );
 
