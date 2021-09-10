@@ -21,6 +21,7 @@ import {
     pastDate,
 } from '~/components/Form/util/validation';
 import { InputTimestampRef } from '~/components/Form/InputTimestamp/util';
+import { useUpdateEffect } from '~/utils/hooks';
 
 interface FilterForm
     extends Pick<
@@ -35,9 +36,9 @@ interface FilterForm
         | TransactionKindString.BlockReward
         | TransactionKindString.UpdateCredentials
     > {
-    toDate?: Date;
-    fromDate?: Date;
-    bakerTransactions?: boolean;
+    toDate: Date | null | undefined;
+    fromDate: Date | null | undefined;
+    bakerTransactions: boolean;
 }
 
 const fieldNames: NotOptional<EqualRecord<FilterForm>> = {
@@ -189,8 +190,8 @@ const TransactionFilters = forwardRef<
                 }),
                 {}
             ),
-            toDate: toDate ? new Date(toDate) : undefined,
-            fromDate: fromDate ? new Date(fromDate) : undefined,
+            toDate: toDate ? new Date(toDate) : null,
+            fromDate: fromDate ? new Date(fromDate) : null,
             bakerTransactions: booleanFilters.includes(
                 TransactionKindString.AddBaker
             ),
@@ -250,7 +251,7 @@ const TransactionFilters = forwardRef<
         [handleSubmit, submit, clear]
     );
 
-    useEffect(() => {
+    useUpdateEffect(() => {
         reset({ ...defaultValues });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [defaultValues]);
@@ -282,7 +283,7 @@ const TransactionFilters = forwardRef<
                         validate: {
                             pastDate: pastDateValidator,
                             minToDate(v?: Date) {
-                                if (!v || !fromDateValue) {
+                                if (!fromDateValue) {
                                     return true;
                                 }
                                 return allowOptional(
