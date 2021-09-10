@@ -1,5 +1,3 @@
-import type { TransferTransaction } from '~/utils/types';
-
 /**
  * The interface for rows in the 'genesis' table.
  */
@@ -12,11 +10,6 @@ export interface ExternalCredential {
     accountAddress: string;
     credId: string;
     note: string;
-}
-
-export interface GetTransactionsOutput {
-    transactions: TransferTransaction[];
-    more: boolean;
 }
 
 export enum PreferenceKey {

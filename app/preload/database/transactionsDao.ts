@@ -8,7 +8,6 @@ import {
 import { transactionTable } from '~/constants/databaseNames.json';
 import { knex } from '~/database/knex';
 import { chunkArray, partition } from '~/utils/basicHelpers';
-import { GetTransactionsOutput } from '~/database/types';
 import { TransactionMethods } from '~/preload/preloadTypes';
 
 async function updateTransaction(
@@ -42,9 +41,8 @@ async function getTransactionsOfAccount(
     account: Account,
     filteredTypes: TransactionKindString[] = [],
     fromDate?: Date,
-    toDate?: Date,
-    limit = 100
-): Promise<GetTransactionsOutput> {
+    toDate?: Date
+): Promise<TransferTransaction[]> {
     const { address } = account;
     const from = (fromDate?.getTime() ?? 0) / TimeStampUnit.seconds;
     const to = (toDate?.getTime() ?? Date.now()) / TimeStampUnit.seconds;
@@ -60,13 +58,9 @@ async function getTransactionsOfAccount(
         })
         .andWhereBetween('blockTime', [from.toString(), to.toString()])
         .orderBy('blockTime', 'desc')
-        .orderBy('id', 'desc')
-        .limit(limit + 1);
+        .orderBy('id', 'desc');
 
-    return {
-        transactions: transactions.slice(0, limit),
-        more: transactions.length > limit,
-    };
+    return transactions;
 }
 
 async function hasEncryptedTransactions(

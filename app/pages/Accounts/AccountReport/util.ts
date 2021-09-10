@@ -143,12 +143,11 @@ export async function containsEncrypted(
 // Updates transactions of the account, and returns them as a csv string.
 export async function getAccountCSV(account: Account, filter: RewardFilter) {
     const { fromDate, toDate } = filter;
-    const { transactions } = await getTransactionsOfAccount(
+    const transactions = await getTransactionsOfAccount(
         account,
         getActiveBooleanFilters(filter),
         fromDate ? new Date(fromDate) : undefined,
-        toDate ? new Date(toDate) : undefined,
-        1000000
+        toDate ? new Date(toDate) : undefined
     );
 
     const withNames: TransferTransactionWithNames[] = await Promise.all(

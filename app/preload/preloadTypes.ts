@@ -24,7 +24,7 @@ import {
     IncomingTransaction,
     AccountAndCredentialPairs,
 } from '~/utils/types';
-import { ExternalCredential, GetTransactionsOutput } from '../database/types';
+import { ExternalCredential } from '../database/types';
 import type LedgerCommands from './preloadLedgerTypes';
 
 export type { default as LedgerCommands } from './preloadLedgerTypes';
@@ -246,9 +246,8 @@ export type TransactionMethods = {
         account: Account,
         filteredTypes: TransactionKindString[],
         fromDate?: Date,
-        toDate?: Date,
-        limit?: number
-    ) => Promise<GetTransactionsOutput>;
+        toDate?: Date
+    ) => Promise<TransferTransaction[]>;
     hasEncryptedTransactions: (
         address: string,
         fromTime: string,

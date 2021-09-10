@@ -40,7 +40,6 @@ const updateTransactionInterval = 5000;
 interface State {
     transactions: TransferTransaction[];
     viewingShielded: boolean;
-    moreTransactions: boolean;
     loadingTransactions: boolean;
 }
 
@@ -49,13 +48,11 @@ const transactionSlice = createSlice({
     initialState: {
         transactions: [],
         viewingShielded: false,
-        moreTransactions: false,
         loadingTransactions: false,
     } as State,
     reducers: {
         setTransactions(state, update) {
             state.transactions = update.payload.transactions;
-            state.moreTransactions = update.payload.more;
         },
         setViewingShielded(state, viewingShielded) {
             state.viewingShielded = viewingShielded.payload;
@@ -188,7 +185,7 @@ export async function loadTransactions(
 
     const { fromDate, toDate } = account.rewardFilter;
     const booleanFilters = getActiveBooleanFilters(account.rewardFilter);
-    const { transactions, more } = await getTransactionsOfAccount(
+    const transactions = await getTransactionsOfAccount(
         account,
         booleanFilters,
         fromDate ? new Date(fromDate) : undefined,
@@ -199,7 +196,7 @@ export async function loadTransactions(
         if (showLoading) {
             dispatch(setLoadingTransactions(false));
         }
-        dispatch(setTransactions({ transactions, more }));
+        dispatch(setTransactions({ transactions }));
     }
 }
 
@@ -391,9 +388,6 @@ export const transactionsSelector = (
 
 export const viewingShieldedSelector = (state: RootState) =>
     state.transactions.viewingShielded;
-
-export const moreTransactionsSelector = (state: RootState) =>
-    state.transactions.moreTransactions;
 
 export const loadingTransactionsSelector = (state: RootState) =>
     state.transactions.loadingTransactions;
