@@ -154,6 +154,16 @@ interface TransactionFiltersProps {
 
 /**
  * Displays available transaction filters, and allows the user to activate/deactive them..
+ *
+ * Form submission/clearing should be triggered through public API.
+ *
+ * @example
+ * const ref = useRef<TransactionFiltersRef>(null);
+ * const [values, setValues] = useState<RewardFilter>({});
+ * ...
+ * <TransactionFilters ref={ref} values={values} />
+ * <Button onClick={() => ref.current?.submit(setValues)}>Apply</Button>
+ * <Button onClick={() => ref.current?.clear(setValues)}>Clear</Button>
  */
 const TransactionFilters = forwardRef<
     TransactionFiltersRef,
