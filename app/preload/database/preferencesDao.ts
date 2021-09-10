@@ -28,11 +28,7 @@ function buildAccessor<V = string>(
     return {
         async get() {
             const { value } = await getPreference(key);
-
-            if (!value) {
-                return null;
-            }
-            return parse(value) as V;
+            return value ? parse(value) : null;
         },
         async set(value: V) {
             await setPreference(key, serialize(value));

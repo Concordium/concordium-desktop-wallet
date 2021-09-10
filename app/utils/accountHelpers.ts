@@ -131,14 +131,11 @@ export function getActiveBooleanFilters({
 
     // eslint-disable-next-line no-restricted-syntax
     for (const k in TransactionKindString) {
-        if (!Object.prototype.hasOwnProperty.call(TransactionKindString, k)) {
-            // eslint-disable-next-line no-continue
-            continue;
+        if (Object.prototype.hasOwnProperty.call(TransactionKindString, k)) {
+            const kind =
+                TransactionKindString[k as keyof typeof TransactionKindString];
+            fullFilter[kind] = filters[kind] ?? true;
         }
-
-        const kind =
-            TransactionKindString[k as keyof typeof TransactionKindString];
-        fullFilter[kind] = filters[kind] ?? true;
     }
 
     return Object.entries(fullFilter as BooleanFilters)
