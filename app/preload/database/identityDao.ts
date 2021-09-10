@@ -18,10 +18,6 @@ import {
 } from '~/utils/types';
 import { IdentityMethods } from '~/preload/preloadTypes';
 
-interface MaxIdentityNumber {
-    maxIdentityNumber: number;
-}
-
 /**
  * Get the identity number to be used to create the next identity with
  * the wallet with the given id.
@@ -32,7 +28,9 @@ export async function getNextIdentityNumber(walletId: number): Promise<number> {
     const maxIdentityNumber = await (await knex())
         .table<Identity>(identitiesTable)
         .where('walletId', walletId)
-        .max<MaxIdentityNumber>('identityNumber as maxIdentityNumber')
+        .max<{ maxIdentityNumber: number }>(
+            'identityNumber as maxIdentityNumber'
+        )
         .first();
 
     if (maxIdentityNumber === undefined) {
