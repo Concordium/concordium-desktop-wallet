@@ -14,12 +14,14 @@
 -   Added reference (sessionId) on failed identities, for support.
 -   Added support for memo transactions.
 -   Added algorithm to recover lost accounts and credentials.
+-   It is now possible to set a default account, which will be selected initially when opening the app.
 
 ### Changed
 
 -   The native menu bar has been updated to only contain relevant items. Terms and conditions and the license notices have been moved to the menu bar. The menu bar is now accessible on Windows and Linux. Press
 -   The accounts page has been updated to make it clearer that multi credential accounts are not able to use shielded transactions.
 -   Transactions in the 'Transfers' list in the account view are now grouped by dates.
+-   Account page has changed, now featuring two different ways to view accounts: a simple, quick overview of all accounts, and a detailed view of a single account.
 
 ### Fixed
 
