@@ -33,7 +33,10 @@ export async function getNextIdentityNumber(walletId: number): Promise<number> {
         )
         .first();
 
-    if (maxIdentityNumber === undefined) {
+    if (
+        maxIdentityNumber === undefined ||
+        maxIdentityNumber.maxIdentityNumber === null
+    ) {
         return 0;
     }
 
