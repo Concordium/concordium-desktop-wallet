@@ -36,9 +36,12 @@ export default function exposedMethods(
             getLedgerClient().getPublicKeySilent(keypath),
         getSignedPublicKey: (keypath: number[]) =>
             getLedgerClient().getSignedPublicKey(keypath),
-        getIdCredSec: (identity: number) =>
-            getLedgerClient().getIdCredSec(identity),
-        getPrfKey: (identity: number) => getLedgerClient().getPrfKey(identity),
+        getPrivateKeySeeds: (identity: number) =>
+            getLedgerClient().getPrivateKeySeeds(identity),
+        getPrfKeyRecovery: (identity: number) =>
+            getLedgerClient().getPrfKeyRecovery(identity),
+        getPrfKeyDecrypt: (identity: number) =>
+            getLedgerClient().getPrfKeyDecrypt(identity),
         signTransfer: (transactionAsJson: string, keypath: number[]) => {
             const transaction: AccountTransaction = parse(transactionAsJson);
             return getLedgerClient().signTransfer(transaction, keypath);

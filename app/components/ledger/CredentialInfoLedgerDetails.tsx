@@ -1,8 +1,6 @@
 /* eslint-disable react/destructuring-assignment */
 import React from 'react';
-import { formatDate } from '~/utils/timeHelpers';
 import { UnsignedCredentialDeploymentInformation } from '~/utils/types';
-import DisplayHexString from './DisplayHexString';
 import PublicKeyDetails from './PublicKeyDetails';
 import DisplayAddress from '../DisplayAddress';
 
@@ -13,32 +11,23 @@ interface Props extends UnsignedCredentialDeploymentInformation {
 const CredentialInfoLedgerDetails = (props: Props) => (
     <div className="textLeft">
         <p className="mT0">Please confirm details on ledger:</p>
-        <p>
+        <div>
             <b>Public key:</b>
             <PublicKeyDetails
                 className="mV40"
                 publicKey={props.credentialPublicKeys.keys[0].verifyKey}
             />
-        </p>
+        </div>
         <p>
             <b>Signature threshold:</b> {props.credentialPublicKeys.threshold}
         </p>
-        <p>
-            <b>Registration ID credential (RegIdCred):</b>
-            <DisplayHexString className="mV40" value={props.credId} />
-        </p>
-        <p>
-            <b>Identity provider:</b> {props.ipIdentity}
-        </p>
-        <p>
-            <b>Revocation threshold:</b> {props.revocationThreshold}
-        </p>
-        <p>
-            <b>Valid to:</b> {formatDate(props.policy.validTo)}
-        </p>
-        <p>
-            <b>Created at:</b> {formatDate(props.policy.createdAt)}
-        </p>
+        <div>
+            <b>Anonymity Revocation threshold:</b>
+            <p className="mT0">
+                {props.revocationThreshold} out of{' '}
+                {Object.keys(props.arData).length}
+            </p>
+        </div>
         {props.address && (
             <>
                 <b>Account address:</b>
