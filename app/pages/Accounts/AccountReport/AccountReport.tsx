@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import clsx from 'clsx';
 import { LocationDescriptorObject } from 'history';
 import PlusIcon from '@resources/svg/plus.svg';
-import { Account, RewardFilter } from '~/utils/types';
+import { Account, TransactionFilter } from '~/utils/types';
 import PageLayout from '~/components/PageLayout';
 import AccountPageHeader from '../AccountPageHeader';
 import routes from '~/constants/routes.json';
@@ -71,7 +71,7 @@ export default function AccountReport({ location }: Props) {
      * If there are multiple chosen accounts, the reports will be bundled into a zip file
      */
     const makeReport = useCallback(
-        async (filters: RewardFilter) => {
+        async (filters: TransactionFilter) => {
             const accountsToReport: Account[] = [];
             for (const account of accounts) {
                 const hasEncrypted = await containsEncrypted(account, filters);

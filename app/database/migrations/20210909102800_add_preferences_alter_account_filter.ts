@@ -26,7 +26,7 @@ export async function up(knex: Knex): Promise<void> {
     });
 
     return knex.schema.alterTable(accountsTable, (table) => {
-        table.string('rewardFilter').defaultTo('{}');
+        table.string('transactionFilter').defaultTo('{}');
     });
 }
 
@@ -34,7 +34,7 @@ export async function down(knex: Knex): Promise<void> {
     await knex.schema.dropTable(preferencesTable);
 
     await knex.schema.alterTable(accountsTable, (table) => {
-        table.dropColumn('rewardFilter');
+        table.dropColumn('transactionFilter');
     });
     return knex.schema.alterTable(accountsTable, (table) => {
         table.string('rewardFilter').defaultTo('[]');

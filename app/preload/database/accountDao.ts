@@ -12,7 +12,7 @@ import {
     Identity,
     AccountAndCredentialPairs,
     Credential,
-    RewardFilter,
+    TransactionFilter,
 } from '~/utils/types';
 import { AccountMethods } from '~/preload/preloadTypes';
 
@@ -22,9 +22,9 @@ function parseAccount(accounts: Account[]): Account[] {
             ...account,
             allDecrypted: Boolean(account.allDecrypted),
             isInitial: Boolean(account.isInitial),
-            rewardFilter: JSON.parse(
-                account.rewardFilter as string
-            ) as RewardFilter,
+            transactionFilter: JSON.parse(
+                account.transactionFilter as string
+            ) as TransactionFilter,
         };
     });
 }
@@ -75,8 +75,10 @@ export async function updateAccount(
 ) {
     const dbValues: Record<string, unknown> = updatedValues;
 
-    if (updatedValues.rewardFilter) {
-        dbValues.rewardFilter = JSON.stringify(updatedValues.rewardFilter);
+    if (updatedValues.transactionFilter) {
+        dbValues.transactionFilter = JSON.stringify(
+            updatedValues.transactionFilter
+        );
     }
 
     return (await knex())(accountsTable).where({ address }).update(dbValues);

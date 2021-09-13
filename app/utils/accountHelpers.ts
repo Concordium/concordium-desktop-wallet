@@ -4,7 +4,7 @@ import {
     Account,
     AccountInfo,
     BooleanFilters,
-    RewardFilter,
+    TransactionFilter,
     TransactionKindString,
     AccountStatus,
 } from './types';
@@ -96,7 +96,7 @@ export function createAccount(
         isInitial,
         deploymentTransactionId,
         maxTransactionId: '0',
-        rewardFilter: {},
+        transactionFilter: {},
         selfAmounts: ENCRYPTED_ZERO,
         incomingAmounts: '[]',
         totalDecrypted: '0',
@@ -115,7 +115,7 @@ export function createInitialAccount(
         signatureThreshold: 1,
         isInitial: true,
         maxTransactionId: '0',
-        rewardFilter: {},
+        transactionFilter: {},
         selfAmounts: ENCRYPTED_ZERO,
         incomingAmounts: '[]',
         totalDecrypted: '0',
@@ -126,7 +126,7 @@ export function getActiveBooleanFilters({
     fromDate,
     toDate,
     ...filters
-}: RewardFilter): TransactionKindString[] {
+}: TransactionFilter): TransactionKindString[] {
     const fullFilter: BooleanFilters = {};
 
     // eslint-disable-next-line no-restricted-syntax

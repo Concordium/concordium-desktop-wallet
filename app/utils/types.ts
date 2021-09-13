@@ -177,7 +177,7 @@ export enum TransactionKindId {
 export type BooleanFilters = { [P in TransactionKindString]?: boolean };
 type DateString = string;
 
-export interface RewardFilter extends BooleanFilters {
+export interface TransactionFilter extends BooleanFilters {
     fromDate?: DateString;
     toDate?: DateString;
 }
@@ -197,7 +197,7 @@ export interface Account {
     totalDecrypted?: string;
     allDecrypted?: boolean;
     incomingAmounts?: string;
-    rewardFilter: RewardFilter;
+    transactionFilter: TransactionFilter;
     selfAmounts?: string;
     maxTransactionId: string;
     deploymentTransactionId?: string;

@@ -171,7 +171,7 @@ export function isShieldedBalanceTransaction(
 
 /**
  * Load transactions from storage.
- * Filters out reward transactions based on the account's rewardFilter.
+ * Filters out reward transactions based on the account's transaction filter.
  */
 export async function loadTransactions(
     account: Account,
@@ -183,8 +183,8 @@ export async function loadTransactions(
         dispatch(setLoadingTransactions(true));
     }
 
-    const { fromDate, toDate } = account.rewardFilter;
-    const booleanFilters = getActiveBooleanFilters(account.rewardFilter);
+    const { fromDate, toDate } = account.transactionFilter;
+    const booleanFilters = getActiveBooleanFilters(account.transactionFilter);
     const transactions = await getTransactionsOfAccount(
         account,
         booleanFilters,

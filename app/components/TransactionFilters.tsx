@@ -10,7 +10,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import {
     EqualRecord,
     NotOptional,
-    RewardFilter,
+    TransactionFilter,
     TransactionKindString,
 } from '~/utils/types';
 import { getActiveBooleanFilters } from '~/utils/accountHelpers';
@@ -25,7 +25,7 @@ import { useUpdateEffect } from '~/utils/hooks';
 
 interface FilterForm
     extends Pick<
-        RewardFilter,
+        TransactionFilter,
         | TransactionKindString.Transfer
         | TransactionKindString.TransferWithSchedule
         | TransactionKindString.TransferToEncrypted
@@ -137,12 +137,12 @@ const getGroupValues = (group: TransactionKindString[], v: boolean) =>
             ...a,
             [f]: v as boolean,
         }),
-        {} as Partial<RewardFilter>
+        {} as Partial<TransactionFilter>
     );
 
 const pastDateValidator = allowOptional(pastDate('Date must be before today'));
 
-type Callback = (filter: RewardFilter) => Promise<unknown>;
+type Callback = (filter: TransactionFilter) => Promise<unknown>;
 
 export interface TransactionFiltersRef {
     submit(cb: Callback): void;
@@ -150,7 +150,7 @@ export interface TransactionFiltersRef {
 }
 
 interface TransactionFiltersProps {
-    values?: RewardFilter;
+    values?: TransactionFilter;
 }
 
 /**
@@ -160,7 +160,7 @@ interface TransactionFiltersProps {
  *
  * @example
  * const ref = useRef<TransactionFiltersRef>(null);
- * const [values, setValues] = useState<RewardFilter>({});
+ * const [values, setValues] = useState<TransactionFilter>({});
  * ...
  * <TransactionFilters ref={ref} />
  * <Button onClick={() => ref.current?.submit(setValues)}>Apply</Button>

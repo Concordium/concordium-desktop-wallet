@@ -31,7 +31,7 @@ import {
     Dispatch,
     Global,
     Identity,
-    RewardFilter,
+    TransactionFilter,
     Hex,
 } from '../utils/types';
 import { getStatus } from '../utils/transactionHelpers';
@@ -551,7 +551,7 @@ export async function addExternalAccount(
         signatureThreshold,
         maxTransactionId: '0',
         isInitial: false,
-        rewardFilter: {},
+        transactionFilter: {},
     };
     await insertAccount(account);
     return loadAccounts(dispatch);
@@ -561,13 +561,13 @@ export async function importAccount(account: Account | Account[]) {
     await insertAccount(account);
 }
 
-export async function updateRewardFilter(
+export async function updateTransactionFilter(
     dispatch: Dispatch,
     address: string,
-    rewardFilter: RewardFilter,
+    transactionFilter: TransactionFilter,
     persist: boolean
 ) {
-    const updatedFields = { rewardFilter };
+    const updatedFields = { transactionFilter };
 
     if (persist) {
         updateAccount(address, updatedFields);
@@ -632,7 +632,12 @@ export async function setFavouriteAccount(dispatch: Dispatch, address: string) {
 }
 
 export function clearRewardFilters(dispatch: Dispatch, address: string) {
-    return updateRewardFilter(dispatch, address, {} as RewardFilter, true);
+    return updateTransactionFilter(
+        dispatch,
+        address,
+        {} as TransactionFilter,
+        true
+    );
 }
 
 export default accountsSlice.reducer;

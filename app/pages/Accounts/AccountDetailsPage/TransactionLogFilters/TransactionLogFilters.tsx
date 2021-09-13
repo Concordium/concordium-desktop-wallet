@@ -6,9 +6,9 @@ import TransactionFilters, {
 import Button from '~/cross-app-components/Button';
 import {
     chosenAccountSelector,
-    updateRewardFilter,
+    updateTransactionFilter,
 } from '~/features/AccountSlice';
-import { RewardFilter, Account } from '~/utils/types';
+import { TransactionFilter, Account } from '~/utils/types';
 
 import styles from './TransactionLogFilters.module.scss';
 
@@ -18,13 +18,13 @@ interface Props {
 
 export default function TransactionLogFilters({ onUpdate }: Props) {
     const account = useSelector(chosenAccountSelector);
-    const { rewardFilter = {}, address } = account ?? ({} as Account);
+    const { transactionFilter = {}, address } = account ?? ({} as Account);
     const ref = useRef<TransactionFiltersRef>(null);
     const dispatch = useDispatch();
 
     const handleUpdate = useCallback(
-        (store: boolean) => async (filter: RewardFilter) => {
-            await updateRewardFilter(dispatch, address, filter, store);
+        (store: boolean) => async (filter: TransactionFilter) => {
+            await updateTransactionFilter(dispatch, address, filter, store);
             onUpdate();
         },
         [dispatch, address, onUpdate]
@@ -43,7 +43,7 @@ export default function TransactionLogFilters({ onUpdate }: Props) {
 
     return (
         <>
-            <TransactionFilters ref={ref} values={rewardFilter} />
+            <TransactionFilters ref={ref} values={transactionFilter} />
             <footer className={styles.footer}>
                 <Button size="tiny" onClick={submit(false)}>
                     Apply

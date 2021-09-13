@@ -4,7 +4,7 @@ import {
     TransactionKindString,
     TransactionStatus,
     TransferTransactionWithNames,
-    RewardFilter,
+    TransactionFilter,
 } from '~/utils/types';
 import {
     getTransactionsOfAccount,
@@ -114,7 +114,7 @@ function parseTransaction(
     return exportedFields.map((field) => fieldValues[getName(field)]);
 }
 
-function showingShieldedTransfers(filters: RewardFilter) {
+function showingShieldedTransfers(filters: TransactionFilter) {
     return getActiveBooleanFilters(filters).includes(
         TransactionKindString.EncryptedAmountTransfer
     );
@@ -122,7 +122,7 @@ function showingShieldedTransfers(filters: RewardFilter) {
 
 export async function containsEncrypted(
     account: Account,
-    filters: RewardFilter
+    filters: TransactionFilter
 ) {
     if (!showingShieldedTransfers(filters) || !hasEncryptedBalance(account)) {
         return false;
@@ -141,7 +141,10 @@ export async function containsEncrypted(
 }
 
 // Updates transactions of the account, and returns them as a csv string.
-export async function getAccountCSV(account: Account, filter: RewardFilter) {
+export async function getAccountCSV(
+    account: Account,
+    filter: TransactionFilter
+) {
     const { fromDate, toDate } = filter;
     const transactions = await getTransactionsOfAccount(
         account,

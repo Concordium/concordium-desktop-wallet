@@ -71,5 +71,5 @@ export default function useAccountSync() {
         }
         return () => {};
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [account?.address, account?.rewardFilter]);
+    }, [account?.address, account?.transactionFilter]);
 }
