@@ -116,6 +116,14 @@ function getAddressFromCredId(
     return rust.getAddressFromCredId(message.credId);
 }
 
+function getCredId(rust: RustInterface, message: Record<string, string>) {
+    return rust.getCredId(
+        message.prfKey,
+        parseInt(message.credentialNumber, 10),
+        message.global
+    );
+}
+
 function mapCommand(command: string) {
     switch (command) {
         case workerCommands.buildPublicInformationForIp:
@@ -142,6 +150,8 @@ function mapCommand(command: string) {
             return generateBakerKeys;
         case workerCommands.getAddressFromCredId:
             return getAddressFromCredId;
+        case workerCommands.getCredId:
+            return getCredId;
         default:
             return () => 'unknown command';
     }

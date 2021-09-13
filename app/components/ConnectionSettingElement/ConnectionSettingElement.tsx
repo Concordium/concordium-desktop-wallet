@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateSettingEntry } from '~/features/SettingsSlice';
 import { globalSelector } from '~/features/GlobalSlice';
@@ -20,6 +21,7 @@ import styles from './ConnectionSettingElement.module.scss';
 interface Props {
     displayText: string;
     setting: Setting;
+    className?: string;
 }
 
 const portRangeMax = 65535;
@@ -69,7 +71,11 @@ async function getConsensusAndGlobalFromNode(address: string, port: string) {
  * A component for connection settings that are updated automatically on changes.
  * N.B. right now is fixed to node location setting.
  */
-export default function ConnectionSetting({ displayText, setting }: Props) {
+export default function ConnectionSetting({
+    displayText,
+    setting,
+    className,
+}: Props) {
     const dispatch = useDispatch();
     const startValues = JSON.parse(setting.value);
     const global = useSelector(globalSelector);
@@ -152,7 +158,7 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
     }
 
     return (
-        <Card className={styles.connection}>
+        <Card className={clsx(styles.connection, className)}>
             <h3>{displayText}</h3>
             <Form
                 className="mT50"

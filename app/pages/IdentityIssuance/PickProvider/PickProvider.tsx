@@ -16,6 +16,7 @@ import { getNextIdentityNumber } from '~/database/IdentityDao';
 import { createIdentityRequestObjectLedger } from '~/utils/rustInterface';
 import errorMessages from '~/constants/errorMessages.json';
 import SimpleLedgerWithCreationKeys from '~/components/ledger/SimpleLedgerWithCreationKeys';
+import PublicKeyDetails from '~/components/ledger/PublicKeyDetails';
 
 import styles from './PickProvider.module.scss';
 import { ExternalIssuanceLocationState } from '../ExternalIssuance/ExternalIssuance';
@@ -25,17 +26,15 @@ import pairWallet from '~/utils/WalletPairing';
 const IPDetails = (info: PublicInformationForIp) => (
     <div className="textLeft">
         <p className="mT0">Please confirm details on ledger:</p>
+        <div>
+            <b>Public key:</b>
+            <PublicKeyDetails
+                className="mV40"
+                publicKey={info.publicKeys.keys[0].verifyKey}
+            />
+        </div>
         <p>
-            <b>Identity Credentials Public (IdCredPub):</b> {info.idCredPub}
-        </p>
-        <p>
-            <b>Registration ID (RegId):</b> {info.regId}
-        </p>
-        <p>
-            <b>Public key:</b> {info.publicKeys.keys[0].verifyKey}
-        </p>
-        <p>
-            <b>Threshold:</b> {info.publicKeys.threshold}
+            <b>Signature Threshold:</b> {info.publicKeys.threshold}
         </p>
     </div>
 );

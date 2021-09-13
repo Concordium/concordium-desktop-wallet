@@ -10,7 +10,11 @@ import {
 } from './GetPublicKey';
 import signTransfer from './Transfer';
 import signPublicInformationForIp from './PublicInformationForIp';
-import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
+import {
+    getPrfKeyDecrypt,
+    getPrivateKeySeeds,
+    getPrfKeyRecovery,
+} from './ExportPrivateKeySeed';
 import {
     signCredentialDeploymentOnNewAccount,
     signCredentialDeploymentOnExistingAccount,
@@ -32,6 +36,8 @@ import {
     HigherLevelKeyUpdate,
     UpdateAccountCredentials,
     AuthorizationKeysUpdate,
+    AddIdentityProvider,
+    PrivateKeySeeds,
 } from '~/utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
@@ -40,6 +46,7 @@ import signUpdateProtocolTransaction from './SignProtocolUpdate';
 import signHigherLevelKeyUpdate from './SignHigherLevelKeyUpdate';
 import signUpdateCredentialTransaction from './SignUpdateCredentials';
 import signAuthorizationKeysUpdate from './SignAuthorizationKeysUpdate';
+import signAddIdentityProviderTransaction from './SignAddIdentityProvider';
 import EmulatorTransport from './EmulatorTransport';
 
 /**
@@ -83,12 +90,16 @@ export default class ConcordiumLedgerClientMain {
         return getSignedPublicKey(this.transport, path);
     }
 
-    getIdCredSec(identity: number): Promise<Buffer> {
-        return getIdCredSec(this.transport, identity);
+    getPrivateKeySeeds(identity: number): Promise<PrivateKeySeeds> {
+        return getPrivateKeySeeds(this.transport, identity);
     }
 
-    getPrfKey(identity: number): Promise<Buffer> {
-        return getPrfKey(this.transport, identity);
+    getPrfKeyDecrypt(identity: number): Promise<Buffer> {
+        return getPrfKeyDecrypt(this.transport, identity);
+    }
+
+    getPrfKeyRecovery(identity: number): Promise<Buffer> {
+        return getPrfKeyRecovery(this.transport, identity);
     }
 
     signTransfer(
@@ -300,6 +311,19 @@ export default class ConcordiumLedgerClientMain {
             transaction,
             serializedPayload,
             INS
+        );
+    }
+
+    signAddIdentityProvider(
+        transaction: UpdateInstruction<AddIdentityProvider>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signAddIdentityProviderTransaction(
+            this.transport,
+            path,
+            transaction,
+            serializedPayload
         );
     }
 

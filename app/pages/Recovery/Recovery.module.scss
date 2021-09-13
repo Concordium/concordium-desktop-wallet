@@ -1,0 +1,52 @@
+.recoveredDiv {
+    margin: auto auto;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    max-width: 428px;
+}
+
+.recoveredDiv,
+.ledgerDiv,
+.ledger {
+    flex-grow: 1;
+}
+
+.ledgerDiv {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ledger {
+    max-width: 428px;
+}
+
+.introductionButton,
+.topButton,
+.button {
+    width: 400px;
+    margin: 20px 40px;
+}
+
+.topButton {
+    margin-top: auto;
+}
+
+.leftColumn {
+    margin: 0 20px;
+    composes: flexColumn from global;
+    height: 100%;
+}
+
+.introduction {
+    composes: flexColumn from global;
+    composes: justifyCenter from global;
+    composes: mH40 from global;
+    height: 100%;
+}
+
+.introductionButton {
+    margin: auto auto 0;
+}

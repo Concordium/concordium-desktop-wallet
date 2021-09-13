@@ -22,6 +22,7 @@ import {
     instanceOfTransferToPublic,
     instanceOfTransferToEncrypted,
     instanceOfEncryptedTransfer,
+    instanceOfEncryptedTransferWithMemo,
     MultiSignatureTransactionStatus,
 } from '~/utils/types';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
@@ -71,7 +72,9 @@ async function attachCompletedPayload(
     accountInfo: AccountInfo
 ) {
     if (instanceOfTransferToEncrypted(transaction)) {
-        const prfKeySeed = await ledger.getPrfKey(credential.identityNumber);
+        const prfKeySeed = await ledger.getPrfKeyDecrypt(
+            credential.identityNumber
+        );
         const data = await makeTransferToEncryptedData(
             transaction.payload.amount,
             prfKeySeed.toString('hex'),
@@ -89,7 +92,9 @@ async function attachCompletedPayload(
         return { ...transaction, payload };
     }
     if (instanceOfTransferToPublic(transaction)) {
-        const prfKeySeed = await ledger.getPrfKey(credential.identityNumber);
+        const prfKeySeed = await ledger.getPrfKeyDecrypt(
+            credential.identityNumber
+        );
         const data = await makeTransferToPublicData(
             transaction.payload.transferAmount,
             prfKeySeed.toString('hex'),
@@ -107,8 +112,13 @@ async function attachCompletedPayload(
 
         return { ...transaction, payload };
     }
-    if (instanceOfEncryptedTransfer(transaction)) {
-        const prfKeySeed = await ledger.getPrfKey(credential.identityNumber);
+    if (
+        instanceOfEncryptedTransfer(transaction) ||
+        instanceOfEncryptedTransferWithMemo(transaction)
+    ) {
+        const prfKeySeed = await ledger.getPrfKeyDecrypt(
+            credential.identityNumber
+        );
         const receiverAccountInfo = await getAccountInfoOfAddress(
             transaction.payload.toAddress
         );

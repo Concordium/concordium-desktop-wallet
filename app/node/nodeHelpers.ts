@@ -3,6 +3,7 @@ import {
     getAccountInfo,
     getCryptographicParameters,
     getBlockSummary,
+    getIdentityProviders,
     getPeerList,
 } from './nodeRequests';
 import { PeerElement } from '../proto/concordium_p2p_rpc_pb';
@@ -55,6 +56,11 @@ export async function fetchLastFinalizedBlockSummary() {
     };
 }
 
+export async function fetchLastFinalizedIdentityProviders() {
+    const blockHash = await getlastFinalizedBlockHash();
+    return getIdentityProviders(blockHash);
+}
+
 export async function fetchGlobal(specificBlockHash?: string): Promise<Global> {
     let blockHash = specificBlockHash;
     if (!blockHash) {
@@ -96,4 +102,13 @@ export async function isNodeUpToDate() {
     const halfOfThePeers = Math.floor(peers.length / 2);
 
     return pendingPeers.length < halfOfThePeers;
+}
+
+/**
+ * Check whether the node supports memo transactions.
+ * memo transactions were added in protocolVersion 2.
+ */
+export async function nodeSupportsMemo() {
+    const consensusStatus = await getConsensusStatus();
+    return consensusStatus.protocolVersion >= 2;
 }
