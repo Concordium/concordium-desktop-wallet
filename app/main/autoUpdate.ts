@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig } from 'axios';
 import { ipcMain, BrowserWindow } from 'electron';
 import { autoUpdater, UpdateInfo } from 'electron-updater';
 import log from 'electron-log';
-import { createHash, createVerify, Verify } from 'crypto';
+import { createHash, verify } from 'crypto';
 import fs from 'fs';
 
 import {
@@ -52,10 +52,6 @@ async function getRemoteContent(url: string, binary = false) {
     return data;
 }
 
-export function getPublicKey() {
-    return getRemoteContent(publicKeyUrl);
-}
-
 function getSha256Sum(path: string): Promise<string> {
     const sum = createHash('sha256');
     const stream = fs.createReadStream(path);
@@ -64,18 +60,6 @@ function getSha256Sum(path: string): Promise<string> {
 
     return new Promise((resolve, reject) => {
         stream.on('end', () => resolve(sum.digest('hex')));
-        stream.on('error', reject);
-    });
-}
-
-function getVerifier(path: string): Promise<Verify> {
-    const verifier = createVerify('RSA-SHA256');
-    const stream = fs.createReadStream(path);
-
-    stream.on('data', (data) => verifier.update(data));
-
-    return new Promise((resolve, reject) => {
-        stream.on('end', () => resolve(verifier));
         stream.on('error', reject);
     });
 }
@@ -91,9 +75,9 @@ function getVerificationFunctions({
 
     return {
         async verifyChecksum() {
-            const remoteHash = (
-                await getRemoteContent(`${releaseFileUrl}.sha256sum`)
-            ).trim();
+            const remoteHash = await getRemoteContent(
+                `${releaseFileUrl}.sha256sum`
+            );
             const localHash = await getSha256Sum(filePath);
 
             if (localHash !== remoteHash) {
@@ -105,11 +89,12 @@ function getVerificationFunctions({
         async verifySignature() {
             const [remoteSig, pubKey] = await Promise.all([
                 getRemoteContent(`${releaseFileUrl}.sig`, true),
-                getPublicKey(),
+                getRemoteContent(publicKeyUrl),
             ]);
 
-            const verifier = await getVerifier(filePath);
-            const success = verifier.verify(
+            const success = verify(
+                null,
+                fs.readFileSync(fileName),
                 Buffer.from(pubKey, 'ascii'),
                 remoteSig
             );

@@ -5,8 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const yargs = require('yargs');
 const https = require('https');
-const { promisify } = require('util');
-const exec = promisify(require('child_process').exec);
+const { createHash, sign, verify } = require('crypto');
 
 const { build } = require('../package.json');
 const app = require('../app/package.json');
@@ -14,8 +13,11 @@ const { publicKeyUrl } = require('../app/constants/verification.json');
 
 /**
  * @description
- * This CLI relies on openssl under the hood to generate and verify hashes and signatures.
- * As such, running the script in a shell that doesn't have access to openssl CLI will fail.
+ * This script is used to generated verification assets needed for both automatic updates and manual verification of downloaded binaries by users.
+ * Key pair used for signing should be generated using ed25519. One way to do this is through openssl (in terminal):
+ *
+ * openssl genpkey -algorithm ed25519 -outform PEM -out concordium-desktop-wallet-privkey.pem
+ * openssl pkey -in concordium-desktop-wallet-pubkey.pem -pubout
  *
  * @example
  * $ node ./scripts/fileDigest.js -k <path-to-private-key> [-f <path-to-file] [--verify <path-to-public-key>] [--skiprv] \
@@ -81,16 +83,30 @@ const {
     appVersion,
 } = argv;
 
+function loadFileIntoCrypto(cryptoObj, file) {
+    const stream = fs.createReadStream(file);
+    stream.on('data', (data) => cryptoObj.update(data));
+
+    return new Promise((resolve, reject) => {
+        stream.on('end', () => {
+            cryptoObj.end();
+            resolve();
+        });
+        stream.on('error', reject);
+    });
+}
+
 const hashAlgorithm = 'sha256';
 
 // Produce file checksum
 async function writeChecksum(file) {
-    const { stdout } = await exec(`openssl dgst -${hashAlgorithm} ${file}`);
+    const hash = createHash(hashAlgorithm);
+    await loadFileIntoCrypto(hash, file);
 
-    const hash = stdout.split('= ')[1];
+    const sha256sum = hash.digest('hex');
     const hashOutFile = `${file}.sha256sum`;
 
-    fs.writeFileSync(hashOutFile, hash);
+    fs.writeFileSync(hashOutFile, sha256sum);
 
     console.log('Wrote hash successfully to file:', hashOutFile);
 }
@@ -98,14 +114,25 @@ async function writeChecksum(file) {
 /**
  * Function to verify the newly created signature against public key
  *
- * @param {string} pubKeyPath public key matching private key given in argv.key (--key).
+ * @param {string} pubKey public key matching private key given in argv.key (--key).
  */
-async function verifySignature(pubKeyPath, file, sigFile) {
-    const { stdout } = await promisify(exec)(
-        `openssl dgst -${hashAlgorithm} -verify ${pubKeyPath} -signature ${sigFile} ${file}`
-    );
+function verifySignature(pubKey, file, sigFile) {
+    try {
+        const success = verify(
+            null,
+            fs.readFileSync(file),
+            pubKey,
+            fs.readFileSync(sigFile)
+        );
 
-    console.log(stdout);
+        if (success) {
+            console.log('Verification succeeded');
+        } else {
+            console.log('Verification failed');
+        }
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 function getPublicKey() {
@@ -126,47 +153,6 @@ function getPublicKey() {
     });
 }
 
-const tempDir = path.resolve(__dirname, '../temp');
-
-function getTempFile(filename) {
-    return path.join(tempDir, filename);
-}
-
-function writeTempFile(content, filename) {
-    try {
-        fs.mkdirSync(tempDir);
-    } catch {
-        // Do nothing...
-    } finally {
-        fs.writeFileSync(getTempFile(filename), content);
-    }
-}
-
-function removeTempFile(filename) {
-    fs.rmSync(getTempFile(filename));
-    fs.rmdirSync(tempDir);
-}
-
-/**
- * Execute async function with temporary file
- *
- * @param {*} content Content for temp file.
- * @param {*} filename Optional filepath. Defaults to timestamp.
- * @returns A function, that takes a callback passing in the filename used. This function must return a promise.
- *
- * @example
- * const execute = executeWithTempFile(someContent);
- * await execute((file) => doSomethingWithFilePath(file));
- */
-const executeWithTempFile = (
-    content,
-    filename = Date.now().toString()
-) => async (cb) => {
-    writeTempFile(content, filename);
-    await cb(getTempFile(filename));
-    removeTempFile(filename);
-};
-
 /**
  * Verify signature with remote (published) public key
  *
@@ -177,10 +163,8 @@ async function verifyRemote(file, sigFile) {
     console.log('\nVerification of signature with remote public key:');
 
     try {
-        const content = await getPublicKey();
-        await executeWithTempFile(content)((key) =>
-            verifySignature(key, file, sigFile)
-        );
+        const pubKey = await getPublicKey();
+        verifySignature(pubKey, file, sigFile);
     } catch (e) {
         console.error(e);
     }
@@ -196,9 +180,10 @@ async function verifyRemote(file, sigFile) {
 async function writeSignature(file, shouldVerify = false) {
     const sigOutFile = `${file}.sig`;
 
-    await promisify(exec)(
-        `openssl dgst -${hashAlgorithm} -sign ${privateKeyPath} -out ${sigOutFile} ${file}`
-    );
+    const privKey = fs.readFileSync(privateKeyPath);
+    const signature = sign(null, fs.readFileSync(file), privKey);
+
+    fs.writeFileSync(sigOutFile, signature);
 
     console.log('Wrote sig successfully to file:', sigOutFile);
 
@@ -207,7 +192,7 @@ async function writeSignature(file, shouldVerify = false) {
     }
 
     if (verifyKeyPath) {
-        verifySignature(verifyKeyPath, file, sigOutFile);
+        verifySignature(fs.readFileSync(verifyKeyPath), file, sigOutFile);
     } else if (!skiprv) {
         verifyRemote(file, sigOutFile);
     }
@@ -254,10 +239,8 @@ const filesToDigest = inputFile
         console.log('\nProcessing file:', file);
 
         try {
-            await Promise.all([
-                writeChecksum(file),
-                writeSignature(file, shouldVerify),
-            ]);
+            await writeChecksum(file);
+            await writeSignature(file, shouldVerify);
         } catch (e) {
             console.error(e);
         }
