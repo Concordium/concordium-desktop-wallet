@@ -140,17 +140,33 @@ export default function PerformImport({ location }: Props) {
     const [messages, setMessages] = useState<Record<string | number, string>>(
         {}
     );
+    const [addressBookMessages, setAddressBookMessages] = useState<
+        Record<string, string>
+    >({});
     const [error, setError] = useState<string>();
     const [started, setStarted] = useState(false);
 
     useEffect(() => {
         if (!started && importedData) {
-            const addMessage = (identifier: string | number, message: string) =>
-                setMessages((currentMessages) => {
-                    const newMap = { ...currentMessages };
-                    newMap[identifier] = message;
-                    return newMap;
-                });
+            const addMessage = (
+                identifier: string | number,
+                message: string,
+                isAddressBookMessage = false
+            ) => {
+                if (isAddressBookMessage) {
+                    setAddressBookMessages((currentMessages) => {
+                        const newMap = { ...currentMessages };
+                        newMap[identifier] = message;
+                        return newMap;
+                    });
+                } else {
+                    setMessages((currentMessages) => {
+                        const newMap = { ...currentMessages };
+                        newMap[identifier] = message;
+                        return newMap;
+                    });
+                }
+            };
             setStarted(true);
             performImport(
                 importedData,
@@ -208,9 +224,9 @@ export default function PerformImport({ location }: Props) {
         .map((entry: AddressBookEntry) => (
             <p key={entry.address} className={styles.importedAddress}>
                 {entry.name}{' '}
-                {messages[entry.address] && (
+                {addressBookMessages[entry.address] && (
                     <span className="bodyLight textFaded mL10">
-                        ({messages[entry.address]})
+                        ({addressBookMessages[entry.address]})
                     </span>
                 )}
             </p>

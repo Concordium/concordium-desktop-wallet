@@ -31,6 +31,7 @@ import {
 } from '~/features/AddressBookSlice';
 
 const alreadyExistsMessage = 'Already exists';
+const alreadyExistsAsAnAccount = 'Already exists as an account';
 const replacesMessage = (name: string) => `Replaces name: ${name}`;
 const alreadyExistsAsMessage = (name: string) => `Already exists as: ${name}`;
 const replacesPlaceholderMessage = (name: string) =>
@@ -50,7 +51,11 @@ interface AttachedEntities {
     attachedAccounts: Account[];
 }
 
-export type AddMessage = (id: string | number, message: string) => void;
+export type AddMessage = (
+    id: string | number,
+    message: string,
+    isAddressBookMessage?: boolean
+) => void;
 
 /**
  * Given two names of an account, and the account's address, determines the name to use.
@@ -92,9 +97,38 @@ export function resolveIdentityNameConflict(
 }
 
 /**
- * Addressbook name conflicts are resolved in the same way as accounts, currently.
+ * Given two addressBookEntries, with the same address, determines the name to use.
+ * @returns An object containing the chosen name, and a message about the decision.
  */
-export const resolveAddressBookNameConflict = resolveAccountNameConflict;
+export function resolveAddressBookNameConflict(
+    existing: AddressBookEntry,
+    imported: AddressBookEntry
+) {
+    let chosenName;
+    let message = '';
+    if (existing.readOnly && imported.readOnly) {
+        // Both addressbookentries are tied to accounts, so we resolve them like the accounts.
+        return resolveAccountNameConflict(
+            existing.name,
+            imported.name,
+            existing.address
+        );
+    }
+    if (existing.readOnly) {
+        // only existing is tied to account, can't change the name.
+        chosenName = existing.name;
+        message = alreadyExistsAsAnAccount;
+    } else if (imported.readOnly) {
+        // only imported is tied to account, must change the name.
+        chosenName = imported.name;
+        message = replacesMessage(existing.name);
+    } else {
+        // No entries are tied to account, prefer existing content.
+        chosenName = existing.name;
+        message = alreadyExistsAsMessage(existing.name);
+    }
+    return { chosenName, message };
+}
 
 export function updateWalletIdReference<T extends HasWalletId>(
     importedWalletId: number,
@@ -847,7 +881,8 @@ export async function importAddressBookEntries(
         }
         const sameName = duplicate.name === match.name;
         const sameNote = duplicate.note === match.note;
-        if (sameName && sameNote) {
+        const sameWriteStatus = duplicate.readOnly === match.readOnly;
+        if (sameName && sameNote && sameWriteStatus) {
             trueDuplicates.push(duplicate);
         } else {
             const update: Partial<AddressBookEntry> = {};
@@ -855,16 +890,15 @@ export async function importAddressBookEntries(
                 const {
                     chosenName,
                     message,
-                } = await resolveAddressBookNameConflict(
-                    match.name,
-                    duplicate.name,
-                    address
-                );
+                } = await resolveAddressBookNameConflict(match, duplicate);
                 update.name = chosenName;
-                addMessage(address, message);
+                addMessage(address, message, true);
             }
             if (!sameNote) {
                 update.note = match.note || duplicate.note;
+            }
+            if (duplicate.readOnly) {
+                update.readOnly = true;
             }
             updateAddressBookEntry(dispatch, address, update);
         }
