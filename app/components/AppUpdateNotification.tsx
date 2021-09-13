@@ -27,6 +27,7 @@ enum UpdateStatus {
     Error,
 }
 interface Props {
+    version: string;
     onUpdate(): void;
     onClose(): void;
 }
@@ -40,7 +41,12 @@ interface ChildProps extends Props, UpdateState {
     setState: Dispatch<SetStateAction<UpdateState>>;
 }
 
-const AvailableChild = ({ onUpdate, setState, onClose }: ChildProps) => {
+const AvailableChild = ({
+    onUpdate,
+    setState,
+    onClose,
+    version,
+}: ChildProps) => {
     const update = useCallback(() => {
         onUpdate();
         setState({ status: UpdateStatus.Downloading });
@@ -50,7 +56,7 @@ const AvailableChild = ({ onUpdate, setState, onClose }: ChildProps) => {
         <>
             <div className="flex alignCenter">
                 <CogIcon width="21" height="22" />
-                <span className="mL5">New updates are available</span>
+                <span className="mL5">Version {version} is available.</span>
             </div>
             <div className="inlineFlexColumn mT20">
                 <Button size="tiny" onClick={update}>

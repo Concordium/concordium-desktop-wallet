@@ -120,13 +120,13 @@ const handleUpdateDownloaded = (mainWindow: BrowserWindow) => async (
         mainWindow.webContents.send(updateVerified);
     } catch (e) {
         log.error('Could not update application due to:', e);
-        mainWindow.webContents.send(updateError, 'Verification failed');
+        mainWindow.webContents.send(updateError, 'Could not apply update.');
     }
 };
 
 export default function initAutoUpdate(mainWindow: BrowserWindow) {
-    autoUpdater.on('update-available', () =>
-        mainWindow.webContents.send(updateAvailable)
+    autoUpdater.on('update-available', (info) =>
+        mainWindow.webContents.send(updateAvailable, info)
     );
     autoUpdater.on('update-downloaded', handleUpdateDownloaded(mainWindow));
 

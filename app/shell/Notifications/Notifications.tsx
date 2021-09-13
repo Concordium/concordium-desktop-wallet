@@ -29,6 +29,7 @@ export default function Notifications() {
                             key={n.id}
                             onClose={() => handleClose(n.id)}
                             onUpdate={() => window.autoUpdate.triggerUpdate()}
+                            version={n.version}
                         />
                     ) : (
                         <Notification
