@@ -71,7 +71,7 @@ const { argv } = yargs
 
 const {
     file: inputFile,
-    key: publicKeyPath,
+    key: privateKeyPath,
     verify: verifyKeyPath,
     skiprv,
     win,
@@ -88,7 +88,7 @@ async function writeChecksum(file) {
     const { stdout } = await exec(`openssl dgst -${hashAlgorithm} ${file}`);
 
     const hash = stdout.split('= ')[1];
-    const hashOutFile = `${file}.hash`;
+    const hashOutFile = `${file}.sha256sum`;
 
     fs.writeFileSync(hashOutFile, hash);
 
@@ -197,7 +197,7 @@ async function writeSignature(file, shouldVerify = false) {
     const sigOutFile = `${file}.sig`;
 
     await promisify(exec)(
-        `openssl dgst -${hashAlgorithm} -sign ${publicKeyPath} -out ${sigOutFile} ${file}`
+        `openssl dgst -${hashAlgorithm} -sign ${privateKeyPath} -out ${sigOutFile} ${file}`
     );
 
     console.log('Wrote sig successfully to file:', sigOutFile);
@@ -215,7 +215,7 @@ async function writeSignature(file, shouldVerify = false) {
 
 const linuxTargets = build.linux.target;
 const winTargets = ['exe'];
-const macTargets = ['dmg', 'zip'];
+const macTargets = ['dmg'];
 
 function getTargetsFromArgs() {
     return [

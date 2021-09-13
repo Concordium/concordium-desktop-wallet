@@ -28,19 +28,19 @@ enum UpdateStatus {
 }
 interface Props {
     onUpdate(): void;
-    onPostpone(): void;
+    onClose(): void;
 }
 
-interface State {
+interface UpdateState {
     status: UpdateStatus;
     message?: string;
 }
 
-interface ChildProps extends Props, State {
-    setState: Dispatch<SetStateAction<State>>;
+interface ChildProps extends Props, UpdateState {
+    setState: Dispatch<SetStateAction<UpdateState>>;
 }
 
-const AvailableChild = ({ onUpdate, setState, onPostpone }: ChildProps) => {
+const AvailableChild = ({ onUpdate, setState, onClose }: ChildProps) => {
     const update = useCallback(() => {
         onUpdate();
         setState({ status: UpdateStatus.Downloading });
@@ -56,7 +56,7 @@ const AvailableChild = ({ onUpdate, setState, onPostpone }: ChildProps) => {
                 <Button size="tiny" onClick={update}>
                     Restart & install
                 </Button>
-                <Button className="mT10" size="tiny" onClick={onPostpone}>
+                <Button className="mT10" size="tiny" onClick={onClose}>
                     Remind me
                 </Button>
             </div>
@@ -76,7 +76,7 @@ const ProcessChild = ({ status }: ChildProps) => (
     </>
 );
 
-const SuccessChild = ({ onPostpone }: ChildProps) => {
+const SuccessChild = ({ onClose: onPostpone }: ChildProps) => {
     function handleEnd() {
         window.autoUpdate.quitAndInstall();
         onPostpone();
@@ -110,8 +110,8 @@ const updateStatusMap: {
 };
 
 export default function AppUpdateNotification(props: Props) {
-    const { onPostpone } = props;
-    const [state, setState] = useState<State>({
+    const { onClose: onPostpone } = props;
+    const [state, setState] = useState<UpdateState>({
         status: UpdateStatus.Available,
     });
     const { status } = state;

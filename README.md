@@ -149,6 +149,6 @@ yarn generate-verification-assets <path-to-private-key>
 
 -   The private key used for this needs to match the public key published for verification, otherwise verification will not succeed.
 
-By default, the script tries to generate a hash and sig file for all release binaries in `release/`. It also tries to verify the signature created with a public key, which is published separately.
+By default, the script tries to generate a hash and sig file for all release binaries in `release/`. It also tries to verify the created signatures with Concordium's public key for the desktop wallet, which is published separately.
 
 The script has a number of optional runtime arguments, which are documented in the underlying script file `scripts/fileDigest.js`.

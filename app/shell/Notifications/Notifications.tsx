@@ -27,7 +27,7 @@ export default function Notifications() {
                     n.level === NotificationLevel.Update ? (
                         <AppUpdateNotification
                             key={n.id}
-                            onPostpone={() => handleClose(n.id)}
+                            onClose={() => handleClose(n.id)}
                             onUpdate={() => window.autoUpdate.triggerUpdate()}
                         />
                     ) : (

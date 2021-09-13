@@ -52,6 +52,10 @@ async function getRemoteContent(url: string, binary = false) {
     return data;
 }
 
+export function getPublicKey() {
+    return getRemoteContent(publicKeyUrl);
+}
+
 function getSha256Sum(path: string): Promise<string> {
     const sum = createHash('sha256');
     const stream = fs.createReadStream(path);
@@ -88,7 +92,7 @@ function getVerificationFunctions({
     return {
         async verifyChecksum() {
             const remoteHash = (
-                await getRemoteContent(`${releaseFileUrl}.hash`)
+                await getRemoteContent(`${releaseFileUrl}.sha256sum`)
             ).trim();
             const localHash = await getSha256Sum(filePath);
 
@@ -101,7 +105,7 @@ function getVerificationFunctions({
         async verifySignature() {
             const [remoteSig, pubKey] = await Promise.all([
                 getRemoteContent(`${releaseFileUrl}.sig`, true),
-                getRemoteContent(publicKeyUrl),
+                getPublicKey(),
             ]);
 
             const verifier = await getVerifier(filePath);
