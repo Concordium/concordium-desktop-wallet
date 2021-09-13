@@ -8,6 +8,7 @@ import IdentityCard from '~/components/IdentityCard';
 import { Identity } from '~/utils/types';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 import styles from './AccountCreation.module.scss';
 import CardList from '~/cross-app-components/CardList';
@@ -44,6 +45,12 @@ export default function AccountCreationPickIdentity({
     return (
         <Columns columnScroll variableSize>
             <Columns.Column>
+                <SimpleErrorModal
+                    header="No valid identities!"
+                    content="You have no identities, which can be used to create new accounts, please create a new identity, or import an existing, to create new accounts."
+                    show={identities.length === 0}
+                    onClick={() => dispatch(push(routes.ACCOUNTS))}
+                />
                 <div className={styles.leftColumn}>
                     <h2>Choose an identity</h2>
                     <div className="flexChildFill flexColumn justifySpaceBetween">

@@ -40,6 +40,7 @@ export interface ConsensusStatus {
     slotDuration: number;
     transactionsPerBlockEMA: number;
     transactionsPerBlockEMSD: number;
+    protocolVersion: number;
 }
 
 interface UpdateQueue {
@@ -60,6 +61,7 @@ interface UpdateQueues {
     rootKeys: UpdateQueue;
     level1Keys: UpdateQueue;
     level2Keys: UpdateQueue;
+    addIdentityProvider: UpdateQueue;
 }
 
 export interface Authorization {

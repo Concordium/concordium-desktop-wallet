@@ -1,8 +1,9 @@
 {
-    "multiSignatureSettings": "multisig",
+    "preferences": "preferences",
     "nodeSettings": "node",
     "passwordSettings": "password",
     "password": "passwordSetting",
     "foundationTransactionsEnabled": "foundationTransactionsEnabled",
-    "nodeLocation": "nodeLocation"
+    "nodeLocation": "nodeLocation",
+    "showMemoWarning": "showMemoWarning"
 }

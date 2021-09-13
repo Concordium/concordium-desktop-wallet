@@ -93,7 +93,8 @@ export default function SimpleLedgerWithCreationKeys({
                     {showComparing && (
                         <Card className={className} header="Compare public key">
                             <PublicKeyDetails
-                                publickey={keys?.publicKey || ''}
+                                className="mV40"
+                                publicKey={keys?.publicKey || ''}
                             />
                             <Button
                                 onClick={() => {

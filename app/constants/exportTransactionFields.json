@@ -10,5 +10,6 @@
     "subtotal": "amount",
     "publicBalance": "Public balance change",
     "shieldedBalance": "Shielded balance change",
-    "status": "status"
+    "status": "status",
+    "memo": "memo"
 }

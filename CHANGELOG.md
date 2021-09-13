@@ -12,7 +12,9 @@
 -   Now shows connected node status in side bar.
 -   It is now possible to remove a failed identity.
 -   Added reference (sessionId) on failed identities, for support.
--   Application will now update automatically (Windows, MacOS, and AppImage for Linux)
+-   Added support for memo transactions.
+-   Added algorithm to recover lost accounts and credentials.
+-   Application will automatically search for updates and prompt the user to download and install them (Windows, macOS and AppImage for Linux).
 
 ### Changed
 

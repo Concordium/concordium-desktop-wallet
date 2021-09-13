@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import type { LocationDescriptorObject } from 'history';
+import type { Buffer } from 'buffer/';
 import type { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import type { HTMLAttributes } from 'react';
 import type { RegisterOptions } from 'react-hook-form';
@@ -96,6 +96,7 @@ export enum IdentityStatus {
     Rejected = 'rejected',
     RejectedAndWarned = 'rejectedAndWarned',
     Pending = 'pending',
+    Recovered = 'recovered',
     // eslint-disable-next-line no-shadow
     Genesis = 'genesis',
 }
@@ -167,6 +168,9 @@ export enum TransactionKindString {
     TransferWithSchedule = 'transferWithSchedule',
     UpdateCredentials = 'updateCredentials',
     RegisterData = 'registerData',
+    TransferWithMemo = 'transferWithMemo',
+    EncryptedAmountTransferWithMemo = 'encryptedAmountTransferWithMemo',
+    TransferWithScheduleAndMemo = 'transferWithScheduleAndMemo',
 }
 
 // The ids of the different types of an AccountTransaction.
@@ -187,7 +191,11 @@ export enum TransactionKindId {
     Transfer_with_schedule = 19,
     Update_credentials = 20,
     Register_data = 21,
+    Simple_transfer_with_memo = 22,
+    Encrypted_transfer_with_memo = 23,
+    Transfer_with_schedule_and_memo = 24,
 }
+
 export interface SimpleTransferPayload {
     amount: string;
     toAddress: string;
@@ -298,10 +306,19 @@ export interface AccountTransaction<
     payload: PayloadType;
 }
 
-export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
+type WithMemo<Base extends {}> = Base & {
+    memo: string;
+};
+export type SimpleTransferWithMemoPayload = WithMemo<SimpleTransferPayload>;
+export type EncryptedTransferWithMemoPayload = WithMemo<EncryptedTransferPayload>;
+export type ScheduledTransferWithMemoPayload = WithMemo<ScheduledTransferPayload>;
 
 export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
+export type SimpleTransferWithMemo = AccountTransaction<SimpleTransferWithMemoPayload>;
 export type EncryptedTransfer = AccountTransaction<EncryptedTransferPayload>;
+export type EncryptedTransferWithMemo = AccountTransaction<EncryptedTransferWithMemoPayload>;
+export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
+export type ScheduledTransferWithMemo = AccountTransaction<ScheduledTransferWithMemoPayload>;
 export type TransferToEncrypted = AccountTransaction<TransferToEncryptedPayload>;
 export type UpdateAccountCredentials = AccountTransaction<UpdateAccountCredentialsPayload>;
 export type TransferToPublic = AccountTransaction<TransferToPublicPayload>;
@@ -492,6 +509,7 @@ export interface TransferTransaction {
     status: TransactionStatus;
     rejectReason?: RejectReason | string;
     decryptedAmount?: string;
+    memo?: string;
 }
 
 export interface TransferTransactionWithNames extends TransferTransaction {
@@ -565,6 +583,17 @@ export interface Description {
     name: string;
     url: string;
     description: string;
+}
+
+export interface SerializedTextWithLength {
+    data: Buffer;
+    length: Buffer;
+}
+
+export interface SerializedDescription {
+    name: SerializedTextWithLength;
+    url: SerializedTextWithLength;
+    description: SerializedTextWithLength;
 }
 
 // Identity Provider information
@@ -700,7 +729,8 @@ export type UpdateInstructionPayload =
     | BakerStakeThreshold
     | ElectionDifficulty
     | HigherLevelKeyUpdate
-    | AuthorizationKeysUpdate;
+    | AuthorizationKeysUpdate
+    | AddIdentityProvider;
 
 // An actual signature, which goes into an account transaction.
 export type Signature = Hex;
@@ -747,6 +777,7 @@ export enum UpdateType {
     UpdateLevel1KeysUsingLevel1Keys,
     UpdateLevel2KeysUsingRootKeys,
     UpdateLevel2KeysUsingLevel1Keys,
+    AddIdentityProvider,
 }
 
 export enum RootKeysUpdateTypes {
@@ -786,7 +817,14 @@ export function instanceOfAccountTransactionWithSignature(
 export function instanceOfSimpleTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is SimpleTransfer {
-    return object.transactionKind === TransactionKindId.Simple_transfer;
+    return TransactionKindId.Simple_transfer === object.transactionKind;
+}
+export function instanceOfSimpleTransferWithMemo(
+    object: AccountTransaction<TransactionPayload>
+): object is SimpleTransferWithMemo {
+    return (
+        TransactionKindId.Simple_transfer_with_memo === object.transactionKind
+    );
 }
 
 export function instanceOfTransferToEncrypted(
@@ -807,10 +845,28 @@ export function instanceOfEncryptedTransfer(
     return object.transactionKind === TransactionKindId.Encrypted_transfer;
 }
 
+export function instanceOfEncryptedTransferWithMemo(
+    object: AccountTransaction<TransactionPayload>
+): object is EncryptedTransferWithMemo {
+    return (
+        object.transactionKind ===
+        TransactionKindId.Encrypted_transfer_with_memo
+    );
+}
+
 export function instanceOfScheduledTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is ScheduledTransfer {
     return object.transactionKind === TransactionKindId.Transfer_with_schedule;
+}
+
+export function instanceOfScheduledTransferWithMemo(
+    object: AccountTransaction<TransactionPayload>
+): object is ScheduledTransferWithMemo {
+    return (
+        object.transactionKind ===
+        TransactionKindId.Transfer_with_schedule_and_memo
+    );
 }
 
 export function instanceOfUpdateAccountCredentials(
@@ -859,6 +915,12 @@ export function isExchangeRate(
         UpdateType.UpdateMicroGTUPerEuro === transaction.type ||
         UpdateType.UpdateEuroPerEnergy === transaction.type
     );
+}
+
+export function isAddIdentityProvider(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<AddIdentityProvider> {
+    return UpdateType.AddIdentityProvider === transaction.type;
 }
 
 export function isTransactionFeeDistribution(
@@ -1003,6 +1065,8 @@ export type ExchangeRate = Fraction;
  */
 export type RewardFraction = Word32;
 
+export type AddIdentityProvider = IpInfo;
+
 export interface TransactionFeeDistribution {
     baker: RewardFraction;
     gasAccount: RewardFraction;
@@ -1116,6 +1180,7 @@ export interface TransactionDetails {
     inputEncryptedAmount?: EncryptedAmount;
     type: TransactionKindString;
     outcome: string;
+    memo?: Hex;
 }
 
 export interface TransactionOrigin {
@@ -1209,11 +1274,6 @@ export interface TransactionEvent {
     cost: string;
 }
 
-export interface Action {
-    label: string;
-    location?: LocationDescriptorObject | string;
-}
-
 export type ClassName = Pick<HTMLAttributes<HTMLElement>, 'className'>;
 
 export type ClassNameAndStyle = Pick<
@@ -1274,6 +1334,8 @@ export type PolymorphicComponentProps<
     C extends React.ElementType,
     Props = {}
 > = InheritableElementProps<C, Props & AsProp<C>>;
+
+export type StateUpdate<Type> = React.Dispatch<React.SetStateAction<Type>>;
 
 export enum TransactionTypes {
     UpdateInstruction,
@@ -1344,3 +1406,13 @@ export enum PrintErrorTypes {
     Failed = 'failed',
     NoPrinters = 'no valid printers available',
 }
+
+export type PrivateKeySeeds = {
+    idCredSec: Buffer;
+    prfKey: Buffer;
+};
+
+export type AccountAndCredentialPairs = {
+    account: Account;
+    credential: Credential;
+}[];

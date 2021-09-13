@@ -34,6 +34,9 @@ autoUpdater.logger = log;
 autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = false;
 
+/**
+ * UpdateInfo interface doesn't seem to be aligned with actual content.
+ */
 interface RealUpdateInfo extends UpdateInfo {
     downloadedFile: string;
 }
@@ -75,9 +78,11 @@ function getVerifier(path: string): Promise<Verify> {
 
 const releasesFeed = `https://github.com/${build.publish.owner}/${build.publish.repo}/releases/download`;
 
-function getVerificationFunctions(
-    { downloadedFile: filePath, releaseName, path: fileName }: RealUpdateInfo // UpdateInfo interface doesn't seem to be aligned with actual content.
-) {
+function getVerificationFunctions({
+    downloadedFile: filePath,
+    releaseName,
+    path: fileName,
+}: RealUpdateInfo) {
     const releaseFileUrl = `${releasesFeed}/${releaseName}/${fileName}`;
 
     return {
