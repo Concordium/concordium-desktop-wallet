@@ -94,7 +94,7 @@ function getVerificationFunctions({
 
             const success = verify(
                 null,
-                fs.readFileSync(fileName),
+                fs.readFileSync(filePath),
                 Buffer.from(pubKey, 'ascii'),
                 remoteSig
             );
