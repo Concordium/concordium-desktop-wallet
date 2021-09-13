@@ -12,6 +12,7 @@ import {
 } from '~/features/TransactionSlice';
 import routes from '~/constants/routes.json';
 import MoreActions from './MoreActions';
+import FinalPage from '~/components/Transfers/FinalPage';
 import EncryptedTransfer from '~/components/Transfers/EncryptedTransfer';
 import SimpleTransfer from '~/components/Transfers/SimpleTransfer';
 import ShieldAmount from '~/components/Transfers/ShieldAmount';
@@ -130,6 +131,10 @@ export default function AccountView() {
                 <Route
                     path={routes.ACCOUNTS_UNSHIELDAMOUNT}
                     render={() => <UnshieldAmount account={account} />}
+                />
+                <Route
+                    path={routes.ACCOUNTS_FINAL_PAGE}
+                    component={FinalPage}
                 />
                 <Route
                     path={routes.ACCOUNTS}
