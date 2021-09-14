@@ -152,6 +152,8 @@ export default function initializeIpcHandlers(
     );
     ipcMain.handle(ipcCommands.removeView, () => {
         browserView.webContents.emit('abort');
+        browserView.webContents.removeAllListeners('will-redirect');
+
         // Load a blank page to prevent flashing of a previous identity
         // provider page.
         browserView.webContents.loadURL('about:blank');
