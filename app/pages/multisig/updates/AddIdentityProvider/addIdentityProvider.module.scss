@@ -1,0 +1,9 @@
+@import 'config/bundle';
+
+.ipVerifyKey {
+    textarea {
+        resize: none;
+    }
+
+    font-size: $font-size-body1;
+}

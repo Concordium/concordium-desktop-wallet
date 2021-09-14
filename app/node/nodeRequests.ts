@@ -5,7 +5,7 @@ import {
     PeerListResponse,
 } from '../proto/concordium_p2p_rpc_pb';
 import { BlockSummary, ConsensusStatus, AccountNonce } from './NodeApiTypes';
-import { AccountInfo, Global, Versioned } from '../utils/types';
+import { AccountInfo, Global, Versioned, IpInfo } from '../utils/types';
 import { intToString } from '../utils/JSONHelper';
 import grpcMethods from '../constants/grpcMethods.json';
 
@@ -86,6 +86,17 @@ export async function getNextAccountNonce(
  */
 export function getConsensusStatus(): Promise<ConsensusStatus> {
     return sendPromiseParseResult(grpcMethods.getConsensusStatus);
+}
+
+/**
+ * Retrieves the list of identity providers at the given blockHash.
+ */
+export async function getIdentityProviders(
+    blockHashValue: string
+): Promise<IpInfo[]> {
+    return sendPromiseParseResult(grpcMethods.getIdentityProviders, {
+        blockHashValue,
+    });
 }
 
 /**
