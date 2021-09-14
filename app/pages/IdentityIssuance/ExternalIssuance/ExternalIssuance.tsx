@@ -26,8 +26,33 @@ import styles from './ExternalIssuance.module.scss';
 import { createInitialAccount } from '~/utils/accountHelpers';
 import { insertPendingIdentityAndInitialAccount } from '~/database/IdentityDao';
 import { getElementRectangle } from '~/utils/htmlHelpers';
+import { ViewResponseStatus } from '~/preload/preloadTypes';
 
 const redirectUri = 'ConcordiumRedirectToken';
+
+enum IdentityRequestStatus {
+    Success,
+    Aborted,
+    Failed,
+}
+
+interface IdentitySuccess {
+    identityId: number;
+    status: IdentityRequestStatus.Success;
+}
+
+interface IdentityAborted {
+    status: IdentityRequestStatus.Aborted;
+}
+
+interface IdentityFailed {
+    status: IdentityRequestStatus.Failed;
+}
+
+type IdentityGenerationResult =
+    | IdentitySuccess
+    | IdentityAborted
+    | IdentityFailed;
 
 /**
  * Performs the identity creation flow with an identity provider.
@@ -51,7 +76,7 @@ async function generateIdentity(
     walletId: number,
     onError: (message: string) => void,
     rect: Rectangle
-): Promise<number> {
+): Promise<IdentityGenerationResult> {
     let identityObjectLocation;
     let identityId;
     try {
@@ -73,7 +98,11 @@ async function generateIdentity(
             identityProviderLocation,
             rect
         );
-        if (providerResult.error) {
+
+        if (providerResult.status === ViewResponseStatus.Aborted) {
+            return { status: IdentityRequestStatus.Aborted };
+        }
+        if (providerResult.status === ViewResponseStatus.Error) {
             throw new Error(providerResult.error);
         }
         identityObjectLocation = providerResult.result;
@@ -115,8 +144,7 @@ async function generateIdentity(
     } catch (e) {
         window.view.removeView();
         onError(`Failed to create identity due to ${e}`);
-        // Rethrow this to avoid redirection;
-        throw e;
+        return { status: IdentityRequestStatus.Failed };
     }
     confirmIdentityAndInitialAccount(
         dispatch,
@@ -125,7 +153,7 @@ async function generateIdentity(
         accountName,
         identityObjectLocation
     ).catch(() => onError(`Failed to confirm identity`));
-    return identityId;
+    return { identityId, status: IdentityRequestStatus.Success };
 }
 
 export interface ExternalIssuanceLocationState extends SignedIdRequest {
@@ -199,13 +227,21 @@ export default function ExternalIssuance({
             onError,
             rect
         )
-            .then((identityId) => {
-                return dispatch(
+            .then((result: IdentityGenerationResult) => {
+                if (
+                    result.status === IdentityRequestStatus.Aborted ||
+                    result.status === IdentityRequestStatus.Failed
+                ) {
+                    return false;
+                }
+
+                dispatch(
                     push({
                         pathname: routes.IDENTITYISSUANCE_FINAL,
-                        state: identityId,
+                        state: result.identityId,
                     })
                 );
+                return true;
             })
             .catch(() => {});
         // eslint-disable-next-line react-hooks/exhaustive-deps
