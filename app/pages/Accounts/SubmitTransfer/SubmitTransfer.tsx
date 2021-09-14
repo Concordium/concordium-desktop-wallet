@@ -209,7 +209,7 @@ export default function SubmitTransfer({ location }: Props) {
             signatureIndex,
         });
 
-        setMessage('Please review and sign transaction on device ');
+        setMessage('Please review and sign transaction on device');
         const signature: Buffer = await ledger.signTransfer(transaction, path);
         const signatureStructured = buildTransactionAccountSignature(
             credential.credentialIndex,

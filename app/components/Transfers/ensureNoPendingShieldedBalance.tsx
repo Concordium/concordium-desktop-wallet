@@ -10,7 +10,7 @@ export interface WithAccount {
 }
 
 /**
- * Component that injects the next nonce on the given account.
+ * Component that ensures the account does not have have a pending shielded balance transaction.
  * Requires the component to have prop account containing an Account.
  */
 export default function ensureNoPendingShieldedBalance<
