@@ -4,20 +4,40 @@ import {
     PublicInformationForIp,
     SignedPublicKey,
     UnsignedCredentialDeploymentInformation,
+    UpdateInstruction,
+    AddIdentityProvider,
+    ElectionDifficulty,
+    BakerStakeThreshold,
+    GasRewards,
+    ProtocolUpdate,
+    MintDistribution,
+    FoundationAccount,
+    TransactionFeeDistribution,
+    ExchangeRate,
+    HigherLevelKeyUpdate,
+    AuthorizationKeysUpdate,
+    UpdateInstructionPayload,
+    UpdateAccountCredentials,
+    AccountTransaction,
 } from '~/utils/types';
 import { AppAndVersion } from '../features/ledger/GetAppAndVersion';
 import { AccountPathInput } from '../features/ledger/Path';
 
 type ReturnBuffer = Promise<Buffer>;
 
-type SignUpdate = (
-    transactionAsJson: string,
+type SignAccountTransaction<T> = (
+    transaction: T,
+    path: number[]
+) => ReturnBuffer;
+
+type SignUpdate<PayloadType extends UpdateInstructionPayload> = (
+    transaction: UpdateInstruction<PayloadType>,
     serializedPayload: Buffer,
     keypath: number[]
 ) => ReturnBuffer;
 
-type SignKeyUpdate = (
-    transactionAsJson: string,
+type SignKeyUpdate<PayloadType extends UpdateInstructionPayload> = (
+    transaction: UpdateInstruction<PayloadType>,
     serializedPayload: Buffer,
     keypath: number[],
     INS: number
@@ -30,18 +50,12 @@ type LedgerCommands = {
     getPrivateKeySeeds: (identity: number) => Promise<PrivateKeySeeds>;
     getPrfKeyDecrypt: (identity: number) => ReturnBuffer;
     getPrfKeyRecovery: (identity: number) => ReturnBuffer;
-    signTransfer: (
-        transactionAsJson: string,
-        keypath: number[]
-    ) => ReturnBuffer;
+    signTransfer: SignAccountTransaction<AccountTransaction>;
     signPublicInformationForIp: (
         publicInfoForIp: PublicInformationForIp,
         accountPathInput: AccountPathInput
     ) => ReturnBuffer;
-    signUpdateCredentialTransaction: (
-        transactionAsJson: string,
-        path: number[]
-    ) => ReturnBuffer;
+    signUpdateCredentialTransaction: SignAccountTransaction<UpdateAccountCredentials>;
     signCredentialDeploymentOnExistingAccount: (
         credentialDeployment: UnsignedCredentialDeploymentInformation,
         address: string,
@@ -49,20 +63,21 @@ type LedgerCommands = {
     ) => ReturnBuffer;
     signCredentialDeploymentOnNewAccount: (
         credentialDeployment: UnsignedCredentialDeploymentInformation,
-        expiry: string,
+        expiry: bigint,
         keypath: number[]
     ) => ReturnBuffer;
-    signMicroGtuPerEuro: SignUpdate;
-    signEuroPerEnergy: SignUpdate;
-    signTransactionFeeDistribution: SignUpdate;
-    signFoundationAccount: SignUpdate;
-    signMintDistribution: SignUpdate;
-    signProtocolUpdate: SignUpdate;
-    signGasRewards: SignUpdate;
-    signBakerStakeThreshold: SignUpdate;
-    signElectionDifficulty: SignUpdate;
-    signHigherLevelKeysUpdate: SignKeyUpdate;
-    signAuthorizationKeysUpdate: SignKeyUpdate;
+    signMicroGtuPerEuro: SignUpdate<ExchangeRate>;
+    signEuroPerEnergy: SignUpdate<ExchangeRate>;
+    signTransactionFeeDistribution: SignUpdate<TransactionFeeDistribution>;
+    signFoundationAccount: SignUpdate<FoundationAccount>;
+    signMintDistribution: SignUpdate<MintDistribution>;
+    signProtocolUpdate: SignUpdate<ProtocolUpdate>;
+    signGasRewards: SignUpdate<GasRewards>;
+    signBakerStakeThreshold: SignUpdate<BakerStakeThreshold>;
+    signElectionDifficulty: SignUpdate<ElectionDifficulty>;
+    signAddIdentityProvider: SignUpdate<AddIdentityProvider>;
+    signHigherLevelKeysUpdate: SignKeyUpdate<HigherLevelKeyUpdate>;
+    signAuthorizationKeysUpdate: SignKeyUpdate<AuthorizationKeysUpdate>;
     getAppAndVersion: () => Promise<AppAndVersion>;
     subscribe: () => Promise<void>;
     closeTransport: () => void;

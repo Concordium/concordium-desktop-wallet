@@ -61,6 +61,7 @@ interface UpdateQueues {
     rootKeys: UpdateQueue;
     level1Keys: UpdateQueue;
     level2Keys: UpdateQueue;
+    addIdentityProvider: UpdateQueue;
 }
 
 export interface Authorization {

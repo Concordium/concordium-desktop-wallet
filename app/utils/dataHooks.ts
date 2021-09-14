@@ -3,6 +3,7 @@ import { getAccount } from '~/database/AccountDao';
 import { BlockSummary, ConsensusStatus } from '~/node/NodeApiTypes';
 import { getConsensusStatus } from '~/node/nodeRequests';
 import {
+    fetchLastFinalizedIdentityProviders,
     fetchLastFinalizedBlockSummary,
     getAccountInfoOfAddress,
 } from '../node/nodeHelpers';
@@ -21,6 +22,7 @@ import {
     Fraction,
     TransactionKindId,
     Account,
+    IpInfo,
 } from './types';
 
 /** Hook for looking up an account name from an address */
@@ -92,6 +94,17 @@ export function useLastFinalizedBlockSummary() {
 /** Hook for fetching consensus status */
 export function useConsensusStatus() {
     return useAsyncMemo<ConsensusStatus>(getConsensusStatus);
+}
+
+/** Hook for fetching identity providers */
+export function useIdentityProviders() {
+    const [providers, setProviders] = useState<IpInfo[]>([]);
+    useEffect(() => {
+        fetchLastFinalizedIdentityProviders()
+            .then(setProviders)
+            .catch(() => {});
+    }, []);
+    return providers;
 }
 
 /** Hook for fetching staked amount for a given account address, Returns undefined while loading and 0 if account is not a baker */
