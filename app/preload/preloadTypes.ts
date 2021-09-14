@@ -99,6 +99,7 @@ export type HttpMethods = {
         address: string,
         id: string
     ) => Promise<GetTransactionsResult>;
+    getNewestTransactions: (address: string) => Promise<IncomingTransaction[]>;
     getIdProviders: () => Promise<IdentityProvider[]>;
 };
 

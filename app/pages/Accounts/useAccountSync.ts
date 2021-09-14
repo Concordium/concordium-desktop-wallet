@@ -8,6 +8,7 @@ import {
 import {
     updateTransactions,
     loadTransactions,
+    fetchNewestTransactions,
 } from '~/features/TransactionSlice';
 import { noOp } from '~/utils/basicHelpers';
 import { AccountStatus } from '~/utils/types';
@@ -21,6 +22,14 @@ export default function useAccountSync() {
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
     const [controller] = useState(new AbortController());
+
+    useEffect(() => {
+        if (account && account.status === AccountStatus.Confirmed) {
+            fetchNewestTransactions(dispatch, account);
+        }
+        return () => {};
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [account?.address]);
 
     useEffect(() => {
         if (account) {

@@ -23,6 +23,10 @@ export async function getTransactions(address: string, id = '0') {
     return window.http.getTransactions(address, id);
 }
 
+export async function getNewestTransactions(address: string) {
+    return window.http.getNewestTransactions(address);
+}
+
 export async function getIdentityProviders() {
     return window.http.getIdProviders();
 }

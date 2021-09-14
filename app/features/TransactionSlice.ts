@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
-import { getTransactions } from '../utils/httpRequests';
+import { getNewestTransactions, getTransactions } from '../utils/httpRequests';
 import { decryptAmounts } from '../utils/rustInterface';
 import {
     getTransactionsOfAccount,
@@ -197,6 +197,22 @@ export async function loadTransactions(
             dispatch(setLoadingTransactions(false));
         }
         dispatch(setTransactions({ transactions }));
+    }
+}
+
+export async function fetchNewestTransactions(
+    dispatch: Dispatch,
+    account: Account
+) {
+    const transactions = await getNewestTransactions(account.address);
+
+    const newTransactions = await insertTransactions(
+        transactions.map((transaction) =>
+            convertIncomingTransaction(transaction, account.address)
+        )
+    );
+    if (newTransactions.some(isShieldedBalanceTransaction)) {
+        await updateAllDecrypted(dispatch, account.address, false);
     }
 }
 

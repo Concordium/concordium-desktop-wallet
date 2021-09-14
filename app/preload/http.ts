@@ -10,6 +10,7 @@ import {
     HttpGetResponse,
 } from '~/preload/preloadTypes';
 import ipcCommands from '~/constants/ipcCommands.json';
+import { IncomingTransaction } from '~/utils/types';
 
 function getWalletProxy() {
     const targetNet = getTargetNet();
@@ -41,6 +42,19 @@ async function httpsGet<T>(
     return JSON.parse(response);
 }
 
+async function getNewestTransactions(
+    address: string
+): Promise<IncomingTransaction[]> {
+    const response = await walletProxy.get(
+        `/v1/accTransactions/${address}?limit=${walletProxytransactionLimit}&order=descending&includeRewards=none&includeRawRejectReason`,
+        {
+            transformResponse: (res) => parse(intToString(res, 'id')),
+        }
+    );
+    const { transactions } = response.data;
+    return transactions;
+}
+
 async function getTransactions(
     address: string,
     id: string
@@ -58,6 +72,7 @@ async function getTransactions(
 const exposedMethods: HttpMethods = {
     get: httpsGet,
     getTransactions,
+    getNewestTransactions,
     getIdProviders: async () => {
         const response = await walletProxy.get('/v0/ip_info');
         return response.data;
