@@ -16,10 +16,8 @@ export interface WithAccount {
 export default function ensureNoPendingShieldedBalance<
     TProps extends WithAccount
 >(Component: ComponentType<TProps>): ComponentType<TProps> {
-    const EnsureNoPendingShieldedBalanceComponent = ({
-        account,
-        ...props
-    }: TProps) => {
+    const EnsureNoPendingShieldedBalanceComponent = (props: TProps) => {
+        const { account } = props;
         const dispatch = useDispatch();
         const [showError, setShowError] = useState<boolean>(false);
 
@@ -37,7 +35,7 @@ export default function ensureNoPendingShieldedBalance<
                     header="Account has pending transfer impacting shielded balance"
                     onClick={() => dispatch(routerActions.goBack())}
                 />
-                <Component {...props} account={account} />
+                <Component {...props} />
             </>
         );
     };
