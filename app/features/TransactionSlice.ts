@@ -200,6 +200,12 @@ export async function loadTransactions(
     }
 }
 
+/**
+ * Fetches a batch of the newest transactions of the given account,
+ * and saves them to the database, and updates the allDecrypted,
+ * if any shielded balance transaction were loaded.
+ * N.B. does not load reward transactions.
+ */
 export async function fetchNewestTransactions(
     dispatch: Dispatch,
     account: Account
@@ -216,6 +222,14 @@ export async function fetchNewestTransactions(
     }
 }
 
+/**
+ * Fetches a batch of transactions on the given address, from the given currenMaxId.
+ * and saves them to the database.
+ * @return An object containing:
+ * - newMaxId (the largest id among the loaded)
+ * - isFinished whether the transactions were the account's latests, or there are more to fetch.
+ * - newEncrypted whether any shielded balance transactions were loaded.
+ */
 async function fetchTransactions(address: string, currentMaxId: bigint) {
     const { transactions, full } = await getTransactions(
         address,

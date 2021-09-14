@@ -42,6 +42,9 @@ async function httpsGet<T>(
     return JSON.parse(response);
 }
 
+/**
+ * N.B. does not load reward transactions.
+ */
 async function getNewestTransactions(
     address: string
 ): Promise<IncomingTransaction[]> {
