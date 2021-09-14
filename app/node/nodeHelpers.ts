@@ -3,6 +3,7 @@ import {
     getAccountInfo,
     getCryptographicParameters,
     getBlockSummary,
+    getIdentityProviders,
     getPeerList,
 } from './nodeRequests';
 import { PeerElement } from '../proto/concordium_p2p_rpc_pb';
@@ -53,6 +54,11 @@ export async function fetchLastFinalizedBlockSummary() {
         consensusStatus,
         lastFinalizedBlockSummary,
     };
+}
+
+export async function fetchLastFinalizedIdentityProviders() {
+    const blockHash = await getlastFinalizedBlockHash();
+    return getIdentityProviders(blockHash);
 }
 
 export async function fetchGlobal(specificBlockHash?: string): Promise<Global> {

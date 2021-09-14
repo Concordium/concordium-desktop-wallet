@@ -16,7 +16,7 @@ const listenerTimeout = 5000;
 enum Status {
     NoWallet = 'No wallet',
     NewDevice = 'New Device',
-    OutDated = 'OutDated',
+    OutDated = 'Outdated',
     Connected = 'Connected',
 }
 
