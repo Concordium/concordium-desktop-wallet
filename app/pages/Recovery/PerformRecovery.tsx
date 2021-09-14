@@ -87,12 +87,15 @@ export default function PerformRecovery({
     useEffect(() => setStatus(Status.Initial), []);
 
     function promptStop(emptyCount: number) {
-        return new Promise((resolve) => {
+        return new Promise<boolean>((resolve) => {
             setShowStop({
                 emptyCount,
                 postAction: (location) => {
-                    setShowStop(undefined);
-                    resolve(Boolean(location));
+                    const moved = Boolean(location);
+                    if (!moved) {
+                        setShowStop(undefined);
+                    }
+                    resolve(moved);
                 },
             });
         });
@@ -174,13 +177,16 @@ export default function PerformRecovery({
         if (identity || accounts.length) {
             setEmptyIndices(0);
         } else {
+            let moved = false;
             if (
                 emptyIndices > 0 &&
                 (emptyIndices + 1) % identitySpacesBetweenWarning === 0
             ) {
-                await promptStop(emptyIndices);
+                moved = await promptStop(emptyIndices);
             }
-            setEmptyIndices((n) => n + 1);
+            if (!moved) {
+                setEmptyIndices((n) => n + 1);
+            }
         }
         controller.finish();
     }
