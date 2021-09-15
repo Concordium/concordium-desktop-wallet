@@ -4,7 +4,7 @@ import { push } from 'connected-react-router';
 import { Account, AccountInfo } from '~/utils/types';
 import AccountCard from '~/components/AccountCard';
 import {
-    accountsSelector,
+    confirmedAccountsSelector,
     accountsInfoSelector,
     loadAccountInfos,
 } from '~/features/AccountSlice';
@@ -38,7 +38,7 @@ export default function PickAccount({
     messageWhenEmpty,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
-    const accounts = useSelector(accountsSelector);
+    const accounts = useSelector(confirmedAccountsSelector);
     const accountsInfo = useSelector(accountsInfoSelector);
     const [chosenIndex, setChosenIndex] = useState<number | undefined>();
     const [loaded, setLoaded] = useState(false);

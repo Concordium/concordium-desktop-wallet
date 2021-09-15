@@ -107,7 +107,12 @@ export function convertIncomingTransaction(
     if (transaction.details.memo) {
         // The memo from the proxy is a "hex-encoded byte array".
         try {
-            memo = decodeCBOR(transaction.details.memo).toString();
+            memo = decodeCBOR(transaction.details.memo);
+            if (typeof memo === 'object') {
+                memo = JSON.stringify(memo);
+            } else {
+                memo = memo.toString();
+            }
         } catch {
             memo = transaction.details.memo;
         }
