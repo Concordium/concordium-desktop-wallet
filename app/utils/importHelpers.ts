@@ -53,8 +53,7 @@ interface AttachedEntities {
 
 export type AddMessage<IdType = string | number> = (
     id: IdType,
-    message: string,
-    isAddressBookMessage?: boolean
+    message: string
 ) => void;
 
 /**
@@ -861,7 +860,7 @@ export async function importAddressBookEntries(
     dispatch: Dispatch,
     entries: AddressBookEntry[],
     addressBook: AddressBookEntry[],
-    addMessage: AddMessage<string>
+    addAddressBookMessage: AddMessage<string>
 ): Promise<AddressBookEntry[]> {
     const [nonDuplicates, duplicates] = partition(entries, (entry) =>
         hasNoDuplicate(entry, addressBook, addressBookFields)
@@ -892,7 +891,7 @@ export async function importAddressBookEntries(
                     message,
                 } = await resolveAddressBookNameConflict(match, duplicate);
                 update.name = chosenName;
-                addMessage(address, message);
+                addAddressBookMessage(address, message);
             }
             if (!sameNote) {
                 update.note = match.note || duplicate.note;
