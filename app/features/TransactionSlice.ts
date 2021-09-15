@@ -34,6 +34,7 @@ import AbortController from '~/utils/AbortController';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
 import { max } from '~/utils/basicHelpers';
 import { getActiveBooleanFilters } from '~/utils/accountHelpers';
+import errorMessages from '~/constants/errorMessages.json';
 
 const updateTransactionInterval = 5000;
 
@@ -231,46 +232,59 @@ export async function updateTransactions(
     account: Account,
     controller: AbortController
 ) {
-    async function updateSubroutine(maxId: bigint) {
-        if (controller.isAborted) {
-            controller.finish();
-            return;
-        }
-        const result = await fetchTransactions(account.address, maxId);
-
-        if (maxId !== result.newMaxId) {
-            await updateMaxTransactionId(
-                dispatch,
-                account.address,
-                result.newMaxId.toString()
-            );
-        }
-
-        if (result.newEncrypted) {
-            await updateAllDecrypted(dispatch, account.address, false);
-        }
-
-        if (controller.isAborted) {
-            controller.finish();
-            return;
-        }
-        if (maxId !== result.newMaxId) {
-            await loadTransactions(account, dispatch);
-            if (!result.isFinished) {
-                setTimeout(
-                    updateSubroutine,
-                    updateTransactionInterval,
-                    result.newMaxId
-                );
+    return new Promise<void>((resolve, reject) => {
+        async function updateSubroutine(maxId: bigint) {
+            if (controller.isAborted) {
+                controller.finish();
+                resolve();
                 return;
             }
-        }
-        controller.finish();
-    }
 
-    updateSubroutine(
-        account.maxTransactionId ? BigInt(account.maxTransactionId) : 0n
-    );
+            let result;
+            try {
+                result = await fetchTransactions(account.address, maxId);
+            } catch (e) {
+                controller.finish();
+                reject(errorMessages.unableToReachWalletProxy);
+                return;
+            }
+
+            if (maxId !== result.newMaxId) {
+                await updateMaxTransactionId(
+                    dispatch,
+                    account.address,
+                    result.newMaxId.toString()
+                );
+            }
+
+            if (result.newEncrypted) {
+                await updateAllDecrypted(dispatch, account.address, false);
+            }
+
+            if (controller.isAborted) {
+                controller.finish();
+                resolve();
+                return;
+            }
+            if (maxId !== result.newMaxId) {
+                await loadTransactions(account, dispatch);
+                if (!result.isFinished) {
+                    setTimeout(
+                        updateSubroutine,
+                        updateTransactionInterval,
+                        result.newMaxId
+                    );
+                    return;
+                }
+            }
+            resolve();
+            controller.finish();
+        }
+
+        updateSubroutine(
+            account.maxTransactionId ? BigInt(account.maxTransactionId) : 0n
+        );
+    });
 }
 
 // Add a pending transaction to storage

@@ -149,6 +149,11 @@ export const accountsOfIdentitySelector = (identity: Identity) => (
         (account) => account.identityId === identity.id
     );
 
+export const confirmedAccountsSelector = (state: RootState) =>
+    state.accounts.accounts.filter(
+        (account) => account.status === AccountStatus.Confirmed
+    );
+
 export const initialAccountNameSelector = (identityId: number) => (
     state: RootState
 ) =>
