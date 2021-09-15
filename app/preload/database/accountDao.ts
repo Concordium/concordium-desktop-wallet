@@ -16,7 +16,7 @@ import {
 } from '~/utils/types';
 import { AccountMethods } from '~/preload/preloadTypes';
 
-function parseAccount(accounts: Account[]): Account[] {
+function parseAccounts(accounts: Account[]): Account[] {
     return accounts.map((account) => {
         return {
             ...account,
@@ -27,6 +27,21 @@ function parseAccount(accounts: Account[]): Account[] {
             ) as TransactionFilter,
         };
     });
+}
+
+function serializeFields(account: Account) {
+    return {
+        ...account,
+        transactionFilter: JSON.stringify(account.transactionFilter),
+    };
+}
+
+function prepareAccounts(accounts: Account | Account[]) {
+    if (Array.isArray(accounts)) {
+        return accounts.map(serializeFields);
+    }
+
+    return serializeFields(accounts);
 }
 
 function selectAccounts(builder: Knex) {
@@ -52,7 +67,7 @@ function selectAccounts(builder: Knex) {
 export async function getAllAccounts(): Promise<Account[]> {
     const accounts: Account[] = await selectAccounts(await knex());
 
-    return parseAccount(accounts);
+    return parseAccounts(accounts);
 }
 
 export async function getAccount(
@@ -62,11 +77,11 @@ export async function getAccount(
         address,
     });
 
-    return parseAccount(accounts)[0];
+    return parseAccounts(accounts)[0];
 }
 
 export async function insertAccount(account: Account | Account[]) {
-    return (await knex())(accountsTable).insert(account);
+    return (await knex())(accountsTable).insert(prepareAccounts(account));
 }
 
 export async function updateAccount(
@@ -89,7 +104,7 @@ export async function findAccounts(condition: Partial<Account>) {
         .select()
         .table(accountsTable)
         .where(condition);
-    return parseAccount(accounts);
+    return parseAccounts(accounts);
 }
 
 export async function removeAccount(accountAddress: string) {
@@ -134,13 +149,13 @@ async function insertAccountTransactionally(
     if (abe) {
         await transaction
             .table(accountsTable)
-            .insert({ ...account, name: abe.name });
+            .insert(prepareAccounts({ ...account, name: abe.name }));
         await transaction
             .table(addressBookTable)
             .where({ address: account.address })
             .update({ readOnly: true });
     } else {
-        await transaction.table(accountsTable).insert(account);
+        await transaction.table(accountsTable).insert(prepareAccounts(account));
         await transaction.table(addressBookTable).insert({
             address: account.address,
             name: account.name,
