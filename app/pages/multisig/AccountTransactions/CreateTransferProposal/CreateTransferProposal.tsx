@@ -31,7 +31,10 @@ import LoadingComponent from '../LoadingComponent';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import PickRecipient from '~/components/Transfers/PickRecipient';
 import { useTransactionExpiryState } from '~/utils/dataHooks';
-import { accountsSelector, accountInfoSelector } from '~/features/AccountSlice';
+import {
+    confirmedAccountsSelector,
+    accountInfoSelector,
+} from '~/features/AccountSlice';
 import { amountAtDisposal, validateMemo } from '~/utils/transactionHelpers';
 import { collapseFraction } from '~/utils/basicHelpers';
 import { toMicroUnits, displayAsGTU } from '~/utils/gtu';
@@ -84,7 +87,7 @@ function CreateTransferProposal({
     const allowMemo = useAsyncMemo(nodeSupportsMemo);
 
     const { pathname, state } = useLocation<State>();
-    const accounts = useSelector(accountsSelector);
+    const accounts = useSelector(confirmedAccountsSelector);
     const location = pathname.replace(`${transactionKind}`, ':transactionKind');
 
     const handler = findAccountTransactionHandler(transactionKind);
