@@ -33,6 +33,7 @@ export default function ensureNoPendingShieldedBalance<
                 <SimpleErrorModal
                     show={showError}
                     header="Account has pending transfer impacting shielded balance"
+                    content="Please wait for any pending shield amounts, unshield amounts or shielded transfers to finalize."
                     onClick={() => dispatch(routerActions.goBack())}
                 />
                 <Component {...props} />
