@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import ShieldImage from '@resources/svg/shield.svg';
 import {
-    accountsSelector,
+    confirmedAccountsSelector,
     accountsInfoSelector,
 } from '~/features/AccountSlice';
 import { Account, AccountInfo } from '~/utils/types';
@@ -40,7 +40,7 @@ function isAllDecrypted(accounts: Account[]) {
 }
 
 export default function AccountPageHeader() {
-    const accounts = useSelector(accountsSelector);
+    const accounts = useSelector(confirmedAccountsSelector);
     const accountInfoMap = useSelector(accountsInfoSelector);
     const accountsInfo = Object.values(accountInfoMap);
 
