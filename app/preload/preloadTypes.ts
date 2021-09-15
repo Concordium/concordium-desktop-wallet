@@ -242,6 +242,7 @@ export type TransactionMethods = {
         fromTime: string,
         toTime: string
     ) => Promise<boolean>;
+    hasPendingShieldedBalanceTransfer: (address: string) => Promise<boolean>;
     update: (
         identifier: Record<string, unknown>,
         updatedValues: Partial<TransferTransaction>

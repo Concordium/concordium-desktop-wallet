@@ -12,7 +12,6 @@ import {
     createScheduledTransferTransaction,
     amountAtDisposal,
 } from '~/utils/transactionHelpers';
-import locations from '~/constants/transferLocations.json';
 import RegularInterval from '~/components/BuildSchedule/BuildRegularInterval';
 import ExplicitSchedule from '~/components/BuildSchedule/BuildExplicitSchedule';
 import { BuildScheduleDefaults } from '~/components/BuildSchedule/util';
@@ -122,13 +121,11 @@ export default function BuildSchedule({ location }: Props) {
                     pathname: routes.SUBMITTRANSFER,
                     state: {
                         confirmed: {
-                            pathname:
-                                routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
+                            pathname: routes.ACCOUNTS_FINAL_PAGE,
                             state: {
                                 transaction: transactionJSON,
                                 account,
                                 recipient,
-                                initialPage: locations.transferSubmitted,
                             },
                         },
                         cancelled: {

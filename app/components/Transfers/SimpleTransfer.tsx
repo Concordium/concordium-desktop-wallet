@@ -11,7 +11,6 @@ import {
     Fraction,
 } from '../../utils/types';
 import { toMicroUnits } from '../../utils/gtu';
-import locations from '../../constants/transferLocations.json';
 import {
     createSimpleTransferTransaction,
     createSimpleTransferWithMemoTransaction,
@@ -69,9 +68,8 @@ function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
                     pathname: routes.SUBMITTRANSFER,
                     state: {
                         confirmed: {
-                            pathname: routes.ACCOUNTS_SIMPLETRANSFER,
+                            pathname: routes.ACCOUNTS_FINAL_PAGE,
                             state: {
-                                initialPage: locations.transferSubmitted,
                                 transaction: stringify(transaction),
                                 recipient,
                             },
@@ -79,7 +77,6 @@ function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
                         cancelled: {
                             pathname: routes.ACCOUNTS_SIMPLETRANSFER,
                             state: {
-                                initialPage: locations.pickAmount,
                                 amount,
                                 memo,
                                 recipient,
