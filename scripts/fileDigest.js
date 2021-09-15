@@ -153,6 +153,8 @@ function getPublicKey() {
     });
 }
 
+let pubKey;
+
 /**
  * Verify signature with remote (published) public key
  *
@@ -160,10 +162,12 @@ function getPublicKey() {
  * @param {*} sigFile path to file containing signature
  */
 async function verifyRemote(file, sigFile) {
-    console.log('\nVerification of signature with remote public key:');
+    console.log('Verification of signature with remote public key:');
 
     try {
-        const pubKey = await getPublicKey();
+        if (!pubKey) {
+            pubKey = await getPublicKey();
+        }
         verifySignature(pubKey, file, sigFile);
     } catch (e) {
         console.error(e);
@@ -177,7 +181,7 @@ async function verifyRemote(file, sigFile) {
  * openssl dgst -<hash-algorithm> -verify <pubkey-file> -signature <signature-file> <file>
  * (e.g. openssl dgst -sha256 -verify ./Downloads/concordium-desktop-wallet.pem -signature ./Downloads/concordium-desktop-wallet-1.0.0.dmg.hash.sig ./Downloads/concordium-desktop-wallet-1.0.0.dmg)
  */
-async function writeSignature(file, shouldVerify = false) {
+async function writeSignature(file) {
     const sigOutFile = `${file}.sig`;
 
     const privKey = fs.readFileSync(privateKeyPath);
@@ -187,14 +191,10 @@ async function writeSignature(file, shouldVerify = false) {
 
     console.log('Wrote sig successfully to file:', sigOutFile);
 
-    if (!shouldVerify) {
-        return;
-    }
-
     if (verifyKeyPath) {
         verifySignature(fs.readFileSync(verifyKeyPath), file, sigOutFile);
     } else if (!skiprv) {
-        verifyRemote(file, sigOutFile);
+        await verifyRemote(file, sigOutFile);
     }
 }
 
@@ -234,13 +234,12 @@ const filesToDigest = inputFile
     }
     for (let i = 0; i < filesToDigest.length; i += 1) {
         const file = filesToDigest[i];
-        const shouldVerify = i === filesToDigest.length - 1;
 
         console.log('\nProcessing file:', file);
 
         try {
             await writeChecksum(file);
-            await writeSignature(file, shouldVerify);
+            await writeSignature(file);
         } catch (e) {
             console.error(e);
         }

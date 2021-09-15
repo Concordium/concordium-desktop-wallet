@@ -82,10 +82,10 @@ const ProcessChild = ({ status }: ChildProps) => (
     </>
 );
 
-const SuccessChild = ({ onClose: onPostpone }: ChildProps) => {
+const SuccessChild = ({ onClose }: ChildProps) => {
     function handleEnd() {
         window.autoUpdate.quitAndInstall();
-        onPostpone();
+        onClose();
     }
     return (
         <>
@@ -116,7 +116,7 @@ const updateStatusMap: {
 };
 
 export default function AppUpdateNotification(props: Props) {
-    const { onClose: onPostpone } = props;
+    const { onClose } = props;
     const [state, setState] = useState<UpdateState>({
         status: UpdateStatus.Available,
     });
@@ -152,7 +152,7 @@ export default function AppUpdateNotification(props: Props) {
             className="flexColumn alignCenter"
             level={NotificationLevel.Update}
             disableClose={disableClose}
-            onCloseClick={onPostpone}
+            onCloseClick={onClose}
         >
             <Child {...props} {...state} setState={setState} />
         </Notification>
