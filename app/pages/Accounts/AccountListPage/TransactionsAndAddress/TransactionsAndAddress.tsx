@@ -9,7 +9,7 @@ import ShowAccountAddress from '../../ShowAccountAddress';
 import TransactionList from '../../TransactionList';
 import TransactionView from '../../TransactionView';
 
-import styles from '../../Transactions.module.scss';
+import styles from '../../Accounts.module.scss';
 
 interface Props {
     account: Account;

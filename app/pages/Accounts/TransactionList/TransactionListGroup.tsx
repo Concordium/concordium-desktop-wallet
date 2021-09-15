@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import { ClassName, TransferTransaction } from '~/utils/types';
 import TransactionListElement from './TransactionListElement';
 
-import styles from '../Transactions.module.scss';
+import styles from './TransactionList.module.scss';
 
 interface Props extends ClassName {
     header: string;

@@ -73,7 +73,7 @@ const transactionFilters: {
             TransactionKindString.Transfer,
             TransactionKindString.TransferWithMemo,
         ],
-        display: 'Simple transfers',
+        display: 'Transfers',
     },
     {
         field: TransactionKindString.TransferWithSchedule,
@@ -85,11 +85,11 @@ const transactionFilters: {
     },
     {
         field: TransactionKindString.TransferToEncrypted,
-        display: 'Shieldings',
+        display: 'Shielded amount',
     },
     {
         field: TransactionKindString.TransferToPublic,
-        display: 'Unshieldings',
+        display: 'Unshielded amount',
     },
     {
         field: TransactionKindString.EncryptedAmountTransfer,
@@ -97,19 +97,19 @@ const transactionFilters: {
             TransactionKindString.EncryptedAmountTransfer,
             TransactionKindString.EncryptedAmountTransferWithMemo,
         ],
-        display: 'Shielded transfer fees',
+        display: 'Shielded transfers',
     },
     {
         field: TransactionKindString.FinalizationReward,
-        display: 'Show finalization rewards',
+        display: 'Finalization rewards',
     },
     {
         field: TransactionKindString.BakingReward,
-        display: 'Show baker rewards',
+        display: 'Baker rewards',
     },
     {
         field: TransactionKindString.BlockReward,
-        display: 'Show block rewards',
+        display: 'Block rewards',
     },
     {
         field: TransactionKindString.UpdateCredentials,

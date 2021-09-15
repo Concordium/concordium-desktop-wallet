@@ -26,7 +26,7 @@ import {
 } from '~/utils/transactionHelpers';
 import transactionKindNames from '~/constants/transactionKindNames.json';
 
-import styles from '../Transactions.module.scss';
+import styles from './TransactionList.module.scss';
 
 const isInternalTransfer = (transaction: TransferTransaction) =>
     [

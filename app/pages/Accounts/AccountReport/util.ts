@@ -130,8 +130,8 @@ export async function containsEncrypted(
 
     const { fromDate, toDate } = filters;
 
-    const fromBlockTime = fromDate ? new Date(fromDate).getTime() : Date.now();
-    const toBlockTime = toDate ? new Date(toDate).getTime() : 0;
+    const fromBlockTime = fromDate ? new Date(fromDate).getTime() : 0;
+    const toBlockTime = toDate ? new Date(toDate).getTime() : Date.now();
 
     return hasEncryptedTransactions(
         account.address,

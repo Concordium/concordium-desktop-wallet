@@ -8,7 +8,7 @@ import LoadingComponent from '~/cross-app-components/Loading';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import TransactionListGroup from './TransactionListGroup';
 
-import styles from '../Transactions.module.scss';
+import styles from './TransactionList.module.scss';
 
 const dateFormat = Intl.DateTimeFormat(undefined, { dateStyle: 'medium' })
     .format;

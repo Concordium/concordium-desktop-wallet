@@ -16,6 +16,9 @@ import AbortController from '~/utils/AbortController';
 // milliseconds between updates of the accountInfo
 const accountInfoUpdateInterval = 30000;
 
+/**
+ * Keeps account info and transactions for selected account in sync.
+ */
 export default function useAccountSync() {
     const dispatch = useDispatch();
     const account = useSelector(chosenAccountSelector);
@@ -23,16 +26,17 @@ export default function useAccountSync() {
     const [controller] = useState(new AbortController());
 
     useEffect(() => {
-        if (account) {
-            updateAccountInfo(account, dispatch);
-            const interval = setInterval(async () => {
-                updateAccountInfo(account, dispatch);
-            }, accountInfoUpdateInterval);
-            return () => {
-                clearInterval(interval);
-            };
+        if (!account) {
+            return noOp;
         }
-        return noOp;
+
+        updateAccountInfo(account, dispatch);
+        const interval = setInterval(async () => {
+            updateAccountInfo(account, dispatch);
+        }, accountInfoUpdateInterval);
+        return () => {
+            clearInterval(interval);
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         account?.address,
