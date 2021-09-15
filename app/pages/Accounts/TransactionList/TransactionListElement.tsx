@@ -13,7 +13,7 @@ import {
     TransactionKindString,
     TransferTransactionWithNames,
     TimeStampUnit,
-    ClassName,
+    ClassNameAndStyle,
 } from '~/utils/types';
 import { chosenAccountSelector } from '~/features/AccountSlice';
 import { viewingShieldedSelector } from '~/features/TransactionSlice';
@@ -264,7 +264,9 @@ const onlyTime = Intl.DateTimeFormat(undefined, {
     hourCycle: 'h24',
 }).format;
 
-interface Props extends ClassName {
+export const transactionListElementHeight = 58;
+
+interface Props extends ClassNameAndStyle {
     transaction: TransferTransaction;
     onClick?: () => void;
     showDate?: boolean;
@@ -280,6 +282,7 @@ function TransactionListElement({
     showFullMemo = false,
     showDate = false,
     className,
+    style,
 }: Props): JSX.Element {
     const account = useSelector(chosenAccountSelector);
     const viewingShielded = useSelector(viewingShieldedSelector);
@@ -310,6 +313,7 @@ function TransactionListElement({
                 Boolean(onClick) && styles.clickableElement,
                 className
             )}
+            style={style}
             onClick={onClick}
             onKeyPress={onClick}
             tabIndex={0}
