@@ -223,12 +223,12 @@ export async function fetchNewestTransactions(
 }
 
 /**
- * Fetches a batch of transactions on the given address, from the given currenMaxId.
+ * Fetches a batch of transactions on the given address, from the given currentMaxId.
  * and saves them to the database.
  * @return An object containing:
- * - newMaxId (the largest id among the loaded)
- * - isFinished whether the transactions were the account's latests, or there are more to fetch.
- * - newEncrypted whether any shielded balance transactions were loaded.
+ * - newMaxId is the largest id among the fetched transactions)
+ * - isFinished is whether the transactions were the account's latests, or there are more to fetch.
+ * - newEncrypted is whether any shielded balance transactions were fetched.
  */
 async function fetchTransactions(address: string, currentMaxId: bigint) {
     const { transactions, full } = await getTransactions(
@@ -255,7 +255,7 @@ async function fetchTransactions(address: string, currentMaxId: bigint) {
 /** Update the transactions from remote source.
  * will fetch transactions in intervals, updating the state each time.
  * stops when it reaches the newest transaction, or it is told to abort by the controller.
- * */
+ */
 export async function updateTransactions(
     dispatch: Dispatch,
     account: Account,

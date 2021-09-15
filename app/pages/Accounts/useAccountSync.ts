@@ -27,7 +27,6 @@ export default function useAccountSync() {
         if (account && account.status === AccountStatus.Confirmed) {
             fetchNewestTransactions(dispatch, account);
         }
-        return () => {};
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [account?.address]);
 
