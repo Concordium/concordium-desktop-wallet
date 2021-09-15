@@ -89,7 +89,14 @@ export async function insertTransactions(
     transactions: Partial<TransferTransaction>[]
 ) {
     const table = (await knex())(transactionTable);
-    const existingTransactions: TransferTransaction[] = await table.select();
+
+    const hashes = transactions
+        .map((t) => t.transactionHash || '')
+        .filter((hash) => hash);
+    const existingTransactions: TransferTransaction[] = await table
+        .whereIn('transactionHash', hashes)
+        .select();
+
     const [updates, additions] = partition(transactions, (t) =>
         existingTransactions.some(
             (t_) => t.transactionHash === t_.transactionHash
