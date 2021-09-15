@@ -23,6 +23,7 @@ import { AccountStatus } from '~/utils/types';
 import AbortController from '~/utils/AbortController';
 import { noOp } from '~/utils/basicHelpers';
 import FailedInitialAccount from './FailedInitialAccount';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 // milliseconds between updates of the accountInfo
 const accountInfoUpdateInterval = 30000;
@@ -36,6 +37,7 @@ export default function AccountView() {
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
     const [controller] = useState(new AbortController());
+    const [error, setError] = useState<string>();
 
     useEffect(() => {
         if (account) {
@@ -64,7 +66,7 @@ export default function AccountView() {
             !controller.isAborted
         ) {
             controller.start();
-            updateTransactions(dispatch, account, controller);
+            updateTransactions(dispatch, account, controller).catch(setError);
             return () => {
                 controller.abort();
             };
@@ -103,6 +105,12 @@ export default function AccountView() {
 
     return (
         <>
+            <SimpleErrorModal
+                show={Boolean(error)}
+                header="Updating Transactions failed"
+                content={error}
+                onClick={() => setError(undefined)}
+            />
             <AccountBalanceView />
             <AccountViewActions account={account} accountInfo={accountInfo} />
             <Switch>

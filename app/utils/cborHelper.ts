@@ -1,14 +1,16 @@
 import { Buffer } from 'buffer/';
 import { encode, decode } from 'cbor';
+import { isValidResolutionString } from './numberStringHelpers';
 
+const isInteger = isValidResolutionString(1, true, false, false);
 /**
  * Given a string or number, return a buffer containing the value under cbor encoding.
  * N.B. given a string, this will attempt to convert it to a number, to decrease the encoded size.
  */
-export function encodeAsCBOR(value: string | number): Buffer {
+export function encodeAsCBOR(value: string): Buffer {
     // Prefer saving as numbers:
-    const asNumber = Number(value);
-    if (Number.isInteger(asNumber)) {
+    if (isInteger(value)) {
+        const asNumber = Number(value);
         if (
             asNumber > Number.MAX_SAFE_INTEGER ||
             asNumber < Number.MIN_SAFE_INTEGER
@@ -31,8 +33,8 @@ export function decodeCBOR(value: string) {
 /**
  * @return if no value or an illegal value is given, this returns 0. Otherwise returns the encoded size.
  */
-export function getEncodedSize(value?: string | number): number {
-    if (!value && value !== 0) {
+export function getEncodedSize(value?: string): number {
+    if (!value) {
         return 0;
     }
     try {

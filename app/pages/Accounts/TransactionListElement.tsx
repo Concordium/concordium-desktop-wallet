@@ -246,14 +246,14 @@ function showMemo(
         return null;
     }
     return (
-        <p
+        <pre
             className={clsx(
                 'body4 m0 mT5 textFaded',
                 showFullMemo || styles.lineClamp
             )}
         >
             {memo}
-        </p>
+        </pre>
     );
 }
 
