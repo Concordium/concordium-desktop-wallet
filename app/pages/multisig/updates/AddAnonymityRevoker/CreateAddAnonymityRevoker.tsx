@@ -39,7 +39,7 @@ const publicKeyLength = 192;
 const arLengthRule = lengthRule(fieldDisplays.arPublicKey, publicKeyLength);
 
 /**
- * Component for creating an addIdentityProvider transaction.
+ * Component for creating an addAnonymityRevoker transaction.
  */
 export default function CreateAddAnonymityRevoker({
     defaults,
@@ -59,7 +59,7 @@ export default function CreateAddAnonymityRevoker({
             <Form.TextArea
                 className="body1"
                 name={fieldNames.name}
-                label={`${fieldDisplays.name}:`}
+                label={fieldDisplays.name}
                 defaultValue={defaults.name || undefined}
                 placeholder={enterHere(fieldDisplays.name)}
                 rules={{ required: requiredMessage(fieldDisplays.name) }}
@@ -68,7 +68,7 @@ export default function CreateAddAnonymityRevoker({
                 className="body1"
                 name={fieldNames.url}
                 defaultValue={defaults.url || undefined}
-                label={`${fieldDisplays.url}:`}
+                label={fieldDisplays.url}
                 placeholder={enterHere(fieldDisplays.url)}
                 rules={{ required: requiredMessage(fieldDisplays.url) }}
             />
@@ -76,14 +76,14 @@ export default function CreateAddAnonymityRevoker({
                 className="body1"
                 name={fieldNames.description}
                 defaultValue={defaults.description || undefined}
-                label={`${fieldDisplays.description}:`}
+                label={fieldDisplays.description}
                 placeholder={enterHere(fieldDisplays.description)}
             />
             <Form.Input
                 className="body1"
                 name={fieldNames.arIdentity}
                 defaultValue={defaults.arIdentity || undefined}
-                label={`${fieldDisplays.arIdentity}:`}
+                label={fieldDisplays.arIdentity}
                 placeholder={enterHere(fieldDisplays.arIdentity)}
                 rules={{
                     required: requiredMessage(fieldDisplays.arIdentity),
@@ -97,7 +97,7 @@ export default function CreateAddAnonymityRevoker({
                 className="body1"
                 name={fieldNames.arPublicKey}
                 defaultValue={defaults.arPublicKey || undefined}
-                label={`${fieldDisplays.arPublicKey}:`}
+                label={fieldDisplays.arPublicKey}
                 placeholder={pasteHere(fieldDisplays.arPublicKey)}
                 spellCheck={false}
                 rules={{

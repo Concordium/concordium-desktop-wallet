@@ -7,7 +7,7 @@ interface Props {
 }
 
 /**
- * Displays an overview of a add Identity provider transaction payload.
+ * Displays an overview of an addAnonymityRevoker transaction payload.
  */
 export default function AddAnonymityRevokerView({
     addAnonymityRevoker,
