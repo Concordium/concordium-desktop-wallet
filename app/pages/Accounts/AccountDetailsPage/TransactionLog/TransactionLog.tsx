@@ -1,4 +1,5 @@
-import React, { useRef, useState } from 'react';
+import clsx from 'clsx';
+import React, { useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import TabbedCard from '~/components/TabbedCard';
 import { TabbedCardTabRef } from '~/components/TabbedCard/TabbedCardTab';
@@ -15,19 +16,34 @@ export default function TransactionLog() {
     const [chosenTransaction, setChosenTransaction] = useState<
         TransferTransaction | undefined
     >();
+    const infinite = useMemo(() => transactions.length > 100, [
+        transactions.length,
+    ]);
+    const [showingLog, setShowingLog] = useState(true);
+
     const transactionsTabRef = useRef<TabbedCardTabRef>(null);
 
     return (
         <TabbedCard className={styles.root}>
-            <TabbedCard.Tab header="Transactions" ref={transactionsTabRef}>
+            <TabbedCard.Tab
+                header="Transactions"
+                ref={transactionsTabRef}
+                onClick={() => setShowingLog(true)}
+            >
                 {chosenTransaction ? (
                     <TransactionView
                         transaction={chosenTransaction}
                         onClose={() => setChosenTransaction(undefined)}
                     />
                 ) : (
-                    <div className={styles.scroll}>
+                    <div
+                        className={clsx(
+                            styles.scroll,
+                            infinite && showingLog && styles.scrollInfinite
+                        )}
+                    >
                         <TransactionList
+                            infinite={infinite}
                             transactions={transactions}
                             onTransactionClick={setChosenTransaction}
                         />
@@ -36,7 +52,10 @@ export default function TransactionLog() {
             </TabbedCard.Tab>
             <TabbedCard.Tab
                 header="Filters"
-                onClick={() => setChosenTransaction(undefined)}
+                onClick={() => {
+                    setChosenTransaction(undefined);
+                    setShowingLog(false);
+                }}
             >
                 <div className={styles.scroll}>
                     <div className={styles.bar} />

@@ -1,5 +1,10 @@
 @import '../../common';
 
+$logHeightMax: calc(
+    100vh - #{$page-header-height} - 2 * #{$page-gutter} - #{$tabbed-card-header-height} -
+        2px
+);
+
 .root {
     padding-bottom: 1px;
 }
@@ -7,12 +12,14 @@
 .scroll {
     composes: fillCardPadding;
     position: relative;
-    max-height: calc(
-        100vh - #{$page-header-height} - 2 * #{$page-gutter} - #{$tabbed-card-header-height} -
-            2px
-    );
+    max-height: $logHeightMax;
     overflow: overlay;
     padding-bottom: 19px;
+
+    &Infinite {
+        max-height: none;
+        height: $logHeightMax;
+    }
 }
 
 .bar {

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import groupBy from 'lodash.groupby';
 import clsx from 'clsx';
@@ -6,7 +6,9 @@ import { TimeStampUnit, TransferTransaction } from '~/utils/types';
 import { loadingTransactionsSelector } from '~/features/TransactionSlice';
 import LoadingComponent from '~/cross-app-components/Loading';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
-import TransactionListGroup from './TransactionListGroup';
+import TransactionListHeader from './TransactionListHeader';
+import TransactionListElement from './TransactionListElement';
+import InfiniteTransactionList from './InfiniteTransactionList';
 
 import styles from './TransactionList.module.scss';
 
@@ -29,9 +31,13 @@ const getGroupHeader = (d: Date): string => {
     }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const getKey = (t: TransferTransaction) => t.transactionHash || t.id!;
+
 interface Props {
     transactions: TransferTransaction[];
     onTransactionClick(transaction: TransferTransaction): void;
+    infinite?: boolean;
 }
 
 /**
@@ -41,15 +47,18 @@ interface Props {
 function TransactionList({
     transactions,
     onTransactionClick,
+    infinite = false,
 }: Props): JSX.Element | null {
     const loading = useSelector(loadingTransactionsSelector);
     const [showLoading, setShowLoading] = useState(false);
 
     const transactionGroups = useMemo(
         () =>
-            groupBy(transactions, (t) =>
-                getGroupHeader(
-                    dateFromTimeStamp(t.blockTime, TimeStampUnit.seconds)
+            Object.entries(
+                groupBy(transactions, (t) =>
+                    getGroupHeader(
+                        dateFromTimeStamp(t.blockTime, TimeStampUnit.seconds)
+                    )
                 )
             ),
         [transactions]
@@ -94,16 +103,28 @@ function TransactionList({
         );
     }
 
+    if (infinite) {
+        return (
+            <InfiniteTransactionList
+                transactionGroups={transactionGroups}
+                onTransactionClick={onTransactionClick}
+            />
+        );
+    }
+
     return (
         <>
-            {Object.entries(transactionGroups).map(([h, ts]) => (
-                <TransactionListGroup
-                    className={styles.transactionGroup}
-                    key={h}
-                    header={h}
-                    transactions={ts}
-                    onTransactionClick={onTransactionClick}
-                />
+            {transactionGroups.map(([h, ts]) => (
+                <Fragment key={h}>
+                    <TransactionListHeader>{h}</TransactionListHeader>
+                    {ts.map((t: TransferTransaction) => (
+                        <TransactionListElement
+                            onClick={() => onTransactionClick(t)}
+                            key={getKey(t)}
+                            transaction={t}
+                        />
+                    ))}
+                </Fragment>
             ))}
         </>
     );

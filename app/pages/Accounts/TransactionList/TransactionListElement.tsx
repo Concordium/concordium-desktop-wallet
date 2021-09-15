@@ -282,7 +282,7 @@ function TransactionListElement({
     showFullMemo = false,
     showDate = false,
     className,
-    style,
+    style = { height: transactionListElementHeight },
 }: Props): JSX.Element {
     const account = useSelector(chosenAccountSelector);
     const viewingShielded = useSelector(viewingShieldedSelector);

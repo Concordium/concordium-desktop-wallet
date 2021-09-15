@@ -1283,11 +1283,9 @@ export interface TransactionEvent {
 }
 
 export type ClassName = Pick<HTMLAttributes<HTMLElement>, 'className'>;
+export type Style = Pick<HTMLAttributes<HTMLElement>, 'style'>;
 
-export type ClassNameAndStyle = Pick<
-    HTMLAttributes<HTMLElement>,
-    'style' | 'className'
->;
+export type ClassNameAndStyle = ClassName & Style;
 
 // Source: https://github.com/emotion-js/emotion/blob/master/packages/styled-base/types/helper.d.ts
 // A more precise version of just React.ComponentPropsWithRef on its own
