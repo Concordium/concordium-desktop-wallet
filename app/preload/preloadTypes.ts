@@ -251,7 +251,9 @@ export type TransactionMethods = {
         account: Account,
         filteredTypes: TransactionKindString[],
         fromDate?: Date,
-        toDate?: Date
+        toDate?: Date,
+        limit?: number,
+        start?: number
     ) => Promise<TransferTransaction[]>;
     hasEncryptedTransactions: (
         address: string,
@@ -265,6 +267,7 @@ export type TransactionMethods = {
     insert: (
         transactions: Partial<TransferTransaction>[]
     ) => Promise<Partial<TransferTransaction>[]>;
+    getTransaction: (id: string) => Promise<TransferTransaction>;
 };
 
 export type WalletMethods = {
@@ -272,10 +275,30 @@ export type WalletMethods = {
     insertWallet: (identifier: Hex, type: WalletType) => Promise<number>;
 };
 
-type ViewResponse = {
-    error?: string;
+export enum ViewResponseStatus {
+    Success,
+    Error,
+    Aborted,
+}
+
+interface ViewResponseSuccess {
     result: string;
-};
+    status: ViewResponseStatus.Success;
+}
+
+interface ViewResponseError {
+    error: string;
+    status: ViewResponseStatus.Error;
+}
+
+interface ViewResponseAborted {
+    status: ViewResponseStatus.Aborted;
+}
+
+export type ViewResponse =
+    | ViewResponseSuccess
+    | ViewResponseError
+    | ViewResponseAborted;
 
 export type BrowserViewMethods = {
     createView: (location: string, rect: Rectangle) => Promise<ViewResponse>;

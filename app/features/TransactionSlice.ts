@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
 import { getNewestTransactions, getTransactions } from '../utils/httpRequests';
@@ -7,6 +7,7 @@ import {
     getTransactionsOfAccount,
     insertTransactions,
     updateTransaction,
+    getTransaction,
 } from '../database/TransactionDao';
 import {
     TransferTransaction,
@@ -34,8 +35,11 @@ import AbortController from '~/utils/AbortController';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
 import { max } from '~/utils/basicHelpers';
 import { getActiveBooleanFilters } from '~/utils/accountHelpers';
+import errorMessages from '~/constants/errorMessages.json';
+import { secondsSinceUnixEpoch } from '~/utils/timeHelpers';
 
 const updateTransactionInterval = 5000;
+export const transactionLogPageSize = 100;
 
 interface State {
     transactions: TransferTransaction[];
@@ -51,8 +55,14 @@ const transactionSlice = createSlice({
         loadingTransactions: false,
     } as State,
     reducers: {
-        setTransactions(state, update) {
-            state.transactions = update.payload.transactions;
+        setTransactions(state, update: PayloadAction<TransferTransaction[]>) {
+            state.transactions = update.payload;
+        },
+        appendTransactions(
+            state,
+            update: PayloadAction<TransferTransaction[]>
+        ) {
+            state.transactions.push(...update.payload);
         },
         setViewingShielded(state, viewingShielded) {
             state.viewingShielded = viewingShielded.payload;
@@ -81,6 +91,7 @@ const {
     setTransactions,
     updateTransactionFields,
     setLoadingTransactions,
+    appendTransactions,
 } = transactionSlice.actions;
 
 // Decrypts the encrypted transfers in the given transacion list, using the prfKey.
@@ -177,7 +188,9 @@ export async function loadTransactions(
     account: Account,
     dispatch: Dispatch,
     showLoading = false,
-    controller?: AbortController
+    controller?: AbortController,
+    from = 0,
+    size = transactionLogPageSize
 ) {
     if (showLoading) {
         dispatch(setLoadingTransactions(true));
@@ -189,14 +202,21 @@ export async function loadTransactions(
         account,
         booleanFilters,
         fromDate ? new Date(fromDate) : undefined,
-        toDate ? new Date(toDate) : undefined
+        toDate ? new Date(toDate) : undefined,
+        size,
+        from
     );
 
     if (!controller?.isAborted) {
         if (showLoading) {
             dispatch(setLoadingTransactions(false));
         }
-        dispatch(setTransactions({ transactions }));
+
+        if (from === 0) {
+            dispatch(setTransactions(transactions));
+        } else {
+            dispatch(appendTransactions(transactions));
+        }
     }
 }
 
@@ -210,6 +230,20 @@ export async function fetchNewestTransactions(
     dispatch: Dispatch,
     account: Account
 ) {
+    const newestTransactionInDatabase = await getTransaction(
+        account.maxTransactionId
+    );
+
+    if (
+        account.transactionFilter.toDate &&
+        secondsSinceUnixEpoch(
+            new Date(account.transactionFilter.toDate)
+        ).toString() < newestTransactionInDatabase.blockTime
+    ) {
+        // The area of search is subset of loaded transactions.
+        return;
+    }
+
     const transactions = await getNewestTransactions(
         account.address,
         account.transactionFilter
@@ -262,34 +296,45 @@ async function fetchTransactions(address: string, currentMaxId: bigint) {
 export async function updateTransactions(
     dispatch: Dispatch,
     account: Account,
-    controller: AbortController
+    controller: AbortController,
+    newestTransactionController: AbortController
 ) {
-    async function updateSubroutine(maxId: bigint) {
-        if (controller.isAborted) {
-            controller.finish();
-            return;
-        }
-        const result = await fetchTransactions(account.address, maxId);
+    return new Promise<void>((resolve, reject) => {
+        async function updateSubroutine(maxId: bigint) {
+            if (controller.isAborted) {
+                controller.finish();
+                resolve();
+                return;
+            }
 
-        if (maxId !== result.newMaxId) {
-            await updateMaxTransactionId(
-                dispatch,
-                account.address,
-                result.newMaxId.toString()
-            );
-        }
+            let result;
+            try {
+                result = await fetchTransactions(account.address, maxId);
+            } catch (e) {
+                controller.finish();
+                reject(errorMessages.unableToReachWalletProxy);
+                return;
+            }
 
-        if (result.newEncrypted) {
-            await updateAllDecrypted(dispatch, account.address, false);
-        }
+            if (maxId !== result.newMaxId) {
+                await updateMaxTransactionId(
+                    dispatch,
+                    account.address,
+                    result.newMaxId.toString()
+                );
+            }
 
-        if (controller.isAborted) {
-            controller.finish();
-            return;
-        }
-        if (maxId !== result.newMaxId) {
-            await loadTransactions(account, dispatch);
-            if (!result.isFinished) {
+            if (result.newEncrypted) {
+                await updateAllDecrypted(dispatch, account.address, false);
+            }
+
+            if (controller.isAborted) {
+                controller.finish();
+                resolve();
+                return;
+            }
+            if (maxId !== result.newMaxId && !result.isFinished) {
+                newestTransactionController.finish();
                 setTimeout(
                     updateSubroutine,
                     updateTransactionInterval,
@@ -297,13 +342,14 @@ export async function updateTransactions(
                 );
                 return;
             }
+            resolve();
+            controller.finish();
         }
-        controller.finish();
-    }
 
-    updateSubroutine(
-        account.maxTransactionId ? BigInt(account.maxTransactionId) : 0n
-    );
+        updateSubroutine(
+            account.maxTransactionId ? BigInt(account.maxTransactionId) : 0n
+        );
+    });
 }
 
 // Add a pending transaction to storage

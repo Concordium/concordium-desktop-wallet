@@ -39,6 +39,7 @@ import { createAccount, isValidAddress } from '../utils/accountHelpers';
 
 import { getAccountInfos, getAccountInfoOfAddress } from '../node/nodeHelpers';
 import { hasPendingTransactions } from '~/database/TransactionDao';
+import { accountSimpleView, favouriteAccount } from '~/database/PreferencesDao';
 
 export interface AccountState {
     simpleView: boolean;
@@ -50,18 +51,34 @@ export interface AccountState {
 
 type AccountByIndexTuple = [number, Account];
 
-function getValidAccountsIncices(accounts: Account[]): AccountByIndexTuple[] {
+function getValidAccountsIndices(accounts: Account[]): AccountByIndexTuple[] {
     return accounts
         .reduce(
             (acc, cur, i) => [...acc, [i, cur]] as AccountByIndexTuple[],
             [] as AccountByIndexTuple[]
         )
-        .filter(([, acc]) =>
-            [AccountStatus.Confirmed, AccountStatus.Genesis].includes(
-                acc.status
-            )
-        );
+        .filter(([, acc]) => acc.status === AccountStatus.Confirmed);
 }
+
+const setConfirmedAccount = (next: boolean) => (state: AccountState) => {
+    const chosenIndex = state.accounts.findIndex(
+        (a) => a.address === state.chosenAccountAddress
+    );
+    let confirmedAccountsIndices = getValidAccountsIndices(state.accounts);
+
+    if (!next) {
+        confirmedAccountsIndices = confirmedAccountsIndices.reverse();
+    }
+
+    const firstValid = next
+        ? ([i]: AccountByIndexTuple) => i > chosenIndex
+        : ([i]: AccountByIndexTuple) => i < chosenIndex;
+
+    state.chosenAccountAddress =
+        confirmedAccountsIndices.find(firstValid)?.[1].address ??
+        confirmedAccountsIndices[0]?.[1].address ??
+        state.chosenAccountAddress;
+};
 
 const initialState: AccountState = {
     simpleView: true,
@@ -78,34 +95,8 @@ const accountsSlice = createSlice({
         simpleViewActive(state, input: PayloadAction<boolean>) {
             state.simpleView = input.payload;
         },
-        nextConfirmedAccount(state) {
-            const chosenIndex = state.accounts.findIndex(
-                (a) => a.address === state.chosenAccountAddress
-            );
-            const confirmedAccountsIndices = getValidAccountsIncices(
-                state.accounts
-            );
-
-            state.chosenAccountAddress =
-                confirmedAccountsIndices.find(([i]) => i > chosenIndex)?.[1]
-                    .address ??
-                confirmedAccountsIndices.find(() => true)?.[1].address ??
-                state.chosenAccountAddress;
-        },
-        previousConfirmedAccount(state) {
-            const chosenIndex = state.accounts.findIndex(
-                (a) => a.address === state.chosenAccountAddress
-            );
-            const confirmedAccountsIndices = getValidAccountsIncices(
-                state.accounts
-            ).reverse();
-
-            state.chosenAccountAddress =
-                confirmedAccountsIndices.find(([i]) => i < chosenIndex)?.[1]
-                    .address ??
-                confirmedAccountsIndices.find(() => true)?.[1].address ??
-                state.chosenAccountAddress;
-        },
+        nextConfirmedAccount: setConfirmedAccount(true),
+        previousConfirmedAccount: setConfirmedAccount(false),
         chooseAccount: (state, input: PayloadAction<string>) => {
             state.chosenAccountAddress = input.payload;
         },
@@ -158,6 +149,11 @@ export const accountsOfIdentitySelector = (identity: Identity) => (
         (account) => account.identityId === identity.id
     );
 
+export const confirmedAccountsSelector = (state: RootState) =>
+    state.accounts.accounts.filter(
+        (account) => account.status === AccountStatus.Confirmed
+    );
+
 export const initialAccountNameSelector = (identityId: number) => (
     state: RootState
 ) =>
@@ -203,14 +199,15 @@ export async function loadAccounts(dispatch: Dispatch) {
 }
 
 async function loadSimpleViewActive(dispatch: Dispatch) {
-    const simpleViewActive = await window.database.preferences.accountSimpleView.get();
+    const simpleViewActive = await accountSimpleView.get();
     dispatch(accountsSlice.actions.simpleViewActive(simpleViewActive ?? true));
 }
 
 async function loadFavouriteAccount(dispatch: Dispatch) {
-    const favouriteAccount = await window.database.preferences.favouriteAccount.get();
     dispatch(
-        accountsSlice.actions.setFavouriteAccount(favouriteAccount ?? undefined)
+        accountsSlice.actions.setFavouriteAccount(
+            (await favouriteAccount.get()) ?? undefined
+        )
     );
 }
 
@@ -620,14 +617,14 @@ export async function editAccountName(
 }
 
 export async function toggleAccountView(dispatch: Dispatch) {
-    const simpleViewActive = await window.database.preferences.accountSimpleView.get();
+    const simpleViewActive = await accountSimpleView.get();
 
-    await window.database.preferences.accountSimpleView.set(!simpleViewActive);
+    await accountSimpleView.set(!simpleViewActive);
     return loadSimpleViewActive(dispatch);
 }
 
 export async function setFavouriteAccount(dispatch: Dispatch, address: string) {
-    await window.database.preferences.favouriteAccount.set(address);
+    await favouriteAccount.set(address);
     loadFavouriteAccount(dispatch);
 }
 

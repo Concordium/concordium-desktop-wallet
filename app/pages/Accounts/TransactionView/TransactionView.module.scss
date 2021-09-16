@@ -16,17 +16,13 @@
 .title,
 .errorMessage,
 .listElement {
+    composes: fillCardPadding;
+    composes: cardPadding;
     composes: greySeparator;
 
     &:not(:last-child) {
         border-bottom: 0.5px solid $color-soft-grey;
     }
-}
-
-.title,
-.listElement {
-    composes: fillCardPadding;
-    composes: cardPadding;
 }
 
 .title {

@@ -3,9 +3,9 @@ export default class AbortController {
 
     isReady: boolean;
 
-    constructor() {
+    constructor(startReady = true) {
         this.isAborted = false;
-        this.isReady = true;
+        this.isReady = startReady;
     }
 
     /**

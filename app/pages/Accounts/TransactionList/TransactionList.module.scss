@@ -1,9 +1,12 @@
 @import 'config/bundle';
-@import './common';
+@import '../common';
 
 .transactionListElement {
     position: relative;
-    padding: 10px 20px;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 
     &:focus {
         outline: none;
@@ -49,12 +52,6 @@
     color: $color-success;
 }
 
-.transactionGroup {
-    &:last-child {
-        margin-bottom: -19px;
-    }
-}
-
 .transactionGroupHeader {
     composes: cardPadding;
     height: $thick-blue-separator-height;
@@ -73,4 +70,8 @@
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+
+.infinite {
+    overflow: overlay !important;
 }
