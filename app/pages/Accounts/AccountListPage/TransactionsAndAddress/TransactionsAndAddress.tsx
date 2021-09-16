@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouteMatch } from 'react-router';
+import clsx from 'clsx';
 import routes from '~/constants/routes.json';
 import TabbedCard from '~/components/TabbedCard';
 import { transactionsSelector } from '~/features/TransactionSlice';
@@ -9,7 +10,7 @@ import ShowAccountAddress from '../../ShowAccountAddress';
 import TransactionList from '../../TransactionList';
 import TransactionView from '../../TransactionView';
 
-import styles from '../../Accounts.module.scss';
+import styles from './TransactionsAndAddress.module.scss';
 
 interface Props {
     account: Account;
@@ -23,7 +24,7 @@ export default function TransfersAndAddress({ account }: Props) {
     >();
 
     return (
-        <TabbedCard>
+        <TabbedCard className={styles.root}>
             <TabbedCard.Tab header="Latest transactions">
                 {chosenTransaction ? (
                     <TransactionView
@@ -45,7 +46,10 @@ export default function TransfersAndAddress({ account }: Props) {
                 initActive={Boolean(addressRouteMatch)}
             >
                 <ShowAccountAddress
-                    className={styles.thickBlueSeparatorTop}
+                    className={clsx(
+                        styles.thickBlueSeparatorTop,
+                        styles.address
+                    )}
                     account={account}
                 />
             </TabbedCard.Tab>

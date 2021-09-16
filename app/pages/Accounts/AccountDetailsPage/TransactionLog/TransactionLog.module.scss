@@ -14,7 +14,6 @@ $logHeightMax: calc(
     position: relative;
     max-height: $logHeightMax;
     overflow: overlay;
-    padding-bottom: 19px;
 
     &Infinite {
         max-height: none;

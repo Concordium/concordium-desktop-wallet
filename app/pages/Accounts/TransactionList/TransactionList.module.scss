@@ -3,7 +3,10 @@
 
 .transactionListElement {
     position: relative;
-    padding: 10px 20px;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 
     &:focus {
         outline: none;
@@ -11,10 +14,6 @@
 
     &:not(:last-child) {
         border-bottom: 0.5px solid $color-soft-grey;
-    }
-
-    &:last-child {
-        margin-bottom: -19px;
     }
 }
 

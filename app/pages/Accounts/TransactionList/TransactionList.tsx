@@ -24,7 +24,7 @@ function TransactionList({
         return (
             <h3
                 className={clsx(
-                    'flex justifyCenter mV0 pT20',
+                    'flex justifyCenter mV0 pV20',
                     styles.thickBlueSeparatorTop,
                     styles.cardPadding
                 )}
