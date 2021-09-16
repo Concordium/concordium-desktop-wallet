@@ -44,14 +44,14 @@ async function httpsGet<T>(
 }
 
 /**
- * N.B. does not load reward transactions.
+ * Loads the newest transactions on the given address, using the given filters.
+ * @param transactionFilter is used to filter the request, however only from/to date, and filters for reward types are currently used.
  */
 async function getNewestTransactions(
     address: string,
     transactionFilter: TransactionFilter
 ): Promise<IncomingTransaction[]> {
     let filters = '';
-    console.log(transactionFilter);
     if (transactionFilter.bakingReward === false) {
         filters += '&bakingRewards=n';
     }
@@ -73,7 +73,6 @@ async function getNewestTransactions(
         );
         filters += `&blockTimeTo=${timestamp}`;
     }
-    console.log(filters);
     const response = await walletProxy.get(
         `/v1/accTransactions/${address}?limit=${walletProxytransactionLimit}&order=descending&includeRawRejectReason${filters}`,
         {

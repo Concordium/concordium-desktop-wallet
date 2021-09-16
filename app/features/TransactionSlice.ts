@@ -223,8 +223,7 @@ export async function loadTransactions(
 /**
  * Fetches a batch of the newest transactions of the given account,
  * and saves them to the database, and updates the allDecrypted,
- * if any shielded balance transaction were loaded.
- * N.B. does not load reward transactions.
+ * if any shielded balance transactions were loaded.
  */
 export async function fetchNewestTransactions(
     dispatch: Dispatch,
