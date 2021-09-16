@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
 import { getTransactions } from '../utils/httpRequests';
@@ -37,6 +37,7 @@ import { getActiveBooleanFilters } from '~/utils/accountHelpers';
 import errorMessages from '~/constants/errorMessages.json';
 
 const updateTransactionInterval = 5000;
+export const transactionLogPageSize = 100;
 
 interface State {
     transactions: TransferTransaction[];
@@ -52,8 +53,14 @@ const transactionSlice = createSlice({
         loadingTransactions: false,
     } as State,
     reducers: {
-        setTransactions(state, update) {
-            state.transactions = update.payload.transactions;
+        setTransactions(state, update: PayloadAction<TransferTransaction[]>) {
+            state.transactions = update.payload;
+        },
+        appendTransactions(
+            state,
+            update: PayloadAction<TransferTransaction[]>
+        ) {
+            state.transactions.push(...update.payload);
         },
         setViewingShielded(state, viewingShielded) {
             state.viewingShielded = viewingShielded.payload;
@@ -82,6 +89,7 @@ const {
     setTransactions,
     updateTransactionFields,
     setLoadingTransactions,
+    appendTransactions,
 } = transactionSlice.actions;
 
 // Decrypts the encrypted transfers in the given transacion list, using the prfKey.
@@ -178,7 +186,9 @@ export async function loadTransactions(
     account: Account,
     dispatch: Dispatch,
     showLoading = false,
-    controller?: AbortController
+    controller?: AbortController,
+    from = 0,
+    size = transactionLogPageSize
 ) {
     if (showLoading) {
         dispatch(setLoadingTransactions(true));
@@ -190,14 +200,21 @@ export async function loadTransactions(
         account,
         booleanFilters,
         fromDate ? new Date(fromDate) : undefined,
-        toDate ? new Date(toDate) : undefined
+        toDate ? new Date(toDate) : undefined,
+        size,
+        from
     );
 
     if (!controller?.isAborted) {
         if (showLoading) {
             dispatch(setLoadingTransactions(false));
         }
-        dispatch(setTransactions({ transactions }));
+
+        if (from === 0) {
+            dispatch(setTransactions(transactions));
+        } else {
+            dispatch(appendTransactions(transactions));
+        }
     }
 }
 
@@ -266,16 +283,13 @@ export async function updateTransactions(
                 resolve();
                 return;
             }
-            if (maxId !== result.newMaxId) {
-                await loadTransactions(account, dispatch);
-                if (!result.isFinished) {
-                    setTimeout(
-                        updateSubroutine,
-                        updateTransactionInterval,
-                        result.newMaxId
-                    );
-                    return;
-                }
+            if (maxId !== result.newMaxId && !result.isFinished) {
+                setTimeout(
+                    updateSubroutine,
+                    updateTransactionInterval,
+                    result.newMaxId
+                );
+                return;
             }
             resolve();
             controller.finish();

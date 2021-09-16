@@ -41,13 +41,15 @@ async function getTransactionsOfAccount(
     account: Account,
     filteredTypes: TransactionKindString[] = [],
     fromDate?: Date,
-    toDate?: Date
+    toDate?: Date,
+    limit?: number,
+    start = 0
 ): Promise<TransferTransaction[]> {
     const { address } = account;
     const from = (fromDate?.getTime() ?? 0) / TimeStampUnit.seconds;
     const to = (toDate?.getTime() ?? Date.now()) / TimeStampUnit.seconds;
 
-    const transactions = await (await knex())
+    const query = (await knex())
         .select()
         .table(transactionTable)
         .whereIn('transactionKind', filteredTypes)
@@ -58,7 +60,14 @@ async function getTransactionsOfAccount(
         })
         .andWhereBetween('blockTime', [from.toString(), to.toString()])
         .orderBy('blockTime', 'desc')
-        .orderBy('id', 'desc');
+        .orderBy('id', 'desc')
+        .offset(start);
+
+    if (limit) {
+        query.limit(limit);
+    }
+
+    const transactions = await query;
 
     return transactions;
 }

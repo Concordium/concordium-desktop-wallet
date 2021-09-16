@@ -3,7 +3,10 @@ import React, { useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import TabbedCard from '~/components/TabbedCard';
 import { TabbedCardTabRef } from '~/components/TabbedCard/TabbedCardTab';
-import { transactionsSelector } from '~/features/TransactionSlice';
+import {
+    transactionLogPageSize,
+    transactionsSelector,
+} from '~/features/TransactionSlice';
 import { TransferTransaction } from '~/utils/types';
 import TransactionList from '../../TransactionList';
 import TransactionView from '../../TransactionView';
@@ -16,9 +19,10 @@ export default function TransactionLog() {
     const [chosenTransaction, setChosenTransaction] = useState<
         TransferTransaction | undefined
     >();
-    const infinite = useMemo(() => transactions.length > 100, [
-        transactions.length,
-    ]);
+    const infinite = useMemo(
+        () => transactions.length >= transactionLogPageSize,
+        [transactions.length]
+    );
     const [showingLog, setShowingLog] = useState(true);
 
     const transactionsTabRef = useRef<TabbedCardTabRef>(null);

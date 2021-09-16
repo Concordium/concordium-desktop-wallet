@@ -12,6 +12,10 @@
     &:not(:last-child) {
         border-bottom: 0.5px solid $color-soft-grey;
     }
+
+    &:last-child {
+        margin-bottom: -19px;
+    }
 }
 
 .clickableElement {

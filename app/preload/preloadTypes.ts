@@ -246,7 +246,9 @@ export type TransactionMethods = {
         account: Account,
         filteredTypes: TransactionKindString[],
         fromDate?: Date,
-        toDate?: Date
+        toDate?: Date,
+        limit?: number,
+        start?: number
     ) => Promise<TransferTransaction[]>;
     hasEncryptedTransactions: (
         address: string,
