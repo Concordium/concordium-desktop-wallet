@@ -292,18 +292,26 @@ async function fetchTransactions(address: string, currentMaxId: bigint) {
 /** Update the transactions from remote source.
  * will fetch transactions in intervals, updating the state each time.
  * stops when it reaches the newest transaction, or it is told to abort by the controller.
+ * @param controller this controls the function, and if it is aborted, this will terminate when able.
+ * @param outdatedController A controller which is assumed to be already started, and should only become ready, when the wallet has an outdated view of the current account's transactions. Additionally it becomes busy again, when this finishes, and the view is up to date
  */
 export async function updateTransactions(
     dispatch: Dispatch,
     account: Account,
     controller: AbortController,
-    newestTransactionController: AbortController
+    outdatedController: AbortController
 ) {
     return new Promise<void>((resolve, reject) => {
+        function finish() {
+            // call start on the outdatedController, to indicate that the transactions are no longer outdated.
+            outdatedController.start();
+            controller.finish();
+            resolve();
+        }
+
         async function updateSubroutine(maxId: bigint) {
             if (controller.isAborted) {
-                controller.finish();
-                resolve();
+                finish();
                 return;
             }
 
@@ -329,12 +337,12 @@ export async function updateTransactions(
             }
 
             if (controller.isAborted) {
-                controller.finish();
-                resolve();
+                finish();
                 return;
             }
             if (maxId !== result.newMaxId && !result.isFinished) {
-                newestTransactionController.finish();
+                // call finish on the outdatedController, to indicate that the transactions are outdated.
+                outdatedController.finish();
                 setTimeout(
                     updateSubroutine,
                     updateTransactionInterval,
@@ -342,8 +350,7 @@ export async function updateTransactions(
                 );
                 return;
             }
-            resolve();
-            controller.finish();
+            finish();
         }
 
         updateSubroutine(
