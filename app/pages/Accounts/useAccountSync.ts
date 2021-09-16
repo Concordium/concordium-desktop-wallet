@@ -28,7 +28,14 @@ export default function useAccountSync() {
             fetchNewestTransactions(dispatch, account);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [account?.address]);
+    }, [
+        account?.address,
+        account?.transactionFilter?.bakingReward,
+        account?.transactionFilter?.blockReward,
+        account?.transactionFilter?.finalizationReward,
+        account?.transactionFilter?.fromDate,
+        account?.transactionFilter?.toDate,
+    ]);
 
     useEffect(() => {
         if (account) {

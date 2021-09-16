@@ -210,7 +210,10 @@ export async function fetchNewestTransactions(
     dispatch: Dispatch,
     account: Account
 ) {
-    const transactions = await getNewestTransactions(account.address);
+    const transactions = await getNewestTransactions(
+        account.address,
+        account.transactionFilter
+    );
 
     const newTransactions = await insertTransactions(
         transactions.map((transaction) =>

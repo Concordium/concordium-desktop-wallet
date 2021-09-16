@@ -23,6 +23,7 @@ import {
     IdentityProvider,
     IncomingTransaction,
     AccountAndCredentialPairs,
+    TransactionFilter,
 } from '~/utils/types';
 import { ExternalCredential } from '../database/types';
 import type LedgerCommands from './preloadLedgerTypes';
@@ -99,7 +100,10 @@ export type HttpMethods = {
         address: string,
         id: string
     ) => Promise<GetTransactionsResult>;
-    getNewestTransactions: (address: string) => Promise<IncomingTransaction[]>;
+    getNewestTransactions: (
+        address: string,
+        transactionFilter: TransactionFilter
+    ) => Promise<IncomingTransaction[]>;
     getIdProviders: () => Promise<IdentityProvider[]>;
 };
 

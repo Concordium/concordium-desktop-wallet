@@ -10,7 +10,8 @@ import {
     HttpGetResponse,
 } from '~/preload/preloadTypes';
 import ipcCommands from '~/constants/ipcCommands.json';
-import { IncomingTransaction } from '~/utils/types';
+import { IncomingTransaction, TransactionFilter } from '~/utils/types';
+import { secondsSinceUnixEpoch } from '~/utils/timeHelpers';
 
 function getWalletProxy() {
     const targetNet = getTargetNet();
@@ -46,10 +47,35 @@ async function httpsGet<T>(
  * N.B. does not load reward transactions.
  */
 async function getNewestTransactions(
-    address: string
+    address: string,
+    transactionFilter: TransactionFilter
 ): Promise<IncomingTransaction[]> {
+    let filters = '';
+    console.log(transactionFilter);
+    if (transactionFilter.bakingReward === false) {
+        filters += '&bakingRewards=n';
+    }
+    if (transactionFilter.blockReward === false) {
+        filters += '&blockRewards=n';
+    }
+    if (transactionFilter.finalizationReward === false) {
+        filters += '&finalizationRewards=n';
+    }
+    if (transactionFilter.fromDate) {
+        const timestamp = secondsSinceUnixEpoch(
+            new Date(transactionFilter.fromDate)
+        );
+        filters += `&blockTimeFrom=${timestamp}`;
+    }
+    if (transactionFilter.toDate) {
+        const timestamp = secondsSinceUnixEpoch(
+            new Date(transactionFilter.toDate)
+        );
+        filters += `&blockTimeTo=${timestamp}`;
+    }
+    console.log(filters);
     const response = await walletProxy.get(
-        `/v1/accTransactions/${address}?limit=${walletProxytransactionLimit}&order=descending&includeRewards=none&includeRawRejectReason`,
+        `/v1/accTransactions/${address}?limit=${walletProxytransactionLimit}&order=descending&includeRawRejectReason${filters}`,
         {
             transformResponse: (res) => parse(intToString(res, 'id')),
         }
