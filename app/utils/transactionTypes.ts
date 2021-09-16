@@ -51,7 +51,6 @@ export interface TransferState {
     amount: string;
     transaction: string;
     recipient: AddressBookEntry;
-    initialPage: string;
     memo?: string;
 }
 

@@ -1,5 +1,7 @@
 import React from 'react';
-import { LocationDescriptorObject } from 'history';
+import { useDispatch } from 'react-redux';
+import { push } from 'connected-react-router';
+import { useLocation } from 'react-router-dom';
 import { parse } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
 import { displayAsGTU } from '~/utils/gtu';
@@ -8,6 +10,7 @@ import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import DisplayMemo from '~/components/DisplayMemo';
+import TransferView from './TransferView';
 
 import {
     AddressBookEntry,
@@ -27,10 +30,6 @@ interface State {
     transaction: string;
     recipient: AddressBookEntry;
     transactionHash?: string;
-}
-
-interface Props {
-    location: LocationDescriptorObject<State>;
 }
 
 function getSpecificsHandler(transaction: AccountTransaction) {
@@ -103,7 +102,9 @@ function displayRecipient(recipient: AddressBookEntry) {
 /**
  * Displays details of a submitted transaction.
  */
-export default function FinalPage({ location }: Props): JSX.Element {
+export default function FinalPage(): JSX.Element {
+    const dispatch = useDispatch();
+    const location = useLocation<State>();
     if (!location.state) {
         throw new Error('Unexpected missing state.');
     }
@@ -117,7 +118,10 @@ export default function FinalPage({ location }: Props): JSX.Element {
     const handler = getSpecificsHandler(transaction);
 
     return (
-        <>
+        <TransferView
+            showBack={false}
+            exitOnClick={() => dispatch(push(routes.ACCOUNTS))}
+        >
             <h3 className="textCenter mB0">{handler.title}</h3>
             <h1 className="textCenter mT10 mB0">
                 {displayAsGTU(handler.amount)}
@@ -141,6 +145,6 @@ export default function FinalPage({ location }: Props): JSX.Element {
             >
                 Finish
             </ButtonNavLink>
-        </>
+        </TransferView>
     );
 }
