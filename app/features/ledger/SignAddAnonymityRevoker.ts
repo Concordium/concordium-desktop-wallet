@@ -8,7 +8,7 @@ import {
     serializeUpdateType,
 } from '../../utils/UpdateSerialization';
 import { encodeWord32, serializeArInfo } from '~/utils/serializationHelpers';
-import { sendDescription } from './SignAddIdentityProvider';
+import sendDescription from './Description';
 
 const INS_ADD_ANONYMITY_REVOKER = 0x2c;
 

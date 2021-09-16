@@ -1,6 +1,7 @@
 import React from 'react';
 import { AddAnonymityRevoker } from '~/utils/types';
 import { fieldDisplays } from './CreateAddAnonymityRevoker';
+import PublicKeyDetails from '~/components/ledger/PublicKeyDetails';
 
 interface Props {
     addAnonymityRevoker: AddAnonymityRevoker;
@@ -32,7 +33,7 @@ export default function AddAnonymityRevokerView({
             </div>
             <div className="body1">
                 <h5 className="mB0">{fieldDisplays.arPublicKey}</h5>
-                {addAnonymityRevoker.arPublicKey}
+                <PublicKeyDetails publicKey={addAnonymityRevoker.arPublicKey} />
             </div>
         </>
     );

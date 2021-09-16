@@ -1,55 +1,17 @@
 /* eslint-disable no-await-in-loop */
 import { Buffer } from 'buffer/';
 import { Transport } from './Transport';
-import {
-    AddIdentityProvider,
-    UpdateInstruction,
-    SerializedDescription,
-    Description,
-} from '../../utils/types';
+import { AddIdentityProvider, UpdateInstruction } from '../../utils/types';
 import pathAsBuffer from './Path';
 import {
     serializeUpdateHeader,
     serializeUpdateType,
 } from '../../utils/UpdateSerialization';
-import { chunkBuffer } from '../../utils/basicHelpers';
-import {
-    serializeIpInfo,
-    encodeWord32,
-    getSerializedDescription,
-} from '~/utils/serializationHelpers';
+import { serializeIpInfo, encodeWord32 } from '~/utils/serializationHelpers';
+import { chunkBuffer } from '~/utils/basicHelpers';
+import sendDescription from './Description';
 
 const INS_ADD_IDENTITY_PROVIDER = 0x2d;
-
-/**
- * Sends the given description for signing.
- * Uses the given p1 for length and p1 + 1 for the content.
- */
-export async function sendDescription(
-    transport: Transport,
-    ins: number,
-    p1: number,
-    p2: number,
-    description: Description
-) {
-    const serializedDescription = getSerializedDescription(description);
-
-    for (const text of ['name', 'url', 'description']) {
-        // Send description
-        const descriptionLengthData =
-            serializedDescription[text as keyof SerializedDescription].length;
-        await transport.send(0xe0, ins, p1, p2, descriptionLengthData);
-
-        // Stream the description bytes (maximum of 255 bytes per packet)
-        const descriptionChunks = chunkBuffer(
-            serializedDescription[text as keyof SerializedDescription].data,
-            255
-        );
-        for (const chunk of descriptionChunks) {
-            await transport.send(0xe0, ins, p1 + 1, p2, Buffer.from(chunk));
-        }
-    }
-}
 
 export default async function signAddIdentityProviderTransaction(
     transport: Transport,
