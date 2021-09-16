@@ -48,7 +48,7 @@ export default function useAccountSync(): string | undefined {
         }
 
         updateAccountInfo(account, dispatch);
-        const interval = setInterval(async () => {
+        const interval = setInterval(() => {
             updateAccountInfo(account, dispatch);
         }, accountInfoUpdateInterval);
         return () => {
@@ -71,11 +71,12 @@ export default function useAccountSync(): string | undefined {
         ) {
             controller.start();
             updateTransactions(dispatch, account, controller).catch(setError);
+
             return () => {
                 controller.abort();
             };
         }
-        return () => {};
+        return noOp;
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         account?.address,

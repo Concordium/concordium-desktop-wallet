@@ -49,12 +49,6 @@
     color: $color-success;
 }
 
-.transactionGroup {
-    &:last-child {
-        margin-bottom: -19px;
-    }
-}
-
 .transactionGroupHeader {
     composes: cardPadding;
     height: $thick-blue-separator-height;

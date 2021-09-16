@@ -1,35 +1,15 @@
-import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import groupBy from 'lodash.groupby';
 import clsx from 'clsx';
-import { TimeStampUnit, TransferTransaction } from '~/utils/types';
+import { TransferTransaction } from '~/utils/types';
 import { loadingTransactionsSelector } from '~/features/TransactionSlice';
 import LoadingComponent from '~/cross-app-components/Loading';
-import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import TransactionListHeader from './TransactionListHeader';
 import TransactionListElement from './TransactionListElement';
 import InfiniteTransactionList from './InfiniteTransactionList';
 
 import styles from './TransactionList.module.scss';
-
-const dateFormat = Intl.DateTimeFormat(undefined, { dateStyle: 'medium' })
-    .format;
-
-const getGroupHeader = (d: Date): string => {
-    const today = new Date().toDateString();
-    const yesterday = new Date(
-        new Date().setDate(new Date().getDate() - 1)
-    ).toDateString();
-
-    switch (d.toDateString()) {
-        case today:
-            return 'Today';
-        case yesterday:
-            return 'Yesterday';
-        default:
-            return dateFormat(d);
-    }
-};
+import useTransactionGroups from './useTransactionGroups';
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const getKey = (t: TransferTransaction) => t.transactionHash || t.id!;
@@ -52,17 +32,7 @@ function TransactionList({
     const loading = useSelector(loadingTransactionsSelector);
     const [showLoading, setShowLoading] = useState(false);
 
-    const transactionGroups = useMemo(
-        () =>
-            Object.entries(
-                groupBy(transactions, (t) =>
-                    getGroupHeader(
-                        dateFromTimeStamp(t.blockTime, TimeStampUnit.seconds)
-                    )
-                )
-            ),
-        [transactions]
-    );
+    const groups = useTransactionGroups(transactions);
 
     useEffect(() => {
         if (loading) {
@@ -106,7 +76,7 @@ function TransactionList({
     if (infinite) {
         return (
             <InfiniteTransactionList
-                transactionGroups={transactionGroups}
+                transactions={transactions}
                 onTransactionClick={onTransactionClick}
             />
         );
@@ -114,7 +84,7 @@ function TransactionList({
 
     return (
         <>
-            {transactionGroups.map(([h, ts]) => (
+            {groups.map(([h, ts]) => (
                 <Fragment key={h}>
                     <TransactionListHeader>{h}</TransactionListHeader>
                     {ts.map((t: TransferTransaction) => (
