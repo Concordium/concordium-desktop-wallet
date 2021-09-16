@@ -1,5 +1,5 @@
 import {
-    Account,
+    Hex,
     TimeStampUnit,
     TransactionKindString,
     TransactionStatus,
@@ -38,14 +38,13 @@ async function hasPendingTransactions(fromAddress: string) {
 }
 
 async function getTransactionsOfAccount(
-    account: Account,
+    address: Hex,
     filteredTypes: TransactionKindString[] = [],
     fromDate?: Date,
     toDate?: Date,
     limit?: number,
     start = 0
 ): Promise<TransferTransaction[]> {
-    const { address } = account;
     const from = (fromDate?.getTime() ?? 0) / TimeStampUnit.seconds;
     const to = (toDate?.getTime() ?? Date.now()) / TimeStampUnit.seconds;
 

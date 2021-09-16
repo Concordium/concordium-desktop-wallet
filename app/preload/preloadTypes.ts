@@ -243,7 +243,7 @@ export type TransactionMethods = {
     getPending: () => Promise<TransferTransaction[]>;
     hasPending: (address: string) => Promise<boolean>;
     getTransactionsForAccount: (
-        account: Account,
+        address: Hex,
         filteredTypes: TransactionKindString[],
         fromDate?: Date,
         toDate?: Date,

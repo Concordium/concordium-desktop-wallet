@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
 import { getTransactions } from '../utils/httpRequests';
@@ -96,27 +96,26 @@ const {
 // This function expects the prfKey to match the account's prfKey,
 // and that the account is the receiver of the transactions.
 export async function decryptTransactions(
-    transactions: TransferTransaction[],
     accountAddress: string,
     prfKey: string,
     credentialNumber: number,
     global: Global
 ) {
-    const encryptedTransfers = transactions.filter(
+    const encryptedTransfers = await getTransactionsOfAccount(accountAddress, [
+        TransactionKindString.EncryptedAmountTransfer,
+        TransactionKindString.EncryptedAmountTransferWithMemo,
+    ]);
+    const notDecrypted = encryptedTransfers.filter(
         (t) =>
-            [
-                TransactionKindString.EncryptedAmountTransfer,
-                TransactionKindString.EncryptedAmountTransferWithMemo,
-            ].includes(t.transactionKind) &&
             t.decryptedAmount === null &&
             t.status === TransactionStatus.Finalized
     );
 
-    if (encryptedTransfers.length === 0) {
+    if (notDecrypted.length === 0) {
         return Promise.resolve();
     }
 
-    const encryptedAmounts = encryptedTransfers.map((t) => {
+    const encryptedAmounts = notDecrypted.map((t) => {
         if (!t.encrypted) {
             throw new Error('Unexpected missing field');
         }
@@ -134,7 +133,7 @@ export async function decryptTransactions(
     );
 
     return Promise.all(
-        encryptedTransfers.map(async (transaction, index) =>
+        notDecrypted.map(async (transaction, index) =>
             updateTransaction(
                 { id: transaction.id },
                 {
@@ -197,7 +196,7 @@ export async function loadTransactions(
     const { fromDate, toDate } = account.transactionFilter;
     const booleanFilters = getActiveBooleanFilters(account.transactionFilter);
     const transactions = await getTransactionsOfAccount(
-        account,
+        account.address,
         booleanFilters,
         fromDate ? new Date(fromDate) : undefined,
         toDate ? new Date(toDate) : undefined,
@@ -217,6 +216,28 @@ export async function loadTransactions(
         }
     }
 }
+
+export const reloadTransactions = createAsyncThunk(
+    'transactions/reload',
+    async (_, { dispatch, getState }) => {
+        const state = getState() as RootState;
+        const { transactions } = state.transactions;
+        const account = chosenAccountSelector(state);
+
+        if (!account) {
+            return;
+        }
+
+        await loadTransactions(
+            account,
+            dispatch,
+            false,
+            undefined,
+            0,
+            transactions.length
+        );
+    }
+);
 
 async function fetchTransactions(address: string, currentMaxId: bigint) {
     const { transactions, full } = await getTransactions(
