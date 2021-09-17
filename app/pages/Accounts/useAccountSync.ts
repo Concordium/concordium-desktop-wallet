@@ -98,7 +98,7 @@ export default function useAccountSync(): string | undefined {
         }
         return () => {};
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [account?.address, account?.transactionFilter]);
+    }, [account?.address, JSON.stringify(account?.transactionFilter)]);
 
     return error;
 }
