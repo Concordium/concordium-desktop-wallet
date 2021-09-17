@@ -5,5 +5,6 @@ export const {
     hasPendingShieldedBalanceTransfer,
     update: updateTransaction,
     insert: insertTransactions,
+    upsertTransactionsAndUpdateMaxId,
     getTransactionsForAccount: getTransactionsOfAccount,
 } = window.database.transaction;

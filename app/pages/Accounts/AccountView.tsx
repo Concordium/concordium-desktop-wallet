@@ -63,16 +63,11 @@ export default function AccountView() {
         if (
             account &&
             account.status === AccountStatus.Confirmed &&
-            controller.isReady &&
-            !controller.isAborted
+            controller.isReady
         ) {
             controller.start();
             updateTransactions(dispatch, account, controller).catch(setError);
-            return () => {
-                controller.abort();
-            };
         }
-        return () => {};
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         account?.address,
@@ -80,6 +75,11 @@ export default function AccountView() {
         account?.status,
         controller.isAborted,
     ]);
+
+    useEffect(() => {
+        return () => controller.abort();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [account?.address]);
 
     useEffect(() => {
         if (account && account.status === AccountStatus.Confirmed) {
