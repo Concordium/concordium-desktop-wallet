@@ -249,6 +249,11 @@ export type TransactionMethods = {
     insert: (
         transactions: Partial<TransferTransaction>[]
     ) => Promise<Partial<TransferTransaction>[]>;
+    upsertTransactionsAndUpdateMaxId: (
+        transactions: TransferTransaction[],
+        address: string,
+        newMaxId: bigint
+    ) => Promise<TransferTransaction[]>;
 };
 
 export type WalletMethods = {

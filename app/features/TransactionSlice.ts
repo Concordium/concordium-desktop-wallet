@@ -5,6 +5,7 @@ import { getTransactions } from '../utils/httpRequests';
 import { decryptAmounts } from '../utils/rustInterface';
 import {
     getTransactionsOfAccount,
+    upsertTransactionsAndUpdateMaxId,
     insertTransactions,
     updateTransaction,
 } from '../database/TransactionDao';
@@ -18,6 +19,7 @@ import {
     TransactionEvent,
     Global,
     TransferTransactionWithNames,
+    IncomingTransaction,
 } from '../utils/types';
 import { isSuccessfulTransaction } from '../utils/transactionHelpers';
 import {
@@ -34,8 +36,6 @@ import AbortController from '~/utils/AbortController';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
 import { max } from '~/utils/basicHelpers';
 import errorMessages from '~/constants/errorMessages.json';
-
-const updateTransactionInterval = 5000;
 
 interface State {
     transactions: TransferTransaction[];
@@ -198,7 +198,22 @@ export async function loadTransactions(
     }
 }
 
-async function fetchTransactions(address: string, currentMaxId: bigint) {
+/**
+ * Fetches a batch of transactions from the wallet proxy for the account
+ * with the provided address.
+ * @param address the account address to fetch transactions for
+ * @param currentMaxId the current transaction id to retrieve transactions from
+ * @returns the list of fetched transactions, and the new max id of the received transactions,
+ * and whether there are more transactions to fetch.
+ */
+async function fetchTransactions(
+    address: string,
+    currentMaxId: bigint
+): Promise<{
+    transactions: IncomingTransaction[];
+    newMaxId: bigint;
+    isFinished: boolean;
+}> {
     const { transactions, full } = await getTransactions(
         address,
         currentMaxId.toString()
@@ -210,19 +225,14 @@ async function fetchTransactions(address: string, currentMaxId: bigint) {
     );
     const isFinished = !full;
 
-    const newTransactions = await insertTransactions(
-        transactions.map((transaction) =>
-            convertIncomingTransaction(transaction, address)
-        )
-    );
-    const newEncrypted = newTransactions.some(isShieldedBalanceTransaction);
-
-    return { newMaxId, isFinished, newEncrypted };
+    return { transactions, newMaxId, isFinished };
 }
 
-/** Update the transactions from remote source.
- * will fetch transactions in intervals, updating the state each time.
- * stops when it reaches the newest transaction, or it is told to abort by the controller.
+/**
+ * Fetches transactions from the wallet proxy, insert them into the
+ * local database and update the state with the updated information.
+ * Stops when the newest transaction has been reached, or if it is told
+ * to abort by the controller.
  * */
 export async function updateTransactions(
     dispatch: Dispatch,
@@ -238,23 +248,35 @@ export async function updateTransactions(
             }
 
             let result;
+            const { address } = account;
             try {
-                result = await fetchTransactions(account.address, maxId);
+                result = await fetchTransactions(address, maxId);
             } catch (e) {
                 controller.finish();
                 reject(errorMessages.unableToReachWalletProxy);
                 return;
             }
 
-            if (maxId !== result.newMaxId) {
-                await updateMaxTransactionId(
-                    dispatch,
-                    account.address,
-                    result.newMaxId.toString()
-                );
-            }
+            // Insert the fetched transactions and update the max transaction id
+            // in a single transaction.
+            const convertedIncomingTransactions = result.transactions.map((t) =>
+                convertIncomingTransaction(t, address)
+            );
+            const newTransactions = await upsertTransactionsAndUpdateMaxId(
+                convertedIncomingTransactions,
+                address,
+                result.newMaxId
+            );
+            await updateMaxTransactionId(
+                dispatch,
+                account.address,
+                result.newMaxId.toString()
+            );
 
-            if (result.newEncrypted) {
+            const newEncrypted = newTransactions.some(
+                isShieldedBalanceTransaction
+            );
+            if (newEncrypted) {
                 await updateAllDecrypted(dispatch, account.address, false);
             }
 
@@ -264,13 +286,14 @@ export async function updateTransactions(
                 return;
             }
             if (maxId !== result.newMaxId) {
-                await loadTransactions(account, dispatch);
+                const accountWithUpdateMaxId = {
+                    ...account,
+                    maxTransactionId: result.newMaxId.toString(),
+                };
+
+                await loadTransactions(accountWithUpdateMaxId, dispatch);
                 if (!result.isFinished) {
-                    setTimeout(
-                        updateSubroutine,
-                        updateTransactionInterval,
-                        result.newMaxId
-                    );
+                    updateSubroutine(result.newMaxId);
                     return;
                 }
             }
