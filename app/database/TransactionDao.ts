@@ -6,4 +6,5 @@ export const {
     update: updateTransaction,
     insert: insertTransactions,
     getTransactionsForAccount: getTransactionsOfAccount,
+    getMinTransactionId,
 } = window.database.transaction;

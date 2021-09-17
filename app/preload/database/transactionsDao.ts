@@ -1,3 +1,4 @@
+import { Knex } from 'knex';
 import {
     Hex,
     TimeStampUnit,
@@ -37,14 +38,14 @@ async function hasPendingTransactions(fromAddress: string) {
     return Boolean(transaction);
 }
 
-async function getTransactionsOfAccount(
+const withFilteredAccountsQuery = <R = TransferTransaction[]>(
+    cb: (query: Knex.QueryBuilder) => Promise<R>
+) => async (
     address: Hex,
     filteredTypes: TransactionKindString[] = [],
     fromDate?: Date,
-    toDate?: Date,
-    limit?: number,
-    startId?: string
-): Promise<TransferTransaction[]> {
+    toDate?: Date
+) => {
     const from = (fromDate?.getTime() ?? 0) / TimeStampUnit.seconds;
     const to = (toDate?.getTime() ?? Date.now()) / TimeStampUnit.seconds;
 
@@ -61,18 +62,42 @@ async function getTransactionsOfAccount(
         .orderBy('blockTime', 'desc')
         .orderBy('id', 'desc');
 
-    if (startId) {
-        query.andWhere('id', '<', startId);
-    }
+    return cb(query);
+};
 
-    if (limit) {
-        query.limit(limit);
-    }
+async function getTransactionsOfAccount(
+    address: Hex,
+    filteredTypes: TransactionKindString[] = [],
+    fromDate?: Date,
+    toDate?: Date,
+    limit?: number,
+    startId?: string
+): Promise<TransferTransaction[]> {
+    return withFilteredAccountsQuery(async (query) => {
+        if (startId) {
+            query.andWhere('id', '<', startId);
+        }
 
-    const transactions = await query;
+        if (limit) {
+            query.limit(limit);
+        }
 
-    return transactions;
+        const transactions = await query;
+
+        return transactions;
+    })(address, filteredTypes, fromDate, toDate);
 }
+
+const getMinTransactionId = withFilteredAccountsQuery<string>(async (query) => {
+    query.min('id');
+
+    const obj = (await query)[0];
+    const minId = Object.values<string>(obj)[0];
+
+    console.log(obj, minId);
+
+    return minId;
+});
 
 async function hasEncryptedTransactions(
     address: string,
@@ -151,6 +176,7 @@ const exposedMethods: TransactionMethods = {
     getPending: getPendingTransactions,
     hasPending: hasPendingTransactions,
     getTransactionsForAccount: getTransactionsOfAccount,
+    getMinTransactionId,
     hasPendingShieldedBalanceTransfer,
     hasEncryptedTransactions,
     update: updateTransaction,

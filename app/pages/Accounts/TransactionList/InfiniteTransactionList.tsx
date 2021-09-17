@@ -17,6 +17,7 @@ import useTransactionGroups, {
     TransactionsByDateTuple,
 } from './useTransactionGroups';
 import {
+    hasMoreTransactionsSelector,
     loadingTransactionsSelector,
     loadTransactions,
     transactionLogPageSize,
@@ -83,6 +84,7 @@ export default function InfiniteTransactionList({
     const dispatch = useDispatch();
     const account = useSelector(chosenAccountSelector);
     const loading = useSelector(loadingTransactionsSelector);
+    const hasMore = useSelector(hasMoreTransactionsSelector);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const loadController = useMemo(() => new AbortController(), [
         account?.address,
@@ -90,7 +92,7 @@ export default function InfiniteTransactionList({
     useEffect(() => () => loadController.abort(), [loadController]);
 
     const loadMore = useCallback(async () => {
-        if (loading) {
+        if (loading || !hasMore) {
             return;
         }
 
@@ -101,12 +103,14 @@ export default function InfiniteTransactionList({
                 append: true,
             })
         );
-    }, [dispatch, loadController, loading]);
+    }, [dispatch, loadController, loading, hasMore]);
 
     const groups = useTransactionGroups(transactions);
     const headersAndTransactions = groups.flat(2);
 
-    const itemCount = headersAndTransactions.length + transactionLogPageSize;
+    const itemCount = hasMore
+        ? headersAndTransactions.length + transactionLogPageSize
+        : headersAndTransactions.length;
 
     return (
         <StickyContext.Provider value={{ groups }}>

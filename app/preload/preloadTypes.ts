@@ -250,6 +250,12 @@ export type TransactionMethods = {
         limit?: number,
         startId?: string
     ) => Promise<TransferTransaction[]>;
+    getMinTransactionId(
+        address: Hex,
+        filteredTypes: TransactionKindString[],
+        fromDate?: Date,
+        toDate?: Date
+    ): Promise<string>;
     hasEncryptedTransactions: (
         address: string,
         fromTime: string,

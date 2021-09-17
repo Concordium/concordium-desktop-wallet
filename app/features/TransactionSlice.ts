@@ -4,6 +4,7 @@ import { RootState } from '../store/store';
 import { getTransactions } from '../utils/httpRequests';
 import { decryptAmounts } from '../utils/rustInterface';
 import {
+    getMinTransactionId,
     getTransactionsOfAccount,
     insertTransactions,
     updateTransaction,
@@ -43,6 +44,7 @@ interface State {
     transactions: TransferTransaction[];
     viewingShielded: boolean;
     loadingTransactions: boolean;
+    lowestTransactionId: string;
 }
 
 const transactionSlice = createSlice({
@@ -51,10 +53,18 @@ const transactionSlice = createSlice({
         transactions: [],
         viewingShielded: false,
         loadingTransactions: false,
+        lowestTransactionId: '0',
     } as State,
     reducers: {
-        setTransactions(state, update: PayloadAction<TransferTransaction[]>) {
-            state.transactions = update.payload;
+        setTransactions(
+            state,
+            update: PayloadAction<{
+                transactions: TransferTransaction[];
+                lowestId: string;
+            }>
+        ) {
+            state.transactions = update.payload.transactions;
+            state.lowestTransactionId = update.payload.lowestId;
         },
         appendTransactions(
             state,
@@ -228,16 +238,25 @@ export const loadTransactions = createAsyncThunk(
             append ? minId : undefined
         );
 
-        if (!controller?.isAborted) {
-            if (showLoading) {
-                dispatch(setLoadingTransactions(false));
-            }
+        if (controller?.isAborted) {
+            return;
+        }
 
-            if (append) {
-                dispatch(appendTransactions(transactions));
-            } else {
-                dispatch(setTransactions(transactions));
-            }
+        if (showLoading) {
+            dispatch(setLoadingTransactions(false));
+        }
+
+        if (append) {
+            dispatch(appendTransactions(transactions));
+        } else {
+            const lowestId = await getMinTransactionId(
+                account.address,
+                booleanFilters,
+                fromDate ? new Date(fromDate) : undefined,
+                toDate ? new Date(toDate) : undefined
+            );
+
+            dispatch(setTransactions({ transactions, lowestId }));
         }
     }
 );
@@ -458,5 +477,11 @@ export const viewingShieldedSelector = (state: RootState) =>
 
 export const loadingTransactionsSelector = (state: RootState) =>
     state.transactions.loadingTransactions;
+
+export const hasMoreTransactionsSelector = (state: RootState) =>
+    state.transactions.transactions
+        .map((t) => t.id)
+        .filter(isDefined)
+        .reverse()[0] > state.transactions.lowestTransactionId;
 
 export default transactionSlice.reducer;
