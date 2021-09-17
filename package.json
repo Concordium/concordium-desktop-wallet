@@ -16,6 +16,7 @@
     "build-storybook": "build-storybook",
     "clean": "yarn clean-scss-modules",
     "clean-scss-modules": "rimraf ./**/*.module.scss.d.ts",
+    "generate-verification-assets": "node ./scripts/fileDigest.js -k",
     "lint": "eslint . --cache --ext .ts,.tsx --max-warnings 0",
     "lint-fix": "yarn --silent lint --fix; exit 0",
     "lint-styles": "stylelint --ignore-path .eslintignore '**/*.*(css|scss)' --syntax scss",
@@ -121,11 +122,16 @@
     "extraResources": [
       "./resources/**",
       "./app/database/migrations/*"
-    ]
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "Concordium",
+      "repo": "concordium-desktop-wallet"
+    }
   },
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.com/Concordium/desktopwallet"
+    "url": "git+https://github.com/Concordium/concordium-desktop-wallet"
   },
   "author": {
     "name": "Concordium Software",
@@ -236,7 +242,8 @@
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.0",
     "webpack-merge": "^5.0.9",
-    "worker-loader": "^3.0.6"
+    "worker-loader": "^3.0.6",
+    "yargs": "^17.1.1"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.3.6",

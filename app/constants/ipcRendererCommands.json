@@ -1,5 +1,10 @@
 {
     "readyToShow": "readyToShow",
     "didFinishLoad": "didFinishLoad",
-    "openRoute": "openRoute"
+    "openRoute": "openRoute",
+    "updateAvailable": "updateAvailable",
+    "logFromMain": "logFromMain",
+    "updateDownloaded": "updateDownloaded",
+    "updateVerified": "updateVerified",
+    "updateError": "updateError"
 }
