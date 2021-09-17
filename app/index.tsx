@@ -19,7 +19,7 @@ window.addListener.openRoute((_, route: string) => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-console
 window.addListener.logFromMain((_, ...args: any[]) => console.log(...args));
 
-window.autoUpdate.onUpdateAvailable((info: UpdateInfo) => {
+window.autoUpdate.onUpdateAvailable((_, info: UpdateInfo) => {
     store.dispatch(triggerUpdateNotification(info.version));
 });
 const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;

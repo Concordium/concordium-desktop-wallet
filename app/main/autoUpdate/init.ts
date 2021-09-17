@@ -17,24 +17,19 @@ import { version } from '../../package.json';
 import { build } from '../../../package.json';
 import { getVerificationFunctions, RealUpdateInfo } from './verify';
 
-let configured = false;
-function configure() {
-    const updateServer = 'https://update.electronjs.org';
-    const updateFeed = `${updateServer}/${build.publish.owner}/${build.publish.repo}/${process.platform}-${process.arch}/${version}/`;
-    autoUpdater.setFeedURL({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ...(build.publish as any),
-        url: updateFeed,
-    });
+const updateServer = 'https://update.electronjs.org';
+const updateFeed = `${updateServer}/${build.publish.owner}/${build.publish.repo}/${process.platform}-${process.arch}/${version}/`;
+autoUpdater.setFeedURL({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ...(build.publish as any),
+    url: updateFeed,
+});
 
-    log.transports.file.level = 'info';
+log.transports.file.level = 'info';
 
-    autoUpdater.logger = log;
-    autoUpdater.autoDownload = false;
-    autoUpdater.autoInstallOnAppQuit = false;
-
-    configured = true;
-}
+autoUpdater.logger = log;
+autoUpdater.autoDownload = false;
+autoUpdater.autoInstallOnAppQuit = false;
 
 const handleUpdateDownloaded = (mainWindow: BrowserWindow) => async (
     info: UpdateInfo
@@ -55,10 +50,6 @@ const handleUpdateDownloaded = (mainWindow: BrowserWindow) => async (
 };
 
 export default function initAutoUpdate(mainWindow: BrowserWindow) {
-    if (!configured) {
-        configure();
-    }
-
     autoUpdater.on('update-available', (info) =>
         mainWindow.webContents.send(updateAvailable, info)
     );
