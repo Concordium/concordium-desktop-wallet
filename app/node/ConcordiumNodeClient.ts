@@ -89,6 +89,12 @@ export default class ConcordiumNodeClient {
         return this.sendRequest(this.client.getIdentityProviders, blockHash);
     }
 
+    getAnonymityRevokers(blockHashValue: string) {
+        const blockHash = new BlockHash();
+        blockHash.setBlockHash(blockHashValue);
+        return this.sendRequest(this.client.getAnonymityRevokers, blockHash);
+    }
+
     sendTransaction(transactionPayload: Uint8Array, networkId = 100) {
         const request = this.buildSendTransactionRequest(
             transactionPayload,

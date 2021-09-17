@@ -8,5 +8,6 @@
     "getBlockSummary": "get-block-summary",
     "getAccountInfo": "get-account-info",
     "getCryptographicParameters": "get-cryptographic-parameters",
+    "getAnonymityRevokers": "get-anonymity-revokers",
     "getIdentityProviders": "get-identity-providers"
 }
