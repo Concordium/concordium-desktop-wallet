@@ -229,8 +229,8 @@ async function fetchTransactions(
 }
 
 /**
- * Fetches transactions from the wallet proxy, insert them into the
- * local database and update the state with the updated information.
+ * Fetches transactions from the wallet proxy, inserts them into the
+ * local database and updates the state with the updated information.
  * Stops when the newest transaction has been reached, or if it is told
  * to abort by the controller.
  * */
@@ -269,7 +269,7 @@ export async function updateTransactions(
             );
             await updateMaxTransactionId(
                 dispatch,
-                account.address,
+                address,
                 result.newMaxId.toString()
             );
 
@@ -277,7 +277,7 @@ export async function updateTransactions(
                 isShieldedBalanceTransaction
             );
             if (newEncrypted) {
-                await updateAllDecrypted(dispatch, account.address, false);
+                await updateAllDecrypted(dispatch, address, false);
             }
 
             if (controller.isAborted) {
