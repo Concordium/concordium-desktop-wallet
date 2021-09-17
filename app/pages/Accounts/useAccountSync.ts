@@ -70,7 +70,7 @@ export default function useAccountSync(): string | undefined {
             !controller.isAborted
         ) {
             controller.start();
-            updateTransactions(dispatch, account, controller).catch(setError);
+            dispatch(updateTransactions({ controller, onError: setError }));
 
             return () => {
                 controller.abort();

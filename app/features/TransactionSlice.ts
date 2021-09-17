@@ -13,7 +13,6 @@ import {
     TransferTransaction,
     TransactionStatus,
     TransactionKindString,
-    Account,
     AccountTransaction,
     Dispatch,
     TransactionEvent,
@@ -272,7 +271,11 @@ export const reloadTransactions = createAsyncThunk(
             return;
         }
 
-        await dispatch(loadTransactions({ size: transactions.length }));
+        await dispatch(
+            loadTransactions({
+                size: Math.max(transactions.length, transactionLogPageSize),
+            })
+        );
     }
 );
 
@@ -298,20 +301,28 @@ async function fetchTransactions(address: string, currentMaxId: bigint) {
     return { newMaxId, isFinished, newEncrypted };
 }
 
+interface UpdateTransactionsArgs {
+    controller: AbortController;
+    onError(e: string): void;
+}
+
 /** Update the transactions from remote source.
  * will fetch transactions in intervals, updating the state each time.
  * stops when it reaches the newest transaction, or it is told to abort by the controller.
  * */
-export async function updateTransactions(
-    dispatch: Dispatch,
-    account: Account,
-    controller: AbortController
-) {
-    return new Promise<void>((resolve, reject) => {
+export const updateTransactions = createAsyncThunk<any, UpdateTransactionsArgs>(
+    'transactions/update',
+    async ({ controller, onError }, { getState, dispatch }) => {
+        const state = getState() as RootState;
+        const account = chosenAccountSelector(state);
+
+        if (!account) {
+            return;
+        }
+
         async function updateSubroutine(maxId: bigint) {
-            if (controller.isAborted) {
+            if (!account || controller.isAborted) {
                 controller.finish();
-                resolve();
                 return;
             }
 
@@ -320,8 +331,8 @@ export async function updateTransactions(
                 result = await fetchTransactions(account.address, maxId);
             } catch (e) {
                 controller.finish();
-                reject(errorMessages.unableToReachWalletProxy);
-                return;
+                onError(errorMessages.unableToReachWalletProxy);
+                throw e;
             }
 
             if (maxId !== result.newMaxId) {
@@ -338,26 +349,33 @@ export async function updateTransactions(
 
             if (controller.isAborted) {
                 controller.finish();
-                resolve();
                 return;
             }
-            if (maxId !== result.newMaxId && !result.isFinished) {
-                setTimeout(
-                    updateSubroutine,
-                    updateTransactionInterval,
-                    result.newMaxId
-                );
+
+            const maxIdInStore = state.transactions.transactions
+                .map((t) => t.id)
+                .filter(isDefined)[0];
+
+            if (maxIdInStore !== result.newMaxId.toString()) {
+                await dispatch(reloadTransactions());
+            }
+
+            if (maxId === result.newMaxId || result.isFinished) {
+                controller.finish();
                 return;
             }
-            resolve();
-            controller.finish();
+
+            await new Promise((resolve) =>
+                setTimeout(resolve, updateTransactionInterval)
+            );
+            await updateSubroutine(result.newMaxId);
         }
 
-        updateSubroutine(
+        await updateSubroutine(
             account.maxTransactionId ? BigInt(account.maxTransactionId) : 0n
         );
-    });
-}
+    }
+);
 
 // Add a pending transaction to storage
 export async function addPendingTransaction(
