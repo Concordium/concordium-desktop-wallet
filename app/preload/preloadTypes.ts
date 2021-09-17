@@ -248,7 +248,7 @@ export type TransactionMethods = {
         fromDate?: Date,
         toDate?: Date,
         limit?: number,
-        start?: number
+        startId?: string
     ) => Promise<TransferTransaction[]>;
     hasEncryptedTransactions: (
         address: string,

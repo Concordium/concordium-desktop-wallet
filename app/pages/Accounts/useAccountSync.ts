@@ -88,7 +88,12 @@ export default function useAccountSync(): string | undefined {
     useEffect(() => {
         if (account && account.status === AccountStatus.Confirmed) {
             const loadController = new AbortController();
-            loadTransactions(account, dispatch, true, loadController);
+            dispatch(
+                loadTransactions({
+                    controller: loadController,
+                    showLoading: true,
+                })
+            );
             return () => loadController.abort();
         }
         return () => {};

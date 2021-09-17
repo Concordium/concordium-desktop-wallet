@@ -32,7 +32,7 @@ import {
 } from './AccountSlice';
 import AbortController from '~/utils/AbortController';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
-import { max } from '~/utils/basicHelpers';
+import { isDefined, max } from '~/utils/basicHelpers';
 import { getActiveBooleanFilters } from '~/utils/accountHelpers';
 import errorMessages from '~/constants/errorMessages.json';
 
@@ -177,45 +177,70 @@ export function isShieldedBalanceTransaction(
     }
 }
 
+interface LoadTransactionsArgs {
+    showLoading?: boolean;
+    controller?: AbortController;
+    append?: boolean;
+    size?: number;
+}
+
 /**
  * Load transactions from storage.
  * Filters out reward transactions based on the account's transaction filter.
  */
-export async function loadTransactions(
-    account: Account,
-    dispatch: Dispatch,
-    showLoading = false,
-    controller?: AbortController,
-    from = 0,
-    size = transactionLogPageSize
-) {
-    if (showLoading) {
-        dispatch(setLoadingTransactions(true));
-    }
+export const loadTransactions = createAsyncThunk(
+    'transactions/load',
+    async (
+        {
+            showLoading = false,
+            append = false,
+            size = transactionLogPageSize,
+            controller,
+        }: LoadTransactionsArgs,
+        { getState, dispatch }
+    ) => {
+        const state = getState() as RootState;
+        const minId = state.transactions.transactions
+            .map((t) => t.id)
+            .filter(isDefined)
+            .reverse()[0];
 
-    const { fromDate, toDate } = account.transactionFilter;
-    const booleanFilters = getActiveBooleanFilters(account.transactionFilter);
-    const transactions = await getTransactionsOfAccount(
-        account.address,
-        booleanFilters,
-        fromDate ? new Date(fromDate) : undefined,
-        toDate ? new Date(toDate) : undefined,
-        size,
-        from
-    );
+        const account = chosenAccountSelector(state);
 
-    if (!controller?.isAborted) {
+        if (!account) {
+            return;
+        }
+
         if (showLoading) {
-            dispatch(setLoadingTransactions(false));
+            dispatch(setLoadingTransactions(true));
         }
 
-        if (from === 0) {
-            dispatch(setTransactions(transactions));
-        } else {
-            dispatch(appendTransactions(transactions));
+        const { fromDate, toDate } = account.transactionFilter;
+        const booleanFilters = getActiveBooleanFilters(
+            account.transactionFilter
+        );
+        const transactions = await getTransactionsOfAccount(
+            account.address,
+            booleanFilters,
+            fromDate ? new Date(fromDate) : undefined,
+            toDate ? new Date(toDate) : undefined,
+            size,
+            append ? minId : undefined
+        );
+
+        if (!controller?.isAborted) {
+            if (showLoading) {
+                dispatch(setLoadingTransactions(false));
+            }
+
+            if (append) {
+                dispatch(appendTransactions(transactions));
+            } else {
+                dispatch(setTransactions(transactions));
+            }
         }
     }
-}
+);
 
 export const reloadTransactions = createAsyncThunk(
     'transactions/reload',
@@ -228,14 +253,7 @@ export const reloadTransactions = createAsyncThunk(
             return;
         }
 
-        await loadTransactions(
-            account,
-            dispatch,
-            false,
-            undefined,
-            0,
-            transactions.length
-        );
+        await dispatch(loadTransactions({ size: transactions.length }));
     }
 );
 

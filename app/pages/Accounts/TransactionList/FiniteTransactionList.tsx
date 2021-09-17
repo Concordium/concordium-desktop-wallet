@@ -46,7 +46,7 @@ export default function FiniteTransactionList({
                         <TransactionListElement
                             onClick={() => onTransactionClick(t)}
                             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                            key={t.id!}
+                            key={t.transactionHash || t.id!}
                             transaction={t}
                         />
                     ))}

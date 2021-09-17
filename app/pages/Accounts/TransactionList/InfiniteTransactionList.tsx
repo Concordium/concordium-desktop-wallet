@@ -6,7 +6,6 @@ import React, {
     useContext,
     useEffect,
     useMemo,
-    useState,
 } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import InfiniteLoader from 'react-window-infinite-loader';
@@ -44,7 +43,7 @@ const getHeight = (item: HeaderOrTransaction) =>
 
 const getKey = (item: HeaderOrTransaction) =>
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    isHeader(item) ? item : item.id!;
+    isHeader(item) ? item : item.transactionHash || item.id!;
 
 interface StickyContextModel {
     groups: TransactionsByDateTuple[];
@@ -89,37 +88,32 @@ export default function InfiniteTransactionList({
         account?.address,
     ]);
     useEffect(() => () => loadController.abort(), [loadController]);
-    const [hasMore] = useState(true);
 
     const loadMore = useCallback(async () => {
-        if (!account || loading) {
+        if (loading) {
             return;
         }
 
-        await loadTransactions(
-            account,
-            dispatch,
-            true,
-            loadController,
-            transactions.length
+        await dispatch(
+            loadTransactions({
+                controller: loadController,
+                showLoading: true,
+                append: true,
+            })
         );
-    }, [account, dispatch, loadController, transactions, loading]);
+    }, [dispatch, loadController, loading]);
 
     const groups = useTransactionGroups(transactions);
     const headersAndTransactions = groups.flat(2);
 
-    const itemCount = hasMore
-        ? headersAndTransactions.length + transactionLogPageSize
-        : headersAndTransactions.length;
+    const itemCount = headersAndTransactions.length + transactionLogPageSize;
 
     return (
         <StickyContext.Provider value={{ groups }}>
             <AutoSizer>
                 {({ height, width }) => (
                     <InfiniteLoader
-                        isItemLoaded={(i) =>
-                            !hasMore || i < headersAndTransactions.length
-                        }
+                        isItemLoaded={(i) => i < headersAndTransactions.length}
                         itemCount={itemCount}
                         loadMoreItems={loadMore}
                     >

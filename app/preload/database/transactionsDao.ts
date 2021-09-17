@@ -43,7 +43,7 @@ async function getTransactionsOfAccount(
     fromDate?: Date,
     toDate?: Date,
     limit?: number,
-    start = 0
+    startId?: string
 ): Promise<TransferTransaction[]> {
     const from = (fromDate?.getTime() ?? 0) / TimeStampUnit.seconds;
     const to = (toDate?.getTime() ?? Date.now()) / TimeStampUnit.seconds;
@@ -59,8 +59,11 @@ async function getTransactionsOfAccount(
         })
         .andWhereBetween('blockTime', [from.toString(), to.toString()])
         .orderBy('blockTime', 'desc')
-        .orderBy('id', 'desc')
-        .offset(start);
+        .orderBy('id', 'desc');
+
+    if (startId) {
+        query.andWhere('id', '<', startId);
+    }
 
     if (limit) {
         query.limit(limit);

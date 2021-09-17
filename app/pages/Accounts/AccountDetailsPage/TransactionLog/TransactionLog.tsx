@@ -66,6 +66,7 @@ export default function TransactionLog() {
                     <TransactionLogFilters
                         onUpdate={() => {
                             transactionsTabRef.current?.focus();
+                            setShowingLog(true);
                         }}
                     />
                 </div>
