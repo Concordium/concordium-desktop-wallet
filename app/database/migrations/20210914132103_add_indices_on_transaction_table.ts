@@ -7,6 +7,7 @@ export async function up(knex: Knex): Promise<void> {
         table.index('status');
         table.index('transactionKind');
         table.index('blockTime');
+        table.index('transactionHash')
     });
 }
 
@@ -15,5 +16,6 @@ export async function down(knex: Knex): Promise<void> {
         table.dropIndex('status');
         table.dropIndex('transactionKind');
         table.dropIndex('blockTime');
+        table.dropIndex('transactionHash');
     });
 }
