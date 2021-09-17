@@ -34,7 +34,11 @@ export default function ChoiceModal({
     return (
         <Modal disableClose={disableClose} open={open}>
             <h3>{title}</h3>
-            <p>{description}</p>
+            {typeof description === 'string' ? (
+                <p>{description}</p>
+            ) : (
+                <div>{description}</div>
+            )}
             <div className="flex justifySpaceBetween mT30">
                 {actions.map(({ label, location, onPicked, inverted }, i) => (
                     <Button
