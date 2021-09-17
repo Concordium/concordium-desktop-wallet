@@ -94,8 +94,6 @@ const getMinTransactionId = withFilteredAccountsQuery<string>(async (query) => {
     const obj = (await query)[0];
     const minId = Object.values<string>(obj)[0];
 
-    console.log(obj, minId);
-
     return minId;
 });
 

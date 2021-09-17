@@ -1,13 +1,13 @@
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import FavouriteIcon from '@resources/svg/star-filled.svg';
-import NotFavouriteIcon from '@resources/svg/star-outline.svg';
+import DefaultIcon from '@resources/svg/star-filled.svg';
+import NotDefaultIcon from '@resources/svg/star-outline.svg';
 import clsx from 'clsx';
 import Button from '~/cross-app-components/Button';
 import {
-    favouriteAccountSelector,
-    setFavouriteAccount,
+    defaultAccountSelector,
+    setDefaultAccount,
 } from '~/features/AccountSlice';
 import { Account, ClassName } from '~/utils/types';
 import ChoiceModal from '~/components/ChoiceModal';
@@ -16,19 +16,19 @@ interface Props extends ClassName {
     account: Account;
 }
 
-export default function AccountFavouriteButton({ account, className }: Props) {
+export default function AccountDefaultButton({ account, className }: Props) {
     const dispatch = useDispatch();
-    const favAccount = useSelector(favouriteAccountSelector);
+    const favAccount = useSelector(defaultAccountSelector);
     const [showPrompt, setShowPrompt] = useState(false);
     const { address, name } = account;
-    const isFavourite = favAccount?.address === address;
-    const Icon = isFavourite ? FavouriteIcon : NotFavouriteIcon;
+    const isDefault = favAccount?.address === address;
+    const Icon = isDefault ? DefaultIcon : NotDefaultIcon;
 
-    const setFavourite = useCallback(() => {
+    const setDefault = useCallback(() => {
         if (favAccount) {
             setShowPrompt(true);
         } else {
-            setFavouriteAccount(dispatch, address);
+            setDefaultAccount(dispatch, address);
         }
     }, [favAccount, dispatch, address]);
 
@@ -53,7 +53,7 @@ export default function AccountFavouriteButton({ account, className }: Props) {
                     { label: 'Cancel' },
                     {
                         label: 'Change default',
-                        action: () => setFavouriteAccount(dispatch, address),
+                        action: () => setDefaultAccount(dispatch, address),
                     },
                 ]}
                 postAction={close}
@@ -62,8 +62,8 @@ export default function AccountFavouriteButton({ account, className }: Props) {
             <Button
                 className={clsx('inlineFlex', className)}
                 clear
-                disabled={isFavourite}
-                onClick={setFavourite}
+                disabled={isDefault}
+                onClick={setDefault}
             >
                 <Icon width={20} height={20} />
             </Button>

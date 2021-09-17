@@ -10,7 +10,7 @@ import {
 import { TransferTransaction } from '~/utils/types';
 import TransactionList from '../../TransactionList';
 import TransactionView from '../../TransactionView';
-import TransactionLogFilters from '../TransactionLogFilters/TransactionLogFilters';
+import TransactionLogFilters from '../TransactionLogFilters';
 
 import styles from './TransactionLog.module.scss';
 

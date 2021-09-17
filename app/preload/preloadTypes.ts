@@ -231,7 +231,7 @@ export interface PreferenceAccessor<V = string> {
 }
 
 export interface PreferencesMethods {
-    favouriteAccount: PreferenceAccessor<Hex>;
+    defaultAccount: PreferenceAccessor<Hex>;
     accountSimpleView: PreferenceAccessor<boolean>;
 }
 
