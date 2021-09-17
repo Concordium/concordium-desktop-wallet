@@ -40,6 +40,7 @@ import { collapseFraction } from '~/utils/basicHelpers';
 import { toMicroUnits, displayAsGTU } from '~/utils/gtu';
 import { useAsyncMemo } from '~/utils/hooks';
 import { nodeSupportsMemo } from '~/node/nodeHelpers';
+import { isMultiSig } from '~/utils/accountHelpers';
 
 import styles from './CreateTransferProposal.module.scss';
 import UpsertAddress from '~/components/UpsertAddress';
@@ -87,7 +88,7 @@ function CreateTransferProposal({
     const allowMemo = useAsyncMemo(nodeSupportsMemo);
 
     const { pathname, state } = useLocation<State>();
-    const accounts = useSelector(confirmedAccountsSelector);
+    const accounts = useSelector(confirmedAccountsSelector).filter(isMultiSig);
     const location = pathname.replace(`${transactionKind}`, ':transactionKind');
 
     const handler = findAccountTransactionHandler(transactionKind);
@@ -384,6 +385,7 @@ function CreateTransferProposal({
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
+                                        filter={isMultiSig}
                                         onAccountClicked={continueAction}
                                         messageWhenEmpty="There are no accounts that require multiple signatures"
                                     />

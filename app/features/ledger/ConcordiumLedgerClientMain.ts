@@ -37,6 +37,7 @@ import {
     UpdateAccountCredentials,
     AuthorizationKeysUpdate,
     AddIdentityProvider,
+    AddAnonymityRevoker,
     PrivateKeySeeds,
 } from '~/utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
@@ -47,6 +48,7 @@ import signHigherLevelKeyUpdate from './SignHigherLevelKeyUpdate';
 import signUpdateCredentialTransaction from './SignUpdateCredentials';
 import signAuthorizationKeysUpdate from './SignAuthorizationKeysUpdate';
 import signAddIdentityProviderTransaction from './SignAddIdentityProvider';
+import signAddAnonymityRevokerTransaction from './SignAddAnonymityRevoker';
 import EmulatorTransport from './EmulatorTransport';
 
 /**
@@ -320,6 +322,19 @@ export default class ConcordiumLedgerClientMain {
         path: number[]
     ): Promise<Buffer> {
         return signAddIdentityProviderTransaction(
+            this.transport,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signAddAnonymityRevoker(
+        transaction: UpdateInstruction<AddAnonymityRevoker>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signAddAnonymityRevokerTransaction(
             this.transport,
             path,
             transaction,

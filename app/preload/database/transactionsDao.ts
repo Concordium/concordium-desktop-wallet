@@ -108,9 +108,10 @@ async function hasEncryptedTransactions(
     const transaction = await (await knex())
         .select()
         .table(transactionTable)
-        .where({
-            transactionKind: TransactionKindString.EncryptedAmountTransfer,
-        })
+        .whereIn('transactionKind', [
+            TransactionKindString.EncryptedAmountTransfer,
+            TransactionKindString.EncryptedAmountTransferWithMemo,
+        ])
         .whereBetween('blockTime', [fromTime, toTime])
         .whereNull('decryptedAmount')
         .where((builder) => {
@@ -118,6 +119,21 @@ async function hasEncryptedTransactions(
                 fromAddress: address,
             });
         })
+        .first();
+    return Boolean(transaction);
+}
+
+async function hasPendingShieldedBalanceTransfer(fromAddress: string) {
+    const transaction = await (await knex())
+        .select()
+        .table(transactionTable)
+        .whereIn('transactionKind', [
+            TransactionKindString.EncryptedAmountTransfer,
+            TransactionKindString.EncryptedAmountTransferWithMemo,
+            TransactionKindString.TransferToEncrypted,
+            TransactionKindString.TransferToPublic,
+        ])
+        .where({ status: TransactionStatus.Pending, fromAddress })
         .first();
     return Boolean(transaction);
 }
@@ -221,6 +237,7 @@ const exposedMethods: TransactionMethods = {
     getPending: getPendingTransactions,
     hasPending: hasPendingTransactions,
     getTransactionsForAccount: getTransactionsOfAccount,
+    hasPendingShieldedBalanceTransfer,
     hasEncryptedTransactions,
     update: updateTransaction,
     insert: insertTransactions,

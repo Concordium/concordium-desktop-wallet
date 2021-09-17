@@ -3,6 +3,7 @@ import routes from '~/constants/routes.json';
 import { createUnshieldAmountTransaction } from '~/utils/transactionHelpers';
 import { Account, TransactionKindId } from '~/utils/types';
 import InternalTransfer from './InternalTransfer';
+import ensureNoPendingShieldedBalance from './ensureNoPendingShieldedBalance';
 
 interface Props {
     account: Account;
@@ -11,7 +12,7 @@ interface Props {
 /**
  * Controls the flow of creating a transfer to public.
  */
-export default function UnshieldAmount({ account }: Props) {
+function UnshieldAmount({ account }: Props) {
     const specific = {
         amountHeader: 'Unshield GTU',
         createTransaction: createUnshieldAmountTransaction,
@@ -21,3 +22,5 @@ export default function UnshieldAmount({ account }: Props) {
 
     return <InternalTransfer account={account} specific={specific} />;
 }
+
+export default ensureNoPendingShieldedBalance(UnshieldAmount);

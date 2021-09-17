@@ -62,6 +62,7 @@ interface UpdateQueues {
     level1Keys: UpdateQueue;
     level2Keys: UpdateQueue;
     addIdentityProvider: UpdateQueue;
+    addAnonymityRevoker: UpdateQueue;
 }
 
 export interface Authorization {
