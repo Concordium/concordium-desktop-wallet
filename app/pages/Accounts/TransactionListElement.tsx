@@ -249,6 +249,7 @@ function showMemo(
         <pre
             className={clsx(
                 'body4 m0 mT5 textFaded',
+                showFullMemo && styles.fullMemo,
                 showFullMemo || styles.lineClamp
             )}
         >

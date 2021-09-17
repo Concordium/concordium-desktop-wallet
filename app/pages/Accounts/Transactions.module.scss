@@ -82,6 +82,10 @@
     background-color: $color-light-blue;
 }
 
+.fullMemo {
+    white-space: pre-wrap;
+}
+
 .lineClamp {
     display: -webkit-box;
     -webkit-line-clamp: 1;
