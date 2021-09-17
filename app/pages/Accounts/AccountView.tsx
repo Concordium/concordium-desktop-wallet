@@ -12,6 +12,7 @@ import {
 } from '~/features/TransactionSlice';
 import routes from '~/constants/routes.json';
 import MoreActions from './MoreActions';
+import FinalPage from '~/components/Transfers/FinalPage';
 import EncryptedTransfer from '~/components/Transfers/EncryptedTransfer';
 import SimpleTransfer from '~/components/Transfers/SimpleTransfer';
 import ShieldAmount from '~/components/Transfers/ShieldAmount';
@@ -62,16 +63,11 @@ export default function AccountView() {
         if (
             account &&
             account.status === AccountStatus.Confirmed &&
-            controller.isReady &&
-            !controller.isAborted
+            controller.isReady
         ) {
             controller.start();
             updateTransactions(dispatch, account, controller).catch(setError);
-            return () => {
-                controller.abort();
-            };
         }
-        return () => {};
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         account?.address,
@@ -79,6 +75,11 @@ export default function AccountView() {
         account?.status,
         controller.isAborted,
     ]);
+
+    useEffect(() => {
+        return () => controller.abort();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [account?.address]);
 
     useEffect(() => {
         if (account && account.status === AccountStatus.Confirmed) {
@@ -138,6 +139,10 @@ export default function AccountView() {
                 <Route
                     path={routes.ACCOUNTS_UNSHIELDAMOUNT}
                     render={() => <UnshieldAmount account={account} />}
+                />
+                <Route
+                    path={routes.ACCOUNTS_FINAL_PAGE}
+                    component={FinalPage}
                 />
                 <Route
                     path={routes.ACCOUNTS}

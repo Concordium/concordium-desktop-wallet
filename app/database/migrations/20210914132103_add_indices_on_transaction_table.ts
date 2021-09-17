@@ -1,0 +1,21 @@
+/* eslint-disable */
+import { Knex } from 'knex';
+import { transactionTable } from '~/constants/databaseNames.json';
+
+export async function up(knex: Knex): Promise<void> {
+    return knex.schema.alterTable(transactionTable, (table) => {
+        table.index('status');
+        table.index('transactionKind');
+        table.index('blockTime');
+        table.index('transactionHash')
+    });
+}
+
+export async function down(knex: Knex): Promise<void> {
+    return knex.schema.alterTable(transactionTable, (table) => {
+        table.dropIndex('status');
+        table.dropIndex('transactionKind');
+        table.dropIndex('blockTime');
+        table.dropIndex('transactionHash');
+    });
+}

@@ -41,12 +41,12 @@ import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
 import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
 import errorMessages from '~/constants/errorMessages.json';
 import routes from '~/constants/routes.json';
-
-import styles from './SubmitTransfer.module.scss';
 import Card from '~/cross-app-components/Card';
 import PrintButton from '~/components/PrintButton';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import findHandler from '~/utils/transactionHandlers/HandlerFinder';
+
+import styles from './SubmitTransfer.module.scss';
 
 interface Location {
     pathname: string;
@@ -69,15 +69,22 @@ async function attachCompletedPayload(
     ledger: ConcordiumLedgerClient,
     global: Global,
     credential: CredentialWithIdentityNumber,
-    accountInfo: AccountInfo
+    accountInfo: AccountInfo,
+    setMessage: (message: string) => void
 ) {
-    if (instanceOfTransferToEncrypted(transaction)) {
+    const getPrfKey = async () => {
+        setMessage('Please accept decrypt on device');
         const prfKeySeed = await ledger.getPrfKeyDecrypt(
             credential.identityNumber
         );
+        setMessage('Please wait');
+        return prfKeySeed.toString('hex');
+    };
+
+    if (instanceOfTransferToEncrypted(transaction)) {
         const data = await makeTransferToEncryptedData(
             transaction.payload.amount,
-            prfKeySeed.toString('hex'),
+            await getPrfKey(),
             global,
             accountInfo.accountEncryptedAmount,
             credential.credentialNumber
@@ -92,12 +99,9 @@ async function attachCompletedPayload(
         return { ...transaction, payload };
     }
     if (instanceOfTransferToPublic(transaction)) {
-        const prfKeySeed = await ledger.getPrfKeyDecrypt(
-            credential.identityNumber
-        );
         const data = await makeTransferToPublicData(
             transaction.payload.transferAmount,
-            prfKeySeed.toString('hex'),
+            await getPrfKey(),
             global,
             accountInfo.accountEncryptedAmount,
             credential.credentialNumber
@@ -116,16 +120,13 @@ async function attachCompletedPayload(
         instanceOfEncryptedTransfer(transaction) ||
         instanceOfEncryptedTransferWithMemo(transaction)
     ) {
-        const prfKeySeed = await ledger.getPrfKeyDecrypt(
-            credential.identityNumber
-        );
         const receiverAccountInfo = await getAccountInfoOfAddress(
             transaction.payload.toAddress
         );
         const data = await makeEncryptedTransferData(
             transaction.payload.plainTransferAmount,
             receiverAccountInfo.accountEncryptionKey,
-            prfKeySeed.toString('hex'),
+            await getPrfKey(),
             global,
             accountInfo.accountEncryptedAmount,
             credential.credentialNumber
@@ -173,7 +174,10 @@ export default function SubmitTransfer({ location }: Props) {
      * then beings monitoring its status before redirecting the user to the
      * final page.
      */
-    async function ledgerSignTransfer(ledger: ConcordiumLedgerClient) {
+    async function ledgerSignTransfer(
+        ledger: ConcordiumLedgerClient,
+        setMessage: (message: string) => void
+    ) {
         const signatureIndex = 0;
 
         if (!global) {
@@ -195,7 +199,8 @@ export default function SubmitTransfer({ location }: Props) {
             ledger,
             global,
             credential,
-            accountInfoMap[account.address]
+            accountInfoMap[account.address],
+            setMessage
         );
 
         const path = getAccountPath({
@@ -203,6 +208,8 @@ export default function SubmitTransfer({ location }: Props) {
             accountIndex: credential.credentialNumber,
             signatureIndex,
         });
+
+        setMessage('Please review and sign transaction on device');
         const signature: Buffer = await ledger.signTransfer(transaction, path);
         const signatureStructured = buildTransactionAccountSignature(
             credential.credentialIndex,

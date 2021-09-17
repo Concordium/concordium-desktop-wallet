@@ -5,6 +5,7 @@ import {
     putBase58Check,
     serializeVerifyKey,
     serializeIpInfo,
+    serializeArInfo,
 } from './serializationHelpers';
 import {
     BakerStakeThreshold,
@@ -24,6 +25,7 @@ import {
     UpdateInstructionSignatureWithIndex,
     AuthorizationKeysUpdate,
     AccessStructure,
+    AddAnonymityRevoker,
     AddIdentityProvider,
     SerializedTextWithLength,
 } from './types';
@@ -45,6 +47,8 @@ export enum OnChainUpdateType {
     UpdateBakerStakeThreshold = 9,
     UpdateRootKeys = 10,
     UpdateLevel1Keys = 11,
+    // eslint-disable-next-line no-shadow
+    AddAnonymityRevoker = 12,
     // eslint-disable-next-line no-shadow
     AddIdentityProvider = 13,
 }
@@ -339,6 +343,17 @@ export function serializeAddIdentityProvider(
 }
 
 /**
+ * Serializes an AddAnonymityRevoker update's payload to bytes.
+ */
+export function serializeAddAnonymityRevoker(
+    addAnonymityRevoker: AddAnonymityRevoker
+) {
+    const data = serializeArInfo(addAnonymityRevoker);
+    const length = encodeWord32(data.length);
+    return Buffer.concat([length, data]);
+}
+
+/**
  * Serializes an UpdateHeader to exactly 28 bytes. See the interface
  * UpdateHeader for comments regarding the byte allocation for each field.
  */
@@ -431,6 +446,8 @@ function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
             return OnChainUpdateType.UpdateLevel1Keys;
         case UpdateType.AddIdentityProvider:
             return OnChainUpdateType.AddIdentityProvider;
+        case UpdateType.AddAnonymityRevoker:
+            return OnChainUpdateType.AddAnonymityRevoker;
         default:
             throw new Error(`An invalid update type was given: ${type}`);
     }

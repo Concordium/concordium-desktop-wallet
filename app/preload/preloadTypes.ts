@@ -244,6 +244,7 @@ export type TransactionMethods = {
         fromTime: string,
         toTime: string
     ) => Promise<boolean>;
+    hasPendingShieldedBalanceTransfer: (address: string) => Promise<boolean>;
     update: (
         identifier: Record<string, unknown>,
         updatedValues: Partial<TransferTransaction>
@@ -251,6 +252,11 @@ export type TransactionMethods = {
     insert: (
         transactions: Partial<TransferTransaction>[]
     ) => Promise<Partial<TransferTransaction>[]>;
+    upsertTransactionsAndUpdateMaxId: (
+        transactions: TransferTransaction[],
+        address: string,
+        newMaxId: bigint
+    ) => Promise<TransferTransaction[]>;
 };
 
 export type WalletMethods = {
