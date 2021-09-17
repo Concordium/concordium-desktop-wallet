@@ -88,7 +88,7 @@ async function getTransactionsOfAccount(
                     .orWhere({ fromAddress: address })
             )
             .orderBy('blockTime', 'desc')
-            .limit(limit);
+            .limit(limit + 1);
 
         transactions = await querytransactions;
         expandHours *= 2;
