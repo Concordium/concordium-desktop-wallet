@@ -730,6 +730,7 @@ export type UpdateInstructionPayload =
     | ElectionDifficulty
     | HigherLevelKeyUpdate
     | AuthorizationKeysUpdate
+    | AddAnonymityRevoker
     | AddIdentityProvider;
 
 // An actual signature, which goes into an account transaction.
@@ -777,6 +778,7 @@ export enum UpdateType {
     UpdateLevel1KeysUsingLevel1Keys,
     UpdateLevel2KeysUsingRootKeys,
     UpdateLevel2KeysUsingLevel1Keys,
+    AddAnonymityRevoker,
     AddIdentityProvider,
 }
 
@@ -923,6 +925,12 @@ export function isAddIdentityProvider(
     return UpdateType.AddIdentityProvider === transaction.type;
 }
 
+export function isAddAnonymityRevoker(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<AddAnonymityRevoker> {
+    return UpdateType.AddAnonymityRevoker === transaction.type;
+}
+
 export function isTransactionFeeDistribution(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<TransactionFeeDistribution> {
@@ -1066,6 +1074,7 @@ export type ExchangeRate = Fraction;
 export type RewardFraction = Word32;
 
 export type AddIdentityProvider = IpInfo;
+export type AddAnonymityRevoker = ArInfo;
 
 export interface TransactionFeeDistribution {
     baker: RewardFraction;

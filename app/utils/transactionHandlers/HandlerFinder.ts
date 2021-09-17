@@ -40,6 +40,8 @@ import TransferToPublicHandler from './TransferToPublicHandler';
 import UpdateLevel2KeysUsingRootKeysHandler from './UpdateLevel2KeysWithRootKeysHandler';
 import UpdateLevel2KeysUsingLevel1KeysHandler from './UpdateLevel2KeysWithLevel1KeysHandler';
 import AddIdentityProviderHandler from './AddIdentityProviderHandler';
+import AddAnonymityRevokerHandler from './AddAnonymityRevokerHandler';
+
 import EncryptedTransferHandler from './EncryptedTransferHandler';
 import BakerHandler from './BakerHandler';
 import { parse } from '../JSONHelper';
@@ -189,6 +191,10 @@ export function findUpdateInstructionHandler(
         case UpdateType.AddIdentityProvider:
             return new UpdateInstructionHandlerTypeMiddleware(
                 new AddIdentityProviderHandler()
+            );
+        case UpdateType.AddAnonymityRevoker:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new AddAnonymityRevokerHandler()
             );
         default:
             throw new Error(`Unsupported transaction type: ${type}`);

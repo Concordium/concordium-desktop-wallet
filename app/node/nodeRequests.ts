@@ -5,7 +5,7 @@ import {
     PeerListResponse,
 } from '../proto/concordium_p2p_rpc_pb';
 import { BlockSummary, ConsensusStatus, AccountNonce } from './NodeApiTypes';
-import { AccountInfo, Global, Versioned, IpInfo } from '../utils/types';
+import { AccountInfo, Global, Versioned, IpInfo, ArInfo } from '../utils/types';
 import { intToString } from '../utils/JSONHelper';
 import grpcMethods from '../constants/grpcMethods.json';
 
@@ -95,6 +95,17 @@ export async function getIdentityProviders(
     blockHashValue: string
 ): Promise<IpInfo[]> {
     return sendPromiseParseResult(grpcMethods.getIdentityProviders, {
+        blockHashValue,
+    });
+}
+
+/**
+ * Retrieves the list of anonymity revokers at the given blockHash.
+ */
+export async function getAnonymityRevokers(
+    blockHashValue: string
+): Promise<ArInfo[]> {
+    return sendPromiseParseResult(grpcMethods.getAnonymityRevokers, {
         blockHashValue,
     });
 }

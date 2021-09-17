@@ -23,6 +23,7 @@ import {
     AuthorizationKeysUpdate,
     UpdateAccountCredentials,
     AddIdentityProvider,
+    AddAnonymityRevoker,
 } from '~/utils/types';
 import { LedgerCommands } from '~/preload/preloadTypes';
 
@@ -146,6 +147,17 @@ export default function exposedMethods(
             keypath: number[]
         ) => {
             return getLedgerClient().signProtocolUpdate(
+                transaction,
+                serializedPayload,
+                keypath
+            );
+        },
+        signAddAnonymityRevoker: (
+            transaction: UpdateInstruction<AddAnonymityRevoker>,
+            serializedPayload: Buffer,
+            keypath: number[]
+        ) => {
+            return getLedgerClient().signAddAnonymityRevoker(
                 transaction,
                 serializedPayload,
                 keypath

@@ -90,6 +90,11 @@ const updateInstructionTypes: [TransactionTypes, UpdateType, string][] = [
         UpdateType.AddIdentityProvider,
         'Add identity provider',
     ],
+    [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.AddAnonymityRevoker,
+        'Add anonymity revoker',
+    ],
 ];
 
 const accountTransactionTypes: [

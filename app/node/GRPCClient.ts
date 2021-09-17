@@ -45,6 +45,10 @@ export function grpcCall(name: string, input: Record<string, string>) {
             const { blockHashValue } = input;
             return client.getIdentityProviders(blockHashValue);
         }
+        case grpcMethods.getAnonymityRevokers: {
+            const { blockHashValue } = input;
+            return client.getAnonymityRevokers(blockHashValue);
+        }
         case grpcMethods.getCryptographicParameters: {
             const { blockHashValue } = input;
             return client.getCryptographicParameters(blockHashValue);
