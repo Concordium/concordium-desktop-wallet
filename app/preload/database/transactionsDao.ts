@@ -1,15 +1,20 @@
-import { Knex } from 'knex';
 import {
-    Hex,
+    Account,
     TimeStampUnit,
     TransactionKindString,
     TransactionStatus,
     TransferTransaction,
 } from '~/utils/types';
-import { transactionTable } from '~/constants/databaseNames.json';
+import {
+    transactionTable,
+    accountsTable,
+} from '~/constants/databaseNames.json';
 import { knex } from '~/database/knex';
 import { chunkArray, partition } from '~/utils/basicHelpers';
-import { TransactionMethods } from '~/preload/preloadTypes';
+import {
+    GetTransactionsOutput,
+    TransactionMethods,
+} from '~/preload/preloadTypes';
 
 async function updateTransaction(
     identifier: Record<string, unknown>,
@@ -38,64 +43,83 @@ async function hasPendingTransactions(fromAddress: string) {
     return Boolean(transaction);
 }
 
-const withFilteredAccountsQuery = <R = TransferTransaction[]>(
-    cb: (query: Knex.QueryBuilder) => Promise<R>
-) => async (
-    address: Hex,
-    filteredTypes: TransactionKindString[] = [],
-    fromDate?: Date,
-    toDate?: Date
-) => {
-    const from = (fromDate?.getTime() ?? 0) / TimeStampUnit.seconds;
-    const to = (toDate?.getTime() ?? Date.now()) / TimeStampUnit.seconds;
-
-    const query = (await knex())
-        .select()
-        .table(transactionTable)
-        .whereIn('transactionKind', filteredTypes)
-        .andWhere((builder) => {
-            builder.where({ toAddress: address }).orWhere({
-                fromAddress: address,
-            });
-        })
-        .andWhereBetween('blockTime', [from.toString(), to.toString()])
-        .orderBy('blockTime', 'desc')
-        .orderBy('id', 'desc');
-
-    return cb(query);
-};
-
+/**
+ * Extracts the most recent transactions for a given account.
+ *
+ * To achieve this we search in the database by block time, which
+ * is extended until we have reached the number of results we are
+ * interested in. If there are not enough results, then less are
+ * returned when we conclude there are no more available transactions.
+ * @param account the account to get transactions for
+ * @param filteredTypes filtering on the transaction kind
+ * @param limit maximum number of transactions to return
+ * @returns a list of the most recent transactions for the account
+ */
 async function getTransactionsOfAccount(
-    address: Hex,
+    account: Account,
     filteredTypes: TransactionKindString[] = [],
     fromDate?: Date,
     toDate?: Date,
     limit?: number,
     startId?: string
-): Promise<TransferTransaction[]> {
-    return withFilteredAccountsQuery(async (query) => {
+): Promise<GetTransactionsOutput> {
+    const { address } = account;
+
+    const latestTransaction: TransferTransaction | undefined = await (
+        await knex()
+    )(transactionTable)
+        .where({ id: account.maxTransactionId })
+        .first();
+    if (!latestTransaction) {
+        // When there are no transactions in the database, this will be the case.
+        return {
+            transactions: [],
+            more: false,
+        };
+    }
+
+    const fromLimit = (fromDate?.getTime() ?? 0) / TimeStampUnit.seconds;
+    const toLimit = (toDate?.getTime() ?? Date.now()) / TimeStampUnit.seconds;
+
+    const toTime = Math.min(Number(latestTransaction.blockTime), toLimit);
+    let expandHours = 1;
+    let fromTime: number;
+    let transactions;
+    let more = true;
+
+    do {
+        fromTime = Math.max(fromLimit, toTime - 60 * 60 * expandHours);
+
+        const querytransactions = (await knex())<TransferTransaction>(
+            transactionTable
+        )
+            .whereIn('transactionKind', filteredTypes)
+            .whereBetween('blockTime', [fromTime, toTime])
+            .andWhere((builder) =>
+                builder
+                    .where({ toAddress: address })
+                    .orWhere({ fromAddress: address })
+            )
+            .orderBy('blockTime', 'desc');
+
         if (startId) {
-            query.andWhere('id', '<', startId);
+            querytransactions.andWhere('id', '<', startId);
         }
 
         if (limit) {
-            query.limit(limit);
+            querytransactions.limit(limit + 1);
         }
+        transactions = await querytransactions;
 
-        const transactions = await query;
+        expandHours *= 2;
+        more = !!limit && transactions.length > limit;
+    } while (!more || fromTime > fromLimit);
 
-        return transactions;
-    })(address, filteredTypes, fromDate, toDate);
+    return {
+        transactions: transactions.slice(0, limit),
+        more,
+    };
 }
-
-const getMinTransactionId = withFilteredAccountsQuery<string>(async (query) => {
-    query.min('id');
-
-    const obj = (await query)[0];
-    const minId = Object.values<string>(obj)[0];
-
-    return minId;
-});
 
 async function hasEncryptedTransactions(
     address: string,
@@ -144,7 +168,14 @@ export async function insertTransactions(
     transactions: Partial<TransferTransaction>[]
 ) {
     const table = (await knex())(transactionTable);
-    const existingTransactions: TransferTransaction[] = await table.select();
+
+    const hashes = transactions
+        .map((t) => t.transactionHash || '')
+        .filter((hash) => hash);
+    const existingTransactions: TransferTransaction[] = await table
+        .whereIn('transactionHash', hashes)
+        .select();
+
     const [updates, additions] = partition(transactions, (t) =>
         existingTransactions.some(
             (t_) => t.transactionHash === t_.transactionHash
@@ -170,15 +201,68 @@ export async function insertTransactions(
     return additions;
 }
 
+/**
+ * Upserts the provided list of transactions into the database. The maximum
+ * id is used to update the corresponding account.
+ * @param transactions the array of transactions to upsert, coming from the wallet proxy post conversion
+ * @param newMaxId the max of the id's in the array of transactions
+ * @returns the newly added transactions, i.e. the array of transactions that were inserted and not updated
+ */
+export async function upsertTransactionsAndUpdateMaxId(
+    transactions: TransferTransaction[],
+    address: string,
+    newMaxId: bigint
+) {
+    if (transactions.length === 0) {
+        return [];
+    }
+
+    const transactionHashes = transactions
+        .map((t) => t.transactionHash || '')
+        .filter((hash) => hash);
+    const transactionTableKnex = (await knex())(transactionTable);
+
+    const existingTransactions: TransferTransaction[] = await transactionTableKnex
+        .whereIn('transactionHash', transactionHashes)
+        .select();
+
+    const [updates, additions] = partition(transactions, (t) =>
+        existingTransactions.some(
+            (t_) => t.transactionHash === t_.transactionHash
+        )
+    );
+
+    const additionChunks = chunkArray(additions, 50);
+    await (await knex()).transaction(async (trx) => {
+        for (const additionChunk of additionChunks) {
+            await trx.table(transactionTable).insert(additionChunk);
+        }
+
+        for (const updatedTransaction of updates) {
+            await trx
+                .table(transactionTable)
+                .where({ transactionHash: updatedTransaction.transactionHash })
+                .update(updatedTransaction);
+        }
+
+        await trx
+            .table(accountsTable)
+            .where({ address })
+            .update({ maxTransactionId: newMaxId.toString() });
+    });
+
+    return additions;
+}
+
 const exposedMethods: TransactionMethods = {
     getPending: getPendingTransactions,
     hasPending: hasPendingTransactions,
     getTransactionsForAccount: getTransactionsOfAccount,
-    getMinTransactionId,
     hasPendingShieldedBalanceTransfer,
     hasEncryptedTransactions,
     update: updateTransaction,
     insert: insertTransactions,
+    upsertTransactionsAndUpdateMaxId,
 };
 
 export default exposedMethods;

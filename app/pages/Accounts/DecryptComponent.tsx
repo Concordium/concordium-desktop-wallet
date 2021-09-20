@@ -60,12 +60,7 @@ export default function DecryptComponent({ account, onDecrypt }: Props) {
         setMessage('Please wait');
         const prfKey = prfKeySeed.toString('hex');
 
-        await decryptTransactions(
-            account.address,
-            prfKey,
-            credentialNumber,
-            global
-        );
+        await decryptTransactions(account, prfKey, credentialNumber, global);
         await decryptAccountBalance(
             prfKey,
             account,

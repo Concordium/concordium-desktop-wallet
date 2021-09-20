@@ -146,8 +146,8 @@ export async function getAccountCSV(
     filter: TransactionFilter
 ) {
     const { fromDate, toDate } = filter;
-    const transactions = await getTransactionsOfAccount(
-        account.address,
+    const { transactions } = await getTransactionsOfAccount(
+        account,
         getActiveBooleanFilters(filter),
         fromDate ? new Date(fromDate) : undefined,
         toDate ? new Date(toDate) : undefined

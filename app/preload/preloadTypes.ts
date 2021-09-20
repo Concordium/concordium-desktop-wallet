@@ -239,23 +239,22 @@ export type SettingsMethods = {
     update: (setting: Setting) => Promise<number>;
 };
 
+export interface GetTransactionsOutput {
+    transactions: TransferTransaction[];
+    more: boolean;
+}
+
 export type TransactionMethods = {
     getPending: () => Promise<TransferTransaction[]>;
     hasPending: (address: string) => Promise<boolean>;
     getTransactionsForAccount: (
-        address: Hex,
+        address: Account,
         filteredTypes: TransactionKindString[],
         fromDate?: Date,
         toDate?: Date,
         limit?: number,
         startId?: string
-    ) => Promise<TransferTransaction[]>;
-    getMinTransactionId(
-        address: Hex,
-        filteredTypes: TransactionKindString[],
-        fromDate?: Date,
-        toDate?: Date
-    ): Promise<string>;
+    ) => Promise<GetTransactionsOutput>;
     hasEncryptedTransactions: (
         address: string,
         fromTime: string,
@@ -269,6 +268,11 @@ export type TransactionMethods = {
     insert: (
         transactions: Partial<TransferTransaction>[]
     ) => Promise<Partial<TransferTransaction>[]>;
+    upsertTransactionsAndUpdateMaxId: (
+        transactions: TransferTransaction[],
+        address: string,
+        newMaxId: bigint
+    ) => Promise<TransferTransaction[]>;
 };
 
 export type WalletMethods = {

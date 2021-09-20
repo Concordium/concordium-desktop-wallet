@@ -71,12 +71,7 @@ export default function useAccountSync(): string | undefined {
         ) {
             controller.start();
             dispatch(updateTransactions({ controller, onError: setError }));
-
-            return () => {
-                controller.abort();
-            };
         }
-        return noOp;
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         account?.address,
@@ -84,6 +79,11 @@ export default function useAccountSync(): string | undefined {
         account?.status,
         controller.isAborted,
     ]);
+
+    useEffect(() => {
+        return () => controller.abort();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [account?.address]);
 
     useEffect(() => {
         if (account && account.status === AccountStatus.Confirmed) {

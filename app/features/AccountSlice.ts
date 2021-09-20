@@ -579,7 +579,6 @@ export async function updateMaxTransactionId(
     maxTransactionId: string
 ) {
     const updatedFields = { maxTransactionId };
-    updateAccount(address, updatedFields);
     return dispatch(updateAccountFields({ address, updatedFields }));
 }
 

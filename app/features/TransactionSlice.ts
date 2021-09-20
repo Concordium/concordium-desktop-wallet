@@ -4,8 +4,8 @@ import { RootState } from '../store/store';
 import { getTransactions } from '../utils/httpRequests';
 import { decryptAmounts } from '../utils/rustInterface';
 import {
-    getMinTransactionId,
     getTransactionsOfAccount,
+    upsertTransactionsAndUpdateMaxId,
     insertTransactions,
     updateTransaction,
 } from '../database/TransactionDao';
@@ -18,6 +18,8 @@ import {
     TransactionEvent,
     Global,
     TransferTransactionWithNames,
+    IncomingTransaction,
+    Account,
 } from '../utils/types';
 import { isSuccessfulTransaction } from '../utils/transactionHelpers';
 import {
@@ -43,7 +45,7 @@ interface State {
     transactions: TransferTransaction[];
     viewingShielded: boolean;
     loadingTransactions: boolean;
-    lowestTransactionId: string;
+    hasMore: boolean;
 }
 
 const transactionSlice = createSlice({
@@ -52,18 +54,18 @@ const transactionSlice = createSlice({
         transactions: [],
         viewingShielded: false,
         loadingTransactions: false,
-        lowestTransactionId: '0',
+        hasMore: true,
     } as State,
     reducers: {
         setTransactions(
             state,
             update: PayloadAction<{
                 transactions: TransferTransaction[];
-                lowestId: string;
+                hasMore: boolean;
             }>
         ) {
             state.transactions = update.payload.transactions;
-            state.lowestTransactionId = update.payload.lowestId;
+            state.hasMore = update.payload.hasMore;
         },
         appendTransactions(
             state,
@@ -105,12 +107,14 @@ const {
 // This function expects the prfKey to match the account's prfKey,
 // and that the account is the receiver of the transactions.
 export async function decryptTransactions(
-    accountAddress: string,
+    account: Account,
     prfKey: string,
     credentialNumber: number,
     global: Global
 ) {
-    const encryptedTransfers = await getTransactionsOfAccount(accountAddress, [
+    const {
+        transactions: encryptedTransfers,
+    } = await getTransactionsOfAccount(account, [
         TransactionKindString.EncryptedAmountTransfer,
         TransactionKindString.EncryptedAmountTransferWithMemo,
     ]);
@@ -128,7 +132,7 @@ export async function decryptTransactions(
         if (!t.encrypted) {
             throw new Error('Unexpected missing field');
         }
-        if (t.fromAddress === accountAddress) {
+        if (t.fromAddress === account.address) {
             return JSON.parse(t.encrypted).inputEncryptedAmount;
         }
         return JSON.parse(t.encrypted).encryptedAmount;
@@ -212,7 +216,7 @@ export const loadTransactions = createAsyncThunk(
         const minId = state.transactions.transactions
             .map((t) => t.id)
             .filter(isDefined)
-            .reverse()[0];
+            .reduce((min, cur) => (min > cur ? cur : min), '0');
 
         const account = chosenAccountSelector(state);
 
@@ -228,8 +232,8 @@ export const loadTransactions = createAsyncThunk(
         const booleanFilters = getActiveBooleanFilters(
             account.transactionFilter
         );
-        const transactions = await getTransactionsOfAccount(
-            account.address,
+        const { transactions, more } = await getTransactionsOfAccount(
+            account,
             booleanFilters,
             fromDate ? new Date(fromDate) : undefined,
             toDate ? new Date(toDate) : undefined,
@@ -248,14 +252,7 @@ export const loadTransactions = createAsyncThunk(
         if (append) {
             dispatch(appendTransactions(transactions));
         } else {
-            const lowestId = await getMinTransactionId(
-                account.address,
-                booleanFilters,
-                fromDate ? new Date(fromDate) : undefined,
-                toDate ? new Date(toDate) : undefined
-            );
-
-            dispatch(setTransactions({ transactions, lowestId }));
+            dispatch(setTransactions({ transactions, hasMore: more }));
         }
     }
 );
@@ -279,7 +276,22 @@ export const reloadTransactions = createAsyncThunk(
     }
 );
 
-async function fetchTransactions(address: string, currentMaxId: bigint) {
+/**
+ * Fetches a batch of transactions from the wallet proxy for the account
+ * with the provided address.
+ * @param address the account address to fetch transactions for
+ * @param currentMaxId the current transaction id to retrieve transactions from
+ * @returns the list of fetched transactions, and the new max id of the received transactions,
+ * and whether there are more transactions to fetch.
+ */
+async function fetchTransactions(
+    address: string,
+    currentMaxId: bigint
+): Promise<{
+    transactions: IncomingTransaction[];
+    newMaxId: bigint;
+    isFinished: boolean;
+}> {
     const { transactions, full } = await getTransactions(
         address,
         currentMaxId.toString()
@@ -291,14 +303,7 @@ async function fetchTransactions(address: string, currentMaxId: bigint) {
     );
     const isFinished = !full;
 
-    const newTransactions = await insertTransactions(
-        transactions.map((transaction) =>
-            convertIncomingTransaction(transaction, address)
-        )
-    );
-    const newEncrypted = newTransactions.some(isShieldedBalanceTransaction);
-
-    return { newMaxId, isFinished, newEncrypted };
+    return { transactions, newMaxId, isFinished };
 }
 
 interface UpdateTransactionsArgs {
@@ -310,7 +315,10 @@ interface UpdateTransactionsArgs {
  * will fetch transactions in intervals, updating the state each time.
  * stops when it reaches the newest transaction, or it is told to abort by the controller.
  * */
-export const updateTransactions = createAsyncThunk<any, UpdateTransactionsArgs>(
+export const updateTransactions = createAsyncThunk<
+    unknown,
+    UpdateTransactionsArgs
+>(
     'transactions/update',
     async ({ controller, onError }, { getState, dispatch }) => {
         const state = getState() as RootState;
@@ -327,24 +335,36 @@ export const updateTransactions = createAsyncThunk<any, UpdateTransactionsArgs>(
             }
 
             let result;
+            const { address } = account;
             try {
-                result = await fetchTransactions(account.address, maxId);
+                result = await fetchTransactions(address, maxId);
             } catch (e) {
                 controller.finish();
                 onError(errorMessages.unableToReachWalletProxy);
                 throw e;
             }
 
-            if (maxId !== result.newMaxId) {
-                await updateMaxTransactionId(
-                    dispatch,
-                    account.address,
-                    result.newMaxId.toString()
-                );
-            }
+            // Insert the fetched transactions and update the max transaction id
+            // in a single transaction.
+            const convertedIncomingTransactions = result.transactions.map((t) =>
+                convertIncomingTransaction(t, address)
+            );
+            const newTransactions = await upsertTransactionsAndUpdateMaxId(
+                convertedIncomingTransactions,
+                address,
+                result.newMaxId
+            );
+            await updateMaxTransactionId(
+                dispatch,
+                address,
+                result.newMaxId.toString()
+            );
 
-            if (result.newEncrypted) {
-                await updateAllDecrypted(dispatch, account.address, false);
+            const newEncrypted = newTransactions.some(
+                isShieldedBalanceTransaction
+            );
+            if (newEncrypted) {
+                await updateAllDecrypted(dispatch, address, false);
             }
 
             if (controller.isAborted) {
@@ -497,9 +517,6 @@ export const loadingTransactionsSelector = (state: RootState) =>
     state.transactions.loadingTransactions;
 
 export const hasMoreTransactionsSelector = (state: RootState) =>
-    state.transactions.transactions
-        .map((t) => t.id)
-        .filter(isDefined)
-        .reverse()[0] > state.transactions.lowestTransactionId;
+    state.transactions.hasMore;
 
 export default transactionSlice.reducer;
