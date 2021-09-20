@@ -275,7 +275,7 @@ export type TransactionMethods = {
     insert: (
         transactions: Partial<TransferTransaction>[]
     ) => Promise<Partial<TransferTransaction>[]>;
-    getTransaction: (id: string) => Promise<TransferTransaction>;
+    getTransaction: (id: string) => Promise<TransferTransaction | undefined>;
     upsertTransactionsAndUpdateMaxId: (
         transactions: TransferTransaction[],
         address: string,

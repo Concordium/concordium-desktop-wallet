@@ -34,10 +34,13 @@ async function getPendingTransactions(): Promise<TransferTransaction[]> {
     return transactions;
 }
 
-async function getTransaction(id: string): Promise<TransferTransaction> {
-    const transaction = await (await knex())
+async function getTransaction(
+    id: string
+): Promise<TransferTransaction | undefined> {
+    const transaction = await (await knex())<TransferTransaction>(
+        transactionTable
+    )
         .select()
-        .table(transactionTable)
         .where({ id })
         .first();
     return transaction;

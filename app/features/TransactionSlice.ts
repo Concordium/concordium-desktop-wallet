@@ -293,6 +293,7 @@ export async function fetchNewestTransactions(
     );
 
     if (
+        newestTransactionInDatabase &&
         account.transactionFilter.toDate &&
         secondsSinceUnixEpoch(
             new Date(account.transactionFilter.toDate)
