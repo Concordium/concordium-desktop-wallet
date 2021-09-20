@@ -58,12 +58,13 @@ export default function ChoiceModal({
                         onClick={() => {
                             if (isAction(a)) {
                                 a.action();
-                                postAction();
                             } else if (a.location) {
                                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                 dispatch(push(a.location as any));
                                 postAction(a.location);
+                                return;
                             }
+                            postAction();
                         }}
                     >
                         {a.label}
