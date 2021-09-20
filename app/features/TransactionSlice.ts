@@ -38,7 +38,7 @@ import { RejectReason } from '~/utils/node/RejectReasonHelper';
 import { isDefined, max } from '~/utils/basicHelpers';
 import { getActiveBooleanFilters } from '~/utils/accountHelpers';
 import errorMessages from '~/constants/errorMessages.json';
-import { secondsSinceUnixEpoch } from '~/utils/timeHelpers';
+import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import { GetTransactionsOutput } from '~/preload/preloadTypes';
 
 export const transactionLogPageSize = 100;
@@ -295,9 +295,8 @@ export async function fetchNewestTransactions(
     if (
         newestTransactionInDatabase &&
         account.transactionFilter.toDate &&
-        secondsSinceUnixEpoch(
-            new Date(account.transactionFilter.toDate)
-        ).toString() < newestTransactionInDatabase.blockTime
+        new Date(account.transactionFilter.toDate).getTime() <
+            dateFromTimeStamp(newestTransactionInDatabase.blockTime).getTime()
     ) {
         // The area of search is subset of loaded transactions.
         return;
