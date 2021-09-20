@@ -39,7 +39,6 @@ import { getActiveBooleanFilters } from '~/utils/accountHelpers';
 import errorMessages from '~/constants/errorMessages.json';
 import { GetTransactionsOutput } from '~/preload/preloadTypes';
 
-const updateTransactionInterval = 5000;
 export const transactionLogPageSize = 100;
 
 interface State {
@@ -387,9 +386,6 @@ export const updateTransactions = createAsyncThunk<
                 return;
             }
 
-            await new Promise((resolve) =>
-                setTimeout(resolve, updateTransactionInterval)
-            );
             await updateSubroutine(result.newMaxId);
         }
 
