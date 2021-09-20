@@ -261,7 +261,7 @@ function showMemo(
 
 const onlyTime = Intl.DateTimeFormat(undefined, {
     timeStyle: 'medium',
-    hourCycle: 'h24',
+    hourCycle: 'h23',
 }).format;
 
 export const transactionListElementHeight = 58;
