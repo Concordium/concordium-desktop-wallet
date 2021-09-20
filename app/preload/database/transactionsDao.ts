@@ -95,10 +95,13 @@ async function getTransactionsOfAccount(
         )
             .whereIn('transactionKind', filteredTypes)
             .whereBetween('blockTime', [fromTime, toTime])
+            // The '+' forces SQLite to NOT use the index on these columns.
+            // SQLite can only use one index, and it HAS to NOT be the address
+            // ones for this to perform (it has to use the blockTime index).
             .andWhere((builder) =>
                 builder
-                    .where({ toAddress: address })
-                    .orWhere({ fromAddress: address })
+                    .whereRaw('+toAddress = ?', address)
+                    .orWhereRaw('+fromAddress = ?', address)
             )
             .orderBy('blockTime', 'desc');
 
