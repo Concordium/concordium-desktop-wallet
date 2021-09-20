@@ -4,6 +4,7 @@ import {
     openRoute,
     readyToShow,
     didFinishLoad,
+    logFromMain,
 } from '~/constants/ipcRendererCommands.json';
 import {
     onAwaitVerificationKey,
@@ -28,6 +29,7 @@ import initializeDatabasePreferencesMethods from './database/preferencesDao';
 import initializeDatabaseSettingsMethods from './database/settingsDao';
 import initializeDatabaseTransactionsMethods from './database/transactionsDao';
 import initializeDatabaseWalletMethods from './database/walletDao';
+import autoUpdateMethods from './autoUpdate';
 
 import ipcCommands from '~/constants/ipcCommands.json';
 
@@ -56,6 +58,7 @@ const Exposed: EqualRecord<WindowFunctions> = {
     openUrl: 'openUrl',
     removeAllListeners: 'removeAllListeners',
     view: 'view',
+    autoUpdate: 'autoUpdate',
 };
 
 const eventEmitter = new EventEmitter();
@@ -65,6 +68,7 @@ const listenImpl: Listen = {
     readyToShow: (func) => ipcRenderer.on(readyToShow, func),
     didFinishLoad: (func) => ipcRenderer.on(didFinishLoad, func),
     ledgerChannel: (func) => eventEmitter.on(listenChannel, func),
+    logFromMain: (func) => ipcRenderer.on(logFromMain, func),
 };
 
 const removeListener: Listen = {
@@ -72,6 +76,7 @@ const removeListener: Listen = {
     readyToShow: (func) => ipcRenderer.off(readyToShow, func),
     didFinishLoad: (func) => ipcRenderer.off(didFinishLoad, func),
     ledgerChannel: (func) => eventEmitter.off(listenChannel, func),
+    logFromMain: (func) => ipcRenderer.off(logFromMain, func),
 };
 
 const onceImpl: Once = {
@@ -135,3 +140,4 @@ const databaseMethods: Database = {
 };
 
 contextBridge.exposeInMainWorld(Exposed.database, databaseMethods);
+contextBridge.exposeInMainWorld(Exposed.autoUpdate, autoUpdateMethods);

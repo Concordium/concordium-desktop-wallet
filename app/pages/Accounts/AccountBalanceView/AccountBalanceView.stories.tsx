@@ -23,7 +23,7 @@ const Template: Story<{ account: Account; accountInfo: AccountInfo }> = ({
         accounts: [account, { ...account, name: 'Another', address: '234' }],
         accountsInfo: { [account.address]: accountInfo, '234': accountInfo },
         chosenAccountAddress: account.address,
-        favouriteAccount: account.address,
+        defaultAccount: account.address,
     };
 
     return (

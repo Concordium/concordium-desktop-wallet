@@ -19,6 +19,7 @@ import {
     UpdateInstructionPayload,
     UpdateAccountCredentials,
     AccountTransaction,
+    AddAnonymityRevoker,
 } from '~/utils/types';
 import { AppAndVersion } from '../features/ledger/GetAppAndVersion';
 import { AccountPathInput } from '../features/ledger/Path';
@@ -76,6 +77,7 @@ type LedgerCommands = {
     signBakerStakeThreshold: SignUpdate<BakerStakeThreshold>;
     signElectionDifficulty: SignUpdate<ElectionDifficulty>;
     signAddIdentityProvider: SignUpdate<AddIdentityProvider>;
+    signAddAnonymityRevoker: SignUpdate<AddAnonymityRevoker>;
     signHigherLevelKeysUpdate: SignKeyUpdate<HigherLevelKeyUpdate>;
     signAuthorizationKeysUpdate: SignKeyUpdate<AuthorizationKeysUpdate>;
     getAppAndVersion: () => Promise<AppAndVersion>;

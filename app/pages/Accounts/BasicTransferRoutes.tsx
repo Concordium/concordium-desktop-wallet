@@ -9,6 +9,7 @@ import SimpleTransfer from '~/components/Transfers/SimpleTransfer';
 import UnshieldAmount from '~/components/Transfers/UnshieldAmount';
 import { Account, PropsOf } from '~/utils/types';
 import { RootState } from '~/store/store';
+import FinalPage from '~/components/Transfers/FinalPage';
 
 interface Props {
     account: Account;
@@ -55,6 +56,7 @@ export default function BasicTransferRoutes({ account, children }: Props) {
                     />
                 )}
             />
+            <Route path={routes.ACCOUNTS_FINAL_PAGE} component={FinalPage} />
             {children}
         </Switch>
     );

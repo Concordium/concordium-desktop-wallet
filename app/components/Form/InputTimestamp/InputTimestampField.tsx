@@ -72,18 +72,20 @@ const InputTimestampField = ({
 
     const handleChange: ChangeEventHandler<HTMLInputElement> = useCallback(
         (e) => {
+            formOnChange(e);
+            if (onChange) {
+                onChange(e);
+            }
+
             const el = e.currentTarget;
             if (
                 el.value.length !== value.length &&
                 el.value.length === autoNext &&
                 autoNext !== undefined
             ) {
-                (el.nextElementSibling as HTMLInputElement | null)?.focus();
-            }
-
-            formOnChange(e);
-            if (onChange) {
-                onChange(e);
+                setTimeout(() => {
+                    (el.nextElementSibling as HTMLInputElement | null)?.focus();
+                });
             }
         },
         [formOnChange, onChange, value, autoNext]

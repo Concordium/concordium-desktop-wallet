@@ -1,4 +1,4 @@
 export const {
-    favouriteAccount,
+    defaultAccount,
     accountSimpleView,
 } = window.database.preferences;

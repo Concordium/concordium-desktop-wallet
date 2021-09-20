@@ -239,7 +239,7 @@ function showMemo(
     ) {
         // If we are fully showing the memo, and the type is one that has a memo version, but there is no memo:
         return (
-            <i className="body4 m0 mT5 textFaded">
+            <i className="body4 m0 textFaded">
                 The transaction contains no memo
             </i>
         );
@@ -250,7 +250,7 @@ function showMemo(
     return (
         <pre
             className={clsx(
-                'body4 m0 mT5 textFaded',
+                'body4 m0 textFaded',
                 showFullMemo || styles.lineClamp
             )}
         >
@@ -261,7 +261,7 @@ function showMemo(
 
 const onlyTime = Intl.DateTimeFormat(undefined, {
     timeStyle: 'medium',
-    hourCycle: 'h24',
+    hourCycle: 'h23',
 }).format;
 
 export const transactionListElementHeight = 58;

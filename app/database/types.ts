@@ -13,7 +13,7 @@ export interface ExternalCredential {
 }
 
 export enum PreferenceKey {
-    FAVOURITE_ACCOUNT = 'favouriteAccount',
+    DEFAULT_ACCOUNT = 'defaultAccount',
     ACCOUNT_PAGE_SIMPLE = 'accountPageSimple',
 }
 

@@ -1,3 +1,4 @@
+import '../mockWindow';
 import { hasNoDuplicate } from '../../app/utils/importHelpers';
 
 test('CheckDuplicates should return true, when sharing some fields', () => {

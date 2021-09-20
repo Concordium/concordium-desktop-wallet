@@ -12,6 +12,7 @@ import {
     updateTransactions,
     loadTransactions,
     fetchNewestTransactions,
+    resetTransactions,
 } from '~/features/TransactionSlice';
 import { noOp } from '~/utils/basicHelpers';
 import { AccountStatus } from '~/utils/types';
@@ -93,15 +94,15 @@ export default function useAccountSync(): string | undefined {
             !updateTransactionsController.isAborted
         ) {
             updateTransactionsController.start();
-            updateTransactions(
-                dispatch,
-                account,
-                updateTransactionsController,
-                newestTransactionsController
-            ).catch(setError);
+            dispatch(
+                updateTransactions({
+                    controller: updateTransactionsController,
+                    onError: setError,
+                    outdatedController: newestTransactionsController,
+                })
+            );
             return () => {
                 newestTransactionsController.start();
-                updateTransactionsController.abort();
             };
         }
         return noOp;
@@ -114,14 +115,25 @@ export default function useAccountSync(): string | undefined {
     ]);
 
     useEffect(() => {
+        return () => updateTransactionsController.abort();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [account?.address]);
+
+    useEffect(() => {
         if (account && account.status === AccountStatus.Confirmed) {
             const loadController = new AbortController();
-            loadTransactions(account, dispatch, true, loadController);
+            dispatch(resetTransactions());
+            dispatch(
+                loadTransactions({
+                    controller: loadController,
+                    showLoading: true,
+                })
+            );
             return () => loadController.abort();
         }
         return () => {};
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [account?.address, account?.transactionFilter]);
+    }, [account?.address, JSON.stringify(account?.transactionFilter)]);
 
     return error;
 }

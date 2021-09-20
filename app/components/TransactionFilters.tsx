@@ -85,11 +85,11 @@ const transactionFilters: {
     },
     {
         field: TransactionKindString.TransferToEncrypted,
-        display: 'Shielded amount',
+        display: 'Shielded amounts',
     },
     {
         field: TransactionKindString.TransferToPublic,
-        display: 'Unshielded amount',
+        display: 'Unshielded amounts',
     },
     {
         field: TransactionKindString.EncryptedAmountTransfer,

@@ -8,6 +8,7 @@ import {
     chosenAccountInfoSelector,
 } from '~/features/AccountSlice';
 import routes from '~/constants/routes.json';
+import { viewingShieldedSelector } from '~/features/TransactionSlice';
 
 import AccountBalanceView from '../AccountBalanceView';
 import AccountPageLayout from '../AccountPageLayout';
@@ -20,12 +21,14 @@ import CredentialInformation from '../CredentialInformation';
 import MoreActions from './MoreActions';
 import BuildSchedule from './BuildSchedule';
 import TransactionLog from './TransactionLog';
+import DecryptComponent from '../DecryptComponent';
 
 const { Master, Detail } = MasterDetailPageLayout;
 
 export default function DetailsPage() {
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
+    const viewingShielded = useSelector(viewingShieldedSelector);
 
     if (!account || !accountInfo) {
         return null;
@@ -63,8 +66,11 @@ export default function DetailsPage() {
                         />
                     </Route>
                     <Route path={routes.ACCOUNTS}>
-                        {/* <TransferLogFilters account={account} /> */}
-                        <TransactionLog />
+                        {viewingShielded && !account.allDecrypted ? (
+                            <DecryptComponent account={account} />
+                        ) : (
+                            <TransactionLog />
+                        )}
                     </Route>
                 </BasicTransferRoutes>
             </Detail>

@@ -19,7 +19,7 @@ export default function AccountsPage() {
     const accounts = useSelector(accountsSelector);
     const dispatch = useDispatch();
     const syncError = useAccountSync();
-    const { simpleView } = useSelector((s: RootState) => s.accounts);
+    const simpleView = useSelector((s: RootState) => s.accounts.simpleView);
 
     if (accounts.length === 0) {
         return (

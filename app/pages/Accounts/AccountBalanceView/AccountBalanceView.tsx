@@ -20,9 +20,9 @@ import {
 } from '~/features/AccountSlice';
 import SidedRow from '~/components/SidedRow';
 import AccountName from './AccountName';
+import AccountDefaultButton from './AccountDefaultButton';
 
 import styles from './AccountBalanceView.module.scss';
-import AccountFavouriteButton from './AccountFavouriteButton';
 
 /**
  * Displays the chosen Account's balance, and contains
@@ -168,9 +168,9 @@ export default function AccountBalanceView(): JSX.Element | null {
             </div>
             {buttons}
             {main}
-            <AccountFavouriteButton
+            <AccountDefaultButton
                 account={account}
-                className={styles.favouriteButton}
+                className={styles.defaultButton}
             />
         </Card>
     );

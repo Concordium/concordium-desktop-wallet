@@ -2,17 +2,17 @@
     display: flex;
 }
 
-.flexColumn {
-    display: flex;
-    flex-direction: column;
-}
-
 .inlineFlex {
     display: inline-flex;
 }
 
 .inlineFlexColumn {
     display: inline-flex;
+    flex-direction: column;
+}
+
+.flexColumn {
+    display: flex;
     flex-direction: column;
 }
 

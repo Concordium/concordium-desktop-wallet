@@ -29,19 +29,22 @@ function parseAccounts(accounts: Account[]): Account[] {
     });
 }
 
-function serializeFields(account: Account) {
-    return {
-        ...account,
-        transactionFilter: JSON.stringify(account.transactionFilter),
-    };
+export function serializeAccountFields(account: Partial<Account>) {
+    const dbValues: Record<string, unknown> = account;
+
+    if (account.transactionFilter) {
+        dbValues.transactionFilter = JSON.stringify(account.transactionFilter);
+    }
+
+    return dbValues;
 }
 
 function prepareAccounts(accounts: Account | Account[]) {
     if (Array.isArray(accounts)) {
-        return accounts.map(serializeFields);
+        return accounts.map(serializeAccountFields);
     }
 
-    return serializeFields(accounts);
+    return serializeAccountFields(accounts);
 }
 
 function selectAccounts(builder: Knex) {
@@ -88,15 +91,9 @@ export async function updateAccount(
     address: string,
     updatedValues: Partial<Account>
 ) {
-    const dbValues: Record<string, unknown> = updatedValues;
-
-    if (updatedValues.transactionFilter) {
-        dbValues.transactionFilter = JSON.stringify(
-            updatedValues.transactionFilter
-        );
-    }
-
-    return (await knex())(accountsTable).where({ address }).update(dbValues);
+    return (await knex())(accountsTable)
+        .where({ address })
+        .update(serializeAccountFields(updatedValues));
 }
 
 export async function findAccounts(condition: Partial<Account>) {
@@ -130,7 +127,7 @@ export async function updateInitialAccount(
         .table(accountsTable)
         .where({ identityId, isInitial: 1 })
         .first()
-        .update(updatedValues);
+        .update(serializeAccountFields(updatedValues));
 }
 
 /** Inserts the given account as part of a transaction
@@ -149,13 +146,15 @@ async function insertAccountTransactionally(
     if (abe) {
         await transaction
             .table(accountsTable)
-            .insert(prepareAccounts({ ...account, name: abe.name }));
+            .insert(serializeAccountFields({ ...account, name: abe.name }));
         await transaction
             .table(addressBookTable)
             .where({ address: account.address })
             .update({ readOnly: true });
     } else {
-        await transaction.table(accountsTable).insert(prepareAccounts(account));
+        await transaction
+            .table(accountsTable)
+            .insert(serializeAccountFields(account));
         await transaction.table(addressBookTable).insert({
             address: account.address,
             name: account.name,

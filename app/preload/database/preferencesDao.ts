@@ -37,7 +37,7 @@ function buildAccessor<V = string>(
 }
 
 const exposedMethods: PreferencesMethods = {
-    favouriteAccount: buildAccessor<Hex>(PreferenceKey.FAVOURITE_ACCOUNT),
+    defaultAccount: buildAccessor<Hex>(PreferenceKey.DEFAULT_ACCOUNT),
     accountSimpleView: buildAccessor<boolean>(
         PreferenceKey.ACCOUNT_PAGE_SIMPLE,
         true

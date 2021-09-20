@@ -39,14 +39,14 @@ import { createAccount, isValidAddress } from '../utils/accountHelpers';
 
 import { getAccountInfos, getAccountInfoOfAddress } from '../node/nodeHelpers';
 import { hasPendingTransactions } from '~/database/TransactionDao';
-import { accountSimpleView, favouriteAccount } from '~/database/PreferencesDao';
+import { accountSimpleView, defaultAccount } from '~/database/PreferencesDao';
 
 export interface AccountState {
     simpleView: boolean;
     accounts: Account[];
     accountsInfo: Record<string, AccountInfo>;
     chosenAccountAddress: string;
-    favouriteAccount: string | undefined;
+    defaultAccount: string | undefined;
 }
 
 type AccountByIndexTuple = [number, Account];
@@ -85,7 +85,7 @@ const initialState: AccountState = {
     accounts: [],
     accountsInfo: {},
     chosenAccountAddress: '',
-    favouriteAccount: undefined,
+    defaultAccount: undefined,
 };
 
 const accountsSlice = createSlice({
@@ -105,14 +105,14 @@ const accountsSlice = createSlice({
 
             if (!state.chosenAccountAddress) {
                 state.chosenAccountAddress =
-                    state.favouriteAccount || state.accounts[0]?.address || '';
+                    state.defaultAccount || state.accounts[0]?.address || '';
             }
         },
         setAccountInfos: (state, map) => {
             state.accountsInfo = map.payload;
         },
-        setFavouriteAccount(state, input: PayloadAction<Hex | undefined>) {
-            state.favouriteAccount = input.payload;
+        setDefaultAccount(state, input: PayloadAction<Hex | undefined>) {
+            state.defaultAccount = input.payload;
 
             if (input.payload) {
                 state.chosenAccountAddress = input.payload;
@@ -175,9 +175,9 @@ export const chosenAccountInfoSelector = (state: RootState) =>
 export const accountInfoSelector = (account?: Account) => (state: RootState) =>
     state.accounts.accountsInfo?.[account?.address ?? ''];
 
-export const favouriteAccountSelector = (state: RootState) =>
+export const defaultAccountSelector = (state: RootState) =>
     state.accounts.accounts.find(
-        (a) => a.address === state.accounts.favouriteAccount
+        (a) => a.address === state.accounts.defaultAccount
     );
 
 export const {
@@ -203,10 +203,10 @@ async function loadSimpleViewActive(dispatch: Dispatch) {
     dispatch(accountsSlice.actions.simpleViewActive(simpleViewActive ?? true));
 }
 
-async function loadFavouriteAccount(dispatch: Dispatch) {
+async function loadDefaultAccount(dispatch: Dispatch) {
     dispatch(
-        accountsSlice.actions.setFavouriteAccount(
-            (await favouriteAccount.get()) ?? undefined
+        accountsSlice.actions.setDefaultAccount(
+            (await defaultAccount.get()) ?? undefined
         )
     );
 }
@@ -215,7 +215,7 @@ export function initAccounts(dispatch: Dispatch) {
     return Promise.all([
         loadAccounts(dispatch),
         loadSimpleViewActive(dispatch),
-        loadFavouriteAccount(dispatch),
+        loadDefaultAccount(dispatch),
     ]);
 }
 
@@ -579,7 +579,6 @@ export async function updateMaxTransactionId(
     maxTransactionId: string
 ) {
     const updatedFields = { maxTransactionId };
-    updateAccount(address, updatedFields);
     return dispatch(updateAccountFields({ address, updatedFields }));
 }
 
@@ -623,9 +622,9 @@ export async function toggleAccountView(dispatch: Dispatch) {
     return loadSimpleViewActive(dispatch);
 }
 
-export async function setFavouriteAccount(dispatch: Dispatch, address: string) {
-    await favouriteAccount.set(address);
-    loadFavouriteAccount(dispatch);
+export async function setDefaultAccount(dispatch: Dispatch, address: string) {
+    await defaultAccount.set(address);
+    loadDefaultAccount(dispatch);
 }
 
 export function clearRewardFilters(dispatch: Dispatch, address: string) {

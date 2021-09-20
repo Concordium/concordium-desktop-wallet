@@ -44,7 +44,11 @@ export default function ChoiceModal({
     return (
         <Modal disableClose={disableClose} open={open} onClose={onClose}>
             <h3>{title}</h3>
-            <p>{description}</p>
+            {typeof description === 'string' ? (
+                <p>{description}</p>
+            ) : (
+                <div>{description}</div>
+            )}
             <div className="flex justifySpaceBetween mT30">
                 {actions.map((a, i) => (
                     <Button
@@ -54,12 +58,13 @@ export default function ChoiceModal({
                         onClick={() => {
                             if (isAction(a)) {
                                 a.action();
-                                postAction();
                             } else if (a.location) {
                                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                 dispatch(push(a.location as any));
                                 postAction(a.location);
+                                return;
                             }
+                            postAction();
                         }}
                     >
                         {a.label}

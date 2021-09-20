@@ -31,8 +31,10 @@ export default function TransactionLogFilters({ onUpdate }: Props) {
     );
 
     const clear = useCallback(() => {
-        ref.current?.clear(handleUpdate(true));
-    }, [ref, handleUpdate]);
+        ref.current?.clear((filter) =>
+            updateTransactionFilter(dispatch, address, filter, false)
+        );
+    }, [ref, dispatch, address]);
 
     const submit = useCallback(
         (store: boolean) => () => {

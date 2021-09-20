@@ -6,7 +6,6 @@ import React, {
     useContext,
     useEffect,
     useMemo,
-    useState,
 } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import InfiniteLoader from 'react-window-infinite-loader';
@@ -18,6 +17,7 @@ import useTransactionGroups, {
     TransactionsByDateTuple,
 } from './useTransactionGroups';
 import {
+    hasMoreTransactionsSelector,
     loadingTransactionsSelector,
     loadTransactions,
     transactionLogPageSize,
@@ -44,7 +44,7 @@ const getHeight = (item: HeaderOrTransaction) =>
 
 const getKey = (item: HeaderOrTransaction) =>
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    isHeader(item) ? item : item.id!;
+    isHeader(item) ? item : item.transactionHash || item.id!;
 
 interface StickyContextModel {
     groups: TransactionsByDateTuple[];
@@ -84,26 +84,26 @@ export default function InfiniteTransactionList({
     const dispatch = useDispatch();
     const account = useSelector(chosenAccountSelector);
     const loading = useSelector(loadingTransactionsSelector);
+    const hasMore = useSelector(hasMoreTransactionsSelector);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const loadController = useMemo(() => new AbortController(), [
         account?.address,
     ]);
     useEffect(() => () => loadController.abort(), [loadController]);
-    const [hasMore] = useState(true);
 
     const loadMore = useCallback(async () => {
-        if (!account || loading) {
+        if (loading || !hasMore) {
             return;
         }
 
-        await loadTransactions(
-            account,
-            dispatch,
-            true,
-            loadController,
-            transactions.length
+        await dispatch(
+            loadTransactions({
+                controller: loadController,
+                showLoading: true,
+                append: true,
+            })
         );
-    }, [account, dispatch, loadController, transactions, loading]);
+    }, [dispatch, loadController, loading, hasMore]);
 
     const groups = useTransactionGroups(transactions);
     const headersAndTransactions = groups.flat(2);
@@ -117,9 +117,7 @@ export default function InfiniteTransactionList({
             <AutoSizer>
                 {({ height, width }) => (
                     <InfiniteLoader
-                        isItemLoaded={(i) =>
-                            !hasMore || i < headersAndTransactions.length
-                        }
+                        isItemLoaded={(i) => i < headersAndTransactions.length}
                         itemCount={itemCount}
                         loadMoreItems={loadMore}
                     >

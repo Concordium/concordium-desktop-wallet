@@ -12,6 +12,7 @@
     "ACCOUNTS_UNSHIELDAMOUNT": "/accounts/unshield-amount",
     "ACCOUNTS_SHIELDAMOUNT": "/accounts/shield-amount",
     "ACCOUNTS_ENCRYPTEDTRANSFER": "/accounts/encrypted-transfer",
+    "ACCOUNTS_FINAL_PAGE": "/accounts/final-page",
     "SHOWADDRESS": "/accounts/show-address",
     "SUBMITTRANSFER": "/accounts/submit-transfer",
     "ACCOUNTS_ADDRESS": "/accounts/address",

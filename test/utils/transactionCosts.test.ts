@@ -1,3 +1,4 @@
+import '../mockWindow';
 import {
     getScheduledTransferPayloadSize,
     getTransactionEnergyCost,

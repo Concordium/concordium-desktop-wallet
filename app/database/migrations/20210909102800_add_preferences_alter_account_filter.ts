@@ -12,7 +12,7 @@ export async function up(knex: Knex): Promise<void> {
     });
 
     const initialPreferences: Preference[] = [
-        { key: PreferenceKey.FAVOURITE_ACCOUNT, value: null },
+        { key: PreferenceKey.DEFAULT_ACCOUNT, value: null },
         {
             key: PreferenceKey.ACCOUNT_PAGE_SIMPLE,
             value: JSON.stringify(true),

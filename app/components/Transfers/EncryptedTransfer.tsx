@@ -10,12 +10,12 @@ import {
     Fraction,
 } from '~/utils/types';
 import { toMicroUnits } from '~/utils/gtu';
-import locations from '~/constants/transferLocations.json';
 import { createEncryptedTransferTransaction } from '~/utils/transactionHelpers';
 import ExternalTransfer from '~/components/Transfers/ExternalTransfer';
 import { multiplyFraction } from '~/utils/basicHelpers';
 
-import ensureExchangeRateAndNonce from '~/components/Transfers/ensureExchangeRateAndNonce';
+import ensureExchangeRateAndNonce from './ensureExchangeRateAndNonce';
+import ensureNoPendingShieldedBalance from './ensureNoPendingShieldedBalance';
 
 interface Props {
     account: Account;
@@ -58,9 +58,8 @@ function EncryptedTransfer({
                     pathname: routes.SUBMITTRANSFER,
                     state: {
                         confirmed: {
-                            pathname: routes.ACCOUNTS_ENCRYPTEDTRANSFER,
+                            pathname: routes.ACCOUNTS_FINAL_PAGE,
                             state: {
-                                initialPage: locations.transferSubmitted,
                                 transaction: stringify(transaction),
                                 recipient,
                             },
@@ -68,7 +67,6 @@ function EncryptedTransfer({
                         cancelled: {
                             pathname: routes.ACCOUNTS_ENCRYPTEDTRANSFER,
                             state: {
-                                initialPage: locations.pickAmount,
                                 amount,
                                 memo,
                                 recipient,
@@ -98,4 +96,6 @@ function EncryptedTransfer({
     );
 }
 
-export default ensureExchangeRateAndNonce(EncryptedTransfer);
+export default ensureExchangeRateAndNonce(
+    ensureNoPendingShieldedBalance(EncryptedTransfer)
+);
