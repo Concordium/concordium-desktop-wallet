@@ -65,6 +65,10 @@
     z-index: 1;
 }
 
+.fullMemo {
+    white-space: pre-wrap;
+}
+
 .lineClamp {
     display: -webkit-box;
     -webkit-line-clamp: 1;
