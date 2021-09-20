@@ -21,12 +21,18 @@ interface Props {
     account: Account;
     exchangeRate: Fraction;
     nonce: string;
+    disableClose?: boolean;
 }
 
 /**
  * Controls the flow of creating an encrypted transfer.
  */
-function EncryptedTransfer({ account, exchangeRate, nonce }: Props) {
+function EncryptedTransfer({
+    account,
+    exchangeRate,
+    nonce,
+    disableClose = false,
+}: Props) {
     const dispatch = useDispatch();
 
     const toConfirmTransfer = useCallback(
@@ -80,7 +86,9 @@ function EncryptedTransfer({ account, exchangeRate, nonce }: Props) {
         <ExternalTransfer
             exchangeRate={exchangeRate}
             toConfirmTransfer={toConfirmTransfer}
-            exitFunction={() => dispatch(push(routes.ACCOUNTS))}
+            exitFunction={
+                disableClose ? undefined : () => dispatch(push(routes.ACCOUNTS))
+            }
             amountHeader="Send shielded funds"
             senderAddress={account.address}
             transactionKind={TransactionKindId.Encrypted_transfer}

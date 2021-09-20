@@ -1,23 +1,25 @@
 import React from 'react';
-import { Switch, Route } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import PlusIcon from '@resources/svg/plus.svg';
 import { push } from 'connected-react-router';
-import AccountList from './AccountList';
-import AccountView from './AccountView';
+
 import NoIdentities from '~/components/NoIdentities';
 import { accountsSelector } from '~/features/AccountSlice';
-import routes from '~/constants/routes.json';
 import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
-import BuildSchedule from './BuildSchedule';
-import AccountPageHeader from './AccountPageHeader';
-import PageLayout from '~/components/PageLayout';
+import { RootState } from '~/store/store';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
+import routes from '~/constants/routes.json';
 
-const { Header, Master, Detail } = MasterDetailPageLayout;
+import useAccountSync from './useAccountSync';
+import AccountListPage from './AccountListPage';
+import AccountDetailsPage from './AccountDetailsPage';
+
+const { Header } = MasterDetailPageLayout;
 
 export default function AccountsPage() {
-    const dispatch = useDispatch();
     const accounts = useSelector(accountsSelector);
+    const dispatch = useDispatch();
+    const syncError = useAccountSync();
+    const simpleView = useSelector((s: RootState) => s.accounts.simpleView);
 
     if (accounts.length === 0) {
         return (
@@ -31,28 +33,14 @@ export default function AccountsPage() {
     }
 
     return (
-        <MasterDetailPageLayout>
-            <Header>
-                <AccountPageHeader />
-                <PageLayout.HeaderButton
-                    align="right"
-                    onClick={() => dispatch(push(routes.ACCOUNTCREATION))}
-                >
-                    <PlusIcon height="20" />
-                </PageLayout.HeaderButton>
-            </Header>
-            <Master>
-                <AccountList />
-            </Master>
-            <Detail>
-                <Switch>
-                    <Route
-                        path={routes.ACCOUNTS_SCHEDULED_TRANSFER}
-                        component={BuildSchedule}
-                    />
-                    <Route component={AccountView} />
-                </Switch>
-            </Detail>
-        </MasterDetailPageLayout>
+        <>
+            <SimpleErrorModal
+                show={Boolean(syncError)}
+                header="Unable to update accounts"
+                content={syncError}
+                onClick={() => dispatch(push(routes.HOME))}
+            />
+            {simpleView ? <AccountListPage /> : <AccountDetailsPage />}
+        </>
     );
 }

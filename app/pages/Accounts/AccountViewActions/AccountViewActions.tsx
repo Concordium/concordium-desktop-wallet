@@ -1,20 +1,23 @@
 import React from 'react';
 import clsx from 'clsx';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import SendImage from '@resources/svg/paperplane.svg';
-import MoreImage from '@resources/svg/more.svg';
+import BracketsImage from '@resources/svg/brackets.svg';
 import UnshieldImage from '@resources/svg/unshield.svg';
 import ShieldImage from '@resources/svg/shield.svg';
 import SendEncryptedImage from '@resources/svg/shielded-paperplane.svg';
+import { Dispatch } from 'redux';
 import routes from '~/constants/routes.json';
 import { viewingShieldedSelector } from '~/features/TransactionSlice';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import styles from './AccountViewAction.module.scss';
 import { Account, AccountInfo } from '~/utils/types';
+import Button from '~/cross-app-components/Button';
+import { toggleAccountView } from '~/features/AccountSlice';
 
 interface ActionObject {
-    route: string;
+    action: string | ((dispatch: Dispatch) => void);
     label: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Image: any;
@@ -24,18 +27,18 @@ interface ActionObject {
     isDisabled(hasCredential: boolean, isMultiSig: boolean): boolean;
 }
 
-const more: ActionObject = {
-    route: routes.ACCOUNTS_MORE,
-    label: 'More',
-    Image: MoreImage,
+const changeView: ActionObject = {
+    action: (dispatch) => toggleAccountView(dispatch),
+    label: 'Change view',
+    Image: BracketsImage,
     imageClassName: 'mB15',
     height: 30,
-    width: 30,
+    width: 48,
     isDisabled: () => false,
 };
-const viewingShieldedbuttons: ActionObject[] = [
+const shieldedActions: ActionObject[] = [
     {
-        route: routes.ACCOUNTS_ENCRYPTEDTRANSFER,
+        action: routes.ACCOUNTS_ENCRYPTEDTRANSFER,
         label: 'Send',
         Image: SendEncryptedImage,
         imageClassName: styles.actionImage,
@@ -43,18 +46,18 @@ const viewingShieldedbuttons: ActionObject[] = [
         isDisabled: (hasCredential: boolean) => !hasCredential,
     },
     {
-        route: routes.ACCOUNTS_UNSHIELDAMOUNT,
+        action: routes.ACCOUNTS_UNSHIELDAMOUNT,
         label: 'Unshield',
         Image: UnshieldImage,
         imageClassName: styles.actionImage,
         height: 40,
         isDisabled: (hasCredential: boolean) => !hasCredential,
     },
-    more,
+    changeView,
 ];
-const viewingUnshieldedbuttons: ActionObject[] = [
+const unshieldedActions: ActionObject[] = [
     {
-        route: routes.ACCOUNTS_SIMPLETRANSFER,
+        action: routes.ACCOUNTS_SIMPLETRANSFER,
         label: 'Send',
         Image: SendImage,
         imageClassName: styles.actionImage,
@@ -62,7 +65,7 @@ const viewingUnshieldedbuttons: ActionObject[] = [
         isDisabled: (hasCredential: boolean) => !hasCredential,
     },
     {
-        route: routes.ACCOUNTS_SHIELDAMOUNT,
+        action: routes.ACCOUNTS_SHIELDAMOUNT,
         label: 'Shield',
         Image: ShieldImage,
         imageClassName: styles.actionImage,
@@ -70,11 +73,11 @@ const viewingUnshieldedbuttons: ActionObject[] = [
         isDisabled: (hasCredential: boolean, isMultiSig: boolean) =>
             !hasCredential || isMultiSig,
     },
-    more,
+    changeView,
 ];
 
 function AccountViewAction({
-    route,
+    action,
     label,
     Image,
     imageClassName,
@@ -88,20 +91,42 @@ function AccountViewAction({
     hasCredentials: boolean;
 }): JSX.Element {
     const disabled = isDisabled(hasCredentials, isMultiSig);
+    const dispatch = useDispatch();
+
+    const body = (
+        <>
+            <Image height={height} width={width} className={imageClassName} />
+            {label}
+        </>
+    );
+    if (typeof action === 'string') {
+        return (
+            <ButtonNavLink
+                className={clsx(
+                    styles.actionButton,
+                    disabled && styles.disabledActionButton
+                )}
+                disabled={disabled}
+                to={action}
+            >
+                {body}
+            </ButtonNavLink>
+        );
+    }
 
     return (
-        <ButtonNavLink
-            key={route}
+        <Button
             className={clsx(
                 styles.actionButton,
                 disabled && styles.disabledActionButton
             )}
+            size="huge"
+            inverted
             disabled={disabled}
-            to={route}
+            onClick={() => action(dispatch)}
         >
-            <Image height={height} width={width} className={imageClassName} />
-            {label}
-        </ButtonNavLink>
+            {body}
+        </Button>
     );
 }
 
@@ -117,18 +142,14 @@ export default function AccountViewActions({ account, accountInfo }: Props) {
     );
     const isMultiSig = Object.values(accountInfo.accountCredentials).length > 1;
 
-    let buttons = [];
-    if (viewingShielded) {
-        buttons = viewingShieldedbuttons;
-    } else {
-        buttons = viewingUnshieldedbuttons;
-    }
+    const actions = viewingShielded ? shieldedActions : unshieldedActions;
 
     return (
         <div className={styles.actionButtonsCard}>
-            {buttons.map((props) => (
+            {actions.map((props, i) => (
                 <AccountViewAction
-                    key={props.route}
+                    // eslint-disable-next-line react/no-array-index-key
+                    key={i}
                     {...props}
                     isMultiSig={isMultiSig}
                     hasCredentials={accountHasDeployedCredentials}

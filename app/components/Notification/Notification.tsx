@@ -24,7 +24,7 @@ const transitionVariants: Variants = {
     },
 };
 
-type NotificationProps = ClassName &
+export type NotificationProps = ClassName &
     PropsWithChildren<{
         level: NotificationLevel;
         disableClose?: boolean;

@@ -20,7 +20,7 @@ interface Props {
         recipient: AddressBookEntry,
         memo?: string
     ): void;
-    exitFunction(): void;
+    exitFunction?(): void;
     exchangeRate?: Fraction;
     amountHeader: string;
     senderAddress: string;
