@@ -349,7 +349,6 @@ async function fetchTransactions(
 
 interface UpdateTransactionsArgs {
     controller: AbortController;
-    outdatedController: AbortController;
     onError(e: string): void;
 }
 
@@ -364,10 +363,7 @@ export const updateTransactions = createAsyncThunk<
     UpdateTransactionsArgs
 >(
     'transactions/update',
-    async (
-        { controller, onError, outdatedController },
-        { getState, dispatch }
-    ) => {
+    async ({ controller, onError }, { getState, dispatch }) => {
         const state = getState() as RootState;
         const account = chosenAccountSelector(state);
 
@@ -375,15 +371,9 @@ export const updateTransactions = createAsyncThunk<
             return;
         }
 
-        function finish() {
-            // call start on the outdatedController, to indicate that the transactions are no longer outdated.
-            outdatedController.start();
-            controller.finish();
-        }
-
         async function updateSubroutine(maxId: bigint) {
             if (!account || controller.isAborted) {
-                finish();
+                controller.finish();
                 return;
             }
 
@@ -421,7 +411,7 @@ export const updateTransactions = createAsyncThunk<
             }
 
             if (controller.isAborted) {
-                finish();
+                controller.finish();
                 return;
             }
 
@@ -434,11 +424,11 @@ export const updateTransactions = createAsyncThunk<
             }
 
             if (maxId === result.newMaxId || result.isFinished) {
-                finish();
+                controller.finish();
                 return;
             }
 
-            outdatedController.finish();
+            controller.onLoop();
             await updateSubroutine(result.newMaxId);
         }
 

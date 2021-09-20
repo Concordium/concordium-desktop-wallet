@@ -3,9 +3,12 @@ export default class AbortController {
 
     isReady: boolean;
 
-    constructor(startReady = true) {
+    hasLooped: boolean;
+
+    constructor() {
         this.isAborted = false;
-        this.isReady = startReady;
+        this.isReady = true;
+        this.hasLooped = false;
     }
 
     /**
@@ -23,6 +26,7 @@ export default class AbortController {
      */
     start() {
         this.isReady = false;
+        this.hasLooped = false;
     }
 
     /**
@@ -31,5 +35,10 @@ export default class AbortController {
     finish() {
         this.isReady = true;
         this.isAborted = false;
+        this.hasLooped = false;
+    }
+
+    onLoop() {
+        this.hasLooped = true;
     }
 }

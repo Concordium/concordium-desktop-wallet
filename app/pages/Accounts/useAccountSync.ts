@@ -37,16 +37,15 @@ export default function useAccountSync(): string | undefined {
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
     // This controller is used to abort updateTransactions, when the chosen account is changed, or the view is destroyed.
-    const [updateTransactionsController] = useState(new AbortController());
-    // This controller is used to control when the wallet should load a batch of the newest transactions.
-    const [newestTransactionsController] = useState(new AbortController(false));
+    const [controller] = useState(new AbortController());
     const [error, setError] = useState<string | undefined>();
 
     useEffect(() => {
         if (
             account &&
             account.status === AccountStatus.Confirmed &&
-            newestTransactionsController.isReady
+            controller.hasLooped &&
+            !controller.isAborted
         ) {
             fetchNewestTransactions(dispatch, account);
         }
@@ -58,7 +57,7 @@ export default function useAccountSync(): string | undefined {
         account?.transactionFilter?.finalizationReward,
         account?.transactionFilter?.fromDate,
         account?.transactionFilter?.toDate,
-        newestTransactionsController.isReady,
+        controller.hasLooped,
     ]);
 
     useEffect(() => {
@@ -90,32 +89,27 @@ export default function useAccountSync(): string | undefined {
         if (
             account &&
             account.status === AccountStatus.Confirmed &&
-            updateTransactionsController.isReady &&
-            !updateTransactionsController.isAborted
+            controller.isReady &&
+            !controller.isAborted
         ) {
-            updateTransactionsController.start();
+            controller.start();
             dispatch(
                 updateTransactions({
-                    controller: updateTransactionsController,
+                    controller,
                     onError: setError,
-                    outdatedController: newestTransactionsController,
                 })
             );
-            return () => {
-                newestTransactionsController.start();
-            };
         }
-        return noOp;
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         account?.address,
         accountInfo?.accountAmount,
         account?.status,
-        updateTransactionsController.isAborted,
+        controller.isAborted,
     ]);
 
     useEffect(() => {
-        return () => updateTransactionsController.abort();
+        return () => controller.abort();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [account?.address]);
 
