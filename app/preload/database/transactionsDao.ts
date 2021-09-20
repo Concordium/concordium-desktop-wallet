@@ -74,23 +74,9 @@ async function getTransactionsOfAccount(
 ): Promise<GetTransactionsOutput> {
     const { address } = account;
 
-    const latestTransaction: TransferTransaction | undefined = await (
-        await knex()
-    )(transactionTable)
-        .where({ id: account.maxTransactionId })
-        .first();
-    if (!latestTransaction) {
-        // When there are no transactions in the database, this will be the case.
-        return {
-            transactions: [],
-            more: false,
-        };
-    }
-
     const fromLimit = (fromDate?.getTime() ?? 0) / TimeStampUnit.seconds;
-    const toLimit = (toDate?.getTime() ?? Date.now()) / TimeStampUnit.seconds;
 
-    const toTime = Math.min(Number(latestTransaction.blockTime), toLimit);
+    const toTime = (toDate?.getTime() ?? Date.now()) / TimeStampUnit.seconds;
     let expandHours = 1;
     let fromTime: number;
     let transactions;
