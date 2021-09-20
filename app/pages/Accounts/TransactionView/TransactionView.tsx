@@ -92,6 +92,7 @@ function TransactionView({ transaction, onClose }: Props) {
             <CloseButton className={styles.closeButton} onClick={onClose} />
             <TransactionListElement
                 className={styles.fillCardPadding}
+                style={{}}
                 transaction={transaction}
                 showDate
                 showFullMemo
