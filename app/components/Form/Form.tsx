@@ -8,6 +8,7 @@ import {
 } from 'react-hook-form';
 
 import Switch from '~/cross-app-components/Switch';
+import { PropsOf } from '~/utils/types';
 import {
     connectWithFormControlled,
     connectWithFormUncontrolled,
@@ -16,9 +17,7 @@ import Input from './Input';
 import Checkbox from './Checkbox';
 import TextArea from './TextArea';
 import Submit from './Submit';
-import InputTimestamp, {
-    InputTimestampProps,
-} from './InputTimestamp/InputTimestamp';
+import InputTimestamp from './InputTimestamp/InputTimestamp';
 import FileInput from './FileInput';
 import { FileInputProps, FileInputValue } from './FileInput/FileInput';
 import InlineNumber, { InlineNumberProps } from './InlineNumber';
@@ -112,9 +111,10 @@ Form.InlineInput = connectWithFormControlled<string, InlineInputProps>(
 );
 (Form.InlineInput as FC).displayName = 'Form.InlineInput';
 
-Form.Timestamp = connectWithFormControlled<Date, InputTimestampProps>(
-    InputTimestamp
-);
+Form.Timestamp = connectWithFormControlled<
+    Date,
+    PropsOf<typeof InputTimestamp>
+>(InputTimestamp);
 (Form.Timestamp as FC).displayName = 'Form.Timestamp';
 
 Form.Submit = Submit;

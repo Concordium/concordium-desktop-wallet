@@ -24,13 +24,20 @@
 }
 
 .field {
-    color: $color-pale-blue;
     -webkit-appearance: none;
+    -moz-appearance: textfield;
+    color: $color-pale-blue;
     border: none;
     text-align: center;
     font-size: $font-size-body3;
     width: 40px;
     background-color: transparent;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
 
     &::placeholder {
         color: $color-text-faded;

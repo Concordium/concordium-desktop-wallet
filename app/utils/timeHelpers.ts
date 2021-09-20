@@ -64,7 +64,7 @@ export function getDefaultExpiry() {
 
 /** Convert a date to seconds since Unix epoch */
 export function secondsSinceUnixEpoch(date: Date) {
-    return Math.floor(date.getTime() / 1000);
+    return Math.floor(date.getTime() / TimeStampUnit.seconds);
 }
 
 /**

@@ -1,8 +1,10 @@
+import React, { PropsWithChildren } from 'react';
 import { configureStore, getDefaultMiddleware, Action } from '@reduxjs/toolkit';
 import { createHashHistory } from 'history';
 import { routerMiddleware } from 'connected-react-router';
 import { createLogger } from 'redux-logger';
 import { ThunkAction } from 'redux-thunk';
+import { Provider } from 'react-redux';
 
 /* eslint-disable import/no-cycle */
 import createRootReducer from './rootReducer';
@@ -44,5 +46,16 @@ export const configuredStore = (initialState?: RootState) => {
     }
     return store;
 };
+
+export function StoreWrapper({
+    children,
+    ...initialState
+}: PropsWithChildren<Partial<RootState>>) {
+    const defaultState = rootReducer(undefined, { type: null });
+    const store = configuredStore({ ...defaultState, ...initialState });
+
+    return <Provider store={store}>{children}</Provider>;
+}
+
 export type Store = ReturnType<typeof configuredStore>;
 export type AppThunk = ThunkAction<void, RootState, unknown, Action<string>>;

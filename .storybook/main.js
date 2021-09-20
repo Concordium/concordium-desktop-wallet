@@ -17,6 +17,8 @@ module.exports = {
     // `configType` has a value of 'DEVELOPMENT' or 'PRODUCTION'
     // You can change the configuration based on that.
     // 'PRODUCTION' is used when building the static version of storybook.
+    config.entry.push(path.resolve(__dirname, '../app/styles/app.global.scss'));
+
     const fileLoaderRule = config.module.rules.find(rule => rule.test.test('.svg'));
     fileLoaderRule.exclude = pathToSvgAssets;
 

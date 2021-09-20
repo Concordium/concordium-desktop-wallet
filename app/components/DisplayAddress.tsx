@@ -19,9 +19,9 @@ export default function DisplayAddress({
     return (
         <div className={clsx(outerClassName, 'textCenter mono')}>
             {chunkString(address, lineLength).map((text) => (
-                <p className={clsx(lineClassName, 'm0')} key={text}>
+                <div className={clsx(lineClassName, 'm0')} key={text}>
                     {text}
-                </p>
+                </div>
             ))}
         </div>
     );

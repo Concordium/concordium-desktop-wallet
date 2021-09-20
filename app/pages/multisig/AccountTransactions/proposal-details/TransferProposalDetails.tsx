@@ -10,7 +10,7 @@ import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import ScheduleList from '~/components/ScheduleList';
 import { AccountDetail, AmountDetail, Details, PlainDetail } from './shared';
 import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
-import DisplayMemo from '~/components/DisplayMemo';
+import DisplayMemo from '~/components/Transfers/DisplayMemo';
 
 interface Props {
     transactionType:

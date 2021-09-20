@@ -24,7 +24,7 @@ import {
     IncomingTransaction,
     AccountAndCredentialPairs,
 } from '~/utils/types';
-import { ExternalCredential, GetTransactionsOutput } from '../database/types';
+import { ExternalCredential } from '../database/types';
 import type LedgerCommands from './preloadLedgerTypes';
 
 export type { default as LedgerCommands } from './preloadLedgerTypes';
@@ -227,17 +227,35 @@ export type MultiSignatureTransactionMethods = {
     getMaxOpenNonceOnAccount: (address: string) => Promise<bigint>;
 };
 
+export interface PreferenceAccessor<V = string> {
+    get(): Promise<V | null>;
+    set(v: V): Promise<void>;
+}
+
+export interface PreferencesMethods {
+    defaultAccount: PreferenceAccessor<Hex>;
+    accountSimpleView: PreferenceAccessor<boolean>;
+}
+
 export type SettingsMethods = {
     update: (setting: Setting) => Promise<number>;
 };
+
+export interface GetTransactionsOutput {
+    transactions: TransferTransaction[];
+    more: boolean;
+}
 
 export type TransactionMethods = {
     getPending: () => Promise<TransferTransaction[]>;
     hasPending: (address: string) => Promise<boolean>;
     getTransactionsForAccount: (
-        account: Account,
+        address: Account,
         filteredTypes: TransactionKindString[],
-        limit?: number
+        fromDate?: Date,
+        toDate?: Date,
+        limit?: number,
+        startId?: string
     ) => Promise<GetTransactionsOutput>;
     hasEncryptedTransactions: (
         address: string,
@@ -304,6 +322,7 @@ export type Database = {
     identity: IdentityMethods;
     genesisAndGlobal: GenesisAndGlobalMethods;
     multiSignatureTransaction: MultiSignatureTransactionMethods;
+    preferences: PreferencesMethods;
     settings: SettingsMethods;
     transaction: TransactionMethods;
     wallet: WalletMethods;

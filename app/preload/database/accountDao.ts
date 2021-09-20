@@ -12,17 +12,39 @@ import {
     Identity,
     AccountAndCredentialPairs,
     Credential,
+    TransactionFilter,
 } from '~/utils/types';
 import { AccountMethods } from '~/preload/preloadTypes';
 
-function convertAccountBooleans(accounts: Account[]) {
+function parseAccounts(accounts: Account[]): Account[] {
     return accounts.map((account) => {
         return {
             ...account,
             allDecrypted: Boolean(account.allDecrypted),
             isInitial: Boolean(account.isInitial),
+            transactionFilter: JSON.parse(
+                account.transactionFilter as string
+            ) as TransactionFilter,
         };
     });
+}
+
+export function serializeAccountFields(account: Partial<Account>) {
+    const dbValues: Record<string, unknown> = account;
+
+    if (account.transactionFilter) {
+        dbValues.transactionFilter = JSON.stringify(account.transactionFilter);
+    }
+
+    return dbValues;
+}
+
+function prepareAccounts(accounts: Account | Account[]) {
+    if (Array.isArray(accounts)) {
+        return accounts.map(serializeAccountFields);
+    }
+
+    return serializeAccountFields(accounts);
 }
 
 function selectAccounts(builder: Knex) {
@@ -48,7 +70,7 @@ function selectAccounts(builder: Knex) {
 export async function getAllAccounts(): Promise<Account[]> {
     const accounts: Account[] = await selectAccounts(await knex());
 
-    return convertAccountBooleans(accounts);
+    return parseAccounts(accounts);
 }
 
 export async function getAccount(
@@ -58,11 +80,11 @@ export async function getAccount(
         address,
     });
 
-    return convertAccountBooleans(accounts)[0];
+    return parseAccounts(accounts)[0];
 }
 
 export async function insertAccount(account: Account | Account[]) {
-    return (await knex())(accountsTable).insert(account);
+    return (await knex())(accountsTable).insert(prepareAccounts(account));
 }
 
 export async function updateAccount(
@@ -71,7 +93,7 @@ export async function updateAccount(
 ) {
     return (await knex())(accountsTable)
         .where({ address })
-        .update(updatedValues);
+        .update(serializeAccountFields(updatedValues));
 }
 
 export async function findAccounts(condition: Partial<Account>) {
@@ -79,7 +101,7 @@ export async function findAccounts(condition: Partial<Account>) {
         .select()
         .table(accountsTable)
         .where(condition);
-    return convertAccountBooleans(accounts);
+    return parseAccounts(accounts);
 }
 
 export async function removeAccount(accountAddress: string) {
@@ -105,7 +127,7 @@ export async function updateInitialAccount(
         .table(accountsTable)
         .where({ identityId, isInitial: 1 })
         .first()
-        .update(updatedValues);
+        .update(serializeAccountFields(updatedValues));
 }
 
 /** Inserts the given account as part of a transaction
@@ -124,13 +146,15 @@ async function insertAccountTransactionally(
     if (abe) {
         await transaction
             .table(accountsTable)
-            .insert({ ...account, name: abe.name });
+            .insert(serializeAccountFields({ ...account, name: abe.name }));
         await transaction
             .table(addressBookTable)
             .where({ address: account.address })
             .update({ readOnly: true });
     } else {
-        await transaction.table(accountsTable).insert(account);
+        await transaction
+            .table(accountsTable)
+            .insert(serializeAccountFields(account));
         await transaction.table(addressBookTable).insert({
             address: account.address,
             name: account.name,

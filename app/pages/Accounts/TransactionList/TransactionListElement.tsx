@@ -13,6 +13,7 @@ import {
     TransactionKindString,
     TransferTransactionWithNames,
     TimeStampUnit,
+    ClassNameAndStyle,
 } from '~/utils/types';
 import { chosenAccountSelector } from '~/features/AccountSlice';
 import { viewingShieldedSelector } from '~/features/TransactionSlice';
@@ -23,8 +24,9 @@ import {
     isRewardKind,
     isOutgoingTransaction,
 } from '~/utils/transactionHelpers';
-import styles from './Transactions.module.scss';
 import transactionKindNames from '~/constants/transactionKindNames.json';
+
+import styles from './TransactionList.module.scss';
 
 const isInternalTransfer = (transaction: TransferTransaction) =>
     [
@@ -237,7 +239,7 @@ function showMemo(
     ) {
         // If we are fully showing the memo, and the type is one that has a memo version, but there is no memo:
         return (
-            <i className="body4 m0 mT5 textFaded">
+            <i className="body4 m0 textFaded">
                 The transaction contains no memo
             </i>
         );
@@ -248,7 +250,8 @@ function showMemo(
     return (
         <pre
             className={clsx(
-                'body4 m0 mT5 textFaded',
+                'body4 m0 textFaded',
+                showFullMemo && styles.fullMemo,
                 showFullMemo || styles.lineClamp
             )}
         >
@@ -259,10 +262,12 @@ function showMemo(
 
 const onlyTime = Intl.DateTimeFormat(undefined, {
     timeStyle: 'medium',
-    hourCycle: 'h24',
+    hourCycle: 'h23',
 }).format;
 
-interface Props {
+export const transactionListElementHeight = 58;
+
+interface Props extends ClassNameAndStyle {
     transaction: TransferTransaction;
     onClick?: () => void;
     showDate?: boolean;
@@ -277,6 +282,8 @@ function TransactionListElement({
     onClick,
     showFullMemo = false,
     showDate = false,
+    className,
+    style = { height: transactionListElementHeight },
 }: Props): JSX.Element {
     const account = useSelector(chosenAccountSelector);
     const viewingShielded = useSelector(viewingShieldedSelector);
@@ -304,8 +311,10 @@ function TransactionListElement({
             className={clsx(
                 styles.transactionListElement,
                 !failed || styles.failedElement,
-                Boolean(onClick) && styles.clickableElement
+                Boolean(onClick) && styles.clickableElement,
+                className
             )}
+            style={style}
             onClick={onClick}
             onKeyPress={onClick}
             tabIndex={0}

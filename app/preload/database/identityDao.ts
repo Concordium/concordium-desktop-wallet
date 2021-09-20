@@ -7,7 +7,7 @@ import {
     credentialsTable,
     addressBookTable,
 } from '~/constants/databaseNames.json';
-import { removeInitialAccount } from './accountDao';
+import { removeInitialAccount, serializeAccountFields } from './accountDao';
 import {
     Account,
     Credential,
@@ -99,7 +99,9 @@ async function insertPendingIdentityAndInitialAccount(
             ...initialAccount,
             identityId,
         };
-        await trx.table(accountsTable).insert(initialAccountWithIdentityId);
+        await trx
+            .table(accountsTable)
+            .insert(serializeAccountFields(initialAccountWithIdentityId));
         return identityId;
     });
 }
