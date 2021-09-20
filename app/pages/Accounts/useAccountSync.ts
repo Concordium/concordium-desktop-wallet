@@ -11,6 +11,7 @@ import {
 import {
     updateTransactions,
     loadTransactions,
+    resetTransactions,
 } from '~/features/TransactionSlice';
 import { noOp } from '~/utils/basicHelpers';
 import { AccountStatus } from '~/utils/types';
@@ -88,6 +89,7 @@ export default function useAccountSync(): string | undefined {
     useEffect(() => {
         if (account && account.status === AccountStatus.Confirmed) {
             const loadController = new AbortController();
+            dispatch(resetTransactions());
             dispatch(
                 loadTransactions({
                     controller: loadController,

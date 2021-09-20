@@ -55,7 +55,7 @@ const transactionSlice = createSlice({
         transactions: [],
         viewingShielded: false,
         loadingTransactions: false,
-        hasMore: true,
+        hasMore: false,
     } as State,
     reducers: {
         setTransactions(state, update: PayloadAction<GetTransactionsOutput>) {
@@ -98,6 +98,9 @@ const {
     setLoadingTransactions,
     appendTransactions,
 } = transactionSlice.actions;
+
+export const resetTransactions = () =>
+    setTransactions({ transactions: [], more: false });
 
 // Decrypts the encrypted transfers in the given transacion list, using the prfKey.
 // This function expects the prfKey to match the account's prfKey,
@@ -209,6 +212,12 @@ export const loadTransactions = createAsyncThunk(
         { getState, dispatch }
     ) => {
         const state = getState() as RootState;
+        const account = chosenAccountSelector(state);
+
+        if (!account) {
+            return;
+        }
+
         const minId = state.transactions.transactions
             .map((t) => t.id)
             .filter(isDefined)
@@ -216,12 +225,6 @@ export const loadTransactions = createAsyncThunk(
                 (min, cur) => (!min || min > cur ? cur : min),
                 undefined
             );
-
-        const account = chosenAccountSelector(state);
-
-        if (!account) {
-            return;
-        }
 
         if (showLoading) {
             dispatch(setLoadingTransactions(true));
