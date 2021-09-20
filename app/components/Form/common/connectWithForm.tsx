@@ -1,6 +1,7 @@
 import React, {
     ComponentType,
     FC,
+    forwardRef,
     ForwardRefExoticComponent,
     RefAttributes,
     useCallback,
@@ -113,46 +114,57 @@ export function connectWithFormControlled<
     > &
         Partial<Pick<TProps, 'onChange' | 'onBlur'>> &
         ControlledConnectorProps<TValue>
-) => JSX.Element {
-    const Connected: ReturnType<typeof connectWithFormControlled> = ({
-        name,
-        rules,
-        defaultValue,
-        onBlur = noOp,
-        onChange = noOp,
-        ...props
-    }) => {
-        const { control, errors } = useFormContext();
-        const {
-            field: { ref, onBlur: cBlur, onChange: cChange, ...fieldProps },
-            meta: { invalid },
-        } = useController({ name, rules, defaultValue, control });
-
-        const handleBlur = useCallback(() => {
-            onBlur();
-            cBlur();
-        }, [onBlur, cBlur]);
-
-        const handleChange: typeof onChange = useCallback(
-            (...e) => {
-                onChange(...e);
-                cChange(...e);
+) => JSX.Element | null {
+    const Connected: ReturnType<typeof connectWithFormControlled> = forwardRef(
+        (
+            {
+                name,
+                rules,
+                defaultValue,
+                onBlur = noOp,
+                onChange = noOp,
+                ...props
             },
-            [onChange, cChange]
-        );
+            ref
+        ) => {
+            const { control, errors } = useFormContext();
+            const {
+                field: {
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                    ref: _,
+                    onBlur: cBlur,
+                    onChange: cChange,
+                    ...fieldProps
+                },
+                meta: { invalid },
+            } = useController({ name, rules, defaultValue, control });
 
-        const error: FieldError | undefined = errors[name];
-        const p: TProps = {
-            isInvalid: invalid,
-            error: error?.message,
-            onBlur: handleBlur,
-            onChange: handleChange,
-            ...fieldProps,
-            ...props,
-        } as TProps;
+            const handleBlur = useCallback(() => {
+                onBlur();
+                cBlur();
+            }, [onBlur, cBlur]);
 
-        return <Field {...p} />;
-    };
+            const handleChange: typeof onChange = useCallback(
+                (...e) => {
+                    onChange(...e);
+                    cChange(...e);
+                },
+                [onChange, cChange]
+            );
+
+            const error: FieldError | undefined = errors[name];
+            const p: TProps = {
+                isInvalid: invalid,
+                error: error?.message,
+                onBlur: handleBlur,
+                onChange: handleChange,
+                ...fieldProps,
+                ...props,
+            } as TProps;
+
+            return <Field {...p} ref={ref} />;
+        }
+    );
 
     return Connected;
 }

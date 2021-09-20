@@ -4,7 +4,11 @@ import {
     DateParts,
     datePartsFromDate,
 } from '~/utils/timeHelpers';
-import { EqualRecord } from '../../../utils/types';
+import { EqualRecord } from '~/utils/types';
+
+export interface InputTimestampRef {
+    clear(): void;
+}
 
 export const fieldNames: EqualRecord<DateParts> = {
     year: 'year',

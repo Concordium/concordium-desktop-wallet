@@ -25,6 +25,7 @@ import initializeDatabaseExternalCredentialMethods from './database/externalCred
 import initializeDatabaseIdentityMethods from './database/identityDao';
 import initializeDatabaseGenesisAndGlobalMethods from './database/genesisAndGlobalDao';
 import initializeDatabaseMultiSignatureTransactionMethods from './database/multiSignatureProposalDao';
+import initializeDatabasePreferencesMethods from './database/preferencesDao';
 import initializeDatabaseSettingsMethods from './database/settingsDao';
 import initializeDatabaseTransactionsMethods from './database/transactionsDao';
 import initializeDatabaseWalletMethods from './database/walletDao';
@@ -132,6 +133,7 @@ const databaseMethods: Database = {
     identity: initializeDatabaseIdentityMethods,
     genesisAndGlobal: initializeDatabaseGenesisAndGlobalMethods,
     multiSignatureTransaction: initializeDatabaseMultiSignatureTransactionMethods,
+    preferences: initializeDatabasePreferencesMethods,
     settings: initializeDatabaseSettingsMethods,
     transaction: initializeDatabaseTransactionsMethods,
     wallet: initializeDatabaseWalletMethods,

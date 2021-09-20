@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import ShieldImage from '@resources/svg/shield.svg';
 import BakerImage from '@resources/svg/baker.svg';
+import ArrowIcon from '@resources/svg/back-arrow.svg';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
 import { displayAsGTU } from '~/utils/gtu';
@@ -13,9 +14,13 @@ import {
 import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
+    accountsSelector,
+    previousConfirmedAccount,
+    nextConfirmedAccount,
 } from '~/features/AccountSlice';
 import SidedRow from '~/components/SidedRow';
 import AccountName from './AccountName';
+import AccountDefaultButton from './AccountDefaultButton';
 
 import styles from './AccountBalanceView.module.scss';
 
@@ -25,6 +30,7 @@ import styles from './AccountBalanceView.module.scss';
  */
 export default function AccountBalanceView(): JSX.Element | null {
     const dispatch = useDispatch();
+    const accounts = useSelector(accountsSelector);
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
     const viewingShielded = useSelector(viewingShieldedSelector);
@@ -34,6 +40,7 @@ export default function AccountBalanceView(): JSX.Element | null {
     }
 
     const isMultiSig = Object.values(accountInfo.accountCredentials).length > 1;
+    const canChangeAccount = accounts.length > 1;
 
     if (isMultiSig && viewingShielded) {
         dispatch(setViewingShielded(false));
@@ -80,7 +87,7 @@ export default function AccountBalanceView(): JSX.Element | null {
         main = (
             <>
                 <ShieldImage className={styles.backgroundImage} />
-                <h1 className={styles.shieldedAmount}>
+                <h1 className={clsx(styles.shieldedAmount, 'mV20')}>
                     {displayAsGTU(totalDecrypted)}
                     {account.allDecrypted || (
                         <>
@@ -108,7 +115,9 @@ export default function AccountBalanceView(): JSX.Element | null {
 
         main = (
             <>
-                <h1 className={styles.blueText}>{displayAsGTU(unShielded)}</h1>
+                <h1 className={clsx(styles.blueText, 'mV20')}>
+                    {displayAsGTU(unShielded)}
+                </h1>
                 <div className={styles.details}>
                     <SidedRow
                         className={clsx(styles.amountRow, 'mT0')}
@@ -133,9 +142,36 @@ export default function AccountBalanceView(): JSX.Element | null {
 
     return (
         <Card className={styles.accountBalanceView}>
-            <AccountName name={account.name} address={account.address} />
+            <div
+                className={clsx(
+                    styles.accountNameWrapper,
+                    canChangeAccount && 'justifySpaceBetween'
+                )}
+            >
+                {canChangeAccount && (
+                    <Button
+                        clear
+                        onClick={() => dispatch(previousConfirmedAccount())}
+                    >
+                        <ArrowIcon className={styles.prevAccountIcon} />
+                    </Button>
+                )}
+                <AccountName name={account.name} address={account.address} />
+                {canChangeAccount && (
+                    <Button
+                        clear
+                        onClick={() => dispatch(nextConfirmedAccount())}
+                    >
+                        <ArrowIcon className={styles.nextAccountIcon} />
+                    </Button>
+                )}
+            </div>
             {buttons}
             {main}
+            <AccountDefaultButton
+                account={account}
+                className={styles.defaultButton}
+            />
         </Card>
     );
 }

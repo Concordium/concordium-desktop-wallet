@@ -126,28 +126,6 @@ export enum AccountStatus {
     Genesis = 'genesis',
 }
 
-/**
- * This Interface models the structure of the accounts stored in the database
- */
-
-export interface Account {
-    name: string;
-    address: Hex;
-    identityId: number;
-    identityName?: string;
-    identityNumber?: number;
-    status: AccountStatus;
-    signatureThreshold?: number;
-    totalDecrypted?: string;
-    allDecrypted?: boolean;
-    incomingAmounts?: string;
-    rewardFilter: string;
-    selfAmounts?: string;
-    maxTransactionId: string;
-    deploymentTransactionId?: string;
-    isInitial: boolean;
-}
-
 export enum TransactionKindString {
     DeployModule = 'deployModule',
     InitContract = 'initContract',
@@ -194,6 +172,36 @@ export enum TransactionKindId {
     Simple_transfer_with_memo = 22,
     Encrypted_transfer_with_memo = 23,
     Transfer_with_schedule_and_memo = 24,
+}
+
+export type BooleanFilters = { [P in TransactionKindString]?: boolean };
+type DateString = string;
+
+export interface TransactionFilter extends BooleanFilters {
+    fromDate?: DateString;
+    toDate?: DateString;
+}
+
+/**
+ * This Interface models the structure of the accounts stored in the database
+ */
+
+export interface Account {
+    name: string;
+    address: Hex;
+    identityId: number;
+    identityName?: string;
+    identityNumber?: number;
+    status: AccountStatus;
+    signatureThreshold?: number;
+    totalDecrypted?: string;
+    allDecrypted?: boolean;
+    incomingAmounts?: string;
+    transactionFilter: TransactionFilter;
+    selfAmounts?: string;
+    maxTransactionId: string;
+    deploymentTransactionId?: string;
+    isInitial: boolean;
 }
 
 export interface SimpleTransferPayload {
@@ -1284,11 +1292,9 @@ export interface TransactionEvent {
 }
 
 export type ClassName = Pick<HTMLAttributes<HTMLElement>, 'className'>;
+export type Style = Pick<HTMLAttributes<HTMLElement>, 'style'>;
 
-export type ClassNameAndStyle = Pick<
-    HTMLAttributes<HTMLElement>,
-    'style' | 'className'
->;
+export type ClassNameAndStyle = ClassName & Style;
 
 // Source: https://github.com/emotion-js/emotion/blob/master/packages/styled-base/types/helper.d.ts
 // A more precise version of just React.ComponentPropsWithRef on its own

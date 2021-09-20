@@ -1,31 +1,12 @@
 @import 'config/bundle';
-@import './common';
-
-.transactionListHeader {
-    composes: cardPadding;
-    composes: fillCardPadding;
-    margin-top: -20px;
-
-    button {
-        width: 50%;
-        padding: 10px;
-    }
-}
-
-.transactionListHeaderNotChosen,
-.transactionListHeaderChosen {
-    font-size: $font-size-button2;
-    font-weight: $font-weight-emphasized;
-}
-
-.transactionListHeaderChosen {
-    color: $color-pale-blue;
-}
+@import '../common';
 
 .transactionListElement {
-    composes: fillCardPadding;
     position: relative;
-    padding: 10px 20px;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 
     &:focus {
         outline: none;
@@ -72,7 +53,6 @@
 }
 
 .transactionGroupHeader {
-    composes: fillCardPadding;
     composes: cardPadding;
     height: $thick-blue-separator-height;
     font-size: 10px;
@@ -80,6 +60,9 @@
     display: flex;
     align-items: center;
     background-color: $color-light-blue;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
 .lineClamp {
@@ -87,4 +70,8 @@
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+
+.infinite {
+    overflow: overlay !important;
 }
