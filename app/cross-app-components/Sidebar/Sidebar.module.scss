@@ -79,7 +79,7 @@ $sidebar-link-height: $page-header-height;
     &:hover {
         outline: none;
 
-        &:not(:disabled):link {
+        &:not(.disabled):link {
             @include emphItem;
         }
     }
@@ -99,7 +99,12 @@ $sidebar-link-height: $page-header-height;
 }
 
 .disabled {
-    color: $color-grey;
-    opacity: 0.5;
     cursor: default;
+    opacity: 0.5;
+
+    &,
+    &:hover,
+    &:visited {
+        color: $color-grey;
+    }
 }
