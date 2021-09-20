@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import ChoiceModal, { Action } from '~/components/ChoiceModal';
+import ChoiceModal, { Action, LocationAction } from '~/components/ChoiceModal';
 import {
     updateSettingEntry,
     showMemoWarningSelector,
@@ -23,14 +23,15 @@ export default function MemoWarning({ open, onClose }: Props) {
         return null;
     }
 
-    const actions: Action[] = [
+    const actions: [Action, LocationAction] = [
         {
             label: 'Don’t show again',
-            onPicked: () =>
+            action() {
                 updateSettingEntry(dispatch, {
                     ...showMemoWarning,
                     value: '0',
-                }),
+                });
+            },
             inverted: true,
         },
         {

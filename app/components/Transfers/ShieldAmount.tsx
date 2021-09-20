@@ -6,12 +6,13 @@ import { Account, TransactionKindId } from '~/utils/types';
 
 interface Props {
     account: Account;
+    disableClose?: boolean;
 }
 
 /**
  * Controls the flow of creating a transfer to encrypted.
  */
-export default function ShieldAmount({ account }: Props) {
+export default function ShieldAmount({ account, disableClose = false }: Props) {
     const specific = {
         amountHeader: 'Shield GTU',
         createTransaction: createShieldAmountTransaction,
@@ -19,5 +20,11 @@ export default function ShieldAmount({ account }: Props) {
         transactionKind: TransactionKindId.Transfer_to_encrypted,
     };
 
-    return <InternalTransfer account={account} specific={specific} />;
+    return (
+        <InternalTransfer
+            account={account}
+            specific={specific}
+            disableClose={disableClose}
+        />
+    );
 }

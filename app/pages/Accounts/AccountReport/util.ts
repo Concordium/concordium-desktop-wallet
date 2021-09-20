@@ -4,6 +4,7 @@ import {
     TransactionKindString,
     TransactionStatus,
     TransferTransactionWithNames,
+    TransactionFilter,
 } from '~/utils/types';
 import {
     getTransactionsOfAccount,
@@ -12,12 +13,13 @@ import {
 import { toCSV } from '~/utils/basicHelpers';
 import { isOutgoingTransaction, lookupName } from '~/utils/transactionHelpers';
 import exportTransactionFields from '~/constants/exportTransactionFields.json';
-import { dateFromTimeStamp, getISOFormat } from '~/utils/timeHelpers';
+import { getISOFormat } from '~/utils/timeHelpers';
 import { isShieldedBalanceTransaction } from '~/features/TransactionSlice';
-import { hasEncryptedBalance } from '~/utils/accountHelpers';
+import {
+    getActiveBooleanFilters,
+    hasEncryptedBalance,
+} from '~/utils/accountHelpers';
 import transactionKindNames from '~/constants/transactionKindNames.json';
-
-type Filter = (transaction: TransferTransaction) => boolean;
 
 function calculatePublicBalanceChange(
     transaction: TransferTransaction,
@@ -78,34 +80,6 @@ function calculateShieldedBalanceChange(
     }
 }
 
-export interface FilterOption {
-    filter: Filter;
-    label: string;
-    key: string;
-}
-
-export function filterKind(kind: TransactionKindString): FilterOption {
-    return {
-        // put an s to pluralize. (Assumes that no transaction name needs specific pluralization)
-        label: `${transactionKindNames[kind]}s`,
-        key: kind,
-        filter: (transaction: TransferTransaction) =>
-            transaction.transactionKind === kind,
-    };
-}
-
-export function filterKindGroup(
-    label: string,
-    kinds: TransactionKindString[]
-): FilterOption {
-    return {
-        label,
-        key: label,
-        filter: (transaction: TransferTransaction) =>
-            kinds.includes(transaction.transactionKind),
-    };
-}
-
 const getName = (i: string[]) => i[0];
 const getLabel = (i: string[]) => i[1];
 const exportedFields = Object.entries(exportTransactionFields);
@@ -140,27 +114,25 @@ function parseTransaction(
     return exportedFields.map((field) => fieldValues[getName(field)]);
 }
 
-function showingShieldedTransfers(filters: FilterOption[]) {
-    return filters.some(
-        (filter) => filter.key === TransactionKindString.EncryptedAmountTransfer
+function showingShieldedTransfers(filters: TransactionFilter) {
+    return getActiveBooleanFilters(filters).includes(
+        TransactionKindString.EncryptedAmountTransfer
     );
 }
 
 export async function containsEncrypted(
     account: Account,
-    filterOptions: FilterOption[],
-    fromTime?: Date,
-    toTime?: Date
+    filters: TransactionFilter
 ) {
-    if (
-        !showingShieldedTransfers(filterOptions) ||
-        !hasEncryptedBalance(account)
-    ) {
+    if (!showingShieldedTransfers(filters) || !hasEncryptedBalance(account)) {
         return false;
     }
 
-    const fromBlockTime = fromTime ? fromTime.getTime() : Date.now();
-    const toBlockTime = toTime ? toTime.getTime() : 0;
+    const { fromDate, toDate } = filters;
+
+    const fromBlockTime = fromDate ? new Date(fromDate).getTime() : 0;
+    const toBlockTime = toDate ? new Date(toDate).getTime() : Date.now();
+
     return hasEncryptedTransactions(
         account.address,
         (fromBlockTime / 1000).toString(),
@@ -171,19 +143,14 @@ export async function containsEncrypted(
 // Updates transactions of the account, and returns them as a csv string.
 export async function getAccountCSV(
     account: Account,
-    filterOptions: FilterOption[],
-    fromTime?: Date,
-    toTime?: Date
+    filter: TransactionFilter
 ) {
-    let { transactions } = await getTransactionsOfAccount(account, [], 1000000); // load from database
-    transactions = transactions.filter(
-        (transaction) =>
-            (!fromTime ||
-                dateFromTimeStamp(transaction.blockTime) > fromTime) &&
-            (!toTime || dateFromTimeStamp(transaction.blockTime) < toTime)
-    );
-    transactions = transactions.filter((transaction) =>
-        filterOptions.some((filterOption) => filterOption.filter(transaction))
+    const { fromDate, toDate } = filter;
+    const { transactions } = await getTransactionsOfAccount(
+        account,
+        getActiveBooleanFilters(filter),
+        fromDate ? new Date(fromDate) : undefined,
+        toDate ? new Date(toDate) : undefined
     );
 
     const withNames: TransferTransactionWithNames[] = await Promise.all(

@@ -1,5 +1,6 @@
 import {
     Account,
+    TimeStampUnit,
     TransactionKindString,
     TransactionStatus,
     TransferTransaction,
@@ -10,8 +11,10 @@ import {
 } from '~/constants/databaseNames.json';
 import { knex } from '~/database/knex';
 import { chunkArray, partition } from '~/utils/basicHelpers';
-import { GetTransactionsOutput } from '~/database/types';
-import { TransactionMethods } from '~/preload/preloadTypes';
+import {
+    GetTransactionsOutput,
+    TransactionMethods,
+} from '~/preload/preloadTypes';
 
 async function updateTransaction(
     identifier: Record<string, unknown>,
@@ -55,11 +58,16 @@ async function hasPendingTransactions(fromAddress: string) {
 async function getTransactionsOfAccount(
     account: Account,
     filteredTypes: TransactionKindString[] = [],
-    limit = 100
+    fromDate?: Date,
+    toDate?: Date,
+    limit?: number,
+    startId?: string
 ): Promise<GetTransactionsOutput> {
     const { address } = account;
 
-    const latestTransaction = await (await knex())(transactionTable)
+    const latestTransaction: TransferTransaction | undefined = await (
+        await knex()
+    )(transactionTable)
         .where({ id: account.maxTransactionId })
         .first();
     if (!latestTransaction) {
@@ -70,33 +78,50 @@ async function getTransactionsOfAccount(
         };
     }
 
-    const maxBlockTime = Number(latestTransaction.blockTime);
+    const fromLimit = (fromDate?.getTime() ?? 0) / TimeStampUnit.seconds;
+    const toLimit = (toDate?.getTime() ?? Date.now()) / TimeStampUnit.seconds;
+
+    const toTime = Math.min(Number(latestTransaction.blockTime), toLimit);
     let expandHours = 1;
     let fromTime: number;
     let transactions;
+    let more = true;
+
     do {
-        fromTime = maxBlockTime - 60 * 60 * expandHours;
+        fromTime = Math.max(fromLimit, toTime - 60 * 60 * expandHours);
 
         const querytransactions = (await knex())<TransferTransaction>(
             transactionTable
         )
-            .whereNotIn('transactionKind', filteredTypes)
-            .whereBetween('blockTime', [fromTime, maxBlockTime])
+            .whereIn('transactionKind', filteredTypes)
+            .whereBetween('blockTime', [fromTime, toTime])
+            // The '+' forces SQLite to NOT use the index on these columns.
+            // SQLite can only use one index, and it HAS to NOT be the address
+            // ones for this to perform (it has to use the blockTime index).
             .andWhere((builder) =>
                 builder
-                    .where({ toAddress: address })
-                    .orWhere({ fromAddress: address })
+                    .whereRaw('+toAddress = ?', address)
+                    .orWhereRaw('+fromAddress = ?', address)
             )
-            .orderBy('blockTime', 'desc')
-            .limit(limit + 1);
+            .orderBy('blockTime', 'desc');
+
+        if (startId) {
+            querytransactions.andWhere('id', '<', startId);
+        }
+
+        if (limit) {
+            querytransactions.limit(limit + 1);
+        }
 
         transactions = await querytransactions;
+
         expandHours *= 2;
-    } while (transactions.length < limit && fromTime > 0);
+        more = !!limit && transactions.length > limit;
+    } while (!more && fromTime > fromLimit);
 
     return {
         transactions: transactions.slice(0, limit),
-        more: transactions.length > limit,
+        more,
     };
 }
 

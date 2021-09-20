@@ -7,12 +7,13 @@ import ensureNoPendingShieldedBalance from './ensureNoPendingShieldedBalance';
 
 interface Props {
     account: Account;
+    disableClose?: boolean;
 }
 
 /**
  * Controls the flow of creating a transfer to public.
  */
-function UnshieldAmount({ account }: Props) {
+function UnshieldAmount({ account, disableClose = false }: Props) {
     const specific = {
         amountHeader: 'Unshield GTU',
         createTransaction: createUnshieldAmountTransaction,
@@ -20,7 +21,13 @@ function UnshieldAmount({ account }: Props) {
         transactionKind: TransactionKindId.Transfer_to_public,
     };
 
-    return <InternalTransfer account={account} specific={specific} />;
+    return (
+        <InternalTransfer
+            account={account}
+            specific={specific}
+            disableClose={disableClose}
+        />
+    );
 }
 
 export default ensureNoPendingShieldedBalance(UnshieldAmount);

@@ -156,11 +156,10 @@ export default function BuildSchedule({ location }: Props) {
         <TransferView
             className={styles.buildSchedule}
             showBack
-            exitOnClick={() => dispatch(push(routes.ACCOUNTS))}
             backOnClick={() =>
                 dispatch(
                     push({
-                        pathname: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
+                        pathname: routes.ACCOUNTS_CREATESCHEDULEDTRANSFER,
                         state: {
                             amount: microGtuToGtu(amount),
                             recipient,
