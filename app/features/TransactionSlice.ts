@@ -37,6 +37,7 @@ import { RejectReason } from '~/utils/node/RejectReasonHelper';
 import { isDefined, max } from '~/utils/basicHelpers';
 import { getActiveBooleanFilters } from '~/utils/accountHelpers';
 import errorMessages from '~/constants/errorMessages.json';
+import { GetTransactionsOutput } from '~/preload/preloadTypes';
 
 const updateTransactionInterval = 5000;
 export const transactionLogPageSize = 100;
@@ -57,21 +58,16 @@ const transactionSlice = createSlice({
         hasMore: true,
     } as State,
     reducers: {
-        setTransactions(
-            state,
-            update: PayloadAction<{
-                transactions: TransferTransaction[];
-                hasMore: boolean;
-            }>
-        ) {
+        setTransactions(state, update: PayloadAction<GetTransactionsOutput>) {
             state.transactions = update.payload.transactions;
-            state.hasMore = update.payload.hasMore;
+            state.hasMore = update.payload.more;
         },
         appendTransactions(
             state,
-            update: PayloadAction<TransferTransaction[]>
+            update: PayloadAction<GetTransactionsOutput>
         ) {
-            state.transactions.push(...update.payload);
+            state.transactions.push(...update.payload.transactions);
+            state.hasMore = update.payload.more;
         },
         setViewingShielded(state, viewingShielded) {
             state.viewingShielded = viewingShielded.payload;
@@ -216,7 +212,10 @@ export const loadTransactions = createAsyncThunk(
         const minId = state.transactions.transactions
             .map((t) => t.id)
             .filter(isDefined)
-            .reduce((min, cur) => (min > cur ? cur : min), '0');
+            .reduce<string | undefined>(
+                (min, cur) => (!min || min > cur ? cur : min),
+                undefined
+            );
 
         const account = chosenAccountSelector(state);
 
@@ -232,7 +231,7 @@ export const loadTransactions = createAsyncThunk(
         const booleanFilters = getActiveBooleanFilters(
             account.transactionFilter
         );
-        const { transactions, more } = await getTransactionsOfAccount(
+        const result = await getTransactionsOfAccount(
             account,
             booleanFilters,
             fromDate ? new Date(fromDate) : undefined,
@@ -250,9 +249,9 @@ export const loadTransactions = createAsyncThunk(
         }
 
         if (append) {
-            dispatch(appendTransactions(transactions));
+            dispatch(appendTransactions(result));
         } else {
-            dispatch(setTransactions({ transactions, hasMore: more }));
+            dispatch(setTransactions(result));
         }
     }
 );

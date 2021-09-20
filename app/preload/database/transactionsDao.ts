@@ -109,11 +109,12 @@ async function getTransactionsOfAccount(
         if (limit) {
             querytransactions.limit(limit + 1);
         }
+
         transactions = await querytransactions;
 
         expandHours *= 2;
         more = !!limit && transactions.length > limit;
-    } while (!more || fromTime > fromLimit);
+    } while (!more && fromTime > fromLimit);
 
     return {
         transactions: transactions.slice(0, limit),
