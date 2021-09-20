@@ -8,7 +8,7 @@ import DisplayFee from '~/components/DisplayFee';
 import ScheduleList from '~/components/ScheduleList';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
-import DisplayMemo from '~/components/DisplayMemo';
+import DisplayMemo from './DisplayMemo';
 import DisplayAddress from '../DisplayAddress';
 
 import styles from './transferDetails.module.scss';
