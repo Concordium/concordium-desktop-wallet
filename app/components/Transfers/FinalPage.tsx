@@ -9,7 +9,7 @@ import { parseTime } from '~/utils/timeHelpers';
 import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import ButtonNavLink from '~/components/ButtonNavLink';
-import DisplayMemo from '~/components/DisplayMemo';
+import DisplayMemo from './DisplayMemo';
 import TransferView from './TransferView';
 
 import {

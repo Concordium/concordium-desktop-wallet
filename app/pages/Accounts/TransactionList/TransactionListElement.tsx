@@ -251,6 +251,7 @@ function showMemo(
         <pre
             className={clsx(
                 'body4 m0 textFaded',
+                showFullMemo && styles.fullMemo,
                 showFullMemo || styles.lineClamp
             )}
         >
@@ -309,6 +310,7 @@ function TransactionListElement({
         <div
             className={clsx(
                 styles.transactionListElement,
+                style.height || styles.transactionListElementVariableHeight,
                 !failed || styles.failedElement,
                 Boolean(onClick) && styles.clickableElement,
                 className

@@ -7,6 +7,7 @@ enum StatusCodes {
     InvalidParam = 0x6b03,
     InvalidTransaction = 0x6b04,
     DeviceLocked = 0x6b0c,
+    DeviceLocked161NoTranslation = 0x530c,
 }
 
 const lockedText =
@@ -34,6 +35,7 @@ errorCodeMap.set(
 );
 errorCodeMap.set(StatusCodes.DeviceLocked, lockedText);
 errorCodeMap.set(StatusCodes.DeviceLocked161, lockedText);
+errorCodeMap.set(StatusCodes.DeviceLocked161NoTranslation, lockedText);
 
 /**
  * Maps a non-successful status code from the Ledger device to a human readable error description.
