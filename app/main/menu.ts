@@ -51,6 +51,12 @@ export function createMenu(window: BrowserWindow) {
                         shell.openExternal(supportForum);
                     },
                 },
+                ...(isMac
+                    ? []
+                    : ([
+                          { type: 'separator' },
+                          { role: 'about' },
+                      ] as MenuItemConstructorOptions[])),
             ],
         },
     ];
