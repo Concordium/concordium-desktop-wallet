@@ -1,3 +1,4 @@
+import '../mockWindow';
 import { createRegularIntervalSchedule } from '../../app/utils/transactionHelpers';
 
 test('createRegularIntervalSchedule release amounts should sum to input amount', () => {

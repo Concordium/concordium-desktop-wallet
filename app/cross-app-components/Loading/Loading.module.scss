@@ -24,9 +24,6 @@
 }
 
 .icon {
-    width: 100px;
-    height: 100px;
-
     :global(.logo-pending_svg__arrows) {
         transform-origin: center;
         animation: spin 1s;

@@ -14,6 +14,7 @@
 -   Added reference (sessionId) on failed identities, for support.
 -   Added support for memo transactions.
 -   Added algorithm to recover lost accounts and credentials.
+-   Application will automatically search for updates and prompt the user to download and install them (Windows, macOS and AppImage for Linux).
 -   It is now possible to set a default account, which will be selected initially when opening the app.
 
 ### Changed

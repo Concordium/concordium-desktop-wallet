@@ -31,12 +31,14 @@ export type { default as LedgerCommands } from './preloadLedgerTypes';
 
 export type Listener = (event: any, ...args: any[]) => void;
 type PutListener = (callback: Listener) => void;
+type PutListenerWithUnsub = (callback: Listener) => () => void;
 
 export interface Listen {
     openRoute: PutListener;
     readyToShow: PutListener;
     didFinishLoad: PutListener;
     ledgerChannel: PutListener;
+    logFromMain: PutListener;
 }
 
 export interface Once {
@@ -326,6 +328,15 @@ export type Database = {
     wallet: WalletMethods;
 };
 
+export interface AutoUpdateMethods {
+    onUpdateAvailable: PutListenerWithUnsub;
+    onUpdateDownloaded: PutListenerWithUnsub;
+    onVerificationSuccess: PutListenerWithUnsub;
+    onError: PutListenerWithUnsub;
+    triggerUpdate(): void;
+    quitAndInstall(): void;
+}
+
 export interface WindowFunctions {
     addListener: Listen;
     removeListener: Listen;
@@ -341,4 +352,5 @@ export interface WindowFunctions {
     writeImageToClipboard: (dataUrl: string) => void;
     openUrl: (href: string) => any;
     removeAllListeners: (channel: string) => void;
+    autoUpdate: AutoUpdateMethods;
 }

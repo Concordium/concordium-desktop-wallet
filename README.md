@@ -11,13 +11,21 @@ You need the following to build and run the project:
 -   Rust (https://www.rust-lang.org/tools/install)
 -   Wasm-pack (https://rustwasm.github.io/wasm-pack/installer/)
 
+### Ubuntu
+
+For ubuntu, a couple of extra dependencies are needed:
+
+-   libusb 1.0 (`sudo apt-get install libusb-1.0`)
+-   libudev-dev (`sudo apt-get install libudev-dev`)
+-   rpm (`sudo apt-get install rpm`)
+
 ## Install
 
 Clone the repo via git.
 
 ```bash
-git clone https://gitlab.com/Concordium/desktopwallet.git
-cd desktopwallet
+git clone https://github.com/Concordium/concordium-desktop-wallet.git
+cd concordium-desktop-wallet
 ```
 
 Make sure to initialize submodules:
@@ -128,3 +136,19 @@ The notarizing process can take a while, and for testing purposes it can be skip
 ```bash
 TARGET_NET=$NET yarn package-mac-no-notarize
 ```
+
+### Generating verification assets
+
+Users are encouraged to verify the integrity of a downloaded application binary before installation. To support this, we need to generate a **hash** and a **signature** for each binary released. Furthermore, automatic updates also rely on these assets for verification of each update being installed.
+
+To generate the assets, run:
+
+```bash
+yarn generate-verification-assets <path-to-private-key>
+```
+
+-   The private key used for this needs to match the public key published for verification, otherwise verification will not succeed.
+
+By default, the script tries to generate a hash and sig file for all release binaries in `release/`. It also tries to verify the created signatures with Concordium's public key for the desktop wallet, which is published separately.
+
+The script has a number of optional runtime arguments, which are documented in the underlying script file `scripts/fileDigest.js`.
