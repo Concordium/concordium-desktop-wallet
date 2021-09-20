@@ -11,11 +11,13 @@ import {
 import {
     updateTransactions,
     loadTransactions,
+    fetchNewestTransactions,
     resetTransactions,
 } from '~/features/TransactionSlice';
 import { noOp } from '~/utils/basicHelpers';
 import { AccountStatus } from '~/utils/types';
 import AbortController from '~/utils/AbortController';
+import AbortControllerWithLooping from '~/utils/AbortControllerWithLooping';
 
 async function load(dispatch: Dispatch) {
     const accounts = await loadAccounts(dispatch);
@@ -35,8 +37,29 @@ export default function useAccountSync(): string | undefined {
     const dispatch = useDispatch();
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
-    const [controller] = useState(new AbortController());
+    // This controller is used to abort updateTransactions, when the chosen account is changed, or the view is destroyed.
+    const [controller] = useState(new AbortControllerWithLooping());
     const [error, setError] = useState<string | undefined>();
+
+    useEffect(() => {
+        if (
+            account &&
+            account.status === AccountStatus.Confirmed &&
+            controller.hasLooped &&
+            !controller.isAborted
+        ) {
+            fetchNewestTransactions(dispatch, account);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+        account?.address,
+        account?.transactionFilter?.bakingReward,
+        account?.transactionFilter?.blockReward,
+        account?.transactionFilter?.finalizationReward,
+        account?.transactionFilter?.fromDate,
+        account?.transactionFilter?.toDate,
+        controller.hasLooped,
+    ]);
 
     useEffect(() => {
         load(dispatch).catch((e: Error) => setError(e.message));
@@ -71,7 +94,12 @@ export default function useAccountSync(): string | undefined {
             !controller.isAborted
         ) {
             controller.start();
-            dispatch(updateTransactions({ controller, onError: setError }));
+            dispatch(
+                updateTransactions({
+                    controller,
+                    onError: setError,
+                })
+            );
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [

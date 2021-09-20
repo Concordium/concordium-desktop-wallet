@@ -34,6 +34,18 @@ async function getPendingTransactions(): Promise<TransferTransaction[]> {
     return transactions;
 }
 
+async function getTransaction(
+    id: string
+): Promise<TransferTransaction | undefined> {
+    const transaction = await (await knex())<TransferTransaction>(
+        transactionTable
+    )
+        .select()
+        .where({ id })
+        .first();
+    return transaction;
+}
+
 async function hasPendingTransactions(fromAddress: string) {
     const transaction = await (await knex())
         .select()
@@ -65,23 +77,9 @@ async function getTransactionsOfAccount(
 ): Promise<GetTransactionsOutput> {
     const { address } = account;
 
-    const latestTransaction: TransferTransaction | undefined = await (
-        await knex()
-    )(transactionTable)
-        .where({ id: account.maxTransactionId })
-        .first();
-    if (!latestTransaction) {
-        // When there are no transactions in the database, this will be the case.
-        return {
-            transactions: [],
-            more: false,
-        };
-    }
-
     const fromLimit = (fromDate?.getTime() ?? 0) / TimeStampUnit.seconds;
-    const toLimit = (toDate?.getTime() ?? Date.now()) / TimeStampUnit.seconds;
 
-    const toTime = Math.min(Number(latestTransaction.blockTime), toLimit);
+    const toTime = (toDate?.getTime() ?? Date.now()) / TimeStampUnit.seconds;
     let expandHours = 1;
     let fromTime: number;
     let transactions;
@@ -266,6 +264,7 @@ const exposedMethods: TransactionMethods = {
     hasEncryptedTransactions,
     update: updateTransaction,
     insert: insertTransactions,
+    getTransaction,
     upsertTransactionsAndUpdateMaxId,
 };
 
