@@ -9,8 +9,8 @@ $sidebar-link-height: $page-header-height;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    box-shadow: inset -10px 0 15px -10px $color-grey;
     overflow: overlay;
+    border-right: 1px solid $color-grey;
 
     &::-webkit-scrollbar-thumb {
         box-shadow: 0 0 transparent;
@@ -25,8 +25,7 @@ $sidebar-link-height: $page-header-height;
 }
 
 .bottom,
-.item,
-.itemContent {
+.item {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -35,34 +34,54 @@ $sidebar-link-height: $page-header-height;
     font-size: $font-size-h6;
 }
 
+@mixin emphItem() {
+    color: $color-pale-blue;
+
+    svg * {
+        fill: $color-pale-blue;
+    }
+}
+
 .item {
     flex: 0 0 $sidebar-link-height;
     text-decoration: none;
     color: $color-text;
+    position: relative;
+    transition: color ease-in 0.1s;
+
+    svg * {
+        transition: fill ease-in 0.1s;
+    }
+
+    &::before {
+        content: '';
+        display: block;
+        height: 15%;
+        opacity: 0;
+        width: 6px;
+        border-radius: 3px;
+        background-color: $color-pale-blue;
+        position: absolute;
+        left: 20px;
+        transition: height ease-out 0.2s, opacity ease-out 0.2s;
+    }
 
     &Active {
-        background-color: $color-background;
-        box-shadow: 0 0 15px 0 $color-grey;
+        @include emphItem;
+
+        &::before {
+            height: 70%;
+            opacity: 1;
+        }
     }
 
     &:focus,
     &:hover {
         outline: none;
-    }
-}
 
-.itemContent {
-    transform: scale(1);
-    transition: transform ease-in 0.1s;
-
-    .item:not(.itemActive):not(.disabled):hover &,
-    .item:not(.itemActive):not(.disabled):focus & {
-        transform: scale(1.1);
-    }
-
-    &:focus,
-    &:hover {
-        outline: none;
+        &:not(:disabled):link {
+            @include emphItem;
+        }
     }
 }
 

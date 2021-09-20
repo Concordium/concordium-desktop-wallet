@@ -7,7 +7,6 @@ import LogoIcon from '../../../resources/svg/logo.svg';
 
 import styles from './Sidebar.module.scss';
 import Switch from '../Switch';
-import routes from '../../constants/routes.json';
 
 export interface SidebarLink {
     route: string;
@@ -58,15 +57,9 @@ export default function Sidebar<THasSwitch extends boolean = false>({
     return (
         <nav className={clsx(styles.root, className)} style={style}>
             <div className={styles.items}>
-                <NavLink
-                    className={styles.item}
-                    to={routes.HOME}
-                    activeClassName={styles.itemActive}
-                >
-                    <span className={styles.itemContent}>
-                        <LogoIcon height="57" />
-                    </span>
-                </NavLink>
+                <div className={styles.item}>
+                    <LogoIcon height="57" />
+                </div>
                 {links.map((l) => (
                     <NavLink
                         key={l.route}
@@ -78,10 +71,8 @@ export default function Sidebar<THasSwitch extends boolean = false>({
                         onClick={handleClick}
                         activeClassName={styles.itemActive}
                     >
-                        <span className={styles.itemContent}>
-                            {l.icon}
-                            <span className={styles.title}>{l.title}</span>
-                        </span>
+                        {l.icon}
+                        <span className={styles.title}>{l.title}</span>
                     </NavLink>
                 ))}
             </div>
