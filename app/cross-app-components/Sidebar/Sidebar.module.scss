@@ -49,7 +49,7 @@ $sidebar-link-height: $page-header-height;
     position: relative;
     transition: color ease-in 0.1s;
 
-    svg * {
+    svg path {
         transition: fill ease-in 0.1s;
     }
 
