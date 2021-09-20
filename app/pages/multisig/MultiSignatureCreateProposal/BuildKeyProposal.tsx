@@ -8,7 +8,6 @@ import {
     MultiSignatureTransaction,
 } from '~/utils/types';
 import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
-import Loading from '~/cross-app-components/Loading';
 
 import { secondsSinceUnixEpoch } from '~/utils/timeHelpers';
 
@@ -17,7 +16,7 @@ export interface MultiSignatureCreateProposalForm {
     expiryTime: Date;
 }
 
-interface Props extends ChainData {
+interface Props extends Required<ChainData> {
     defaults: FieldValues;
     type: UpdateType;
     onFinish: (
@@ -70,19 +69,12 @@ export default function BuildProposal({
     }
 
     return (
-        <>
-            {(!blockSummary || !consensusStatus) && (
-                <Loading text="Getting current settings from chain" />
-            )}
-            {blockSummary && consensusStatus && (
-                <UpdateComponent
-                    defaults={defaults}
-                    blockSummary={blockSummary}
-                    consensusStatus={consensusStatus}
-                    handleHigherLevelKeySubmit={handleSubmit}
-                    handleAuthorizationKeySubmit={handleSubmit}
-                />
-            )}
-        </>
+        <UpdateComponent
+            defaults={defaults}
+            blockSummary={blockSummary}
+            consensusStatus={consensusStatus}
+            handleHigherLevelKeySubmit={handleSubmit}
+            handleAuthorizationKeySubmit={handleSubmit}
+        />
     );
 }
