@@ -34,6 +34,7 @@ import {
     chosenAccountSelector,
 } from './AccountSlice';
 import AbortController from '~/utils/AbortController';
+import AbortControllerWithLooping from '~/utils/AbortControllerWithLooping';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
 import { isDefined, max } from '~/utils/basicHelpers';
 import { getActiveBooleanFilters } from '~/utils/accountHelpers';
@@ -348,15 +349,14 @@ async function fetchTransactions(
 }
 
 interface UpdateTransactionsArgs {
-    controller: AbortController;
+    controller: AbortControllerWithLooping;
     onError(e: string): void;
 }
 
 /** Update the transactions from remote source.
  * will fetch transactions in intervals, updating the state each time.
  * stops when it reaches the newest transaction, or it is told to abort by the controller.
- * @param controller this controls the function, and if it is aborted, this will terminate when able.
- * @param outdatedController A controller which is assumed to be already started, and should only become ready, when the wallet has an outdated view of the current account's transactions. Additionally it becomes busy again, when this finishes, and the view is up to date
+ * @param controller this controls the function, and if it is aborted, this will terminate when able. Has a hasLooped check, so it can be checked whether this function has completed loading a batch.
  * */
 export const updateTransactions = createAsyncThunk<
     unknown,

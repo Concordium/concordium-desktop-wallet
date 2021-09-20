@@ -17,6 +17,7 @@ import {
 import { noOp } from '~/utils/basicHelpers';
 import { AccountStatus } from '~/utils/types';
 import AbortController from '~/utils/AbortController';
+import AbortControllerWithLooping from '~/utils/AbortControllerWithLooping';
 
 async function load(dispatch: Dispatch) {
     const accounts = await loadAccounts(dispatch);
@@ -37,7 +38,7 @@ export default function useAccountSync(): string | undefined {
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
     // This controller is used to abort updateTransactions, when the chosen account is changed, or the view is destroyed.
-    const [controller] = useState(new AbortController());
+    const [controller] = useState(new AbortControllerWithLooping());
     const [error, setError] = useState<string | undefined>();
 
     useEffect(() => {
