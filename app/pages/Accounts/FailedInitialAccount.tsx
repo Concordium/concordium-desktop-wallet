@@ -35,7 +35,7 @@ export default function FailedInitialAccountModal({ account }: Props) {
             buttonText="Go to identity"
             onClick={() => {
                 // Remove chosen account, to avoid triggering this modal, when returning to account page.
-                dispatch(chooseAccount(-1));
+                dispatch(chooseAccount(''));
                 dispatch(chooseIdentity(account.identityId));
                 dispatch(push(routes.IDENTITIES));
             }}

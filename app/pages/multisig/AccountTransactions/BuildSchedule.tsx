@@ -9,7 +9,7 @@ import {
     ScheduledTransferBuilderRef,
     BuildScheduleDefaults,
 } from '~/components/BuildSchedule/util';
-import accountStyles from '~/pages/Accounts/BuildSchedule/BuildSchedule.module.scss';
+import accountStyles from '~/pages/Accounts/AccountDetailsPage/BuildSchedule/BuildSchedule.module.scss';
 import styles from './MultisignatureAccountTransactions.module.scss';
 
 interface Props {

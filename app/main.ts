@@ -11,21 +11,10 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
 import { app, BrowserView, BrowserWindow } from 'electron';
-import { autoUpdater } from 'electron-updater';
-import log from 'electron-log';
 import ipcRendererCommands from './constants/ipcRendererCommands.json';
 import { createMenu } from './main/menu';
 import initializeIpcHandlers from './main/ipcHandlers';
-
-export default class AppUpdater {
-    constructor() {
-        log.transports.file.level = 'info';
-        autoUpdater.logger = log;
-
-        // Disable automatic updates for now.
-        // autoUpdater.checkForUpdatesAndNotify();
-    }
-}
+import initAutoUpdate from './main/autoUpdate';
 
 let mainWindow: BrowserWindow | null = null;
 let printWindow: BrowserWindow | null = null;
@@ -156,9 +145,9 @@ const createWindow = async () => {
 
     initializeIpcHandlers(mainWindow, printWindow, browserView);
 
-    // Remove this if your app does not use auto updates
-    // eslint-disable-next-line
-    new AppUpdater();
+    if (process.env.NODE_ENV === 'production' && !process.env.TARGET_NET) {
+        initAutoUpdate(mainWindow);
+    }
 };
 
 app.on('window-all-closed', () => {

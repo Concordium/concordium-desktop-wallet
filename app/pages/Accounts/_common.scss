@@ -1,4 +1,7 @@
+@import 'config/bundle';
+
 $thick-blue-separator-height: 13px;
+$tabbed-card-header-height: 38px;
 
 .fillCardPadding {
     margin-left: -19px;
@@ -29,8 +32,12 @@ $thick-blue-separator-height: 13px;
     }
 }
 
-.closeButton {
-    position: absolute;
-    top: 20px;
-    right: 20px;
+.blueSeparatorTop {
+    &:not(:first-child) {
+        border-top: 5px solid $color-light-blue;
+    }
+}
+
+.thickBlueSeparatorTop {
+    border-top: $thick-blue-separator-height solid $color-light-blue;
 }

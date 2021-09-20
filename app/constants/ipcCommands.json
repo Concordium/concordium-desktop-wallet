@@ -7,5 +7,7 @@
     "createView": "CREATE_VIEW",
     "removeView": "REMOVE_VIEW",
     "resizeView": "RESIZE_VIEW",
-    "getUserDataPath": "GET_USER_DATA_PATH"
+    "getUserDataPath": "GET_USER_DATA_PATH",
+    "triggerAppUpdate": "TRIGGER_APP_UPDATE",
+    "quitAndInstallUpdate": "QUIT_AND_INSTALL_UPDATE"
 }

@@ -24,19 +24,21 @@ import {
     IncomingTransaction,
     AccountAndCredentialPairs,
 } from '~/utils/types';
-import { ExternalCredential, GetTransactionsOutput } from '../database/types';
+import { ExternalCredential } from '../database/types';
 import type LedgerCommands from './preloadLedgerTypes';
 
 export type { default as LedgerCommands } from './preloadLedgerTypes';
 
 export type Listener = (event: any, ...args: any[]) => void;
 type PutListener = (callback: Listener) => void;
+type PutListenerWithUnsub = (callback: Listener) => () => void;
 
 export interface Listen {
     openRoute: PutListener;
     readyToShow: PutListener;
     didFinishLoad: PutListener;
     ledgerChannel: PutListener;
+    logFromMain: PutListener;
 }
 
 export interface Once {
@@ -225,17 +227,35 @@ export type MultiSignatureTransactionMethods = {
     getMaxOpenNonceOnAccount: (address: string) => Promise<bigint>;
 };
 
+export interface PreferenceAccessor<V = string> {
+    get(): Promise<V | null>;
+    set(v: V): Promise<void>;
+}
+
+export interface PreferencesMethods {
+    defaultAccount: PreferenceAccessor<Hex>;
+    accountSimpleView: PreferenceAccessor<boolean>;
+}
+
 export type SettingsMethods = {
     update: (setting: Setting) => Promise<number>;
 };
+
+export interface GetTransactionsOutput {
+    transactions: TransferTransaction[];
+    more: boolean;
+}
 
 export type TransactionMethods = {
     getPending: () => Promise<TransferTransaction[]>;
     hasPending: (address: string) => Promise<boolean>;
     getTransactionsForAccount: (
-        account: Account,
+        address: Account,
         filteredTypes: TransactionKindString[],
-        limit?: number
+        fromDate?: Date,
+        toDate?: Date,
+        limit?: number,
+        startId?: string
     ) => Promise<GetTransactionsOutput>;
     hasEncryptedTransactions: (
         address: string,
@@ -250,6 +270,11 @@ export type TransactionMethods = {
     insert: (
         transactions: Partial<TransferTransaction>[]
     ) => Promise<Partial<TransferTransaction>[]>;
+    upsertTransactionsAndUpdateMaxId: (
+        transactions: TransferTransaction[],
+        address: string,
+        newMaxId: bigint
+    ) => Promise<TransferTransaction[]>;
 };
 
 export type WalletMethods = {
@@ -297,10 +322,20 @@ export type Database = {
     identity: IdentityMethods;
     genesisAndGlobal: GenesisAndGlobalMethods;
     multiSignatureTransaction: MultiSignatureTransactionMethods;
+    preferences: PreferencesMethods;
     settings: SettingsMethods;
     transaction: TransactionMethods;
     wallet: WalletMethods;
 };
+
+export interface AutoUpdateMethods {
+    onUpdateAvailable: PutListenerWithUnsub;
+    onUpdateDownloaded: PutListenerWithUnsub;
+    onVerificationSuccess: PutListenerWithUnsub;
+    onError: PutListenerWithUnsub;
+    triggerUpdate(): void;
+    quitAndInstall(): void;
+}
 
 export interface WindowFunctions {
     addListener: Listen;
@@ -317,4 +352,5 @@ export interface WindowFunctions {
     writeImageToClipboard: (dataUrl: string) => void;
     openUrl: (href: string) => any;
     removeAllListeners: (channel: string) => void;
+    autoUpdate: AutoUpdateMethods;
 }

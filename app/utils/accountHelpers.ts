@@ -1,6 +1,13 @@
 import { RegisterOptions, Validate } from 'react-hook-form';
 import bs58check from 'bs58check';
-import { Account, AccountInfo, AccountStatus } from './types';
+import {
+    Account,
+    AccountInfo,
+    BooleanFilters,
+    TransactionFilter,
+    TransactionKindString,
+    AccountStatus,
+} from './types';
 
 export const ACCOUNT_NAME_MAX_LENGTH = 25;
 export const ADDRESS_LENGTH = 50;
@@ -89,7 +96,7 @@ export function createAccount(
         isInitial,
         deploymentTransactionId,
         maxTransactionId: '0',
-        rewardFilter: '[]',
+        transactionFilter: {},
         selfAmounts: ENCRYPTED_ZERO,
         incomingAmounts: '[]',
         totalDecrypted: '0',
@@ -108,9 +115,30 @@ export function createInitialAccount(
         signatureThreshold: 1,
         isInitial: true,
         maxTransactionId: '0',
-        rewardFilter: '[]',
+        transactionFilter: {},
         selfAmounts: ENCRYPTED_ZERO,
         incomingAmounts: '[]',
         totalDecrypted: '0',
     };
+}
+
+export function getActiveBooleanFilters({
+    fromDate,
+    toDate,
+    ...filters
+}: TransactionFilter): TransactionKindString[] {
+    const fullFilter: BooleanFilters = {};
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const k in TransactionKindString) {
+        if (Object.prototype.hasOwnProperty.call(TransactionKindString, k)) {
+            const kind =
+                TransactionKindString[k as keyof typeof TransactionKindString];
+            fullFilter[kind] = filters[kind] ?? true;
+        }
+    }
+
+    return Object.entries(fullFilter as BooleanFilters)
+        .filter(([, v]) => v)
+        .map(([kind]) => kind as TransactionKindString);
 }
