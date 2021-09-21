@@ -18,7 +18,7 @@ import { addProposal } from '~/features/MultiSignatureSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import {
     getUpdateKey,
-    attachKeyIndex,
+    findKeyIndex,
 } from '~/utils/updates/AuthorizationHelper';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import Columns from '~/components/Columns';
@@ -70,6 +70,18 @@ function SignTransactionProposalView({ proposal, blockSummary }: Props) {
         if (ledger) {
             const publicKey = await getUpdateKey(ledger, updateInstruction);
 
+            const keyIndex = findKeyIndex(
+                publicKey,
+                blockSummary.updates.keys,
+                updateInstruction,
+                transactionHandler
+            );
+            if (keyIndex === undefined) {
+                throw new Error(
+                    'Your key is not authorized to sign this update type.'
+                );
+            }
+
             const signatureBytes = await transactionHandler.signTransaction(
                 updateInstruction,
                 ledger
@@ -81,12 +93,6 @@ function SignTransactionProposalView({ proposal, blockSummary }: Props) {
                 authorizationPublicKey: publicKey,
             };
             signatures.push(signature);
-            await attachKeyIndex(
-                signature,
-                blockSummary,
-                updateInstruction,
-                transactionHandler
-            );
         }
 
         updateInstruction.signatures = signatures;

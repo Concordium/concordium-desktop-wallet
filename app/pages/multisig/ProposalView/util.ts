@@ -18,7 +18,7 @@ import {
     fetchLastFinalizedBlockSummary,
     getAccountInfoOfAddress,
 } from '~/node/nodeHelpers';
-import { attachKeyIndex } from '~/utils/updates/AuthorizationHelper';
+import { findKeyIndex } from '~/utils/updates/AuthorizationHelper';
 import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import errorMessages from '~/constants/errorMessages.json';
 
@@ -67,7 +67,8 @@ async function HandleAccountTransactionSignatureFile(
         return {
             show: true,
             header: errorMessages.unableToReachNode,
-            content: 'Unable to verify signature without connection to node.',
+            content:
+                'Unable to verify the signature without a connection to a node.',
         };
     }
 
@@ -159,13 +160,17 @@ async function HandleUpdateInstructionSignatureFile(
             show: true,
             header: errorMessages.unableToReachNode,
             content:
-                'Unable to verify signature is signed by an authorized key without connection to node.',
+                'Unable to verify that the signature is signed by an authorized key without a connection to a node.',
         };
     }
     const handler = findUpdateInstructionHandler(proposal.type);
-    try {
-        await attachKeyIndex(signature, blockSummary, proposal, handler);
-    } catch {
+    const keyIndex = findKeyIndex(
+        signature.authorizationPublicKey,
+        blockSummary.updates.keys,
+        proposal,
+        handler
+    );
+    if (keyIndex === undefined) {
         return {
             show: true,
             header: 'Unathorized signature',
