@@ -13,7 +13,7 @@ interface Props {
 export default function TransactionsHeader({ text }: Props) {
     const [showSpinner, setShowSpinner] = useState(false);
     const synchronizing = useSelector(
-        (s: RootState) => s.transactions.syncronizing
+        (s: RootState) => s.transactions.synchronizing
     );
 
     useEffect(() => {

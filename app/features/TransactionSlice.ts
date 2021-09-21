@@ -273,7 +273,7 @@ interface State {
     viewingShielded: boolean;
     loadingTransactions: boolean;
     hasMore: boolean;
-    syncronizing: boolean;
+    synchronizing: boolean;
 }
 
 const transactionSlice = createSlice({
@@ -283,7 +283,7 @@ const transactionSlice = createSlice({
         viewingShielded: false,
         loadingTransactions: false,
         hasMore: false,
-        syncronizing: false,
+        synchronizing: false,
     } as State,
     reducers: {
         setTransactions(state, update: PayloadAction<GetTransactionsOutput>) {
@@ -314,7 +314,7 @@ const transactionSlice = createSlice({
         });
 
         builder.addCase(updateTransactions.pending, (state) => {
-            state.syncronizing = true;
+            state.synchronizing = true;
         });
 
         builder.addCase(loadTransactions.rejected, (state) => {
@@ -341,7 +341,7 @@ const transactionSlice = createSlice({
         builder.addMatcher(
             isAnyOf(updateTransactions.rejected, updateTransactions.fulfilled),
             (state) => {
-                state.syncronizing = false;
+                state.synchronizing = false;
             }
         );
 
