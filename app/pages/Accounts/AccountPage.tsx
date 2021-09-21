@@ -1,13 +1,11 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { push } from 'connected-react-router';
+import { useSelector } from 'react-redux';
 
 import NoIdentities from '~/components/NoIdentities';
 import { accountsSelector } from '~/features/AccountSlice';
 import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
 import { RootState } from '~/store/store';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
-import routes from '~/constants/routes.json';
 
 import useAccountSync from './useAccountSync';
 import AccountListPage from './AccountListPage';
@@ -17,8 +15,7 @@ const { Header } = MasterDetailPageLayout;
 
 export default function AccountsPage() {
     const accounts = useSelector(accountsSelector);
-    const dispatch = useDispatch();
-    const syncError = useAccountSync();
+    const { error, clearError } = useAccountSync();
     const simpleView = useSelector((s: RootState) => s.accounts.simpleView);
 
     if (accounts.length === 0) {
@@ -35,10 +32,10 @@ export default function AccountsPage() {
     return (
         <>
             <SimpleErrorModal
-                show={Boolean(syncError)}
+                show={Boolean(error)}
                 header="Unable to update accounts"
-                content={syncError}
-                onClick={() => dispatch(push(routes.HOME))}
+                content={error}
+                onClick={clearError}
             />
             {simpleView ? <AccountListPage /> : <AccountDetailsPage />}
         </>

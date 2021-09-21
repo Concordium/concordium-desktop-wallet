@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import PendingImage from '@resources/svg/pending-arrows.svg';
 import SuccessImage from '@resources/svg/success.svg';
 import RejectedImage from '@resources/svg/warning.svg';
@@ -9,26 +9,22 @@ import AbortController from '~/utils/AbortController';
 import { specificSettingSelector } from '~/features/SettingsSlice';
 import settingKeys from '~/constants/settingKeys.json';
 import StatusPart from './StatusPart';
+import { RootState } from '~/store/store';
+import { NodeConnectionStatus } from '~/utils/types';
+import { setNodeStatus } from '~/features/MiscSlice';
 
 const checkInterval = 15000;
 const showPingTimeout = 1000;
 
-enum Status {
-    Pinging = 'Pinging',
-    CatchingUp = 'Catching up',
-    Ready = 'Ready',
-    Unavailable = 'Unavailable',
-}
-
-function getStatusImage(status: Status) {
+function getStatusImage(status: NodeConnectionStatus) {
     switch (status) {
-        case Status.CatchingUp:
+        case NodeConnectionStatus.CatchingUp:
             return PendingImage;
-        case Status.Unavailable:
+        case NodeConnectionStatus.Unavailable:
             return RejectedImage;
-        case Status.Ready:
+        case NodeConnectionStatus.Ready:
             return SuccessImage;
-        case Status.Pinging:
+        case NodeConnectionStatus.Pinging:
             return ScanningImage;
         default:
             return undefined;
@@ -36,33 +32,43 @@ function getStatusImage(status: Status) {
 }
 
 export default function NodeStatus(): JSX.Element {
+    const dispatch = useDispatch();
     const connectionSettings = useSelector(
         specificSettingSelector(settingKeys.nodeLocation)
     );
-    const [statusText, setStatusText] = useState<Status>(Status.Pinging);
+    const statusText = useSelector((s: RootState) => s.misc.nodeStatus);
+    const setStatusText = useCallback(
+        (status: NodeConnectionStatus) => dispatch(setNodeStatus(status)),
+        [dispatch]
+    );
 
-    const setStatus = useCallback(async (controller: AbortController) => {
-        if (controller.isAborted) {
-            return;
-        }
-        const setPingingTimeout = setTimeout(
-            () => setStatusText(Status.Pinging),
-            showPingTimeout
-        );
-        let status = Status.Unavailable;
-        try {
-            const upToDate = await isNodeUpToDate();
-            status = upToDate ? Status.Ready : Status.CatchingUp;
-        } catch {
-            // do nothing, status defaults to unavailable.
-        } finally {
-            clearTimeout(setPingingTimeout);
-            if (!controller.isAborted) {
-                setStatusText(status);
-                setTimeout(setStatus, checkInterval, controller);
+    const setStatus = useCallback(
+        async (controller: AbortController) => {
+            if (controller.isAborted) {
+                return;
             }
-        }
-    }, []);
+            const setPingingTimeout = setTimeout(
+                () => setStatusText(NodeConnectionStatus.Pinging),
+                showPingTimeout
+            );
+            let status = NodeConnectionStatus.Unavailable;
+            try {
+                const upToDate = await isNodeUpToDate();
+                status = upToDate
+                    ? NodeConnectionStatus.Ready
+                    : NodeConnectionStatus.CatchingUp;
+            } catch {
+                // do nothing, status defaults to unavailable.
+            } finally {
+                clearTimeout(setPingingTimeout);
+                if (!controller.isAborted) {
+                    setStatusText(status);
+                    setTimeout(setStatus, checkInterval, controller);
+                }
+            }
+        },
+        [setStatusText]
+    );
 
     useEffect(() => {
         const controller = new AbortController();

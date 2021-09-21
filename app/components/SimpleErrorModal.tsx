@@ -10,7 +10,7 @@ export interface ModalErrorInput {
 }
 
 interface Props extends ModalErrorInput {
-    onClick: () => void;
+    onClick?(): void;
     disableClose?: boolean;
 }
 

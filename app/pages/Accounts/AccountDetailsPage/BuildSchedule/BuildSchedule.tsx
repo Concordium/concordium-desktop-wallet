@@ -78,6 +78,10 @@ export default function BuildSchedule({ location }: Props) {
     const [amountError, setAmountError] = useState<string>();
 
     useEffect(() => {
+        if (!accountInfo) {
+            return;
+        }
+
         const atDisposal = amountAtDisposal(accountInfo);
         if (
             estimatedFee &&

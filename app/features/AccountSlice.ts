@@ -169,7 +169,9 @@ export const chosenAccountSelector = (state: RootState) =>
         (a) => a.address === state.accounts.chosenAccountAddress
     );
 
-export const chosenAccountInfoSelector = (state: RootState) =>
+export const chosenAccountInfoSelector = (
+    state: RootState
+): AccountInfo | undefined =>
     state.accounts.accountsInfo?.[chosenAccountSelector(state)?.address ?? ''];
 
 export const accountInfoSelector = (account?: Account) => (state: RootState) =>

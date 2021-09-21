@@ -31,7 +31,7 @@ const accountInfoUpdateInterval = 30000;
  * @returns
  * Optional error message.
  */
-export default function useAccountSync(): string | undefined {
+export default function useAccountSync() {
     const dispatch = useDispatch();
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
@@ -97,5 +97,5 @@ export default function useAccountSync(): string | undefined {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [account?.address, JSON.stringify(account?.transactionFilter)]);
 
-    return error;
+    return { error, clearError: () => setError(undefined) };
 }

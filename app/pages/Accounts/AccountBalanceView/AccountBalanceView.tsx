@@ -35,11 +35,12 @@ export default function AccountBalanceView(): JSX.Element | null {
     const accountInfo = useSelector(chosenAccountInfoSelector);
     const viewingShielded = useSelector(viewingShieldedSelector);
 
-    if (!account || !accountInfo) {
+    if (!account) {
         return null; // TODO: add display for pending account (which have no accountinfo)
     }
 
-    const isMultiSig = Object.values(accountInfo.accountCredentials).length > 1;
+    const isMultiSig =
+        Object.values(accountInfo?.accountCredentials ?? {}).length > 1;
     const canChangeAccount = accounts.length > 1;
 
     if (isMultiSig && viewingShielded) {
@@ -104,13 +105,13 @@ export default function AccountBalanceView(): JSX.Element | null {
         );
     } else {
         const accountBaker = accountInfo?.accountBaker;
-        const unShielded = BigInt(accountInfo.accountAmount);
+        const unShielded = BigInt(accountInfo?.accountAmount ?? 0);
         const stakedAmount = accountBaker
             ? BigInt(accountBaker.stakedAmount)
             : 0n;
         const amountAtDisposal =
             unShielded -
-            BigInt(accountInfo.accountReleaseSchedule.total) -
+            BigInt(accountInfo?.accountReleaseSchedule.total ?? 0) -
             stakedAmount;
 
         main = (

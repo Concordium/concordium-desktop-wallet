@@ -1431,3 +1431,10 @@ export type AccountAndCredentialPairs = {
     account: Account;
     credential: Credential;
 }[];
+
+export enum NodeConnectionStatus {
+    Pinging = 'Pinging',
+    CatchingUp = 'Catching up',
+    Ready = 'Ready',
+    Unavailable = 'Unavailable',
+}

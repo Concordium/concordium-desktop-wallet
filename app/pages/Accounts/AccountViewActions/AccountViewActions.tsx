@@ -24,7 +24,11 @@ interface ActionObject {
     imageClassName: string;
     height: number;
     width?: number;
-    isDisabled(hasCredential: boolean, isMultiSig: boolean): boolean;
+    isDisabled(
+        hasCredential: boolean,
+        isMultiSig: boolean,
+        hasInfo: boolean
+    ): boolean;
 }
 
 const changeView: ActionObject = {
@@ -43,7 +47,8 @@ const shieldedActions: ActionObject[] = [
         Image: SendEncryptedImage,
         imageClassName: styles.actionImage,
         height: 35,
-        isDisabled: (hasCredential: boolean) => !hasCredential,
+        isDisabled: (hasCredential: boolean, _, hasInfo) =>
+            !hasCredential || !hasInfo,
     },
     {
         action: routes.ACCOUNTS_UNSHIELDAMOUNT,
@@ -51,7 +56,8 @@ const shieldedActions: ActionObject[] = [
         Image: UnshieldImage,
         imageClassName: styles.actionImage,
         height: 40,
-        isDisabled: (hasCredential: boolean) => !hasCredential,
+        isDisabled: (hasCredential: boolean, _, hasInfo) =>
+            !hasCredential || !hasInfo,
     },
     changeView,
 ];
@@ -62,7 +68,8 @@ const unshieldedActions: ActionObject[] = [
         Image: SendImage,
         imageClassName: styles.actionImage,
         height: 30,
-        isDisabled: (hasCredential: boolean) => !hasCredential,
+        isDisabled: (hasCredential: boolean, _, hasInfo) =>
+            !hasCredential || !hasInfo,
     },
     {
         action: routes.ACCOUNTS_SHIELDAMOUNT,
@@ -70,8 +77,8 @@ const unshieldedActions: ActionObject[] = [
         Image: ShieldImage,
         imageClassName: styles.actionImage,
         height: 30,
-        isDisabled: (hasCredential: boolean, isMultiSig: boolean) =>
-            !hasCredential || isMultiSig,
+        isDisabled: (hasCredential: boolean, isMultiSig, hasInfo) =>
+            !hasCredential || !hasInfo || isMultiSig,
     },
     changeView,
 ];
@@ -86,11 +93,13 @@ function AccountViewAction({
     isDisabled,
     hasCredentials,
     isMultiSig,
+    hasInfo,
 }: ActionObject & {
     isMultiSig: boolean;
     hasCredentials: boolean;
+    hasInfo: boolean;
 }): JSX.Element {
-    const disabled = isDisabled(hasCredentials, isMultiSig);
+    const disabled = isDisabled(hasCredentials, isMultiSig, hasInfo);
     const dispatch = useDispatch();
 
     const body = (
@@ -132,7 +141,7 @@ function AccountViewAction({
 
 interface Props {
     account: Account;
-    accountInfo: AccountInfo;
+    accountInfo?: AccountInfo;
 }
 
 export default function AccountViewActions({ account, accountInfo }: Props) {
@@ -140,7 +149,8 @@ export default function AccountViewActions({ account, accountInfo }: Props) {
     const accountHasDeployedCredentials = useSelector(
         accountHasDeployedCredentialsSelector(account)
     );
-    const isMultiSig = Object.values(accountInfo.accountCredentials).length > 1;
+    const isMultiSig =
+        Object.values(accountInfo?.accountCredentials ?? {}).length > 1;
 
     const actions = viewingShielded ? shieldedActions : unshieldedActions;
 
@@ -153,6 +163,7 @@ export default function AccountViewActions({ account, accountInfo }: Props) {
                     {...props}
                     isMultiSig={isMultiSig}
                     hasCredentials={accountHasDeployedCredentials}
+                    hasInfo={Boolean(accountInfo)}
                 />
             ))}
         </div>
