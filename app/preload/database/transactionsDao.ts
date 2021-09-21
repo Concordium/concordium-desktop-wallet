@@ -166,6 +166,11 @@ interface UpdatesAndAdditions<T> {
     updates: T[];
     additions: T[];
 }
+/**
+ * Find which of the given transactions already exists in the database.
+ * @returns updates, which are the transactions that already exist,
+ * and additions, which are those that don't already exist.
+ */
 async function findExistingTransactions<T extends Partial<TransferTransaction>>(
     transactions: T[]
 ): Promise<UpdatesAndAdditions<T>> {
