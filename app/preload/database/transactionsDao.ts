@@ -161,6 +161,45 @@ async function hasPendingShieldedBalanceTransfer(fromAddress: string) {
     return Boolean(transaction);
 }
 
+interface UpdatesAndAdditions<T> {
+    updates: T[];
+    additions: T[];
+}
+async function findExistingTransactions<T extends Partial<TransferTransaction>>(
+    transactions: T[]
+): Promise<UpdatesAndAdditions<T>> {
+    const knexConnection = await knex();
+    const hashes = transactions
+        .map((t) => t.transactionHash || '')
+        .filter((hash) => hash);
+    let existingTransactions: TransferTransaction[] = await knexConnection
+        .table(transactionTable)
+        .whereIn('transactionHash', hashes)
+        .select();
+
+    const [updates, additionsOnHash] = partition(transactions, (t) =>
+        existingTransactions.some(
+            (t_) => t.transactionHash === t_.transactionHash
+        )
+    );
+
+    if (!additionsOnHash.length) {
+        return { updates, additions: [] };
+    }
+
+    const ids = additionsOnHash.map((t) => t.id || '').filter((id) => id);
+    existingTransactions = await knexConnection
+        .table(transactionTable)
+        .whereIn('id', ids)
+        .select();
+
+    const [alsoUpdates, additions] = partition(additionsOnHash, (t) =>
+        existingTransactions.some((t_) => t.id === t_.id)
+    );
+
+    return { updates: updates.concat(alsoUpdates), additions };
+}
+
 /** Given a list of transactions, checks which already exists.
  *  New transactions are added to the table, while duplicates are treated
  *  as updates to the current transactions.
@@ -169,36 +208,30 @@ async function hasPendingShieldedBalanceTransfer(fromAddress: string) {
 export async function insertTransactions(
     transactions: Partial<TransferTransaction>[]
 ) {
-    const table = (await knex())(transactionTable);
-
-    const hashes = transactions
-        .map((t) => t.transactionHash || '')
-        .filter((hash) => hash);
-    const existingTransactions: TransferTransaction[] = await table
-        .whereIn('transactionHash', hashes)
-        .select();
-
-    const [updates, additions] = partition(transactions, (t) =>
-        existingTransactions.some(
-            (t_) => t.transactionHash === t_.transactionHash
-        )
-    );
-
+    let time = Date.now();
+    const { updates, additions } = await findExistingTransactions(transactions);
+    time = Date.now();
     const additionChunks = chunkArray(additions, 50);
-    for (let i = 0; i < additionChunks.length; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
-        await table.insert(additionChunks[i]);
-    }
+    await (await knex()).transaction(async (trx) => {
+        for (const additionChunk of additionChunks) {
+            await trx.table(transactionTable).insert(additionChunk);
+        }
 
-    await Promise.all(
-        updates.map(async (transaction) => {
-            const { transactionHash, ...otherFields } = transaction;
-            return updateTransaction(
-                { transactionHash: transaction.transactionHash },
-                otherFields
-            );
-        })
-    );
+        for (const updatedTransaction of updates) {
+            const { transactionHash, ...otherFields } = updatedTransaction;
+            if (transactionHash) {
+                await trx
+                    .table(transactionTable)
+                    .where({ transactionHash })
+                    .update(otherFields);
+            } else {
+                await trx
+                    .table(transactionTable)
+                    .where({ id: updatedTransaction.id })
+                    .update(otherFields);
+            }
+        }
+    });
 
     return additions;
 }
@@ -219,20 +252,7 @@ export async function upsertTransactionsAndUpdateMaxId(
         return [];
     }
 
-    const transactionHashes = transactions
-        .map((t) => t.transactionHash || '')
-        .filter((hash) => hash);
-    const transactionTableKnex = (await knex())(transactionTable);
-
-    const existingTransactions: TransferTransaction[] = await transactionTableKnex
-        .whereIn('transactionHash', transactionHashes)
-        .select();
-
-    const [updates, additions] = partition(transactions, (t) =>
-        existingTransactions.some(
-            (t_) => t.transactionHash === t_.transactionHash
-        )
-    );
+    const { updates, additions } = await findExistingTransactions(transactions);
 
     const additionChunks = chunkArray(additions, 50);
     await (await knex()).transaction(async (trx) => {
@@ -241,18 +261,24 @@ export async function upsertTransactionsAndUpdateMaxId(
         }
 
         for (const updatedTransaction of updates) {
-            await trx
-                .table(transactionTable)
-                .where({ transactionHash: updatedTransaction.transactionHash })
-                .update(updatedTransaction);
+            const { transactionHash, ...otherFields } = updatedTransaction;
+            if (transactionHash) {
+                await trx
+                    .table(transactionTable)
+                    .where({ transactionHash })
+                    .update(otherFields);
+            } else {
+                await trx
+                    .table(transactionTable)
+                    .where({ id: updatedTransaction.id })
+                    .update(otherFields);
+            }
         }
-
         await trx
             .table(accountsTable)
             .where({ address })
             .update({ maxTransactionId: newMaxId.toString() });
     });
-
     return additions;
 }
 
