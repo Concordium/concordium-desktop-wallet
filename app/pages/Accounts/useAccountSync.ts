@@ -35,7 +35,6 @@ export default function useAccountSync(): string | undefined {
     const dispatch = useDispatch();
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
-    const [controller] = useState(new AbortController());
     const [error, setError] = useState<string | undefined>();
 
     useEffect(() => {
@@ -64,41 +63,37 @@ export default function useAccountSync(): string | undefined {
     ]);
 
     useEffect(() => {
-        if (
-            account &&
-            account.status === AccountStatus.Confirmed &&
-            controller.isReady &&
-            !controller.isAborted
-        ) {
-            controller.start();
-            dispatch(updateTransactions({ controller, onError: setError }));
+        if (!account || account.status !== AccountStatus.Confirmed) {
+            return noOp;
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-        account?.address,
-        accountInfo?.accountAmount,
-        account?.status,
-        controller.isAborted,
-    ]);
 
-    useEffect(() => {
+        const controller = new AbortController();
+        controller.start();
+
+        dispatch(updateTransactions({ controller, onError: setError }));
+
         return () => controller.abort();
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [account?.address]);
+    }, [account?.address, accountInfo?.accountAmount, account?.status]);
 
     useEffect(() => {
-        if (account && account.status === AccountStatus.Confirmed) {
-            const loadController = new AbortController();
-            dispatch(resetTransactions());
-            dispatch(
-                loadTransactions({
-                    controller: loadController,
-                    showLoading: true,
-                })
-            );
-            return () => loadController.abort();
+        if (!account || account.status !== AccountStatus.Confirmed) {
+            return noOp;
         }
-        return () => {};
+
+        const loadController = new AbortController();
+        loadController.start();
+
+        dispatch(resetTransactions());
+        dispatch(
+            loadTransactions({
+                controller: loadController,
+                showLoading: true,
+            })
+        );
+
+        return () => loadController.abort();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [account?.address, JSON.stringify(account?.transactionFilter)]);
 
