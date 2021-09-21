@@ -252,7 +252,7 @@ export const updateTransactions = createAsyncThunk<
                 );
 
             if (maxIdInStore !== result.newMaxId.toString()) {
-                await dispatch(reloadTransactions(controller));
+                dispatch(reloadTransactions(controller));
             }
 
             if (maxId === result.newMaxId || result.isFinished) {
@@ -330,7 +330,6 @@ const transactionSlice = createSlice({
 
             state.hasMore = action.payload.more;
             state.loadingTransactions = false;
-            controller?.finish();
 
             if (append) {
                 state.transactions.push(...action.payload.transactions);
@@ -341,9 +340,8 @@ const transactionSlice = createSlice({
 
         builder.addMatcher(
             isAnyOf(updateTransactions.rejected, updateTransactions.fulfilled),
-            (state, action) => {
+            (state) => {
                 state.syncronizing = false;
-                action.meta.arg.controller?.finish();
             }
         );
 

@@ -44,7 +44,8 @@ function TabbedCard({ children, className }: Props) {
                         <Button
                             clear
                             className={styles.button}
-                            key={header}
+                            // eslint-disable-next-line react/no-array-index-key
+                            key={i}
                             onClick={() => {
                                 onClick();
                                 setActive(i);

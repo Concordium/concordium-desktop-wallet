@@ -5,7 +5,7 @@ export interface TabbedCardTabRef {
 }
 
 export type TabbedCardTabProps = PropsWithChildren<{
-    header: string;
+    header: string | JSX.Element;
     initActive?: boolean;
     onClick?(): void;
 }>;

@@ -13,6 +13,7 @@ import TransactionView from '../../TransactionView';
 import TransactionLogFilters from '../TransactionLogFilters';
 
 import styles from './TransactionLog.module.scss';
+import TransactionsHeader from '../../TransactionsHeader';
 
 export default function TransactionLog() {
     const transactions = useSelector(transactionsSelector);
@@ -30,7 +31,7 @@ export default function TransactionLog() {
     return (
         <TabbedCard className={styles.root}>
             <TabbedCard.Tab
-                header="Transactions"
+                header={<TransactionsHeader text="Transactions" />}
                 ref={transactionsTabRef}
                 onClick={() => setShowingLog(true)}
             >
