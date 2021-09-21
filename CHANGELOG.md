@@ -23,6 +23,7 @@
 -   The accounts page has been updated to make it clearer that multi credential accounts are not able to use shielded transactions.
 -   Transactions in the 'Transfers' list in the account view are now grouped by dates.
 -   Account page has changed, now featuring two different ways to view accounts: a simple, quick overview of all accounts, and a detailed view of a single account. All actions previously found under "More" will now be found in "detailed view" for the specific account.
+-   Account page can be viewed in its entirety (though with limited use) without being connected to a node.
 
 ### Fixed
 
