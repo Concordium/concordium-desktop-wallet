@@ -1,3 +1,4 @@
+import { Knex } from 'knex';
 import {
     Account,
     TimeStampUnit,
@@ -200,6 +201,37 @@ async function findExistingTransactions<T extends Partial<TransferTransaction>>(
     return { updates: updates.concat(alsoUpdates), additions };
 }
 
+/**
+ * Upserts the provided list of transactions into the database as part of a database transaction.
+ * @param updates the array of transactions to update
+ * @param additions the array of transactions to insert
+ * @param trx knex transaction, which these upserts should be added to.
+ */
+async function upsertTransactionsTransactionally<
+    T extends Partial<TransferTransaction>
+>(updates: T[], additions: T[], trx: Knex.Transaction): Promise<void> {
+    const additionChunks = chunkArray(additions, 50);
+
+    for (const additionChunk of additionChunks) {
+        await trx.table(transactionTable).insert(additionChunk);
+    }
+
+    for (const updatedTransaction of updates) {
+        const { transactionHash, ...otherFields } = updatedTransaction;
+        if (transactionHash) {
+            await trx
+                .table(transactionTable)
+                .where({ transactionHash })
+                .update(otherFields);
+        } else {
+            await trx
+                .table(transactionTable)
+                .where({ id: updatedTransaction.id })
+                .update(otherFields);
+        }
+    }
+}
+
 /** Given a list of transactions, checks which already exists.
  *  New transactions are added to the table, while duplicates are treated
  *  as updates to the current transactions.
@@ -208,31 +240,14 @@ async function findExistingTransactions<T extends Partial<TransferTransaction>>(
 export async function insertTransactions(
     transactions: Partial<TransferTransaction>[]
 ) {
-    let time = Date.now();
     const { updates, additions } = await findExistingTransactions(transactions);
-    time = Date.now();
-    const additionChunks = chunkArray(additions, 50);
-    await (await knex()).transaction(async (trx) => {
-        for (const additionChunk of additionChunks) {
-            await trx.table(transactionTable).insert(additionChunk);
-        }
-
-        for (const updatedTransaction of updates) {
-            const { transactionHash, ...otherFields } = updatedTransaction;
-            if (transactionHash) {
-                await trx
-                    .table(transactionTable)
-                    .where({ transactionHash })
-                    .update(otherFields);
-            } else {
-                await trx
-                    .table(transactionTable)
-                    .where({ id: updatedTransaction.id })
-                    .update(otherFields);
-            }
-        }
-    });
-
+    await (await knex())
+        .transaction(async (trx) => {
+            await upsertTransactionsTransactionally(updates, additions, trx);
+        })
+        .catch((e) => {
+            throw e;
+        });
     return additions;
 }
 
@@ -251,34 +266,20 @@ export async function upsertTransactionsAndUpdateMaxId(
     if (transactions.length === 0) {
         return [];
     }
-
     const { updates, additions } = await findExistingTransactions(transactions);
+    await (await knex())
+        .transaction(async (trx) => {
+            await upsertTransactionsTransactionally(updates, additions, trx);
 
-    const additionChunks = chunkArray(additions, 50);
-    await (await knex()).transaction(async (trx) => {
-        for (const additionChunk of additionChunks) {
-            await trx.table(transactionTable).insert(additionChunk);
-        }
+            await trx
+                .table(accountsTable)
+                .where({ address })
+                .update({ maxTransactionId: newMaxId.toString() });
+        })
+        .catch((e) => {
+            throw e;
+        });
 
-        for (const updatedTransaction of updates) {
-            const { transactionHash, ...otherFields } = updatedTransaction;
-            if (transactionHash) {
-                await trx
-                    .table(transactionTable)
-                    .where({ transactionHash })
-                    .update(otherFields);
-            } else {
-                await trx
-                    .table(transactionTable)
-                    .where({ id: updatedTransaction.id })
-                    .update(otherFields);
-            }
-        }
-        await trx
-            .table(accountsTable)
-            .where({ address })
-            .update({ maxTransactionId: newMaxId.toString() });
-    });
     return additions;
 }
 
