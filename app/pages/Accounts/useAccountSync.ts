@@ -10,15 +10,12 @@ import {
 } from '~/features/AccountSlice';
 import {
     updateTransactions,
-    // loadTransactions,
     fetchNewestTransactions,
     resetTransactions,
     loadTransactions,
-    // resetTransactions,
 } from '~/features/TransactionSlice';
 import { noOp } from '~/utils/basicHelpers';
 import { AccountStatus } from '~/utils/types';
-// import AbortController from '~/utils/AbortController';
 import AbortControllerWithLooping from '~/utils/AbortControllerWithLooping';
 
 async function load(dispatch: Dispatch) {
