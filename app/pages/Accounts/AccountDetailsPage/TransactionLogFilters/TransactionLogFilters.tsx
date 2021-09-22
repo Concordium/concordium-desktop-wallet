@@ -48,10 +48,10 @@ export default function TransactionLogFilters({ onUpdate }: Props) {
             <TransactionFilters ref={ref} values={transactionFilter} />
             <footer className={styles.footer}>
                 <Button size="tiny" onClick={submit(false)}>
-                    Apply
+                    Search
                 </Button>
                 <Button size="tiny" onClick={submit(true)}>
-                    Save
+                    Save filters
                 </Button>
                 <Button size="tiny" onClick={clear}>
                     Clear
