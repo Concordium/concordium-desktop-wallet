@@ -14,7 +14,13 @@ import { parse, stringify } from '~/utils/JSONHelper';
 import { ModalErrorInput } from '~/components/SimpleErrorModal';
 import { updateCurrentProposal } from '~/features/MultiSignatureSlice';
 import getTransactionSignDigest from '~/utils/transactionHash';
-import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
+import {
+    fetchLastFinalizedBlockSummary,
+    getAccountInfoOfAddress,
+} from '~/node/nodeHelpers';
+import { findKeyIndex } from '~/utils/updates/AuthorizationHelper';
+import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
+import errorMessages from '~/constants/errorMessages.json';
 
 /**
  * @param transactionObject, transaction object, which contains a signature, which is to be added to the current proposal
@@ -60,8 +66,9 @@ async function HandleAccountTransactionSignatureFile(
     } catch (e) {
         return {
             show: true,
-            header: 'Unable to reach node',
-            content: 'Unable to verify signature without connection to node.',
+            header: errorMessages.unableToReachNode,
+            content:
+                'Unable to verify the signature without a connection to a node.',
         };
     }
 
@@ -144,8 +151,35 @@ async function HandleUpdateInstructionSignatureFile(
         };
     }
 
-    let validSignature = false;
-    validSignature = await isSignatureValid(proposal, signature);
+    let blockSummary;
+    try {
+        blockSummary = (await fetchLastFinalizedBlockSummary())
+            .lastFinalizedBlockSummary;
+    } catch {
+        return {
+            show: true,
+            header: errorMessages.unableToReachNode,
+            content:
+                'Unable to verify that the signature is signed by an authorized key without a connection to a node.',
+        };
+    }
+    const handler = findUpdateInstructionHandler(proposal.type);
+    const keyIndex = findKeyIndex(
+        signature.authorizationPublicKey,
+        blockSummary.updates.keys,
+        proposal,
+        handler
+    );
+    if (keyIndex === undefined) {
+        return {
+            show: true,
+            header: 'Unathorized signature',
+            content:
+                'The loaded signature file contains a signature signed by an unauthorized key.',
+        };
+    }
+
+    const validSignature = await isSignatureValid(proposal, signature);
 
     // Prevent the user from adding an invalid signature.
     if (!validSignature) {
