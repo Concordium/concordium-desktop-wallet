@@ -17,12 +17,14 @@ import { proposalsSelector } from '~/features/MultiSignatureSlice';
 import { getUpdateQueueTypes } from '~/utils/UpdateInstructionHelper';
 import { parse } from '~/utils/JSONHelper';
 
-import withChainData, { ChainData } from '../common/withChainData';
+import { ensureChainData, ChainData } from '../common/withChainData';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 import SignTransactionProposal from '../SignTransactionProposal';
 import BuildProposal from './BuildProposal';
 import BuildKeyProposal from './BuildKeyProposal';
 import { createProposalRoute } from '~/utils/routerHelper';
+
+import Loading from '~/cross-app-components/Loading';
 
 export interface MultiSignatureCreateProposalForm {
     effectiveTime: Date;
@@ -46,7 +48,7 @@ function getSigningRoute(type: UpdateType) {
 function MultiSignatureCreateProposal({
     blockSummary,
     consensusStatus,
-}: ChainData) {
+}: Required<ChainData>) {
     const proposals = useSelector(proposalsSelector);
     const [restrictionModalOpen, setRestrictionModalOpen] = useState(false);
     const [defaults, setDefaults] = useState<
@@ -120,6 +122,7 @@ function MultiSignatureCreateProposal({
                     render={() => (
                         <SignTransactionProposal
                             proposal={proposal as MultiSignatureTransaction}
+                            blockSummary={blockSummary}
                         />
                     )}
                 />
@@ -145,4 +148,15 @@ function MultiSignatureCreateProposal({
     );
 }
 
-export default withChainData(MultiSignatureCreateProposal);
+function LoadingComponent() {
+    return (
+        <MultiSignatureLayout
+            pageTitle="Create Multisignature Proposal"
+            stepTitle="Transaction Proposal - loading"
+        >
+            <Loading text="Fetching information from the node" />
+        </MultiSignatureLayout>
+    );
+}
+
+export default ensureChainData(MultiSignatureCreateProposal, LoadingComponent);
