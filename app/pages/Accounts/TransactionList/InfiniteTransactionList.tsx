@@ -96,6 +96,7 @@ export default function InfiniteTransactionList({
             return;
         }
 
+        loadController.start();
         await dispatch(
             loadTransactions({
                 controller: loadController,
