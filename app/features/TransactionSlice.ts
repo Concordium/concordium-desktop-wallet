@@ -3,16 +3,18 @@ import {
     createSlice,
     PayloadAction,
     isAnyOf,
+    isFulfilled,
 } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
-import { getTransactions } from '../utils/httpRequests';
+import { getNewestTransactions, getTransactions } from '../utils/httpRequests';
 import { decryptAmounts } from '../utils/rustInterface';
 import {
     getTransactionsOfAccount,
     upsertTransactionsAndUpdateMaxId,
     insertTransactions,
     updateTransaction,
+    getTransaction,
 } from '../database/TransactionDao';
 import {
     TransferTransaction,
@@ -38,10 +40,12 @@ import {
     chosenAccountSelector,
 } from './AccountSlice';
 import AbortController from '~/utils/AbortController';
+import AbortControllerWithLooping from '~/utils/AbortControllerWithLooping';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
 import { isDefined, max, noOp } from '~/utils/basicHelpers';
 import { getActiveBooleanFilters } from '~/utils/accountHelpers';
 import errorMessages from '~/constants/errorMessages.json';
+import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import { GetTransactionsOutput } from '~/preload/preloadTypes';
 
 export const transactionLogPageSize = 100;
@@ -130,6 +134,61 @@ export const reloadTransactions = createAsyncThunk(
 );
 
 /**
+ * Determine whether the transaction affects shielded balance.
+ */
+export function isShieldedBalanceTransaction(
+    transaction: Partial<TransferTransaction>
+) {
+    switch (transaction.transactionKind) {
+        case TransactionKindString.EncryptedAmountTransfer:
+        case TransactionKindString.EncryptedAmountTransferWithMemo:
+        case TransactionKindString.TransferToEncrypted:
+        case TransactionKindString.TransferToPublic:
+            return true;
+        default:
+            return false;
+    }
+}
+
+/**
+ * Fetches a batch of the newest transactions of the given account,
+ * and saves them to the database, and updates the allDecrypted,
+ * if any shielded balance transactions were loaded.
+ */
+export async function fetchNewestTransactions(
+    dispatch: Dispatch,
+    account: Account
+) {
+    const newestTransactionInDatabase = await getTransaction(
+        account.maxTransactionId
+    );
+
+    if (
+        newestTransactionInDatabase &&
+        account.transactionFilter.toDate &&
+        new Date(account.transactionFilter.toDate).getTime() <
+            dateFromTimeStamp(newestTransactionInDatabase.blockTime).getTime()
+    ) {
+        // The area of search is subset of loaded transactions.
+        return;
+    }
+
+    const transactions = await getNewestTransactions(
+        account.address,
+        account.transactionFilter
+    );
+
+    const newTransactions = await insertTransactions(
+        transactions.map((transaction) =>
+            convertIncomingTransaction(transaction, account.address)
+        )
+    );
+    if (newTransactions.some(isShieldedBalanceTransaction)) {
+        await updateAllDecrypted(dispatch, account.address, false);
+    }
+}
+
+/**
  * Fetches a batch of transactions from the wallet proxy for the account
  * with the provided address.
  * @param address the account address to fetch transactions for
@@ -159,31 +218,15 @@ async function fetchTransactions(
     return { transactions, newMaxId, isFinished };
 }
 
-/**
- * Determine whether the transaction affects shielded balance.
- */
-export function isShieldedBalanceTransaction(
-    transaction: Partial<TransferTransaction>
-) {
-    switch (transaction.transactionKind) {
-        case TransactionKindString.EncryptedAmountTransfer:
-        case TransactionKindString.EncryptedAmountTransferWithMemo:
-        case TransactionKindString.TransferToEncrypted:
-        case TransactionKindString.TransferToPublic:
-            return true;
-        default:
-            return false;
-    }
-}
-
 interface UpdateTransactionsArgs {
-    controller: AbortController;
+    controller: AbortControllerWithLooping;
     onError(e: string): void;
 }
 
 /** Update the transactions from remote source.
  * will fetch transactions in intervals, updating the state each time.
  * stops when it reaches the newest transaction, or it is told to abort by the controller.
+ * @param controller this controls the function, and if it is aborted, this will terminate when able. Has a hasLooped check, so it can be checked whether this function has completed loading a batch.
  * */
 export const updateTransactions = createAsyncThunk<
     unknown,
@@ -259,6 +302,7 @@ export const updateTransactions = createAsyncThunk<
                 return;
             }
 
+            controller.onLoop();
             await updateSubroutine(result.newMaxId);
         }
 
@@ -317,31 +361,31 @@ const transactionSlice = createSlice({
             state.synchronizing = true;
         });
 
-        builder.addCase(loadTransactions.rejected, (state) => {
-            state.loadingTransactions = false;
-        });
+        builder.addMatcher(
+            isAnyOf(loadTransactions.rejected, loadTransactions.fulfilled),
+            (state, action) => {
+                const { controller, append = false } = action.meta.arg;
 
-        builder.addCase(loadTransactions.fulfilled, (state, action) => {
-            const { controller, append = false } = action.meta.arg;
+                if (isFulfilled(action) && !controller?.isAborted) {
+                    state.hasMore = action.payload.more;
 
-            if (controller?.isAborted) {
-                return;
+                    if (append) {
+                        state.transactions.push(...action.payload.transactions);
+                    } else {
+                        state.transactions = action.payload.transactions;
+                    }
+                }
+
+                state.loadingTransactions = false;
+                controller?.finish();
             }
-
-            state.hasMore = action.payload.more;
-            state.loadingTransactions = false;
-
-            if (append) {
-                state.transactions.push(...action.payload.transactions);
-            } else {
-                state.transactions = action.payload.transactions;
-            }
-        });
+        );
 
         builder.addMatcher(
             isAnyOf(updateTransactions.rejected, updateTransactions.fulfilled),
-            (state) => {
+            (state, action) => {
                 state.synchronizing = false;
+                action.meta.arg.controller.finish();
             }
         );
 
