@@ -83,7 +83,7 @@ export const loadTransactions = createAsyncThunk(
         }: LoadTransactionsArgs,
         { getState, requestId }
     ) => {
-        const checkValid = (message: string) => {
+        const rejectIfInvalid = (message: string) => {
             if (
                 controller?.isAborted ||
                 (requestId !== latestLoadingRequestId && !force)
@@ -117,7 +117,7 @@ export const loadTransactions = createAsyncThunk(
             account.transactionFilter
         );
 
-        checkValid('DB load aborted');
+        rejectIfInvalid('DB load aborted');
 
         try {
             const result = await getTransactionsOfAccount(
@@ -129,7 +129,7 @@ export const loadTransactions = createAsyncThunk(
                 append ? minId : undefined
             );
 
-            checkValid('Redux load aborted');
+            rejectIfInvalid('Redux load aborted');
             setTimeout(() => release?.());
 
             return result;

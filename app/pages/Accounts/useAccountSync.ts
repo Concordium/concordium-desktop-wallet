@@ -16,6 +16,7 @@ import {
 } from '~/features/TransactionSlice';
 import { noOp } from '~/utils/basicHelpers';
 import { AccountStatus } from '~/utils/types';
+import AbortController from '~/utils/AbortController';
 import AbortControllerWithLooping from '~/utils/AbortControllerWithLooping';
 
 async function load(dispatch: Dispatch) {
@@ -116,11 +117,24 @@ export default function useAccountSync() {
 
     useEffect(() => {
         if (!account || account.status !== AccountStatus.Confirmed) {
-            return;
+            return noOp;
         }
 
+        const loadController = new AbortController();
+        loadController.start();
+
         dispatch(resetTransactions());
-        dispatch(loadTransactions({ showLoading: true, force: true }));
+        dispatch(
+            loadTransactions({
+                showLoading: true,
+                force: true,
+                controller: loadController,
+            })
+        );
+
+        return () => {
+            loadController.abort();
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [account?.address, JSON.stringify(account?.transactionFilter)]);
 
