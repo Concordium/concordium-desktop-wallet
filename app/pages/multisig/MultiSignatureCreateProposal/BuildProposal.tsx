@@ -11,14 +11,13 @@ import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/Handle
 import styles from './MultiSignatureCreateProposal.module.scss';
 import Form from '~/components/Form';
 import { futureDate, maxDate } from '~/components/Form/util/validation';
-import Loading from '~/cross-app-components/Loading';
 
 export interface MultiSignatureCreateProposalForm {
     effectiveTime: Date;
     expiryTime: Date;
 }
 
-interface Props extends ChainData {
+interface Props extends Required<ChainData> {
     defaults: FieldValues;
     type: UpdateType;
     onFinish: (
@@ -45,9 +44,6 @@ export default function BuildProposal({
     async function handleProposalSubmit(
         fields: FieldValues & MultiSignatureCreateProposalForm
     ): Promise<void> {
-        if (!blockSummary) {
-            return;
-        }
         const { effectiveTime, expiryTime, ...dynamicFields } = fields;
         const effectiveTimeInSeconds = BigInt(
             secondsSinceUnixEpoch(effectiveTime)
@@ -79,58 +75,53 @@ export default function BuildProposal({
                         Add all the details for the {displayType} transaction
                         below.
                     </p>
-                    {blockSummary && consensusStatus ? (
-                        <>
-                            <UpdateComponent
-                                defaults={defaults}
-                                blockSummary={blockSummary}
-                                consensusStatus={consensusStatus}
-                            />
-                            <Form.Timestamp
-                                name="effectiveTime"
-                                label="Effective Time"
-                                defaultValue={
-                                    defaults.effectiveTime ||
-                                    new Date(
-                                        getDefaultExpiry().getTime() +
-                                            5 * TimeConstants.Minute
-                                    )
-                                }
-                                rules={{
-                                    required: 'Effective time is required',
-                                    validate: futureDate(
-                                        'Effective time must be in the future'
+                    <>
+                        <UpdateComponent
+                            defaults={defaults}
+                            blockSummary={blockSummary}
+                            consensusStatus={consensusStatus}
+                        />
+                        <Form.Timestamp
+                            name="effectiveTime"
+                            label="Effective Time"
+                            defaultValue={
+                                defaults.effectiveTime ||
+                                new Date(
+                                    getDefaultExpiry().getTime() +
+                                        5 * TimeConstants.Minute
+                                )
+                            }
+                            rules={{
+                                required: 'Effective time is required',
+                                validate: futureDate(
+                                    'Effective time must be in the future'
+                                ),
+                            }}
+                        />
+                        <Form.Timestamp
+                            name="expiryTime"
+                            label="Transaction Expiry Time"
+                            defaultValue={
+                                defaults.expiryTime || getDefaultExpiry()
+                            }
+                            rules={{
+                                required: 'Transaction expiry time is required',
+                                validate: {
+                                    ...(effective !== undefined
+                                        ? {
+                                              beforeEffective: maxDate(
+                                                  effective,
+                                                  'Transaction expiry time must be before the effective time'
+                                              ),
+                                          }
+                                        : undefined),
+                                    future: futureDate(
+                                        'Transaction expiry time must be in the future'
                                     ),
-                                }}
-                            />
-                            <Form.Timestamp
-                                name="expiryTime"
-                                label="Transaction Expiry Time"
-                                defaultValue={
-                                    defaults.expiryTime || getDefaultExpiry()
-                                }
-                                rules={{
-                                    required:
-                                        'Transaction expiry time is required',
-                                    validate: {
-                                        ...(effective !== undefined
-                                            ? {
-                                                  beforeEffective: maxDate(
-                                                      effective,
-                                                      'Transaction expiry time must be before the effective time'
-                                                  ),
-                                              }
-                                            : undefined),
-                                        future: futureDate(
-                                            'Transaction expiry time must be in the future'
-                                        ),
-                                    },
-                                }}
-                            />
-                        </>
-                    ) : (
-                        <Loading text="Getting current settings from chain" />
-                    )}
+                                },
+                            }}
+                        />
+                    </>
                 </div>
                 <Form.Submit disabled={!blockSummary}>Continue</Form.Submit>
             </Form>
