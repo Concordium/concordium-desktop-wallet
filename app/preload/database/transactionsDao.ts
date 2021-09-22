@@ -162,18 +162,19 @@ async function hasPendingShieldedBalanceTransfer(fromAddress: string) {
     return Boolean(transaction);
 }
 
-interface UpdatesAndAdditions<T> {
-    updates: T[];
-    additions: T[];
+interface UpdatesAndAdditions {
+    hashUpdates: TransferTransaction[];
+    idUpdates: TransferTransaction[];
+    additions: TransferTransaction[];
 }
 /**
  * Find which of the given transactions already exists in the database.
  * @returns updates, which are the transactions that already exist,
  * and additions, which are those that don't already exist.
  */
-async function findExistingTransactions<T extends Partial<TransferTransaction>>(
-    transactions: T[]
-): Promise<UpdatesAndAdditions<T>> {
+async function findExistingTransactions(
+    transactions: TransferTransaction[]
+): Promise<UpdatesAndAdditions> {
     const knexConnection = await knex();
     const hashes = transactions
         .map((t) => t.transactionHash || '')
@@ -183,14 +184,14 @@ async function findExistingTransactions<T extends Partial<TransferTransaction>>(
         .whereIn('transactionHash', hashes)
         .select();
 
-    const [updates, additionsOnHash] = partition(transactions, (t) =>
+    const [hashUpdates, additionsOnHash] = partition(transactions, (t) =>
         existingTransactions.some(
             (t_) => t.transactionHash === t_.transactionHash
         )
     );
 
     if (!additionsOnHash.length) {
-        return { updates, additions: [] };
+        return { hashUpdates, idUpdates: [], additions: [] };
     }
 
     const ids = additionsOnHash.map((t) => t.id || '').filter((id) => id);
@@ -199,11 +200,11 @@ async function findExistingTransactions<T extends Partial<TransferTransaction>>(
         .whereIn('id', ids)
         .select();
 
-    const [alsoUpdates, additions] = partition(additionsOnHash, (t) =>
+    const [idUpdates, additions] = partition(additionsOnHash, (t) =>
         existingTransactions.some((t_) => t.id === t_.id)
     );
 
-    return { updates: updates.concat(alsoUpdates), additions };
+    return { hashUpdates, idUpdates, additions };
 }
 
 /**
@@ -212,28 +213,27 @@ async function findExistingTransactions<T extends Partial<TransferTransaction>>(
  * @param additions the array of transactions to insert
  * @param trx knex transaction, which these upserts should be added to.
  */
-async function upsertTransactionsTransactionally<
-    T extends Partial<TransferTransaction>
->(updates: T[], additions: T[], trx: Knex.Transaction): Promise<void> {
+async function upsertTransactionsTransactionally(
+    { hashUpdates, idUpdates, additions }: UpdatesAndAdditions,
+    trx: Knex.Transaction
+): Promise<void> {
     const additionChunks = chunkArray(additions, 50);
 
     for (const additionChunk of additionChunks) {
         await trx.table(transactionTable).insert(additionChunk);
     }
 
-    for (const updatedTransaction of updates) {
+    for (const updatedTransaction of hashUpdates) {
         const { transactionHash, ...otherFields } = updatedTransaction;
-        if (transactionHash) {
-            await trx
-                .table(transactionTable)
-                .where({ transactionHash })
-                .update(otherFields);
-        } else {
-            await trx
-                .table(transactionTable)
-                .where({ id: updatedTransaction.id })
-                .update(otherFields);
-        }
+        await trx
+            .table(transactionTable)
+            .where({ transactionHash })
+            .update(otherFields);
+    }
+
+    for (const updatedTransaction of idUpdates) {
+        const { id, ...otherFields } = updatedTransaction;
+        await trx.table(transactionTable).where({ id }).update(otherFields);
     }
 }
 
@@ -242,18 +242,12 @@ async function upsertTransactionsTransactionally<
  *  as updates to the current transactions.
  * @Return the list of new transactions.
  * */
-export async function insertTransactions(
-    transactions: Partial<TransferTransaction>[]
-) {
-    const { updates, additions } = await findExistingTransactions(transactions);
-    await (await knex())
-        .transaction(async (trx) => {
-            await upsertTransactionsTransactionally(updates, additions, trx);
-        })
-        .catch((e) => {
-            throw e;
-        });
-    return additions;
+export async function insertTransactions(transactions: TransferTransaction[]) {
+    const updatesAndAdditions = await findExistingTransactions(transactions);
+    await (await knex()).transaction(async (trx) => {
+        await upsertTransactionsTransactionally(updatesAndAdditions, trx);
+    });
+    return updatesAndAdditions.additions;
 }
 
 /**
@@ -271,21 +265,18 @@ export async function upsertTransactionsAndUpdateMaxId(
     if (transactions.length === 0) {
         return [];
     }
-    const { updates, additions } = await findExistingTransactions(transactions);
-    await (await knex())
-        .transaction(async (trx) => {
-            await upsertTransactionsTransactionally(updates, additions, trx);
+    const updatesAndAdditions = await findExistingTransactions(transactions);
 
-            await trx
-                .table(accountsTable)
-                .where({ address })
-                .update({ maxTransactionId: newMaxId.toString() });
-        })
-        .catch((e) => {
-            throw e;
-        });
+    await (await knex()).transaction(async (trx) => {
+        await upsertTransactionsTransactionally(updatesAndAdditions, trx);
 
-    return additions;
+        await trx
+            .table(accountsTable)
+            .where({ address })
+            .update({ maxTransactionId: newMaxId.toString() });
+    });
+
+    return updatesAndAdditions.additions;
 }
 
 const exposedMethods: TransactionMethods = {
