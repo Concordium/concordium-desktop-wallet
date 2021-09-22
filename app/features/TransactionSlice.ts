@@ -324,7 +324,7 @@ export const updateTransactions = createAsyncThunk<
                 );
 
             if (maxIdInStore !== result.newMaxId.toString()) {
-                dispatch(reloadTransactions(controller));
+                await dispatch(reloadTransactions(controller));
             }
 
             if (maxId === result.newMaxId || result.isFinished) {

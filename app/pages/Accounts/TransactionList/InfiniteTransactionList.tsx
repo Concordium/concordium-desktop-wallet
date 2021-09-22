@@ -96,9 +96,7 @@ export default function InfiniteTransactionList({
             return;
         }
 
-        console.log('\n\n\nLoad more\n\n\n');
-
-        dispatch(
+        await dispatch(
             loadTransactions({
                 controller: loadController,
                 showLoading: true,
