@@ -7,4 +7,5 @@ export const {
     insert: insertTransactions,
     upsertTransactionsAndUpdateMaxId,
     getTransactionsForAccount: getTransactionsOfAccount,
+    getTransaction,
 } = window.database.transaction;

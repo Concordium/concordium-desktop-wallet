@@ -34,6 +34,18 @@ async function getPendingTransactions(): Promise<TransferTransaction[]> {
     return transactions;
 }
 
+async function getTransaction(
+    id: string
+): Promise<TransferTransaction | undefined> {
+    const transaction = await (await knex())<TransferTransaction>(
+        transactionTable
+    )
+        .select()
+        .where({ id })
+        .first();
+    return transaction;
+}
+
 async function hasPendingTransactions(fromAddress: string) {
     const transaction = await (await knex())
         .select()
@@ -65,23 +77,9 @@ async function getTransactionsOfAccount(
 ): Promise<GetTransactionsOutput> {
     const { address } = account;
 
-    const latestTransaction: TransferTransaction | undefined = await (
-        await knex()
-    )(transactionTable)
-        .where({ id: account.maxTransactionId })
-        .first();
-    if (!latestTransaction) {
-        // When there are no transactions in the database, this will be the case.
-        return {
-            transactions: [],
-            more: false,
-        };
-    }
-
     const fromLimit = (fromDate?.getTime() ?? 0) / TimeStampUnit.seconds;
-    const toLimit = (toDate?.getTime() ?? Date.now()) / TimeStampUnit.seconds;
 
-    const toTime = Math.min(Number(latestTransaction.blockTime), toLimit);
+    const toTime = (toDate?.getTime() ?? Date.now()) / TimeStampUnit.seconds;
     let expandHours = 1;
     let fromTime: number;
     let transactions;
@@ -90,18 +88,23 @@ async function getTransactionsOfAccount(
     do {
         fromTime = Math.max(fromLimit, toTime - 60 * 60 * expandHours);
 
+        const localScopedFromTime = fromTime;
         const querytransactions = (await knex())<TransferTransaction>(
             transactionTable
         )
             .whereIn('transactionKind', filteredTypes)
-            .whereBetween('blockTime', [fromTime, toTime])
-            // The '+' forces SQLite to NOT use the index on these columns.
-            // SQLite can only use one index, and it HAS to NOT be the address
-            // ones for this to perform (it has to use the blockTime index).
             .andWhere((builder) =>
                 builder
-                    .whereRaw('+toAddress = ?', address)
-                    .orWhereRaw('+fromAddress = ?', address)
+                    .where({ toAddress: address })
+                    .andWhereBetween('blockTime', [localScopedFromTime, toTime])
+                    .orWhere((orBuilder) =>
+                        orBuilder
+                            .where({ fromAddress: address })
+                            .andWhereBetween('blockTime', [
+                                localScopedFromTime,
+                                toTime,
+                            ])
+                    )
             )
             .orderBy('blockTime', 'desc');
 
@@ -137,13 +140,17 @@ async function hasEncryptedTransactions(
             TransactionKindString.EncryptedAmountTransfer,
             TransactionKindString.EncryptedAmountTransferWithMemo,
         ])
-        .whereBetween('blockTime', [fromTime, toTime])
+        .andWhere((builder) =>
+            builder
+                .where({ toAddress: address })
+                .andWhereBetween('blockTime', [fromTime, toTime])
+                .orWhere((orBuilder) =>
+                    orBuilder
+                        .where({ fromAddress: address })
+                        .andWhereBetween('blockTime', [fromTime, toTime])
+                )
+        )
         .whereNull('decryptedAmount')
-        .where((builder) => {
-            builder.where({ toAddress: address }).orWhere({
-                fromAddress: address,
-            });
-        })
         .first();
     return Boolean(transaction);
 }
@@ -158,7 +165,10 @@ async function hasPendingShieldedBalanceTransfer(fromAddress: string) {
             TransactionKindString.TransferToEncrypted,
             TransactionKindString.TransferToPublic,
         ])
-        .where({ status: TransactionStatus.Pending, fromAddress })
+        .where({ status: TransactionStatus.Pending })
+        // Do not use the fromAddress index, to ensure that the status
+        // index is used as we expect few transactions with the 'pending' status.
+        .whereRaw('+fromAddress = ?', fromAddress)
         .first();
     return Boolean(transaction);
 }
@@ -266,6 +276,7 @@ const exposedMethods: TransactionMethods = {
     hasEncryptedTransactions,
     update: updateTransaction,
     insert: insertTransactions,
+    getTransaction,
     upsertTransactionsAndUpdateMaxId,
 };
 

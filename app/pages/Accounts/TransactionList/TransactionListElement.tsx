@@ -310,6 +310,7 @@ function TransactionListElement({
         <div
             className={clsx(
                 styles.transactionListElement,
+                style.height || styles.transactionListElementVariableHeight,
                 !failed || styles.failedElement,
                 Boolean(onClick) && styles.clickableElement,
                 className
