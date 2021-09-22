@@ -10,13 +10,15 @@ import {
 } from '~/features/AccountSlice';
 import {
     updateTransactions,
-    loadTransactions,
+    // loadTransactions,
     fetchNewestTransactions,
     resetTransactions,
+    loadTransactions,
+    // resetTransactions,
 } from '~/features/TransactionSlice';
 import { noOp } from '~/utils/basicHelpers';
 import { AccountStatus } from '~/utils/types';
-import AbortController from '~/utils/AbortController';
+// import AbortController from '~/utils/AbortController';
 import AbortControllerWithLooping from '~/utils/AbortControllerWithLooping';
 
 async function load(dispatch: Dispatch) {
@@ -102,11 +104,13 @@ export default function useAccountSync() {
                 })
             );
         }
-
-        dispatch(updateTransactions({ controller, onError: setError }));
-
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [account?.address, accountInfo?.accountAmount, account?.status]);
+    }, [
+        account?.address,
+        accountInfo?.accountAmount,
+        account?.status,
+        controller.isAborted,
+    ]);
 
     useEffect(() => {
         return () => controller.abort();
@@ -115,21 +119,11 @@ export default function useAccountSync() {
 
     useEffect(() => {
         if (!account || account.status !== AccountStatus.Confirmed) {
-            return noOp;
+            return;
         }
 
-        const loadController = new AbortController();
-        loadController.start();
-
         dispatch(resetTransactions());
-        dispatch(
-            loadTransactions({
-                controller: loadController,
-                showLoading: true,
-            })
-        );
-
-        return () => loadController.abort();
+        dispatch(loadTransactions({ showLoading: true, force: true }));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [account?.address, JSON.stringify(account?.transactionFilter)]);
 

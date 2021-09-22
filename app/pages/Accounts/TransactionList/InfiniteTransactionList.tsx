@@ -96,11 +96,14 @@ export default function InfiniteTransactionList({
             return;
         }
 
-        await dispatch(
+        console.log('\n\n\nLoad more\n\n\n');
+
+        dispatch(
             loadTransactions({
                 controller: loadController,
                 showLoading: true,
                 append: true,
+                force: true,
             })
         );
     }, [dispatch, loadController, loading, hasMore]);

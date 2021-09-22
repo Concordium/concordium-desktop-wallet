@@ -5,6 +5,7 @@ import {
     isAnyOf,
     isFulfilled,
 } from '@reduxjs/toolkit';
+import { Mutex, MutexInterface } from 'async-mutex';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
 import { getNewestTransactions, getTransactions } from '../utils/httpRequests';
@@ -61,7 +62,11 @@ interface LoadTransactionsArgs {
     controller?: AbortController;
     append?: boolean;
     size?: number;
+    force?: boolean;
 }
+
+let latestLoadingRequestId: string | undefined;
+const forceLock = new Mutex();
 
 /**
  * Load transactions from storage.
@@ -74,14 +79,29 @@ export const loadTransactions = createAsyncThunk(
             append = false,
             size = transactionLogPageSize,
             controller,
+            force = false,
         }: LoadTransactionsArgs,
-        { getState }
+        { getState, requestId }
     ) => {
+        const checkValid = (message: string) => {
+            if (
+                controller?.isAborted ||
+                (requestId !== latestLoadingRequestId && !force)
+            ) {
+                throw new Error(message);
+            }
+        };
+
         const state = getState() as RootState;
         const account = chosenAccountSelector(state);
 
         if (!account) {
             throw new Error('No account');
+        }
+
+        let release: MutexInterface.Releaser | undefined;
+        if (force) {
+            release = await forceLock.acquire();
         }
 
         const minId = state.transactions.transactions
@@ -96,26 +116,35 @@ export const loadTransactions = createAsyncThunk(
         const booleanFilters = getActiveBooleanFilters(
             account.transactionFilter
         );
-        const result = await getTransactionsOfAccount(
-            account,
-            booleanFilters,
-            fromDate ? new Date(fromDate) : undefined,
-            toDate ? new Date(toDate) : undefined,
-            size,
-            append ? minId : undefined
-        );
 
-        if (controller?.isAborted) {
-            throw new Error('Load aborted');
+        checkValid('DB load aborted');
+
+        try {
+            const result = await getTransactionsOfAccount(
+                account,
+                booleanFilters,
+                fromDate ? new Date(fromDate) : undefined,
+                toDate ? new Date(toDate) : undefined,
+                size,
+                append ? minId : undefined
+            );
+
+            checkValid('Redux load aborted');
+            setTimeout(() => release?.());
+
+            return result;
+        } catch (e) {
+            release?.();
+            throw e;
         }
-
-        return result;
     }
 );
 
 export const reloadTransactions = createAsyncThunk(
     ActionTypePrefix.Reload,
     async (controller: AbortController | undefined, { dispatch, getState }) => {
+        await forceLock.waitForUnlock();
+
         const state = getState() as RootState;
         const { transactions } = state.transactions;
         const account = chosenAccountSelector(state);
@@ -352,6 +381,9 @@ const transactionSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder.addCase(loadTransactions.pending, (state, action) => {
+            const { requestId } = action.meta;
+            latestLoadingRequestId = requestId;
+
             if (action.meta.arg.showLoading) {
                 state.loadingTransactions = true;
             }
@@ -365,8 +397,10 @@ const transactionSlice = createSlice({
             isAnyOf(loadTransactions.rejected, loadTransactions.fulfilled),
             (state, action) => {
                 const { controller, append = false } = action.meta.arg;
+                const isLatest =
+                    action.meta.requestId === latestLoadingRequestId;
 
-                if (isFulfilled(action) && !controller?.isAborted) {
+                if (isFulfilled(action)) {
                     state.hasMore = action.payload.more;
 
                     if (append) {
@@ -376,7 +410,10 @@ const transactionSlice = createSlice({
                     }
                 }
 
-                state.loadingTransactions = false;
+                if (isLatest) {
+                    state.loadingTransactions = false;
+                }
+
                 controller?.finish();
             }
         );
