@@ -1,13 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import { Dispatch } from '@reduxjs/toolkit';
 import { Mutex } from 'async-mutex';
 import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
     updateAccountInfo,
-    loadAccounts,
-    loadAccountInfos,
 } from '~/features/AccountSlice';
 import {
     updateTransactions,
@@ -19,15 +16,8 @@ import { noOp } from '~/utils/basicHelpers';
 import { AccountStatus } from '~/utils/types';
 import useThunkDispatch from '~/store/useThunkDispatch';
 
-async function handleLoad(dispatch: Dispatch) {
-    const accounts = await loadAccounts(dispatch);
-    return loadAccountInfos(accounts, dispatch);
-}
-
 // milliseconds between updates of the accountInfo
 const accountInfoUpdateInterval = 30000;
-
-const updateLock = new Mutex();
 
 /**
  * Keeps account info and transactions for selected account in sync.
@@ -35,16 +25,16 @@ const updateLock = new Mutex();
  * @returns
  * Optional error message.
  */
-export default function useAccountSync() {
+export default function useAccountSync(onError: (message: string) => void) {
     const dispatch = useThunkDispatch();
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
     const [abortUpdate, setAbortUpdate] = useState<(() => void) | undefined>(
         undefined
     );
+    const { current: updateLock } = useRef(new Mutex());
     const [updateAborted, setUpdateAborted] = useState(false);
     const [updateLooped, setUpdateLooped] = useState(false);
-    const [error, setError] = useState<string | undefined>();
 
     useEffect(() => {
         if (
@@ -66,11 +56,6 @@ export default function useAccountSync() {
         updateLooped,
         updateAborted,
     ]);
-
-    useEffect(() => {
-        handleLoad(dispatch).catch((e: Error) => setError(e.message));
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dispatch]);
 
     useEffect(() => {
         if (!account) {
@@ -107,7 +92,7 @@ export default function useAccountSync() {
                     onFirstLoop() {
                         setUpdateLooped(true);
                     },
-                    onError: setError,
+                    onError,
                 })
             );
 
@@ -160,6 +145,4 @@ export default function useAccountSync() {
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [account?.address, JSON.stringify(account?.transactionFilter)]);
-
-    return { error, clearError: () => setError(undefined) };
 }
