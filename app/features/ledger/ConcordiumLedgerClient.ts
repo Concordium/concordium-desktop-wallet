@@ -16,6 +16,7 @@ import {
     AuthorizationKeysUpdate,
     Hex,
     AddIdentityProvider,
+    AddAnonymityRevoker,
     PrivateKeySeeds,
 } from '~/utils/types';
 import { pipe } from '~/utils/basicHelpers';
@@ -243,6 +244,20 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         return toBuffer(
             window.ledger.signAddIdentityProvider(
+                transaction,
+                serializedPayload,
+                path
+            )
+        );
+    }
+
+    signAddAnonymityRevoker(
+        transaction: UpdateInstruction<AddAnonymityRevoker>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return toBuffer(
+            window.ledger.signAddAnonymityRevoker(
                 transaction,
                 serializedPayload,
                 path

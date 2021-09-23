@@ -5,21 +5,30 @@ import { push } from 'connected-react-router';
 import clsx from 'clsx';
 import Modal from '~/cross-app-components/Modal';
 import Button from '~/cross-app-components/Button';
+import { noOp } from '~/utils/basicHelpers';
 
 export interface Action {
     label: string;
-    onPicked?: () => void;
-    location?: LocationDescriptorObject | string;
     inverted?: boolean;
+    action(): void;
+}
+
+export interface LocationAction extends Omit<Action, 'action'> {
+    location?: LocationDescriptorObject | string;
+}
+
+function isAction(action: Action | LocationAction): action is Action {
+    return (action as Action).action !== undefined;
 }
 
 interface Props {
     title: string;
     description: string | JSX.Element;
-    actions: Action[];
+    actions: (Action | LocationAction)[];
     open: boolean;
-    postAction(location?: string | LocationDescriptorObject): void;
+    postAction?(location?: string | LocationDescriptorObject): void;
     disableClose?: boolean;
+    onClose?(): void;
 }
 
 export default function ChoiceModal({
@@ -27,12 +36,13 @@ export default function ChoiceModal({
     description,
     actions,
     open,
-    postAction,
+    postAction = noOp,
     disableClose = false,
+    onClose = noOp,
 }: Props) {
     const dispatch = useDispatch();
     return (
-        <Modal disableClose={disableClose} open={open}>
+        <Modal disableClose={disableClose} open={open} onClose={onClose}>
             <h3>{title}</h3>
             {typeof description === 'string' ? (
                 <p>{description}</p>
@@ -40,23 +50,24 @@ export default function ChoiceModal({
                 <div>{description}</div>
             )}
             <div className="flex justifySpaceBetween mT30">
-                {actions.map(({ label, location, onPicked, inverted }, i) => (
+                {actions.map((a, i) => (
                     <Button
-                        inverted={inverted}
+                        inverted={a.inverted}
                         className={clsx('flexChildFill', i !== 0 && 'mL30')}
-                        key={label}
+                        key={a.label}
                         onClick={() => {
-                            if (onPicked) {
-                                onPicked();
-                            }
-                            if (location) {
+                            if (isAction(a)) {
+                                a.action();
+                            } else if (a.location) {
                                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                dispatch(push(location as any));
+                                dispatch(push(a.location as any));
+                                postAction(a.location);
+                                return;
                             }
-                            postAction(location);
+                            postAction();
                         }}
                     >
-                        {label}
+                        {a.label}
                     </Button>
                 ))}
             </div>

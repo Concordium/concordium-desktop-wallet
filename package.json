@@ -16,6 +16,7 @@
     "build-storybook": "build-storybook",
     "clean": "yarn clean-scss-modules",
     "clean-scss-modules": "rimraf ./**/*.module.scss.d.ts",
+    "generate-verification-assets": "node ./scripts/fileDigest.js -k",
     "lint": "eslint . --cache --ext .ts,.tsx --max-warnings 0",
     "lint-fix": "yarn --silent lint --fix; exit 0",
     "lint-styles": "stylelint --ignore-path .eslintignore '**/*.*(css|scss)' --syntax scss",
@@ -121,11 +122,16 @@
     "extraResources": [
       "./resources/**",
       "./app/database/migrations/*"
-    ]
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "Concordium",
+      "repo": "concordium-desktop-wallet"
+    }
   },
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.com/Concordium/desktopwallet"
+    "url": "git+https://github.com/Concordium/concordium-desktop-wallet"
   },
   "author": {
     "name": "Concordium Software",
@@ -160,6 +166,9 @@
     "@types/react-router": "^5.1.8",
     "@types/react-router-dom": "^5.1.5",
     "@types/react-test-renderer": "^16.9.3",
+    "@types/react-virtualized-auto-sizer": "^1.0.1",
+    "@types/react-window": "^1.8.5",
+    "@types/react-window-infinite-loader": "^1.0.5",
     "@types/redux-logger": "^3.0.8",
     "@types/webpack": "^4.41.21",
     "@types/webpack-env": "^1.15.2",
@@ -236,7 +245,8 @@
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.0",
     "webpack-merge": "^5.0.9",
-    "worker-loader": "^3.0.6"
+    "worker-loader": "^3.0.6",
+    "yargs": "^17.1.1"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.3.6",
@@ -246,8 +256,8 @@
     "axios": "^0.21.0",
     "bs58check": "^2.1.2",
     "buffer": "^6.0.3",
-    "cbor": "^8.0.0",
     "caniuse-lite": "^1.0.30001251",
+    "cbor": "^8.0.0",
     "clsx": "^1.1.1",
     "connected-react-router": "^6.6.1",
     "electron": "12.0.12",
@@ -271,11 +281,14 @@
     "react-router-dom": "^5.2.0",
     "react-singleton-hook": "^3.1.1",
     "react-to-print": "^2.12.4",
+    "react-virtualized-auto-sizer": "^1.0.6",
+    "react-window": "^1.8.6",
+    "react-window-infinite-loader": "^1.0.7",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "regenerator-runtime": "^0.13.5",
-    "serialize-error": "^8.1.0",
     "semver": "^7.3.5",
+    "serialize-error": "^8.1.0",
     "source-map-support": "^0.5.19",
     "use-react-screenshot": "^1.0.2"
   },

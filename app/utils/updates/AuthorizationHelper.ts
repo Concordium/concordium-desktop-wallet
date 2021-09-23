@@ -112,7 +112,7 @@ function findAuthorizationKey(
  * Attempts to find the key index of the given public key in the authorization.
  * If the public-key is not in the authorization on chain, then undefined will be returned.
  */
-async function findKeyIndex(
+export function findKeyIndex(
     publicKey: string,
     keys: Keys,
     transaction: UpdateInstruction<UpdateInstructionPayload>,
@@ -120,7 +120,7 @@ async function findKeyIndex(
         UpdateInstruction<UpdateInstructionPayload>,
         ConcordiumLedgerClient
     >
-): Promise<number | undefined> {
+): number | undefined {
     if (isUpdateUsingRootKeys(transaction)) {
         return findHigherLevelKey(publicKey, keys.rootKeys)?.index;
     }
@@ -144,7 +144,7 @@ export async function attachKeyIndex(
         ConcordiumLedgerClient
     >
 ): Promise<UpdateInstructionSignatureWithIndex> {
-    const index = await findKeyIndex(
+    const index = findKeyIndex(
         signature.authorizationPublicKey,
         blockSummary.updates.keys,
         transaction,

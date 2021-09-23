@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom';
 import PlusIcon from '@resources/svg/plus.svg';
 import PickRecipient from '../PickRecipient';
 import PickAmount from '../PickAmount';
-import FinalPage from '../FinalPage';
 import { getTransactionKindCost } from '~/utils/transactionCosts';
 import { TransactionKindId, AddressBookEntry, Fraction } from '~/utils/types';
 import locations from '~/constants/transferLocations.json';
@@ -21,7 +20,7 @@ interface Props {
         recipient: AddressBookEntry,
         memo?: string
     ): void;
-    exitFunction(): void;
+    exitFunction?(): void;
     exchangeRate?: Fraction;
     amountHeader: string;
     senderAddress: string;
@@ -44,7 +43,7 @@ export default function ExternalTransfer({
     const allowMemo = useAsyncMemo(nodeSupportsMemo);
 
     const [subLocation, setSubLocation] = useState<string>(
-        location?.state?.initialPage || locations.pickAmount
+        locations.pickAmount
     );
 
     const [amount, setAmount] = useState<string>(
@@ -73,10 +72,7 @@ export default function ExternalTransfer({
 
     return (
         <TransferView
-            showBack={
-                subLocation === locations.pickRecipient ||
-                subLocation === locations.confirmTransfer
-            }
+            showBack={subLocation === locations.pickRecipient}
             exitOnClick={exitFunction}
             backOnClick={() => setSubLocation(locations.pickAmount)}
         >
@@ -137,9 +133,6 @@ export default function ExternalTransfer({
                         <PlusIcon />
                     </UpsertAddress>
                 </>
-            )}
-            {subLocation === locations.transferSubmitted && (
-                <FinalPage location={location} />
             )}
         </TransferView>
     );

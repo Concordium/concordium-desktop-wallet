@@ -1,0 +1,87 @@
+@import 'config/bundle';
+@import '../common';
+
+.transactionListElement {
+    position: relative;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    &:focus {
+        outline: none;
+    }
+
+    &:not(:last-child) {
+        border-bottom: 0.5px solid $color-soft-grey;
+    }
+
+    &VariableHeight {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+}
+
+.clickableElement {
+    cursor: pointer;
+
+    &:focus {
+        box-shadow: 0 0 0 2px $color-pale-blue;
+    }
+}
+
+.failedElement {
+    padding-left: 30px;
+}
+
+.strikedThrough {
+    text-decoration: line-through;
+}
+
+.warning {
+    position: absolute;
+    margin: 5px -25px;
+
+    :global(.warning_svg__boundary) {
+        fill: $color-error;
+    }
+}
+
+.checkmark {
+    position: relative;
+    top: 1px;
+    margin-left: 5px;
+}
+
+.greenText {
+    color: $color-success;
+}
+
+.transactionGroupHeader {
+    composes: cardPadding;
+    height: $thick-blue-separator-height;
+    font-size: 10px;
+    line-height: 12px;
+    display: flex;
+    align-items: center;
+    background-color: $color-light-blue;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.fullMemo {
+    white-space: pre-wrap;
+}
+
+.lineClamp {
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 100%;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+}
+
+.infinite {
+    overflow: overlay !important;
+}

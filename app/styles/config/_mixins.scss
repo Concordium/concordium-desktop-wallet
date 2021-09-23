@@ -14,3 +14,13 @@
 @mixin shadowBorder($color: $color-grey, $width: 1px) {
     box-shadow: 0 0 0 $width $color inset;
 }
+
+@mixin withFirstLastMods() {
+    &,
+    &\:notFirst:not(:first-of-type),
+    &\:notLast:not(:last-of-type),
+    &\:first:first-of-type,
+    &\:last:last-of-type {
+        @content;
+    }
+}

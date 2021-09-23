@@ -11,7 +11,6 @@ import {
     Fraction,
 } from '../../utils/types';
 import { toMicroUnits } from '../../utils/gtu';
-import locations from '../../constants/transferLocations.json';
 import {
     createSimpleTransferTransaction,
     createSimpleTransferWithMemoTransaction,
@@ -27,12 +26,18 @@ interface Props {
     account: Account;
     exchangeRate: Fraction;
     nonce: string;
+    disableClose?: boolean;
 }
 
 /**
  * Controls the flow of creating a simple transfer.
  */
-function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
+function SimpleTransfer({
+    account,
+    exchangeRate,
+    nonce,
+    disableClose = false,
+}: Props) {
     const dispatch = useDispatch();
 
     const toConfirmTransfer = useCallback(
@@ -69,9 +74,8 @@ function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
                     pathname: routes.SUBMITTRANSFER,
                     state: {
                         confirmed: {
-                            pathname: routes.ACCOUNTS_SIMPLETRANSFER,
+                            pathname: routes.ACCOUNTS_FINAL_PAGE,
                             state: {
-                                initialPage: locations.transferSubmitted,
                                 transaction: stringify(transaction),
                                 recipient,
                             },
@@ -79,7 +83,6 @@ function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
                         cancelled: {
                             pathname: routes.ACCOUNTS_SIMPLETRANSFER,
                             state: {
-                                initialPage: locations.pickAmount,
                                 amount,
                                 memo,
                                 recipient,
@@ -110,7 +113,9 @@ function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
         <ExternalTransfer
             exchangeRate={exchangeRate}
             toConfirmTransfer={toConfirmTransfer}
-            exitFunction={() => dispatch(push(routes.ACCOUNTS))}
+            exitFunction={
+                disableClose ? undefined : () => dispatch(push(routes.ACCOUNTS))
+            }
             amountHeader="Send GTU"
             senderAddress={account.address}
             transactionKind={TransactionKindId.Simple_transfer}

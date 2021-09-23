@@ -67,11 +67,12 @@ export default function SignatureCheckboxes({
     threshold,
     signatures,
 }: SignatureCheckboxesProps): JSX.Element {
-    const thresholdArray = new Array(threshold).fill(0);
+    const boxesToShow = Math.max(threshold, signatures.length);
+    const boxesToShowArray = new Array(boxesToShow).fill(0);
 
     return (
         <>
-            {thresholdArray.map((_, i) => (
+            {boxesToShowArray.map((_, i) => (
                 <SignatureCheckbox
                     signature={signatures[i]}
                     name={getCheckboxName(i)}

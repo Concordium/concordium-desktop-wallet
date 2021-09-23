@@ -3,9 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { decryptAccountBalance } from '~/features/AccountSlice';
 import { globalSelector } from '~/features/GlobalSlice';
 import {
-    transactionsSelector,
     decryptTransactions,
-    loadTransactions,
+    reloadTransactions,
 } from '~/features/TransactionSlice';
 import { Account } from '~/utils/types';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
@@ -27,7 +26,6 @@ interface Props {
  */
 export default function DecryptComponent({ account, onDecrypt }: Props) {
     const dispatch = useDispatch();
-    const transactions = useSelector(transactionsSelector);
     const global = useSelector(globalSelector);
 
     async function ledgerCall(
@@ -62,13 +60,7 @@ export default function DecryptComponent({ account, onDecrypt }: Props) {
         setMessage('Please wait');
         const prfKey = prfKeySeed.toString('hex');
 
-        await decryptTransactions(
-            transactions,
-            account.address,
-            prfKey,
-            credentialNumber,
-            global
-        );
+        await decryptTransactions(account, prfKey, credentialNumber, global);
         await decryptAccountBalance(
             prfKey,
             account,
@@ -76,7 +68,8 @@ export default function DecryptComponent({ account, onDecrypt }: Props) {
             global,
             dispatch
         );
-        await loadTransactions(account, dispatch);
+        await dispatch(reloadTransactions());
+
         if (onDecrypt) {
             onDecrypt();
         }

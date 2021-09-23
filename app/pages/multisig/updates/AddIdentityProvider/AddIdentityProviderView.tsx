@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { AddIdentityProvider } from '~/utils/types';
 import { hashSha256 } from '~/utils/serializationHelpers';
 import { fieldDisplays } from './CreateAddIdentityProvider';
+import PublicKeyDetails from '~/components/ledger/PublicKeyDetails';
+import DisplayHexString from '~/components/ledger/DisplayHexString';
 
 interface Props {
     addIdentityProvider: AddIdentityProvider;
@@ -48,11 +50,13 @@ export default function AddIdentityProviderView({
             </div>
             <div className="body1">
                 <h5 className="mB0">{fieldDisplays.ipVerifyKey} Hash</h5>
-                {ipVerifyKeyHash}
+                <DisplayHexString value={ipVerifyKeyHash} />
             </div>
             <div className="body1">
                 <h5 className="mB0">{fieldDisplays.ipCdiVerifyKey}</h5>
-                {addIdentityProvider.ipCdiVerifyKey}
+                <PublicKeyDetails
+                    publicKey={addIdentityProvider.ipCdiVerifyKey}
+                />
             </div>
         </>
     );

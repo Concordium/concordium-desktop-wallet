@@ -1,11 +1,7 @@
 import React from 'react';
-import clsx from 'clsx';
-import { useSelector } from 'react-redux';
 import attributeNamesJson from '~/constants/attributeNames.json';
-import { chosenAccountInfoSelector } from '~/features/AccountSlice';
 import SidedRow from '~/components/SidedRow';
-import styles from './Accounts.module.scss';
-import { AttributeKeyName } from '~/utils/types';
+import { AttributeKeyName, CredentialDeploymentValues } from '~/utils/types';
 import {
     formatAttributeValue,
     compareAttributes,
@@ -13,63 +9,43 @@ import {
 
 const attributeNames: Record<string, string> = attributeNamesJson;
 
+interface Props {
+    credential: CredentialDeploymentValues;
+}
+
 /**
  *  DIsplays the revealed Attributes of the chosen account.
  *  TODO: Use local credential to get attributes?
  */
-export default function DisplayIdentityAttributes(): JSX.Element | null {
-    const accountInfo = useSelector(chosenAccountInfoSelector);
+export default function DisplayIdentityAttributes({
+    credential,
+}: Props): JSX.Element | null {
+    const attributes = credential.policy.revealedAttributes;
+    const attributeKeys = Object.keys(attributes);
 
-    if (!accountInfo) {
-        return null;
+    if (attributeKeys.length === 0) {
+        return (
+            <div className="pT10" key={credential.credId || credential.regId}>
+                This credential has no identity data revealed
+            </div>
+        );
     }
-
     return (
         <>
-            {Object.values(accountInfo.accountCredentials).map((credential) => {
-                const attributes =
-                    credential.value.contents.policy.revealedAttributes;
-                const attributeKeys = Object.keys(attributes);
-
-                if (attributeKeys.length === 0) {
-                    return (
-                        <h3
-                            key={
-                                credential.value.contents.credId ||
-                                credential.value.contents.regId
-                            }
-                            className={clsx(
-                                styles.identityAttributesOfCredential,
-                                'flex justifyCenter pB20'
-                            )}
-                        >
-                            This credential has no revealed attributes!
-                        </h3>
-                    );
-                }
-
-                return (
-                    <div
-                        key={credential.value.contents.credId}
-                        className={styles.identityAttributesOfCredential}
-                    >
-                        {attributeKeys
-                            .map((k) => k as AttributeKeyName)
-                            .sort(compareAttributes)
-                            .map((attributeKey: AttributeKeyName) => (
-                                <SidedRow
-                                    className={styles.identityAttribute}
-                                    key={attributeKey}
-                                    left={attributeNames[attributeKey]}
-                                    right={formatAttributeValue(
-                                        attributeKey,
-                                        attributes[attributeKey]
-                                    )}
-                                />
-                            ))}
-                    </div>
-                );
-            })}
+            {attributeKeys
+                .map((k) => k as AttributeKeyName)
+                .sort(compareAttributes)
+                .map((attributeKey: AttributeKeyName) => (
+                    <SidedRow
+                        className="pT10"
+                        key={attributeKey}
+                        left={attributeNames[attributeKey]}
+                        right={formatAttributeValue(
+                            attributeKey,
+                            attributes[attributeKey]
+                        )}
+                    />
+                ))}
         </>
     );
 }

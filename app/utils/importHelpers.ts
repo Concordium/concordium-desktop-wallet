@@ -261,6 +261,15 @@ function handleDuplicateAccount(
     }
 }
 
+interface AccountWithOldFields extends Account {
+    rewardFilter: string;
+}
+
+function sanitizeAccount(account: AccountWithOldFields): Account {
+    const { rewardFilter, ...sanitized } = account;
+    return sanitized;
+}
+
 /**
  * Inserts new accounts and credentials for an identity that has already been inserted into the
  * database, so that we have its up-to-date id, which can be used to update the identityId
@@ -290,7 +299,9 @@ async function insertNewAccountsAndCredentials(
             ...newAccount,
             identityId,
         };
-        await insertAccount(newAccountToInsert);
+        await insertAccount(
+            sanitizeAccount(newAccountToInsert as AccountWithOldFields)
+        );
     }
 
     for (const duplicate of duplicateAccounts) {

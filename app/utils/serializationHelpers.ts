@@ -8,6 +8,7 @@ import {
     CredentialDeploymentInformation,
     Description,
     IpInfo,
+    ArInfo,
     SerializedDescription,
     SerializedTextWithLength,
     AttributeKey,
@@ -243,4 +244,11 @@ export function serializeIpInfo(ipInfo: IpInfo) {
     const verifyKey = Buffer.from(ipInfo.ipVerifyKey, 'hex');
     const cdiVerifyKey = Buffer.from(ipInfo.ipCdiVerifyKey, 'hex');
     return Buffer.concat([id, description, verifyKey, cdiVerifyKey]);
+}
+
+export function serializeArInfo(arInfo: ArInfo) {
+    const id = encodeWord32(arInfo.arIdentity);
+    const description = serializeDescription(arInfo.arDescription);
+    const publicKey = Buffer.from(arInfo.arPublicKey, 'hex');
+    return Buffer.concat([id, description, publicKey]);
 }
