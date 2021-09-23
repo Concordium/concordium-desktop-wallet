@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Dispatch } from '@reduxjs/toolkit';
 import {
     chosenAccountSelector,
@@ -16,10 +16,10 @@ import {
 } from '~/features/TransactionSlice';
 import { noOp } from '~/utils/basicHelpers';
 import { AccountStatus } from '~/utils/types';
-import AbortController from '~/utils/AbortController';
 import AbortControllerWithLooping from '~/utils/AbortControllerWithLooping';
+import useThunkDispatch from '~/store/useThunkDispatch';
 
-async function load(dispatch: Dispatch) {
+async function handleLoad(dispatch: Dispatch) {
     const accounts = await loadAccounts(dispatch);
     return loadAccountInfos(accounts, dispatch);
 }
@@ -34,12 +34,28 @@ const accountInfoUpdateInterval = 30000;
  * Optional error message.
  */
 export default function useAccountSync() {
-    const dispatch = useDispatch();
+    const dispatch = useThunkDispatch();
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
     // This controller is used to abort updateTransactions, when the chosen account is changed, or the view is destroyed.
     const [controller] = useState(new AbortControllerWithLooping());
     const [error, setError] = useState<string | undefined>();
+
+    useEffect(() => {
+        console.log('init');
+    }, []);
+
+    useEffect(() => {
+        console.log('loop', controller.hasLooped);
+    }, [controller.hasLooped]);
+
+    useEffect(() => {
+        console.log('abort', controller.isAborted);
+    }, [controller.isAborted]);
+
+    useEffect(() => {
+        console.log('ready', controller.isReady);
+    }, [controller.isReady]);
 
     useEffect(() => {
         if (
@@ -62,7 +78,7 @@ export default function useAccountSync() {
     ]);
 
     useEffect(() => {
-        load(dispatch).catch((e: Error) => setError(e.message));
+        handleLoad(dispatch).catch((e: Error) => setError(e.message));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dispatch]);
 
@@ -88,6 +104,7 @@ export default function useAccountSync() {
     ]);
 
     useEffect(() => {
+        console.log('(re)start', controller.isReady);
         if (
             account &&
             account.status === AccountStatus.Confirmed &&
@@ -108,6 +125,7 @@ export default function useAccountSync() {
         accountInfo?.accountAmount,
         account?.status,
         controller.isAborted,
+        controller.isReady,
     ]);
 
     useEffect(() => {
@@ -120,20 +138,16 @@ export default function useAccountSync() {
             return noOp;
         }
 
-        const loadController = new AbortController();
-        loadController.start();
-
         dispatch(resetTransactions());
-        dispatch(
+        const load = dispatch(
             loadTransactions({
                 showLoading: true,
                 force: true,
-                controller: loadController,
             })
         );
 
         return () => {
-            loadController.abort();
+            load.abort();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [account?.address, JSON.stringify(account?.transactionFilter)]);

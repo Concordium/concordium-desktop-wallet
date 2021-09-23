@@ -40,7 +40,6 @@ import {
     updateAllDecrypted,
     chosenAccountSelector,
 } from './AccountSlice';
-import AbortController from '~/utils/AbortController';
 import AbortControllerWithLooping from '~/utils/AbortControllerWithLooping';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
 import { isDefined, max, noOp } from '~/utils/basicHelpers';
@@ -59,7 +58,6 @@ enum ActionTypePrefix {
 
 interface LoadTransactionsArgs {
     showLoading?: boolean;
-    controller?: AbortController;
     append?: boolean;
     size?: number;
     force?: boolean;
@@ -78,14 +76,13 @@ export const loadTransactions = createAsyncThunk(
         {
             append = false,
             size = transactionLogPageSize,
-            controller,
             force = false,
         }: LoadTransactionsArgs,
-        { getState, requestId }
+        { getState, requestId, signal }
     ) => {
         const rejectIfInvalid = (message: string) => {
             if (
-                controller?.isAborted ||
+                signal.aborted ||
                 (requestId !== latestLoadingRequestId && !force)
             ) {
                 throw new Error(message);
@@ -142,7 +139,7 @@ export const loadTransactions = createAsyncThunk(
 
 export const reloadTransactions = createAsyncThunk(
     ActionTypePrefix.Reload,
-    async (controller: AbortController | undefined, { dispatch, getState }) => {
+    async (_, { dispatch, getState, signal }) => {
         await forceLock.waitForUnlock();
 
         const state = getState() as RootState;
@@ -153,12 +150,14 @@ export const reloadTransactions = createAsyncThunk(
             return;
         }
 
-        await dispatch(
+        const load = dispatch(
             loadTransactions({
-                controller,
                 size: Math.max(transactions.length, transactionLogPageSize),
             })
         );
+
+        signal.onabort = () => load.abort();
+        await load;
     }
 );
 
@@ -270,14 +269,18 @@ export const updateTransactions = createAsyncThunk<
             return;
         }
 
+        const rejectIfInvalid = (reason: string) => {
+            if (controller.isAborted) {
+                throw new Error(reason);
+            }
+        };
+
         async function updateSubroutine(maxId: bigint) {
             if (!account) {
                 throw new Error('Account missing');
             }
 
-            if (controller.isAborted) {
-                throw new Error('Update aborted');
-            }
+            rejectIfInvalid('Update aborted before fetch');
 
             let result;
             const { address } = account;
@@ -287,6 +290,8 @@ export const updateTransactions = createAsyncThunk<
                 onError(errorMessages.unableToReachWalletProxy);
                 throw e;
             }
+
+            rejectIfInvalid('Update aborted before DB');
 
             // Insert the fetched transactions and update the max transaction id
             // in a single transaction.
@@ -311,9 +316,7 @@ export const updateTransactions = createAsyncThunk<
                 await updateAllDecrypted(dispatch, address, false);
             }
 
-            if (controller.isAborted) {
-                throw new Error('Update aborted');
-            }
+            rejectIfInvalid('Update aborted before reload');
 
             const maxIdInStore = state.transactions.transactions
                 .map((t) => t.id)
@@ -324,7 +327,10 @@ export const updateTransactions = createAsyncThunk<
                 );
 
             if (maxIdInStore !== result.newMaxId.toString()) {
-                await dispatch(reloadTransactions(controller));
+                const reload = dispatch(reloadTransactions());
+
+                controller.onabort = reload.abort;
+                await reload;
             }
 
             if (maxId === result.newMaxId || result.isFinished) {
@@ -396,14 +402,13 @@ const transactionSlice = createSlice({
         builder.addMatcher(
             isAnyOf(loadTransactions.rejected, loadTransactions.fulfilled),
             (state, action) => {
-                const { controller, append = false } = action.meta.arg;
                 const isLatest =
                     action.meta.requestId === latestLoadingRequestId;
 
                 if (isFulfilled(action)) {
                     state.hasMore = action.payload.more;
 
-                    if (append) {
+                    if (action.meta.arg.append) {
                         state.transactions.push(...action.payload.transactions);
                     } else {
                         state.transactions = action.payload.transactions;
@@ -413,8 +418,6 @@ const transactionSlice = createSlice({
                 if (isLatest) {
                     state.loadingTransactions = false;
                 }
-
-                controller?.finish();
             }
         );
 
