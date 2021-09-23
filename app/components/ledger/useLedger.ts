@@ -20,6 +20,10 @@ import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import ledgerIpcCommands from '~/constants/ledgerIpcCommands.json';
 import { noOp } from '~/utils/basicHelpers';
 import { instanceOfTransportStatusError } from '~/features/ledger/TransportStatusError';
+import {
+    instanceOfTransportError,
+    isInvalidChannelError,
+} from '~/features/ledger/TransportError';
 
 const { CONNECTED, ERROR, OPEN_APP, AWAITING_USER_INPUT } = LedgerStatusType;
 
@@ -153,6 +157,14 @@ export default function ExternalHook(
         } catch (e) {
             if (instanceOfClosedWhileSendingError(e)) {
                 dispatch(finishedAction());
+            } else if (
+                instanceOfTransportError(e) &&
+                isInvalidChannelError(e)
+            ) {
+                await window.ledger.resetTransport();
+                const errorMessage =
+                    'Invalid channel. Please close any other application attempting to connect to the Ledger and try again.';
+                dispatch(errorAction(errorMessage));
             } else {
                 let errorMessage;
                 if (instanceOfTransportStatusError(e)) {

@@ -83,6 +83,7 @@ type LedgerCommands = {
     getAppAndVersion: () => Promise<AppAndVersion>;
     subscribe: () => Promise<void>;
     closeTransport: () => void;
+    resetTransport: () => Promise<void>;
 };
 
 export default LedgerCommands;
