@@ -40,7 +40,6 @@ import {
     updateAllDecrypted,
     chosenAccountSelector,
 } from './AccountSlice';
-import AbortControllerWithLooping from '~/utils/AbortControllerWithLooping';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
 import { isDefined, max, noOp } from '~/utils/basicHelpers';
 import { getActiveBooleanFilters } from '~/utils/accountHelpers';
@@ -247,7 +246,7 @@ async function fetchTransactions(
 }
 
 interface UpdateTransactionsArgs {
-    controller: AbortControllerWithLooping;
+    onFirstLoop(): void;
     onError(e: string): void;
 }
 
@@ -261,7 +260,7 @@ export const updateTransactions = createAsyncThunk<
     UpdateTransactionsArgs
 >(
     ActionTypePrefix.Update,
-    async ({ controller, onError }, { getState, dispatch }) => {
+    async ({ onFirstLoop, onError }, { getState, dispatch, signal }) => {
         const state = getState() as RootState;
         const account = chosenAccountSelector(state);
 
@@ -270,12 +269,12 @@ export const updateTransactions = createAsyncThunk<
         }
 
         const rejectIfInvalid = (reason: string) => {
-            if (controller.isAborted) {
+            if (signal.aborted) {
                 throw new Error(reason);
             }
         };
 
-        async function updateSubroutine(maxId: bigint) {
+        async function updateSubroutine(maxId: bigint, firstLoop = false) {
             if (!account) {
                 throw new Error('Account missing');
             }
@@ -329,7 +328,7 @@ export const updateTransactions = createAsyncThunk<
             if (maxIdInStore !== result.newMaxId.toString()) {
                 const reload = dispatch(reloadTransactions());
 
-                controller.onabort = reload.abort;
+                signal.onabort = () => reload.abort();
                 await reload;
             }
 
@@ -337,12 +336,16 @@ export const updateTransactions = createAsyncThunk<
                 return;
             }
 
-            controller.onLoop();
+            if (firstLoop) {
+                onFirstLoop();
+            }
+
             await updateSubroutine(result.newMaxId);
         }
 
         await updateSubroutine(
-            account.maxTransactionId ? BigInt(account.maxTransactionId) : 0n
+            account.maxTransactionId ? BigInt(account.maxTransactionId) : 0n,
+            true
         );
     }
 );
@@ -423,9 +426,8 @@ const transactionSlice = createSlice({
 
         builder.addMatcher(
             isAnyOf(updateTransactions.rejected, updateTransactions.fulfilled),
-            (state, action) => {
+            (state) => {
                 state.synchronizing = false;
-                action.meta.arg.controller.finish();
             }
         );
 

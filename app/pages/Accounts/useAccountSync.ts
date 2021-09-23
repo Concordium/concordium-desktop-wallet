@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Dispatch } from '@reduxjs/toolkit';
+import { Mutex } from 'async-mutex';
 import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
@@ -16,7 +17,6 @@ import {
 } from '~/features/TransactionSlice';
 import { noOp } from '~/utils/basicHelpers';
 import { AccountStatus } from '~/utils/types';
-import AbortControllerWithLooping from '~/utils/AbortControllerWithLooping';
 import useThunkDispatch from '~/store/useThunkDispatch';
 
 async function handleLoad(dispatch: Dispatch) {
@@ -26,6 +26,8 @@ async function handleLoad(dispatch: Dispatch) {
 
 // milliseconds between updates of the accountInfo
 const accountInfoUpdateInterval = 30000;
+
+const updateLock = new Mutex();
 
 /**
  * Keeps account info and transactions for selected account in sync.
@@ -37,32 +39,19 @@ export default function useAccountSync() {
     const dispatch = useThunkDispatch();
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
-    // This controller is used to abort updateTransactions, when the chosen account is changed, or the view is destroyed.
-    const [controller] = useState(new AbortControllerWithLooping());
+    const [abortUpdate, setAbortUpdate] = useState<(() => void) | undefined>(
+        undefined
+    );
+    const [updateAborted, setUpdateAborted] = useState(false);
+    const [updateLooped, setUpdateLooped] = useState(false);
     const [error, setError] = useState<string | undefined>();
-
-    useEffect(() => {
-        console.log('init');
-    }, []);
-
-    useEffect(() => {
-        console.log('loop', controller.hasLooped);
-    }, [controller.hasLooped]);
-
-    useEffect(() => {
-        console.log('abort', controller.isAborted);
-    }, [controller.isAborted]);
-
-    useEffect(() => {
-        console.log('ready', controller.isReady);
-    }, [controller.isReady]);
 
     useEffect(() => {
         if (
             account &&
             account.status === AccountStatus.Confirmed &&
-            controller.hasLooped &&
-            !controller.isAborted
+            updateLooped &&
+            !updateAborted
         ) {
             fetchNewestTransactions(dispatch, account);
         }
@@ -74,7 +63,8 @@ export default function useAccountSync() {
         account?.transactionFilter?.finalizationReward,
         account?.transactionFilter?.fromDate,
         account?.transactionFilter?.toDate,
-        controller.hasLooped,
+        updateLooped,
+        updateAborted,
     ]);
 
     useEffect(() => {
@@ -104,34 +94,53 @@ export default function useAccountSync() {
     ]);
 
     useEffect(() => {
-        console.log('(re)start', controller.isReady);
-        if (
-            account &&
-            account.status === AccountStatus.Confirmed &&
-            controller.isReady &&
-            !controller.isAborted
-        ) {
-            controller.start();
-            dispatch(
+        (async () => {
+            const isRunning = updateLock.isLocked() && !updateAborted;
+            if (account?.status !== AccountStatus.Confirmed || isRunning) {
+                return;
+            }
+
+            const unlock = await updateLock.acquire();
+
+            const update = dispatch(
                 updateTransactions({
-                    controller,
+                    onFirstLoop() {
+                        setUpdateLooped(true);
+                    },
                     onError: setError,
                 })
             );
-        }
+
+            setAbortUpdate(() => update.abort);
+
+            await update;
+
+            updateLock.runExclusive(() => {
+                setUpdateLooped(false);
+                setUpdateAborted(false);
+            });
+
+            unlock();
+        })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         account?.address,
         accountInfo?.accountAmount,
         account?.status,
-        controller.isAborted,
-        controller.isReady,
+        updateAborted,
     ]);
 
     useEffect(() => {
-        return () => controller.abort();
+        if (!abortUpdate) {
+            return noOp;
+        }
+
+        return () => {
+            setUpdateAborted(true);
+            abortUpdate();
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [account?.address]);
+    }, [account?.address, abortUpdate]);
 
     useEffect(() => {
         if (!account || account.status !== AccountStatus.Confirmed) {
