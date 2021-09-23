@@ -320,7 +320,8 @@ export default function PerformImport({ location }: Props) {
                                             Recipient accounts:
                                         </p>
                                         {AddressBookList}
-                                        {duplicateAddressBookEntries.length && (
+                                        {duplicateAddressBookEntries.length !==
+                                            0 && (
                                             <p>
                                                 (
                                                 {
@@ -329,9 +330,9 @@ export default function PerformImport({ location }: Props) {
                                                 recipient account
                                                 {duplicateAddressBookEntries.length >
                                                 1
-                                                    ? 's were not imported, as they'
-                                                    : ' was not imported, as it'}{' '}
-                                                already existed)
+                                                    ? 's were not imported, as they already exist'
+                                                    : ' was not imported, as it already exists'}
+                                                )
                                             </p>
                                         )}
                                     </div>
