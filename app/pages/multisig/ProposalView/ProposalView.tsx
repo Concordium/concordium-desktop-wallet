@@ -73,6 +73,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
         () => parse(proposal.transaction),
         [proposal]
     );
+    const isAccountTransaction = instanceOfAccountTransaction(transaction);
 
     const signatures = getSignatures(transaction);
 
@@ -149,7 +150,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
             pageTitle={handler.title}
             print={handler.print(transaction, proposal.status, image)}
             stepTitle={`Transaction Proposal - ${handler.type}`}
-            disableBack={instanceOfAccountTransaction(transaction)}
+            disableBack={isAccountTransaction}
             closeRoute={CLOSE_ROUTE}
             delegateScroll
         >
@@ -191,7 +192,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
                             <div>
                                 <h5>
                                     {signatures.length} of {proposal.threshold}{' '}
-                                    signatures.
+                                    required signatures.
                                 </h5>
                                 <div className={styles.signatureCheckboxes}>
                                     <SignatureCheckboxes
@@ -209,7 +210,8 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                     multiple
                                     className={styles.fileInput}
                                     disabled={
-                                        !missingSignatures ||
+                                        (!missingSignatures &&
+                                            isAccountTransaction) ||
                                         currentlyLoadingFile ||
                                         !isOpen
                                     }
