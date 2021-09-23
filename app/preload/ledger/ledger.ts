@@ -3,6 +3,7 @@ import EventEmitter from 'events';
 import {
     closeTransport,
     getLedgerClient,
+    resetTransport,
     subscribeLedger,
 } from './ledgerObserverHelper';
 import { AccountPathInput } from '~/features/ledger/Path';
@@ -236,5 +237,6 @@ export default function exposedMethods(
         getAppAndVersion: () => getLedgerClient().getAppAndVersion(),
         subscribe: () => subscribeLedger(eventEmitter),
         closeTransport,
+        resetTransport: () => resetTransport(eventEmitter),
     };
 }

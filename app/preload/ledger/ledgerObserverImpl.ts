@@ -33,6 +33,24 @@ export default class LedgerObserverImpl implements LedgerObserver {
         }
     }
 
+    async resetTransport(mainWindow: EventEmitter) {
+        await TransportNodeHid.disconnect();
+        const transport = await TransportNodeHid.open();
+        this.concordiumClient = new ConcordiumLedgerClientMain(
+            mainWindow,
+            transport
+        );
+
+        // There may be a previous message from the previous channel on the transport
+        // (even though we just opened a new one!). Therefore we do this call to get rid
+        // of any such old message that would otherwise fail elsewhere.
+        try {
+            await this.concordiumClient.getAppAndVersion();
+        } catch (_e) {
+            // Expected to happen. Do nothing with the error.
+        }
+    }
+
     closeTransport(): void {
         if (this.concordiumClient) {
             this.concordiumClient.closeTransport();
@@ -70,7 +88,7 @@ export default class LedgerObserverImpl implements LedgerObserver {
                     try {
                         appAndVersion = await this.concordiumClient.getAppAndVersion();
                     } catch (e) {
-                        throw new Error('Unable to get current app');
+                        throw new Error(`Unable to get current app: ${e}`);
                     }
                     let action;
                     if (!appAndVersion) {

@@ -158,10 +158,23 @@ app.on('window-all-closed', () => {
     }
 });
 
+const gotTheLock = app.requestSingleInstanceLock();
+
 if (process.env.E2E_BUILD === 'true') {
     // eslint-disable-next-line promise/catch-or-return
     app.whenReady().then(createWindow);
+} else if (!gotTheLock) {
+    app.quit();
 } else {
+    app.on('second-instance', () => {
+        if (mainWindow) {
+            if (mainWindow.isMinimized()) {
+                mainWindow.restore();
+            }
+            mainWindow.focus();
+        }
+    });
+
     app.on('ready', async () => {
         await createWindow();
 
