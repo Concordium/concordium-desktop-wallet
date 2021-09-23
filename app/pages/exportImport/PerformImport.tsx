@@ -11,6 +11,7 @@ import {
     Identity,
     ExportData,
     Dispatch,
+    StateUpdate,
 } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import { loadIdentities, identitiesSelector } from '~/features/IdentitySlice';
@@ -50,7 +51,8 @@ async function performImport(
     importedData: ExportData,
     existingData: ExportData,
     dispatch: Dispatch,
-    addMessage: AddMessage
+    addMessage: AddMessage,
+    addAddressBookMessage: AddMessage<string>
 ) {
     if (importedData.genesis) {
         const genesis = await getGenesis();
@@ -93,7 +95,7 @@ async function performImport(
             dispatch,
             importedData.addressBook,
             existingData.addressBook,
-            addMessage
+            addAddressBookMessage
         );
     } catch (e) {
         throw new Error(
@@ -119,6 +121,23 @@ async function performImport(
 }
 
 /**
+ * Given a redux state update function, return a function to add entries into the map.
+ *
+ * @param mapUpdate state update function to create an add function for.
+ * @return an add function to the map, which is connected to the given state update.
+ */
+function addToMap<K extends string | number | symbol, V>(
+    mapUpdate: StateUpdate<Record<K, V>>
+) {
+    return (k: K, v: V) =>
+        mapUpdate((map) => {
+            const newMap = { ...map };
+            newMap[k] = v;
+            return newMap;
+        });
+}
+
+/**
  * Component to import identities/accounts/addressBookEntries.
  * Expects prop.location.state to contain identities/accounts/addressBookEntries.
  * Checks for duplicates and saves the input.
@@ -140,17 +159,17 @@ export default function PerformImport({ location }: Props) {
     const [messages, setMessages] = useState<Record<string | number, string>>(
         {}
     );
+    const [addressBookMessages, setAddressBookMessages] = useState<
+        Record<string, string>
+    >({});
     const [error, setError] = useState<string>();
     const [started, setStarted] = useState(false);
 
     useEffect(() => {
         if (!started && importedData) {
-            const addMessage = (identifier: string | number, message: string) =>
-                setMessages((currentMessages) => {
-                    const newMap = { ...currentMessages };
-                    newMap[identifier] = message;
-                    return newMap;
-                });
+            const addMessage = addToMap(setMessages);
+            const addAddressBookMessage = addToMap(setAddressBookMessages);
+
             setStarted(true);
             performImport(
                 importedData,
@@ -163,7 +182,8 @@ export default function PerformImport({ location }: Props) {
                     wallets: [],
                 },
                 dispatch,
-                addMessage
+                addMessage,
+                addAddressBookMessage
             )
                 .then(setDuplicateAddressBookEntries)
                 .catch((e) => setError(e.message));
@@ -208,9 +228,9 @@ export default function PerformImport({ location }: Props) {
         .map((entry: AddressBookEntry) => (
             <p key={entry.address} className={styles.importedAddress}>
                 {entry.name}{' '}
-                {messages[entry.address] && (
+                {addressBookMessages[entry.address] && (
                     <span className="bodyLight textFaded mL10">
-                        ({messages[entry.address]})
+                        ({addressBookMessages[entry.address]})
                     </span>
                 )}
             </p>
