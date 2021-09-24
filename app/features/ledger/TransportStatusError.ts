@@ -16,7 +16,8 @@ export default class TransportStatusError extends Error {
 }
 
 export function instanceOfTransportStatusError(
-    object: Error
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    object: any
 ): object is TransportStatusError {
     return (
         'name' in object &&
