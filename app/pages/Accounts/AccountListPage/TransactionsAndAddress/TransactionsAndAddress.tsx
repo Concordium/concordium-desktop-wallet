@@ -11,6 +11,7 @@ import TransactionList from '../../TransactionList';
 import TransactionView from '../../TransactionView';
 
 import styles from './TransactionsAndAddress.module.scss';
+import TransactionsHeader from '../../TransactionsHeader';
 
 interface Props {
     account: Account;
@@ -25,7 +26,9 @@ export default function TransfersAndAddress({ account }: Props) {
 
     return (
         <TabbedCard className={styles.root}>
-            <TabbedCard.Tab header="Latest transactions">
+            <TabbedCard.Tab
+                header={<TransactionsHeader text="Latest transactions" />}
+            >
                 {chosenTransaction ? (
                     <TransactionView
                         transaction={chosenTransaction}

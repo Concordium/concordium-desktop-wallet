@@ -30,7 +30,7 @@ export default function DetailsPage() {
     const accountInfo = useSelector(chosenAccountInfoSelector);
     const viewingShielded = useSelector(viewingShieldedSelector);
 
-    if (!account || !accountInfo) {
+    if (!account) {
         return null;
     }
 

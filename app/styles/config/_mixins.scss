@@ -17,10 +17,10 @@
 
 @mixin withFirstLastMods() {
     &,
-    &\:notFirst:not(:first-of-type),
-    &\:notLast:not(:last-of-type),
-    &\:first:first-of-type,
-    &\:last:last-of-type {
+    &\:notFirst:not(:first-child),
+    &\:notLast:not(:last-child),
+    &\:first:first-child,
+    &\:last:last-child {
         @content;
     }
 }

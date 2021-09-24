@@ -34,7 +34,7 @@ interface CredentialOfAccount
 
 interface Props {
     account: Account;
-    accountInfo: AccountInfo;
+    accountInfo?: AccountInfo;
 }
 /**
  * Displays the account's deployed credential information and the
@@ -46,6 +46,10 @@ export default function CredentialInformation({ account, accountInfo }: Props) {
     const externalCredentials = useSelector(externalCredentialsSelector);
     const ownCredentials = useSelector(credentialsSelector);
     const identities = useSelector(identitiesSelector);
+
+    if (!accountInfo) {
+        return null;
+    }
 
     const credentials = Object.values(accountInfo.accountCredentials)
         .map((o) => o.value.contents)

@@ -5,13 +5,13 @@ import React, {
     useCallback,
     useContext,
     useEffect,
-    useMemo,
+    useRef,
 } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import InfiniteLoader from 'react-window-infinite-loader';
 import { VariableSizeList as List } from 'react-window';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { PropsOf, TransferTransaction } from '~/utils/types';
 import useTransactionGroups, {
     TransactionsByDateTuple,
@@ -23,7 +23,6 @@ import {
     transactionLogPageSize,
 } from '~/features/TransactionSlice';
 import { chosenAccountSelector } from '~/features/AccountSlice';
-import AbortController from '~/utils/AbortController';
 import TransactionListHeader, {
     transactionListHeaderHeight,
 } from './TransactionListHeader';
@@ -33,6 +32,7 @@ import TransactionListElement, {
 
 import styles from './TransactionList.module.scss';
 import { TransactionListProps } from './util';
+import useThunkDispatch from '~/store/useThunkDispatch';
 
 type HeaderOrTransaction = string | TransferTransaction;
 
@@ -81,29 +81,28 @@ export default function InfiniteTransactionList({
     transactions,
     onTransactionClick,
 }: TransactionListProps) {
-    const dispatch = useDispatch();
+    const dispatch = useThunkDispatch();
     const account = useSelector(chosenAccountSelector);
     const loading = useSelector(loadingTransactionsSelector);
     const hasMore = useSelector(hasMoreTransactionsSelector);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const loadController = useMemo(() => new AbortController(), [
-        account?.address,
-    ]);
-    useEffect(() => () => loadController.abort(), [loadController]);
+    const abortRef = useRef<((reason?: string) => void) | undefined>(undefined);
+
+    useEffect(() => () => abortRef.current?.(), [account?.address]);
 
     const loadMore = useCallback(async () => {
         if (loading || !hasMore) {
             return;
         }
-
-        await dispatch(
+        const load = dispatch(
             loadTransactions({
-                controller: loadController,
                 showLoading: true,
                 append: true,
+                force: true,
             })
         );
-    }, [dispatch, loadController, loading, hasMore]);
+
+        abortRef.current = load.abort;
+    }, [dispatch, loading, hasMore]);
 
     const groups = useTransactionGroups(transactions);
     const headersAndTransactions = groups.flat(2);

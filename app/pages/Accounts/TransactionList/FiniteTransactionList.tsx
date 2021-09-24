@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import React, { Fragment, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import Loading from '~/cross-app-components/Loading';
@@ -7,6 +8,8 @@ import TransactionListElement from './TransactionListElement';
 import TransactionListHeader from './TransactionListHeader';
 import useTransactionGroups from './useTransactionGroups';
 import { TransactionListProps } from './util';
+
+import styles from './TransactionList.module.scss';
 
 export default function FiniteTransactionList({
     transactions,
@@ -27,13 +30,27 @@ export default function FiniteTransactionList({
 
     if (showLoading) {
         return (
-            <div className="flex">
+            <div className={clsx('flex', styles.thickBlueSeparatorTop)}>
                 <Loading
                     inline
                     className="marginCenter mV40"
-                    text="loading transactions"
+                    text="Loading transactions"
                 />
             </div>
+        );
+    }
+
+    if (transactions.length === 0) {
+        return (
+            <h3
+                className={clsx(
+                    'flex justifyCenter mV0 pV20',
+                    styles.thickBlueSeparatorTop,
+                    styles.cardPadding
+                )}
+            >
+                No transactions to show for account.
+            </h3>
         );
     }
 

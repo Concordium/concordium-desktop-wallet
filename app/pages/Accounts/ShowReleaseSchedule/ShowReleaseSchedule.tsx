@@ -7,7 +7,7 @@ import SidedRow from '~/components/SidedRow';
 import styles from './ShowReleaseSchedule.module.scss';
 
 interface Props {
-    accountInfo: AccountInfo;
+    accountInfo?: AccountInfo;
 }
 /**
  * Displays the account's release schedule:
@@ -15,6 +15,10 @@ interface Props {
  * and the total locked value.
  */
 export default function ShowReleaseSchedule({ accountInfo }: Props) {
+    if (!accountInfo) {
+        return null;
+    }
+
     const { schedule } = accountInfo.accountReleaseSchedule;
 
     return (

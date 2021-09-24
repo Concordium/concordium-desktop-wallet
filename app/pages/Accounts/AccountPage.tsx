@@ -1,24 +1,32 @@
-import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { push } from 'connected-react-router';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 
+import { Dispatch } from '@reduxjs/toolkit';
 import NoIdentities from '~/components/NoIdentities';
-import { accountsSelector } from '~/features/AccountSlice';
+import {
+    accountsSelector,
+    chosenAccountSelector,
+    loadAccountInfos,
+    loadAccounts,
+} from '~/features/AccountSlice';
 import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
 import { RootState } from '~/store/store';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
-import routes from '~/constants/routes.json';
 
 import useAccountSync from './useAccountSync';
 import AccountListPage from './AccountListPage';
 import AccountDetailsPage from './AccountDetailsPage';
+import useThunkDispatch from '~/store/useThunkDispatch';
 
 const { Header } = MasterDetailPageLayout;
 
-export default function AccountsPage() {
+interface Props {
+    onError(message: string): void;
+}
+
+function AccountsPageComponent({ onError }: Props) {
     const accounts = useSelector(accountsSelector);
-    const dispatch = useDispatch();
-    const syncError = useAccountSync();
+    useAccountSync(onError);
     const simpleView = useSelector((s: RootState) => s.accounts.simpleView);
 
     if (accounts.length === 0) {
@@ -32,15 +40,41 @@ export default function AccountsPage() {
         );
     }
 
+    return simpleView ? <AccountListPage /> : <AccountDetailsPage />;
+}
+
+async function handleLoad(dispatch: Dispatch) {
+    const accounts = await loadAccounts(dispatch);
+    return loadAccountInfos(accounts, dispatch);
+}
+
+export default function AccountsPage() {
+    const dispatch = useThunkDispatch();
+    const account = useSelector(chosenAccountSelector);
+    const [error, setError] = useState<string | undefined>();
+
+    const ReloadWrapper: typeof AccountsPageComponent = useCallback(
+        (props) => {
+            return <AccountsPageComponent {...props} />;
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [account?.address]
+    );
+
+    useEffect(() => {
+        handleLoad(dispatch).catch((e: Error) => setError(e.message));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dispatch]);
+
     return (
         <>
             <SimpleErrorModal
-                show={Boolean(syncError)}
+                show={Boolean(error)}
                 header="Unable to update accounts"
-                content={syncError}
-                onClick={() => dispatch(push(routes.HOME))}
+                content={error}
+                onClick={() => setError(undefined)}
             />
-            {simpleView ? <AccountListPage /> : <AccountDetailsPage />}
+            <ReloadWrapper onError={setError} />
         </>
     );
 }

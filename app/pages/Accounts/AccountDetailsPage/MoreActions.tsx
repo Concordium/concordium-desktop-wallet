@@ -9,7 +9,7 @@ import { hasEncryptedBalance } from '~/utils/accountHelpers';
 
 interface Props {
     account: Account;
-    accountInfo: AccountInfo;
+    accountInfo?: AccountInfo;
 }
 
 export default function MoreActions({ account, accountInfo }: Props) {
@@ -17,13 +17,13 @@ export default function MoreActions({ account, accountInfo }: Props) {
         accountHasDeployedCredentialsSelector(account)
     );
     const hasUsedEncrypted = hasEncryptedBalance(account);
-    const isBaker = Boolean(accountInfo.accountBaker);
+    const isBaker = Boolean(accountInfo?.accountBaker);
     const hasBakerCooldown = Boolean(accountInfo?.accountBaker?.pendingChange);
 
     return (
         <>
             <ButtonNavLink
-                className="mB20:notLast flex"
+                className="mB20:notLast flex width100"
                 exact
                 to={routes.ACCOUNTS}
             >
@@ -39,20 +39,22 @@ export default function MoreActions({ account, accountInfo }: Props) {
             </ButtonNavLink>
             {accountHasDeployedCredentials && (
                 <ButtonNavLink
-                    className="mB20:notLast flex"
+                    className="mB20:notLast flex width100"
                     to={routes.ACCOUNTS_CREATESCHEDULEDTRANSFER}
+                    disabled={!accountInfo}
                 >
                     Send GTU with a schedule
                 </ButtonNavLink>
             )}
             <ButtonNavLink
-                className="mB20:notLast flex"
+                className="mB20:notLast flex width100"
                 to={routes.ACCOUNTS_INSPECTRELEASESCHEDULE}
+                disabled={!accountInfo}
             >
                 Inspect release schedule
             </ButtonNavLink>
             <ButtonNavLink
-                className="mB20:notLast flex"
+                className="mB20:notLast flex width100"
                 to={{
                     pathname: routes.ACCOUNT_REPORT,
                     state: { account },
@@ -61,33 +63,35 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 Export account reports
             </ButtonNavLink>
             <ButtonNavLink
-                className="mB20:notLast flex"
+                className="mB20:notLast flex width100"
                 to={routes.ACCOUNTS_CREDENTIAL_INFORMATION}
             >
                 Credential & attribute Information
             </ButtonNavLink>
             {accountHasDeployedCredentials && !hasUsedEncrypted && (
                 <ButtonNavLink
-                    className="mB20:notLast flex"
+                    className="mB20:notLast flex width100"
                     to={{
                         pathname: createTransferWithAccountPathName(
                             TransactionKindId.Update_credentials
                         ),
                         state: { account },
                     }}
+                    disabled={!accountInfo}
                 >
                     Update credentials
                 </ButtonNavLink>
             )}
             {accountHasDeployedCredentials && !isBaker && (
                 <ButtonNavLink
-                    className="mB20:notLast flex"
+                    className="mB20:notLast flex width100"
                     to={{
                         pathname: createTransferWithAccountPathName(
                             TransactionKindId.Add_baker
                         ),
                         state: { account },
                     }}
+                    disabled={!accountInfo}
                 >
                     Add baker
                 </ButtonNavLink>
@@ -96,49 +100,53 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 <>
                     {hasBakerCooldown || (
                         <ButtonNavLink
-                            className="mB20:notLast flex"
+                            className="mB20:notLast flex width100"
                             to={{
                                 pathname: createTransferWithAccountPathName(
                                     TransactionKindId.Remove_baker
                                 ),
                                 state: { account },
                             }}
+                            disabled={!accountInfo}
                         >
                             Remove baker
                         </ButtonNavLink>
                     )}
                     <ButtonNavLink
-                        className="mB20:notLast flex"
+                        className="mB20:notLast flex width100"
                         to={{
                             pathname: createTransferWithAccountPathName(
                                 TransactionKindId.Update_baker_keys
                             ),
                             state: { account },
                         }}
+                        disabled={!accountInfo}
                     >
                         Update baker keys
                     </ButtonNavLink>
                     {hasBakerCooldown || (
                         <ButtonNavLink
-                            className="mB20:notLast flex"
+                            className="mB20:notLast flex width100"
                             to={{
                                 pathname: createTransferWithAccountPathName(
                                     TransactionKindId.Update_baker_stake
                                 ),
                                 state: { account },
                             }}
+                            disabled={!accountInfo}
                         >
                             Update baker stake
                         </ButtonNavLink>
                     )}
                     <ButtonNavLink
-                        className="mB20:notLast flex"
+                        className="mB20:notLast flex width100"
                         to={{
                             pathname: createTransferWithAccountPathName(
                                 TransactionKindId.Update_baker_restake_earnings
                             ),
                             state: { account },
                         }}
+                        disabled={!accountInfo}
                     >
                         Update baker restake earnings
                     </ButtonNavLink>

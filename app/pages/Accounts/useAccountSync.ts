@@ -1,70 +1,52 @@
-import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Dispatch } from '@reduxjs/toolkit';
+import { useState, useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
+import { Mutex } from 'async-mutex';
 import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
     updateAccountInfo,
-    loadAccounts,
-    loadAccountInfos,
 } from '~/features/AccountSlice';
 import {
     updateTransactions,
-    loadTransactions,
     fetchNewestTransactions,
     resetTransactions,
+    loadTransactions,
 } from '~/features/TransactionSlice';
 import { noOp } from '~/utils/basicHelpers';
 import { AccountStatus } from '~/utils/types';
-import AbortController from '~/utils/AbortController';
-import AbortControllerWithLooping from '~/utils/AbortControllerWithLooping';
-
-async function load(dispatch: Dispatch) {
-    const accounts = await loadAccounts(dispatch);
-    return loadAccountInfos(accounts, dispatch);
-}
+import useThunkDispatch from '~/store/useThunkDispatch';
 
 // milliseconds between updates of the accountInfo
 const accountInfoUpdateInterval = 30000;
 
 /**
- * Keeps account info and transactions for selected account in sync.
- *
- * @returns
- * Optional error message.
+ * Keeps account info and transactions for selected account in sync. Is dependant on a full re-mount when chosen account changes.
  */
-export default function useAccountSync(): string | undefined {
-    const dispatch = useDispatch();
+export default function useAccountSync(onError: (message: string) => void) {
+    const dispatch = useThunkDispatch();
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
-    // This controller is used to abort updateTransactions, when the chosen account is changed, or the view is destroyed.
-    const [controller] = useState(new AbortControllerWithLooping());
-    const [error, setError] = useState<string | undefined>();
+    const abortUpdateRef = useRef(noOp);
+    const { current: updateLock } = useRef(new Mutex());
+    const [updateLooped, setUpdateLooped] = useState(false);
 
     useEffect(() => {
         if (
             account &&
             account.status === AccountStatus.Confirmed &&
-            controller.hasLooped &&
-            !controller.isAborted
+            updateLooped
         ) {
             fetchNewestTransactions(dispatch, account);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
-        account?.address,
         account?.transactionFilter?.bakingReward,
         account?.transactionFilter?.blockReward,
         account?.transactionFilter?.finalizationReward,
         account?.transactionFilter?.fromDate,
         account?.transactionFilter?.toDate,
-        controller.hasLooped,
+        updateLooped,
     ]);
-
-    useEffect(() => {
-        load(dispatch).catch((e: Error) => setError(e.message));
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dispatch]);
 
     useEffect(() => {
         if (!account) {
@@ -75,60 +57,66 @@ export default function useAccountSync(): string | undefined {
         const interval = setInterval(() => {
             updateAccountInfo(account, dispatch);
         }, accountInfoUpdateInterval);
+
         return () => {
             clearInterval(interval);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-        account?.address,
-        account?.status,
-        account?.selfAmounts,
-        account?.incomingAmounts,
-    ]);
+    }, [account?.status, account?.selfAmounts, account?.incomingAmounts]);
 
     useEffect(() => {
-        if (
-            account &&
-            account.status === AccountStatus.Confirmed &&
-            controller.isReady &&
-            !controller.isAborted
-        ) {
-            controller.start();
-            dispatch(
+        (async () => {
+            if (
+                account?.status !== AccountStatus.Confirmed ||
+                updateLock.isLocked() // If update is already running, we don't need to run again because of new transactions (accountInfo.accountAmount).
+            ) {
+                return;
+            }
+
+            const unlock = await updateLock.acquire();
+
+            const update = dispatch(
                 updateTransactions({
-                    controller,
-                    onError: setError,
+                    onFirstLoop() {
+                        setUpdateLooped(true);
+                    },
+                    onError,
                 })
             );
-        }
+
+            abortUpdateRef.current = update.abort;
+
+            await update;
+
+            unlock();
+            setUpdateLooped(false);
+        })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-        account?.address,
-        accountInfo?.accountAmount,
-        account?.status,
-        controller.isAborted,
-    ]);
+    }, [accountInfo?.accountAmount, account?.status]);
+
+    useEffect(
+        () => () => {
+            abortUpdateRef.current();
+        },
+        []
+    );
 
     useEffect(() => {
-        return () => controller.abort();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [account?.address]);
-
-    useEffect(() => {
-        if (account && account.status === AccountStatus.Confirmed) {
-            const loadController = new AbortController();
-            dispatch(resetTransactions());
-            dispatch(
-                loadTransactions({
-                    controller: loadController,
-                    showLoading: true,
-                })
-            );
-            return () => loadController.abort();
+        if (!account || account.status !== AccountStatus.Confirmed) {
+            return noOp;
         }
-        return () => {};
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [account?.address, JSON.stringify(account?.transactionFilter)]);
 
-    return error;
+        dispatch(resetTransactions());
+        const load = dispatch(
+            loadTransactions({
+                showLoading: true,
+                force: true,
+            })
+        );
+
+        return () => {
+            load.abort();
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [JSON.stringify(account?.transactionFilter)]);
 }

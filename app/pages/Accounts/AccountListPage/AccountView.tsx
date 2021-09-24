@@ -28,17 +28,11 @@ export default function AccountView() {
         return null;
     }
 
-    if (account.isInitial && accountInfo === undefined) {
-        return <FailedInitialAccount account={account} />;
-    }
-
-    if (accountInfo === undefined) {
-        // TODO: Handle AccountInfo not available, either the account is not confirmed, or we can't reach the node.
-        return null;
-    }
-
     return (
         <>
+            {account.isInitial && accountInfo === undefined && (
+                <FailedInitialAccount account={account} />
+            )}
             <AccountBalanceView />
             <AccountViewActions account={account} accountInfo={accountInfo} />
             <BasicTransferRoutes account={account}>

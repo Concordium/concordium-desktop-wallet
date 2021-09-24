@@ -1,8 +1,6 @@
 import React from 'react';
-import clsx from 'clsx';
 import InfiniteTransactionList from './InfiniteTransactionList';
 
-import styles from './TransactionList.module.scss';
 import FiniteTransactionList from './FiniteTransactionList';
 import { TransactionListProps } from './util';
 
@@ -18,24 +16,7 @@ function TransactionList({
     infinite = false,
     ...props
 }: Props): JSX.Element | null {
-    const { transactions } = props;
-
-    if (transactions.length === 0) {
-        return (
-            <h3
-                className={clsx(
-                    'flex justifyCenter mV0 pV20',
-                    styles.thickBlueSeparatorTop,
-                    styles.cardPadding
-                )}
-            >
-                No transactions to show for account.
-            </h3>
-        );
-    }
-
     const List = infinite ? InfiniteTransactionList : FiniteTransactionList;
-
     return <List {...props} />;
 }
 
