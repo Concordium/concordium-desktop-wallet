@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import DefaultIcon from '@resources/svg/star-filled.svg';
@@ -24,35 +24,46 @@ export default function AccountDefaultButton({ account, className }: Props) {
     const isDefault = favAccount?.address === address;
     const Icon = isDefault ? DefaultIcon : NotDefaultIcon;
 
-    const setDefault = useCallback(() => {
-        if (favAccount) {
-            setShowPrompt(true);
-        } else {
-            setDefaultAccount(dispatch, address);
-        }
-    }, [favAccount, dispatch, address]);
-
     const close = () => setShowPrompt(false);
+
+    const description: JSX.Element = useMemo(() => {
+        return favAccount ? (
+            <>
+                <b>{favAccount?.name}</b> is currently set as your default
+                account. Do you want to change default account to
+                <br />
+                <br />
+                <b>{name}</b>?
+            </>
+        ) : (
+            <>
+                You are about to set a default account. Setting this means, that
+                this will be the account initially visible when opening the
+                account page.
+                <br />
+                <br />
+                Would you like to set your default account to
+                <br />
+                <br />
+                <b>{name}</b>?
+            </>
+        );
+    }, [favAccount, name]);
 
     return (
         <>
             <ChoiceModal
                 open={showPrompt}
-                title="Set new default account?"
-                description={
-                    <>
-                        <b>{favAccount?.name}</b> is currently set as your
-                        default account. Do you want to change default account
-                        to
-                        <br />
-                        <br />
-                        <b>{name}</b>?
-                    </>
+                title={
+                    favAccount
+                        ? 'Set new default account?'
+                        : 'Set default account?'
                 }
+                description={description}
                 actions={[
                     { label: 'Cancel' },
                     {
-                        label: 'Change default',
+                        label: 'Set default',
                         action: () => setDefaultAccount(dispatch, address),
                     },
                 ]}
@@ -63,7 +74,7 @@ export default function AccountDefaultButton({ account, className }: Props) {
                 className={clsx('inlineFlex', className)}
                 clear
                 disabled={isDefault}
-                onClick={setDefault}
+                onClick={() => setShowPrompt(true)}
             >
                 <Icon width={20} height={20} />
             </Button>
