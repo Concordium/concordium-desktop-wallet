@@ -102,11 +102,12 @@ export default function useAccountSync(onError: (message: string) => void) {
     );
 
     useEffect(() => {
-        if (!account || account.status !== AccountStatus.Confirmed) {
+        dispatch(resetTransactions());
+
+        if (account?.status !== AccountStatus.Confirmed) {
             return noOp;
         }
 
-        dispatch(resetTransactions());
         const load = dispatch(
             loadTransactions({
                 showLoading: true,
