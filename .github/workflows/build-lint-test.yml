@@ -28,7 +28,7 @@ jobs:
                       **/dll
                       **/pkg
                       **/target
-                  key: ${{ runner.os }}-v2-${{ hashFiles('**/yarn.lock', '**/rust-src/') }}
+                  key: ${{ runner.os }}-v3-${{ hashFiles('**/yarn.lock', '**/rust-src/') }}
 
             - name: Install rust
               if: steps.fetch-dependencies.outputs.cache-hit != 'true'
@@ -71,7 +71,7 @@ jobs:
                       **/dll
                       **/pkg
                       **/target
-                  key: ${{ runner.os }}-v2-${{ hashFiles('**/yarn.lock', '**/rust-src/') }}
+                  key: ${{ runner.os }}-v3-${{ hashFiles('**/yarn.lock', '**/rust-src/') }}
 
             - name: Build proto
               run: yarn build-proto
@@ -86,7 +86,7 @@ jobs:
                       **/app/proto
                       **/app/main.prod.js
                       **/app/dist
-                  key: ${{ runner.os }}-v2-${{ hashFiles('**/app/proto/', '**/app/main.prod.js', '**/app/dist/') }}
+                  key: ${{ runner.os }}-v3-${{ hashFiles('**/app/proto/', '**/app/main.prod.js', '**/app/dist/') }}
 
     lint:
         runs-on: ubuntu-20.04
@@ -108,7 +108,7 @@ jobs:
                       **/dll
                       **/pkg
                       **/target
-                  key: ${{ runner.os }}-v2-${{ hashFiles('**/yarn.lock', '**/rust-src/') }}
+                  key: ${{ runner.os }}-v3-${{ hashFiles('**/yarn.lock', '**/rust-src/') }}
 
             - name: Get build cache
               uses: actions/cache@v2
@@ -117,7 +117,7 @@ jobs:
                       **/app/proto
                       **/app/main.prod.js
                       **/app/dist
-                  key: ${{ runner.os }}-v2-${{ hashFiles('**/app/proto/', '**/app/main.prod.js', '**/app/dist/') }}
+                  key: ${{ runner.os }}-v3-${{ hashFiles('**/app/proto/', '**/app/main.prod.js', '**/app/dist/') }}
 
             - name: Lint
               run: yarn lint
@@ -142,7 +142,7 @@ jobs:
                       **/dll
                       **/pkg
                       **/target
-                  key: ${{ runner.os }}-v2-${{ hashFiles('**/yarn.lock', '**/rust-src/') }}
+                  key: ${{ runner.os }}-v3-${{ hashFiles('**/yarn.lock', '**/rust-src/') }}
 
             - name: Get build cache
               uses: actions/cache@v2
@@ -151,7 +151,7 @@ jobs:
                       **/app/proto
                       **/app/main.prod.js
                       **/app/dist
-                  key: ${{ runner.os }}-v2-${{ hashFiles('**/app/proto/', '**/app/main.prod.js', '**/app/dist/') }}
+                  key: ${{ runner.os }}-v3-${{ hashFiles('**/app/proto/', '**/app/main.prod.js', '**/app/dist/') }}
 
             - name: Test
               run: yarn test
