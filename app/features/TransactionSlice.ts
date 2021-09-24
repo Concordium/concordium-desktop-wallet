@@ -79,15 +79,6 @@ export const loadTransactions = createAsyncThunk(
         }: LoadTransactionsArgs,
         { getState, requestId, signal }
     ) => {
-        const rejectIfInvalid = (message: string) => {
-            if (
-                signal.aborted ||
-                (requestId !== latestLoadingRequestId && !force)
-            ) {
-                throw new Error(message);
-            }
-        };
-
         const state = getState() as RootState;
         const account = chosenAccountSelector(state);
 
@@ -99,6 +90,16 @@ export const loadTransactions = createAsyncThunk(
         if (force) {
             release = await forceLock.acquire();
         }
+
+        const rejectIfInvalid = (reason: string) => {
+            if (
+                signal.aborted ||
+                (requestId !== latestLoadingRequestId && !force)
+            ) {
+                release?.();
+                throw new Error(reason);
+            }
+        };
 
         const minId = state.transactions.transactions
             .map((t) => t.id)
@@ -126,12 +127,10 @@ export const loadTransactions = createAsyncThunk(
             );
 
             rejectIfInvalid('Redux load aborted');
-            setTimeout(() => release?.());
 
             return result;
-        } catch (e) {
-            release?.();
-            throw e;
+        } finally {
+            setTimeout(() => release?.());
         }
     }
 );
@@ -245,6 +244,8 @@ async function fetchTransactions(
     return { transactions, newMaxId, isFinished };
 }
 
+let latestUpdateRequestId: string | undefined;
+
 interface UpdateTransactionsArgs {
     onFirstLoop(): void;
     onError(e: string): void;
@@ -260,7 +261,11 @@ export const updateTransactions = createAsyncThunk<
     UpdateTransactionsArgs
 >(
     ActionTypePrefix.Update,
-    async ({ onFirstLoop, onError }, { getState, dispatch, signal }) => {
+    async (
+        { onFirstLoop, onError },
+        { getState, dispatch, signal, requestId }
+    ) => {
+        latestUpdateRequestId = requestId;
         const state = getState() as RootState;
         const account = chosenAccountSelector(state);
 
@@ -269,7 +274,7 @@ export const updateTransactions = createAsyncThunk<
         }
 
         const rejectIfInvalid = (reason: string) => {
-            if (signal.aborted) {
+            if (signal.aborted || latestUpdateRequestId !== requestId) {
                 throw new Error(reason);
             }
         };
@@ -279,10 +284,11 @@ export const updateTransactions = createAsyncThunk<
                 throw new Error('Account missing');
             }
 
-            rejectIfInvalid('Update aborted before fetch');
-
             let result;
             const { address } = account;
+
+            rejectIfInvalid('Update aborted before fetch');
+
             try {
                 result = await fetchTransactions(address, maxId);
             } catch (e) {
