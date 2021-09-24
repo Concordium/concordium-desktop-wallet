@@ -34,7 +34,7 @@ export default function FiniteTransactionList({
                 <Loading
                     inline
                     className="marginCenter mV40"
-                    text="loading transactions"
+                    text="Loading transactions"
                 />
             </div>
         );
