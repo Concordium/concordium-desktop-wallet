@@ -56,9 +56,22 @@ enum ActionTypePrefix {
 }
 
 interface LoadTransactionsArgs {
+    /**
+     * If true, activates loading indicator in transaction list
+     */
     showLoading?: boolean;
+    /**
+     * Append to existing transactions or load as new set of transactions.
+     */
     append?: boolean;
+    /**
+     * Number of transactions to load.
+     */
     size?: number;
+    /**
+     * If this is true, loading more transactions will be locked until this finishes.
+     * It will also make the load always run, even though subsequent loads are dispatched before this finishes.
+     */
     force?: boolean;
 }
 
@@ -130,6 +143,7 @@ export const loadTransactions = createAsyncThunk(
 
             return result;
         } finally {
+            // Push release of lock to end of async queue, as this will wait for redux to update with loaded transactions.
             setTimeout(() => release?.());
         }
     }
@@ -138,6 +152,7 @@ export const loadTransactions = createAsyncThunk(
 export const reloadTransactions = createAsyncThunk(
     ActionTypePrefix.Reload,
     async (_, { dispatch, getState, signal }) => {
+        // If a forced load is running, wait for it to finish, to reload with updated length of transactions.
         await forceLock.waitForUnlock();
 
         const state = getState() as RootState;
@@ -245,6 +260,7 @@ async function fetchTransactions(
 }
 
 let latestUpdateRequestId: string | undefined;
+const updateLock = new Mutex();
 
 interface UpdateTransactionsArgs {
     onFirstLoop(): void;
@@ -266,6 +282,8 @@ export const updateTransactions = createAsyncThunk<
         { getState, dispatch, signal, requestId }
     ) => {
         latestUpdateRequestId = requestId;
+        const release = await updateLock.acquire();
+
         const state = getState() as RootState;
         const account = chosenAccountSelector(state);
 
@@ -275,6 +293,7 @@ export const updateTransactions = createAsyncThunk<
 
         const rejectIfInvalid = (reason: string) => {
             if (signal.aborted || latestUpdateRequestId !== requestId) {
+                release();
                 throw new Error(reason);
             }
         };
@@ -295,8 +314,6 @@ export const updateTransactions = createAsyncThunk<
                 onError(errorMessages.unableToReachWalletProxy);
                 throw e;
             }
-
-            rejectIfInvalid('Update aborted before DB');
 
             // Insert the fetched transactions and update the max transaction id
             // in a single transaction.
@@ -339,6 +356,7 @@ export const updateTransactions = createAsyncThunk<
             }
 
             if (maxId === result.newMaxId || result.isFinished) {
+                release();
                 return;
             }
 

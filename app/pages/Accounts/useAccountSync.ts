@@ -66,8 +66,10 @@ export default function useAccountSync(onError: (message: string) => void) {
 
     useEffect(() => {
         (async () => {
-            const isRunning = updateLock.isLocked();
-            if (account?.status !== AccountStatus.Confirmed || isRunning) {
+            if (
+                account?.status !== AccountStatus.Confirmed ||
+                updateLock.isLocked() // If update is already running, we don't need to run again because of new transactions (accountInfo.accountAmount).
+            ) {
                 return;
             }
 
