@@ -58,6 +58,10 @@
     color: $color-success;
 }
 
+.transactionGroupHeaderPlaceholder {
+    opacity: 0;
+}
+
 .transactionGroupHeader {
     composes: cardPadding;
     height: $thick-blue-separator-height;
