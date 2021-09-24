@@ -22,10 +22,11 @@ import MoreActions from './MoreActions';
 import BuildSchedule from './BuildSchedule';
 import TransactionLog from './TransactionLog';
 import DecryptComponent from '../DecryptComponent';
+import withAccountSync from '../withAccountSync';
 
 const { Master, Detail } = MasterDetailPageLayout;
 
-export default function DetailsPage() {
+export default withAccountSync(function DetailsPage() {
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
     const viewingShielded = useSelector(viewingShieldedSelector);
@@ -76,4 +77,4 @@ export default function DetailsPage() {
             </Detail>
         </AccountPageLayout>
     );
-}
+});
