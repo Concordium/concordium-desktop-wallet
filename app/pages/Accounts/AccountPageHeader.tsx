@@ -7,7 +7,7 @@ import {
 } from '~/features/AccountSlice';
 import { Account, AccountInfo } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
-import { sumToBigInt } from '~/utils/basicHelpers';
+import { sumToBigInt, max } from '~/utils/basicHelpers';
 
 function getUnshieldedAmount(accountsInfo: AccountInfo[]) {
     return sumToBigInt(accountsInfo, (accountInfo) =>
@@ -48,7 +48,7 @@ export default function AccountPageHeader() {
     const totalAmount = getUnshieldedAmount(accountsInfo) + totalShielded;
     const totalLocked = getTotalLocked(accountsInfo);
     const totalStaked = getTotalStaked(accountsInfo);
-    const atDisposal = totalAmount - totalLocked - totalStaked;
+    const atDisposal = totalAmount - max(totalLocked, totalStaked);
     const allDecrypted = isAllDecrypted(accounts);
 
     const hidden = allDecrypted ? null : (

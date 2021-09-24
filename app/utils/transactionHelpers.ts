@@ -44,7 +44,7 @@ import {
 import { toMicroUnits, isValidGTUString, displayAsGTU } from './gtu';
 import { getEncodedSize } from './cborHelper';
 import { maxMemoSize } from '~/constants/externalConstants.json';
-import { isASCII } from './basicHelpers';
+import { isASCII, max } from './basicHelpers';
 
 export async function lookupAddressBookEntry(
     address: string
@@ -572,7 +572,7 @@ export function amountAtDisposal(accountInfo: AccountInfo): bigint {
     const scheduled = accountInfo.accountReleaseSchedule
         ? BigInt(accountInfo.accountReleaseSchedule.total)
         : 0n;
-    return unShielded - scheduled - stakedAmount;
+    return unShielded - max(scheduled, stakedAmount);
 }
 
 export function validateShieldedAmount(
@@ -632,14 +632,6 @@ export function validateFee(
     return undefined;
 }
 
-function amountToStakeAtDisposal(accountInfo: AccountInfo): bigint {
-    const unShielded = BigInt(accountInfo.accountAmount);
-    const scheduled = accountInfo.accountReleaseSchedule
-        ? BigInt(accountInfo.accountReleaseSchedule.total)
-        : 0n;
-    return unShielded - scheduled;
-}
-
 export function validateBakerStake(
     bakerStakeThreshold: bigint | undefined,
     amountToValidate: string,
@@ -657,7 +649,7 @@ export function validateBakerStake(
     }
     if (
         accountInfo &&
-        amountToStakeAtDisposal(accountInfo) < amount + (estimatedFee || 0n)
+        BigInt(accountInfo.accountAmount) < amount + (estimatedFee || 0n)
     ) {
         return 'Insufficient funds';
     }

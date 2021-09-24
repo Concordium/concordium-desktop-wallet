@@ -21,6 +21,7 @@ import {
 import SidedRow from '~/components/SidedRow';
 import AccountName from './AccountName';
 import AccountDefaultButton from './AccountDefaultButton';
+import { max } from '~/utils/basicHelpers';
 
 import styles from './AccountBalanceView.module.scss';
 
@@ -111,8 +112,10 @@ export default function AccountBalanceView(): JSX.Element | null {
             : 0n;
         const amountAtDisposal =
             unShielded -
-            BigInt(accountInfo?.accountReleaseSchedule.total ?? 0) -
-            stakedAmount;
+            max(
+                BigInt(accountInfo?.accountReleaseSchedule.total ?? 0),
+                stakedAmount
+            );
 
         main = (
             <>

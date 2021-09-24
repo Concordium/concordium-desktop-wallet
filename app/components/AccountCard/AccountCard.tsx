@@ -16,6 +16,7 @@ import SidedRow from '~/components/SidedRow';
 import { walletIdSelector } from '~/features/WalletSlice';
 import { findLocalDeployedCredential } from '~/utils/credentialHelper';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
+import { max } from '~/utils/basicHelpers';
 
 import styles from './AccountCard.module.scss';
 
@@ -293,7 +294,7 @@ export default function AccountCard({
             : 0n;
     const accountBaker = accountInfo?.accountBaker;
     const stakedAmount = accountBaker ? BigInt(accountBaker.stakedAmount) : 0n;
-    const amountAtDisposal = unShielded - scheduled - stakedAmount;
+    const amountAtDisposal = unShielded - max(scheduled, stakedAmount);
 
     return (
         <AccountCardView
