@@ -29,10 +29,10 @@ import TransactionListHeader, {
 import TransactionListElement, {
     transactionListElementHeight,
 } from './TransactionListElement';
-
-import styles from './TransactionList.module.scss';
 import { TransactionListProps } from './util';
 import useThunkDispatch from '~/store/useThunkDispatch';
+
+import styles from './TransactionList.module.scss';
 
 type HeaderOrTransaction = string | TransferTransaction;
 
@@ -140,7 +140,14 @@ export default function InfiniteTransactionList({
                                     const item = headersAndTransactions[index];
 
                                     if (isHeader(item)) {
-                                        return null; // Handled in "innerElementType"
+                                        return (
+                                            <span
+                                                className={
+                                                    styles.transactionGroupHeaderPlaceholder
+                                                }
+                                                style={style}
+                                            />
+                                        ); // Handled in "innerElementType"
                                     }
 
                                     return (
