@@ -13,7 +13,7 @@ import { Account, AccountStatus } from '~/utils/types';
 
 const canSelectAccount = ({ status, isInitial }: Account) =>
     status !== AccountStatus.Pending &&
-    !(status === AccountStatus.Rejected && isInitial);
+    (status !== AccountStatus.Rejected || isInitial);
 
 /**
  * Displays the List of local accounts, And allows picking the chosen account.
