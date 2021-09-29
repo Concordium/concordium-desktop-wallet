@@ -9,7 +9,11 @@ import {
 import { setViewingShielded } from '~/features/TransactionSlice';
 import AccountCard from '~/components/AccountCard';
 import CardList from '~/cross-app-components/CardList';
-import { AccountStatus } from '~/utils/types';
+import { Account, AccountStatus } from '~/utils/types';
+
+const canSelectAccount = ({ status, isInitial }: Account) =>
+    status !== AccountStatus.Pending &&
+    !(status === AccountStatus.Rejected && isInitial);
 
 /**
  * Displays the List of local accounts, And allows picking the chosen account.
@@ -33,12 +37,12 @@ export default function AccountList() {
                     account={a}
                     accountInfo={accountsInfo[a.address]}
                     onClick={
-                        a.status === AccountStatus.Pending
-                            ? undefined
-                            : (shielded) => {
+                        canSelectAccount(a)
+                            ? (shielded) => {
                                   dispatch(chooseAccount(a.address));
                                   dispatch(setViewingShielded(shielded));
                               }
+                            : undefined
                     }
                 />
             ))}
