@@ -1,5 +1,4 @@
 import React from 'react';
-import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     accountsSelector,
@@ -9,7 +8,6 @@ import {
 } from '~/features/AccountSlice';
 import { setViewingShielded } from '~/features/TransactionSlice';
 import AccountCard from '~/components/AccountCard';
-import routes from '~/constants/routes.json';
 import CardList from '~/cross-app-components/CardList';
 
 /**
@@ -34,7 +32,6 @@ export default function AccountList() {
                     account={a}
                     accountInfo={accountsInfo[a.address]}
                     onClick={(shielded) => {
-                        dispatch(push(routes.ACCOUNTS));
                         dispatch(chooseAccount(a.address));
                         dispatch(setViewingShielded(shielded));
                     }}
