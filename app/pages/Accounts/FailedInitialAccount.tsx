@@ -30,7 +30,7 @@ export default function FailedInitialAccountModal({ account }: Props) {
         <SimpleErrorModal
             disableClose={false}
             header="Identity issuance failed"
-            content={`Unfortunately something went wrong with this account's identity (${account.identityName}). This account is therefore not valid.`}
+            content={`Unfortunately something went wrong with this account's identity (${account.identityName}). This account is therefore not valid. The account will be automatically removed when you delete the related failed identity.`}
             show={modalOpen}
             buttonText="Go to identity"
             onClick={() => {
