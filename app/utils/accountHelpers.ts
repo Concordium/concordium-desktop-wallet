@@ -151,6 +151,13 @@ interface PublicAccountAmounts {
     atDisposal: bigint;
 }
 
+/**
+ * Function to determine the parts of an account's public balance
+ * The only amount, which is not directly extracted from the accountInfo is atDisposal, which
+ * is calculated as "total - max(scheduled, staked)". This is because the staked amount uses the scheduled first.
+ * @param accountInfo the accountInfo to extract the amounts from. If not given, then all balances are set to 0.
+ * @returns an object containing the staked, scheduled, at disposal and total public balance.
+ */
 export function getPublicAccountAmounts(
     accountInfo?: AccountInfo
 ): PublicAccountAmounts {
