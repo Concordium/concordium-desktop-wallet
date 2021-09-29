@@ -21,7 +21,7 @@ import {
 import SidedRow from '~/components/SidedRow';
 import AccountName from './AccountName';
 import AccountDefaultButton from './AccountDefaultButton';
-import { max } from '~/utils/basicHelpers';
+import { getPublicAccountAmounts } from '~/utils/accountHelpers';
 
 import styles from './AccountBalanceView.module.scss';
 
@@ -106,32 +106,25 @@ export default function AccountBalanceView(): JSX.Element | null {
         );
     } else {
         const accountBaker = accountInfo?.accountBaker;
-        const unShielded = BigInt(accountInfo?.accountAmount ?? 0);
-        const stakedAmount = accountBaker
-            ? BigInt(accountBaker.stakedAmount)
-            : 0n;
-        const amountAtDisposal =
-            unShielded -
-            max(
-                BigInt(accountInfo?.accountReleaseSchedule.total ?? 0),
-                stakedAmount
-            );
+        const { total, staked, atDisposal } = getPublicAccountAmounts(
+            accountInfo
+        );
 
         main = (
             <>
                 <h1 className={clsx(styles.blueText, 'mV20')}>
-                    {displayAsGTU(unShielded)}
+                    {displayAsGTU(total)}
                 </h1>
                 <div className={styles.details}>
                     <SidedRow
                         className={clsx(styles.amountRow, 'mT0')}
                         left={<span className="mR5">At disposal:</span>}
-                        right={displayAsGTU(amountAtDisposal)}
+                        right={displayAsGTU(atDisposal)}
                     />
                     <SidedRow
                         className={clsx(styles.amountRow, 'mB0')}
                         left={<span className="mR5">Staked:</span>}
-                        right={displayAsGTU(stakedAmount)}
+                        right={displayAsGTU(staked)}
                     />
                 </div>
                 {accountBaker && (

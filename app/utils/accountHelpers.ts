@@ -8,6 +8,7 @@ import {
     TransactionKindString,
     AccountStatus,
 } from './types';
+import { max } from './basicHelpers';
 
 export const ACCOUNT_NAME_MAX_LENGTH = 25;
 export const ADDRESS_LENGTH = 50;
@@ -141,4 +142,32 @@ export function getActiveBooleanFilters({
     return Object.entries(fullFilter as BooleanFilters)
         .filter(([, v]) => v)
         .map(([kind]) => kind as TransactionKindString);
+}
+
+interface PublicAccountAmounts {
+    total: bigint;
+    staked: bigint;
+    scheduled: bigint;
+    atDisposal: bigint;
+}
+
+export function getPublicAccountAmounts(
+    accountInfo?: AccountInfo
+): PublicAccountAmounts {
+    if (!accountInfo) {
+        return { total: 0n, staked: 0n, scheduled: 0n, atDisposal: 0n };
+    }
+    const total = BigInt(accountInfo.accountAmount);
+    const staked = accountInfo.accountBaker
+        ? BigInt(accountInfo.accountBaker.stakedAmount)
+        : 0n;
+    const scheduled = accountInfo.accountReleaseSchedule
+        ? BigInt(accountInfo.accountReleaseSchedule.total)
+        : 0n;
+    const atDisposal = total - max(scheduled, staked);
+    return { total, staked, scheduled, atDisposal };
+}
+
+export function getAmountAtDisposal(accountInfo: AccountInfo): bigint {
+    return getPublicAccountAmounts(accountInfo).atDisposal;
 }
