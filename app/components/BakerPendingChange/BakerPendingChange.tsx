@@ -18,7 +18,7 @@ export default function PendingChange({ pending }: PendingChangeProps) {
         epochDate(
             pending.epoch,
             status.epochDuration,
-            new Date(status.genesisTime)
+            new Date(status.currentEraGenesisTime)
         )
     );
 
