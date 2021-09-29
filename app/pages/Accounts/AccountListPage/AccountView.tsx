@@ -5,6 +5,7 @@ import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
 } from '~/features/AccountSlice';
+import { viewingShieldedSelector } from '~/features/TransactionSlice';
 import routes from '~/constants/routes.json';
 
 import AccountBalanceView from '../AccountBalanceView';
@@ -13,13 +14,13 @@ import FailedInitialAccount from '../FailedInitialAccount';
 import BasicTransferRoutes from '../BasicTransferRoutes';
 import TransactionsAndAddress from './TransactionsAndAddress/TransactionsAndAddress';
 import DecryptComponent from '../DecryptComponent';
-import { viewingShieldedSelector } from '~/features/TransactionSlice';
+import withAccountSync from '../withAccountSync';
 
 /**
  * Detailed view of the chosen account and its transactions.
  * Also contains controls for sending transfers.
  */
-export default function AccountView() {
+export default withAccountSync(function AccountView() {
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
     const viewingShielded = useSelector(viewingShieldedSelector);
@@ -46,4 +47,4 @@ export default function AccountView() {
             </BasicTransferRoutes>
         </>
     );
-}
+});

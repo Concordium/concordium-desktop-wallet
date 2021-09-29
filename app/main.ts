@@ -158,22 +158,24 @@ app.on('window-all-closed', () => {
     }
 });
 
-const gotTheLock = app.requestSingleInstanceLock();
+const isMac = process.platform === 'darwin';
 
 if (process.env.E2E_BUILD === 'true') {
     // eslint-disable-next-line promise/catch-or-return
     app.whenReady().then(createWindow);
-} else if (!gotTheLock) {
+} else if (!isMac && !app.requestSingleInstanceLock()) {
     app.quit();
 } else {
-    app.on('second-instance', () => {
-        if (mainWindow) {
-            if (mainWindow.isMinimized()) {
-                mainWindow.restore();
+    if (!isMac) {
+        app.on('second-instance', () => {
+            if (mainWindow) {
+                if (mainWindow.isMinimized()) {
+                    mainWindow.restore();
+                }
+                mainWindow.focus();
             }
-            mainWindow.focus();
-        }
-    });
+        });
+    }
 
     app.on('ready', async () => {
         await createWindow();
