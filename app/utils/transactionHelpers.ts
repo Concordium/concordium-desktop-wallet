@@ -45,6 +45,7 @@ import { toMicroUnits, isValidGTUString, displayAsGTU } from './gtu';
 import { getEncodedSize } from './cborHelper';
 import { maxMemoSize } from '~/constants/externalConstants.json';
 import { isASCII } from './basicHelpers';
+import { getAmountAtDisposal } from './accountHelpers';
 
 export async function lookupAddressBookEntry(
     address: string
@@ -564,17 +565,6 @@ export function isSuccessfulTransaction(event: TransactionEvent) {
 export const isExpired = (transaction: Transaction) =>
     getTimeout(transaction) <= getNow(TimeStampUnit.seconds);
 
-export function amountAtDisposal(accountInfo: AccountInfo): bigint {
-    const unShielded = BigInt(accountInfo.accountAmount);
-    const stakedAmount = accountInfo.accountBaker
-        ? BigInt(accountInfo.accountBaker.stakedAmount)
-        : 0n;
-    const scheduled = accountInfo.accountReleaseSchedule
-        ? BigInt(accountInfo.accountReleaseSchedule.total)
-        : 0n;
-    return unShielded - scheduled - stakedAmount;
-}
-
 export function validateShieldedAmount(
     amountToValidate: string,
     account: Account | undefined,
@@ -585,7 +575,10 @@ export function validateShieldedAmount(
         return 'Value is not a valid GTU amount';
     }
     const amountToValidateMicroGTU = toMicroUnits(amountToValidate);
-    if (accountInfo && amountAtDisposal(accountInfo) < (estimatedFee || 0n)) {
+    if (
+        accountInfo &&
+        getAmountAtDisposal(accountInfo) < (estimatedFee || 0n)
+    ) {
         return 'Insufficient public funds to cover fee';
     }
     if (
@@ -611,7 +604,7 @@ export function validateTransferAmount(
     const amountToValidateMicroGTU = toMicroUnits(amountToValidate);
     if (
         accountInfo &&
-        amountAtDisposal(accountInfo) <
+        getAmountAtDisposal(accountInfo) <
             amountToValidateMicroGTU + (estimatedFee || 0n)
     ) {
         return 'Insufficient funds';
@@ -626,18 +619,13 @@ export function validateFee(
     accountInfo: AccountInfo | undefined,
     estimatedFee: bigint | undefined
 ): string | undefined {
-    if (accountInfo && amountAtDisposal(accountInfo) < (estimatedFee || 0n)) {
+    if (
+        accountInfo &&
+        getAmountAtDisposal(accountInfo) < (estimatedFee || 0n)
+    ) {
         return 'Insufficient funds';
     }
     return undefined;
-}
-
-function amountToStakeAtDisposal(accountInfo: AccountInfo): bigint {
-    const unShielded = BigInt(accountInfo.accountAmount);
-    const scheduled = accountInfo.accountReleaseSchedule
-        ? BigInt(accountInfo.accountReleaseSchedule.total)
-        : 0n;
-    return unShielded - scheduled;
 }
 
 export function validateBakerStake(
@@ -657,7 +645,7 @@ export function validateBakerStake(
     }
     if (
         accountInfo &&
-        amountToStakeAtDisposal(accountInfo) < amount + (estimatedFee || 0n)
+        BigInt(accountInfo.accountAmount) < amount + (estimatedFee || 0n)
     ) {
         return 'Insufficient funds';
     }
