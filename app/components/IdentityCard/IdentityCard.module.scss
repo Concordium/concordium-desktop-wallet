@@ -62,12 +62,33 @@
 
 .failedDetailsLine {
     text-align: left;
+    min-height: 2.5em;
     margin: 0;
     font-size: $font-size-body3;
+}
 
-    &:not(:last-child) {
-        padding-bottom: 10px;
+.failedIdentityBody {
+    word-break: break-word;
+    white-space: break-spaces;
+}
+
+.failedDetailsBodyContainer {
+    position: relative;
+    text-align: left;
+    padding: 10px;
+    background-color: $color-off-white;
+    box-shadow: 0 0 0 0.5px $color-grey inset;
+
+    &Copied {
+        background: $color-very-pale-green;
+        box-shadow: 0 0 0 0.5px $color-pale-green inset;
     }
+}
+
+.failedDetailsBodyContainerButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
 }
 
 .form,
