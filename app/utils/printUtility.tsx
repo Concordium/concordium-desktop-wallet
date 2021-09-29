@@ -172,7 +172,14 @@ export const displayStatus = (status: MultiSignatureTransactionStatus) => (
 export const displayMemo = (memo: string) => (
     <tr>
         <td>Memo</td>
-        <td>{memo}</td>
+        <td
+            style={{
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+            }}
+        >
+            {memo}
+        </td>
     </tr>
 );
 
