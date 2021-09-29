@@ -10,8 +10,8 @@ import { collapseFraction } from '~/utils/basicHelpers';
 import {
     createScheduledTransferWithMemoTransaction,
     createScheduledTransferTransaction,
-    amountAtDisposal,
 } from '~/utils/transactionHelpers';
+import { getAmountAtDisposal } from '~/utils/accountHelpers';
 import RegularInterval from '~/components/BuildSchedule/BuildRegularInterval';
 import ExplicitSchedule from '~/components/BuildSchedule/BuildExplicitSchedule';
 import { BuildScheduleDefaults } from '~/components/BuildSchedule/util';
@@ -82,7 +82,7 @@ export default function BuildSchedule({ location }: Props) {
             return;
         }
 
-        const atDisposal = amountAtDisposal(accountInfo);
+        const atDisposal = getAmountAtDisposal(accountInfo);
         if (
             estimatedFee &&
             atDisposal < BigInt(amount) + collapseFraction(estimatedFee)

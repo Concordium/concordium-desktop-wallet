@@ -35,12 +35,12 @@ import {
     confirmedAccountsSelector,
     accountInfoSelector,
 } from '~/features/AccountSlice';
-import { amountAtDisposal, validateMemo } from '~/utils/transactionHelpers';
+import { validateMemo } from '~/utils/transactionHelpers';
 import { collapseFraction } from '~/utils/basicHelpers';
 import { toMicroUnits, displayAsGTU } from '~/utils/gtu';
 import { useAsyncMemo } from '~/utils/hooks';
 import { nodeSupportsMemo } from '~/node/nodeHelpers';
-import { isMultiSig } from '~/utils/accountHelpers';
+import { isMultiSig, getAmountAtDisposal } from '~/utils/accountHelpers';
 
 import styles from './CreateTransferProposal.module.scss';
 import UpsertAddress from '~/components/UpsertAddress';
@@ -146,7 +146,7 @@ function CreateTransferProposal({
     const accountInfo = useSelector(accountInfoSelector(account));
 
     useEffect(() => {
-        const atDisposal = accountInfo ? amountAtDisposal(accountInfo) : 0n;
+        const atDisposal = accountInfo ? getAmountAtDisposal(accountInfo) : 0n;
         if (
             estimatedFee &&
             amount &&
