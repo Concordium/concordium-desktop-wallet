@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
+import {
+    Route,
+    Switch,
+    useRouteMatch,
+    useLocation,
+    Redirect,
+} from 'react-router';
 import { push } from 'connected-react-router';
 import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
@@ -15,7 +21,6 @@ import {
 } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
 import { toMicroUnits } from '~/utils/gtu';
-import PickAmount from './PickAmount';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
 import SignTransactionColumn from '../SignTransactionProposal/SignTransaction';
@@ -24,10 +29,7 @@ import { ensureChainData, ChainData } from '../common/withChainData';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 
-import {
-    createAddBakerTransaction,
-    validateBakerStake,
-} from '~/utils/transactionHelpers';
+import { createAddBakerTransaction } from '~/utils/transactionHelpers';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import routes from '~/constants/routes.json';
 import saveFile from '~/utils/FileHelper';
@@ -42,7 +44,6 @@ import {
     createMultisignatureTransaction,
 } from './SignTransaction';
 import { addProposal } from '~/features/MultiSignatureSlice';
-import ButtonGroup from '~/components/ButtonGroup';
 import AddBakerProposalDetails from './proposal-details/AddBakerProposalDetails';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import LoadingComponent from './LoadingComponent';
@@ -52,6 +53,7 @@ import {
 } from '~/utils/accountRouterHelpers';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
+import AddBakerDetailsForm from '~/components/AddBakerDetailsForm';
 
 const pageTitle = 'Multi Signature Transactions | Add Baker';
 
@@ -252,74 +254,31 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                     </Route>
 
                     <Route path={`${path}/${BakerSubRoutes.stake}`}>
-                        <Columns.Column
-                            header="Stake"
-                            className={styles.stretchColumn}
-                        >
-                            <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
-                                    <p className="mT0">
-                                        To add a baker you must choose an amount
-                                        to stake on the account. The staked
-                                        amount will be part of the balance, but
-                                        while staked the amount is unavailable
-                                        for transactions.
-                                    </p>
-                                    <PickAmount
-                                        amount={stake}
-                                        account={account}
-                                        estimatedFee={estimatedFee}
-                                        validateAmount={(...args) =>
-                                            validateBakerStake(
-                                                minimumThresholdForBaking,
-                                                ...args
-                                            )
-                                        }
-                                        setAmount={(gtuString) =>
-                                            setStake(gtuString)
-                                        }
-                                    />
-                                    <p>
-                                        By default all baker rewards are added
-                                        to the staked amount. This can be
-                                        disabled below.
-                                    </p>
-                                    <ButtonGroup
-                                        title="Enable restake earnings"
-                                        name="restake"
-                                        buttons={[
-                                            {
-                                                label: 'Yes, restake',
-                                                value: true,
-                                            },
-                                            {
-                                                label: 'No, don’t restake',
-                                                value: false,
-                                            },
-                                        ]}
-                                        isSelected={({ value }) =>
-                                            value === restakeEnabled
-                                        }
-                                        onClick={({ value }) =>
-                                            setRestakeEnabled(value)
-                                        }
-                                    />
-                                </div>
-                                <Button
-                                    className="mT40"
-                                    disabled={stake === undefined}
-                                    onClick={() => {
+                        {!account ? (
+                            <Redirect to={path} />
+                        ) : (
+                            <Columns.Column
+                                header="Stake"
+                                className={styles.stretchColumn}
+                            >
+                                <AddBakerDetailsForm
+                                    className={styles.columnContent}
+                                    minimumStake={minimumThresholdForBaking}
+                                    showAccountCard
+                                    account={account}
+                                    estimatedFee={estimatedFee}
+                                    onSubmit={(values) => {
+                                        setStake(values.stake);
+                                        setRestakeEnabled(values.restake);
                                         dispatch(
                                             push(
                                                 `${url}/${BakerSubRoutes.expiry}`
                                             )
                                         );
                                     }}
-                                >
-                                    Continue
-                                </Button>
-                            </div>
-                        </Columns.Column>
+                                />
+                            </Columns.Column>
+                        )}
                     </Route>
 
                     <Route path={`${path}/${BakerSubRoutes.expiry}`}>

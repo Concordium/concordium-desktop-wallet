@@ -257,7 +257,7 @@ export default function SubmitTransfer({ location }: Props) {
     return (
         <PageLayout>
             <PageLayout.Header>
-                <h1>Accounts | Submit Transfer</h1>
+                <h1>Accounts | Submit Transaction</h1>
             </PageLayout.Header>
             <PageLayout.Container
                 closeRoute={cancelled}
@@ -266,8 +266,8 @@ export default function SubmitTransfer({ location }: Props) {
             >
                 <SimpleErrorModal
                     show={rejected}
-                    header="Transfer rejected"
-                    content="Your transfer was rejected by the node."
+                    header="Transaction rejected"
+                    content="Your transaction was rejected by the node."
                     onClick={() => setRejected(false)}
                 />
                 <div className={styles.grid}>
