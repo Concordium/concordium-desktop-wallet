@@ -46,6 +46,7 @@ export default function PickMemo({
                 onChange={onMemoChange}
                 onFocus={() => setFocused(true)}
                 placeholder="You can add a memo here"
+                isInvalid={Boolean(error)}
             />
             <MemoWarning
                 open={focused && !shownMemoWarning}
