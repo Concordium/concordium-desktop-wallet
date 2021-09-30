@@ -167,7 +167,7 @@ export function useCalcBakerStakeCooldownUntil() {
     const {
         chainParameters,
     } = lastFinalizedBlockSummary.lastFinalizedBlockSummary.updates;
-    const genesisTime = new Date(consensusStatus.genesisTime);
+    const genesisTime = new Date(consensusStatus.currentEraGenesisTime);
     const currentEpochIndex = getEpochIndexAt(
         now,
         consensusStatus.epochDuration,

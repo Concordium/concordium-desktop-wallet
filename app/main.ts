@@ -12,7 +12,7 @@ import 'regenerator-runtime/runtime';
 import path from 'path';
 import { app, BrowserView, BrowserWindow } from 'electron';
 import ipcRendererCommands from './constants/ipcRendererCommands.json';
-import { createMenu } from './main/menu';
+import { createMenu, addContextMenu } from './main/menu';
 import initializeIpcHandlers from './main/ipcHandlers';
 import initAutoUpdate from './main/autoUpdate';
 
@@ -142,6 +142,8 @@ const createWindow = async () => {
     });
 
     browserView = new BrowserView();
+
+    addContextMenu(mainWindow);
 
     initializeIpcHandlers(mainWindow, printWindow, browserView);
 
