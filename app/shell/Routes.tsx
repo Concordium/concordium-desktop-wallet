@@ -13,7 +13,7 @@ import PerformImport from '../pages/exportImport/PerformImport';
 import SubmitTransfer from '../pages/Accounts/SubmitTransfer';
 import GenerateCredential from '../pages/GenerateCredential/GenerateCredentialPage';
 import ShowAccountAddress from '~/pages/Accounts/ShowAccountAddressFull';
-import AccountReport from '~/pages/Accounts/AccountReport';
+import AccountReport from '~/pages/Accounts/AccountDetailsPage/AccountReport';
 import genesisAccount from '../pages/GenesisAccount/GenesisAccount';
 import TermsPage from '../pages/TermsPage';
 import DefaultPage from '~/pages/Home/DefaultPage';

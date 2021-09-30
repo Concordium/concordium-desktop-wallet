@@ -15,9 +15,9 @@ import AccountPageLayout from '../AccountPageLayout';
 import AccountViewActions from '../AccountViewActions';
 import BasicTransferRoutes from '../BasicTransferRoutes';
 import ShowAccountAddress from '../ShowAccountAddress';
-import ShowReleaseSchedule from '../ShowReleaseSchedule';
-import ScheduleTransfer from '../ScheduleTransfer';
-import CredentialInformation from '../CredentialInformation';
+import ShowReleaseSchedule from './ShowReleaseSchedule';
+import ScheduleTransfer from './ScheduleTransfer';
+import CredentialInformation from './CredentialInformation';
 import MoreActions from './MoreActions';
 import BuildSchedule from './BuildSchedule';
 import TransactionLog from './TransactionLog';
@@ -66,6 +66,23 @@ export default withAccountSync(function DetailsPage() {
                             accountInfo={accountInfo}
                         />
                     </Route>
+                    <Route path={routes.ACCOUNTS_ADD_BAKER}>Add baker</Route>
+                    <Route path={routes.ACCOUNTS_REMOVE_BAKER}>
+                        Remove baker
+                    </Route>
+                    <Route path={routes.ACCOUNTS_EXPORT_BAKER_KEYS}>
+                        Export baker keys
+                    </Route>
+                    <Route path={routes.ACCOUNTS_UPDATE_BAKER_KEYS}>
+                        Update baker keys
+                    </Route>
+                    <Route path={routes.ACCOUNTS_UPDATE_BAKER_STAKE}>
+                        Update baker stake
+                    </Route>
+                    <Route path={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}>
+                        Update baker restake earnings
+                    </Route>
+
                     <Route path={routes.ACCOUNTS}>
                         {viewingShielded && !account.allDecrypted ? (
                             <DecryptComponent account={account} />

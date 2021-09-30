@@ -22,9 +22,9 @@ import {
     getNoteForOwnCredential,
 } from '~/utils/credentialHelper';
 import { identitiesSelector } from '~/features/IdentitySlice';
+import DisplayIdentityAttributes from './DisplayIdentityAttributes';
 
 import styles from './CredentialInformation.module.scss';
-import DisplayIdentityAttributes from '../DisplayIdentityAttributes';
 
 interface CredentialOfAccount
     extends Omit<CredentialDeploymentInformation, 'regId'> {
