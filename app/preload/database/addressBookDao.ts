@@ -47,6 +47,18 @@ async function findEntries(
         .then((e) => e.map(sanitizeAddressBookEntry));
 }
 
+export async function getEntryName(address: string) {
+    const entry = await (await knex())
+        .select<AddressBookEntry>()
+        .table(addressBookTable)
+        .where({ address })
+        .first();
+    if (entry) {
+        return entry.name;
+    }
+    return undefined;
+}
+
 const exposedMethods: AddressBookMethods = {
     getAll: getAddressBook,
     insert: insertEntry,

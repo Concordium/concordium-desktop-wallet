@@ -50,6 +50,26 @@ export default async function saveFile(
     return window.files.saveFile(saveFileDialog.filePath, data);
 }
 
+export async function chooseFileDestination(
+    opts: Electron.SaveDialogOptions
+): Promise<string | undefined> {
+    const saveFileDialog: Electron.SaveDialogReturnValue = await window.files.saveFileDialog(
+        opts
+    );
+
+    if (saveFileDialog.canceled) {
+        return undefined;
+    }
+
+    if (!saveFileDialog.filePath) {
+        return Promise.reject(
+            new Error('No file path was selected by the user.')
+        );
+    }
+
+    return saveFileDialog.filePath;
+}
+
 /**
  * Saves the given data to the directory selected by the user.
  * @param data the string or buffer to save to a file

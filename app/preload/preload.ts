@@ -30,6 +30,7 @@ import initializeDatabaseSettingsMethods from './database/settingsDao';
 import initializeDatabaseTransactionsMethods from './database/transactionsDao';
 import initializeDatabaseWalletMethods from './database/walletDao';
 import autoUpdateMethods from './autoUpdate';
+import accountReportMethods from './accountReport';
 
 import ipcCommands from '~/constants/ipcCommands.json';
 
@@ -59,6 +60,7 @@ const Exposed: EqualRecord<WindowFunctions> = {
     removeAllListeners: 'removeAllListeners',
     view: 'view',
     autoUpdate: 'autoUpdate',
+    accountReport: 'accountReport',
 };
 
 const eventEmitter = new EventEmitter();
@@ -141,3 +143,4 @@ const databaseMethods: Database = {
 
 contextBridge.exposeInMainWorld(Exposed.database, databaseMethods);
 contextBridge.exposeInMainWorld(Exposed.autoUpdate, autoUpdateMethods);
+contextBridge.exposeInMainWorld(Exposed.accountReport, accountReportMethods);

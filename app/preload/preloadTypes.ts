@@ -343,6 +343,14 @@ export interface AutoUpdateMethods {
     quitAndInstall(): void;
 }
 
+export interface AccountReportMethods {
+    single: (
+        fileName: string,
+        account: Account,
+        filters: TransactionFilter
+    ) => Promise<boolean>;
+}
+
 export interface WindowFunctions {
     addListener: Listen;
     removeListener: Listen;
@@ -359,4 +367,5 @@ export interface WindowFunctions {
     openUrl: (href: string) => any;
     removeAllListeners: (channel: string) => void;
     autoUpdate: AutoUpdateMethods;
+    accountReport: AccountReportMethods;
 }

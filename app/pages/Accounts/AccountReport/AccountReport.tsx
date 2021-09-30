@@ -14,7 +14,7 @@ import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
 import type { SaveFileData } from '~/preload/preloadTypes';
-import saveFile from '~/utils/FileHelper';
+import { chooseFileDestination } from '~/utils/FileHelper';
 import DisplayAddress from '~/components/DisplayAddress';
 import TransactionFilters, {
     TransactionFiltersRef,
@@ -51,6 +51,8 @@ export default function AccountReport({ location }: Props) {
         location?.state ? [location?.state.account] : []
     );
     const [adding, setAdding] = useState(false);
+    const [makingReport, setMakingReport] = useState(false);
+
     const filtersRef = useRef<TransactionFiltersRef>(null);
 
     function promptDecrypt(account: Account) {
@@ -94,16 +96,20 @@ export default function AccountReport({ location }: Props) {
 
             try {
                 if (accountsLength === 1) {
-                    return saveFile(
-                        await getAccountCSV(accountsToReport[0], filters),
-                        {
-                            title: 'Save Account Report',
-                            defaultPath: `${accountsToReport[0].name}.csv`,
-                            filters: [{ name: 'csv', extensions: ['csv'] }],
-                        }
+                    const fileName = await chooseFileDestination({
+                        title: 'Save Account Report',
+                        defaultPath: `${accountsToReport[0].name}.csv`,
+                        filters: [{ name: 'csv', extensions: ['csv'] }],
+                    });
+                    if (!fileName) {
+                        return false;
+                    }
+                    return window.accountReport.single(
+                        fileName,
+                        accountsToReport[0],
+                        filters
                     );
                 }
-
                 const filesToZip: SaveFileData[] = [];
                 for (let i = 0; i < accountsLength; i += 1) {
                     const account = accountsToReport[i];
@@ -256,12 +262,21 @@ export default function AccountReport({ location }: Props) {
                                         </div>
                                         <Button
                                             className={styles.makeReportButton}
-                                            disabled={accounts.length === 0}
-                                            onClick={() =>
-                                                filtersRef.current?.submit(
-                                                    makeReport
-                                                )
+                                            disabled={
+                                                accounts.length === 0 ||
+                                                makingReport
                                             }
+                                            onClick={() => {
+                                                setMakingReport(true);
+                                                filtersRef.current?.submit(
+                                                    (f) =>
+                                                        makeReport(f).then(() =>
+                                                            setMakingReport(
+                                                                false
+                                                            )
+                                                        )
+                                                );
+                                            }}
                                         >
                                             Make Account Report
                                         </Button>
