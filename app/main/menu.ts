@@ -5,6 +5,7 @@ import {
     shell,
     dialog,
     app,
+    MenuItem,
 } from 'electron';
 import { licenseNotices, supportForum } from '~/constants/urls.json';
 import { openRoute } from '~/constants/ipcRendererCommands.json';
@@ -80,4 +81,50 @@ export function createMenu(window: BrowserWindow) {
 
     const menu = Menu.buildFromTemplate(template);
     Menu.setApplicationMenu(menu);
+}
+
+export function addContextMenu(window: BrowserWindow) {
+    window.webContents.on('context-menu', (_, params) => {
+        const menu = Menu.buildFromTemplate([
+            { label: 'Cut', role: 'cut', enabled: params.editFlags.canCut },
+            { label: 'Copy', role: 'copy', enabled: params.editFlags.canCopy },
+            {
+                label: 'Paste',
+                role: 'paste',
+                enabled: params.editFlags.canPaste,
+            },
+        ]);
+
+        if (params.dictionarySuggestions.length > 0) {
+            menu.append(new MenuItem({ type: 'separator' }));
+        }
+
+        // Add each spelling suggestion
+        for (const suggestion of params.dictionarySuggestions) {
+            menu.append(
+                new MenuItem({
+                    label: suggestion,
+                    click: () =>
+                        window.webContents.replaceMisspelling(suggestion),
+                })
+            );
+        }
+
+        // Allow users to add the misspelled word to the dictionary
+        if (params.misspelledWord) {
+            menu.append(new MenuItem({ type: 'separator' }));
+
+            menu.append(
+                new MenuItem({
+                    label: 'Add to dictionary',
+                    click: () =>
+                        window.webContents.session.addWordToSpellCheckerDictionary(
+                            params.misspelledWord
+                        ),
+                })
+            );
+        }
+
+        menu.popup();
+    });
 }
