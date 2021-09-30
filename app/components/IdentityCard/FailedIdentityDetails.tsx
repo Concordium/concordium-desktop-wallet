@@ -14,6 +14,20 @@ interface FailedIdentityDetailsProps {
     identity: Identity;
 }
 
+function getOS() {
+    const { platform } = window;
+    switch (platform.toLowerCase()) {
+        case 'win32':
+            return 'Windows';
+        case 'darwin':
+            return 'MacOs';
+        case 'linux':
+            return 'Linux';
+        default:
+            return platform;
+    }
+}
+
 export default function FailedIdentityDetails({
     identity,
 }: FailedIdentityDetailsProps) {
@@ -32,7 +46,7 @@ Desktop Wallet version:
 v${pkg.version}
 
 Operating system:
-${window.platform}`;
+${getOS()}`;
 
     const [copied, setCopied] = useTimeoutState(false, 2000);
 
