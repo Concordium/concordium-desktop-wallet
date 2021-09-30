@@ -358,6 +358,6 @@ export interface WindowFunctions {
     writeImageToClipboard: (dataUrl: string) => void;
     openUrl: (href: string) => any;
     removeAllListeners: (channel: string) => void;
-    platform: string;
+    platform: NodeJS.Platform;
     autoUpdate: AutoUpdateMethods;
 }
