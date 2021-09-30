@@ -55,6 +55,11 @@
     margin-bottom: -20px;
 }
 
+.failedDetails {
+    composes: details;
+    margin-top: -100px;
+}
+
 .detailsRow {
     padding: 13px;
     border-top: 1px solid $color-grey;

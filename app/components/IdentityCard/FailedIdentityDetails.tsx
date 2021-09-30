@@ -37,7 +37,7 @@ ${window.platform}`;
     const [copied, setCopied] = useTimeoutState(false, 2000);
 
     return (
-        <div className={clsx('body3 p20', styles.details)}>
+        <div className={clsx('body3 p20', styles.failedDetails)}>
             <p className="textError textCenter">Identity issuance failed.</p>
             <p className={clsx(styles.failedDetailsLine, 'pV10')}>
                 For more information and support, you can contact Notabene (and
