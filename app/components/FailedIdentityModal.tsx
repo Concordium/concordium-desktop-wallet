@@ -39,7 +39,7 @@ export default function FailedIdentityModal({
         <ChoiceModal
             disableClose
             title="The identity and initial account creation failed"
-            description={`Unfortunately something went wrong with your new identity (${identityName}) and initial account (${initialAccountName}). You can either go back and try again, or try again later. The identity and initial account can removed in the identity view.`}
+            description={`Unfortunately something went wrong with your new identity (${identityName}) and initial account (${initialAccountName}). You can either go back and try again, or try again later. The identity can be removed by deleting the identity card in the identity view. This will automatically delete the related initial account as well.`}
             open={modalOpen}
             actions={[
                 {

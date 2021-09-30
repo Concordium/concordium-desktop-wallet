@@ -34,6 +34,8 @@ export interface ConsensusStatus {
     finalizationPeriodEMSD: number;
     genesisBlock: string;
     genesisTime: string;
+    currentEraGenesisBlock: string;
+    currentEraGenesisTime: string;
     lastFinalizedBlock: string;
     lastFinalizedBlockHeight: number;
     lastFinalizedTime: string | null;
