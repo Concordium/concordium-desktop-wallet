@@ -348,7 +348,13 @@ export interface AccountReportMethods {
         fileName: string,
         account: Account,
         filters: TransactionFilter
-    ) => Promise<boolean>;
+    ) => Promise<void>;
+    multiple: (
+        fileName: string,
+        accounts: Account[],
+        filters: TransactionFilter
+    ) => Promise<void>;
+    abort: () => void;
 }
 
 export interface WindowFunctions {

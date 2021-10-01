@@ -1,4 +1,6 @@
 import fs from 'fs';
+import archiver from 'archiver';
+import { PassThrough, Writable } from 'stream';
 import {
     Account,
     TransferTransaction,
@@ -13,6 +15,8 @@ import transactionKindNames from '~/constants/transactionKindNames.json';
 import transactionMethods from './database/transactionsDao';
 import { AccountReportMethods } from './preloadTypes';
 import { getActiveBooleanFilters } from '~/utils/accountHelpers';
+import { isShieldedBalanceTransaction } from '~/utils/transactionHelpers';
+import AbortController from '~/utils/AbortController';
 
 function calculatePublicBalanceChange(
     transaction: TransferTransaction,
@@ -40,23 +44,6 @@ function calculatePublicBalanceChange(
     return (
         -BigInt(transaction.subtotal) - BigInt(transaction.cost || 0)
     ).toString();
-}
-
-/**
- * Determine whether the transaction affects shielded balance.
- */
-function isShieldedBalanceTransaction(
-    transaction: Partial<TransferTransaction>
-) {
-    switch (transaction.transactionKind) {
-        case TransactionKindString.EncryptedAmountTransfer:
-        case TransactionKindString.EncryptedAmountTransferWithMemo:
-        case TransactionKindString.TransferToEncrypted:
-        case TransactionKindString.TransferToPublic:
-            return true;
-        default:
-            return false;
-    }
 }
 
 function calculateShieldedBalanceChange(
@@ -132,24 +119,37 @@ function toCSV(elements: string[][]): string {
     return `${elements.map((element) => element.join(',')).join('\n')}`;
 }
 
-async function streamToFile(
-    fileName: string,
+/**
+ * Streams the given account's transactions into the given writable, csv formatted.
+ * @param stream a Writable, which the transactions are written to.
+ * @param account account from which transactions are selected.
+ */
+async function streamTransactions(
+    stream: Writable,
     account: Account,
-    filteredTypes: TransactionKindString[] = [],
-    fromDate?: Date,
-    startToDate?: Date
+    filter: TransactionFilter,
+    abortController: AbortController
 ) {
     const limit = 10000;
-    let toDate = startToDate;
+    const filteredTypes = getActiveBooleanFilters(filter);
+
+    const fromDate = filter.fromDate ? new Date(filter.fromDate) : undefined;
+    let toDate = filter.toDate ? new Date(filter.toDate) : undefined;
+
     let startId = '';
     let hasMore = true;
-    const stream = fs.createWriteStream(fileName);
+
     stream.write(toCSV([exportedFields.map(getLabel)]));
+    stream.write('\n');
 
     const idReducer = (acc: bigint, t: TransferTransaction) =>
         acc === 0n || BigInt(t.id) < acc ? BigInt(t.id) : acc;
 
     while (hasMore) {
+        if (abortController.isAborted) {
+            return;
+        }
+
         const {
             transactions,
             more,
@@ -177,29 +177,78 @@ async function streamToFile(
         );
         stream.write(asCSV);
     }
-    stream.end();
 }
 
-const exposedMethods: AccountReportMethods = {
-    single: async (
-        fileName: string,
-        account: Account,
-        filter: TransactionFilter
-    ) => {
-        const { fromDate, toDate } = filter;
-        try {
-            await streamToFile(
-                fileName,
-                account,
-                getActiveBooleanFilters(filter),
-                fromDate ? new Date(fromDate) : undefined,
-                toDate ? new Date(toDate) : undefined
-            );
-            return true;
-        } catch (e) {
-            return false;
+/**
+ * Builds an account report at the given filename.
+ */
+async function buildAccountReportForSingleAccount(
+    fileName: string,
+    account: Account,
+    filter: TransactionFilter,
+    abortController: AbortController
+) {
+    abortController.start();
+
+    const stream = fs.createWriteStream(fileName);
+    const finishedWriting = new Promise<void>((resolve) =>
+        stream.once('finish', resolve)
+    );
+    await streamTransactions(stream, account, filter, abortController);
+    stream.end();
+    abortController.finish();
+    return finishedWriting;
+}
+
+/**
+ * Builds a zip archive containing account reports, for each given account, at the given filename.
+ */
+async function buildAccountReportForMultipleAccounts(
+    fileName: string,
+    accounts: Account[],
+    filter: TransactionFilter,
+    abortController: AbortController
+) {
+    abortController.start();
+
+    // Setup zip archive builder:
+    const stream = fs.createWriteStream(fileName);
+    const archive = archiver('zip', { zlib: { level: 9 } });
+    archive.pipe(stream);
+
+    for (const account of accounts) {
+        // setup stream to add report for current account
+        const middleMan = new PassThrough();
+        const name = `${account.name}.csv`;
+        archive.append(middleMan, { name });
+
+        // build report
+        await streamTransactions(middleMan, account, filter, abortController);
+        middleMan.end();
+
+        if (abortController.isAborted) {
+            archive.abort();
+            break;
         }
-    },
+    }
+
+    // Wait for stream to be done writing
+    const finishedWriting = new Promise<void>((resolve) =>
+        stream.once('finish', resolve)
+    );
+    archive.finalize();
+    abortController.finish();
+    return finishedWriting;
+}
+
+const abortController = new AbortController();
+
+const exposedMethods: AccountReportMethods = {
+    single: (...params) =>
+        buildAccountReportForSingleAccount(...params, abortController),
+    multiple: (...params) =>
+        buildAccountReportForMultipleAccounts(...params, abortController),
+    abort: () => abortController.abort(),
 };
 
 export default exposedMethods;

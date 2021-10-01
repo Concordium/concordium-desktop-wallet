@@ -29,7 +29,11 @@ import {
     IncomingTransaction,
     Account,
 } from '../utils/types';
-import { isSuccessfulTransaction } from '../utils/transactionHelpers';
+import {
+    isSuccessfulTransaction,
+    isShieldedBalanceTransaction,
+    isUnshieldedBalanceTransaction,
+} from '../utils/transactionHelpers';
 import {
     convertIncomingTransaction,
     convertAccountTransaction,
@@ -173,23 +177,6 @@ export const reloadTransactions = createAsyncThunk(
         await load;
     }
 );
-
-/**
- * Determine whether the transaction affects shielded balance.
- */
-export function isShieldedBalanceTransaction(
-    transaction: Partial<TransferTransaction>
-) {
-    switch (transaction.transactionKind) {
-        case TransactionKindString.EncryptedAmountTransfer:
-        case TransactionKindString.EncryptedAmountTransferWithMemo:
-        case TransactionKindString.TransferToEncrypted:
-        case TransactionKindString.TransferToPublic:
-            return true;
-        default:
-            return false;
-    }
-}
 
 /**
  * Fetches a batch of the newest transactions of the given account,
@@ -517,22 +504,6 @@ export async function decryptTransactions(
                 }
             )
         )
-    );
-}
-
-/**
- * Determine whether the transaction affects unshielded balance.
- */
-function isUnshieldedBalanceTransaction(
-    transaction: TransferTransaction,
-    currentAddress: string
-) {
-    return !(
-        [
-            TransactionKindString.EncryptedAmountTransfer,
-            TransactionKindString.EncryptedAmountTransferWithMemo,
-        ].includes(transaction.transactionKind) &&
-        transaction.fromAddress !== currentAddress
     );
 }
 

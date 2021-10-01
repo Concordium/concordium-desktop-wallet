@@ -705,3 +705,36 @@ export function isOutgoingTransaction(
 ) {
     return transaction.fromAddress === accountAddress;
 }
+
+/**
+ * Determine whether the transaction affects unshielded balance.
+ */
+export function isUnshieldedBalanceTransaction(
+    transaction: TransferTransaction,
+    currentAddress: string
+) {
+    return !(
+        [
+            TransactionKindString.EncryptedAmountTransfer,
+            TransactionKindString.EncryptedAmountTransferWithMemo,
+        ].includes(transaction.transactionKind) &&
+        transaction.fromAddress !== currentAddress
+    );
+}
+
+/**
+ * Determine whether the transaction affects shielded balance.
+ */
+export function isShieldedBalanceTransaction(
+    transaction: Partial<TransferTransaction>
+) {
+    switch (transaction.transactionKind) {
+        case TransactionKindString.EncryptedAmountTransfer:
+        case TransactionKindString.EncryptedAmountTransferWithMemo:
+        case TransactionKindString.TransferToEncrypted:
+        case TransactionKindString.TransferToPublic:
+            return true;
+        default:
+            return false;
+    }
+}

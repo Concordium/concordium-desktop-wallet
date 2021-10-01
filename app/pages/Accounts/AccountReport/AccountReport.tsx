@@ -13,13 +13,12 @@ import PickAccount from '~/components/PickAccount';
 import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
-import type { SaveFileData } from '~/preload/preloadTypes';
 import { chooseFileDestination } from '~/utils/FileHelper';
 import DisplayAddress from '~/components/DisplayAddress';
 import TransactionFilters, {
     TransactionFiltersRef,
 } from '~/components/TransactionFilters';
-import { getAccountCSV, containsEncrypted } from './util';
+import { containsEncrypted } from './util';
 import DecryptModal, { DecryptModalInput } from '../DecryptModal';
 
 import styles from './AccountReport.module.scss';
@@ -94,35 +93,44 @@ export default function AccountReport({ location }: Props) {
                 return Promise.resolve();
             }
 
+            const multipleAccounts = accountsLength > 1;
+
+            const opts = multipleAccounts
+                ? {
+                      title: 'Save Account Reports',
+                      defaultPath: 'reports.zip',
+                      filters: [{ name: 'zip', extensions: ['zip'] }],
+                  }
+                : {
+                      title: 'Save Account Report',
+                      defaultPath: `${accountsToReport[0].name}.csv`,
+                      filters: [{ name: 'csv', extensions: ['csv'] }],
+                  };
+
+            const fileName = await chooseFileDestination(opts);
+            if (!fileName) {
+                return false;
+            }
+
             try {
-                if (accountsLength === 1) {
-                    const fileName = await chooseFileDestination({
-                        title: 'Save Account Report',
-                        defaultPath: `${accountsToReport[0].name}.csv`,
-                        filters: [{ name: 'csv', extensions: ['csv'] }],
-                    });
-                    if (!fileName) {
-                        return false;
-                    }
-                    return window.accountReport.single(
+                setMakingReport(true);
+                if (multipleAccounts) {
+                    await window.accountReport.multiple(
+                        fileName,
+                        accountsToReport,
+                        filters
+                    );
+                } else {
+                    await window.accountReport.single(
                         fileName,
                         accountsToReport[0],
                         filters
                     );
                 }
-                const filesToZip: SaveFileData[] = [];
-                for (let i = 0; i < accountsLength; i += 1) {
-                    const account = accountsToReport[i];
-                    const data = await getAccountCSV(account, filters);
-                    filesToZip.push({
-                        filename: `${account.name}.csv`,
-                        data: Buffer.from(data),
-                    });
-                }
-
-                // Send to main thread for saving the files as a single zip file.
-                return window.files.saveZipFileDialog(filesToZip);
+                setMakingReport(false);
+                return true;
             } catch (e) {
+                setMakingReport(false);
                 setShowError({
                     show: true,
                     header: 'Account Report was not saved.',
@@ -154,6 +162,13 @@ export default function AccountReport({ location }: Props) {
                 header={showError.header}
                 content={showError.content}
                 onClick={() => setShowError({ show: false })}
+            />
+            <SimpleErrorModal
+                show={makingReport}
+                header={`Generating Report${accounts.length > 1 ? 's' : ''}`}
+                content="Please wait"
+                buttonText="Abort"
+                onClick={() => window.accountReport.abort()}
             />
             <DecryptModal {...showDecrypt} />
             <PageLayout>
@@ -266,17 +281,11 @@ export default function AccountReport({ location }: Props) {
                                                 accounts.length === 0 ||
                                                 makingReport
                                             }
-                                            onClick={() => {
-                                                setMakingReport(true);
+                                            onClick={() =>
                                                 filtersRef.current?.submit(
-                                                    (f) =>
-                                                        makeReport(f).then(() =>
-                                                            setMakingReport(
-                                                                false
-                                                            )
-                                                        )
-                                                );
-                                            }}
+                                                    makeReport
+                                                )
+                                            }
                                         >
                                             Make Account Report
                                         </Button>

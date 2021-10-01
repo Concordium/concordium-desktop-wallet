@@ -32,20 +32,6 @@ export function onlyDigitsNoLeadingZeroes(value: string): boolean {
     return /^(?:[1-9][0-9]*|0)$/.test(value);
 }
 
-/** Given a list of elements, a function to parse the elements to string array,
- * and the names of the elements' fields, outputs
- * csv string, with the names first, and the values of each element per line.
- */
-export function toCSV(elements: string[][], fieldNames: string[]): string {
-    if (elements.find((element) => element.length !== fieldNames.length)) {
-        throw new Error('invalid formatted input');
-    }
-
-    return `${fieldNames.join(',')}\n${elements
-        .map((element) => element.join(','))
-        .join('\n')}`;
-}
-
 /**
  * Takes an array of elements with an arbitary type  and a function to tranform them to bigints.
  * Return the sum as a bigint.
