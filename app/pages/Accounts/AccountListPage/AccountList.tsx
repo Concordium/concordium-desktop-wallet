@@ -1,5 +1,4 @@
 import React from 'react';
-import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     accountsSelector,
@@ -9,8 +8,12 @@ import {
 } from '~/features/AccountSlice';
 import { setViewingShielded } from '~/features/TransactionSlice';
 import AccountCard from '~/components/AccountCard';
-import routes from '~/constants/routes.json';
 import CardList from '~/cross-app-components/CardList';
+import { Account, AccountStatus } from '~/utils/types';
+
+const canSelectAccount = ({ status, isInitial }: Account) =>
+    status !== AccountStatus.Pending &&
+    (status !== AccountStatus.Rejected || isInitial);
 
 /**
  * Displays the List of local accounts, And allows picking the chosen account.
@@ -33,11 +36,14 @@ export default function AccountList() {
                     active={a.address === chosenAccount?.address}
                     account={a}
                     accountInfo={accountsInfo[a.address]}
-                    onClick={(shielded) => {
-                        dispatch(push(routes.ACCOUNTS));
-                        dispatch(chooseAccount(a.address));
-                        dispatch(setViewingShielded(shielded));
-                    }}
+                    onClick={
+                        canSelectAccount(a)
+                            ? (shielded) => {
+                                  dispatch(chooseAccount(a.address));
+                                  dispatch(setViewingShielded(shielded));
+                              }
+                            : undefined
+                    }
                 />
             ))}
         </CardList>
