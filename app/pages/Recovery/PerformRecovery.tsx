@@ -207,7 +207,7 @@ export default function PerformRecovery({
                     the process now.
                 </p>
                 <p>
-                    if you expected more accounts, you can continue and look for
+                    If you expected more accounts, you can continue and look for
                     more.
                 </p>
             </>
