@@ -61,6 +61,7 @@ const Exposed: EqualRecord<WindowFunctions> = {
     view: 'view',
     autoUpdate: 'autoUpdate',
     accountReport: 'accountReport',
+    platform: 'platform',
 };
 
 const eventEmitter = new EventEmitter();
@@ -111,6 +112,7 @@ contextBridge.exposeInMainWorld(Exposed.printElement, (body: string) =>
 contextBridge.exposeInMainWorld(Exposed.openUrl, (href: string) =>
     ipcRenderer.invoke(ipcCommands.openUrl, href)
 );
+contextBridge.exposeInMainWorld(Exposed.platform, process.platform);
 
 contextBridge.exposeInMainWorld(Exposed.grpc, initializeGrpcMethods);
 contextBridge.exposeInMainWorld(

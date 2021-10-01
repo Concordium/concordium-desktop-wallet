@@ -66,6 +66,7 @@ function calculateShieldedBalanceChange(
             case TransactionKindString.TransferToEncrypted:
                 return transaction.decryptedAmount;
             case TransactionKindString.EncryptedAmountTransfer:
+            case TransactionKindString.EncryptedAmountTransferWithMemo:
                 return isOutgoing
                     ? '-'.concat(transaction.decryptedAmount)
                     : transaction.decryptedAmount;
