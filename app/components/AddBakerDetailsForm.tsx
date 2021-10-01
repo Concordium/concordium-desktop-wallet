@@ -18,6 +18,7 @@ const fieldNames: EqualRecord<AddBakerForm> = {
 };
 
 interface Props extends ClassName {
+    initialData?: Partial<AddBakerForm>;
     showAccountCard?: boolean;
     account: Account;
     estimatedFee: Fraction;
@@ -26,6 +27,7 @@ interface Props extends ClassName {
 }
 
 export default function AddBakerDetailsForm({
+    initialData,
     showAccountCard,
     account,
     estimatedFee,
@@ -50,6 +52,7 @@ export default function AddBakerDetailsForm({
                     <AccountCard account={account} accountInfo={accountInfo} />
                 )}
                 <PickBakerStakeAmount
+                    initial={initialData?.stake}
                     accountInfo={accountInfo}
                     estimatedFee={estimatedFee}
                     fieldName={fieldNames.stake}
@@ -59,7 +62,10 @@ export default function AddBakerDetailsForm({
                     By default all baker rewards are added to the staked amount.
                     This can be disabled below.
                 </p>
-                <PickBakerRestake fieldName={fieldNames.restake} />
+                <PickBakerRestake
+                    initial={initialData?.restake}
+                    fieldName={fieldNames.restake}
+                />
             </div>
             <Form.Submit className="mT50">Continue</Form.Submit>
         </Form>

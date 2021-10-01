@@ -53,10 +53,11 @@ const FormWrapper = ensureExchangeRate(
 );
 
 interface Props {
+    initialData?: AddBakerForm;
     onSubmit(values: AddBakerForm): void;
 }
 
-export default function AddBakerData({ onSubmit }: Props) {
+export default function AddBakerData({ onSubmit, initialData }: Props) {
     const account = useSelector(chosenAccountSelector);
 
     if (!account) {
@@ -66,7 +67,11 @@ export default function AddBakerData({ onSubmit }: Props) {
     return (
         <Card className="textCenter">
             <h3>Add baker</h3>
-            <FormWrapper account={account} onSubmit={onSubmit} />
+            <FormWrapper
+                account={account}
+                onSubmit={onSubmit}
+                initialData={initialData}
+            />
         </Card>
     );
 }

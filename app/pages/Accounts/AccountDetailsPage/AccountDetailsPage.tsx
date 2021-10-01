@@ -67,9 +67,10 @@ export default withAccountSync(function DetailsPage() {
                             accountInfo={accountInfo}
                         />
                     </Route>
-                    <Route path={routes.ACCOUNTS_ADD_BAKER}>
-                        <AddBaker />
-                    </Route>
+                    <Route
+                        path={routes.ACCOUNTS_ADD_BAKER}
+                        component={AddBaker}
+                    />
                     <Route path={routes.ACCOUNTS_REMOVE_BAKER}>
                         Remove baker
                     </Route>

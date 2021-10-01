@@ -4,9 +4,10 @@ import ButtonGroup from './ButtonGroup';
 
 interface Props {
     fieldName: string;
+    initial?: boolean;
 }
 
-export default function PickBakerRestake({ fieldName }: Props) {
+export default function PickBakerRestake({ fieldName, initial = true }: Props) {
     const form = useFormContext();
 
     if (!form) {
@@ -17,7 +18,7 @@ export default function PickBakerRestake({ fieldName }: Props) {
         <Controller
             name={fieldName}
             // eslint-disable-next-line react/jsx-boolean-value
-            defaultValue={true}
+            defaultValue={initial}
             control={form.control}
             render={(f) => (
                 <ButtonGroup

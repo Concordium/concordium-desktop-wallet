@@ -1,4 +1,5 @@
 import { push, replace } from 'connected-react-router';
+import { LocationDescriptorObject } from 'history';
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch } from 'react-router';
@@ -15,7 +16,11 @@ import { SubmitTransferLocationState } from '../../SubmitTransfer/SubmitTransfer
 import GenerateBakerKeys from '../GenerateBakerKeys';
 import AddBakerData from './AddBakerData';
 
-export default function AddBaker() {
+interface Props {
+    location: LocationDescriptorObject<AddBakerForm>;
+}
+
+export default function AddBaker({ location }: Props) {
     const dispatch = useDispatch();
     const account = useSelector(chosenAccountSelector);
     const [bakerData, setBakerData] = useState<AddBakerForm>();
@@ -71,7 +76,7 @@ export default function AddBaker() {
                 throw new Error('No account');
             }
 
-            const transaction = makeTransaction(bakerKeys);
+            const transaction = await makeTransaction(bakerKeys);
 
             const state: SubmitTransferLocationState<AddBakerForm> = {
                 account,
@@ -84,7 +89,7 @@ export default function AddBaker() {
                 },
                 transaction: stringify(transaction),
             };
-            dispatch(replace(routes.SUBMITTRANSFER, state));
+            dispatch(replace({ pathname: routes.SUBMITTRANSFER, state }));
         },
         [dispatch, makeTransaction, bakerData, account]
     );
@@ -95,7 +100,10 @@ export default function AddBaker() {
                 <GenerateBakerKeys onContinue={next} />
             </Route>
             <Route path={routes.ACCOUNTS_ADD_BAKER}>
-                <AddBakerData onSubmit={handleSubmit} />
+                <AddBakerData
+                    onSubmit={handleSubmit}
+                    initialData={location.state}
+                />
             </Route>
         </Switch>
     );

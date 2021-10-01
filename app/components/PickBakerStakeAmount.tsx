@@ -10,6 +10,7 @@ import ErrorMessage from './Form/ErrorMessage';
 import Label from './Label';
 
 interface Props {
+    initial?: string;
     minimumStake: bigint;
     fieldName: string;
     accountInfo?: AccountInfo;
@@ -21,6 +22,7 @@ export default function PickBakerStakeAmount({
     fieldName,
     accountInfo,
     estimatedFee,
+    initial,
 }: Props) {
     const form = useFormContext<{ [key: string]: string }>();
     const validStakeAmount: Validate = useCallback(
@@ -55,7 +57,7 @@ export default function PickBakerStakeAmount({
             <div className="body1">
                 {getGTUSymbol()}{' '}
                 <Form.GtuInput
-                    defaultValue="0.00"
+                    defaultValue={initial}
                     name={fieldName}
                     autoFocus
                     rules={{
