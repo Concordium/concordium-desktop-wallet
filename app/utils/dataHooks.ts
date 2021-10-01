@@ -131,7 +131,7 @@ export function useStakedAmount(accountAddress: string): Amount | undefined {
 
 /** Hook for accessing chain parameters of the last finalized block */
 export function useChainParameters() {
-    const lastFinalizedBlock = useLastFinalizedBlockSummary();
+    const [lastFinalizedBlock] = useLastFinalizedBlockSummary();
     return lastFinalizedBlock?.lastFinalizedBlockSummary.updates
         .chainParameters;
 }
@@ -156,7 +156,7 @@ export function useTransactionExpiryState(
 
 /** Hook for calculating the date of the baking stake cooldown ending, will result in undefined while loading */
 export function useCalcBakerStakeCooldownUntil() {
-    const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
+    const [lastFinalizedBlockSummary] = useLastFinalizedBlockSummary();
     const now = useCurrentTime(60000);
 
     if (lastFinalizedBlockSummary === undefined) {

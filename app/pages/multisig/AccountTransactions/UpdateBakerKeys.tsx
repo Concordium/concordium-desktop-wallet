@@ -31,7 +31,6 @@ import {
 } from '~/utils/dataHooks';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { addProposal } from '~/features/MultiSignatureSlice';
-import { DownloadBakerCredentialsStep } from './AddBaker';
 import UpdateBakerKeysProposalDetails from './proposal-details/UpdateBakerKeysProposalDetails';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
@@ -42,6 +41,7 @@ import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
+import ExportBakerKeys from './ExportBakerKeys';
 
 const pageTitle = 'Multi Signature Transactions | Update Baker Keys';
 
@@ -266,30 +266,26 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                             header="Baker keys"
                             className={styles.stretchColumn}
                         >
-                            {bakerKeys !== undefined &&
-                            account !== undefined ? (
-                                <DownloadBakerCredentialsStep
-                                    accountAddress={account.address}
-                                    bakerKeys={bakerKeys}
-                                    onContinue={() =>
-                                        onCreateTransaction()
-                                            .then(() =>
-                                                dispatch(
-                                                    push(
-                                                        `${url}/${BakerSubRoutes.sign}`
-                                                    )
+                            <ExportBakerKeys
+                                className={styles.columnContent}
+                                accountAddress={account?.address}
+                                bakerKeys={bakerKeys}
+                                onContinue={() =>
+                                    onCreateTransaction()
+                                        .then(() =>
+                                            dispatch(
+                                                push(
+                                                    `${url}/${BakerSubRoutes.sign}`
                                                 )
                                             )
-                                            .catch(() =>
-                                                setError(
-                                                    errorMessages.unableToReachNode
-                                                )
+                                        )
+                                        .catch(() =>
+                                            setError(
+                                                errorMessages.unableToReachNode
                                             )
-                                    }
-                                />
-                            ) : (
-                                <p>Generating keys...</p>
-                            )}
+                                        )
+                                }
+                            />
                         </Columns.Column>
                     </Route>
                     <Route path={`${path}/${BakerSubRoutes.sign}`}>

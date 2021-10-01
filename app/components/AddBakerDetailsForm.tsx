@@ -61,7 +61,7 @@ export default function AddBakerDetailsForm({
                 </p>
                 <PickBakerRestake fieldName={fieldNames.restake} />
             </div>
-            <Form.Submit className="mT40">Continue</Form.Submit>
+            <Form.Submit className="mT50">Continue</Form.Submit>
         </Form>
     );
 }

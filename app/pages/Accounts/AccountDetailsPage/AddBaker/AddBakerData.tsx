@@ -65,7 +65,7 @@ export default function AddBakerData({ onSubmit }: Props) {
 
     return (
         <Card className="textCenter">
-            <h5>Add baker</h5>
+            <h3>Add baker</h3>
             <FormWrapper account={account} onSubmit={onSubmit} />
         </Card>
     );

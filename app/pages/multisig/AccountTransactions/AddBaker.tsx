@@ -32,9 +32,7 @@ import { getNextAccountNonce } from '~/node/nodeRequests';
 import { createAddBakerTransaction } from '~/utils/transactionHelpers';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import routes from '~/constants/routes.json';
-import saveFile from '~/utils/FileHelper';
 import {
-    useAccountInfo,
     useTransactionCostEstimate,
     useTransactionExpiryState,
 } from '~/utils/dataHooks';
@@ -54,6 +52,7 @@ import {
 
 import styles from './MultisignatureAccountTransactions.module.scss';
 import AddBakerDetailsForm from '~/components/AddBakerDetailsForm';
+import ExportBakerKeys from './ExportBakerKeys';
 
 const pageTitle = 'Multi Signature Transactions | Add Baker';
 
@@ -333,30 +332,26 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                             header="Baker keys"
                             className={styles.stretchColumn}
                         >
-                            {bakerKeys !== undefined &&
-                            account !== undefined ? (
-                                <DownloadBakerCredentialsStep
-                                    accountAddress={account.address}
-                                    bakerKeys={bakerKeys}
-                                    onContinue={() =>
-                                        onCreateTransaction()
-                                            .then(() =>
-                                                dispatch(
-                                                    push(
-                                                        `${url}/${BakerSubRoutes.sign}`
-                                                    )
+                            <ExportBakerKeys
+                                className={styles.columnContent}
+                                accountAddress={account?.address}
+                                bakerKeys={bakerKeys}
+                                onContinue={() =>
+                                    onCreateTransaction()
+                                        .then(() =>
+                                            dispatch(
+                                                push(
+                                                    `${url}/${BakerSubRoutes.sign}`
                                                 )
                                             )
-                                            .catch(() =>
-                                                setError(
-                                                    errorMessages.unableToReachNode
-                                                )
+                                        )
+                                        .catch(() =>
+                                            setError(
+                                                errorMessages.unableToReachNode
                                             )
-                                    }
-                                />
-                            ) : (
-                                <p>Generating keys...</p>
-                            )}
+                                        )
+                                }
+                            />
                         </Columns.Column>
                     </Route>
 
@@ -371,67 +366,6 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                 </Switch>
             </Columns>
         </MultiSignatureLayout>
-    );
-}
-
-type DownloadBakerCredentialsStepProps = {
-    accountAddress: string;
-    bakerKeys: BakerKeys;
-    onContinue: () => void;
-};
-
-export function DownloadBakerCredentialsStep({
-    accountAddress,
-    bakerKeys,
-    onContinue,
-}: DownloadBakerCredentialsStepProps) {
-    const accountInfo = useAccountInfo(accountAddress);
-
-    const onExport = async () => {
-        if (accountInfo === undefined) {
-            return;
-        }
-        const fileString = JSON.stringify({
-            bakerId: accountInfo.accountIndex,
-            aggregationSignKey: bakerKeys.aggregationSecret,
-            aggregationVerifyKey: bakerKeys.aggregationPublic,
-            electionPrivateKey: bakerKeys.electionSecret,
-            electionVerifyKey: bakerKeys.electionPublic,
-            signatureSignKey: bakerKeys.signatureSecret,
-            signatureVerifyKey: bakerKeys.signaturePublic,
-        });
-        const success = await saveFile(fileString, {
-            title: 'Save Baker Credentials',
-            defaultPath: 'baker-credentials.json',
-        });
-        if (success) {
-            onContinue();
-        }
-    };
-
-    return (
-        <div className={styles.columnContent}>
-            <div className={styles.flex1}>
-                <p className="mT0">
-                    Your baker keys have been generated, and the public keys can
-                    be seen to the left.
-                </p>
-                <p>
-                    Make sure to export and backup your Baker Credentials, as
-                    this will be the only chance to export them.
-                </p>
-                <p>
-                    Baker credentials are used by the concordium node for baking
-                    and contains private keys, which should only be transferred
-                    on a secure channel.
-                </p>
-                <p>
-                    If the Baker Credentials are lost or compromised, new ones
-                    should be generated by updating Baker Keys.
-                </p>
-            </div>
-            <Button onClick={onExport}>Export Baker Credentials</Button>
-        </div>
     );
 }
 

@@ -63,12 +63,20 @@ export const useTimeoutState = <TValue>(
 
 export const useAsyncMemo = <ReturnType>(
     getResult: () => Promise<ReturnType>,
-    handleError: (e: Error) => void = () => {}
-) => {
+    handleError: (e: Error) => void = () => {},
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    deps?: any[]
+): [ReturnType | undefined, boolean] => {
     const [result, setResult] = useState<ReturnType>();
+    const [isLoading, setIsLoading] = useState(true);
     useEffect(() => {
-        getResult().then(setResult).catch(handleError);
+        setIsLoading(true);
+        // eslint-disable-next-line promise/catch-or-return
+        getResult()
+            .then(setResult)
+            .catch(handleError)
+            .finally(() => setIsLoading(false));
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-    return result;
+    }, deps);
+    return [result, isLoading];
 };

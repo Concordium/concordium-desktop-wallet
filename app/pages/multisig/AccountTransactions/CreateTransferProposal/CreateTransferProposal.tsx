@@ -85,7 +85,7 @@ function CreateTransferProposal({
 }: Props): JSX.Element {
     const dispatch = useDispatch();
 
-    const allowMemo = useAsyncMemo(nodeSupportsMemo);
+    const [allowMemo] = useAsyncMemo(nodeSupportsMemo);
 
     const { pathname, state } = useLocation<State>();
     const accounts = useSelector(confirmedAccountsSelector).filter(isMultiSig);

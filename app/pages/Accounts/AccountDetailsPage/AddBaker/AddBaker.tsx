@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import { Route, Switch } from 'react-router';
 import { AddBakerForm } from '~/components/AddBakerDetailsForm';
 import routes from '~/constants/routes.json';
+import GenerateBakerKeys from '../GenerateBakerKeys';
 import AddBakerData from './AddBakerData';
 
 export default function AddBaker() {
@@ -16,8 +17,8 @@ export default function AddBaker() {
             dispatch(
                 push(
                     routes.ACCOUNTS_EXPORT_BAKER_KEYS.replace(
-                        ':bakerTransferType',
-                        'addBaker'
+                        /^.*:bakerTransferType/,
+                        routes.ACCOUNTS_ADD_BAKER
                     )
                 )
             );
@@ -28,7 +29,7 @@ export default function AddBaker() {
     return (
         <Switch>
             <Route path={routes.ACCOUNTS_EXPORT_BAKER_KEYS}>
-                Export baker keys
+                <GenerateBakerKeys />
             </Route>
             <Route path={routes.ACCOUNTS_ADD_BAKER}>
                 <AddBakerData onSubmit={handleSubmit} />
