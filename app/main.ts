@@ -12,7 +12,7 @@ import 'regenerator-runtime/runtime';
 import path from 'path';
 import { app, BrowserView, BrowserWindow, shell } from 'electron';
 import ipcRendererCommands from './constants/ipcRendererCommands.json';
-import { createMenu } from './main/menu';
+import { createMenu, addContextMenu } from './main/menu';
 import initializeIpcHandlers from './main/ipcHandlers';
 import initAutoUpdate from './main/autoUpdate';
 
@@ -147,6 +147,8 @@ const createWindow = async () => {
         shell.openExternal(url);
         return { action: 'deny' };
     });
+
+    addContextMenu(mainWindow);
 
     initializeIpcHandlers(mainWindow, printWindow, browserView);
 
