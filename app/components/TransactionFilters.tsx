@@ -140,7 +140,9 @@ const getGroupValues = (group: TransactionKindString[], v: boolean) =>
         {} as Partial<TransactionFilter>
     );
 
-const pastDateValidator = allowOptional(pastDate('Date must be before today'));
+const pastDateValidator = allowOptional(
+    pastDate('The time cannot be in the future')
+);
 
 type Callback = (filter: TransactionFilter) => Promise<unknown>;
 
