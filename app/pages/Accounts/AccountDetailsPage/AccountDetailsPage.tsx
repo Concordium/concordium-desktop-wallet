@@ -23,6 +23,7 @@ import BuildSchedule from './BuildSchedule';
 import TransactionLog from './TransactionLog';
 import DecryptComponent from '../DecryptComponent';
 import withAccountSync from '../withAccountSync';
+import AddBaker from './AddBaker';
 
 const { Master, Detail } = MasterDetailPageLayout;
 
@@ -66,12 +67,11 @@ export default withAccountSync(function DetailsPage() {
                             accountInfo={accountInfo}
                         />
                     </Route>
-                    <Route path={routes.ACCOUNTS_ADD_BAKER}>Add baker</Route>
+                    <Route path={routes.ACCOUNTS_ADD_BAKER}>
+                        <AddBaker />
+                    </Route>
                     <Route path={routes.ACCOUNTS_REMOVE_BAKER}>
                         Remove baker
-                    </Route>
-                    <Route path={routes.ACCOUNTS_EXPORT_BAKER_KEYS}>
-                        Export baker keys
                     </Route>
                     <Route path={routes.ACCOUNTS_UPDATE_BAKER_KEYS}>
                         Update baker keys
