@@ -15,6 +15,7 @@ import BasicTransferRoutes from '../BasicTransferRoutes';
 import TransactionsAndAddress from './TransactionsAndAddress';
 import DecryptComponent from '../DecryptComponent';
 import withAccountSync from '../withAccountSync';
+import { AccountStatus } from '~/utils/types';
 
 /**
  * Detailed view of the chosen account and its transactions.
@@ -34,17 +35,24 @@ export default withAccountSync(function AccountView() {
             {account.isInitial && accountInfo === undefined && (
                 <FailedInitialAccount account={account} />
             )}
-            <AccountBalanceView />
-            <AccountViewActions account={account} accountInfo={accountInfo} />
-            <BasicTransferRoutes account={account}>
-                <Route path={routes.ACCOUNTS}>
-                    {viewingShielded && !account.allDecrypted ? (
-                        <DecryptComponent account={account} />
-                    ) : (
-                        <TransactionsAndAddress account={account} />
-                    )}
-                </Route>
-            </BasicTransferRoutes>
+            {account.status === AccountStatus.Confirmed && (
+                <>
+                    <AccountBalanceView />
+                    <AccountViewActions
+                        account={account}
+                        accountInfo={accountInfo}
+                    />
+                    <BasicTransferRoutes account={account}>
+                        <Route path={routes.ACCOUNTS}>
+                            {viewingShielded && !account.allDecrypted ? (
+                                <DecryptComponent account={account} />
+                            ) : (
+                                <TransactionsAndAddress account={account} />
+                            )}
+                        </Route>
+                    </BasicTransferRoutes>
+                </>
+            )}
         </>
     );
 });
