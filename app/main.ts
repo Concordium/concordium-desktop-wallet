@@ -10,7 +10,7 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, BrowserView, BrowserWindow } from 'electron';
+import { app, BrowserView, BrowserWindow, shell } from 'electron';
 import ipcRendererCommands from './constants/ipcRendererCommands.json';
 import { createMenu, addContextMenu } from './main/menu';
 import initializeIpcHandlers from './main/ipcHandlers';
@@ -142,6 +142,11 @@ const createWindow = async () => {
     });
 
     browserView = new BrowserView();
+
+    browserView.webContents.setWindowOpenHandler(({ url }) => {
+        shell.openExternal(url);
+        return { action: 'deny' };
+    });
 
     addContextMenu(mainWindow);
 
