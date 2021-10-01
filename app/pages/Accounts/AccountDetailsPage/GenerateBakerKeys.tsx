@@ -1,15 +1,18 @@
-import { goBack, replace } from 'connected-react-router';
-import React, { useCallback, useState } from 'react';
+import { goBack } from 'connected-react-router';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ExportBakerCredentials from '~/components/ExportBakerCredentials';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import Card from '~/cross-app-components/Card';
 import { chosenAccountSelector } from '~/features/AccountSlice';
 import { useAsyncMemo } from '~/utils/hooks';
-import { generateBakerKeys } from '~/utils/rustInterface';
-import routes from '~/constants/routes.json';
+import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
 
-export default function GenerateBakerKeys() {
+interface Props {
+    onContinue(keys: BakerKeys): void;
+}
+
+export default function GenerateBakerKeys({ onContinue }: Props) {
     const account = useSelector(chosenAccountSelector);
     const dispatch = useDispatch();
     const [error, setError] = useState<string>();
@@ -24,10 +27,6 @@ export default function GenerateBakerKeys() {
         () => setError("Couldn't generate baker keys"),
         [account?.address]
     );
-
-    const next = useCallback(() => dispatch(replace(routes.SUBMITTRANSFER)), [
-        dispatch,
-    ]);
 
     const title = 'Add baker';
 
@@ -47,7 +46,7 @@ export default function GenerateBakerKeys() {
                 <ExportBakerCredentials
                     bakerKeys={keys}
                     accountAddress={account.address}
-                    onContinue={next}
+                    onContinue={() => onContinue(keys)}
                 >
                     <p>
                         Your baker keys have been generated. Make sure to export

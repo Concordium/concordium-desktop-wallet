@@ -48,20 +48,18 @@ import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 
 import styles from './SubmitTransfer.module.scss';
 
-interface Location {
-    pathname: string;
-    state: Record<string, unknown>;
-}
-
-interface State {
+export interface SubmitTransferLocationState<
+    CancelledState = Record<string, unknown>,
+    ConfirmedState = Record<string, unknown>
+> {
     transaction: string;
     account: Account;
-    cancelled: Location;
-    confirmed: Location;
+    cancelled: LocationDescriptorObject<CancelledState>;
+    confirmed: LocationDescriptorObject<ConfirmedState>;
 }
 
 interface Props {
-    location: LocationDescriptorObject<State>;
+    location: LocationDescriptorObject<SubmitTransferLocationState>;
 }
 
 async function attachCompletedPayload(

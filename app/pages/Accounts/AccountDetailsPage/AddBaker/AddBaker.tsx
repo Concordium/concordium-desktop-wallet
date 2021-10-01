@@ -1,15 +1,24 @@
-import { push } from 'connected-react-router';
+import { push, replace } from 'connected-react-router';
 import React, { useCallback, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch } from 'react-router';
 import { AddBakerForm } from '~/components/AddBakerDetailsForm';
 import routes from '~/constants/routes.json';
+import { chosenAccountSelector } from '~/features/AccountSlice';
+import { getNextAccountNonce } from '~/node/nodeRequests';
+import { toMicroUnits } from '~/utils/gtu';
+import { stringify } from '~/utils/JSONHelper';
+import { BakerKeys } from '~/utils/rustInterface';
+import { createAddBakerTransaction } from '~/utils/transactionHelpers';
+import { AddBakerPayload } from '~/utils/types';
+import { SubmitTransferLocationState } from '../../SubmitTransfer/SubmitTransfer';
 import GenerateBakerKeys from '../GenerateBakerKeys';
 import AddBakerData from './AddBakerData';
 
 export default function AddBaker() {
     const dispatch = useDispatch();
-    const [, setBakerData] = useState<AddBakerForm>();
+    const account = useSelector(chosenAccountSelector);
+    const [bakerData, setBakerData] = useState<AddBakerForm>();
 
     const handleSubmit = useCallback(
         (values: AddBakerForm) => {
@@ -26,10 +35,64 @@ export default function AddBaker() {
         [dispatch]
     );
 
+    const makeTransaction = useCallback(
+        async (bakerKeys: BakerKeys) => {
+            if (!account?.address || !bakerData) {
+                return undefined;
+            }
+
+            const { stake, restake } = bakerData;
+
+            const payload: AddBakerPayload = {
+                electionVerifyKey: bakerKeys.electionPublic,
+                signatureVerifyKey: bakerKeys.signaturePublic,
+                aggregationVerifyKey: bakerKeys.aggregationPublic,
+                proofElection: bakerKeys.proofElection,
+                proofSignature: bakerKeys.proofSignature,
+                proofAggregation: bakerKeys.proofAggregation,
+                bakingStake: toMicroUnits(stake),
+                restakeEarnings: restake,
+            };
+
+            const accountNonce = await getNextAccountNonce(account.address);
+
+            return createAddBakerTransaction(
+                account.address,
+                payload,
+                accountNonce.nonce
+            );
+        },
+        [account?.address, bakerData]
+    );
+
+    const next = useCallback(
+        async (bakerKeys: BakerKeys) => {
+            if (!account) {
+                throw new Error('No account');
+            }
+
+            const transaction = makeTransaction(bakerKeys);
+
+            const state: SubmitTransferLocationState<AddBakerForm> = {
+                account,
+                cancelled: {
+                    pathname: routes.ACCOUNTS_ADD_BAKER,
+                    state: bakerData,
+                },
+                confirmed: {
+                    pathname: routes.ACCOUNTS,
+                },
+                transaction: stringify(transaction),
+            };
+            dispatch(replace(routes.SUBMITTRANSFER, state));
+        },
+        [dispatch, makeTransaction, bakerData, account]
+    );
+
     return (
         <Switch>
             <Route path={routes.ACCOUNTS_EXPORT_BAKER_KEYS}>
-                <GenerateBakerKeys />
+                <GenerateBakerKeys onContinue={next} />
             </Route>
             <Route path={routes.ACCOUNTS_ADD_BAKER}>
                 <AddBakerData onSubmit={handleSubmit} />
