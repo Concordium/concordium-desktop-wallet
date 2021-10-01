@@ -1,5 +1,4 @@
 import type { Buffer } from 'buffer/';
-import { findEntries } from '~/database/AddressBookDao';
 import { getTransactionStatus } from '../node/nodeRequests';
 import { getDefaultExpiry, getNow, secondsSinceUnixEpoch } from './timeHelpers';
 import {
@@ -29,7 +28,6 @@ import {
     UpdateBakerKeys,
     UpdateBakerStakePayload,
     UpdateBakerRestakeEarningsPayload,
-    AddressBookEntry,
     UpdateBakerStake,
     UpdateBakerRestakeEarnings,
     TransactionKindString,
@@ -46,21 +44,6 @@ import { getEncodedSize } from './cborHelper';
 import { maxMemoSize } from '~/constants/externalConstants.json';
 import { isASCII } from './basicHelpers';
 import { getAmountAtDisposal } from './accountHelpers';
-
-export async function lookupAddressBookEntry(
-    address: string
-): Promise<AddressBookEntry | undefined> {
-    const entries = await findEntries({ address });
-    return entries[0];
-}
-
-/**
- * Attempts to find the address in the accounts, and then AddressBookEntries
- * If the address is found, return the name, otherwise returns undefined;
- */
-export async function lookupName(address: string): Promise<string | undefined> {
-    return (await lookupAddressBookEntry(address))?.name;
-}
 
 interface CreateAccountTransactionInput<T> {
     fromAddress: string;

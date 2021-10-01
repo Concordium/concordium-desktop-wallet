@@ -53,16 +53,10 @@ export type GRPC = {
     nodeConsensusAndGlobal: (address: string, port: string) => Promise<any>;
 };
 
-export interface SaveFileData {
-    filename: string;
-    data: Buffer;
-}
-
 export type FileMethods = {
     databaseExists: () => Promise<boolean>;
     saveFile: (filepath: string, data: string | Buffer) => Promise<boolean>;
     saveFileDialog: (opts: SaveDialogOptions) => Promise<SaveDialogReturnValue>;
-    saveZipFileDialog: (files: SaveFileData[]) => Promise<false | void>;
     openFileDialog: (opts: OpenDialogOptions) => Promise<OpenDialogReturnValue>;
 };
 

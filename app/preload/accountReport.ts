@@ -17,6 +17,7 @@ import { AccountReportMethods } from './preloadTypes';
 import { getActiveBooleanFilters } from '~/utils/accountHelpers';
 import { isShieldedBalanceTransaction } from '~/utils/transactionHelpers';
 import AbortController from '~/utils/AbortController';
+import { getEntryName } from './database/addressBookDao';
 
 function calculatePublicBalanceChange(
     transaction: TransferTransaction,
@@ -112,12 +113,11 @@ function parseTransaction(
     return exportedFields.map((field) => fieldValues[getName(field)]);
 }
 
-/** Given a list of elements, a function to parse the elements to string array,
- * and the names of the elements' fields, outputs
- * csv string, with the names first, and the values of each element per line.
+/** Given a nested list of strings, parses the elements to csv,
+ *   each inner list is turned into a line.
  */
 function toCSV(elements: string[][]): string {
-    return `${elements.map((element) => element.join(',')).join('\n')}`;
+    return elements.map((element) => element.join(',')).join('\n');
 }
 
 /**
@@ -131,6 +131,16 @@ async function streamTransactions(
     filter: TransactionFilter,
     abortController: AbortController
 ) {
+    const getAddressName = async (address: string) => {
+        if (!address) {
+            return undefined;
+        }
+        if (address === account.address) {
+            return account.name;
+        }
+        return getEntryName(address);
+    };
+
     const limit = 10000;
     const filteredTypes = getActiveBooleanFilters(filter);
 
@@ -173,8 +183,16 @@ async function streamTransactions(
         );
         startId = transactions.reduce(idReducer, 0n).toString();
         hasMore = more;
+
+        const withNames: TransferTransactionWithNames[] = await Promise.all(
+            transactions.map(async (t) => ({
+                ...t,
+                fromName: await getAddressName(t.fromAddress),
+                toName: await getAddressName(t.toAddress),
+            }))
+        );
         const asCSV = toCSV(
-            transactions.map((t) => parseTransaction(t, account.address))
+            withNames.map((t) => parseTransaction(t, account.address))
         );
         stream.write(asCSV);
     }

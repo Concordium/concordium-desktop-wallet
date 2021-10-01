@@ -17,10 +17,7 @@ import {
     instanceOfUpdateBakerRestakeEarnings,
     AddressBookEntry,
 } from '../../utils/types';
-import {
-    lookupAddressBookEntry,
-    lookupName,
-} from '../../utils/transactionHelpers';
+import { lookupAddressBookEntry, lookupName } from '~/utils/addressBookHelpers';
 import DisplayScheduleTransfer from './DisplayScheduledTransferDetails';
 import DisplayInternalTransfer from './DisplayInternalTransfer';
 import DisplaySimpleTransfer from './DisplaySimpleTransfer';
