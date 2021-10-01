@@ -195,6 +195,7 @@ async function streamTransactions(
             withNames.map((t) => parseTransaction(t, account.address))
         );
         stream.write(asCSV);
+        stream.write('\n');
     }
 }
 
