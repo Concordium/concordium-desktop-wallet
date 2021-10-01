@@ -97,7 +97,7 @@ export default function AddBaker({ location }: Props) {
     return (
         <Switch>
             <Route path={routes.ACCOUNTS_EXPORT_BAKER_KEYS}>
-                <GenerateBakerKeys onContinue={next} />
+                <GenerateBakerKeys onContinue={next} header="Add baker" />
             </Route>
             <Route path={routes.ACCOUNTS_ADD_BAKER}>
                 <AddBakerData

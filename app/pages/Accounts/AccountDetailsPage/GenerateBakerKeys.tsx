@@ -9,10 +9,11 @@ import { useAsyncMemo } from '~/utils/hooks';
 import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
 
 interface Props {
+    header: string;
     onContinue(keys: BakerKeys): void;
 }
 
-export default function GenerateBakerKeys({ onContinue }: Props) {
+export default function GenerateBakerKeys({ onContinue, header }: Props) {
     const account = useSelector(chosenAccountSelector);
     const dispatch = useDispatch();
     const [error, setError] = useState<string>();
@@ -28,8 +29,6 @@ export default function GenerateBakerKeys({ onContinue }: Props) {
         [account?.address]
     );
 
-    const title = 'Add baker';
-
     if (!account) {
         throw new Error('No account selected');
     }
@@ -41,7 +40,7 @@ export default function GenerateBakerKeys({ onContinue }: Props) {
                 header={error}
                 onClick={() => dispatch(goBack())}
             />
-            <h3>{title}</h3>
+            <h3>{header}</h3>
             {keys && (
                 <ExportBakerCredentials
                     bakerKeys={keys}
