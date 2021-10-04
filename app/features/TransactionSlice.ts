@@ -281,7 +281,6 @@ export const updateTransactions = createAsyncThunk<
         { onFirstLoop, onError },
         { getState, dispatch, signal, requestId }
     ) => {
-        latestUpdateRequestId = requestId;
         const release = await updateLock.acquire();
 
         const state = getState() as RootState;
@@ -422,7 +421,8 @@ const transactionSlice = createSlice({
             }
         });
 
-        builder.addCase(updateTransactions.pending, (state) => {
+        builder.addCase(updateTransactions.pending, (state, { meta }) => {
+            latestUpdateRequestId = meta.requestId;
             state.synchronizing = true;
         });
 
@@ -450,8 +450,10 @@ const transactionSlice = createSlice({
 
         builder.addMatcher(
             isAnyOf(updateTransactions.rejected, updateTransactions.fulfilled),
-            (state) => {
-                state.synchronizing = false;
+            (state, { meta }) => {
+                if (meta.requestId === latestUpdateRequestId) {
+                    state.synchronizing = false;
+                }
             }
         );
 
