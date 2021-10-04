@@ -789,13 +789,11 @@ export function validateEncryptedStructure(
         return { isValid: false, reason: 'missing metadata field.' };
     }
     const metaDataFields = [
-        'keyLen',
         'iterations',
         'salt',
         'initializationVector',
         'encryptionMethod',
         'keyDerivationMethod',
-        'hashAlgorithm',
     ];
 
     // Check that metaData is an object, so we don't crash when checking it's fields.
