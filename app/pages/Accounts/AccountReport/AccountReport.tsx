@@ -195,10 +195,7 @@ export default function AccountReport({ location }: Props) {
                         >
                             <Columns.Column header="Time Period & Filters">
                                 <div className={styles.wrapper}>
-                                    <TransactionFilters
-                                        ref={filtersRef}
-                                        values={{}}
-                                    />
+                                    <TransactionFilters ref={filtersRef} />
                                 </div>
                             </Columns.Column>
                             <Columns.Column header="Accounts to include">
