@@ -27,6 +27,7 @@ import AddBaker from './AddBaker';
 import RemoveBaker from './RemoveBaker';
 import UpdateBakerKeys from './UpdateBakerKeys';
 import UpdateBakerStake from './UpdateBakerStake';
+import UpdateBakerRestake from './UpdateBakerRestake';
 
 const { Master, Detail } = MasterDetailPageLayout;
 
@@ -86,9 +87,10 @@ export default withAccountSync(function DetailsPage() {
                         path={routes.ACCOUNTS_UPDATE_BAKER_STAKE}
                         component={UpdateBakerStake}
                     />
-                    <Route path={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}>
-                        Update baker restake earnings
-                    </Route>
+                    <Route
+                        path={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}
+                        component={UpdateBakerRestake}
+                    />
 
                     <Route path={routes.ACCOUNTS}>
                         {viewingShielded && !account.allDecrypted ? (

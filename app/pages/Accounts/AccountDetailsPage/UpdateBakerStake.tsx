@@ -69,7 +69,7 @@ const UpdateBakerStakeForm = ensureChainData(
                     account,
                     transaction: stringify(transaction),
                     cancelled: {
-                        pathname: routes.ACCOUNTS_REMOVE_BAKER,
+                        pathname: routes.ACCOUNTS_UPDATE_BAKER_STAKE,
                     },
                     confirmed: {
                         pathname: routes.ACCOUNTS,
