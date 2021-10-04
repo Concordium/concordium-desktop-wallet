@@ -8,6 +8,8 @@ import { chosenAccountSelector } from '~/features/AccountSlice';
 import { useAsyncMemo } from '~/utils/hooks';
 import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
 
+import styles from './AccountDetailsPage.module.scss';
+
 interface Props {
     header: string;
     onContinue(keys: BakerKeys): void;
@@ -40,14 +42,16 @@ export default function GenerateBakerKeys({ onContinue, header }: Props) {
                 header={error}
                 onClick={() => dispatch(goBack())}
             />
-            <h3>{header}</h3>
+            <h3 className="bodyEmphasized">{header}</h3>
             {keys && (
                 <ExportBakerCredentials
                     bakerKeys={keys}
                     accountAddress={account.address}
                     onContinue={() => onContinue(keys)}
+                    className="mT30"
+                    buttonClassName={styles.bakerFlowContinue}
                 >
-                    <p>
+                    <p className="mT0">
                         Your baker keys have been generated. Make sure to export
                         and backup your baker credentials, as this will be the
                         only chance to export them.

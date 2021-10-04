@@ -24,6 +24,8 @@ import TransactionLog from './TransactionLog';
 import DecryptComponent from '../DecryptComponent';
 import withAccountSync from '../withAccountSync';
 import AddBaker from './AddBaker';
+import RemoveBaker from './RemoveBaker';
+import UpdateBakerKeys from './UpdateBakerKeys';
 
 const { Master, Detail } = MasterDetailPageLayout;
 
@@ -71,12 +73,14 @@ export default withAccountSync(function DetailsPage() {
                         path={routes.ACCOUNTS_ADD_BAKER}
                         component={AddBaker}
                     />
-                    <Route path={routes.ACCOUNTS_REMOVE_BAKER}>
-                        Remove baker
-                    </Route>
-                    <Route path={routes.ACCOUNTS_UPDATE_BAKER_KEYS}>
-                        Update baker keys
-                    </Route>
+                    <Route
+                        path={routes.ACCOUNTS_REMOVE_BAKER}
+                        component={RemoveBaker}
+                    />
+                    <Route
+                        path={routes.ACCOUNTS_UPDATE_BAKER_KEYS}
+                        component={UpdateBakerKeys}
+                    />
                     <Route path={routes.ACCOUNTS_UPDATE_BAKER_STAKE}>
                         Update baker stake
                     </Route>

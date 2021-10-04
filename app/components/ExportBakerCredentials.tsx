@@ -11,6 +11,7 @@ type Props = ClassName &
         accountAddress: string;
         bakerKeys: BakerKeys;
         onContinue: () => void;
+        buttonClassName?: string;
     }>;
 
 export default function ExportBakerCredentials({
@@ -19,6 +20,7 @@ export default function ExportBakerCredentials({
     onContinue,
     className,
     children,
+    buttonClassName,
 }: Props) {
     const accountInfo = useAccountInfo(accountAddress);
 
@@ -47,7 +49,10 @@ export default function ExportBakerCredentials({
     return (
         <div className={clsx('flexColumn', className)}>
             <div className="flexFill">{children}</div>
-            <Button className="mT50" onClick={onExport}>
+            <Button
+                className={clsx('mT50', buttonClassName)}
+                onClick={onExport}
+            >
                 Export Baker Credentials
             </Button>
         </div>

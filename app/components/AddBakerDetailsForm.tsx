@@ -23,6 +23,7 @@ interface Props extends ClassName {
     account: Account;
     estimatedFee: Fraction;
     minimumStake: bigint;
+    buttonClassName?: string;
     onSubmit(values: AddBakerForm): void;
 }
 
@@ -33,6 +34,7 @@ export default function AddBakerDetailsForm({
     estimatedFee,
     minimumStake,
     className,
+    buttonClassName,
     onSubmit,
 }: Props) {
     const accountInfo = useAccountInfo(account.address);
@@ -67,7 +69,9 @@ export default function AddBakerDetailsForm({
                     fieldName={fieldNames.restake}
                 />
             </div>
-            <Form.Submit className="mT50">Continue</Form.Submit>
+            <Form.Submit className={clsx('mT50', buttonClassName)}>
+                Continue
+            </Form.Submit>
         </Form>
     );
 }

@@ -16,6 +16,8 @@ import { SubmitTransferLocationState } from '../../SubmitTransfer/SubmitTransfer
 import GenerateBakerKeys from '../GenerateBakerKeys';
 import AddBakerData from './AddBakerData';
 
+const header = 'Add baker';
+
 interface Props {
     location: LocationDescriptorObject<AddBakerForm>;
 }
@@ -97,10 +99,11 @@ export default function AddBaker({ location }: Props) {
     return (
         <Switch>
             <Route path={routes.ACCOUNTS_EXPORT_BAKER_KEYS}>
-                <GenerateBakerKeys onContinue={next} header="Add baker" />
+                <GenerateBakerKeys onContinue={next} header={header} />
             </Route>
             <Route path={routes.ACCOUNTS_ADD_BAKER}>
                 <AddBakerData
+                    header={header}
                     onSubmit={handleSubmit}
                     initialData={location.state}
                 />

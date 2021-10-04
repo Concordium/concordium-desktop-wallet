@@ -14,6 +14,8 @@ import { createUpdateBakerKeysTransaction } from '~/utils/transactionHelpers';
 import { SubmitTransferLocationState } from '../SubmitTransfer/SubmitTransfer';
 import { stringify } from '~/utils/JSONHelper';
 
+import styles from './AccountDetailsPage.module.scss';
+
 const header = 'Update baker keys';
 
 function UpdateBakerKeysIntro() {
@@ -31,13 +33,13 @@ function UpdateBakerKeysIntro() {
 
     return (
         <Card className="textCenter">
-            <h3>{header}</h3>
-            <p>
+            <h3 className="bodyEmphasized">{header}</h3>
+            <p className="mT30">
                 Before updating your baker keys, you must first generate a new
                 set of baker credentials. You can do so by pressing the button
                 below.
             </p>
-            <Button onClick={next} className="mT50">
+            <Button onClick={next} className={styles.bakerFlowContinue}>
                 Generate new keys
             </Button>
         </Card>
@@ -96,6 +98,7 @@ export default function UpdateBakerKeys() {
         },
         [makeTransaction, dispatch, account]
     );
+
     return (
         <Switch>
             <Route path={routes.ACCOUNTS_EXPORT_BAKER_KEYS}>

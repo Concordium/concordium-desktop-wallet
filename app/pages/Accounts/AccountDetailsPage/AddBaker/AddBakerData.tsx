@@ -17,6 +17,8 @@ import {
 import { useTransactionCostEstimate } from '~/utils/dataHooks';
 import { NotOptional, PropsOf, TransactionKindId } from '~/utils/types';
 
+import styles from '../AccountDetailsPage.module.scss';
+
 type FormWrapperProps = Omit<
     PropsOf<typeof AddBakerDetailsForm>,
     'minimumStake' | 'estimatedFee'
@@ -44,6 +46,8 @@ const FormWrapper = ensureExchangeRate(
                     {...props}
                     minimumStake={minimumStake}
                     estimatedFee={estimatedFee}
+                    className="mT30"
+                    buttonClassName={styles.bakerFlowContinue}
                 />
             );
         },
@@ -53,11 +57,12 @@ const FormWrapper = ensureExchangeRate(
 );
 
 interface Props {
+    header: string;
     initialData?: AddBakerForm;
     onSubmit(values: AddBakerForm): void;
 }
 
-export default function AddBakerData({ onSubmit, initialData }: Props) {
+export default function AddBakerData({ onSubmit, initialData, header }: Props) {
     const account = useSelector(chosenAccountSelector);
 
     if (!account) {
@@ -66,7 +71,7 @@ export default function AddBakerData({ onSubmit, initialData }: Props) {
 
     return (
         <Card className="textCenter">
-            <h3>Add baker</h3>
+            <h3 className="bodyEmphasized">{header}</h3>
             <FormWrapper
                 account={account}
                 onSubmit={onSubmit}
