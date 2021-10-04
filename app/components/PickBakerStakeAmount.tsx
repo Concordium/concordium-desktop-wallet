@@ -10,14 +10,16 @@ import ErrorMessage from './Form/ErrorMessage';
 import Label from './Label';
 
 interface Props {
+    header: string;
     initial?: string;
     minimumStake: bigint;
     fieldName: string;
-    accountInfo?: AccountInfo;
-    estimatedFee?: Fraction;
+    accountInfo: AccountInfo | undefined;
+    estimatedFee: Fraction | undefined;
 }
 
 export default function PickBakerStakeAmount({
+    header,
     minimumStake,
     fieldName,
     accountInfo,
@@ -52,8 +54,8 @@ export default function PickBakerStakeAmount({
     const { errors } = form;
 
     return (
-        <div className="mV50">
-            <Label>Amount:</Label>
+        <div className="mV30">
+            <Label>{header}</Label>
             <div className="body1">
                 {getGTUSymbol()}{' '}
                 <Form.GtuInput

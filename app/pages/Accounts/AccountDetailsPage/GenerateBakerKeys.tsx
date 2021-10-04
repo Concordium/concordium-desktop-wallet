@@ -36,7 +36,7 @@ export default function GenerateBakerKeys({ onContinue, header }: Props) {
     }
 
     return (
-        <Card className="textCenter">
+        <Card className="textCenter pB40">
             <SimpleErrorModal
                 show={Boolean(error)}
                 header={error}

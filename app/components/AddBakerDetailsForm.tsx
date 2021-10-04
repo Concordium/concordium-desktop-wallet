@@ -54,6 +54,7 @@ export default function AddBakerDetailsForm({
                     <AccountCard account={account} accountInfo={accountInfo} />
                 )}
                 <PickBakerStakeAmount
+                    header="Amount:"
                     initial={initialData?.stake}
                     accountInfo={accountInfo}
                     estimatedFee={estimatedFee}

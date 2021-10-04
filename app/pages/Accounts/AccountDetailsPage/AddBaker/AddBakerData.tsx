@@ -70,7 +70,7 @@ export default function AddBakerData({ onSubmit, initialData, header }: Props) {
     }
 
     return (
-        <Card className="textCenter">
+        <Card className="textCenter pB40">
             <h3 className="bodyEmphasized">{header}</h3>
             <FormWrapper
                 account={account}

@@ -32,7 +32,7 @@ function UpdateBakerKeysIntro() {
     }, [dispatch]);
 
     return (
-        <Card className="textCenter">
+        <Card className="textCenter pB40">
             <h3 className="bodyEmphasized">{header}</h3>
             <p className="mT30">
                 Before updating your baker keys, you must first generate a new

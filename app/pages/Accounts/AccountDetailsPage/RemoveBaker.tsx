@@ -42,7 +42,7 @@ export default function RemoveBaker() {
     }, [dispatch, account]);
 
     return (
-        <Card className="textCenter">
+        <Card className="textCenter pB40">
             <h3 className="bodyEmphasized">Remove baker</h3>
             <p className="mT30">
                 This will remove the baker status of the account. After the
