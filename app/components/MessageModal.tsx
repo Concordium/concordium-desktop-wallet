@@ -7,6 +7,7 @@ interface Props {
     buttonText: string;
     open: boolean;
     onClose(): void;
+    disableClose?: boolean;
 }
 
 export default function MessageModal({
@@ -14,9 +15,10 @@ export default function MessageModal({
     buttonText,
     open,
     onClose,
+    disableClose,
 }: Props) {
     return (
-        <Modal onClose={onClose} onOpen={() => {}} open={open}>
+        <Modal onClose={onClose} open={open} disableClose={disableClose}>
             <h2>{title}</h2>
             <Button onClick={onClose} className="mT50">
                 {buttonText}
