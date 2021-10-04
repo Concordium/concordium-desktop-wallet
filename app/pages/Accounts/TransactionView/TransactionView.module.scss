@@ -15,14 +15,20 @@
 
 .title,
 .errorMessage,
-.listElement {
+.listElement,
+.transactionListElement {
     composes: fillCardPadding;
-    composes: cardPadding;
-    composes: greySeparator;
 
     &:not(:last-child) {
         border-bottom: 0.5px solid $color-soft-grey;
     }
+}
+
+.title,
+.errorMessage,
+.listElement {
+    composes: cardPadding;
+    composes: greySeparator;
 }
 
 .title {

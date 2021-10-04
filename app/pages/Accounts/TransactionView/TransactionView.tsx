@@ -91,7 +91,7 @@ function TransactionView({ transaction, onClose }: Props) {
             <h3 className={styles.title}>Transaction details</h3>
             <CloseButton className={styles.closeButton} onClick={onClose} />
             <TransactionListElement
-                className={styles.fillCardPadding}
+                className={styles.transactionListElement}
                 style={{}}
                 transaction={transaction}
                 showDate
