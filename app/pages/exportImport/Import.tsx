@@ -16,6 +16,8 @@ import {
 import { EncryptedData } from '../../utils/types';
 import styles from './ExportImport.module.scss';
 
+const mobileWalletExportType = 'concordium-mobile-wallet-data';
+
 /**
  * Component to start importing identities/account/addressBook.
  * Allows the user to choose a file, then parses/validates/decrypts the file.
@@ -57,9 +59,16 @@ export default function Import() {
             fail('Unable to parse decrypted data!');
             return;
         }
+        if (data.type === mobileWalletExportType) {
+            fail(
+                `Exports from the Concordium Mobile Wallet are not compatible with the Concordium Desktop Wallet, and vice versa.`
+            );
+            return;
+        }
         const validation = validateImportStructure(data);
         if (!validation.isValid) {
             fail(`This file is invalid due to: ${validation.reason}`);
+            return;
         }
         dispatch(
             push({
