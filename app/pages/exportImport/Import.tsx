@@ -61,7 +61,7 @@ export default function Import() {
         }
         if (data.type === mobileWalletExportType) {
             fail(
-                `Exports from the Concordium Mobile Wallet are not compatible with the Concordium Desktop Wallet, and vice versa.`
+                `The selected file was an export from a Concordium Mobile Wallet. Exports from a Concordium Mobile Wallet are not compatible with the Concordium Desktop Wallet, and vice versa.`
             );
             return;
         }
