@@ -172,20 +172,23 @@ async function streamTransactions(
             limit,
             startId
         );
-        toDate = new Date(
-            transactions.reduce(
-                (acc, t) =>
-                    acc === 0 || parseInt(t.blockTime, 10) < acc
-                        ? parseInt(t.blockTime, 10)
-                        : acc,
-                0
-            ) + 1
-        );
-        startId = transactions.reduce(idReducer, 0n).toString();
         hasMore = more;
+        const smallestBlockTime = transactions.reduce(
+            (acc, t) =>
+                acc === 0 || Number(t.blockTime) < acc
+                    ? Number(t.blockTime)
+                    : acc,
+            0
+        );
+
+        const transactionsToSave = more
+            ? transactions.filter(
+                  (t) => Number(t.blockTime) !== smallestBlockTime
+              )
+            : transactions;
 
         const withNames: TransferTransactionWithNames[] = await Promise.all(
-            transactions.map(async (t) => ({
+            transactionsToSave.map(async (t) => ({
                 ...t,
                 fromName: await getAddressName(t.fromAddress),
                 toName: await getAddressName(t.toAddress),
@@ -196,6 +199,11 @@ async function streamTransactions(
         );
         stream.write(asCSV);
         stream.write('\n');
+
+        if (more) {
+            toDate = new Date(smallestBlockTime * 1000);
+            startId = transactionsToSave.reduce(idReducer, 0n).toString();
+        }
     }
 }
 
