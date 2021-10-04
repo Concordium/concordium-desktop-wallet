@@ -49,7 +49,7 @@ async function findEntries(
 
 export async function getEntryName(address: string) {
     const entry = await (await knex())
-        .select<AddressBookEntry>()
+        .select<AddressBookEntry>('name')
         .table(addressBookTable)
         .where({ address })
         .first();

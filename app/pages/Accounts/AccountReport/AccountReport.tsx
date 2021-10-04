@@ -20,6 +20,7 @@ import TransactionFilters, {
 } from '~/components/TransactionFilters';
 import { containsEncrypted } from './util';
 import DecryptModal, { DecryptModalInput } from '../DecryptModal';
+import MessageModal from '~/components/MessageModal';
 
 import styles from './AccountReport.module.scss';
 import Columns from '~/components/Columns';
@@ -163,12 +164,12 @@ export default function AccountReport({ location }: Props) {
                 content={showError.content}
                 onClick={() => setShowError({ show: false })}
             />
-            <SimpleErrorModal
-                show={makingReport}
-                header={`Generating Report${accounts.length > 1 ? 's' : ''}`}
-                content="Please wait"
+            <MessageModal
+                open={makingReport}
+                title={`Generating Report${accounts.length > 1 ? 's' : ''}`}
                 buttonText="Abort"
-                onClick={() => window.accountReport.abort()}
+                onClose={() => window.accountReport.abort()}
+                disableClose
             />
             <DecryptModal {...showDecrypt} />
             <PageLayout>

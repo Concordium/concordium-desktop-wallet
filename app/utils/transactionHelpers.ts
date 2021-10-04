@@ -708,9 +708,7 @@ export function isUnshieldedBalanceTransaction(
 /**
  * Determine whether the transaction affects shielded balance.
  */
-export function isShieldedBalanceTransaction(
-    transaction: Partial<TransferTransaction>
-) {
+export function isShieldedBalanceTransaction(transaction: TransferTransaction) {
     switch (transaction.transactionKind) {
         case TransactionKindString.EncryptedAmountTransfer:
         case TransactionKindString.EncryptedAmountTransferWithMemo:
