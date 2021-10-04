@@ -83,6 +83,7 @@ function createExternalView(
     return new Promise((resolve) => {
         window.setBrowserView(browserView);
         browserView.setBounds(rect);
+        browserView.webContents.clearHistory();
         browserView.webContents
             .loadURL(location)
             .then(() => {
