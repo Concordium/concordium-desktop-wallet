@@ -13,14 +13,14 @@ import PickAccount from '~/components/PickAccount';
 import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
-import type { SaveFileData } from '~/preload/preloadTypes';
-import saveFile from '~/utils/FileHelper';
+import { chooseFileDestination } from '~/utils/FileHelper';
 import DisplayAddress from '~/components/DisplayAddress';
 import TransactionFilters, {
     TransactionFiltersRef,
 } from '~/components/TransactionFilters';
-import { getAccountCSV, containsEncrypted } from './util';
+import { containsEncrypted } from './util';
 import DecryptModal, { DecryptModalInput } from '../DecryptModal';
+import MessageModal from '~/components/MessageModal';
 
 import styles from './AccountReport.module.scss';
 import Columns from '~/components/Columns';
@@ -51,6 +51,8 @@ export default function AccountReport({ location }: Props) {
         location?.state ? [location?.state.account] : []
     );
     const [adding, setAdding] = useState(false);
+    const [makingReport, setMakingReport] = useState(false);
+
     const filtersRef = useRef<TransactionFiltersRef>(null);
 
     function promptDecrypt(account: Account) {
@@ -92,31 +94,44 @@ export default function AccountReport({ location }: Props) {
                 return Promise.resolve();
             }
 
+            const multipleAccounts = accountsLength > 1;
+
+            const opts = multipleAccounts
+                ? {
+                      title: 'Save Account Reports',
+                      defaultPath: 'reports.zip',
+                      filters: [{ name: 'zip', extensions: ['zip'] }],
+                  }
+                : {
+                      title: 'Save Account Report',
+                      defaultPath: `${accountsToReport[0].name}.csv`,
+                      filters: [{ name: 'csv', extensions: ['csv'] }],
+                  };
+
+            const fileName = await chooseFileDestination(opts);
+            if (!fileName) {
+                return false;
+            }
+
             try {
-                if (accountsLength === 1) {
-                    return saveFile(
-                        await getAccountCSV(accountsToReport[0], filters),
-                        {
-                            title: 'Save Account Report',
-                            defaultPath: `${accountsToReport[0].name}.csv`,
-                            filters: [{ name: 'csv', extensions: ['csv'] }],
-                        }
+                setMakingReport(true);
+                if (multipleAccounts) {
+                    await window.accountReport.multiple(
+                        fileName,
+                        accountsToReport,
+                        filters
+                    );
+                } else {
+                    await window.accountReport.single(
+                        fileName,
+                        accountsToReport[0],
+                        filters
                     );
                 }
-
-                const filesToZip: SaveFileData[] = [];
-                for (let i = 0; i < accountsLength; i += 1) {
-                    const account = accountsToReport[i];
-                    const data = await getAccountCSV(account, filters);
-                    filesToZip.push({
-                        filename: `${account.name}.csv`,
-                        data: Buffer.from(data),
-                    });
-                }
-
-                // Send to main thread for saving the files as a single zip file.
-                return window.files.saveZipFileDialog(filesToZip);
+                setMakingReport(false);
+                return true;
             } catch (e) {
+                setMakingReport(false);
                 setShowError({
                     show: true,
                     header: 'Account Report was not saved.',
@@ -149,6 +164,13 @@ export default function AccountReport({ location }: Props) {
                 content={showError.content}
                 onClick={() => setShowError({ show: false })}
             />
+            <MessageModal
+                open={makingReport}
+                title={`Generating Report${accounts.length > 1 ? 's' : ''}`}
+                buttonText="Abort"
+                onClose={() => window.accountReport.abort()}
+                disableClose
+            />
             <DecryptModal {...showDecrypt} />
             <PageLayout>
                 <PageLayout.Header>
@@ -173,10 +195,7 @@ export default function AccountReport({ location }: Props) {
                         >
                             <Columns.Column header="Time Period & Filters">
                                 <div className={styles.wrapper}>
-                                    <TransactionFilters
-                                        ref={filtersRef}
-                                        values={{}}
-                                    />
+                                    <TransactionFilters ref={filtersRef} />
                                 </div>
                             </Columns.Column>
                             <Columns.Column header="Accounts to include">
@@ -256,7 +275,10 @@ export default function AccountReport({ location }: Props) {
                                         </div>
                                         <Button
                                             className={styles.makeReportButton}
-                                            disabled={accounts.length === 0}
+                                            disabled={
+                                                accounts.length === 0 ||
+                                                makingReport
+                                            }
                                             onClick={() =>
                                                 filtersRef.current?.submit(
                                                     makeReport
