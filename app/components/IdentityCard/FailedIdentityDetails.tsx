@@ -47,6 +47,7 @@ export default function FailedIdentityDetails({
     );
     const identityProviderName = identityProvider.ipInfo.ipDescription.name;
     const mail = getIdentityProviderMail(identityProvider.ipInfo.ipIdentity);
+    const { url } = identityProvider.ipInfo.ipDescription;
     const cc = 'idiss@concordium.software';
     const subject = `Issuance Reference: ${sessionId}`;
     const body = `Hi! My identity issuance failed.
@@ -109,7 +110,7 @@ ${getOS()}`;
                     </p>
                 </>
             )}
-            {mail || (
+            {Boolean(mail) || (
                 <>
                     <p className={clsx(styles.failedDetailsLine, 'pV10')}>
                         We don’t have the support email for{' '}
@@ -118,14 +119,8 @@ ${getOS()}`;
                     </p>
                     <SidedRow
                         className={styles.failedDetailsLine}
-                        left={
-                            <ExternalLink
-                                href={identityProvider.ipInfo.ipDescription.url}
-                            >
-                                {identityProvider.ipInfo.ipDescription.url}
-                            </ExternalLink>
-                        }
-                        right={<CopyButton value={cc} />}
+                        left={<ExternalLink href={url}>{url}</ExternalLink>}
+                        right={<CopyButton value={url} />}
                     />
                     <p className={clsx(styles.failedDetailsLine, 'pV20')}>
                         When seeking support please include the following
