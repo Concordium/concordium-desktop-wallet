@@ -11,7 +11,7 @@ interface Props {
 }
 
 export default function TransactionsHeader({ text }: Props) {
-    const [showSpinner, setShowSpinner] = useState(false);
+    const [showSpinner, setShowSpinner] = useState(true);
     const synchronizing = useSelector(
         (s: RootState) => s.transactions.synchronizing
     );

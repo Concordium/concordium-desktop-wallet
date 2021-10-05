@@ -110,7 +110,7 @@ async function getTransactionsOfAccount(
             .orderBy('blockTime', 'desc');
 
         if (startId) {
-            querytransactions.andWhere('id', '<', startId);
+            querytransactions.andWhereRaw(` CAST(id as int) < ${startId}`);
         }
 
         if (limit) {
