@@ -16,6 +16,7 @@ import { EqualRecord } from '~/utils/types';
 import { SubmitTransferLocationState } from '../SubmitTransfer/SubmitTransfer';
 
 import styles from './AccountDetailsPage.module.scss';
+import Label from '~/components/Label';
 
 interface FormModel {
     restake: boolean;
@@ -66,6 +67,14 @@ export default function UpdateBakerRestake() {
         <Card className="textCenter pB40">
             <h3 className="bodyEmphasized">Update baker stake</h3>
             <p className="mV30">Choose to restake earnings or not, below.</p>
+            <div className="mV30">
+                <Label>Current restake:</Label>
+                <span className="body1">
+                    {accountInfo?.accountBaker?.restakeEarnings ?? true
+                        ? 'Yes'
+                        : 'No'}
+                </span>
+            </div>
             <Form<FormModel> onSubmit={submit}>
                 <PickBakerRestake
                     fieldName={fieldNames.restake}
