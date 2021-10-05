@@ -32,6 +32,15 @@ if (
     require('electron-debug')();
 }
 
+// Set the userData folder according to the userData environment variable,
+// instead of having Electron rely on the application name.
+if (process.env.USER_DATA) {
+    app.setPath(
+        'userData',
+        path.join(app.getPath('appData'), process.env.USER_DATA)
+    );
+}
+
 const installExtensions = async () => {
     const installer = require('electron-devtools-installer');
     const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
@@ -50,7 +59,6 @@ const createWindow = async () => {
         await installExtensions();
     }
 
-    const titleSuffix = process.env.TARGET_NET || '';
     const commonMainPreferences: Electron.WebPreferences = {
         nodeIntegration: false,
         contextIsolation: true,
@@ -63,7 +71,7 @@ const createWindow = async () => {
      * security documentation provided
      */
     mainWindow = new BrowserWindow({
-        title: `Concordium Wallet ${titleSuffix}`,
+        title: app.getName(),
         show: false,
         minWidth: 800,
         minHeight: 600,

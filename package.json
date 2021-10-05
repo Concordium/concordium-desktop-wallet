@@ -1,6 +1,7 @@
 {
   "name": "concordium-desktop-wallet",
-  "productName": "Concordium Wallet",
+  "productName": "Concordium Desktop Wallet",
+  "userData": "Concordium Wallet",
   "description": "concordium-desktop-wallet",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\" \"yarn build-preload\"",

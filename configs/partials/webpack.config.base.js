@@ -11,12 +11,16 @@ const { dependencies: externals } = require('../../app/package.json');
 
 const extensions = ['.js', '.jsx', '.json', '.ts', '.tsx'];
 
-if (
-    process.env.TARGET_NET &&
-    !['stagenet', 'testnet'].includes(process.env.TARGET_NET)
-) {
+const targetNet = process.env.TARGET_NET;
+
+let userData = process.env.npm_package_userData;
+if (targetNet) {
+    userData += ` ${targetNet}`;
+}
+
+if (targetNet && !['stagenet', 'testnet'].includes(targetNet)) {
     throw new Error(
-        `Unknown TARGET_NET. Only [stagenet,testnet] are allowed values. Given: ${process.env.TARGET_NET}`
+        `Unknown TARGET_NET. Only [stagenet, testnet] are allowed values. Given: ${targetNet}`
     );
 }
 
@@ -87,6 +91,7 @@ module.exports = {
         new webpack.EnvironmentPlugin({
             NODE_ENV: 'production',
             TARGET_NET: '',
+            USER_DATA: userData,
             LEDGER_EMULATOR_URL: '',
         }),
         new WasmPackPlugin({
