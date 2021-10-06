@@ -21,6 +21,16 @@ import {
     EncryptedTransferWithMemo,
     instanceOfScheduledTransferWithMemo,
     instanceOfEncryptedTransferWithMemo,
+    AddBaker,
+    RemoveBaker,
+    UpdateBakerStake,
+    UpdateBakerKeys,
+    UpdateBakerRestakeEarnings,
+    instanceOfAddBaker,
+    instanceOfRemoveBaker,
+    instanceOfUpdateBakerStake,
+    instanceOfUpdateBakerKeys,
+    instanceOfUpdateBakerRestakeEarnings,
 } from './types';
 import { getScheduledTransferAmount } from './transactionHelpers';
 import { collapseFraction, abs } from './basicHelpers';
@@ -292,6 +302,47 @@ function convertEncryptedTransferWithMemo(
     };
 }
 
+function convertAddBakerTransaction(transaction: AddBaker): TypeSpecific {
+    return {
+        transactionKind: TransactionKindString.AddBaker,
+        toAddress: transaction.sender,
+    };
+}
+
+function convertRemoveBakerTransaction(transaction: RemoveBaker): TypeSpecific {
+    return {
+        transactionKind: TransactionKindString.RemoveBaker,
+        toAddress: transaction.sender,
+    };
+}
+
+function convertUpdateBakerStakeTransaction(
+    transaction: UpdateBakerStake
+): TypeSpecific {
+    return {
+        transactionKind: TransactionKindString.UpdateBakerStake,
+        toAddress: transaction.sender,
+    };
+}
+
+function convertUpdateBakerKeysTransaction(
+    transaction: UpdateBakerKeys
+): TypeSpecific {
+    return {
+        transactionKind: TransactionKindString.UpdateBakerKeys,
+        toAddress: transaction.sender,
+    };
+}
+
+function convertUpdateBakerRestakeTransaction(
+    transaction: UpdateBakerRestakeEarnings
+): TypeSpecific {
+    return {
+        transactionKind: TransactionKindString.UpdateBakerRestakeEarnings,
+        toAddress: transaction.sender,
+    };
+}
+
 /**
  * Converts an Account Transaction, so that it fits local Transfer Transaction model and
  * can be entered into the local database.
@@ -323,6 +374,16 @@ export async function convertAccountTransaction(
         typeSpecific = convertEncryptedTransfer(transaction);
     } else if (instanceOfEncryptedTransferWithMemo(transaction)) {
         typeSpecific = convertEncryptedTransferWithMemo(transaction);
+    } else if (instanceOfAddBaker(transaction)) {
+        typeSpecific = convertAddBakerTransaction(transaction);
+    } else if (instanceOfRemoveBaker(transaction)) {
+        typeSpecific = convertRemoveBakerTransaction(transaction);
+    } else if (instanceOfUpdateBakerStake(transaction)) {
+        typeSpecific = convertUpdateBakerStakeTransaction(transaction);
+    } else if (instanceOfUpdateBakerKeys(transaction)) {
+        typeSpecific = convertUpdateBakerKeysTransaction(transaction);
+    } else if (instanceOfUpdateBakerRestakeEarnings(transaction)) {
+        typeSpecific = convertUpdateBakerRestakeTransaction(transaction);
     } else {
         throw new Error('unsupported transaction type - please implement');
     }

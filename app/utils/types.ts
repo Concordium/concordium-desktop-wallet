@@ -899,7 +899,7 @@ export function instanceOfUpdateBakerKeys(
 
 export function instanceOfRemoveBaker(
     object: AccountTransaction<TransactionPayload>
-): object is AddBaker {
+): object is RemoveBaker {
     return object.transactionKind === TransactionKindId.Remove_baker;
 }
 
