@@ -13,7 +13,6 @@ import {
     Fraction,
 } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
-import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import {
     createUpdateBakerStakeTransaction,
@@ -42,6 +41,9 @@ import {
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
 import { ensureChainData, ChainData } from '../common/withChainData';
+
+import styles from './MultisignatureAccountTransactions.module.scss';
+import { isMultiSig } from '~/utils/accountHelpers';
 
 function toMicroUnitsSafe(str: string | undefined) {
     if (str === undefined) {
@@ -146,10 +148,11 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
-                                        filter={(_, info) =>
-                                            info?.accountBaker !== undefined
+                                        filter={(a, info) =>
+                                            info?.accountBaker !== undefined &&
+                                            isMultiSig(a)
                                         }
-                                        messageWhenEmpty="There are no baker accounts "
+                                        messageWhenEmpty="There are no baker accounts that require multiple signatures"
                                         onAccountClicked={() => {
                                             dispatch(
                                                 push(

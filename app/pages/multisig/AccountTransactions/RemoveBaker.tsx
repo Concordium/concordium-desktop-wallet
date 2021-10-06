@@ -12,7 +12,6 @@ import {
     Fraction,
 } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
-import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { createRemoveBakerTransaction } from '~/utils/transactionHelpers';
 import routes from '~/constants/routes.json';
@@ -34,6 +33,9 @@ import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
+
+import styles from './MultisignatureAccountTransactions.module.scss';
+import { isMultiSig } from '~/utils/accountHelpers';
 
 interface PageProps {
     exchangeRate: Fraction;
@@ -123,8 +125,9 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
-                                        filter={(_, info) =>
-                                            info?.accountBaker !== undefined
+                                        filter={(a, info) =>
+                                            info?.accountBaker !== undefined &&
+                                            isMultiSig(a)
                                         }
                                         onAccountClicked={() => {
                                             dispatch(
@@ -152,7 +155,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                                 </>
                                             ) : undefined
                                         }
-                                        messageWhenEmpty="There are no baker accounts "
+                                        messageWhenEmpty="There are no baker accounts that require multiple signatures"
                                     />
                                 </div>
                             </div>

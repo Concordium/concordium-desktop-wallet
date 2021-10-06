@@ -12,7 +12,6 @@ import {
     Fraction,
 } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
-import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { createUpdateBakerRestakeEarningsTransaction } from '~/utils/transactionHelpers';
 import routes from '~/constants/routes.json';
@@ -33,6 +32,9 @@ import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
+
+import styles from './MultisignatureAccountTransactions.module.scss';
+import { isMultiSig } from '~/utils/accountHelpers';
 
 interface PageProps {
     exchangeRate: Fraction;
@@ -131,10 +133,11 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
-                                        filter={(_, info) =>
-                                            info?.accountBaker !== undefined
+                                        filter={(a, info) =>
+                                            info?.accountBaker !== undefined &&
+                                            isMultiSig(a)
                                         }
-                                        messageWhenEmpty="There are no baker accounts "
+                                        messageWhenEmpty="There are no baker accounts that require multiple signatures"
                                         onAccountClicked={() => {
                                             dispatch(
                                                 push(

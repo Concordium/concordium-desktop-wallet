@@ -53,6 +53,7 @@ import AddBakerDetailsForm from '~/components/AddBakerDetailsForm';
 import ExportBakerKeys from './ExportBakerKeys';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
+import { isMultiSig } from '~/utils/accountHelpers';
 
 const pageTitle = 'Multi Signature Transactions | Add Baker';
 
@@ -232,8 +233,9 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
-                                        filter={(_, info) =>
-                                            info?.accountBaker === undefined
+                                        filter={(a, info) =>
+                                            info?.accountBaker === undefined &&
+                                            isMultiSig(a)
                                         }
                                         onAccountClicked={() =>
                                             dispatch(
@@ -245,7 +247,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                                                 )
                                             )
                                         }
-                                        messageWhenEmpty="There are no accounts that can become bakers"
+                                        messageWhenEmpty="There are no accounts that require multiple signatures, which can become bakers"
                                     />
                                 </div>
                             </div>

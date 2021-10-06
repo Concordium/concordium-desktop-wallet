@@ -13,7 +13,6 @@ import {
     Fraction,
 } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
-import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
 import {
@@ -42,6 +41,9 @@ import {
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
 import ExportBakerKeys from './ExportBakerKeys';
+
+import styles from './MultisignatureAccountTransactions.module.scss';
+import { isMultiSig } from '~/utils/accountHelpers';
 
 const pageTitle = 'Multi Signature Transactions | Update Baker Keys';
 
@@ -196,10 +198,11 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
-                                        filter={(_, info) =>
-                                            info?.accountBaker !== undefined
+                                        filter={(a, info) =>
+                                            info?.accountBaker !== undefined &&
+                                            isMultiSig(a)
                                         }
-                                        messageWhenEmpty="There are no baker accounts "
+                                        messageWhenEmpty="There are no baker accounts that require multiple signatures"
                                         onAccountClicked={() => {
                                             dispatch(
                                                 push(
