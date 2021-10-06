@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Route } from 'react-router';
+import { Redirect, Route } from 'react-router';
 
 import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
 import {
@@ -28,13 +28,20 @@ import RemoveBaker from './RemoveBaker';
 import UpdateBakerKeys from './UpdateBakerKeys';
 import UpdateBakerStake from './UpdateBakerStake';
 import UpdateBakerRestake from './UpdateBakerRestake';
+import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
 
 const { Master, Detail } = MasterDetailPageLayout;
+const ToAccounts = () => <Redirect to={routes.ACCOUNTS} />;
 
 export default withAccountSync(function DetailsPage() {
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
     const viewingShielded = useSelector(viewingShieldedSelector);
+    const hasCredentials = useSelector(
+        account ? accountHasDeployedCredentialsSelector(account) : () => false
+    );
+    const isBaker = Boolean(accountInfo?.accountBaker);
+    const hasBakerCooldown = Boolean(accountInfo?.accountBaker?.pendingChange);
 
     if (!account) {
         return null;
@@ -54,7 +61,11 @@ export default withAccountSync(function DetailsPage() {
                 <BasicTransferRoutes account={account}>
                     <Route
                         path={routes.ACCOUNTS_SCHEDULED_TRANSFER}
-                        component={BuildSchedule}
+                        component={
+                            hasCredentials && accountInfo
+                                ? BuildSchedule
+                                : ToAccounts
+                        }
                     />
                     <Route path={routes.ACCOUNTS_ADDRESS}>
                         <ShowAccountAddress account={account} asCard />
@@ -63,7 +74,11 @@ export default withAccountSync(function DetailsPage() {
                         <ShowReleaseSchedule accountInfo={accountInfo} />
                     </Route>
                     <Route path={routes.ACCOUNTS_CREATESCHEDULEDTRANSFER}>
-                        <ScheduleTransfer account={account} />
+                        {hasCredentials && accountInfo ? (
+                            <ScheduleTransfer account={account} />
+                        ) : (
+                            <ToAccounts />
+                        )}
                     </Route>
                     <Route path={routes.ACCOUNTS_CREDENTIAL_INFORMATION}>
                         <CredentialInformation
@@ -73,24 +88,46 @@ export default withAccountSync(function DetailsPage() {
                     </Route>
                     <Route
                         path={routes.ACCOUNTS_ADD_BAKER}
-                        component={AddBaker}
+                        component={
+                            hasCredentials && !isBaker && accountInfo
+                                ? AddBaker
+                                : ToAccounts
+                        }
                     />
-                    <Route
-                        path={routes.ACCOUNTS_REMOVE_BAKER}
-                        component={RemoveBaker}
-                    />
-                    <Route
-                        path={routes.ACCOUNTS_UPDATE_BAKER_KEYS}
-                        component={UpdateBakerKeys}
-                    />
-                    <Route
-                        path={routes.ACCOUNTS_UPDATE_BAKER_STAKE}
-                        component={UpdateBakerStake}
-                    />
-                    <Route
-                        path={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}
-                        component={UpdateBakerRestake}
-                    />
+                    <Route path={routes.ACCOUNTS_REMOVE_BAKER}>
+                        {hasCredentials &&
+                        isBaker &&
+                        accountInfo &&
+                        !hasBakerCooldown ? (
+                            <RemoveBaker />
+                        ) : (
+                            <ToAccounts />
+                        )}
+                    </Route>
+                    <Route path={routes.ACCOUNTS_UPDATE_BAKER_KEYS}>
+                        {hasCredentials && isBaker && accountInfo ? (
+                            <UpdateBakerKeys />
+                        ) : (
+                            <ToAccounts />
+                        )}
+                    </Route>
+                    <Route path={routes.ACCOUNTS_UPDATE_BAKER_STAKE}>
+                        {hasCredentials &&
+                        isBaker &&
+                        accountInfo &&
+                        !hasBakerCooldown ? (
+                            <UpdateBakerStake />
+                        ) : (
+                            <ToAccounts />
+                        )}
+                    </Route>
+                    <Route path={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}>
+                        {hasCredentials && isBaker && accountInfo ? (
+                            <UpdateBakerRestake />
+                        ) : (
+                            <ToAccounts />
+                        )}
+                    </Route>
 
                     <Route path={routes.ACCOUNTS}>
                         {viewingShielded && !account.allDecrypted ? (
