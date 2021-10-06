@@ -111,7 +111,11 @@ export default function UpdateBakerKeys() {
     return (
         <Switch>
             <Route path={routes.ACCOUNTS_EXPORT_BAKER_KEYS}>
-                <GenerateBakerKeys header={header} onContinue={next} />
+                <GenerateBakerKeys
+                    header={header}
+                    onContinue={next}
+                    keyVariant="UPDATE"
+                />
             </Route>
             <Route component={UpdateBakerKeysIntro} />
         </Switch>

@@ -42,6 +42,7 @@ export default withAccountSync(function DetailsPage() {
     );
     const isBaker = Boolean(accountInfo?.accountBaker);
     const hasBakerCooldown = Boolean(accountInfo?.accountBaker?.pendingChange);
+    const canTransfer = hasCredentials && Boolean(accountInfo);
 
     if (!account) {
         return null;
@@ -61,11 +62,7 @@ export default withAccountSync(function DetailsPage() {
                 <BasicTransferRoutes account={account}>
                     <Route
                         path={routes.ACCOUNTS_SCHEDULED_TRANSFER}
-                        component={
-                            hasCredentials && accountInfo
-                                ? BuildSchedule
-                                : ToAccounts
-                        }
+                        component={canTransfer ? BuildSchedule : ToAccounts}
                     />
                     <Route path={routes.ACCOUNTS_ADDRESS}>
                         <ShowAccountAddress account={account} asCard />
@@ -89,40 +86,32 @@ export default withAccountSync(function DetailsPage() {
                     <Route
                         path={routes.ACCOUNTS_ADD_BAKER}
                         component={
-                            hasCredentials && !isBaker && accountInfo
-                                ? AddBaker
-                                : ToAccounts
+                            canTransfer && !isBaker ? AddBaker : ToAccounts
                         }
                     />
                     <Route path={routes.ACCOUNTS_REMOVE_BAKER}>
-                        {hasCredentials &&
-                        isBaker &&
-                        accountInfo &&
-                        !hasBakerCooldown ? (
+                        {canTransfer && isBaker && !hasBakerCooldown ? (
                             <RemoveBaker />
                         ) : (
                             <ToAccounts />
                         )}
                     </Route>
                     <Route path={routes.ACCOUNTS_UPDATE_BAKER_KEYS}>
-                        {hasCredentials && isBaker && accountInfo ? (
+                        {canTransfer && isBaker ? (
                             <UpdateBakerKeys />
                         ) : (
                             <ToAccounts />
                         )}
                     </Route>
                     <Route path={routes.ACCOUNTS_UPDATE_BAKER_STAKE}>
-                        {hasCredentials &&
-                        isBaker &&
-                        accountInfo &&
-                        !hasBakerCooldown ? (
+                        {canTransfer && isBaker && !hasBakerCooldown ? (
                             <UpdateBakerStake />
                         ) : (
                             <ToAccounts />
                         )}
                     </Route>
                     <Route path={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}>
-                        {hasCredentials && isBaker && accountInfo ? (
+                        {canTransfer && isBaker ? (
                             <UpdateBakerRestake />
                         ) : (
                             <ToAccounts />

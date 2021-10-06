@@ -6,16 +6,22 @@ import SimpleErrorModal from '~/components/SimpleErrorModal';
 import Card from '~/cross-app-components/Card';
 import { chosenAccountSelector } from '~/features/AccountSlice';
 import { useAsyncMemo } from '~/utils/hooks';
+import { BakerKeyVariants } from '~/utils/rust.worker';
 import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
 
 import styles from './AccountDetailsPage.module.scss';
 
 interface Props {
     header: string;
+    keyVariant: BakerKeyVariants;
     onContinue(keys: BakerKeys): void;
 }
 
-export default function GenerateBakerKeys({ onContinue, header }: Props) {
+export default function GenerateBakerKeys({
+    onContinue,
+    header,
+    keyVariant,
+}: Props) {
     const account = useSelector(chosenAccountSelector);
     const dispatch = useDispatch();
     const [error, setError] = useState<string>();
@@ -25,10 +31,10 @@ export default function GenerateBakerKeys({ onContinue, header }: Props) {
             if (!account) {
                 return undefined;
             }
-            return generateBakerKeys(account?.address, 'ADD');
+            return generateBakerKeys(account?.address, keyVariant);
         },
         () => setError("Couldn't generate baker keys"),
-        [account?.address]
+        [account?.address, keyVariant]
     );
 
     if (!account) {

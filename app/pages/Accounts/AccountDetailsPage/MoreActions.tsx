@@ -93,15 +93,18 @@ export default function MoreActions({ account, accountInfo }: Props) {
             )}
             {accountHasDeployedCredentials && isBaker && (
                 <>
-                    {hasBakerCooldown || (
-                        <ButtonNavLink
-                            className="mB20:notLast flex width100"
-                            to={routes.ACCOUNTS_REMOVE_BAKER}
-                            disabled={!accountInfo}
-                        >
-                            Remove baker
-                        </ButtonNavLink>
-                    )}
+                    <ButtonNavLink
+                        className="mB20:notLast flex width100"
+                        to={routes.ACCOUNTS_REMOVE_BAKER}
+                        disabled={!accountInfo || hasBakerCooldown}
+                        title={
+                            hasBakerCooldown
+                                ? 'Account has pending baker change.'
+                                : undefined
+                        }
+                    >
+                        Remove baker
+                    </ButtonNavLink>
                     <ButtonNavLink
                         className="mB20:notLast flex width100"
                         to={routes.ACCOUNTS_UPDATE_BAKER_KEYS}
@@ -109,15 +112,18 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     >
                         Update baker keys
                     </ButtonNavLink>
-                    {hasBakerCooldown || (
-                        <ButtonNavLink
-                            className="mB20:notLast flex width100"
-                            to={routes.ACCOUNTS_UPDATE_BAKER_STAKE}
-                            disabled={!accountInfo}
-                        >
-                            Update baker stake
-                        </ButtonNavLink>
-                    )}
+                    <ButtonNavLink
+                        className="mB20:notLast flex width100"
+                        to={routes.ACCOUNTS_UPDATE_BAKER_STAKE}
+                        disabled={!accountInfo || hasBakerCooldown}
+                        title={
+                            hasBakerCooldown
+                                ? 'Account has pending baker change.'
+                                : undefined
+                        }
+                    >
+                        Update baker stake
+                    </ButtonNavLink>
                     <ButtonNavLink
                         className="mB20:notLast flex width100"
                         to={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}
