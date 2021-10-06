@@ -2,10 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { displayAsGTU } from '~/utils/gtu';
 
-import {
-    getScheduledTransferAmount,
-    lookupName,
-} from '~/utils/transactionHelpers';
+import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
+import { lookupName } from '~/utils/addressBookHelpers';
 import {
     AccountTransaction,
     instanceOfSimpleTransfer,

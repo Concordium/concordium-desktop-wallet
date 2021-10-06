@@ -16,7 +16,7 @@ import {
     isFutureDate,
 } from './timeHelpers';
 import { getTransactionKindCost } from './transactionCosts';
-import { lookupName } from './transactionHelpers';
+import { lookupName } from './addressBookHelpers';
 import {
     AccountInfo,
     Amount,
