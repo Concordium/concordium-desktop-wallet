@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.2.0
+
 ### Added
 
 -   Support for macOS running on M1 chipsets through Rosetta.
