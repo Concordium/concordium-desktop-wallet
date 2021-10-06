@@ -14,9 +14,11 @@ import { stringify } from '~/utils/JSONHelper';
 import { createUpdateBakerRestakeEarningsTransaction } from '~/utils/transactionHelpers';
 import { EqualRecord } from '~/utils/types';
 import { SubmitTransferLocationState } from '../SubmitTransfer/SubmitTransfer';
+import Label from '~/components/Label';
+import { getEnergyToMicroGtuRate } from '~/node/nodeHelpers';
+import { multiplyFraction } from '~/utils/basicHelpers';
 
 import styles from './AccountDetailsPage.module.scss';
-import Label from '~/components/Label';
 
 interface FormModel {
     restake: boolean;
@@ -37,10 +39,16 @@ export default function UpdateBakerRestake() {
             }
 
             const { nonce } = await getNextAccountNonce(account.address);
+            const exchangeRate = await getEnergyToMicroGtuRate();
+
             const transaction = await createUpdateBakerRestakeEarningsTransaction(
                 account.address,
                 { restakeEarnings: restake },
                 nonce
+            );
+            transaction.estimatedFee = multiplyFraction(
+                exchangeRate,
+                transaction.energyAmount
             );
 
             const state: SubmitTransferLocationState = {

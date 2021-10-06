@@ -26,6 +26,7 @@ import { stringify } from '~/utils/JSONHelper';
 import { createUpdateBakerStakeTransaction } from '~/utils/transactionHelpers';
 import { EqualRecord, NotOptional, TransactionKindId } from '~/utils/types';
 import { SubmitTransferLocationState } from '../SubmitTransfer/SubmitTransfer';
+import { multiplyFraction } from '~/utils/basicHelpers';
 
 import styles from './AccountDetailsPage.module.scss';
 
@@ -65,6 +66,11 @@ const UpdateBakerStakeForm = ensureChainData(
                     nonce
                 );
 
+                transaction.estimatedFee = multiplyFraction(
+                    exchangeRate,
+                    transaction.energyAmount
+                );
+
                 const state: SubmitTransferLocationState = {
                     account,
                     transaction: stringify(transaction),
@@ -78,7 +84,7 @@ const UpdateBakerStakeForm = ensureChainData(
 
                 dispatch(push({ pathname: routes.SUBMITTRANSFER, state }));
             },
-            [account, dispatch]
+            [account, dispatch, exchangeRate]
         );
 
         if (!account) {

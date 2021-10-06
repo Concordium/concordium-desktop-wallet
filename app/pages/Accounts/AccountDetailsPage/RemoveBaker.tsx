@@ -11,6 +11,8 @@ import { createRemoveBakerTransaction } from '~/utils/transactionHelpers';
 import { SubmitTransferLocationState } from '../SubmitTransfer/SubmitTransfer';
 
 import styles from './AccountDetailsPage.module.scss';
+import { multiplyFraction } from '~/utils/basicHelpers';
+import { getEnergyToMicroGtuRate } from '~/node/nodeHelpers';
 
 export default function RemoveBaker() {
     const account = useSelector(chosenAccountSelector);
@@ -25,6 +27,12 @@ export default function RemoveBaker() {
         const transaction = await createRemoveBakerTransaction(
             account.address,
             nonce
+        );
+        const exchangeRate = await getEnergyToMicroGtuRate();
+
+        transaction.estimatedFee = multiplyFraction(
+            exchangeRate,
+            transaction.energyAmount
         );
 
         const state: SubmitTransferLocationState = {

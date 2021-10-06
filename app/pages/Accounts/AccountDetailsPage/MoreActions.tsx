@@ -91,42 +91,42 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     Add baker
                 </ButtonNavLink>
             )}
-            {/* {accountHasDeployedCredentials && isBaker && ( */}
-            <>
-                {hasBakerCooldown || (
+            {accountHasDeployedCredentials && isBaker && (
+                <>
+                    {hasBakerCooldown || (
+                        <ButtonNavLink
+                            className="mB20:notLast flex width100"
+                            to={routes.ACCOUNTS_REMOVE_BAKER}
+                            disabled={!accountInfo}
+                        >
+                            Remove baker
+                        </ButtonNavLink>
+                    )}
                     <ButtonNavLink
                         className="mB20:notLast flex width100"
-                        to={routes.ACCOUNTS_REMOVE_BAKER}
+                        to={routes.ACCOUNTS_UPDATE_BAKER_KEYS}
                         disabled={!accountInfo}
                     >
-                        Remove baker
+                        Update baker keys
                     </ButtonNavLink>
-                )}
-                <ButtonNavLink
-                    className="mB20:notLast flex width100"
-                    to={routes.ACCOUNTS_UPDATE_BAKER_KEYS}
-                    disabled={!accountInfo}
-                >
-                    Update baker keys
-                </ButtonNavLink>
-                {hasBakerCooldown || (
+                    {hasBakerCooldown || (
+                        <ButtonNavLink
+                            className="mB20:notLast flex width100"
+                            to={routes.ACCOUNTS_UPDATE_BAKER_STAKE}
+                            disabled={!accountInfo}
+                        >
+                            Update baker stake
+                        </ButtonNavLink>
+                    )}
                     <ButtonNavLink
                         className="mB20:notLast flex width100"
-                        to={routes.ACCOUNTS_UPDATE_BAKER_STAKE}
+                        to={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}
                         disabled={!accountInfo}
                     >
-                        Update baker stake
+                        Update baker restake earnings
                     </ButtonNavLink>
-                )}
-                <ButtonNavLink
-                    className="mB20:notLast flex width100"
-                    to={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}
-                    disabled={!accountInfo}
-                >
-                    Update baker restake earnings
-                </ButtonNavLink>
-            </>
-            {/* )} */}
+                </>
+            )}
         </>
     );
 }

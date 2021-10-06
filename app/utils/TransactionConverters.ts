@@ -21,11 +21,6 @@ import {
     EncryptedTransferWithMemo,
     instanceOfScheduledTransferWithMemo,
     instanceOfEncryptedTransferWithMemo,
-    AddBaker,
-    RemoveBaker,
-    UpdateBakerStake,
-    UpdateBakerKeys,
-    UpdateBakerRestakeEarnings,
     instanceOfAddBaker,
     instanceOfRemoveBaker,
     instanceOfUpdateBakerStake,
@@ -302,44 +297,43 @@ function convertEncryptedTransferWithMemo(
     };
 }
 
-function convertAddBakerTransaction(transaction: AddBaker): TypeSpecific {
+function convertAddBakerTransaction(): TypeSpecific {
     return {
         transactionKind: TransactionKindString.AddBaker,
-        toAddress: transaction.sender,
+        subtotal: '0',
+        toAddress: '',
     };
 }
 
-function convertRemoveBakerTransaction(transaction: RemoveBaker): TypeSpecific {
+function convertRemoveBakerTransaction(): TypeSpecific {
     return {
         transactionKind: TransactionKindString.RemoveBaker,
-        toAddress: transaction.sender,
+        subtotal: '0',
+        toAddress: '',
     };
 }
 
-function convertUpdateBakerStakeTransaction(
-    transaction: UpdateBakerStake
-): TypeSpecific {
+function convertUpdateBakerStakeTransaction(): TypeSpecific {
     return {
         transactionKind: TransactionKindString.UpdateBakerStake,
-        toAddress: transaction.sender,
+        subtotal: '0',
+        toAddress: '',
     };
 }
 
-function convertUpdateBakerKeysTransaction(
-    transaction: UpdateBakerKeys
-): TypeSpecific {
+function convertUpdateBakerKeysTransaction(): TypeSpecific {
     return {
         transactionKind: TransactionKindString.UpdateBakerKeys,
-        toAddress: transaction.sender,
+        subtotal: '0',
+        toAddress: '',
     };
 }
 
-function convertUpdateBakerRestakeTransaction(
-    transaction: UpdateBakerRestakeEarnings
-): TypeSpecific {
+function convertUpdateBakerRestakeTransaction(): TypeSpecific {
     return {
         transactionKind: TransactionKindString.UpdateBakerRestakeEarnings,
-        toAddress: transaction.sender,
+        subtotal: '0',
+        toAddress: '',
     };
 }
 
@@ -375,15 +369,15 @@ export async function convertAccountTransaction(
     } else if (instanceOfEncryptedTransferWithMemo(transaction)) {
         typeSpecific = convertEncryptedTransferWithMemo(transaction);
     } else if (instanceOfAddBaker(transaction)) {
-        typeSpecific = convertAddBakerTransaction(transaction);
+        typeSpecific = convertAddBakerTransaction();
     } else if (instanceOfRemoveBaker(transaction)) {
-        typeSpecific = convertRemoveBakerTransaction(transaction);
+        typeSpecific = convertRemoveBakerTransaction();
     } else if (instanceOfUpdateBakerStake(transaction)) {
-        typeSpecific = convertUpdateBakerStakeTransaction(transaction);
+        typeSpecific = convertUpdateBakerStakeTransaction();
     } else if (instanceOfUpdateBakerKeys(transaction)) {
-        typeSpecific = convertUpdateBakerKeysTransaction(transaction);
+        typeSpecific = convertUpdateBakerKeysTransaction();
     } else if (instanceOfUpdateBakerRestakeEarnings(transaction)) {
-        typeSpecific = convertUpdateBakerRestakeTransaction(transaction);
+        typeSpecific = convertUpdateBakerRestakeTransaction();
     } else {
         throw new Error('unsupported transaction type - please implement');
     }

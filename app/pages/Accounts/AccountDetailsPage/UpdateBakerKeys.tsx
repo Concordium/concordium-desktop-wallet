@@ -13,6 +13,8 @@ import { getNextAccountNonce } from '~/node/nodeRequests';
 import { createUpdateBakerKeysTransaction } from '~/utils/transactionHelpers';
 import { SubmitTransferLocationState } from '../SubmitTransfer/SubmitTransfer';
 import { stringify } from '~/utils/JSONHelper';
+import { multiplyFraction } from '~/utils/basicHelpers';
+import { getEnergyToMicroGtuRate } from '~/node/nodeHelpers';
 
 import styles from './AccountDetailsPage.module.scss';
 
@@ -66,12 +68,19 @@ export default function UpdateBakerKeys() {
             };
 
             const accountNonce = await getNextAccountNonce(account.address);
+            const exchangeRate = await getEnergyToMicroGtuRate();
 
-            return createUpdateBakerKeysTransaction(
+            const transaction = createUpdateBakerKeysTransaction(
                 account.address,
                 payload,
                 accountNonce.nonce
             );
+            transaction.estimatedFee = multiplyFraction(
+                exchangeRate,
+                transaction.energyAmount
+            );
+
+            return transaction;
         },
         [account?.address]
     );

@@ -6,7 +6,9 @@ import { Route, Switch } from 'react-router';
 import { AddBakerForm } from '~/components/AddBakerDetailsForm';
 import routes from '~/constants/routes.json';
 import { chosenAccountSelector } from '~/features/AccountSlice';
+import { getEnergyToMicroGtuRate } from '~/node/nodeHelpers';
 import { getNextAccountNonce } from '~/node/nodeRequests';
+import { multiplyFraction } from '~/utils/basicHelpers';
 import { toMicroUnits } from '~/utils/gtu';
 import { stringify } from '~/utils/JSONHelper';
 import { BakerKeys } from '~/utils/rustInterface';
@@ -62,12 +64,18 @@ export default function AddBaker({ location }: Props) {
             };
 
             const accountNonce = await getNextAccountNonce(account.address);
-
-            return createAddBakerTransaction(
+            const transaction = createAddBakerTransaction(
                 account.address,
                 payload,
                 accountNonce.nonce
             );
+            const exchangeRate = await getEnergyToMicroGtuRate();
+            transaction.estimatedFee = multiplyFraction(
+                exchangeRate,
+                transaction.energyAmount
+            );
+
+            return transaction;
         },
         [account?.address, bakerData]
     );

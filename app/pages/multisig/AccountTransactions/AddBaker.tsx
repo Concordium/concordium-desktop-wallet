@@ -49,10 +49,10 @@ import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
-
-import styles from './MultisignatureAccountTransactions.module.scss';
 import AddBakerDetailsForm from '~/components/AddBakerDetailsForm';
 import ExportBakerKeys from './ExportBakerKeys';
+
+import styles from './MultisignatureAccountTransactions.module.scss';
 
 const pageTitle = 'Multi Signature Transactions | Add Baker';
 

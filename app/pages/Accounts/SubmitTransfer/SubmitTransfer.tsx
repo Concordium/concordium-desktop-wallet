@@ -227,21 +227,25 @@ export default function SubmitTransfer({ location }: Props) {
         const response = await sendTransaction(serializedTransaction);
 
         if (response.getValue()) {
-            const convertedTransaction = await addPendingTransaction(
-                transaction,
-                transactionHash
-            );
-            monitorTransactionStatus(dispatch, convertedTransaction);
+            try {
+                // If an error happens here, it only means the transaction couldn't be added as pending, so no reason to show user an error.
+                const convertedTransaction = await addPendingTransaction(
+                    transaction,
+                    transactionHash
+                );
 
-            const confirmedStateWithHash = {
-                transactionHash,
-                ...confirmed.state,
-            };
-            const confirmedWithHash = {
-                ...confirmed,
-                state: confirmedStateWithHash,
-            };
-            dispatch(push(confirmedWithHash));
+                monitorTransactionStatus(dispatch, convertedTransaction);
+            } finally {
+                const confirmedStateWithHash = {
+                    transactionHash,
+                    ...confirmed.state,
+                };
+                const confirmedWithHash = {
+                    ...confirmed,
+                    state: confirmedStateWithHash,
+                };
+                dispatch(push(confirmedWithHash));
+            }
         } else {
             setRejected(true);
         }
