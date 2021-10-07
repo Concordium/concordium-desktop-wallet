@@ -2,6 +2,7 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router';
 import clsx from 'clsx';
+import EditIcon from '@resources/svg/edit.svg';
 import {
     addressBookSelector,
     removeFromAddressBook,
@@ -10,8 +11,6 @@ import DeleteAddress from '../DeleteAddress';
 import UpsertAddress from '~/components/UpsertAddress';
 import Card from '~/cross-app-components/Card';
 import DisplayAddress from '~/components/DisplayAddress';
-
-import EditIcon from '~/../resources/svg/edit.svg';
 import CopyButton from '~/components/CopyButton';
 
 import styles from './AddressBookSelected.module.scss';
@@ -34,11 +33,11 @@ export default function AddressBookElementView() {
                     <h2 className={styles.heading}>{chosenEntry.name}</h2>
                     <span className={styles.actions}>
                         <UpsertAddress
+                            className={styles.edit}
                             initialValues={chosenEntry}
-                            clear
                             readOnly={chosenEntry.readOnly}
                         >
-                            <EditIcon width="22" className={styles.icon} />
+                            <EditIcon width="22" />
                         </UpsertAddress>
                         {!chosenEntry.readOnly && (
                             <DeleteAddress

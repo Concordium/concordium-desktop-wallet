@@ -1,9 +1,15 @@
 @import 'config/bundle';
 
 .root {
-    transition: transform $anim-easing $anim-timing;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 4px;
+    background-color: transparent;
+    transition: background-color $anim-timing $anim-easing;
 
     &:hover:not(:disabled) {
-        transform: scale(1.1);
+        background-color: rgba(0, 0, 0, 0.03);
     }
 }

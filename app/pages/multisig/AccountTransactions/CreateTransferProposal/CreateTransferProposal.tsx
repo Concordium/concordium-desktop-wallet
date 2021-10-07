@@ -327,7 +327,6 @@ function CreateTransferProposal({
                                             onClickedRecipient={continueAction}
                                         />
                                         <UpsertAddress
-                                            clear
                                             className={styles.addRecipient}
                                             onSubmit={(e) => {
                                                 setRecipient(e);
@@ -385,7 +384,7 @@ function CreateTransferProposal({
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
-                                        filter={isMultiSig}
+                                        // filter={isMultiSig}
                                         onAccountClicked={continueAction}
                                         messageWhenEmpty="There are no accounts that require multiple signatures"
                                     />
