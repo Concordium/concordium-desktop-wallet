@@ -1,6 +1,6 @@
 import React, { ComponentType, useState, useEffect } from 'react';
-import { AccountTransaction } from '../../utils/types';
-import { lookupName } from '../../utils/transactionHelpers';
+import { AccountTransaction } from '~/utils/types';
+import { lookupName } from '~/utils/addressBookHelpers';
 
 export interface WithNames {
     fromName?: string;

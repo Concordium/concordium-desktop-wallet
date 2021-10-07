@@ -29,7 +29,11 @@ import {
     IncomingTransaction,
     Account,
 } from '../utils/types';
-import { isSuccessfulTransaction } from '../utils/transactionHelpers';
+import {
+    isSuccessfulTransaction,
+    isShieldedBalanceTransaction,
+    isUnshieldedBalanceTransaction,
+} from '../utils/transactionHelpers';
 import {
     convertIncomingTransaction,
     convertAccountTransaction,
@@ -175,23 +179,6 @@ export const reloadTransactions = createAsyncThunk(
 );
 
 /**
- * Determine whether the transaction affects shielded balance.
- */
-export function isShieldedBalanceTransaction(
-    transaction: Partial<TransferTransaction>
-) {
-    switch (transaction.transactionKind) {
-        case TransactionKindString.EncryptedAmountTransfer:
-        case TransactionKindString.EncryptedAmountTransferWithMemo:
-        case TransactionKindString.TransferToEncrypted:
-        case TransactionKindString.TransferToPublic:
-            return true;
-        default:
-            return false;
-    }
-}
-
-/**
  * Fetches a batch of the newest transactions of the given account,
  * and saves them to the database, and updates the allDecrypted,
  * if any shielded balance transactions were loaded.
@@ -281,7 +268,6 @@ export const updateTransactions = createAsyncThunk<
         { onFirstLoop, onError },
         { getState, dispatch, signal, requestId }
     ) => {
-        latestUpdateRequestId = requestId;
         const release = await updateLock.acquire();
 
         const state = getState() as RootState;
@@ -422,7 +408,8 @@ const transactionSlice = createSlice({
             }
         });
 
-        builder.addCase(updateTransactions.pending, (state) => {
+        builder.addCase(updateTransactions.pending, (state, { meta }) => {
+            latestUpdateRequestId = meta.requestId;
             state.synchronizing = true;
         });
 
@@ -450,8 +437,10 @@ const transactionSlice = createSlice({
 
         builder.addMatcher(
             isAnyOf(updateTransactions.rejected, updateTransactions.fulfilled),
-            (state) => {
-                state.synchronizing = false;
+            (state, { meta }) => {
+                if (meta.requestId === latestUpdateRequestId) {
+                    state.synchronizing = false;
+                }
             }
         );
 
@@ -517,22 +506,6 @@ export async function decryptTransactions(
                 }
             )
         )
-    );
-}
-
-/**
- * Determine whether the transaction affects unshielded balance.
- */
-function isUnshieldedBalanceTransaction(
-    transaction: TransferTransaction,
-    currentAddress: string
-) {
-    return !(
-        [
-            TransactionKindString.EncryptedAmountTransfer,
-            TransactionKindString.EncryptedAmountTransferWithMemo,
-        ].includes(transaction.transactionKind) &&
-        transaction.fromAddress !== currentAddress
     );
 }
 

@@ -171,15 +171,17 @@ interface TransactionFiltersProps {
 const TransactionFilters = forwardRef<
     TransactionFiltersRef,
     TransactionFiltersProps
->(({ values = {} }, ref) => {
-    const { fromDate, toDate } = values;
+>(({ values }, ref) => {
+    const fromDate = values?.fromDate;
+    const toDate = values?.toDate;
 
     const fromDateRef = useRef<InputTimestampRef>(null);
     const toDateRef = useRef<InputTimestampRef>(null);
 
-    const booleanFilters = useMemo(() => getActiveBooleanFilters(values), [
-        values,
-    ]);
+    const booleanFilters = useMemo(
+        () => getActiveBooleanFilters(values || {}),
+        [values]
+    );
 
     const defaultValues = useMemo<FilterForm>(
         () => ({
@@ -230,7 +232,7 @@ const TransactionFilters = forwardRef<
                     ...acc,
                     ...getGroupValues(filterGroup, v as boolean),
                 };
-            }, values);
+            }, values || {});
 
             cb(newFilter);
         },

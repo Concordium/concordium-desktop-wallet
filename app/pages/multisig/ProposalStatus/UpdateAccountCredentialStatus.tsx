@@ -1,6 +1,6 @@
 /* eslint-disable promise/catch-or-return */
 import React, { useEffect, useState } from 'react';
-import { lookupName } from '~/utils/transactionHelpers';
+import { lookupName } from '~/utils/addressBookHelpers';
 import {
     UpdateAccountCredentials,
     MultiSignatureTransactionStatus,

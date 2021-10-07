@@ -53,16 +53,10 @@ export type GRPC = {
     nodeConsensusAndGlobal: (address: string, port: string) => Promise<any>;
 };
 
-export interface SaveFileData {
-    filename: string;
-    data: Buffer;
-}
-
 export type FileMethods = {
     databaseExists: () => Promise<boolean>;
     saveFile: (filepath: string, data: string | Buffer) => Promise<boolean>;
     saveFileDialog: (opts: SaveDialogOptions) => Promise<SaveDialogReturnValue>;
-    saveZipFileDialog: (files: SaveFileData[]) => Promise<false | void>;
     openFileDialog: (opts: OpenDialogOptions) => Promise<OpenDialogReturnValue>;
 };
 
@@ -343,6 +337,20 @@ export interface AutoUpdateMethods {
     quitAndInstall(): void;
 }
 
+export interface AccountReportMethods {
+    single: (
+        fileName: string,
+        account: Account,
+        filters: TransactionFilter
+    ) => Promise<void>;
+    multiple: (
+        fileName: string,
+        accounts: Account[],
+        filters: TransactionFilter
+    ) => Promise<void>;
+    abort: () => void;
+}
+
 export interface WindowFunctions {
     addListener: Listen;
     removeListener: Listen;
@@ -360,4 +368,5 @@ export interface WindowFunctions {
     removeAllListeners: (channel: string) => void;
     platform: NodeJS.Platform;
     autoUpdate: AutoUpdateMethods;
+    accountReport: AccountReportMethods;
 }
