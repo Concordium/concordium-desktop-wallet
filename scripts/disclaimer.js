@@ -3,7 +3,7 @@ const readline = require('readline');
 const fs = require('fs');
 
 /**
- * This script takes a file with generated license disclaimers (prodcued by
+ * This script takes a file with generated license disclaimers (produced by
  * yarn --prod true licenses generate-disclaimer), and re-formats
  * it into a format using reStructuredText.
  */
@@ -47,7 +47,7 @@ readInterface.on('line', (line) => {
         );
         const title = line.substring(56, titleEndIndex);
         writeHeading(title, output, '-');
-        output.write('\n.. code-block::\n');
+        output.write('\n.. code-block:: console\n');
     } else if (
         line ===
         'THE FOLLOWING SETS FORTH ATTRIBUTION NOTICES FOR THIRD PARTY SOFTWARE THAT MAY BE CONTAINED IN PORTIONS OF THE CONCORDIUM DESKTOP WALLET PRODUCT.'
@@ -57,6 +57,11 @@ readInterface.on('line', (line) => {
             'The following sets forth attribution notices for third party software that may be contained in portions of the Concordium Desktop Wallet product.'
         );
     } else {
-        output.write(`   ${line}\n`);
+        const lineWithNoSpacesAtEnd = line.replace(/\s*$/, '');
+        if (lineWithNoSpacesAtEnd === '') {
+            output.write('\n');
+        } else {
+            output.write(`   ${lineWithNoSpacesAtEnd}\n`);
+        }
     }
 });
