@@ -26,7 +26,6 @@
 }
 
 .actionImage {
-    composes: svgOffBlack from global;
     @include svgColorTransition;
 
     .actionButton:hover & {
