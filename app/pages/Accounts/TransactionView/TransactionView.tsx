@@ -46,7 +46,7 @@ function CopiableListElement({
                     </p>
                 </div>
             }
-            right={<CopyButton value={value} />}
+            right={<CopyButton className={styles.copyButton} value={value} />}
         />
     );
 }

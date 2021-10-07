@@ -16,7 +16,6 @@ import {
     updateExternalCredential,
 } from '~/features/CredentialSlice';
 import InputModal from '~/components/InputModal';
-import Button from '~/cross-app-components/Button';
 import {
     CREDENTIAL_NOTE_MAX_LENGTH,
     getNoteForOwnCredential,
@@ -25,6 +24,7 @@ import { identitiesSelector } from '~/features/IdentitySlice';
 
 import styles from './CredentialInformation.module.scss';
 import DisplayIdentityAttributes from '../DisplayIdentityAttributes';
+import IconButton from '~/cross-app-components/IconButton';
 
 interface CredentialOfAccount
     extends Omit<CredentialDeploymentInformation, 'regId'> {
@@ -120,36 +120,32 @@ export default function CredentialInformation({ account, accountInfo }: Props) {
                             left="Note:"
                             right={
                                 <>
-                                    {c.isOwn || (
-                                        <InputModal
-                                            open={showEditNote === c.credId}
-                                            onOpen={() =>
-                                                setShowEditNote(c.credId)
-                                            }
-                                            onClose={() =>
-                                                setShowEditNote(undefined)
-                                            }
-                                            trigger={
-                                                <Button
-                                                    className={styles.editNote}
-                                                    clear
-                                                >
-                                                    <EditIcon />
-                                                </Button>
-                                            }
-                                            title="Set note for credential"
-                                            buttonText="Submit"
-                                            placeholder="Add note"
-                                            buttonOnClick={submitNote(c.credId)}
-                                            defaultValue={c.note}
-                                            validationRules={{
-                                                maxLength: {
-                                                    value: CREDENTIAL_NOTE_MAX_LENGTH,
-                                                    message: `Cannot be longer than ${CREDENTIAL_NOTE_MAX_LENGTH} characters`,
-                                                },
-                                            }}
-                                        />
-                                    )}
+                                    {/* {c.isOwn || ( */}
+                                    <InputModal
+                                        open={showEditNote === c.credId}
+                                        onOpen={() => setShowEditNote(c.credId)}
+                                        onClose={() =>
+                                            setShowEditNote(undefined)
+                                        }
+                                        trigger={
+                                            <IconButton
+                                                className={styles.editNote}
+                                            >
+                                                <EditIcon />
+                                            </IconButton>
+                                        }
+                                        title="Set note for credential"
+                                        buttonText="Submit"
+                                        placeholder="Add note"
+                                        buttonOnClick={submitNote(c.credId)}
+                                        defaultValue={c.note}
+                                        validationRules={{
+                                            maxLength: {
+                                                value: CREDENTIAL_NOTE_MAX_LENGTH,
+                                                message: `Cannot be longer than ${CREDENTIAL_NOTE_MAX_LENGTH} characters`,
+                                            },
+                                        }}
+                                    />
                                     {c.note || <i>No note for credential</i>}
                                 </>
                             }
