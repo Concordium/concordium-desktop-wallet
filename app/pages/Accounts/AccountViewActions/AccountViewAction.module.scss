@@ -26,5 +26,10 @@
 }
 
 .actionImage {
-    margin-bottom: 5px;
+    composes: svgOffBlack from global;
+    @include svgColorTransition;
+
+    .actionButton:hover & {
+        @include svgColor($color-pale-blue);
+    }
 }

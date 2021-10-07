@@ -1,4 +1,4 @@
-import React, { ChangeEventHandler, useCallback } from 'react';
+import React from 'react';
 import { NavLink } from 'react-router-dom';
 import clsx from 'clsx';
 
@@ -6,7 +6,6 @@ import { ClassNameAndStyle } from '../../utils/types';
 import LogoIcon from '../../../resources/svg/logo.svg';
 
 import styles from './Sidebar.module.scss';
-import Switch from '../Switch';
 
 export interface SidebarLink {
     route: string;
@@ -14,40 +13,23 @@ export interface SidebarLink {
     title: string;
 }
 
-export interface SidebarProps<THasSwitch extends boolean>
-    extends ClassNameAndStyle {
+export interface SidebarProps extends ClassNameAndStyle {
     links: SidebarLink[];
     version?: string;
     child?: JSX.Element;
     disabled: boolean;
-    hasThemeSwitch?: THasSwitch;
-    isDark?: THasSwitch extends true ? boolean : undefined;
-    onThemeChange?: THasSwitch extends true
-        ? (isDark: boolean) => void
-        : undefined;
+    logoClassName?: string;
 }
 
-export default function Sidebar<THasSwitch extends boolean = false>({
+export default function Sidebar({
     links,
     className,
     style,
     disabled = false,
     version,
-    hasThemeSwitch,
-    isDark = false,
+    logoClassName,
     child,
-    onThemeChange,
-}: SidebarProps<THasSwitch>) {
-    const handleSwitchToggle: ChangeEventHandler<HTMLInputElement> = useCallback(
-        (e) => {
-            if (onThemeChange) {
-                onThemeChange(e.target.checked);
-            }
-        },
-
-        [onThemeChange]
-    );
-
+}: SidebarProps) {
     const handleClick = (e: React.MouseEvent) => {
         if (disabled) {
             e.preventDefault();
@@ -58,7 +40,7 @@ export default function Sidebar<THasSwitch extends boolean = false>({
         <nav className={clsx(styles.root, className)} style={style}>
             <div className={styles.items}>
                 <div className={styles.item}>
-                    <LogoIcon height="57" />
+                    <LogoIcon height="57" className={clsx(logoClassName)} />
                 </div>
                 {links.map((l) => (
                     <NavLink
@@ -78,9 +60,6 @@ export default function Sidebar<THasSwitch extends boolean = false>({
             </div>
             {child}
             <section className={styles.bottom}>
-                {hasThemeSwitch && (
-                    <Switch checked={isDark} onChange={handleSwitchToggle} />
-                )}
                 {version && <div>V {version}</div>}
             </section>
         </nav>
