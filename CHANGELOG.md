@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+-   Auxiliary data in an Update Protocol transaction is now optional.
+
 ## 1.2.0
 
 ### Added
