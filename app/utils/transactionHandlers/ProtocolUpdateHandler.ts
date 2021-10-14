@@ -44,13 +44,17 @@ export default class ProtocolUpdateHandler
         const sequenceNumber =
             blockSummary.updates.updateQueues.protocol.nextSequenceNumber;
 
-        const file = files.item(0);
-
-        if (!file) {
-            throw new Error('No auxiliary data file in update transaction');
+        let specificationAuxiliaryData: string | undefined;
+        if (files) {
+            const file = files.item(0);
+            if (!file) {
+                throw new Error(
+                    'An auxiliary file was expected but was not present.'
+                );
+            }
+            const ab = await file.arrayBuffer();
+            specificationAuxiliaryData = Buffer.from(ab).toString('base64');
         }
-        const ab = await file.arrayBuffer();
-        const specificationAuxiliaryData = Buffer.from(ab).toString('base64');
 
         const protocolUpdate: ProtocolUpdate = {
             ...fields,
