@@ -52,7 +52,7 @@ async function handleGtuDrop(
             toAddress: address,
             fromAddress: '',
             status: TransactionStatus.Pending,
-            blockHash: submissionId,
+            blockHash: '',
             blockTime: secondsSinceUnixEpoch(new Date()).toString(),
             subtotal: gtuDropAmount,
         };
