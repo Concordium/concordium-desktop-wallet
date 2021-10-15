@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+-   Added a GTU drop option for testnet and stagenet.
+
 ## 1.2.0
 
 ### Added

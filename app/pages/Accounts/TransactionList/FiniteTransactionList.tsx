@@ -10,6 +10,10 @@ import useTransactionGroups from './useTransactionGroups';
 import { TransactionListProps } from './util';
 
 import styles from './TransactionList.module.scss';
+import { getTargetNet, Net } from '~/utils/ConfigHelper';
+import GtuDrop from './GtuDrop';
+
+const isMainnet = getTargetNet() === Net.Mainnet;
 
 export default function FiniteTransactionList({
     transactions,
@@ -40,18 +44,21 @@ export default function FiniteTransactionList({
         );
     }
 
-    if (transactions.length === 0) {
-        return (
-            <h3
-                className={clsx(
-                    'flex justifyCenter mV0 pV20',
-                    styles.thickBlueSeparatorTop,
-                    styles.cardPadding
-                )}
-            >
-                No transactions to show for account.
-            </h3>
-        );
+    if (transactions.length === 0 && !loading) {
+        if (isMainnet) {
+            return (
+                <h3
+                    className={clsx(
+                        'flex justifyCenter mV0 pV20',
+                        styles.thickBlueSeparatorTop,
+                        styles.cardPadding
+                    )}
+                >
+                    No transactions to show for account.
+                </h3>
+            );
+        }
+        return <GtuDrop />;
     }
 
     return (
