@@ -274,12 +274,12 @@ export const updateTransactions = createAsyncThunk<
         const account = chosenAccountSelector(state);
 
         if (!account) {
+            release();
             return;
         }
 
         const rejectIfInvalid = (reason: string) => {
             if (signal.aborted || latestUpdateRequestId !== requestId) {
-                release();
                 throw new Error(reason);
             }
         };
@@ -342,7 +342,6 @@ export const updateTransactions = createAsyncThunk<
             }
 
             if (maxId === result.newMaxId || result.isFinished) {
-                release();
                 return;
             }
 
@@ -353,10 +352,16 @@ export const updateTransactions = createAsyncThunk<
             await updateSubroutine(result.newMaxId);
         }
 
-        await updateSubroutine(
-            account.maxTransactionId ? BigInt(account.maxTransactionId) : 0n,
-            true
-        );
+        try {
+            await updateSubroutine(
+                account.maxTransactionId
+                    ? BigInt(account.maxTransactionId)
+                    : 0n,
+                true
+            );
+        } finally {
+            release();
+        }
     }
 );
 
