@@ -39,6 +39,8 @@ if (process.env.USER_DATA) {
         'userData',
         path.join(app.getPath('appData'), process.env.USER_DATA)
     );
+} else {
+    throw new Error('"USER_DATA is not defined');
 }
 
 const installExtensions = async () => {
