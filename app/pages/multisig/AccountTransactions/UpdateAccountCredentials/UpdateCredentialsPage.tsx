@@ -309,8 +309,8 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
         ).map((accountCredential) => {
             const credentialIndex = parseInt(accountCredential[0], 10);
             const cred = accountCredential[1].value;
+            // TODO: don't use literal string
             if (cred.type === 'initial') {
-                // TODO: don't use literal
                 return {
                     credentialIndex,
                     credential: {

@@ -3,7 +3,6 @@ import {
     ReleaseSchedule,
     TransactionSummary,
 } from '@concordium/node-sdk/lib/src/types';
-import { getTransactionStatus } from '../node/nodeRequests';
 import {
     dateFromTimeStamp,
     getDefaultExpiry,
@@ -463,48 +462,6 @@ export function createUpdateBakerRestakeEarningsTransaction(
         nonce,
         payload,
         signatureAmount,
-    });
-}
-
-export interface StatusResponse {
-    status: TransactionStatus;
-    outcomes: Record<string, TransactionSummary>;
-}
-
-/**
- * Queries the node for the status of the transaction with the provided transaction hash.
- * The polling will continue until the transaction becomes absent or finalized.
- * @param transactionHash the hash of the transaction to get the status for
- * @param pollingIntervalM, optional, interval between polling in milliSeconds, defaults to every 20 seconds.
- */
-export async function getStatus(
-    transactionHash: string,
-    pollingIntervalMs = 20000
-): Promise<StatusResponse> {
-    return new Promise((resolve) => {
-        const interval = setInterval(async () => {
-            let response;
-            try {
-                response = await getTransactionStatus(transactionHash);
-            } catch (err) {
-                // This happens if the node cannot be reached. Just wait for the next
-                // interval and try again.
-                return;
-            }
-            if (!response) {
-                clearInterval(interval);
-                resolve({ status: TransactionStatus.Rejected, outcomes: {} });
-                return;
-            }
-
-            if (response.status === 'finalized') {
-                clearInterval(interval);
-                resolve({
-                    status: TransactionStatus.Finalized,
-                    outcomes: response.outcomes || {},
-                });
-            }
-        }, pollingIntervalMs);
     });
 }
 

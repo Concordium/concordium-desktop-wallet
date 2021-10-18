@@ -34,10 +34,12 @@ import {
     TransactionFilter,
     Hex,
 } from '../utils/types';
-import { getStatus } from '../utils/transactionHelpers';
 import { createAccount, isValidAddress } from '../utils/accountHelpers';
-
-import { getAccountInfos, getAccountInfoOfAddress } from '../node/nodeHelpers';
+import {
+    getAccountInfos,
+    getAccountInfoOfAddress,
+    getStatus,
+} from '../node/nodeHelpers';
 import { hasPendingTransactions } from '~/database/TransactionDao';
 import { accountSimpleView, defaultAccount } from '~/database/PreferencesDao';
 import { toStringBigInts } from '~/utils/JSONHelper';

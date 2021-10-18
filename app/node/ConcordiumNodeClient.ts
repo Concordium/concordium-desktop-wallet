@@ -1,4 +1,3 @@
-import { PeerListResponse } from '@concordium/node-sdk/lib/grpc/concordium_p2p_rpc_pb';
 import { credentials, Metadata, ServiceError } from '@grpc/grpc-js';
 import { P2PClient } from '~/proto/concordium_p2p_rpc_grpc_pb';
 import {
@@ -8,9 +7,10 @@ import {
     SendTransactionRequest,
     BoolResponse,
     NodeInfoResponse,
+    PeerListResponse,
     JsonResponse,
 } from '~/proto/concordium_p2p_rpc_pb';
-import { ArInfo, IpInfo } from '~/utils/types';
+import type { ArInfo, IpInfo } from '~/utils/types';
 
 interface GRPCClient extends P2PClient {
     waitForReady?(date: Date, cb: (error: ServiceError) => void): void;

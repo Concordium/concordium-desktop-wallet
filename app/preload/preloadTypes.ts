@@ -7,7 +7,6 @@ import {
     TransactionStatus,
     Versioned,
 } from '@concordium/node-sdk';
-import { PeerListResponse } from '@concordium/node-sdk/lib/grpc/concordium_p2p_rpc_pb';
 import {
     OpenDialogOptions,
     OpenDialogReturnValue,
@@ -15,7 +14,10 @@ import {
     SaveDialogOptions,
     SaveDialogReturnValue,
 } from 'electron';
-import { NodeInfoResponse } from '~/proto/concordium_p2p_rpc_pb';
+import {
+    NodeInfoResponse,
+    PeerListResponse,
+} from '~/proto/concordium_p2p_rpc_pb';
 import {
     Account,
     Identity,
