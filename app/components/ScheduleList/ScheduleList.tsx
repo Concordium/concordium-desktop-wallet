@@ -8,7 +8,7 @@ import { getFormattedDateString } from '~/utils/timeHelpers';
 import styles from './ScheduleList.module.scss';
 
 interface Props {
-    schedule: Omit<ReleaseSchedule, 'transactions'>[]; // TODO: use better type
+    schedule: ReleaseSchedule[];
     removeFromSchedule?: (index: number) => void;
     className?: string;
     elementClassName?: string;

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import EditIcon from '@resources/svg/edit.svg';
-import { InitialCredentialDeploymentValues } from '@concordium/node-sdk';
 import { Account, AccountInfo } from '~/utils/types';
 import { formatDate } from '~/utils/timeHelpers';
 import CopyButton from '~/components/CopyButton';
@@ -22,15 +21,6 @@ import { identitiesSelector } from '~/features/IdentitySlice';
 
 import styles from './CredentialInformation.module.scss';
 import DisplayIdentityAttributes from '../DisplayIdentityAttributes';
-
-type Credential = Omit<InitialCredentialDeploymentValues, 'regId'> & {
-    credId: string;
-};
-
-interface CredentialOfAccount extends Credential {
-    isOwn: boolean;
-    note: string | undefined;
-}
 
 interface Props {
     account: Account;
@@ -54,7 +44,7 @@ export default function CredentialInformation({ account, accountInfo }: Props) {
     const credentials = Object.values(accountInfo.accountCredentials)
         .map((o) => o.value)
         .map((cred) => {
-            const enrichedCred: CredentialOfAccount = {
+            const enrichedCred = {
                 ...cred.contents,
                 // The node returns the credId in the regId field for
                 // initial accounts, so we have to hack it a bit here.
@@ -101,7 +91,7 @@ export default function CredentialInformation({ account, accountInfo }: Props) {
                 </p>
             </div>
             <div className={styles.credentialList}>
-                {credentials.map((c: CredentialOfAccount) => (
+                {credentials.map((c) => (
                     <div className={styles.listElement} key={c.credId}>
                         <SidedRow
                             className={styles.listElementRow}
@@ -167,7 +157,9 @@ export default function CredentialInformation({ account, accountInfo }: Props) {
                         />
                         <div className={styles.attributesRow}>
                             <em>Revealed attributes:</em>
-                            <DisplayIdentityAttributes credential={c} />
+                            <DisplayIdentityAttributes
+                                revealedAttributes={c.policy.revealedAttributes}
+                            />
                         </div>
                     </div>
                 ))}

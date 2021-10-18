@@ -30,7 +30,6 @@ import {
     Account,
 } from '../utils/types';
 import {
-    isSuccessfulTransaction,
     isShieldedBalanceTransaction,
     isUnshieldedBalanceTransaction,
 } from '../utils/transactionHelpers';
@@ -532,14 +531,12 @@ export async function confirmTransaction(
     blockHash: string,
     event: TransactionSummary
 ) {
-    const success = isSuccessfulTransaction(event);
-    const { cost } = event;
-
+    let status = TransactionStatus.Finalized;
     let rejectReason;
-    if (!success) {
-        // TransactionSummary.result: EventResult is missing rejectReason property. TODO: remove this type cast when dependency has been updated
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const rejectReasonContent = (event.result as any).rejectReason;
+
+    if (event.result.outcome === 'reject') {
+        status = TransactionStatus.Failed;
+        const rejectReasonContent = event.result.rejectReason;
         if (!rejectReasonContent) {
             throw new Error('Missing rejection reason in transaction event');
         }
@@ -552,13 +549,9 @@ export async function confirmTransaction(
         }
     }
 
-    const status = success
-        ? TransactionStatus.Finalized
-        : TransactionStatus.Failed;
-
     const update = {
         status,
-        cost: cost.toString(),
+        cost: event.cost.toString(),
         rejectReason,
         blockHash,
     };

@@ -686,9 +686,7 @@ export function isShieldedBalanceTransaction(transaction: TransferTransaction) {
     }
 }
 
-export function toReleaseSchedule(
-    release: SchedulePoint
-): Omit<ReleaseSchedule, 'transactions'> {
+export function toReleaseSchedule(release: SchedulePoint): ReleaseSchedule {
     return {
         amount: BigInt(release.amount),
         timestamp: dateFromTimeStamp(

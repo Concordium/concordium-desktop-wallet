@@ -1,5 +1,5 @@
 import React from 'react';
-import { InitialCredentialDeploymentValues } from '@concordium/node-sdk';
+import { AttributeKey } from '@concordium/node-sdk';
 import attributeNamesJson from '~/constants/attributeNames.json';
 import SidedRow from '~/components/SidedRow';
 import { AttributeKeyName } from '~/utils/types';
@@ -8,14 +8,10 @@ import {
     compareAttributes,
 } from '~/utils/identityHelpers';
 
-type Credential = Omit<InitialCredentialDeploymentValues, 'regId'> & {
-    credId: string;
-};
-
 const attributeNames: Record<string, string> = attributeNamesJson;
 
 interface Props {
-    credential: Credential;
+    revealedAttributes: Record<AttributeKey, string>;
 }
 
 /**
@@ -23,14 +19,13 @@ interface Props {
  *  TODO: Use local credential to get attributes?
  */
 export default function DisplayIdentityAttributes({
-    credential,
+    revealedAttributes,
 }: Props): JSX.Element | null {
-    const attributes = credential.policy.revealedAttributes;
-    const attributeKeys = Object.keys(attributes);
+    const attributeKeys = Object.keys(revealedAttributes);
 
     if (attributeKeys.length === 0) {
         return (
-            <div className="pT10" key={credential.credId}>
+            <div className="pT10">
                 This credential has no identity data revealed
             </div>
         );
@@ -47,7 +42,7 @@ export default function DisplayIdentityAttributes({
                         left={attributeNames[attributeKey]}
                         right={formatAttributeValue(
                             attributeKey,
-                            attributes[attributeKey]
+                            revealedAttributes[attributeKey]
                         )}
                     />
                 ))}
