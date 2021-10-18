@@ -77,6 +77,9 @@ export default function GtuDrop() {
     const account = useSelector(chosenAccountSelector);
     const netName = displayTargetNet(getTargetNet());
     const [error, setError] = useState<string>();
+    const [gtuDropButtonActive, setGtuDropButtonActive] = useState<boolean>(
+        true
+    );
 
     return (
         <>
@@ -99,9 +102,18 @@ export default function GtuDrop() {
                     deposited to an account to get you started.
                 </p>
                 <Button
-                    onClick={() =>
-                        handleGtuDrop(dispatch, setError, account?.address)
-                    }
+                    disabled={!gtuDropButtonActive}
+                    onClick={async () => {
+                        if (gtuDropButtonActive) {
+                            setGtuDropButtonActive(false);
+                            await handleGtuDrop(
+                                dispatch,
+                                setError,
+                                account?.address
+                            );
+                            setGtuDropButtonActive(true);
+                        }
+                    }}
                 >
                     Request GTU
                 </Button>
