@@ -1,23 +1,43 @@
-import React from 'react';
-import { Switch, Route } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import PlusIcon from '@resources/svg/plus.svg';
-import { push } from 'connected-react-router';
-import AccountList from './AccountList';
-import AccountView from './AccountView';
-import NoIdentities from '~/components/NoIdentities';
-import { accountsSelector } from '~/features/AccountSlice';
-import routes from '~/constants/routes.json';
-import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
-import BuildSchedule from './BuildSchedule';
-import AccountPageHeader from './AccountPageHeader';
-import PageLayout from '~/components/PageLayout';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 
-const { Header, Master, Detail } = MasterDetailPageLayout;
+import { Dispatch } from '@reduxjs/toolkit';
+import NoIdentities from '~/components/NoIdentities';
+import {
+    accountsSelector,
+    loadAccountInfos,
+    loadAccounts,
+} from '~/features/AccountSlice';
+import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
+import { RootState } from '~/store/store';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
+
+import AccountListPage from './AccountListPage';
+import AccountDetailsPage from './AccountDetailsPage';
+import useThunkDispatch from '~/store/useThunkDispatch';
+import { accountInfoFailedMessage } from './useAccountSync';
+
+const { Header } = MasterDetailPageLayout;
+
+async function handleLoad(dispatch: Dispatch) {
+    const accounts = await loadAccounts(dispatch);
+    try {
+        await loadAccountInfos(accounts, dispatch);
+    } catch (e) {
+        throw new Error(accountInfoFailedMessage(e.message));
+    }
+}
 
 export default function AccountsPage() {
-    const dispatch = useDispatch();
+    const dispatch = useThunkDispatch();
     const accounts = useSelector(accountsSelector);
+    const simpleView = useSelector((s: RootState) => s.accounts.simpleView);
+    const [error, setError] = useState<string | undefined>();
+
+    useEffect(() => {
+        handleLoad(dispatch).catch((e: Error) => setError(e.message));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dispatch]);
 
     if (accounts.length === 0) {
         return (
@@ -30,29 +50,17 @@ export default function AccountsPage() {
         );
     }
 
+    const Page = simpleView ? AccountListPage : AccountDetailsPage;
+
     return (
-        <MasterDetailPageLayout>
-            <Header>
-                <AccountPageHeader />
-                <PageLayout.HeaderButton
-                    align="right"
-                    onClick={() => dispatch(push(routes.ACCOUNTCREATION))}
-                >
-                    <PlusIcon height="20" />
-                </PageLayout.HeaderButton>
-            </Header>
-            <Master>
-                <AccountList />
-            </Master>
-            <Detail>
-                <Switch>
-                    <Route
-                        path={routes.ACCOUNTS_SCHEDULED_TRANSFER}
-                        component={BuildSchedule}
-                    />
-                    <Route component={AccountView} />
-                </Switch>
-            </Detail>
-        </MasterDetailPageLayout>
+        <>
+            <SimpleErrorModal
+                show={Boolean(error)}
+                header="Unable to load account information"
+                content={error}
+                onClick={() => setError(undefined)}
+            />
+            <Page onError={setError} />
+        </>
     );
 }

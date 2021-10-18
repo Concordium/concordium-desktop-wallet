@@ -13,6 +13,7 @@ import {
     HashRows,
     standardTableHeader,
     displayExpiry,
+    displayMemo,
 } from '~/utils/printUtility';
 import withNames from '~/components/Transfers/withNames';
 
@@ -22,6 +23,7 @@ interface Props {
     image?: string;
     fromName?: string;
     toName?: string;
+    memo?: string;
 }
 
 /**
@@ -34,6 +36,7 @@ function PrintFormatSimpleTransfer({
     status,
     fromName,
     toName,
+    memo,
 }: Props) {
     const { amount } = transaction.payload;
     const body = (
@@ -47,6 +50,7 @@ function PrintFormatSimpleTransfer({
                     {totalWithdrawn(amount, transaction)}
                     {displayAmount(amount)}
                     {fee(transaction)}
+                    {memo ? displayMemo(memo) : null}
                     {displayStatus(status)}
                     {status === MultiSignatureTransactionStatus.Open &&
                         displayExpiry(transaction.expiry)}

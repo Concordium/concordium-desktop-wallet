@@ -1,9 +1,11 @@
 @import 'config/bundle';
 @import '../common';
 
-.errorMessage,
-.title {
-    text-align: center;
+.root {
+    composes: thickBlueSeparatorTop;
+    composes: fillCardPadding;
+    composes: cardPadding;
+    position: relative;
 }
 
 .errorMessage {
@@ -13,18 +15,24 @@
 
 .title,
 .errorMessage,
-.listElement {
+.listElement,
+.transactionListElement {
     composes: fillCardPadding;
-    composes: cardPadding;
-    composes: greySeparator;
 
     &:not(:last-child) {
         border-bottom: 0.5px solid $color-soft-grey;
     }
 }
 
+.title,
+.errorMessage,
+.listElement {
+    composes: cardPadding;
+    composes: greySeparator;
+}
+
 .title {
-    padding-bottom: 20px;
+    composes: pV10 from global;
     margin-bottom: 0;
 }
 
@@ -32,10 +40,6 @@
 .listElement {
     padding-top: 10px;
     padding-bottom: 10px;
-}
-
-.listElement:last-child {
-    padding-bottom: 0;
 }
 
 .copiableListElementLeftSide {
@@ -48,4 +52,10 @@
     font-size: $font-size-body3;
     color: $color-text-faded;
     margin: 0;
+}
+
+.closeButton {
+    position: absolute;
+    top: 10px;
+    right: 20px;
 }

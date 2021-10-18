@@ -11,6 +11,7 @@ import {
 } from 'electron';
 import { PrintErrorTypes } from '~/utils/types';
 import ipcCommands from '~/constants/ipcCommands.json';
+import { ViewResponse, ViewResponseStatus } from '~/preload/preloadTypes';
 
 async function print(body: string, printWindow: BrowserWindow) {
     return new Promise<string | void>((resolve, reject) => {
@@ -79,35 +80,51 @@ async function httpsGet(
 }
 
 const redirectUri = 'ConcordiumRedirectToken';
+const codeUriKey = 'code_uri=';
 
 function createExternalView(
     browserView: BrowserView,
     window: BrowserWindow,
     location: string,
     rect: Rectangle
-) {
+): Promise<ViewResponse> {
     return new Promise((resolve) => {
         window.setBrowserView(browserView);
         browserView.setBounds(rect);
+        browserView.webContents.clearHistory();
         browserView.webContents
             .loadURL(location)
-            .then(() =>
-                browserView.webContents.on(
-                    'did-navigate',
-                    async (_e, url, httpResponseCode, httpStatusText) => {
+            .then(() => {
+                // Ignoring ts as it otherwise blocks us from using a custom
+                // event name ('abort').
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                browserView.webContents.once('abort', async () => {
+                    resolve({
+                        status: ViewResponseStatus.Aborted,
+                    });
+                });
+
+                return browserView.webContents.on(
+                    'will-redirect',
+                    async (event, url) => {
+                        // If the redirect contains the location of the identity, then do not
+                        // follow it, but extract the URL and return it.
                         if (url.includes(redirectUri)) {
+                            event.preventDefault();
                             resolve({
-                                result: url.substring(url.indexOf('=') + 1),
-                            });
-                        } else {
-                            resolve({
-                                error: `Unexpected response code: ${httpResponseCode}. status: ${httpStatusText}`,
+                                status: ViewResponseStatus.Success,
+                                result: url.substring(
+                                    url.indexOf(codeUriKey) + codeUriKey.length
+                                ),
                             });
                         }
                     }
-                )
-            )
-            .catch((e) => resolve({ error: e.message }));
+                );
+            })
+            .catch((e) =>
+                resolve({ error: e.message, status: ViewResponseStatus.Error })
+            );
     });
 }
 
@@ -148,9 +165,15 @@ export default function initializeIpcHandlers(
         (_event, location: string, rect: Rectangle) =>
             createExternalView(browserView, mainWindow, location, rect)
     );
-    ipcMain.handle(ipcCommands.removeView, () =>
-        mainWindow.removeBrowserView(browserView)
-    );
+    ipcMain.handle(ipcCommands.removeView, () => {
+        browserView.webContents.emit('abort');
+        browserView.webContents.removeAllListeners('will-redirect');
+
+        // Load a blank page to prevent flashing of a previous identity
+        // provider page.
+        browserView.webContents.loadURL('about:blank');
+        mainWindow.removeBrowserView(browserView);
+    });
     ipcMain.handle(ipcCommands.resizeView, (_event, rect: Rectangle) =>
         browserView.setBounds(rect)
     );

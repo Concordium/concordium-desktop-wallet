@@ -1,18 +1,50 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Knex } from 'knex';
 import { knex } from '~/database/knex';
-import { accountsTable, identitiesTable } from '~/constants/databaseNames.json';
-import { Account } from '~/utils/types';
+import {
+    accountsTable,
+    identitiesTable,
+    addressBookTable,
+    credentialsTable,
+} from '~/constants/databaseNames.json';
+import {
+    Account,
+    Identity,
+    AccountAndCredentialPairs,
+    Credential,
+    TransactionFilter,
+} from '~/utils/types';
 import { AccountMethods } from '~/preload/preloadTypes';
 
-function convertAccountBooleans(accounts: Account[]) {
+function parseAccounts(accounts: Account[]): Account[] {
     return accounts.map((account) => {
         return {
             ...account,
             allDecrypted: Boolean(account.allDecrypted),
             isInitial: Boolean(account.isInitial),
+            transactionFilter: JSON.parse(
+                account.transactionFilter as string
+            ) as TransactionFilter,
         };
     });
+}
+
+export function serializeAccountFields(account: Partial<Account>) {
+    const dbValues: Record<string, unknown> = account;
+
+    if (account.transactionFilter) {
+        dbValues.transactionFilter = JSON.stringify(account.transactionFilter);
+    }
+
+    return dbValues;
+}
+
+function prepareAccounts(accounts: Account | Account[]) {
+    if (Array.isArray(accounts)) {
+        return accounts.map(serializeAccountFields);
+    }
+
+    return serializeAccountFields(accounts);
 }
 
 function selectAccounts(builder: Knex) {
@@ -38,7 +70,7 @@ function selectAccounts(builder: Knex) {
 export async function getAllAccounts(): Promise<Account[]> {
     const accounts: Account[] = await selectAccounts(await knex());
 
-    return convertAccountBooleans(accounts);
+    return parseAccounts(accounts);
 }
 
 export async function getAccount(
@@ -48,11 +80,11 @@ export async function getAccount(
         address,
     });
 
-    return convertAccountBooleans(accounts)[0];
+    return parseAccounts(accounts)[0];
 }
 
 export async function insertAccount(account: Account | Account[]) {
-    return (await knex())(accountsTable).insert(account);
+    return (await knex())(accountsTable).insert(prepareAccounts(account));
 }
 
 export async function updateAccount(
@@ -61,7 +93,7 @@ export async function updateAccount(
 ) {
     return (await knex())(accountsTable)
         .where({ address })
-        .update(updatedValues);
+        .update(serializeAccountFields(updatedValues));
 }
 
 export async function findAccounts(condition: Partial<Account>) {
@@ -69,7 +101,7 @@ export async function findAccounts(condition: Partial<Account>) {
         .select()
         .table(accountsTable)
         .where(condition);
-    return convertAccountBooleans(accounts);
+    return parseAccounts(accounts);
 }
 
 export async function removeAccount(accountAddress: string) {
@@ -95,7 +127,95 @@ export async function updateInitialAccount(
         .table(accountsTable)
         .where({ identityId, isInitial: 1 })
         .first()
-        .update(updatedValues);
+        .update(serializeAccountFields(updatedValues));
+}
+
+/** Inserts the given account as part of a transaction
+ * Also inserts a addressbookentry for the account, if it does not already exist.
+ */
+async function insertAccountTransactionally(
+    account: Account,
+    note: string,
+    transaction: Knex.Transaction
+) {
+    const abe = await transaction
+        .table(addressBookTable)
+        .where({ address: account.address })
+        .first()
+        .select();
+    if (abe) {
+        await transaction
+            .table(accountsTable)
+            .insert(serializeAccountFields({ ...account, name: abe.name }));
+        await transaction
+            .table(addressBookTable)
+            .where({ address: account.address })
+            .update({ readOnly: true });
+    } else {
+        await transaction
+            .table(accountsTable)
+            .insert(serializeAccountFields(account));
+        await transaction.table(addressBookTable).insert({
+            address: account.address,
+            name: account.name,
+            readOnly: true,
+            note,
+        });
+    }
+}
+
+/**
+ * Inserts account (if it doesn't exist already) and the credential, as part of the given transaction.
+ */
+async function insertFromRecovery(
+    account: Account,
+    credential: Credential,
+    transaction: Knex.Transaction
+): Promise<void> {
+    const accountInDatabase = await transaction
+        .table(accountsTable)
+        .where({ address: account.address })
+        .first()
+        .select();
+    if (!accountInDatabase) {
+        await insertAccountTransactionally(
+            account,
+            'Recovered account',
+            transaction
+        );
+    }
+    await transaction.table(credentialsTable).insert(credential);
+}
+
+/** Inserts accounts and credentials for a specific identity, from recovery.
+ * The identity is first inserted, and its given id is attached to the accounts and credentials.
+ */
+async function insertFromRecoveryNewIdentity(
+    recovered: AccountAndCredentialPairs,
+    identity: Omit<Identity, 'id'>
+) {
+    return (await knex()).transaction(async (transaction) => {
+        const identityId = (
+            await transaction.table(identitiesTable).insert(identity)
+        )[0];
+        for (const pair of recovered) {
+            const account = { ...pair.account, identityId };
+            const credential = { ...pair.credential, identityId };
+            await insertFromRecovery(account, credential, transaction);
+        }
+    });
+}
+
+/** Inserts accounts and credentials for an existing identity, from recovery.
+ */
+async function insertFromRecoveryExistingIdentity(
+    recovered: AccountAndCredentialPairs
+) {
+    return (await knex()).transaction(async (transaction) => {
+        for (const { account, credential } of recovered) {
+            await insertFromRecovery(account, credential, transaction);
+        }
+    });
 }
 
 const exposedMethods: AccountMethods = {
@@ -106,5 +226,7 @@ const exposedMethods: AccountMethods = {
     findAccounts,
     removeAccount,
     updateInitialAccount,
+    insertFromRecoveryNewIdentity,
+    insertFromRecoveryExistingIdentity,
 };
 export default exposedMethods;

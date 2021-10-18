@@ -7,7 +7,7 @@ import {
     credentialsTable,
     addressBookTable,
 } from '~/constants/databaseNames.json';
-import { removeInitialAccount } from './accountDao';
+import { removeInitialAccount, serializeAccountFields } from './accountDao';
 import {
     Account,
     Credential,
@@ -25,11 +25,22 @@ import { IdentityMethods } from '~/preload/preloadTypes';
  * @returns the id for the next identity to be created by the given wallet
  */
 export async function getNextIdentityNumber(walletId: number): Promise<number> {
-    const model = (await knex())
-        .table(identitiesTable)
-        .where('walletId', walletId);
-    const totalCount = await model.clone().count();
-    return parseInt(totalCount[0]['count(*)'].toString(), 10);
+    const maxIdentityNumber = await (await knex())
+        .table<Identity>(identitiesTable)
+        .where('walletId', walletId)
+        .max<{ maxIdentityNumber: number }>(
+            'identityNumber as maxIdentityNumber'
+        )
+        .first();
+
+    if (
+        maxIdentityNumber === undefined ||
+        maxIdentityNumber.maxIdentityNumber === null
+    ) {
+        return 0;
+    }
+
+    return maxIdentityNumber.maxIdentityNumber + 1;
 }
 
 async function insertIdentity(identity: Partial<Identity> | Identity[]) {
@@ -88,7 +99,9 @@ async function insertPendingIdentityAndInitialAccount(
             ...initialAccount,
             identityId,
         };
-        await trx.table(accountsTable).insert(initialAccountWithIdentityId);
+        await trx
+            .table(accountsTable)
+            .insert(serializeAccountFields(initialAccountWithIdentityId));
         return identityId;
     });
 }

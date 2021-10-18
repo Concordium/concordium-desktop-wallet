@@ -158,6 +158,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                                 </>
                                             ) : undefined
                                         }
+                                        messageWhenEmpty="There are no baker accounts "
                                     />
                                 </div>
                             </div>

@@ -17,3 +17,7 @@ export function getLedgerClient() {
 export function subscribeLedger(eventEmitter: EventEmitter) {
     return ledgerObserver.subscribeLedger(eventEmitter);
 }
+
+export function resetTransport(eventEmitter: EventEmitter) {
+    return ledgerObserver.resetTransport(eventEmitter);
+}

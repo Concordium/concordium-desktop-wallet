@@ -1,5 +1,7 @@
 import React from 'react';
-import { LocationDescriptorObject } from 'history';
+import { useDispatch } from 'react-redux';
+import { push } from 'connected-react-router';
+import { useLocation } from 'react-router-dom';
 import { parse } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
 import { displayAsGTU } from '~/utils/gtu';
@@ -7,6 +9,8 @@ import { parseTime } from '~/utils/timeHelpers';
 import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import ButtonNavLink from '~/components/ButtonNavLink';
+import DisplayMemo from './DisplayMemo';
+import TransferView from './TransferView';
 
 import {
     AddressBookEntry,
@@ -17,6 +21,9 @@ import {
     instanceOfTransferToPublic,
     instanceOfEncryptedTransfer,
     TimeStampUnit,
+    instanceOfScheduledTransferWithMemo,
+    instanceOfEncryptedTransferWithMemo,
+    instanceOfSimpleTransferWithMemo,
 } from '~/utils/types';
 
 interface State {
@@ -25,15 +32,23 @@ interface State {
     transactionHash?: string;
 }
 
-interface Props {
-    location: LocationDescriptorObject<State>;
-}
-
 function getSpecificsHandler(transaction: AccountTransaction) {
     let amount;
     let title;
     let note;
-    if (instanceOfScheduledTransfer(transaction)) {
+    let memo;
+    if (
+        instanceOfSimpleTransferWithMemo(transaction) ||
+        instanceOfScheduledTransferWithMemo(transaction) ||
+        instanceOfEncryptedTransferWithMemo(transaction)
+    ) {
+        memo = transaction.payload.memo;
+    }
+
+    if (
+        instanceOfScheduledTransfer(transaction) ||
+        instanceOfScheduledTransferWithMemo(transaction)
+    ) {
         title = 'Scheduled Transfer submitted!';
         amount = getScheduledTransferAmount(transaction);
         note = (
@@ -50,13 +65,19 @@ function getSpecificsHandler(transaction: AccountTransaction) {
     } else if (instanceOfTransferToPublic(transaction)) {
         title = 'Unshield amount submitted!';
         amount = transaction.payload.transferAmount;
-    } else if (instanceOfSimpleTransfer(transaction)) {
+    } else if (
+        instanceOfSimpleTransfer(transaction) ||
+        instanceOfSimpleTransferWithMemo(transaction)
+    ) {
         title = 'Transfer submitted!';
         amount = transaction.payload.amount;
     } else if (instanceOfTransferToEncrypted(transaction)) {
         title = 'Shield amount submitted!';
         amount = transaction.payload.amount;
-    } else if (instanceOfEncryptedTransfer(transaction)) {
+    } else if (
+        instanceOfEncryptedTransfer(transaction) ||
+        instanceOfEncryptedTransferWithMemo(transaction)
+    ) {
         title = 'Shielded transfer submitted!';
         amount = transaction.payload.plainTransferAmount;
     } else {
@@ -64,7 +85,7 @@ function getSpecificsHandler(transaction: AccountTransaction) {
             `Unsupported transaction type - please implement: ${transaction}`
         );
     }
-    return { amount, title, note };
+    return { amount, title, note, memo };
 }
 
 function displayRecipient(recipient: AddressBookEntry) {
@@ -81,7 +102,9 @@ function displayRecipient(recipient: AddressBookEntry) {
 /**
  * Displays details of a submitted transaction.
  */
-export default function FinalPage({ location }: Props): JSX.Element {
+export default function FinalPage(): JSX.Element {
+    const dispatch = useDispatch();
+    const location = useLocation<State>();
     if (!location.state) {
         throw new Error('Unexpected missing state.');
     }
@@ -95,7 +118,10 @@ export default function FinalPage({ location }: Props): JSX.Element {
     const handler = getSpecificsHandler(transaction);
 
     return (
-        <>
+        <TransferView
+            showBack={false}
+            exitOnClick={() => dispatch(push(routes.ACCOUNTS))}
+        >
             <h3 className="textCenter mB0">{handler.title}</h3>
             <h1 className="textCenter mT10 mB0">
                 {displayAsGTU(handler.amount)}
@@ -106,6 +132,8 @@ export default function FinalPage({ location }: Props): JSX.Element {
             />
             {handler.note}
             {displayRecipient(recipient)}
+
+            <DisplayMemo className="textCenter" memo={handler.memo} />
             <h3 className="textCenter mT10">
                 <b>Transaction hash:</b> {transactionHash}
             </h3>
@@ -117,6 +145,6 @@ export default function FinalPage({ location }: Props): JSX.Element {
             >
                 Finish
             </ButtonNavLink>
-        </>
+        </TransferView>
     );
 }

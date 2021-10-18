@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Redirect } from 'react-router';
 import routes from '~/constants/routes.json';
+import { BlockSummary } from '~/node/NodeApiTypes';
 import {
     AccountTransaction,
     MultiSignatureTransaction,
@@ -15,7 +16,10 @@ import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/Handle
 import { insert } from '~/database/MultiSignatureProposalDao';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import { getUpdateKey } from '~/utils/updates/AuthorizationHelper';
+import {
+    getUpdateKey,
+    findKeyIndex,
+} from '~/utils/updates/AuthorizationHelper';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import Columns from '~/components/Columns';
 import TransactionDetails from '~/components/TransactionDetails';
@@ -30,6 +34,7 @@ import { parse, stringify } from '~/utils/JSONHelper';
 
 interface Props {
     proposal: MultiSignatureTransaction;
+    blockSummary: BlockSummary;
 }
 
 /**
@@ -37,7 +42,7 @@ interface Props {
  * proposal that is to be signed before being generated and persisted
  * to the database.
  */
-function SignTransactionProposalView({ proposal }: Props) {
+function SignTransactionProposalView({ proposal, blockSummary }: Props) {
     const dispatch = useDispatch();
 
     const { transaction } = proposal;
@@ -65,6 +70,18 @@ function SignTransactionProposalView({ proposal }: Props) {
         if (ledger) {
             const publicKey = await getUpdateKey(ledger, updateInstruction);
 
+            const keyIndex = findKeyIndex(
+                publicKey,
+                blockSummary.updates.keys,
+                updateInstruction,
+                transactionHandler
+            );
+            if (keyIndex === undefined) {
+                throw new Error(
+                    'Your key is not authorized to sign this update type.'
+                );
+            }
+
             const signatureBytes = await transactionHandler.signTransaction(
                 updateInstruction,
                 ledger
@@ -77,6 +94,7 @@ function SignTransactionProposalView({ proposal }: Props) {
             };
             signatures.push(signature);
         }
+
         updateInstruction.signatures = signatures;
 
         const updatedProposal = {

@@ -21,7 +21,7 @@ export function partition<T>(
  * @param str the string to check for hexadecimal
  */
 export function isHex(str: string): boolean {
-    return /^[A-F0-9]+$/i.test(str);
+    return /^[A-F0-9]+$/i.test(str) && str.length % 2 === 0;
 }
 
 /**
@@ -30,20 +30,6 @@ export function isHex(str: string): boolean {
  */
 export function onlyDigitsNoLeadingZeroes(value: string): boolean {
     return /^(?:[1-9][0-9]*|0)$/.test(value);
-}
-
-/** Given a list of elements, a function to parse the elements to string array,
- * and the names of the elements' fields, outputs
- * csv string, with the names first, and the values of each element per line.
- */
-export function toCSV(elements: string[][], fieldNames: string[]): string {
-    if (elements.find((element) => element.length !== fieldNames.length)) {
-        throw new Error('invalid formatted input');
-    }
-
-    return `${fieldNames.join(',')}\n${elements
-        .map((element) => element.join(','))
-        .join('\n')}`;
 }
 
 /**
@@ -152,6 +138,16 @@ export function collapseFraction({ numerator, denominator }: Fraction): bigint {
     return 1n + quotient;
 }
 
+export function multiplyFraction(
+    { numerator, denominator }: Fraction,
+    factor: bigint | string
+): Fraction {
+    return {
+        numerator: numerator * BigInt(factor),
+        denominator,
+    };
+}
+
 /**
  * Returns the absolute value of the given bigint.
  */
@@ -161,6 +157,11 @@ export function abs(value: bigint) {
 
 export function max(first: bigint, second: bigint) {
     return first > second ? first : second;
+}
+
+export function isASCII(value: string) {
+    // eslint-disable-next-line no-control-regex
+    return /[^\u0000-\u007f]/.test(value);
 }
 
 /**

@@ -1,4 +1,5 @@
 {
+    "peerList": "peer-list",
     "nodeInfo": "node-info",
     "getConsensusStatus": "get-consensus-status",
     "sendTransaction": "send-transaction",
@@ -6,5 +7,7 @@
     "getNextAccountNonce": "get-next-account-nonce",
     "getBlockSummary": "get-block-summary",
     "getAccountInfo": "get-account-info",
-    "getCryptographicParameters": "get-cryptographic-parameters"
+    "getCryptographicParameters": "get-cryptographic-parameters",
+    "getAnonymityRevokers": "get-anonymity-revokers",
+    "getIdentityProviders": "get-identity-providers"
 }

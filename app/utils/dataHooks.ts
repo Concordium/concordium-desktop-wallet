@@ -3,10 +3,12 @@ import { getAccount } from '~/database/AccountDao';
 import { BlockSummary, ConsensusStatus } from '~/node/NodeApiTypes';
 import { getConsensusStatus } from '~/node/nodeRequests';
 import {
+    fetchLastFinalizedIdentityProviders,
     fetchLastFinalizedBlockSummary,
     getAccountInfoOfAddress,
+    fetchLastFinalizedAnonymityRevokers,
 } from '../node/nodeHelpers';
-import { useCurrentTime } from './hooks';
+import { useCurrentTime, useAsyncMemo } from './hooks';
 import {
     epochDate,
     getDefaultExpiry,
@@ -14,13 +16,15 @@ import {
     isFutureDate,
 } from './timeHelpers';
 import { getTransactionKindCost } from './transactionCosts';
-import { lookupName } from './transactionHelpers';
+import { lookupName } from './addressBookHelpers';
 import {
     AccountInfo,
     Amount,
     Fraction,
     TransactionKindId,
     Account,
+    IpInfo,
+    ArInfo,
 } from './types';
 
 /** Hook for looking up an account name from an address */
@@ -63,6 +67,7 @@ export function useTransactionCostEstimate(
     kind: TransactionKindId,
     exchangeRate: Fraction,
     signatureAmount?: number,
+    memo?: string,
     payloadSize?: number
 ) {
     return useMemo(
@@ -71,33 +76,40 @@ export function useTransactionCostEstimate(
                 kind,
                 exchangeRate,
                 signatureAmount,
+                memo,
                 payloadSize
             ),
-        [kind, exchangeRate, payloadSize, signatureAmount]
+        [kind, exchangeRate, payloadSize, signatureAmount, memo]
     );
 }
 
 /** Hook for fetching last finalized block summary */
 export function useLastFinalizedBlockSummary() {
-    const [summary, setSummary] = useState<{
+    return useAsyncMemo<{
         lastFinalizedBlockSummary: BlockSummary;
         consensusStatus: ConsensusStatus;
-    }>();
-    useEffect(() => {
-        fetchLastFinalizedBlockSummary()
-            .then(setSummary)
-            .catch(window.log.error);
-    }, []);
-    return summary;
+    }>(fetchLastFinalizedBlockSummary, window.log.error);
 }
 
 /** Hook for fetching consensus status */
 export function useConsensusStatus() {
-    const [status, setStatus] = useState<ConsensusStatus>();
-    useEffect(() => {
-        getConsensusStatus().then(setStatus).catch(window.log.error);
-    }, []);
-    return status;
+    return useAsyncMemo<ConsensusStatus>(getConsensusStatus, window.log.error);
+}
+
+/** Hook for fetching identity providers */
+export function useIdentityProviders() {
+    return useAsyncMemo<IpInfo[]>(
+        fetchLastFinalizedIdentityProviders,
+        window.log.error
+    );
+}
+
+/** Hook for fetching anonymity revokers */
+export function useAnonymityRevokers() {
+    return useAsyncMemo<ArInfo[]>(
+        fetchLastFinalizedAnonymityRevokers,
+        window.log.error
+    );
 }
 
 /** Hook for fetching staked amount for a given account address, Returns undefined while loading and 0 if account is not a baker */
@@ -147,7 +159,7 @@ export function useCalcBakerStakeCooldownUntil() {
     const {
         chainParameters,
     } = lastFinalizedBlockSummary.lastFinalizedBlockSummary.updates;
-    const genesisTime = new Date(consensusStatus.genesisTime);
+    const genesisTime = new Date(consensusStatus.currentEraGenesisTime);
     const currentEpochIndex = getEpochIndexAt(
         now,
         consensusStatus.epochDuration,

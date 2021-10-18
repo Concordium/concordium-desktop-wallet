@@ -1,17 +1,20 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Dispatch } from 'redux';
 import { hasAcceptedTerms, storeTerms } from '~/utils/termsHelpers';
+import { NodeConnectionStatus } from '~/utils/types';
 
 interface MiscState {
     termsAccepted: boolean;
     unlocked: boolean;
     isPrinting: boolean;
+    nodeStatus: NodeConnectionStatus;
 }
 
 const initialState: MiscState = {
     termsAccepted: false,
     unlocked: false,
     isPrinting: false,
+    nodeStatus: NodeConnectionStatus.Pinging,
 };
 
 const miscSlice = createSlice({
@@ -27,10 +30,13 @@ const miscSlice = createSlice({
         setPrinting: (state, index) => {
             state.isPrinting = index.payload;
         },
+        setNodeStatus(state, input: PayloadAction<NodeConnectionStatus>) {
+            state.nodeStatus = input.payload;
+        },
     },
 });
 
-export const { unlock, setPrinting } = miscSlice.actions;
+export const { unlock, setPrinting, setNodeStatus } = miscSlice.actions;
 const { acceptTerms: setTermsAccepted } = miscSlice.actions;
 
 export async function init(dispatch: Dispatch) {

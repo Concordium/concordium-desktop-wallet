@@ -6,6 +6,11 @@ import {
     YearMonth,
     SchemeId,
     CredentialDeploymentInformation,
+    Description,
+    IpInfo,
+    ArInfo,
+    SerializedDescription,
+    SerializedTextWithLength,
     AttributeKey,
 } from './types';
 
@@ -188,4 +193,62 @@ export function serializeCredentialDeploymentInformation(
     buffers.push(encodeWord32(proofs.length));
     buffers.push(proofs);
     return Buffer.concat(buffers);
+}
+
+/**
+ *  Given a string, return a serializedTextWithLength object.
+ * N.B. This function assumes the text length can fit into a uint32, and the length buffer will always have a length of 4 bytes.
+ */
+function getSerializedTextWithLength(text: string): SerializedTextWithLength {
+    const encoded = Buffer.from(new TextEncoder().encode(text));
+    const serializedLength = encodeWord32(encoded.length);
+    return {
+        data: encoded,
+        length: serializedLength,
+    };
+}
+
+/**
+ * converts a Description object into a SerializedDescription.
+ * (Which is used in IpInfo and ArInfo)
+ */
+export function getSerializedDescription(
+    description: Description
+): SerializedDescription {
+    return {
+        name: getSerializedTextWithLength(description.name),
+        url: getSerializedTextWithLength(description.url),
+        description: getSerializedTextWithLength(description.description),
+    };
+}
+
+function serializeDescription(description: Description): Buffer {
+    const sd = getSerializedDescription(description);
+    return Buffer.concat([
+        sd.name.length,
+        sd.name.data,
+        sd.url.length,
+        sd.url.data,
+        sd.description.length,
+        sd.description.data,
+    ]);
+}
+
+/**
+ * Serializes an IpInfo object.
+ * N.B. does not include the length of the entire object.
+ */
+export function serializeIpInfo(ipInfo: IpInfo) {
+    const id = encodeWord32(ipInfo.ipIdentity);
+    const description = serializeDescription(ipInfo.ipDescription);
+    const verifyKey = Buffer.from(ipInfo.ipVerifyKey, 'hex');
+    const cdiVerifyKey = Buffer.from(ipInfo.ipCdiVerifyKey, 'hex');
+    return Buffer.concat([id, description, verifyKey, cdiVerifyKey]);
+}
+
+export function serializeArInfo(arInfo: ArInfo) {
+    const id = encodeWord32(arInfo.arIdentity);
+    const description = serializeDescription(arInfo.arDescription);
+    const publicKey = Buffer.from(arInfo.arPublicKey, 'hex');
+    return Buffer.concat([id, description, publicKey]);
 }

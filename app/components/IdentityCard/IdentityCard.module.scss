@@ -31,6 +31,7 @@
 }
 
 .topRow {
+    min-height: 1.2em;
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -54,9 +55,45 @@
     margin-bottom: -20px;
 }
 
+.failedDetails {
+    composes: details;
+    margin-top: -100px;
+}
+
 .detailsRow {
     padding: 13px;
     border-top: 1px solid $color-grey;
+}
+
+.failedDetailsLine {
+    text-align: left;
+    min-height: 2.5em;
+    margin: 0;
+    font-size: $font-size-body3;
+}
+
+.failedIdentityBody {
+    word-break: break-word;
+    white-space: break-spaces;
+}
+
+.failedDetailsBodyContainer {
+    position: relative;
+    text-align: left;
+    padding: 10px;
+    background-color: $color-off-white;
+    box-shadow: 0 0 0 0.5px $color-grey inset;
+
+    &Copied {
+        background: $color-very-pale-green;
+        box-shadow: 0 0 0 0.5px $color-pale-green inset;
+    }
+}
+
+.failedDetailsBodyContainerButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
 }
 
 .form,
@@ -72,6 +109,7 @@
 }
 
 .name {
+    font-weight: $font-weight-regular;
     padding: 0 40px;
     margin-bottom: 0;
 }

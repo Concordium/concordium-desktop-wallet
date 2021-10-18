@@ -10,6 +10,7 @@ import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import ScheduleList from '~/components/ScheduleList';
 import { AccountDetail, AmountDetail, Details, PlainDetail } from './shared';
 import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
+import DisplayMemo from '~/components/Transfers/DisplayMemo';
 
 interface Props {
     transactionType:
@@ -18,6 +19,8 @@ interface Props {
     account?: Account;
     amount?: string;
     recipient?: AddressBookEntry;
+    allowMemo?: boolean;
+    memo?: string;
     schedule?: Schedule;
     estimatedFee?: Fraction;
     expiryTime?: Date;
@@ -28,6 +31,8 @@ export default function TransferProposalDetails({
     account,
     amount,
     recipient,
+    allowMemo = false,
+    memo,
     schedule,
     transactionType,
     estimatedFee,
@@ -45,6 +50,7 @@ export default function TransferProposalDetails({
             {Boolean(amountError) && (
                 <p className="textError textCenter">{amountError}</p>
             )}
+            {allowMemo && <DisplayMemo memo={memo} fallback="Optional" />}
             <AccountDetail title="Recipient" value={recipient} />
             {isScheduledTransfer ? (
                 <PlainDetail

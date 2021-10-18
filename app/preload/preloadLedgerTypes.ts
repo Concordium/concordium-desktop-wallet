@@ -1,22 +1,44 @@
 import { Buffer } from 'buffer/';
 import {
+    PrivateKeySeeds,
     PublicInformationForIp,
     SignedPublicKey,
     UnsignedCredentialDeploymentInformation,
+    UpdateInstruction,
+    AddIdentityProvider,
+    ElectionDifficulty,
+    BakerStakeThreshold,
+    GasRewards,
+    ProtocolUpdate,
+    MintDistribution,
+    FoundationAccount,
+    TransactionFeeDistribution,
+    ExchangeRate,
+    HigherLevelKeyUpdate,
+    AuthorizationKeysUpdate,
+    UpdateInstructionPayload,
+    UpdateAccountCredentials,
+    AccountTransaction,
+    AddAnonymityRevoker,
 } from '~/utils/types';
 import { AppAndVersion } from '../features/ledger/GetAppAndVersion';
 import { AccountPathInput } from '../features/ledger/Path';
 
 type ReturnBuffer = Promise<Buffer>;
 
-type SignUpdate = (
-    transactionAsJson: string,
+type SignAccountTransaction<T> = (
+    transaction: T,
+    path: number[]
+) => ReturnBuffer;
+
+type SignUpdate<PayloadType extends UpdateInstructionPayload> = (
+    transaction: UpdateInstruction<PayloadType>,
     serializedPayload: Buffer,
     keypath: number[]
 ) => ReturnBuffer;
 
-type SignKeyUpdate = (
-    transactionAsJson: string,
+type SignKeyUpdate<PayloadType extends UpdateInstructionPayload> = (
+    transaction: UpdateInstruction<PayloadType>,
     serializedPayload: Buffer,
     keypath: number[],
     INS: number
@@ -26,20 +48,15 @@ type LedgerCommands = {
     getPublicKey: (keypath: number[]) => Promise<Buffer>;
     getPublicKeySilent: (keypath: number[]) => ReturnBuffer;
     getSignedPublicKey: (keypath: number[]) => Promise<SignedPublicKey>;
-    getIdCredSec: (identity: number) => ReturnBuffer;
-    getPrfKey: (identity: number) => ReturnBuffer;
-    signTransfer: (
-        transactionAsJson: string,
-        keypath: number[]
-    ) => ReturnBuffer;
+    getPrivateKeySeeds: (identity: number) => Promise<PrivateKeySeeds>;
+    getPrfKeyDecrypt: (identity: number) => ReturnBuffer;
+    getPrfKeyRecovery: (identity: number) => ReturnBuffer;
+    signTransfer: SignAccountTransaction<AccountTransaction>;
     signPublicInformationForIp: (
         publicInfoForIp: PublicInformationForIp,
         accountPathInput: AccountPathInput
     ) => ReturnBuffer;
-    signUpdateCredentialTransaction: (
-        transactionAsJson: string,
-        path: number[]
-    ) => ReturnBuffer;
+    signUpdateCredentialTransaction: SignAccountTransaction<UpdateAccountCredentials>;
     signCredentialDeploymentOnExistingAccount: (
         credentialDeployment: UnsignedCredentialDeploymentInformation,
         address: string,
@@ -47,23 +64,26 @@ type LedgerCommands = {
     ) => ReturnBuffer;
     signCredentialDeploymentOnNewAccount: (
         credentialDeployment: UnsignedCredentialDeploymentInformation,
-        expiry: string,
+        expiry: bigint,
         keypath: number[]
     ) => ReturnBuffer;
-    signMicroGtuPerEuro: SignUpdate;
-    signEuroPerEnergy: SignUpdate;
-    signTransactionFeeDistribution: SignUpdate;
-    signFoundationAccount: SignUpdate;
-    signMintDistribution: SignUpdate;
-    signProtocolUpdate: SignUpdate;
-    signGasRewards: SignUpdate;
-    signBakerStakeThreshold: SignUpdate;
-    signElectionDifficulty: SignUpdate;
-    signHigherLevelKeysUpdate: SignKeyUpdate;
-    signAuthorizationKeysUpdate: SignKeyUpdate;
+    signMicroGtuPerEuro: SignUpdate<ExchangeRate>;
+    signEuroPerEnergy: SignUpdate<ExchangeRate>;
+    signTransactionFeeDistribution: SignUpdate<TransactionFeeDistribution>;
+    signFoundationAccount: SignUpdate<FoundationAccount>;
+    signMintDistribution: SignUpdate<MintDistribution>;
+    signProtocolUpdate: SignUpdate<ProtocolUpdate>;
+    signGasRewards: SignUpdate<GasRewards>;
+    signBakerStakeThreshold: SignUpdate<BakerStakeThreshold>;
+    signElectionDifficulty: SignUpdate<ElectionDifficulty>;
+    signAddIdentityProvider: SignUpdate<AddIdentityProvider>;
+    signAddAnonymityRevoker: SignUpdate<AddAnonymityRevoker>;
+    signHigherLevelKeysUpdate: SignKeyUpdate<HigherLevelKeyUpdate>;
+    signAuthorizationKeysUpdate: SignKeyUpdate<AuthorizationKeysUpdate>;
     getAppAndVersion: () => Promise<AppAndVersion>;
     subscribe: () => Promise<void>;
     closeTransport: () => void;
+    resetTransport: () => Promise<void>;
 };
 
 export default LedgerCommands;

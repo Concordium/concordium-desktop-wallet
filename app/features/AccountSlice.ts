@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
 // eslint-disable-next-line import/no-cycle
@@ -31,42 +31,96 @@ import {
     Dispatch,
     Global,
     Identity,
-    TransactionKindString,
+    TransactionFilter,
+    Hex,
 } from '../utils/types';
 import { getStatus } from '../utils/transactionHelpers';
-import {
-    isValidAddress,
-    getInitialEncryptedAmount,
-} from '../utils/accountHelpers';
+import { createAccount, isValidAddress } from '../utils/accountHelpers';
 
 import { getAccountInfos, getAccountInfoOfAddress } from '../node/nodeHelpers';
 import { hasPendingTransactions } from '~/database/TransactionDao';
 import { throwLoggedError } from '~/utils/basicHelpers';
+import { accountSimpleView, defaultAccount } from '~/database/PreferencesDao';
 
-interface AccountState {
+export interface AccountState {
+    simpleView: boolean;
     accounts: Account[];
     accountsInfo: Record<string, AccountInfo>;
-    chosenAccountIndex: number;
+    chosenAccountAddress: string;
+    defaultAccount: string | undefined;
 }
 
+type AccountByIndexTuple = [number, Account];
+
+function getValidAccountsIndices(accounts: Account[]): AccountByIndexTuple[] {
+    return accounts
+        .reduce(
+            (acc, cur, i) => [...acc, [i, cur]] as AccountByIndexTuple[],
+            [] as AccountByIndexTuple[]
+        )
+        .filter(([, acc]) => acc.status === AccountStatus.Confirmed);
+}
+
+const setConfirmedAccount = (next: boolean) => (state: AccountState) => {
+    const chosenIndex = state.accounts.findIndex(
+        (a) => a.address === state.chosenAccountAddress
+    );
+    let confirmedAccountsIndices = getValidAccountsIndices(state.accounts);
+
+    if (!next) {
+        confirmedAccountsIndices = confirmedAccountsIndices.reverse();
+    }
+
+    const firstValid = next
+        ? ([i]: AccountByIndexTuple) => i > chosenIndex
+        : ([i]: AccountByIndexTuple) => i < chosenIndex;
+
+    state.chosenAccountAddress =
+        confirmedAccountsIndices.find(firstValid)?.[1].address ??
+        confirmedAccountsIndices[0]?.[1].address ??
+        state.chosenAccountAddress;
+};
+
 const initialState: AccountState = {
+    simpleView: true,
     accounts: [],
     accountsInfo: {},
-    chosenAccountIndex: -1,
+    chosenAccountAddress: '',
+    defaultAccount: undefined,
 };
 
 const accountsSlice = createSlice({
     name: 'accounts',
     initialState,
     reducers: {
-        chooseAccount: (state, input) => {
-            state.chosenAccountIndex = input.payload;
+        simpleViewActive(state, input: PayloadAction<boolean>) {
+            state.simpleView = input.payload;
+        },
+        nextConfirmedAccount: setConfirmedAccount(true),
+        previousConfirmedAccount: setConfirmedAccount(false),
+        chooseAccount: (state, input: PayloadAction<string>) => {
+            state.chosenAccountAddress = input.payload;
         },
         updateAccounts: (state, input) => {
             state.accounts = input.payload;
+
+            if (!state.chosenAccountAddress) {
+                state.chosenAccountAddress =
+                    state.defaultAccount || state.accounts[0]?.address || '';
+            }
         },
         setAccountInfos: (state, map) => {
             state.accountsInfo = map.payload;
+        },
+        setDefaultAccount(state, input: PayloadAction<Hex | undefined>) {
+            state.defaultAccount = input.payload;
+
+            if (input.payload) {
+                state.chosenAccountAddress = input.payload;
+            }
+        },
+        addToAccountInfos: (state, map) => {
+            state.accountsInfo = { ...state.accountsInfo, ...map.payload };
         },
         updateAccountInfoEntry: (state, update) => {
             const { address, accountInfo } = update.payload;
@@ -96,6 +150,11 @@ export const accountsOfIdentitySelector = (identity: Identity) => (
         (account) => account.identityId === identity.id
     );
 
+export const confirmedAccountsSelector = (state: RootState) =>
+    state.accounts.accounts.filter(
+        (account) => account.status === AccountStatus.Confirmed
+    );
+
 export const initialAccountNameSelector = (identityId: number) => (
     state: RootState
 ) =>
@@ -107,16 +166,22 @@ export const accountsInfoSelector = (state: RootState) =>
     state.accounts.accountsInfo;
 
 export const chosenAccountSelector = (state: RootState) =>
-    state.accounts.accounts[state.accounts.chosenAccountIndex];
+    state.accounts.accounts.find(
+        (a) => a.address === state.accounts.chosenAccountAddress
+    );
 
-export const chosenAccountInfoSelector = (state: RootState) =>
+export const chosenAccountInfoSelector = (
+    state: RootState
+): AccountInfo | undefined =>
     state.accounts.accountsInfo?.[chosenAccountSelector(state)?.address ?? ''];
-
-export const chosenAccountIndexSelector = (state: RootState) =>
-    state.accounts.chosenAccountIndex;
 
 export const accountInfoSelector = (account?: Account) => (state: RootState) =>
     state.accounts.accountsInfo?.[account?.address ?? ''];
+
+export const defaultAccountSelector = (state: RootState) =>
+    state.accounts.accounts.find(
+        (a) => a.address === state.accounts.defaultAccount
+    );
 
 export const {
     chooseAccount,
@@ -124,6 +189,9 @@ export const {
     setAccountInfos,
     updateAccountInfoEntry,
     updateAccountFields,
+    nextConfirmedAccount,
+    previousConfirmedAccount,
+    addToAccountInfos,
 } = accountsSlice.actions;
 
 // Load accounts into state, and updates their infos
@@ -131,6 +199,27 @@ export async function loadAccounts(dispatch: Dispatch) {
     const accounts: Account[] = await getAllAccounts();
     dispatch(updateAccounts(accounts.reverse()));
     return accounts;
+}
+
+async function loadSimpleViewActive(dispatch: Dispatch) {
+    const simpleViewActive = await accountSimpleView.get();
+    dispatch(accountsSlice.actions.simpleViewActive(simpleViewActive ?? true));
+}
+
+async function loadDefaultAccount(dispatch: Dispatch) {
+    dispatch(
+        accountsSlice.actions.setDefaultAccount(
+            (await defaultAccount.get()) ?? undefined
+        )
+    );
+}
+
+export function initAccounts(dispatch: Dispatch) {
+    return Promise.all([
+        loadAccounts(dispatch),
+        loadSimpleViewActive(dispatch),
+        loadDefaultAccount(dispatch),
+    ]);
 }
 
 // given an account and the accountEncryptedAmount from the accountInfo
@@ -264,7 +353,8 @@ async function updateAccountFromAccountInfo(
 // AccountInfo state.
 export async function loadAccountInfos(
     accounts: Account[],
-    dispatch: Dispatch
+    dispatch: Dispatch,
+    resetInfo = true
 ) {
     const map: Record<string, AccountInfo> = {};
 
@@ -309,7 +399,10 @@ export async function loadAccountInfos(
             await updateAccountFromAccountInfo(dispatch, account, accountInfo);
         }
     }
-    return dispatch(setAccountInfos(map));
+    if (resetInfo) {
+        return dispatch(setAccountInfos(map));
+    }
+    return dispatch(addToAccountInfos(map));
 }
 
 /**
@@ -346,20 +439,15 @@ export async function addPendingAccount(
     accountAddress = '',
     deploymentTransactionId: string | undefined = undefined
 ) {
-    const account: Account = {
-        name: accountName,
+    const account = createAccount(
         identityId,
-        status: AccountStatus.Pending,
-        address: accountAddress,
-        signatureThreshold: 1,
-        maxTransactionId: '0',
+        accountAddress,
+        AccountStatus.Pending,
+        accountName,
+        undefined,
         isInitial,
-        deploymentTransactionId,
-        rewardFilter: '[]',
-        selfAmounts: getInitialEncryptedAmount(),
-        incomingAmounts: '[]',
-        totalDecrypted: '0',
-    };
+        deploymentTransactionId
+    );
     await insertAccount(account);
     return loadAccounts(dispatch);
 }
@@ -469,7 +557,7 @@ export async function addExternalAccount(
         signatureThreshold,
         maxTransactionId: '0',
         isInitial: false,
-        rewardFilter: '[]',
+        transactionFilter: {},
     };
     await insertAccount(account);
     return loadAccounts(dispatch);
@@ -479,13 +567,18 @@ export async function importAccount(account: Account | Account[]) {
     await insertAccount(account);
 }
 
-export async function updateRewardFilter(
+export async function updateTransactionFilter(
     dispatch: Dispatch,
     address: string,
-    rewardFilter: TransactionKindString[]
+    transactionFilter: TransactionFilter,
+    persist: boolean
 ) {
-    const updatedFields = { rewardFilter: JSON.stringify(rewardFilter) };
-    updateAccount(address, updatedFields);
+    const updatedFields = { transactionFilter };
+
+    if (persist) {
+        updateAccount(address, updatedFields);
+    }
+
     return dispatch(updateAccountFields({ address, updatedFields }));
 }
 
@@ -495,7 +588,6 @@ export async function updateMaxTransactionId(
     maxTransactionId: string
 ) {
     const updatedFields = { maxTransactionId };
-    updateAccount(address, updatedFields);
     return dispatch(updateAccountFields({ address, updatedFields }));
 }
 
@@ -530,6 +622,27 @@ export async function editAccountName(
     await updateAddressBookEntry(dispatch, address, { name });
 
     return dispatch(updateAccountFields({ address, updatedFields }));
+}
+
+export async function toggleAccountView(dispatch: Dispatch) {
+    const simpleViewActive = await accountSimpleView.get();
+
+    await accountSimpleView.set(!simpleViewActive);
+    return loadSimpleViewActive(dispatch);
+}
+
+export async function setDefaultAccount(dispatch: Dispatch, address: string) {
+    await defaultAccount.set(address);
+    loadDefaultAccount(dispatch);
+}
+
+export function clearRewardFilters(dispatch: Dispatch, address: string) {
+    return updateTransactionFilter(
+        dispatch,
+        address,
+        {} as TransactionFilter,
+        true
+    );
 }
 
 export default accountsSlice.reducer;

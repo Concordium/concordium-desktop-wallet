@@ -2,6 +2,15 @@
     display: flex;
 }
 
+.inlineFlex {
+    display: inline-flex;
+}
+
+.inlineFlexColumn {
+    display: inline-flex;
+    flex-direction: column;
+}
+
 .flexColumn {
     display: flex;
     flex-direction: column;

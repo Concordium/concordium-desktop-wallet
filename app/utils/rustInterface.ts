@@ -37,11 +37,11 @@ async function getSecretsFromLedger(
     displayMessage: (message: string) => void,
     identityNumber: number
 ) {
-    displayMessage('Please confirm exporting PRF key on device');
-    const prfKeySeed = await ledger.getPrfKey(identityNumber);
-
-    displayMessage('Please confirm exporting IdCredSec on device');
-    const idCredSecSeed = await ledger.getIdCredSec(identityNumber);
+    displayMessage('Please accept to create credential on device');
+    const {
+        prfKey: prfKeySeed,
+        idCredSec: idCredSecSeed,
+    } = await ledger.getPrivateKeySeeds(identityNumber);
 
     const prfKey = prfKeySeed.toString('hex');
     const idCredSec = idCredSecSeed.toString('hex');
@@ -65,7 +65,11 @@ export async function exportKeysFromLedger(
         displayMessage,
         identityNumber
     );
-    displayMessage('Please confirm exporting public key on device');
+    displayMessage(
+        `Please confirm exporting
+public key on device,
+for identity: ${identityNumber}, credential: ${credentialNumber}.`
+    );
     const publicKey = (await ledger.getPublicKey(path)).toString('hex');
     displayMessage(`Please confirm exported public key: ${publicKey}`);
     return { prfKey, idCredSec, publicKey };
@@ -493,5 +497,18 @@ export function getAddressFromCredentialId(credId: string): Promise<string> {
     return worker.postMessage({
         command: workerCommands.getAddressFromCredId,
         credId,
+    });
+}
+
+export function getCredId(
+    prfKeySeed: string,
+    credentialNumber: number,
+    global: Global
+): Promise<string> {
+    return worker.postMessage({
+        command: workerCommands.getCredId,
+        prfKey: prfKeySeed,
+        credentialNumber,
+        global: stringify(global),
     });
 }

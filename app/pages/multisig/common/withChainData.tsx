@@ -8,8 +8,8 @@ import routes from '~/constants/routes.json';
 import Execute from '../Execute';
 
 export interface ChainData {
-    consensusStatus: ConsensusStatus | undefined;
-    blockSummary: BlockSummary | undefined;
+    consensusStatus?: ConsensusStatus;
+    blockSummary?: BlockSummary;
 }
 
 export default function withChainData<TProps extends ChainData>(

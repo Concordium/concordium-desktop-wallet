@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import clsx from 'clsx';
 import { useDispatch } from 'react-redux';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import Card from '~/cross-app-components/Card';
@@ -12,6 +13,7 @@ interface Props {
     displayText: string;
     setting: Setting;
     warning?: string;
+    className?: string;
 }
 
 /**
@@ -22,6 +24,7 @@ export default function BooleanSetting({
     displayText,
     setting,
     warning,
+    className,
 }: Props) {
     const [open, setOpen] = useState(false);
     const dispatch = useDispatch();
@@ -39,7 +42,7 @@ export default function BooleanSetting({
 
     const toggleCheckbox = (
         <Switch defaultChecked={setting.value === '1'} onClick={handleClick}>
-            <span className="body1">{displayText}</span>
+            <span className="body2">{displayText}</span>
         </Switch>
     );
 
@@ -53,7 +56,7 @@ export default function BooleanSetting({
     );
 
     return (
-        <Card className={styles.root}>
+        <Card className={clsx(styles.root, className)}>
             {enableWarningModal}
             {toggleCheckbox}
         </Card>

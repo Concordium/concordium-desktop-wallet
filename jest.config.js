@@ -10,8 +10,10 @@ module.exports = {
     },
     moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json'],
     moduleDirectories: ['node_modules', 'app/node_modules'],
-    setupFiles: ['./internals/scripts/CheckBuildsExist.js'],
-    setupFilesAfterEnv: ['./test/mockWindow.ts'],
+    setupFiles: [
+        './internals/scripts/CheckBuildsExist.js',
+        './test/loadModules.ts',
+    ],
     globals: {
         'ts-jest': {
             tsconfig: 'tsconfig.jest.json',

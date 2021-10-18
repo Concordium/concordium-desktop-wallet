@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { stringify } from '~/utils/JSONHelper';
@@ -10,36 +10,33 @@ import {
     Fraction,
 } from '~/utils/types';
 import { toMicroUnits } from '~/utils/gtu';
-import locations from '~/constants/transferLocations.json';
 import { createEncryptedTransferTransaction } from '~/utils/transactionHelpers';
 import ExternalTransfer from '~/components/Transfers/ExternalTransfer';
+import { multiplyFraction } from '~/utils/basicHelpers';
 
-import { getTransactionKindCost } from '~/utils/transactionCosts';
-import ensureExchangeRateAndNonce from '~/components/Transfers/ensureExchangeRateAndNonce';
+import ensureExchangeRateAndNonce from './ensureExchangeRateAndNonce';
+import ensureNoPendingShieldedBalance from './ensureNoPendingShieldedBalance';
 
 interface Props {
     account: Account;
     exchangeRate: Fraction;
     nonce: string;
+    disableClose?: boolean;
 }
 
 /**
  * Controls the flow of creating an encrypted transfer.
  */
-function EncryptedTransfer({ account, exchangeRate, nonce }: Props) {
+function EncryptedTransfer({
+    account,
+    exchangeRate,
+    nonce,
+    disableClose = false,
+}: Props) {
     const dispatch = useDispatch();
 
-    const estimatedFee = useMemo(
-        () =>
-            getTransactionKindCost(
-                TransactionKindId.Encrypted_transfer,
-                exchangeRate
-            ),
-        [exchangeRate]
-    );
-
     const toConfirmTransfer = useCallback(
-        async (amount: string, recipient: AddressBookEntry) => {
+        async (amount: string, recipient: AddressBookEntry, memo?: string) => {
             if (!recipient) {
                 throw new Error('Unexpected missing recipient');
             }
@@ -48,18 +45,21 @@ function EncryptedTransfer({ account, exchangeRate, nonce }: Props) {
                 account.address,
                 toMicroUnits(amount),
                 recipient.address,
-                nonce
+                nonce,
+                memo
             );
-            transaction.estimatedFee = estimatedFee;
+            transaction.estimatedFee = multiplyFraction(
+                exchangeRate,
+                transaction.energyAmount
+            );
 
             dispatch(
                 push({
                     pathname: routes.SUBMITTRANSFER,
                     state: {
                         confirmed: {
-                            pathname: routes.ACCOUNTS_ENCRYPTEDTRANSFER,
+                            pathname: routes.ACCOUNTS_FINAL_PAGE,
                             state: {
-                                initialPage: locations.transferSubmitted,
                                 transaction: stringify(transaction),
                                 recipient,
                             },
@@ -67,8 +67,8 @@ function EncryptedTransfer({ account, exchangeRate, nonce }: Props) {
                         cancelled: {
                             pathname: routes.ACCOUNTS_ENCRYPTEDTRANSFER,
                             state: {
-                                initialPage: locations.pickAmount,
                                 amount,
+                                memo,
                                 recipient,
                             },
                         },
@@ -79,14 +79,16 @@ function EncryptedTransfer({ account, exchangeRate, nonce }: Props) {
             );
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [JSON.stringify(account), estimatedFee, nonce]
+        [JSON.stringify(account)]
     );
 
     return (
         <ExternalTransfer
-            estimatedFee={estimatedFee}
+            exchangeRate={exchangeRate}
             toConfirmTransfer={toConfirmTransfer}
-            exitFunction={() => dispatch(push(routes.ACCOUNTS))}
+            exitFunction={
+                disableClose ? undefined : () => dispatch(push(routes.ACCOUNTS))
+            }
             amountHeader="Send shielded funds"
             senderAddress={account.address}
             transactionKind={TransactionKindId.Encrypted_transfer}
@@ -94,4 +96,6 @@ function EncryptedTransfer({ account, exchangeRate, nonce }: Props) {
     );
 }
 
-export default ensureExchangeRateAndNonce(EncryptedTransfer);
+export default ensureExchangeRateAndNonce(
+    ensureNoPendingShieldedBalance(EncryptedTransfer)
+);

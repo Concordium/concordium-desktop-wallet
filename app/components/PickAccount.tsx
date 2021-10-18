@@ -4,7 +4,7 @@ import { push } from 'connected-react-router';
 import { Account, AccountInfo } from '~/utils/types';
 import AccountCard from '~/components/AccountCard';
 import {
-    accountsSelector,
+    confirmedAccountsSelector,
     accountsInfoSelector,
     loadAccountInfos,
 } from '~/features/AccountSlice';
@@ -23,6 +23,7 @@ interface Props {
         account: Account,
         info?: AccountInfo
     ) => ReactNode | undefined;
+    messageWhenEmpty: string;
 }
 
 /**
@@ -34,9 +35,10 @@ export default function PickAccount({
     filter = () => true,
     isDisabled,
     onAccountClicked = noOp,
+    messageWhenEmpty,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
-    const accounts = useSelector(accountsSelector);
+    const accounts = useSelector(confirmedAccountsSelector);
     const accountsInfo = useSelector(accountsInfoSelector);
     const [chosenIndex, setChosenIndex] = useState<number | undefined>();
     const [loaded, setLoaded] = useState(false);
@@ -63,6 +65,10 @@ export default function PickAccount({
             );
         }
     }, [accounts, dispatch, loaded]);
+
+    if (filtered.length === 0) {
+        return <h2>{messageWhenEmpty}</h2>;
+    }
 
     return (
         <>

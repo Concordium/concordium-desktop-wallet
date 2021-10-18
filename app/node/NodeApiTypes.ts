@@ -34,12 +34,15 @@ export interface ConsensusStatus {
     finalizationPeriodEMSD: number;
     genesisBlock: string;
     genesisTime: string;
+    currentEraGenesisBlock: string;
+    currentEraGenesisTime: string;
     lastFinalizedBlock: string;
     lastFinalizedBlockHeight: number;
     lastFinalizedTime: string | null;
     slotDuration: number;
     transactionsPerBlockEMA: number;
     transactionsPerBlockEMSD: number;
+    protocolVersion: number;
 }
 
 interface UpdateQueue {
@@ -60,6 +63,8 @@ interface UpdateQueues {
     rootKeys: UpdateQueue;
     level1Keys: UpdateQueue;
     level2Keys: UpdateQueue;
+    addIdentityProvider: UpdateQueue;
+    addAnonymityRevoker: UpdateQueue;
 }
 
 export interface Authorization {

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Changed
+
+-   Added logging, which can be exported from the application menu.
+-   Auxiliary data in an Update Protocol transaction is now optional.
+
+## 1.2.0
+
 ### Added
 
 -   Support for macOS running on M1 chipsets through Rosetta.
@@ -9,14 +16,23 @@
 -   It is now possible to rename accounts and identities.
 -   Added an option to add an address book entry while creating a transfer transaction.
 -   Added an introductory screen to set up a node connection for first time users.
+-   Now shows connected node status in side bar.
 -   It is now possible to remove a failed identity.
--   Added logging, which can be exported from the application menu.
+-   Added reference (sessionId) on failed identities, for support.
+-   Added support for memo transactions.
+-   Added algorithm to recover lost accounts and credentials.
+-   Application will automatically search for updates and prompt the user to download and install them (Windows, macOS and AppImage for Linux).
+-   It is now possible to set a default account, which will be selected initially when opening the app.
+-   "About" menu link has been added to native menu bar under "Help" for windows/linux. It is already accessible on mac under "Concordium desktop wallet" in the native menu.
+-   When an account is synchronizing transactions, it now shows with a spinning icon in the tab header of the transaction log.
 
 ### Changed
 
 -   The native menu bar has been updated to only contain relevant items. Terms and conditions and the license notices have been moved to the menu bar. The menu bar is now accessible on Windows and Linux. Press
 -   The accounts page has been updated to make it clearer that multi credential accounts are not able to use shielded transactions.
 -   Transactions in the 'Transfers' list in the account view are now grouped by dates.
+-   Account page has changed, now featuring two different ways to view accounts: a simple, quick overview of all accounts, and a detailed view of a single account. All actions previously found under "More" will now be found in "detailed view" for the specific account.
+-   Account page can be viewed in its entirety (though with limited use) without being connected to a node.
 
 ### Fixed
 

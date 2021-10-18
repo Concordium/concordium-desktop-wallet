@@ -18,7 +18,6 @@ import { isMultiSig } from '~/utils/accountHelpers';
 
 interface Props {
     account: Account;
-    returnFunction(): void;
     exchangeRate: Fraction;
     nonce: string;
 }
@@ -26,12 +25,7 @@ interface Props {
 /**
  * Controls the flow of creating a scheduled transfer.
  */
-function ScheduleTransfer({
-    account,
-    returnFunction,
-    exchangeRate,
-    nonce,
-}: Props) {
+function ScheduleTransfer({ account, exchangeRate, nonce }: Props) {
     const dispatch = useDispatch();
 
     if (isMultiSig(account)) {
@@ -45,13 +39,18 @@ function ScheduleTransfer({
         );
     }
 
-    function toBuildSchedule(amount: string, recipient: AddressBookEntry) {
+    function toBuildSchedule(
+        amount: string,
+        recipient: AddressBookEntry,
+        memo?: string
+    ) {
         dispatch(
             push({
                 pathname: routes.ACCOUNTS_SCHEDULED_TRANSFER,
                 state: {
                     account,
                     nonce,
+                    memo,
                     amount: toMicroUnits(amount).toString(),
                     recipient,
                     exchangeRate: stringify(exchangeRate),
@@ -63,7 +62,6 @@ function ScheduleTransfer({
     return (
         <ExternalTransfer
             toConfirmTransfer={toBuildSchedule}
-            exitFunction={returnFunction}
             amountHeader="Send GTU with a schedule"
             senderAddress={account.address}
             transactionKind={TransactionKindId.Simple_transfer}

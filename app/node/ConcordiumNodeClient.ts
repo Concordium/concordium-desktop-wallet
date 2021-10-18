@@ -5,6 +5,7 @@ import {
     BlockHash,
     Empty,
     GetAddressInfoRequest,
+    PeersRequest,
     SendTransactionRequest,
     TransactionHash,
 } from '~/proto/concordium_p2p_rpc_pb';
@@ -82,6 +83,18 @@ export default class ConcordiumNodeClient {
         return this.sendRequest(this.client.getConsensusStatus, new Empty());
     }
 
+    getIdentityProviders(blockHashValue: string) {
+        const blockHash = new BlockHash();
+        blockHash.setBlockHash(blockHashValue);
+        return this.sendRequest(this.client.getIdentityProviders, blockHash);
+    }
+
+    getAnonymityRevokers(blockHashValue: string) {
+        const blockHash = new BlockHash();
+        blockHash.setBlockHash(blockHashValue);
+        return this.sendRequest(this.client.getAnonymityRevokers, blockHash);
+    }
+
     sendTransaction(transactionPayload: Uint8Array, networkId = 100) {
         const request = this.buildSendTransactionRequest(
             transactionPayload,
@@ -127,6 +140,12 @@ export default class ConcordiumNodeClient {
 
     getNodeInfo() {
         return this.sendRequest(this.client.nodeInfo, new Empty());
+    }
+
+    getPeerList(includeBootstrappers: boolean) {
+        const peersRequest = new PeersRequest();
+        peersRequest.setIncludeBootstrappers(includeBootstrappers);
+        return this.sendRequest(this.client.peerList, peersRequest);
     }
 
     sendRequest<T, Response extends Serializable>(

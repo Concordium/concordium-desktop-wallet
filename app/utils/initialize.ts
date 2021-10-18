@@ -1,5 +1,5 @@
 import { loadAllSettings } from '~/database/SettingsDao';
-import { loadAccounts } from '~/features/AccountSlice';
+import { initAccounts } from '~/features/AccountSlice';
 import { loadAddressBook } from '~/features/AddressBookSlice';
 import {
     loadCredentials,
@@ -41,7 +41,7 @@ export default async function initApplication(dispatch: Dispatch) {
 
     await Promise.all([
         loadAddressBook(dispatch),
-        loadAccounts(dispatch),
+        initAccounts(dispatch),
         loadIdentities(dispatch),
         loadProposals(dispatch),
         loadCredentials(dispatch),

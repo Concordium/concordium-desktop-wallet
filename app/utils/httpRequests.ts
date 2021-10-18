@@ -1,4 +1,4 @@
-import { IdObjectRequest, Versioned } from './types';
+import { IdObjectRequest, TransactionFilter, Versioned } from './types';
 import {
     DoneIdentityTokenContainer,
     IdentityProviderIdentityStatus,
@@ -22,6 +22,13 @@ export async function httpGet<T>(
 
 export async function getTransactions(address: string, id = '0') {
     return window.http.getTransactions(address, id);
+}
+
+export async function getNewestTransactions(
+    address: string,
+    transactionFilter: TransactionFilter
+) {
+    return window.http.getNewestTransactions(address, transactionFilter);
 }
 
 export async function getIdentityProviders() {

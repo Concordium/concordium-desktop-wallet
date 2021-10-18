@@ -9,10 +9,12 @@ const encoding = 'base64';
 const aes256EncryptionMethodExternal = 'AES-256';
 const aes256EncryptionMethod = 'AES-256-CBC';
 
-const keyDerivationMethodExternal = 'PBKDF2WithHmacSHA256';
-const keyDerivationMethod = 'PBKDF2';
+const PBKDF2keyDerivationMethodExternal = 'PBKDF2WithHmacSHA256';
+const PBKDF2keyDerivationMethod = 'PBKDF2';
 
 const hashAlgorithmInternal = 'sha256';
+
+const defaultKeyLength = 32;
 
 /**
  * The naming of the encryption methods across different crypto libraries are different,
@@ -36,13 +38,21 @@ function getEncryptionMethodImport(method: string) {
     );
 }
 
+function checkKeyDerivationMethodImport(method: string) {
+    if (method !== PBKDF2keyDerivationMethodExternal) {
+        throw new Error(
+            `An unsupported key derivation method was used: " ${method}`
+        );
+    }
+}
+
 /**
  * The naming of the key derivation methods across different crypto libraries are different,
  * so this method is required to output in the format expected by external tools.
  */
 function getKeyDerivationAlgorithmExport(algorithm: string) {
-    if (algorithm === keyDerivationMethod) {
-        return keyDerivationMethodExternal;
+    if (algorithm === PBKDF2keyDerivationMethod) {
+        return PBKDF2keyDerivationMethodExternal;
     }
     return throwLoggedError(
         `An unsupported key derivation algorithm was used: ${algorithm}`
@@ -55,7 +65,7 @@ function getKeyDerivationAlgorithmExport(algorithm: string) {
  * required to decrypt the file.
  */
 export function encrypt(data: string, password: string): EncryptedData {
-    const keyLen = 32;
+    const keyLen = defaultKeyLength;
     const iterations = 10000;
     const salt = crypto.randomBytes(16);
     const key = crypto.pbkdf2Sync(
@@ -82,7 +92,7 @@ export function encrypt(data: string, password: string): EncryptedData {
             initializationVector: initializationVector.toString(encoding),
             encryptionMethod: getEncryptionMethodExport(aes256EncryptionMethod),
             keyDerivationMethod: getKeyDerivationAlgorithmExport(
-                keyDerivationMethod
+                PBKDF2keyDerivationMethod
             ),
             hashAlgorithm: hashAlgorithmInternal,
         },
@@ -104,16 +114,20 @@ export function decrypt(
         initializationVector,
         encryptionMethod,
         hashAlgorithm,
+        keyDerivationMethod,
     } = metadata;
-    const internalEncryptionMethod = getEncryptionMethodImport(
-        encryptionMethod
-    );
+
+    checkKeyDerivationMethodImport(keyDerivationMethod);
     const key = crypto.pbkdf2Sync(
         password,
         Buffer.from(salt, encoding),
         iterations,
-        keyLen,
-        hashAlgorithm
+        keyLen || defaultKeyLength,
+        hashAlgorithm || hashAlgorithmInternal
+    );
+
+    const internalEncryptionMethod = getEncryptionMethodImport(
+        encryptionMethod
     );
     const decipher = crypto.createDecipheriv(
         internalEncryptionMethod,
@@ -125,7 +139,7 @@ export function decrypt(
     return data;
 }
 
-function hashSha256(data: (Buffer | Uint8Array)[]) {
+function hashSha256(data: (string | Buffer | Uint8Array)[]) {
     const hash = crypto.createHash('sha256');
     data.forEach((input) => hash.update(input));
     return hash.digest();

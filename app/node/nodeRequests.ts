@@ -2,9 +2,10 @@ import {
     BoolResponse,
     JsonResponse,
     NodeInfoResponse,
+    PeerListResponse,
 } from '../proto/concordium_p2p_rpc_pb';
 import { BlockSummary, ConsensusStatus, AccountNonce } from './NodeApiTypes';
-import { AccountInfo, Global, Versioned } from '../utils/types';
+import { AccountInfo, Global, Versioned, IpInfo, ArInfo } from '../utils/types';
 import { intToString } from '../utils/JSONHelper';
 import grpcMethods from '../constants/grpcMethods.json';
 
@@ -88,6 +89,28 @@ export function getConsensusStatus(): Promise<ConsensusStatus> {
 }
 
 /**
+ * Retrieves the list of identity providers at the given blockHash.
+ */
+export async function getIdentityProviders(
+    blockHashValue: string
+): Promise<IpInfo[]> {
+    return sendPromiseParseResult(grpcMethods.getIdentityProviders, {
+        blockHashValue,
+    });
+}
+
+/**
+ * Retrieves the list of anonymity revokers at the given blockHash.
+ */
+export async function getAnonymityRevokers(
+    blockHashValue: string
+): Promise<ArInfo[]> {
+    return sendPromiseParseResult(grpcMethods.getAnonymityRevokers, {
+        blockHashValue,
+    });
+}
+
+/**
  * Retrieves the block summary for the provided block hash from the node.
  * @param blockHashValue the block hash to retrieve the block summary for
  */
@@ -110,6 +133,17 @@ export function getAccountInfo(
 export async function getNodeInfo(): Promise<NodeInfoResponse> {
     const response = await sendPromise(grpcMethods.nodeInfo);
     return NodeInfoResponse.deserializeBinary(response);
+}
+
+export async function getPeerList(
+    includeBootstrappers = false
+): Promise<PeerListResponse> {
+    const response = await sendPromise(grpcMethods.peerList, {
+        includeBootstrappers: includeBootstrappers
+            ? 'includeBootstrappers'
+            : '',
+    });
+    return PeerListResponse.deserializeBinary(response);
 }
 
 export async function getCryptographicParameters(

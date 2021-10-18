@@ -15,10 +15,17 @@ import {
     TransferToPublic,
     instanceOfEncryptedTransfer,
     EncryptedTransfer,
+    instanceOfSimpleTransferWithMemo,
+    SimpleTransferWithMemo,
+    ScheduledTransferWithMemo,
+    EncryptedTransferWithMemo,
+    instanceOfScheduledTransferWithMemo,
+    instanceOfEncryptedTransferWithMemo,
 } from './types';
 import { getScheduledTransferAmount } from './transactionHelpers';
 import { collapseFraction, abs } from './basicHelpers';
 import { stringify } from './JSONHelper';
+import { decodeCBOR } from './cborHelper';
 
 /*
  * Converts the given transaction into the structure, which is used in the database.
@@ -96,6 +103,21 @@ export function convertIncomingTransaction(
         ? TransactionStatus.Finalized
         : TransactionStatus.Failed;
 
+    let memo;
+    if (transaction.details.memo) {
+        // The memo from the proxy is a "hex-encoded byte array".
+        try {
+            memo = decodeCBOR(transaction.details.memo);
+            if (typeof memo === 'object') {
+                memo = JSON.stringify(memo);
+            } else {
+                memo = memo.toString();
+            }
+        } catch {
+            memo = transaction.details.memo;
+        }
+    }
+
     return {
         transactionKind,
         id: transaction.id,
@@ -110,6 +132,7 @@ export function convertIncomingTransaction(
         toAddress,
         rejectReason: transaction.details.rawRejectReason?.tag,
         status,
+        memo,
     };
 }
 
@@ -122,6 +145,7 @@ type TypeSpecific = Pick<
     | 'toAddress'
     | 'decryptedAmount'
     | 'encrypted'
+    | 'memo'
 >;
 
 // Helper function for converting Account Transaction to TransferTransaction.
@@ -133,6 +157,18 @@ function convertSimpleTransfer(transaction: SimpleTransfer): TypeSpecific {
         transactionKind: TransactionKindString.Transfer,
         subtotal: amount.toString(),
         toAddress: transaction.payload.toAddress,
+    };
+}
+
+// Helper function for converting Account Transaction to TransferTransaction.
+// Handles the fields of a simple transfer with memo, which cannot be converted by the generic function .
+function convertSimpleTransferWithMemo(
+    transaction: SimpleTransferWithMemo
+): TypeSpecific {
+    return {
+        ...convertSimpleTransfer(transaction),
+        transactionKind: TransactionKindString.TransferWithMemo,
+        memo: transaction.payload.memo,
     };
 }
 
@@ -206,6 +242,18 @@ function convertScheduledTransfer(
 }
 
 // Helper function for converting Account Transaction to TransferTransaction.
+// Handles the fields of a simple transfer with memo, which cannot be converted by the generic function .
+function convertScheduledTransferWithMemo(
+    transaction: ScheduledTransferWithMemo
+): TypeSpecific {
+    return {
+        ...convertScheduledTransfer(transaction),
+        transactionKind: TransactionKindString.TransferWithScheduleAndMemo,
+        memo: transaction.payload.memo,
+    };
+}
+
+// Helper function for converting Account Transaction to TransferTransaction.
 // Handles the fields of a encrypted transfer, which cannot be converted by the generic function .
 function convertEncryptedTransfer(
     transaction: EncryptedTransfer
@@ -223,13 +271,24 @@ function convertEncryptedTransfer(
         newSelfEncryptedAmount: remainingEncryptedAmount,
         remainingDecryptedAmount,
     });
-
     return {
         transactionKind: TransactionKindString.EncryptedAmountTransfer,
         subtotal: '0',
         decryptedAmount: amount.toString(),
         toAddress: transaction.payload.toAddress,
         encrypted,
+    };
+}
+
+// Helper function for converting Account Transaction to TransferTransaction.
+// Handles the fields of a simple transfer with memo, which cannot be converted by the generic function .
+function convertEncryptedTransferWithMemo(
+    transaction: EncryptedTransferWithMemo
+): TypeSpecific {
+    return {
+        ...convertEncryptedTransfer(transaction),
+        transactionKind: TransactionKindString.EncryptedAmountTransferWithMemo,
+        memo: transaction.payload.memo,
     };
 }
 
@@ -250,14 +309,20 @@ export async function convertAccountTransaction(
     let typeSpecific;
     if (instanceOfSimpleTransfer(transaction)) {
         typeSpecific = convertSimpleTransfer(transaction);
+    } else if (instanceOfSimpleTransferWithMemo(transaction)) {
+        typeSpecific = convertSimpleTransferWithMemo(transaction);
     } else if (instanceOfScheduledTransfer(transaction)) {
         typeSpecific = convertScheduledTransfer(transaction);
+    } else if (instanceOfScheduledTransferWithMemo(transaction)) {
+        typeSpecific = convertScheduledTransferWithMemo(transaction);
     } else if (instanceOfTransferToEncrypted(transaction)) {
         typeSpecific = convertTransferToEncrypted(transaction);
     } else if (instanceOfTransferToPublic(transaction)) {
         typeSpecific = convertTransferToPublic(transaction);
     } else if (instanceOfEncryptedTransfer(transaction)) {
         typeSpecific = convertEncryptedTransfer(transaction);
+    } else if (instanceOfEncryptedTransferWithMemo(transaction)) {
+        typeSpecific = convertEncryptedTransferWithMemo(transaction);
     } else {
         throw new Error('unsupported transaction type - please implement');
     }

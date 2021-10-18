@@ -9,6 +9,7 @@ import {
 import DeleteAddress from '../DeleteAddress';
 import UpsertAddress from '~/components/UpsertAddress';
 import Card from '~/cross-app-components/Card';
+import DisplayAddress from '~/components/DisplayAddress';
 
 import EditIcon from '~/../resources/svg/edit.svg';
 import CopyButton from '~/components/CopyButton';
@@ -50,7 +51,11 @@ export default function AddressBookElementView() {
                     </span>
                 </header>
                 <div className={styles.address}>
-                    {chosenEntry.address}
+                    <DisplayAddress
+                        lineClassName="body3"
+                        lineLength={25}
+                        address={chosenEntry.address}
+                    />
                     <CopyButton
                         className={styles.copy}
                         value={chosenEntry.address}

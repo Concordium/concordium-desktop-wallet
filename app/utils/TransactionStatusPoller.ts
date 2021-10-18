@@ -15,10 +15,13 @@ import {
 import {
     confirmTransaction,
     rejectTransaction,
-    isShieldedBalanceTransaction,
 } from '~/features/TransactionSlice';
 import { getPendingTransactions } from '~/database/TransactionDao';
-import { getStatus, isSuccessfulTransaction } from './transactionHelpers';
+import {
+    getStatus,
+    isSuccessfulTransaction,
+    isShieldedBalanceTransaction,
+} from './transactionHelpers';
 import { getTransactionHash } from './transactionHash';
 import {
     updateAccountInfoOfAddress,

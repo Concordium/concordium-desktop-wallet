@@ -1,6 +1,14 @@
 import { RegisterOptions, Validate } from 'react-hook-form';
 import bs58check from 'bs58check';
-import { Account, AccountInfo } from './types';
+import {
+    Account,
+    AccountInfo,
+    BooleanFilters,
+    TransactionFilter,
+    TransactionKindString,
+    AccountStatus,
+} from './types';
+import { max } from './basicHelpers';
 
 export const ACCOUNT_NAME_MAX_LENGTH = 25;
 export const ADDRESS_LENGTH = 50;
@@ -71,6 +79,102 @@ export function isMultiCred(accountInfo: AccountInfo): boolean {
     return Object.values(accountInfo.accountCredentials).length > 1;
 }
 
-export function getInitialEncryptedAmount() {
-    return ENCRYPTED_ZERO;
+export function createAccount(
+    identityId: number,
+    address: string,
+    status: AccountStatus,
+    name = address.substr(0, 8),
+    signatureThreshold = 1,
+    isInitial = false,
+    deploymentTransactionId?: string
+): Account {
+    return {
+        name,
+        identityId,
+        status,
+        address,
+        signatureThreshold,
+        isInitial,
+        deploymentTransactionId,
+        maxTransactionId: '0',
+        transactionFilter: {},
+        selfAmounts: ENCRYPTED_ZERO,
+        incomingAmounts: '[]',
+        totalDecrypted: '0',
+    };
+}
+
+export function createInitialAccount(
+    address: string,
+    status: AccountStatus,
+    name = address.substr(0, 8)
+): Omit<Account, 'identityId'> {
+    return {
+        name,
+        status,
+        address,
+        signatureThreshold: 1,
+        isInitial: true,
+        maxTransactionId: '0',
+        transactionFilter: {},
+        selfAmounts: ENCRYPTED_ZERO,
+        incomingAmounts: '[]',
+        totalDecrypted: '0',
+    };
+}
+
+export function getActiveBooleanFilters({
+    fromDate,
+    toDate,
+    ...filters
+}: TransactionFilter): TransactionKindString[] {
+    const fullFilter: BooleanFilters = {};
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const k in TransactionKindString) {
+        if (Object.prototype.hasOwnProperty.call(TransactionKindString, k)) {
+            const kind =
+                TransactionKindString[k as keyof typeof TransactionKindString];
+            fullFilter[kind] = filters[kind] ?? true;
+        }
+    }
+
+    return Object.entries(fullFilter as BooleanFilters)
+        .filter(([, v]) => v)
+        .map(([kind]) => kind as TransactionKindString);
+}
+
+interface PublicAccountAmounts {
+    total: bigint;
+    staked: bigint;
+    scheduled: bigint;
+    atDisposal: bigint;
+}
+
+/**
+ * Function to determine the parts of an account's public balance
+ * The only amount, which is not directly extracted from the accountInfo is atDisposal, which
+ * is calculated as "total - max(scheduled, staked)". This is because the staked amount uses the scheduled first.
+ * @param accountInfo the accountInfo to extract the amounts from. If not given, then all balances are set to 0.
+ * @returns an object containing the staked, scheduled, at disposal and total public balance.
+ */
+export function getPublicAccountAmounts(
+    accountInfo?: AccountInfo
+): PublicAccountAmounts {
+    if (!accountInfo) {
+        return { total: 0n, staked: 0n, scheduled: 0n, atDisposal: 0n };
+    }
+    const total = BigInt(accountInfo.accountAmount);
+    const staked = accountInfo.accountBaker
+        ? BigInt(accountInfo.accountBaker.stakedAmount)
+        : 0n;
+    const scheduled = accountInfo.accountReleaseSchedule
+        ? BigInt(accountInfo.accountReleaseSchedule.total)
+        : 0n;
+    const atDisposal = total - max(scheduled, staked);
+    return { total, staked, scheduled, atDisposal };
+}
+
+export function getAmountAtDisposal(accountInfo: AccountInfo): bigint {
+    return getPublicAccountAmounts(accountInfo).atDisposal;
 }

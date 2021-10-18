@@ -1,25 +1,39 @@
-import { createSlice } from '@reduxjs/toolkit';
+import {
+    createAsyncThunk,
+    createSlice,
+    PayloadAction,
+    isAnyOf,
+    isFulfilled,
+} from '@reduxjs/toolkit';
+import { Mutex, MutexInterface } from 'async-mutex';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
-import { getTransactions } from '../utils/httpRequests';
+import { getNewestTransactions, getTransactions } from '../utils/httpRequests';
 import { decryptAmounts } from '../utils/rustInterface';
 import {
     getTransactionsOfAccount,
+    upsertTransactionsAndUpdateMaxId,
     insertTransactions,
     updateTransaction,
+    getTransaction,
 } from '../database/TransactionDao';
 import {
     TransferTransaction,
     TransactionStatus,
     TransactionKindString,
-    Account,
     AccountTransaction,
     Dispatch,
     TransactionEvent,
     Global,
     TransferTransactionWithNames,
+    IncomingTransaction,
+    Account,
 } from '../utils/types';
-import { isSuccessfulTransaction } from '../utils/transactionHelpers';
+import {
+    isSuccessfulTransaction,
+    isShieldedBalanceTransaction,
+    isUnshieldedBalanceTransaction,
+} from '../utils/transactionHelpers';
 import {
     convertIncomingTransaction,
     convertAccountTransaction,
@@ -30,17 +44,328 @@ import {
     updateAllDecrypted,
     chosenAccountSelector,
 } from './AccountSlice';
-import AbortController from '~/utils/AbortController';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
-import { max, throwLoggedError } from '~/utils/basicHelpers';
+import { isDefined, max, noOp, throwLoggedError } from '~/utils/basicHelpers';
+import { getActiveBooleanFilters } from '~/utils/accountHelpers';
+import errorMessages from '~/constants/errorMessages.json';
+import { dateFromTimeStamp } from '~/utils/timeHelpers';
+import { GetTransactionsOutput } from '~/preload/preloadTypes';
 
-const updateTransactionInterval = 5000;
+export const transactionLogPageSize = 100;
+
+enum ActionTypePrefix {
+    Load = 'transactions/load',
+    Update = 'transactions/update',
+    Reload = 'transactions/reload',
+}
+
+interface LoadTransactionsArgs {
+    /**
+     * If true, activates loading indicator in transaction list
+     */
+    showLoading?: boolean;
+    /**
+     * Append to existing transactions or load as new set of transactions.
+     */
+    append?: boolean;
+    /**
+     * Number of transactions to load.
+     */
+    size?: number;
+    /**
+     * If this is true, loading more transactions will be locked until this finishes.
+     * It will also make the load always run, even though subsequent loads are dispatched before this finishes.
+     */
+    force?: boolean;
+}
+
+let latestLoadingRequestId: string | undefined;
+const forceLock = new Mutex();
+
+/**
+ * Load transactions from storage.
+ * Filters out reward transactions based on the account's transaction filter.
+ */
+export const loadTransactions = createAsyncThunk(
+    ActionTypePrefix.Load,
+    async (
+        {
+            append = false,
+            size = transactionLogPageSize,
+            force = false,
+        }: LoadTransactionsArgs,
+        { getState, requestId, signal }
+    ) => {
+        const state = getState() as RootState;
+        const account = chosenAccountSelector(state);
+
+        if (!account) {
+            throw new Error('No account');
+        }
+
+        let release: MutexInterface.Releaser | undefined;
+        if (force) {
+            release = await forceLock.acquire();
+        }
+
+        const rejectIfInvalid = (reason: string) => {
+            if (
+                signal.aborted ||
+                (requestId !== latestLoadingRequestId && !force)
+            ) {
+                release?.();
+                throw new Error(reason);
+            }
+        };
+
+        const minId = state.transactions.transactions
+            .map((t) => t.id)
+            .filter(isDefined)
+            .reduce<string | undefined>(
+                (min, cur) => (!min || min > cur ? cur : min),
+                undefined
+            );
+
+        const { fromDate, toDate } = account.transactionFilter;
+        const booleanFilters = getActiveBooleanFilters(
+            account.transactionFilter
+        );
+
+        rejectIfInvalid('DB load aborted');
+
+        try {
+            const result = await getTransactionsOfAccount(
+                account,
+                booleanFilters,
+                fromDate ? new Date(fromDate) : undefined,
+                toDate ? new Date(toDate) : undefined,
+                size,
+                append ? minId : undefined
+            );
+
+            rejectIfInvalid('Redux load aborted');
+
+            return result;
+        } finally {
+            // Push release of lock to end of async queue, as this will wait for redux to update with loaded transactions.
+            setTimeout(() => release?.());
+        }
+    }
+);
+
+export const reloadTransactions = createAsyncThunk(
+    ActionTypePrefix.Reload,
+    async (_, { dispatch, getState, signal }) => {
+        // If a forced load is running, wait for it to finish, to reload with updated length of transactions.
+        await forceLock.waitForUnlock();
+
+        const state = getState() as RootState;
+        const { transactions } = state.transactions;
+        const account = chosenAccountSelector(state);
+
+        if (!account) {
+            return;
+        }
+
+        const load = dispatch(
+            loadTransactions({
+                size: Math.max(transactions.length, transactionLogPageSize),
+            })
+        );
+
+        signal.onabort = () => load.abort();
+        await load;
+    }
+);
+
+/**
+ * Fetches a batch of the newest transactions of the given account,
+ * and saves them to the database, and updates the allDecrypted,
+ * if any shielded balance transactions were loaded.
+ */
+export async function fetchNewestTransactions(
+    dispatch: Dispatch,
+    account: Account
+) {
+    const newestTransactionInDatabase = await getTransaction(
+        account.maxTransactionId
+    );
+
+    if (
+        newestTransactionInDatabase &&
+        account.transactionFilter.toDate &&
+        new Date(account.transactionFilter.toDate).getTime() <
+            dateFromTimeStamp(newestTransactionInDatabase.blockTime).getTime()
+    ) {
+        // The area of search is subset of loaded transactions.
+        return;
+    }
+
+    const transactions = await getNewestTransactions(
+        account.address,
+        account.transactionFilter
+    );
+
+    const newTransactions = await insertTransactions(
+        transactions.map((transaction) =>
+            convertIncomingTransaction(transaction, account.address)
+        )
+    );
+    if (newTransactions.some(isShieldedBalanceTransaction)) {
+        await updateAllDecrypted(dispatch, account.address, false);
+    }
+}
+
+/**
+ * Fetches a batch of transactions from the wallet proxy for the account
+ * with the provided address.
+ * @param address the account address to fetch transactions for
+ * @param currentMaxId the current transaction id to retrieve transactions from
+ * @returns the list of fetched transactions, and the new max id of the received transactions,
+ * and whether there are more transactions to fetch.
+ */
+async function fetchTransactions(
+    address: string,
+    currentMaxId: bigint
+): Promise<{
+    transactions: IncomingTransaction[];
+    newMaxId: bigint;
+    isFinished: boolean;
+}> {
+    const { transactions, full } = await getTransactions(
+        address,
+        currentMaxId.toString()
+    );
+
+    const newMaxId = transactions.reduce(
+        (id, t) => max(id, BigInt(t.id)),
+        currentMaxId
+    );
+    const isFinished = !full;
+
+    return { transactions, newMaxId, isFinished };
+}
+
+let latestUpdateRequestId: string | undefined;
+const updateLock = new Mutex();
+
+interface UpdateTransactionsArgs {
+    onFirstLoop(): void;
+    onError(e: string): void;
+}
+
+/** Update the transactions from remote source.
+ * will fetch transactions in intervals, updating the state each time.
+ * stops when it reaches the newest transaction, or it is told to abort by the controller.
+ * @param controller this controls the function, and if it is aborted, this will terminate when able. Has a hasLooped check, so it can be checked whether this function has completed loading a batch.
+ * */
+export const updateTransactions = createAsyncThunk<
+    unknown,
+    UpdateTransactionsArgs
+>(
+    ActionTypePrefix.Update,
+    async (
+        { onFirstLoop, onError },
+        { getState, dispatch, signal, requestId }
+    ) => {
+        const release = await updateLock.acquire();
+
+        const state = getState() as RootState;
+        const account = chosenAccountSelector(state);
+
+        if (!account) {
+            return;
+        }
+
+        const rejectIfInvalid = (reason: string) => {
+            if (signal.aborted || latestUpdateRequestId !== requestId) {
+                release();
+                throw new Error(reason);
+            }
+        };
+
+        async function updateSubroutine(maxId: bigint, firstLoop = false) {
+            if (!account) {
+                throw new Error('Account missing');
+            }
+
+            let result;
+            const { address } = account;
+
+            rejectIfInvalid('Update aborted before fetch');
+
+            try {
+                result = await fetchTransactions(address, maxId);
+            } catch (e) {
+                onError(errorMessages.unableToReachWalletProxy);
+                throw e;
+            }
+
+            // Insert the fetched transactions and update the max transaction id
+            // in a single transaction.
+            const convertedIncomingTransactions = result.transactions.map((t) =>
+                convertIncomingTransaction(t, address)
+            );
+            const newTransactions = await upsertTransactionsAndUpdateMaxId(
+                convertedIncomingTransactions,
+                address,
+                result.newMaxId
+            );
+            await updateMaxTransactionId(
+                dispatch,
+                address,
+                result.newMaxId.toString()
+            );
+
+            const newEncrypted = newTransactions.some(
+                isShieldedBalanceTransaction
+            );
+            if (newEncrypted) {
+                await updateAllDecrypted(dispatch, address, false);
+            }
+
+            rejectIfInvalid('Update aborted before reload');
+
+            const maxIdInStore = state.transactions.transactions
+                .map((t) => t.id)
+                .filter(isDefined)
+                .reduce<string | undefined>(
+                    (top, cur) => (!!top && top > cur ? top : cur),
+                    undefined
+                );
+
+            if (maxIdInStore !== result.newMaxId.toString()) {
+                const reload = dispatch(reloadTransactions());
+
+                signal.onabort = () => reload.abort();
+                await reload;
+            }
+
+            if (maxId === result.newMaxId || result.isFinished) {
+                release();
+                return;
+            }
+
+            if (firstLoop) {
+                onFirstLoop();
+            }
+
+            await updateSubroutine(result.newMaxId);
+        }
+
+        await updateSubroutine(
+            account.maxTransactionId ? BigInt(account.maxTransactionId) : 0n,
+            true
+        );
+    }
+);
 
 interface State {
     transactions: TransferTransaction[];
     viewingShielded: boolean;
-    moreTransactions: boolean;
     loadingTransactions: boolean;
+    hasMore: boolean;
+    synchronizing: boolean;
 }
 
 const transactionSlice = createSlice({
@@ -48,19 +373,17 @@ const transactionSlice = createSlice({
     initialState: {
         transactions: [],
         viewingShielded: false,
-        moreTransactions: false,
         loadingTransactions: false,
+        hasMore: false,
+        synchronizing: false,
     } as State,
     reducers: {
-        setTransactions(state, update) {
+        setTransactions(state, update: PayloadAction<GetTransactionsOutput>) {
             state.transactions = update.payload.transactions;
-            state.moreTransactions = update.payload.more;
+            state.hasMore = update.payload.more;
         },
         setViewingShielded(state, viewingShielded) {
             state.viewingShielded = viewingShielded.payload;
-        },
-        setLoadingTransactions(state, loading) {
-            state.loadingTransactions = loading.payload;
         },
         updateTransactionFields(state, update) {
             const { hash, updatedFields } = update.payload;
@@ -75,43 +398,93 @@ const transactionSlice = createSlice({
             }
         },
     },
+    extraReducers: (builder) => {
+        builder.addCase(loadTransactions.pending, (state, action) => {
+            const { requestId } = action.meta;
+            latestLoadingRequestId = requestId;
+
+            if (action.meta.arg.showLoading) {
+                state.loadingTransactions = true;
+            }
+        });
+
+        builder.addCase(updateTransactions.pending, (state, { meta }) => {
+            latestUpdateRequestId = meta.requestId;
+            state.synchronizing = true;
+        });
+
+        builder.addMatcher(
+            isAnyOf(loadTransactions.rejected, loadTransactions.fulfilled),
+            (state, action) => {
+                const isLatest =
+                    action.meta.requestId === latestLoadingRequestId;
+
+                if (isFulfilled(action)) {
+                    state.hasMore = action.payload.more;
+
+                    if (action.meta.arg.append) {
+                        state.transactions.push(...action.payload.transactions);
+                    } else {
+                        state.transactions = action.payload.transactions;
+                    }
+                }
+
+                if (isLatest) {
+                    state.loadingTransactions = false;
+                }
+            }
+        );
+
+        builder.addMatcher(
+            isAnyOf(updateTransactions.rejected, updateTransactions.fulfilled),
+            (state, { meta }) => {
+                if (meta.requestId === latestUpdateRequestId) {
+                    state.synchronizing = false;
+                }
+            }
+        );
+
+        builder.addDefaultCase(noOp);
+    },
 });
 
 export const { setViewingShielded } = transactionSlice.actions;
 
-const {
-    setTransactions,
-    updateTransactionFields,
-    setLoadingTransactions,
-} = transactionSlice.actions;
+const { setTransactions, updateTransactionFields } = transactionSlice.actions;
+
+export const resetTransactions = () =>
+    setTransactions({ transactions: [], more: false });
 
 // Decrypts the encrypted transfers in the given transacion list, using the prfKey.
 // This function expects the prfKey to match the account's prfKey,
 // and that the account is the receiver of the transactions.
 export async function decryptTransactions(
-    transactions: TransferTransaction[],
-    accountAddress: string,
+    account: Account,
     prfKey: string,
     credentialNumber: number,
     global: Global
 ) {
-    const encryptedTransfers = transactions.filter(
+    const {
+        transactions: encryptedTransfers,
+    } = await getTransactionsOfAccount(account, [
+        TransactionKindString.EncryptedAmountTransfer,
+        TransactionKindString.EncryptedAmountTransferWithMemo,
+    ]);
+    const notDecrypted = encryptedTransfers.filter(
         (t) =>
-            t.transactionKind ===
-                TransactionKindString.EncryptedAmountTransfer &&
             t.decryptedAmount === null &&
             t.status === TransactionStatus.Finalized
     );
 
-    if (encryptedTransfers.length === 0) {
+    if (notDecrypted.length === 0) {
         return Promise.resolve();
     }
 
-    const encryptedAmounts = encryptedTransfers.map((t) => {
+    const encryptedAmounts = notDecrypted.map((t) => {
         if (!t.encrypted) {
             throwLoggedError('Unexpected missing field');
         }
-        if (t.fromAddress === accountAddress) {
+        if (t.fromAddress === account.address) {
             return JSON.parse(t.encrypted).inputEncryptedAmount;
         }
         return JSON.parse(t.encrypted).encryptedAmount;
@@ -125,7 +498,7 @@ export async function decryptTransactions(
     );
 
     return Promise.all(
-        encryptedTransfers.map(async (transaction, index) =>
+        notDecrypted.map(async (transaction, index) =>
             updateTransaction(
                 { id: transaction.id },
                 {
@@ -133,135 +506,6 @@ export async function decryptTransactions(
                 }
             )
         )
-    );
-}
-
-/**
- * Determine whether the transaction affects unshielded balance.
- */
-function isUnshieldedBalanceTransaction(
-    transaction: TransferTransaction,
-    currentAddress: string
-) {
-    return !(
-        transaction.transactionKind ===
-            TransactionKindString.EncryptedAmountTransfer &&
-        transaction.fromAddress !== currentAddress
-    );
-}
-
-/**
- * Determine whether the transaction affects shielded balance.
- */
-export function isShieldedBalanceTransaction(
-    transaction: Partial<TransferTransaction>
-) {
-    switch (transaction.transactionKind) {
-        case TransactionKindString.EncryptedAmountTransfer:
-        case TransactionKindString.TransferToEncrypted:
-        case TransactionKindString.TransferToPublic:
-            return true;
-        default:
-            return false;
-    }
-}
-
-/**
- * Load transactions from storage.
- * Filters out reward transactions based on the account's rewardFilter.
- */
-export async function loadTransactions(
-    account: Account,
-    dispatch: Dispatch,
-    showLoading = false,
-    controller?: AbortController
-) {
-    if (showLoading) {
-        dispatch(setLoadingTransactions(true));
-    }
-    const { transactions, more } = await getTransactionsOfAccount(
-        account,
-        JSON.parse(account.rewardFilter)
-    );
-
-    if (!controller?.isAborted) {
-        if (showLoading) {
-            dispatch(setLoadingTransactions(false));
-        }
-        dispatch(setTransactions({ transactions, more }));
-    }
-}
-
-async function fetchTransactions(address: string, currentMaxId: bigint) {
-    const { transactions, full } = await getTransactions(
-        address,
-        currentMaxId.toString()
-    );
-
-    const newMaxId = transactions.reduce(
-        (id, t) => max(id, BigInt(t.id)),
-        currentMaxId
-    );
-    const isFinished = !full;
-
-    const newTransactions = await insertTransactions(
-        transactions.map((transaction) =>
-            convertIncomingTransaction(transaction, address)
-        )
-    );
-    const newEncrypted = newTransactions.some(isShieldedBalanceTransaction);
-
-    return { newMaxId, isFinished, newEncrypted };
-}
-
-/** Update the transactions from remote source.
- * will fetch transactions in intervals, updating the state each time.
- * stops when it reaches the newest transaction, or it is told to abort by the controller.
- * */
-export async function updateTransactions(
-    dispatch: Dispatch,
-    account: Account,
-    controller: AbortController
-) {
-    async function updateSubroutine(maxId: bigint) {
-        if (controller.isAborted) {
-            controller.onAborted();
-            return;
-        }
-        const result = await fetchTransactions(account.address, maxId);
-
-        if (maxId !== result.newMaxId) {
-            await updateMaxTransactionId(
-                dispatch,
-                account.address,
-                result.newMaxId.toString()
-            );
-        }
-
-        if (result.newEncrypted) {
-            await updateAllDecrypted(dispatch, account.address, false);
-        }
-
-        if (controller.isAborted) {
-            controller.onAborted();
-            return;
-        }
-        if (maxId !== result.newMaxId) {
-            await loadTransactions(account, dispatch);
-            if (!result.isFinished) {
-                setTimeout(
-                    updateSubroutine,
-                    updateTransactionInterval,
-                    result.newMaxId
-                );
-                return;
-            }
-        }
-        controller.finish();
-    }
-
-    updateSubroutine(
-        account.maxTransactionId ? BigInt(account.maxTransactionId) : 0n
     );
 }
 
@@ -381,10 +625,10 @@ export const transactionsSelector = (
 export const viewingShieldedSelector = (state: RootState) =>
     state.transactions.viewingShielded;
 
-export const moreTransactionsSelector = (state: RootState) =>
-    state.transactions.moreTransactions;
-
 export const loadingTransactionsSelector = (state: RootState) =>
     state.transactions.loadingTransactions;
+
+export const hasMoreTransactionsSelector = (state: RootState) =>
+    state.transactions.hasMore;
 
 export default transactionSlice.reducer;

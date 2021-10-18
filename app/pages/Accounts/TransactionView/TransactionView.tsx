@@ -1,18 +1,23 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
-import TransactionListElement from '../TransactionListElement';
-import { TransferTransactionWithNames, TransactionStatus } from '~/utils/types';
+import { useSelector } from 'react-redux';
+import TransactionListElement from '../TransactionList/TransactionListElement';
+import {
+    TransferTransactionWithNames,
+    TransactionStatus,
+    TransferTransaction,
+} from '~/utils/types';
 import { isFailed } from '~/utils/transactionHelpers';
-import CloseButton from '~/cross-app-components/CloseButton';
-import Card from '~/cross-app-components/Card';
 import SidedRow from '~/components/SidedRow';
 import CopyButton from '~/components/CopyButton';
 import { rejectReasonToDisplayText } from '~/utils/node/RejectReasonHelper';
+import { transactionsSelector } from '~/features/TransactionSlice';
 import styles from './TransactionView.module.scss';
+import CloseButton from '~/cross-app-components/CloseButton';
 
 interface Props {
     transaction: TransferTransactionWithNames;
-    returnFunction: () => void;
+    onClose?(): void;
 }
 
 interface CopiableListElementProps {
@@ -36,7 +41,7 @@ function CopiableListElement({
                 <div className={styles.copiableListElementLeftSide}>
                     <p className={styles.copiableListElementTitle}>{title}</p>
                     {'\n'}
-                    <p className="body4">
+                    <p className="body4 m0 mT5">
                         {value} {note ? `(${note})` : undefined}
                     </p>
                 </div>
@@ -63,15 +68,35 @@ function displayRejectReason(transaction: TransferTransactionWithNames) {
 /**
  * Detailed view of the given transaction.
  */
-function TransactionView({ transaction, returnFunction }: Props) {
+function TransactionView({ transaction, onClose }: Props) {
+    const transactions = useSelector(transactionsSelector);
+    const [
+        chosenTransaction,
+        setChosenTransaction,
+    ] = useState<TransferTransaction>(transaction);
+
+    useEffect(() => {
+        if (chosenTransaction) {
+            const upToDateChosenTransaction = transactions.find(
+                (t) => t.transactionHash === chosenTransaction.transactionHash
+            );
+            if (upToDateChosenTransaction) {
+                setChosenTransaction(upToDateChosenTransaction);
+            }
+        }
+    }, [transactions, chosenTransaction, setChosenTransaction]);
+
     return (
-        <Card className="relative pB10">
-            <h3 className={styles.title}> Transaction Details </h3>
-            <CloseButton
-                className={styles.closeButton}
-                onClick={returnFunction}
+        <div className={styles.root}>
+            <h3 className={styles.title}>Transaction details</h3>
+            <CloseButton className={styles.closeButton} onClick={onClose} />
+            <TransactionListElement
+                className={styles.transactionListElement}
+                style={{}}
+                transaction={transaction}
+                showDate
+                showFullMemo
             />
-            <TransactionListElement transaction={transaction} showDate />
             {displayRejectReason(transaction)}
             {!!transaction.fromAddress && (
                 <CopiableListElement
@@ -95,7 +120,7 @@ function TransactionView({ transaction, returnFunction }: Props) {
                 title="Block Hash"
                 value={transaction.blockHash || 'Awaiting finalization'}
             />
-        </Card>
+        </div>
     );
 }
 
