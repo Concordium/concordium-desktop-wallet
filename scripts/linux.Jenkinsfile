@@ -114,19 +114,18 @@ pipeline {
                        FILENAME_APPIMAGE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.AppImage"
                     fi
 
-                    OUT_FILENAME_DEB="${VERSION}/${FILENAME_DEB}"
+                    FILENAME_LATEST_LINUX="latest-linux.yml"
 
-                    OUT_FILENAME_RPM="${VERSION}/${FILENAME_RPM}"
-
-                    OUT_FILENAME_APPIMAGE="${VERSION}/${FILENAME_APPIMAGE}"
-
-                    OUT_LATEST_LINUX="${VERSION}/latest-linux.yml"
+                    OUT_FILENAME_DEB="${VERSION}/${TARGET_NET}/${FILENAME_DEB}"
+                    OUT_FILENAME_RPM="${VERSION}/${TARGET_NET}/${FILENAME_RPM}"
+                    OUT_FILENAME_APPIMAGE="${VERSION}/${TARGET_NET}/${FILENAME_APPIMAGE}"
+                    OUT_LATEST_LINUX="${VERSION}/${TARGET_NET}/latest-linux.yml"
                     
                     # Push to s3
                     aws s3 cp "release/${FILENAME_DEB}" "${S3_BUCKET}/${OUT_FILENAME_DEB}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
                     aws s3 cp "release/${FILENAME_RPM}" "${S3_BUCKET}/${OUT_FILENAME_RPM}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
                     aws s3 cp "release/${FILENAME_APPIMAGE}" "${S3_BUCKET}/${OUT_FILENAME_APPIMAGE}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-                    aws s3 cp "release/${OUT_LATEST_LINUX}" "${S3_BUCKET}/${OUT_LATEST_LINUX}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+                    aws s3 cp "release/${FILENAME_LATEST_LINUX}" "${S3_BUCKET}/${OUT_LATEST_LINUX}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
                 '''.stripIndent()
             }
         }
