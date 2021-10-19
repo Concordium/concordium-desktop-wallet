@@ -16,15 +16,10 @@ import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { createUpdateBakerRestakeEarningsTransaction } from '~/utils/transactionHelpers';
 import routes from '~/constants/routes.json';
-import {
-    useAccountInfo,
-    useTransactionCostEstimate,
-    useTransactionExpiryState,
-} from '~/utils/dataHooks';
+import { useAccountInfo, useTransactionCostEstimate } from '~/utils/dataHooks';
 import SignTransaction from './SignTransaction';
 import ButtonGroup from '~/components/ButtonGroup';
 import UpdateBakerRestakeEarningsProposalDetails from './proposal-details/UpdateBakerRestakeEarnings';
-import InputTimestamp from '~/components/Form/InputTimestamp';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
@@ -33,6 +28,7 @@ import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
+import ChooseExpiry from './ChooseExpiry';
 
 interface PageProps {
     exchangeRate: Fraction;
@@ -62,11 +58,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
         account?.signatureThreshold
     );
 
-    const [
-        expiryTime,
-        setExpiryTime,
-        expiryTimeError,
-    ] = useTransactionExpiryState();
+    const [expiryTime, setExpiryTime] = useState<Date>();
 
     const onCreateTransaction = async () => {
         if (account === undefined) {
@@ -187,52 +179,25 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                             header="Transaction expiry time"
                             className={styles.stretchColumn}
                         >
-                            <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
-                                    <p className="mT0">
-                                        Choose the expiry date for the
-                                        transaction.
-                                    </p>
-                                    <InputTimestamp
-                                        label="Transaction expiry time"
-                                        name="expiry"
-                                        isInvalid={
-                                            expiryTimeError !== undefined
-                                        }
-                                        error={expiryTimeError}
-                                        value={expiryTime}
-                                        onChange={setExpiryTime}
-                                    />
-                                    <p className="mB0">
-                                        Committing the transaction after this
-                                        date, will be rejected.
-                                    </p>
-                                </div>
-                                <Button
-                                    className="mT40"
-                                    disabled={
-                                        expiryTime === undefined ||
-                                        expiryTimeError !== undefined
-                                    }
-                                    onClick={() =>
-                                        onCreateTransaction()
-                                            .then(() =>
-                                                dispatch(
-                                                    push(
-                                                        `${url}/${BakerSubRoutes.sign}`
-                                                    )
+                            <ChooseExpiry
+                                buttonText="Continue"
+                                onClick={(expiry) => {
+                                    setExpiryTime(expiry);
+                                    onCreateTransaction()
+                                        .then(() =>
+                                            dispatch(
+                                                push(
+                                                    `${url}/${BakerSubRoutes.sign}`
                                                 )
                                             )
-                                            .catch(() =>
-                                                setError(
-                                                    errorMessages.unableToReachNode
-                                                )
+                                        )
+                                        .catch(() =>
+                                            setError(
+                                                errorMessages.unableToReachNode
                                             )
-                                    }
-                                >
-                                    Continue
-                                </Button>
-                            </div>
+                                        );
+                                }}
+                            />
                         </Columns.Column>
                     </Route>
                     <Route path={`${path}/${BakerSubRoutes.sign}`}>

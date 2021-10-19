@@ -4,7 +4,6 @@ import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
 import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
-import Button from '~/cross-app-components/Button';
 import {
     Account,
     TransactionKindId,
@@ -19,11 +18,9 @@ import routes from '~/constants/routes.json';
 import {
     useCalcBakerStakeCooldownUntil,
     useTransactionCostEstimate,
-    useTransactionExpiryState,
 } from '~/utils/dataHooks';
 import SignTransaction from './SignTransaction';
 import RemoveBakerProposalDetails from './proposal-details/RemoveBakerProposalDetails';
-import InputTimestamp from '~/components/Form/InputTimestamp';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import PendingChange from '~/components/BakerPendingChange/BakerPendingChange';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
@@ -34,6 +31,7 @@ import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
+import ChooseExpiry from './ChooseExpiry';
 
 interface PageProps {
     exchangeRate: Fraction;
@@ -60,11 +58,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
         exchangeRate,
         account?.signatureThreshold
     );
-    const [
-        expiryTime,
-        setExpiryTime,
-        expiryTimeError,
-    ] = useTransactionExpiryState();
+    const [expiryTime, setExpiryTime] = useState<Date>();
 
     const onCreateTransaction = async () => {
         if (account === undefined) {
@@ -163,65 +157,37 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                             header="Transaction expiry time"
                             className={styles.stretchColumn}
                         >
-                            <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
-                                    <p className="mT0">
-                                        Choose the expiry date for the
-                                        transaction.
-                                    </p>
-                                    <InputTimestamp
-                                        label="Transaction expiry time"
-                                        name="expiry"
-                                        isInvalid={
-                                            expiryTimeError !== undefined
-                                        }
-                                        error={expiryTimeError}
-                                        value={expiryTime}
-                                        onChange={setExpiryTime}
-                                    />
-                                    <p className="mB0">
-                                        Committing the transaction after this
-                                        date, will be rejected.
-                                    </p>
-                                    {cooldownUntil !== undefined ? (
-                                        <p>
-                                            Remove a baker will result in the
-                                            baker stake being frozen until
-                                            <br />
-                                            {getFormattedDateString(
-                                                cooldownUntil
-                                            )}
-                                            <br />
-                                            where the actual removing of the
-                                            baker will take effect.
-                                        </p>
-                                    ) : null}
-                                </div>
-                                <Button
-                                    className="mT40"
-                                    disabled={
-                                        expiryTime === undefined ||
-                                        expiryTimeError !== undefined
-                                    }
-                                    onClick={() =>
-                                        onCreateTransaction()
-                                            .then(() =>
-                                                dispatch(
-                                                    push(
-                                                        `${url}/${BakerSubRoutes.sign}`
-                                                    )
+                            <ChooseExpiry
+                                buttonText="Continue"
+                                onClick={(expiry) => {
+                                    setExpiryTime(expiry);
+                                    onCreateTransaction()
+                                        .then(() =>
+                                            dispatch(
+                                                push(
+                                                    `${url}/${BakerSubRoutes.sign}`
                                                 )
                                             )
-                                            .catch(() =>
-                                                setError(
-                                                    errorMessages.unableToReachNode
-                                                )
+                                        )
+                                        .catch(() =>
+                                            setError(
+                                                errorMessages.unableToReachNode
                                             )
-                                    }
-                                >
-                                    Continue
-                                </Button>
-                            </div>
+                                        );
+                                }}
+                            >
+                                {cooldownUntil !== undefined ? (
+                                    <p>
+                                        Removing a baker will result in the
+                                        baker stake being frozen until
+                                        <br />
+                                        {getFormattedDateString(cooldownUntil)}
+                                        <br />
+                                        where the actual removal of the baker
+                                        will take effect.
+                                    </p>
+                                ) : null}
+                            </ChooseExpiry>
                         </Columns.Column>
                     </Route>
                     <Route path={`${path}/${BakerSubRoutes.sign}`}>

@@ -4,7 +4,6 @@ import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
 import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
-import Button from '~/cross-app-components/Button';
 import {
     Account,
     TransactionKindId,
@@ -25,15 +24,11 @@ import SignTransactionColumn from '../SignTransactionProposal/SignTransaction';
 import { createUpdateBakerKeysTransaction } from '~/utils/transactionHelpers';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import routes from '~/constants/routes.json';
-import {
-    useTransactionCostEstimate,
-    useTransactionExpiryState,
-} from '~/utils/dataHooks';
+import { useTransactionCostEstimate } from '~/utils/dataHooks';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import { DownloadBakerCredentialsStep } from './AddBaker';
 import UpdateBakerKeysProposalDetails from './proposal-details/UpdateBakerKeysProposalDetails';
-import InputTimestamp from '~/components/Form/InputTimestamp';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
@@ -42,6 +37,7 @@ import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
+import ChooseExpiry from './ChooseExpiry';
 
 const pageTitle = 'Multi Signature Transactions | Update Baker Keys';
 
@@ -70,11 +66,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
         account?.signatureThreshold
     );
 
-    const [
-        expiryTime,
-        setExpiryTime,
-        expiryTimeError,
-    ] = useTransactionExpiryState();
+    const [expiryTime, setExpiryTime] = useState<Date>();
 
     const onGenerateKeys = () => {
         if (account === undefined) {
@@ -220,45 +212,16 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                             header="Transaction expiry time"
                             className={styles.stretchColumn}
                         >
-                            <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
-                                    <p className="mT0">
-                                        Choose the expiry date for the
-                                        transaction.
-                                    </p>
-                                    <InputTimestamp
-                                        label="Transaction expiry time"
-                                        name="expiry"
-                                        isInvalid={
-                                            expiryTimeError !== undefined
-                                        }
-                                        error={expiryTimeError}
-                                        value={expiryTime}
-                                        onChange={setExpiryTime}
-                                    />
-                                    <p className="mB0">
-                                        Committing the transaction after this
-                                        date, will be rejected.
-                                    </p>
-                                </div>
-                                <Button
-                                    className="mT40"
-                                    disabled={
-                                        expiryTime === undefined ||
-                                        expiryTimeError !== undefined
-                                    }
-                                    onClick={() => {
-                                        onGenerateKeys();
-                                        dispatch(
-                                            push(
-                                                `${url}/${BakerSubRoutes.keys}`
-                                            )
-                                        );
-                                    }}
-                                >
-                                    Generate keys
-                                </Button>
-                            </div>
+                            <ChooseExpiry
+                                buttonText="Generate keys"
+                                onClick={(expiry) => {
+                                    setExpiryTime(expiry);
+                                    onGenerateKeys();
+                                    dispatch(
+                                        push(`${url}/${BakerSubRoutes.keys}`)
+                                    );
+                                }}
+                            />
                         </Columns.Column>
                     </Route>
                     <Route path={`${path}/${BakerSubRoutes.keys}`}>

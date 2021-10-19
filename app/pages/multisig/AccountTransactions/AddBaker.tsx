@@ -31,11 +31,7 @@ import {
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import routes from '~/constants/routes.json';
 import saveFile from '~/utils/FileHelper';
-import {
-    useAccountInfo,
-    useTransactionCostEstimate,
-    useTransactionExpiryState,
-} from '~/utils/dataHooks';
+import { useAccountInfo, useTransactionCostEstimate } from '~/utils/dataHooks';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import {
     signUsingLedger,
@@ -44,12 +40,12 @@ import {
 import { addProposal } from '~/features/MultiSignatureSlice';
 import ButtonGroup from '~/components/ButtonGroup';
 import AddBakerProposalDetails from './proposal-details/AddBakerProposalDetails';
-import InputTimestamp from '~/components/Form/InputTimestamp';
 import LoadingComponent from './LoadingComponent';
 import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
+import ChooseExpiry from './ChooseExpiry';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
 
@@ -81,11 +77,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
     const minimumThresholdForBaking = BigInt(
         blockSummary.updates.chainParameters.minimumThresholdForBaking
     );
-    const [
-        expiryTime,
-        setExpiryTime,
-        expiryTimeError,
-    ] = useTransactionExpiryState();
+    const [expiryTime, setExpiryTime] = useState<Date>();
 
     const estimatedFee = useTransactionCostEstimate(
         TransactionKindId.Add_baker,
@@ -327,45 +319,16 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                             header="Transaction expiry time"
                             className={styles.stretchColumn}
                         >
-                            <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
-                                    <p className="mT0">
-                                        Choose the expiry date for the
-                                        transaction.
-                                    </p>
-                                    <InputTimestamp
-                                        label="Transaction expiry time"
-                                        name="expiry"
-                                        isInvalid={
-                                            expiryTimeError !== undefined
-                                        }
-                                        error={expiryTimeError}
-                                        value={expiryTime}
-                                        onChange={setExpiryTime}
-                                    />
-                                    <p className="mB0">
-                                        Committing the transaction after this
-                                        date, will be rejected.
-                                    </p>
-                                </div>
-                                <Button
-                                    className="mT40"
-                                    disabled={
-                                        expiryTime === undefined ||
-                                        expiryTimeError !== undefined
-                                    }
-                                    onClick={() => {
-                                        onGenerateKeys();
-                                        dispatch(
-                                            push(
-                                                `${url}/${BakerSubRoutes.keys}`
-                                            )
-                                        );
-                                    }}
-                                >
-                                    Generate keys
-                                </Button>
-                            </div>
+                            <ChooseExpiry
+                                buttonText="Generate keys"
+                                onClick={(expiry: Date) => {
+                                    setExpiryTime(expiry);
+                                    onGenerateKeys();
+                                    dispatch(
+                                        push(`${url}/${BakerSubRoutes.keys}`)
+                                    );
+                                }}
+                            />
                         </Columns.Column>
                     </Route>
 
