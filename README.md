@@ -76,12 +76,11 @@ This way, you can get quicker reloads, because you only need to restart start:de
 as the renderer thread will recompile in the background. N.B. This doesn't apply for changes in the rust code,
 which is only recompiled with a full restart.
 
-## Targeting specific Network
+## Targeting specific network
 
-To build the app for a specific network, supply the `TARGET_NET` environment variable.
-Currently works with `stagenet` and `testnet`.
-Otherwise the app will be targeted Mainnet.
-When using this variable when packaging, this variable will also be appended to the application name.
+To build the application for a specific network you must supply the `TARGET_NET` variable. The value
+has to be one of `stagenet`, `testnet` or `mainnet`, otherwise the build will fail. Note that the
+`TARGET_NET` will be appeneded to the filenames for `stagenet` and `testnet`.
 
 ```bash
 TARGET_NET=stagenet yarn start

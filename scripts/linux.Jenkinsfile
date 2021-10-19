@@ -22,7 +22,7 @@ pipeline {
                     VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
 
                     # Prepare filenames
-                    if [[ -z $TARGET_NET  || $TARGET_NET = "mainnet" ]]; then
+                    if [[ $TARGET_NET = "mainnet" ]]; then
                        FILENAME_DEB="concordium-desktop-wallet-${VERSION}.deb"
                        FILENAME_RPM="concordium-desktop-wallet-${VERSION}.rpm"
                        FILENAME_APPIMAGE="concordium-desktop-wallet-${VERSION}.AppImage"
@@ -73,12 +73,6 @@ pipeline {
                     rustup show
                     wasm-pack --version
 
-                    # Clear TARGET_NET value if set to mainnet.
-                    if [[ -z $TARGET_NET  || $TARGET_NET = "mainnet" ]]; then
-                        TARGET_NET=
-                        echo $TARGET_NET
-                    fi
-
                     # Install dependencies
                     yarn
 
@@ -107,7 +101,7 @@ pipeline {
                     VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
                     
                     # Prepare filenames
-                    if [[ -z $TARGET_NET || $TARGET_NET = "mainnet" ]]; then
+                    if [[ $TARGET_NET = "mainnet" ]]; then
                        FILENAME_DEB="concordium-desktop-wallet-${VERSION}.deb"
                        FILENAME_RPM="concordium-desktop-wallet-${VERSION}.rpm"
                        FILENAME_APPIMAGE="concordium-desktop-wallet-${VERSION}.AppImage"
