@@ -25,6 +25,8 @@ import {
     instanceOfSimpleTransferWithMemo,
     instanceOfScheduledTransferWithMemo,
     instanceOfEncryptedTransferWithMemo,
+    instanceOfRegisterData,
+    RegisterData,
 } from '~/utils/types';
 import {
     serializeTransactionHeader,
@@ -38,6 +40,7 @@ import {
     serializeBakerKeyProofs,
     serializeUpdateBakerStake,
     serializeUpdateBakerRestakeEarnings,
+    serializeRegisterData,
 } from '~/utils/transactionSerialization';
 import pathAsBuffer from './Path';
 import {
@@ -65,6 +68,7 @@ const INS_REMOVE_BAKER = 0x14;
 const INS_UPDATE_BAKER_STAKE = 0x15;
 const INS_UPDATE_BAKER_RESTAKE_EARNINGS = 0x16;
 const INS_SIMPLE_TRANSFER_WITH_MEMO = 0x32;
+const INS_REGISTER_DATA = 0x35;
 
 async function signSimpleTransfer(
     transport: Transport,
@@ -433,6 +437,55 @@ async function signUpdateBakerRestakeEarnings(
     return response.slice(0, 64);
 }
 
+async function signRegisterData(
+    transport: Transport,
+    path: number[],
+    transaction: RegisterData
+): Promise<Buffer> {
+    const payload = serializeRegisterData(transaction.payload);
+
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+
+    const data = encodeAsCBOR(transaction.payload.data); // TODO: How should we do this
+
+    const cdata = Buffer.concat([
+        pathAsBuffer(path),
+        header,
+        Buffer.from(Uint8Array.of(TransactionKindId.Register_data)),
+        encodeWord16(data.length),
+    ]);
+
+    let p1 = 0x00;
+    const p2 = 0x00;
+
+    await transport.send(0xe0, INS_REGISTER_DATA, p1, p2, cdata);
+
+    p1 = 0x01;
+
+    const chunks = chunkBuffer(data, 255);
+    let response;
+    for (const chunk of chunks) {
+        response = await transport.send(
+            0xe0,
+            INS_REGISTER_DATA,
+            p1,
+            p2,
+            Buffer.from(chunk)
+        );
+    }
+
+    if (!response) {
+        throw new Error('Unexpected missing response from ledger;');
+    }
+    return response.slice(0, 64);
+}
+
 export default async function signTransfer(
     transport: Transport,
     path: number[],
@@ -476,6 +529,9 @@ export default async function signTransfer(
     }
     if (instanceOfUpdateBakerRestakeEarnings(transaction)) {
         return signUpdateBakerRestakeEarnings(transport, path, transaction);
+    }
+    if (instanceOfRegisterData(transaction)) {
+        return signRegisterData(transport, path, transaction);
     }
     throw new Error(
         `The received transaction was not a supported transaction type`

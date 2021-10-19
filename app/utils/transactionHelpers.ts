@@ -23,6 +23,7 @@ import {
     AccountInfo,
     AddBaker,
     AddBakerPayload,
+    RegisterData,
     RemoveBaker,
     UpdateBakerKeysPayload,
     UpdateBakerKeys,
@@ -139,6 +140,30 @@ export function createSimpleTransferWithMemoTransaction(
         memo,
     };
     const transactionKind = TransactionKindId.Simple_transfer_with_memo;
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind,
+        payload,
+        signatureAmount,
+        nonce,
+    });
+}
+
+/**
+ *  Constructs a, register data, transaction object,
+ */
+export function createRegisterDataTransaction(
+    fromAddress: string,
+    nonce: string,
+    data: string,
+    signatureAmount = 1,
+    expiry = getDefaultExpiry()
+): RegisterData {
+    const payload = {
+        data,
+    };
+    const transactionKind = TransactionKindId.Register_data;
     return createAccountTransaction({
         fromAddress,
         expiry,

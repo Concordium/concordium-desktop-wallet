@@ -8,6 +8,7 @@ export enum BakerSubRoutes {
     keys,
     stake,
     restake,
+    data,
     expiry,
     sign,
 }
@@ -39,6 +40,8 @@ export function getLocationAfterAccounts(
             return `${url}/${BakerSubRoutes.stake}`;
         case TransactionKindId.Update_baker_restake_earnings:
             return `${url}/${BakerSubRoutes.restake}`;
+        case TransactionKindId.Register_data:
+            return `${url}/${BakerSubRoutes.data}`;
         default:
             throw new Error('unknown transactionKind');
     }

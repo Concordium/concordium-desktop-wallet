@@ -119,6 +119,11 @@ const accountTransactionTypes: [
     ],
     [
         TransactionTypes.AccountTransaction,
+        TransactionKind.Register_data,
+        'Register Data',
+    ],
+    [
+        TransactionTypes.AccountTransaction,
         TransactionKind.Add_baker,
         'Add Baker',
     ],

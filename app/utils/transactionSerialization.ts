@@ -23,6 +23,7 @@ import {
     SimpleTransferWithMemoPayload,
     ScheduledTransferWithMemoPayload,
     EncryptedTransferWithMemoPayload,
+    RegisterDataPayload,
 } from './types';
 import {
     encodeWord32,
@@ -250,6 +251,14 @@ function serializeEncryptedTransferWithMemo(
     ]);
 }
 
+export function serializeRegisterData(payload: RegisterDataPayload) {
+    // TODO: How should we do this
+    return Buffer.concat([
+        putInt8(TransactionKind.Register_data),
+        serializeMemo(payload.data),
+    ]);
+}
+
 export function serializeTransactionHeader(
     sender: string,
     nonce: string,
@@ -385,6 +394,8 @@ export function serializeTransferPayload(
             return serializeUpdateBakerRestakeEarnings(
                 payload as UpdateBakerRestakeEarningsPayload
             );
+        case TransactionKind.Register_data:
+            return serializeRegisterData(payload as RegisterDataPayload);
         default:
             throw new Error('Unsupported transaction kind');
     }

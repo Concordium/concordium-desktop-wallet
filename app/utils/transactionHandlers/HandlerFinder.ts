@@ -48,6 +48,7 @@ import { parse } from '../JSONHelper';
 import ScheduledTransferWithMemoHandler from './ScheduledTransferWithMemoHandler';
 import EncryptedTransferWithMemoHandler from './EncryptedTransferWithMemoHandler';
 import SimpleTransferWithMemoHandler from './SimpleTransferWithMemoHandler';
+import RegisterDataHandler from './RegisterDataHandler';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -119,6 +120,8 @@ export function findAccountTransactionHandler(
             return new AccountHandlerTypeMiddleware(
                 new TransferToPublicHandler()
             );
+        case TransactionKindId.Register_data:
+            return new AccountHandlerTypeMiddleware(new RegisterDataHandler());
         default:
             throw new Error(`Unsupported transaction type: ${transactionKind}`);
     }

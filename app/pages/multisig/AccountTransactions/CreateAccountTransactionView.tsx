@@ -11,6 +11,7 @@ import ErrorBoundary from '~/components/ErrorBoundary';
 import routes from '~/constants/routes.json';
 import UpdateBakerStake from './UpdateBakerStake';
 import UpdateBakerRestakeEarnings from './UpdateBakerRestakeEarnings';
+import RegisterData from './RegisterData';
 
 function AccountTransactionRoutes(): JSX.Element {
     const { transactionKind: transactionKindRaw } = useParams<{
@@ -24,6 +25,8 @@ function AccountTransactionRoutes(): JSX.Element {
         case TransactionKindId.Simple_transfer:
         case TransactionKindId.Transfer_with_schedule:
             return <CreateTransferProposal transactionKind={transactionKind} />;
+        case TransactionKindId.Register_data:
+            return <RegisterData />;
         case TransactionKindId.Add_baker:
             return <AddBaker />;
         case TransactionKindId.Update_baker_keys:

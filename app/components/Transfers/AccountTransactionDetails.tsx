@@ -15,6 +15,7 @@ import {
     instanceOfUpdateBakerKeys,
     instanceOfUpdateBakerStake,
     instanceOfUpdateBakerRestakeEarnings,
+    instanceOfRegisterData,
     AddressBookEntry,
 } from '../../utils/types';
 import { lookupAddressBookEntry, lookupName } from '~/utils/addressBookHelpers';
@@ -28,6 +29,7 @@ import DisplayRemoveBaker from './DisplayRemoveBaker';
 import DisplayAccountCredentialsUpdate from '../DisplayAccountCredentialUpdate';
 import DisplayUpdateBakerStake from './DisplayUpdateBakerStake';
 import DisplayUpdateBakerRestakeEarnings from './DisplayUpdateBakerRestakeEarnings';
+import DisplayRegisterData from './DisplayRegisterData';
 
 interface Props {
     transaction: AccountTransaction;
@@ -89,6 +91,9 @@ export default function AccountTransactionDetails({ transaction }: Props) {
                 memo={transaction.payload.memo}
             />
         );
+    }
+    if (instanceOfRegisterData(transaction)) {
+        return <DisplayRegisterData transaction={transaction} />;
     }
     if (instanceOfAddBaker(transaction)) {
         return <DisplayAddBaker transaction={transaction} />;

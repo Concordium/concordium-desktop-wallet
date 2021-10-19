@@ -27,6 +27,7 @@ export const energyConstants = {
     RemoveBaker: 300n,
     UpdateBakerStake: 300n,
     UpdateBakerRestakeEarnings: 300n,
+    RegisterData: 300n,
 };
 
 /**
@@ -131,6 +132,8 @@ function getEnergyCostOfType(transactionKind: TransactionKindId) {
             return energyConstants.UpdateBakerStake;
         case TransactionKindId.Update_baker_restake_earnings:
             return energyConstants.UpdateBakerRestakeEarnings;
+        case TransactionKindId.Register_data:
+            return energyConstants.RegisterData;
         default:
             throw new Error(`Unsupported transaction type: ${transactionKind}`);
     }

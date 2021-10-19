@@ -286,6 +286,10 @@ export type UpdateBakerRestakeEarningsPayload = {
     restakeEarnings: boolean;
 };
 
+export type RegisterDataPayload = {
+    data: string;
+};
+
 export type TransactionPayload =
     | UpdateAccountCredentialsPayload
     | TransferToPublicPayload
@@ -297,7 +301,8 @@ export type TransactionPayload =
     | UpdateBakerKeysPayload
     | RemoveBakerPayload
     | UpdateBakerStakePayload
-    | UpdateBakerRestakeEarningsPayload;
+    | UpdateBakerRestakeEarningsPayload
+    | RegisterDataPayload;
 
 // Structure of an accountTransaction, which is expected
 // the blockchain's nodes
@@ -335,6 +340,7 @@ export type UpdateBakerKeys = AccountTransaction<UpdateBakerKeysPayload>;
 export type RemoveBaker = AccountTransaction<RemoveBakerPayload>;
 export type UpdateBakerStake = AccountTransaction<UpdateBakerStakePayload>;
 export type UpdateBakerRestakeEarnings = AccountTransaction<UpdateBakerRestakeEarningsPayload>;
+export type RegisterData = AccountTransaction<RegisterDataPayload>;
 
 // Types of block items, and their identifier numbers
 export enum BlockItemKind {
@@ -883,6 +889,12 @@ export function instanceOfUpdateAccountCredentials(
     object: AccountTransaction<TransactionPayload>
 ): object is UpdateAccountCredentials {
     return object.transactionKind === TransactionKindId.Update_credentials;
+}
+
+export function instanceOfRegisterData(
+    object: AccountTransaction<TransactionPayload>
+): object is RegisterData {
+    return object.transactionKind === TransactionKindId.Register_data;
 }
 
 export function instanceOfAddBaker(
