@@ -33,13 +33,13 @@ pipeline {
                        FILENAME_APPIMAGE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.AppImage"
                     fi
 
-                    OUT_FILENAME_DEB="${VERSION}/${FILENAME_DEB}"
+                    OUT_FILENAME_DEB="${VERSION}/${TARGET_NET}/${FILENAME_DEB}"
 
-                    OUT_FILENAME_RPM="${VERSION}/${FILENAME_RPM}"
+                    OUT_FILENAME_RPM="${VERSION}/${TARGET_NET}/${FILENAME_RPM}"
 
-                    OUT_FILENAME_APPIMAGE="${VERSION}/${FILENAME_APPIMAGE}"
+                    OUT_FILENAME_APPIMAGE="${VERSION}/${TARGET_NET}/${FILENAME_APPIMAGE}"
 
-                    OUT_LATEST_LINUX="${VERSION}/latest-linux.yml"
+                    OUT_LATEST_LINUX="${VERSION}/${TARGET_NET}/latest-linux.yml"
 
                     check_uniqueness() {
                         # Fail if file already exists
