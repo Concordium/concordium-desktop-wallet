@@ -2,7 +2,10 @@ import clsx from 'clsx';
 import React, { Fragment, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import Loading from '~/cross-app-components/Loading';
-import { loadingTransactionsSelector } from '~/features/TransactionSlice';
+import {
+    loadingTransactionsSelector,
+    viewingShieldedSelector,
+} from '~/features/TransactionSlice';
 import { TransferTransaction } from '~/utils/types';
 import TransactionListElement from './TransactionListElement';
 import TransactionListHeader from './TransactionListHeader';
@@ -12,6 +15,7 @@ import { TransactionListProps } from './util';
 import styles from './TransactionList.module.scss';
 import { getTargetNet, Net } from '~/utils/ConfigHelper';
 import GtuDrop from './GtuDrop';
+import { chosenAccountSelector } from '~/features/AccountSlice';
 
 const isMainnet = getTargetNet() === Net.Mainnet;
 
@@ -21,6 +25,8 @@ export default function FiniteTransactionList({
 }: TransactionListProps) {
     const groups = useTransactionGroups(transactions);
     const loading = useSelector(loadingTransactionsSelector);
+    const account = useSelector(chosenAccountSelector);
+    const isViewingShielded = useSelector(viewingShieldedSelector);
     const [showLoading, setShowLoading] = useState(false);
 
     useEffect(() => {
@@ -45,20 +51,29 @@ export default function FiniteTransactionList({
     }
 
     if (transactions.length === 0 && !loading) {
-        if (isMainnet) {
-            return (
-                <h3
-                    className={clsx(
-                        'flex justifyCenter mV0 pV20',
-                        styles.thickBlueSeparatorTop,
-                        styles.cardPadding
-                    )}
-                >
-                    No transactions to show for account.
-                </h3>
-            );
+        // Only present a GTU drop when not on mainnet, and if no transaction filter
+        // has ever been set. We expect to have an endpoint available in the wallet proxy
+        // at a later point that will determine whether a GTU drop is available for the given
+        // account, so this solution is expected to be temporary.
+        if (
+            !isMainnet &&
+            !isViewingShielded &&
+            account &&
+            Object.keys(account.transactionFilter).length === 0
+        ) {
+            return <GtuDrop />;
         }
-        return <GtuDrop />;
+        return (
+            <h3
+                className={clsx(
+                    'flex justifyCenter mV0 pV20',
+                    styles.thickBlueSeparatorTop,
+                    styles.cardPadding
+                )}
+            >
+                No transactions to show for account.
+            </h3>
+        );
     }
 
     return (
