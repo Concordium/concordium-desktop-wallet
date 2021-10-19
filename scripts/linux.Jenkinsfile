@@ -26,6 +26,7 @@ pipeline {
                        FILENAME_DEB="concordium-desktop-wallet-${VERSION}.deb"
                        FILENAME_RPM="concordium-desktop-wallet-${VERSION}.rpm"
                        FILENAME_APPIMAGE="concordium-desktop-wallet-${VERSION}.AppImage"
+                       export TARGET_NET=
                     else
                        FILENAME_DEB="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.deb"
                        FILENAME_RPM="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.rpm"
@@ -71,6 +72,12 @@ pipeline {
                     python --version
                     rustup show
                     wasm-pack --version
+
+                    # Clear TARGET_NET value if set to mainnet.
+                    if [[ -z $TARGET_NET  || $TARGET_NET = "mainnet" ]]; then
+                        TARGET_NET=
+                        echo $TARGET_NET
+                    fi
 
                     # Install dependencies
                     yarn
