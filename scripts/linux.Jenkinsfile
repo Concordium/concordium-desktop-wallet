@@ -39,6 +39,8 @@ pipeline {
 
                     OUT_FILENAME_APPIMAGE="${VERSION}/${FILENAME_APPIMAGE}"
 
+                    OUT_LATEST_LINUX="${VERSION}/latest-linux.yml"
+
                     check_uniqueness() {
                         # Fail if file already exists
                         totalFoundObjects=$(aws s3 ls "${S3_BUCKET}/$1" --summarize | grep "Total Objects: " | sed 's/[^0-9]*//g')
@@ -51,6 +53,7 @@ pipeline {
                     check_uniqueness "${OUT_FILENAME_DEB}"
                     check_uniqueness "${OUT_FILENAME_RPM}"
                     check_uniqueness "${OUT_FILENAME_APPIMAGE}"
+                    check_uniqueness "${OUT_LATEST_LINUX}"
                 '''.stripIndent()
             }
         }
@@ -116,11 +119,14 @@ pipeline {
                     OUT_FILENAME_RPM="${VERSION}/${FILENAME_RPM}"
 
                     OUT_FILENAME_APPIMAGE="${VERSION}/${FILENAME_APPIMAGE}"
+
+                    OUT_LATEST_LINUX="${VERSION}/latest-linux.yml"
                     
                     # Push to s3
                     aws s3 cp "release/${FILENAME_DEB}" "${S3_BUCKET}/${OUT_FILENAME_DEB}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
                     aws s3 cp "release/${FILENAME_RPM}" "${S3_BUCKET}/${OUT_FILENAME_RPM}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
                     aws s3 cp "release/${FILENAME_APPIMAGE}" "${S3_BUCKET}/${OUT_FILENAME_APPIMAGE}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+                    aws s3 cp "release/${OUT_LATEST_LINUX}" "${S3_BUCKET}/${OUT_LATEST_LINUX}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
                 '''.stripIndent()
             }
         }
