@@ -8,14 +8,11 @@ const webpack = require('webpack');
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const { dependencies: externals } = require('../../app/package.json');
+const CheckTargetNet = require('../../internals/scripts/CheckTargetNet');
+
+CheckTargetNet();
 
 const extensions = ['.js', '.jsx', '.json', '.ts', '.tsx'];
-
-if (!['stagenet', 'testnet', 'mainnet'].includes(process.env.TARGET_NET)) {
-    throw new Error(
-        `Unknown TARGET_NET. Only [stagenet, testnet, mainnet] are allowed values. Given: ${process.env.TARGET_NET}`
-    );
-}
 
 module.exports = {
     externals: [...Object.keys(externals || {})],

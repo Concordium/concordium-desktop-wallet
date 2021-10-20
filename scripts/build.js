@@ -11,7 +11,7 @@ const targetNet = process.env.TARGET_NET;
 let name;
 let productName;
 let appId;
-if (targetNet === 'mainnet') {
+if (!targetNet || targetNet === 'mainnet') {
     name = process.env.npm_package_name;
     productName = process.env.npm_package_productName;
     appId = process.env.npm_package_build_appId;
