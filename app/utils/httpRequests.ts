@@ -23,6 +23,10 @@ export async function getTransactions(address: string, id = '0') {
     return window.http.getTransactions(address, id);
 }
 
+export async function gtuDrop(address: string) {
+    return window.http.gtuDrop(address);
+}
+
 export async function getNewestTransactions(
     address: string,
     transactionFilter: TransactionFilter
