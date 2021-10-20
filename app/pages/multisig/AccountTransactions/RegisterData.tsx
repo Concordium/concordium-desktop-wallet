@@ -13,7 +13,10 @@ import {
 } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
-import { createRegisterDataTransaction } from '~/utils/transactionHelpers';
+import {
+    createRegisterDataTransaction,
+    validateData,
+} from '~/utils/transactionHelpers';
 import routes from '~/constants/routes.json';
 import { useTransactionCostEstimate } from '~/utils/dataHooks';
 import SignTransaction from './SignTransaction';
@@ -117,14 +120,11 @@ function RegisterData({ exchangeRate }: PageProps) {
                             className={styles.stretchColumn}
                         >
                             <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
+                                <div className="flexChildFill">
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
-                                        filter={(_, info) =>
-                                            info?.accountBaker !== undefined
-                                        }
-                                        messageWhenEmpty="There are no baker accounts "
+                                        messageWhenEmpty="There are no accounts "
                                         onAccountClicked={() => {
                                             dispatch(
                                                 push(
@@ -146,13 +146,8 @@ function RegisterData({ exchangeRate }: PageProps) {
                             className={styles.stretchColumn}
                         >
                             <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
-                                    {account !== undefined ? (
-                                        <EnterData
-                                            setData={setData}
-                                            data={data}
-                                        />
-                                    ) : null}
+                                <div className="flexChildFill">
+                                    <EnterData setData={setData} data={data} />
                                 </div>
                                 <Button
                                     className="mT40"
@@ -231,7 +226,8 @@ function EnterData({ setData, data }: EnterDataProps): JSX.Element {
     const onDataChange = useCallback(
         (event: FormEvent<HTMLTextAreaElement>) => {
             const currentData = event.currentTarget.value;
-            setError(undefined);
+            const validation = validateData(currentData);
+            setError(validation);
             setData(currentData);
         },
         [setData]
@@ -239,13 +235,13 @@ function EnterData({ setData, data }: EnterDataProps): JSX.Element {
 
     return (
         <>
-            <p className="mT50">
+            <p className="mT10">
                 Enter the data, which is to be registered. The cost of the
                 transaction depends on the size of the data.
             </p>
             <TextArea
                 value={data || ''}
-                className="mT10"
+                className="mT50"
                 onChange={onDataChange}
                 placeholder="You can add data here"
                 isInvalid={Boolean(error)}

@@ -219,7 +219,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                             className={styles.stretchColumn}
                         >
                             <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
+                                <div className="flexChildFill">
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
@@ -249,7 +249,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                             className={styles.stretchColumn}
                         >
                             <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
+                                <div className="flexChildFill">
                                     <p className="mT0">
                                         To add a baker you must choose an amount
                                         to stake on the account. The staked
@@ -415,7 +415,7 @@ export function DownloadBakerCredentialsStep({
 
     return (
         <div className={styles.columnContent}>
-            <div className={styles.flex1}>
+            <div className="flexChildFill">
                 <p className="mT0">
                     Your baker keys have been generated, and the public keys can
                     be seen to the left.

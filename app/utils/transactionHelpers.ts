@@ -661,8 +661,8 @@ export function validateBakerStake(
     return undefined;
 }
 
-export function validateMemo(memo: string): string | undefined {
-    const asNumber = Number(memo);
+export function validateData(data: string, name = 'Data'): string | undefined {
+    const asNumber = Number(data);
     if (
         Number.isInteger(asNumber) &&
         (asNumber > Number.MAX_SAFE_INTEGER ||
@@ -670,14 +670,18 @@ export function validateMemo(memo: string): string | undefined {
     ) {
         return `Numbers greater than ${Number.MAX_SAFE_INTEGER} or smaller than ${Number.MIN_SAFE_INTEGER} are not supported`;
     }
-    if (getEncodedSize(memo) > maxMemoSize) {
-        return `Memo is too large, encoded size must be at most ${maxMemoSize} bytes`;
+    if (getEncodedSize(data) > maxMemoSize) {
+        return `${name} is too large, encoded size must be at most ${maxMemoSize} bytes`;
     }
     // Check that the memo only contains ascii characters
-    if (isASCII(memo)) {
-        return 'Memo contains non-ascii characters';
+    if (isASCII(data)) {
+        return `${name} contains non-ascii characters`;
     }
     return undefined;
+}
+
+export function validateMemo(memo: string): string | undefined {
+    return validateData(memo, 'Memo');
 }
 
 export function isTransferKind(kind: TransactionKindString) {

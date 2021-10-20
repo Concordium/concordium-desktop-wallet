@@ -12,6 +12,8 @@ interface AddBakerProposalStatusProps
     status: MultiSignatureTransactionStatus;
 }
 
+const shownLength = 16;
+
 export default function AddBakerProposalStatus({
     transaction,
     status,
@@ -28,8 +30,8 @@ export default function AddBakerProposalStatus({
             title="Register Data"
         >
             <span className="textFaded">
-                {data.substring(0, 8)}
-                {data.length > 8 ? '...' : null}
+                {data.substring(0, shownLength)}
+                {data.length > shownLength ? '...' : null}
             </span>
         </ProposalStatusView>
     );

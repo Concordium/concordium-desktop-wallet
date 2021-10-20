@@ -50,7 +50,10 @@ export function getLocationAfterAccounts(
 export function createTransferWithAccountPathName(
     transactionKind: TransactionKindId
 ) {
-    if (isBakerTransaction(transactionKind)) {
+    if (
+        isBakerTransaction(transactionKind) ||
+        transactionKind === TransactionKindId.Register_data
+    ) {
         return getLocationAfterAccounts(
             createProposalRoute(
                 TransactionTypes.AccountTransaction,

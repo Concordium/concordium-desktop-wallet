@@ -137,7 +137,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                             className={styles.stretchColumn}
                         >
                             <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
+                                <div className="flexChildFill">
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
@@ -182,7 +182,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                             className={styles.stretchColumn}
                         >
                             <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
+                                <div className="flexChildFill">
                                     {account !== undefined ? (
                                         <PickNewStake
                                             account={account}

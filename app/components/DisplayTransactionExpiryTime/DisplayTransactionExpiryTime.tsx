@@ -13,7 +13,7 @@ export default function DisplayTransactionExpiryTime({
 }: Props) {
     return (
         <>
-            <p className={styles.title}>Transaction expiry time</p>
+            <p className={styles.title}>Transaction expiry time:</p>
             <p className={styles.value}>
                 {expiryTime === undefined
                     ? placeholder

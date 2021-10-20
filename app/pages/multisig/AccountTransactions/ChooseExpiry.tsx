@@ -19,7 +19,7 @@ export default function ChooseExpiry({ onClick, buttonText, children }: Props) {
 
     return (
         <div className={styles.columnContent}>
-            <div className={styles.flex1}>
+            <div className="flexChildFill">
                 <p className="mT0">
                     Choose the expiry date for the transaction.
                 </p>

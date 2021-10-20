@@ -113,7 +113,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                             className={styles.stretchColumn}
                         >
                             <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
+                                <div className="flexChildFill">
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}

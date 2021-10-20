@@ -10,7 +10,6 @@ import {
     BuildScheduleDefaults,
 } from '~/components/BuildSchedule/util';
 import accountStyles from '~/pages/Accounts/AccountDetailsPage/BuildSchedule/BuildSchedule.module.scss';
-import styles from './MultisignatureAccountTransactions.module.scss';
 
 interface Props {
     submitSchedule: (
@@ -37,7 +36,7 @@ const BuildSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
             <div
                 className={clsx(
                     accountStyles.buildSchedule,
-                    styles.buildSchedule
+                    'flexColumn flexChildFill'
                 )}
             >
                 <ButtonGroup
