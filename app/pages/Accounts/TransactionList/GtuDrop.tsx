@@ -115,7 +115,7 @@ export default function GtuDrop() {
                         }
                     }}
                 >
-                    Request GTU
+                    Request 2000 GTU
                 </Button>
             </div>
         </>

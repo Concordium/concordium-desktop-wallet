@@ -99,8 +99,7 @@ async function getTransactions(
 
 async function gtuDrop(address: string) {
     const response = await walletProxy.put(`/v0/testnetGTUDrop/${address}`);
-    const { submissionId } = response.data;
-    return submissionId;
+    return response.data.submissionId;
 }
 
 const exposedMethods: HttpMethods = {
