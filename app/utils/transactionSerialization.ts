@@ -252,7 +252,6 @@ function serializeEncryptedTransferWithMemo(
 }
 
 export function serializeRegisterData(payload: RegisterDataPayload) {
-    // TODO: How should we do this
     return Buffer.concat([
         putInt8(TransactionKind.Register_data),
         serializeMemo(payload.data),

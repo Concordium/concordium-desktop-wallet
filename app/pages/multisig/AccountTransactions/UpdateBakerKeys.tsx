@@ -34,7 +34,7 @@ import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
 import LoadingComponent from './LoadingComponent';
 import {
-    BakerSubRoutes,
+    AccountTransactionSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
 import ChooseExpiry from './ChooseExpiry';
@@ -207,7 +207,9 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${BakerSubRoutes.expiry}`}>
+                    <Route
+                        path={`${path}/${AccountTransactionSubRoutes.expiry}`}
+                    >
                         <Columns.Column
                             header="Transaction expiry time"
                             className={styles.stretchColumn}
@@ -218,13 +220,15 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                                     setExpiryTime(expiry);
                                     onGenerateKeys();
                                     dispatch(
-                                        push(`${url}/${BakerSubRoutes.keys}`)
+                                        push(
+                                            `${url}/${AccountTransactionSubRoutes.keys}`
+                                        )
                                     );
                                 }}
                             />
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${BakerSubRoutes.keys}`}>
+                    <Route path={`${path}/${AccountTransactionSubRoutes.keys}`}>
                         <Columns.Column
                             header="Baker keys"
                             className={styles.stretchColumn}
@@ -239,7 +243,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                                             .then(() =>
                                                 dispatch(
                                                     push(
-                                                        `${url}/${BakerSubRoutes.sign}`
+                                                        `${url}/${AccountTransactionSubRoutes.sign}`
                                                     )
                                                 )
                                             )
@@ -255,7 +259,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                             )}
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${BakerSubRoutes.sign}`}>
+                    <Route path={`${path}/${AccountTransactionSubRoutes.sign}`}>
                         <Columns.Column header="Signature and Hardware Wallet">
                             <SignTransactionColumn
                                 signingFunction={signingFunction}

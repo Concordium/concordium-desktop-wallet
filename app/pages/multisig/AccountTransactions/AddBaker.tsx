@@ -42,7 +42,7 @@ import ButtonGroup from '~/components/ButtonGroup';
 import AddBakerProposalDetails from './proposal-details/AddBakerProposalDetails';
 import LoadingComponent from './LoadingComponent';
 import {
-    BakerSubRoutes,
+    AccountTransactionSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
 import ChooseExpiry from './ChooseExpiry';
@@ -243,7 +243,9 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                         </Columns.Column>
                     </Route>
 
-                    <Route path={`${path}/${BakerSubRoutes.stake}`}>
+                    <Route
+                        path={`${path}/${AccountTransactionSubRoutes.stake}`}
+                    >
                         <Columns.Column
                             header="Stake"
                             className={styles.stretchColumn}
@@ -303,7 +305,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                                     onClick={() => {
                                         dispatch(
                                             push(
-                                                `${url}/${BakerSubRoutes.expiry}`
+                                                `${url}/${AccountTransactionSubRoutes.expiry}`
                                             )
                                         );
                                     }}
@@ -314,7 +316,9 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                         </Columns.Column>
                     </Route>
 
-                    <Route path={`${path}/${BakerSubRoutes.expiry}`}>
+                    <Route
+                        path={`${path}/${AccountTransactionSubRoutes.expiry}`}
+                    >
                         <Columns.Column
                             header="Transaction expiry time"
                             className={styles.stretchColumn}
@@ -325,14 +329,16 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                                     setExpiryTime(expiry);
                                     onGenerateKeys();
                                     dispatch(
-                                        push(`${url}/${BakerSubRoutes.keys}`)
+                                        push(
+                                            `${url}/${AccountTransactionSubRoutes.keys}`
+                                        )
                                     );
                                 }}
                             />
                         </Columns.Column>
                     </Route>
 
-                    <Route path={`${path}/${BakerSubRoutes.keys}`}>
+                    <Route path={`${path}/${AccountTransactionSubRoutes.keys}`}>
                         <Columns.Column
                             header="Baker keys"
                             className={styles.stretchColumn}
@@ -347,7 +353,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                                             .then(() =>
                                                 dispatch(
                                                     push(
-                                                        `${url}/${BakerSubRoutes.sign}`
+                                                        `${url}/${AccountTransactionSubRoutes.sign}`
                                                     )
                                                 )
                                             )
@@ -364,7 +370,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                         </Columns.Column>
                     </Route>
 
-                    <Route path={`${path}/${BakerSubRoutes.sign}`}>
+                    <Route path={`${path}/${AccountTransactionSubRoutes.sign}`}>
                         <Columns.Column header="Signature and Hardware Wallet">
                             <SignTransactionColumn
                                 signingFunction={signingFunction}

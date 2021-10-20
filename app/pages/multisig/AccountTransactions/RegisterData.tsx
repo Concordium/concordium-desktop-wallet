@@ -12,28 +12,40 @@ import {
     Fraction,
 } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
-import SimpleErrorModal from '~/components/SimpleErrorModal';
-import {
-    createRegisterDataTransaction,
-    validateData,
-} from '~/utils/transactionHelpers';
-import routes from '~/constants/routes.json';
+import { validateData } from '~/utils/transactionHelpers';
 import { useTransactionCostEstimate } from '~/utils/dataHooks';
-import SignTransaction from './SignTransaction';
 import RegisterDataProposalDetails from './proposal-details/RegisterDataProposalDetails';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
-import { getNextAccountNonce } from '~/node/nodeRequests';
 import LoadingComponent from './LoadingComponent';
-import {
-    BakerSubRoutes,
-    getLocationAfterAccounts,
-} from '~/utils/accountRouterHelpers';
+import { AccountTransactionSubRoutes } from '~/utils/accountRouterHelpers';
 import ChooseExpiry from './ChooseExpiry';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import TextArea from '~/components/Form/TextArea';
-import errorMessages from '~/constants/errorMessages.json';
+import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
+import CreateTransaction from './CreateTransaction';
+import routes from '~/constants/routes.json';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
+
+function useRouteSubTitle() {
+    const match = useRouteMatch<{
+        subRoute?: string;
+    }>(`${routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION}/:subRoute`);
+    const subRoute = match?.params.subRoute;
+    if (!subRoute) {
+        return 'Accounts';
+    }
+    switch (parseInt(subRoute, 10)) {
+        case AccountTransactionSubRoutes.data:
+            return 'Data to register';
+        case AccountTransactionSubRoutes.expiry:
+            return 'Transaction expiry time';
+        case AccountTransactionSubRoutes.sign:
+            return 'Signature and Hardware Wallet';
+        default:
+            throw new Error('Unsupported sub route');
+    }
+}
 
 interface PageProps {
     exchangeRate: Fraction;
@@ -46,59 +58,55 @@ interface State {
 function RegisterData({ exchangeRate }: PageProps) {
     const dispatch = useDispatch();
 
+    const transactionKind = TransactionKindId.Register_data;
+
     const { state } = useLocation<State>();
 
     const { path, url } = useRouteMatch();
     const [account, setAccount] = useState<Account | undefined>(state?.account);
     const [data, setData] = useState<string>();
-    const [error, setError] = useState<string>();
-    const [transaction, setTransaction] = useState<RegisterData>();
 
     const estimatedFee = useTransactionCostEstimate(
-        TransactionKindId.Register_data,
+        transactionKind,
         exchangeRate,
         account?.signatureThreshold,
-        undefined,
-        data?.length ? 2 + data.length : 0
+        data,
+        0
+    );
+
+    const goToSubRoute = useCallback(
+        (subRoute: AccountTransactionSubRoutes) =>
+            dispatch(push(`${url}/${subRoute}`)),
+        [url]
     );
 
     const [expiryTime, setExpiryTime] = useState<Date>();
 
-    const onCreateTransaction = async () => {
-        if (account === undefined) {
-            setError('Account is needed to make transaction');
-            return;
-        }
+    const handler = findAccountTransactionHandler(transactionKind);
 
-        if (data === undefined) {
-            setError('The data is needed to make transaction');
-            return;
+    function renderSignTransaction() {
+        if (!account || !expiryTime) {
+            throw new Error('Unexpected missing account and/or expiry time');
         }
-
-        const accountNonce = await getNextAccountNonce(account.address);
-        setTransaction(
-            createRegisterDataTransaction(
-                account.address,
-                accountNonce.nonce,
-                data,
-                account?.signatureThreshold,
-                expiryTime
-            )
+        return (
+            <CreateTransaction
+                transactionKind={transactionKind}
+                data={data}
+                account={account}
+                estimatedFee={estimatedFee}
+                expiryTime={expiryTime}
+            />
         );
-    };
+    }
+
+    const subtitle = useRouteSubTitle();
 
     return (
         <MultiSignatureLayout
-            pageTitle="Multi Signature Transactions | Register Data"
-            stepTitle="Transaction Proposal - Register Data"
+            pageTitle={handler.title}
+            stepTitle={`Transaction Proposal - ${handler.type}`}
             delegateScroll
         >
-            <SimpleErrorModal
-                show={Boolean(error)}
-                header="Unable to perform transfer"
-                content={error}
-                onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
-            />
             <Columns divider columnScroll>
                 <Columns.Column
                     header="Transaction Details"
@@ -113,37 +121,29 @@ function RegisterData({ exchangeRate }: PageProps) {
                         />
                     </div>
                 </Columns.Column>
-                <Switch>
-                    <Route exact path={path}>
-                        <Columns.Column
-                            header="Accounts"
-                            className={styles.stretchColumn}
-                        >
+                <Columns.Column
+                    header={subtitle}
+                    className={styles.stretchColumn}
+                >
+                    <Switch>
+                        <Route exact path={path}>
                             <div className={styles.columnContent}>
                                 <div className="flexChildFill">
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
                                         messageWhenEmpty="There are no accounts "
-                                        onAccountClicked={() => {
-                                            dispatch(
-                                                push(
-                                                    getLocationAfterAccounts(
-                                                        url,
-                                                        TransactionKindId.Register_data
-                                                    )
-                                                )
-                                            );
-                                        }}
+                                        onAccountClicked={() =>
+                                            goToSubRoute(
+                                                AccountTransactionSubRoutes.data
+                                            )
+                                        }
                                     />
                                 </div>
                             </div>
-                        </Columns.Column>
-                    </Route>
-                    <Route path={`${path}/${BakerSubRoutes.data}`}>
-                        <Columns.Column
-                            header="Data to register"
-                            className={styles.stretchColumn}
+                        </Route>
+                        <Route
+                            path={`${path}/${AccountTransactionSubRoutes.data}`}
                         >
                             <div className={styles.columnContent}>
                                 <div className="flexChildFill">
@@ -152,61 +152,35 @@ function RegisterData({ exchangeRate }: PageProps) {
                                 <Button
                                     className="mT40"
                                     disabled={data === undefined}
-                                    onClick={() => {
-                                        dispatch(
-                                            push(
-                                                `${url}/${BakerSubRoutes.expiry}`
-                                            )
-                                        );
-                                    }}
+                                    onClick={() =>
+                                        goToSubRoute(
+                                            AccountTransactionSubRoutes.expiry
+                                        )
+                                    }
                                 >
                                     Continue
                                 </Button>
                             </div>
-                        </Columns.Column>
-                    </Route>
-
-                    <Route path={`${path}/${BakerSubRoutes.expiry}`}>
-                        <Columns.Column
-                            header="Transaction expiry time"
-                            className={styles.stretchColumn}
+                        </Route>
+                        <Route
+                            path={`${path}/${AccountTransactionSubRoutes.expiry}`}
                         >
                             <ChooseExpiry
                                 buttonText="Continue"
                                 onClick={(expiry: Date) => {
                                     setExpiryTime(expiry);
-                                    onCreateTransaction()
-                                        .then(() =>
-                                            dispatch(
-                                                push(
-                                                    `${url}/${BakerSubRoutes.sign}`
-                                                )
-                                            )
-                                        )
-                                        .catch(() =>
-                                            setError(
-                                                errorMessages.unableToReachNode
-                                            )
-                                        );
+                                    goToSubRoute(
+                                        AccountTransactionSubRoutes.sign
+                                    );
                                 }}
                             />
-                        </Columns.Column>
-                    </Route>
-                    <Route path={`${path}/${BakerSubRoutes.sign}`}>
-                        <Columns.Column
-                            header="Signature and Hardware Wallet"
-                            className={styles.stretchColumn}
-                        >
-                            {transaction !== undefined &&
-                            account !== undefined ? (
-                                <SignTransaction
-                                    transaction={transaction}
-                                    account={account}
-                                />
-                            ) : null}
-                        </Columns.Column>
-                    </Route>
-                </Switch>
+                        </Route>
+                        <Route
+                            path={`${path}/${AccountTransactionSubRoutes.sign}`}
+                            render={renderSignTransaction}
+                        />
+                    </Switch>
+                </Columns.Column>
             </Columns>
         </MultiSignatureLayout>
     );
@@ -218,7 +192,7 @@ interface EnterDataProps {
 }
 
 /**
- * Allow the user to input a memo.
+ * Allow the user to input the data, which is to be registered.
  */
 function EnterData({ setData, data }: EnterDataProps): JSX.Element {
     const [error, setError] = useState<string>();

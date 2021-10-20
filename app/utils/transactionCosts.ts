@@ -266,9 +266,10 @@ export function getTransactionKindCost(
     memo?: string,
     payloadSize: number = getPayloadSizeEstimate(transactionKind)
 ): Fraction {
+    const memoSize = memo ? 2 + getEncodedSize(memo) : 0;
     const energy = getTransactionKindEnergy(
         transactionKind,
-        payloadSize + getEncodedSize(memo),
+        payloadSize + memoSize,
         signatureAmount
     );
     return energyToCost(energy, energyToMicroGtu);

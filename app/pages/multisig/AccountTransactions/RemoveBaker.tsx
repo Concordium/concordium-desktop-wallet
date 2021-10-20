@@ -28,7 +28,7 @@ import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
 import LoadingComponent from './LoadingComponent';
 import {
-    BakerSubRoutes,
+    AccountTransactionSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
 import ChooseExpiry from './ChooseExpiry';
@@ -152,7 +152,9 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${BakerSubRoutes.expiry}`}>
+                    <Route
+                        path={`${path}/${AccountTransactionSubRoutes.expiry}`}
+                    >
                         <Columns.Column
                             header="Transaction expiry time"
                             className={styles.stretchColumn}
@@ -165,7 +167,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                         .then(() =>
                                             dispatch(
                                                 push(
-                                                    `${url}/${BakerSubRoutes.sign}`
+                                                    `${url}/${AccountTransactionSubRoutes.sign}`
                                                 )
                                             )
                                         )
@@ -190,7 +192,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                             </ChooseExpiry>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${BakerSubRoutes.sign}`}>
+                    <Route path={`${path}/${AccountTransactionSubRoutes.sign}`}>
                         <Columns.Column
                             header="Signature and Hardware Wallet"
                             className={styles.stretchColumn}

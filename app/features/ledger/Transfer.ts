@@ -452,7 +452,7 @@ async function signRegisterData(
         transaction.expiry
     );
 
-    const data = encodeAsCBOR(transaction.payload.data); // TODO: How should we do this
+    const data = encodeAsCBOR(transaction.payload.data);
 
     const cdata = Buffer.concat([
         pathAsBuffer(path),
