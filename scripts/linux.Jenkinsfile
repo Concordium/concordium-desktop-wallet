@@ -26,7 +26,6 @@ pipeline {
                        FILENAME_DEB="concordium-desktop-wallet-${VERSION}.deb"
                        FILENAME_RPM="concordium-desktop-wallet-${VERSION}.rpm"
                        FILENAME_APPIMAGE="concordium-desktop-wallet-${VERSION}.AppImage"
-                       export TARGET_NET=
                     else
                        FILENAME_DEB="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.deb"
                        FILENAME_RPM="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.rpm"

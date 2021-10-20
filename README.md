@@ -80,7 +80,7 @@ which is only recompiled with a full restart.
 
 To build the application for a specific network you must supply the `TARGET_NET` variable. The value
 has to be one of `stagenet`, `testnet` or `mainnet`, otherwise the build will fail. Note that the
-`TARGET_NET` will be appeneded to the filenames for `stagenet` and `testnet`.
+`TARGET_NET` will be appended to the filenames for `stagenet` and `testnet`.
 
 ```bash
 TARGET_NET=stagenet yarn start
