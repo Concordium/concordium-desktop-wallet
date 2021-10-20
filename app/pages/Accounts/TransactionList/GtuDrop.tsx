@@ -9,6 +9,7 @@ import { insertTransactions } from '~/database/TransactionDao';
 import { chosenAccountSelector } from '~/features/AccountSlice';
 import { reloadTransactions } from '~/features/TransactionSlice';
 import { displayTargetNet, getTargetNet } from '~/utils/ConfigHelper';
+import { getGTUSymbol, microGtuToGtu } from '~/utils/gtu';
 import { gtuDrop } from '~/utils/httpRequests';
 import { secondsSinceUnixEpoch } from '~/utils/timeHelpers';
 import {
@@ -18,7 +19,7 @@ import {
 } from '~/utils/types';
 import styles from './TransactionList.module.scss';
 
-const gtuDropAmount = '2000000000';
+const microGtuDropAmount = '2000000000';
 
 /**
  * Sends a GTU drop request to the wallet proxy. If successful a pending
@@ -54,7 +55,7 @@ async function handleGtuDrop(
             status: TransactionStatus.Pending,
             blockHash: '',
             blockTime: secondsSinceUnixEpoch(new Date()).toString(),
-            subtotal: gtuDropAmount,
+            subtotal: microGtuDropAmount,
         };
         await insertTransactions([gtuDropTransaction]);
     } catch {
@@ -115,7 +116,8 @@ export default function GtuDrop() {
                         }
                     }}
                 >
-                    Request 2000 GTU
+                    Request {getGTUSymbol()}
+                    {microGtuToGtu(microGtuDropAmount)}
                 </Button>
             </div>
         </>
