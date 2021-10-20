@@ -49,7 +49,7 @@ pipeline {
 
                     # Push to s3
                     aws s3 cp "release/${FILENAME_EXE}" "${S3_BUCKET}/${OUT_FILENAME_EXE}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-                    aws s3 cp "release/latest.yml" "${S3_BUCKET}/${OUT_FILENAME_EXE}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+                    aws s3 cp "release/latest.yml" "${S3_BUCKET}/${OUT_FILENAME_LATEST_WINDOWS}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
                 '''.stripIndent()
             }
         }
