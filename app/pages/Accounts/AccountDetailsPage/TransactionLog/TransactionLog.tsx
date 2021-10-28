@@ -38,6 +38,7 @@ export default function TransactionLog() {
                 {chosenTransaction ? (
                     <TransactionView
                         transaction={chosenTransaction}
+                        setTransaction={setChosenTransaction}
                         onClose={() => setChosenTransaction(undefined)}
                     />
                 ) : (
