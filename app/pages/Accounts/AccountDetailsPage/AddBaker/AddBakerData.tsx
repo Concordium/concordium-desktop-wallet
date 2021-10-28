@@ -3,19 +3,20 @@ import { useSelector } from 'react-redux';
 import AddBakerDetailsForm, {
     AddBakerForm,
 } from '~/components/AddBakerDetailsForm';
-import {
-    ensureExchangeRate,
-    ExchangeRate,
-} from '~/components/Transfers/withExchangeRate';
+import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import Card from '~/cross-app-components/Card';
-import Loading from '~/cross-app-components/Loading';
 import { chosenAccountSelector } from '~/features/AccountSlice';
 import {
     ChainData,
     ensureChainData,
 } from '~/pages/multisig/common/withChainData';
 import { useTransactionCostEstimate } from '~/utils/dataHooks';
-import { NotOptional, PropsOf, TransactionKindId } from '~/utils/types';
+import {
+    Fraction,
+    NotOptional,
+    PropsOf,
+    TransactionKindId,
+} from '~/utils/types';
 
 import styles from '../AccountDetailsPage.module.scss';
 
@@ -26,43 +27,43 @@ type FormWrapperProps = Omit<
     NotOptional<ChainData> &
     NotOptional<ExchangeRate>;
 
-const LoadingChainData = () => <Loading text="Loading chain data" inline />;
+const FormWrapper = ensureChainData(
+    ({ blockSummary, exchangeRate, ...props }: FormWrapperProps) => {
+        const { account } = props;
+        const minimumStake = BigInt(
+            blockSummary.updates.chainParameters.minimumThresholdForBaking
+        );
+        const estimatedFee = useTransactionCostEstimate(
+            TransactionKindId.Add_baker,
+            exchangeRate,
+            account?.signatureThreshold
+        );
 
-const FormWrapper = ensureExchangeRate(
-    ensureChainData(
-        ({ blockSummary, exchangeRate, ...props }: FormWrapperProps) => {
-            const { account } = props;
-            const minimumStake = BigInt(
-                blockSummary.updates.chainParameters.minimumThresholdForBaking
-            );
-            const estimatedFee = useTransactionCostEstimate(
-                TransactionKindId.Add_baker,
-                exchangeRate,
-                account?.signatureThreshold
-            );
-
-            return (
-                <AddBakerDetailsForm
-                    {...props}
-                    minimumStake={minimumStake}
-                    estimatedFee={estimatedFee}
-                    className="mT30"
-                    buttonClassName={styles.bakerFlowContinue}
-                />
-            );
-        },
-        LoadingChainData
-    ),
-    LoadingChainData
+        return (
+            <AddBakerDetailsForm
+                {...props}
+                minimumStake={minimumStake}
+                estimatedFee={estimatedFee}
+                className="mT30"
+                buttonClassName={styles.bakerFlowContinue}
+            />
+        );
+    }
 );
 
 interface Props {
     header: string;
     initialData?: AddBakerForm;
+    exchangeRate: Fraction;
     onSubmit(values: AddBakerForm): void;
 }
 
-export default function AddBakerData({ onSubmit, initialData, header }: Props) {
+export default function AddBakerData({
+    onSubmit,
+    initialData,
+    header,
+    exchangeRate,
+}: Props) {
     const account = useSelector(chosenAccountSelector);
 
     if (!account) {
@@ -75,6 +76,7 @@ export default function AddBakerData({ onSubmit, initialData, header }: Props) {
             <FormWrapper
                 account={account}
                 onSubmit={onSubmit}
+                exchangeRate={exchangeRate}
                 initialData={initialData}
             />
         </Card>

@@ -73,7 +73,7 @@ export default function UpdateBakerRestake() {
 
     return (
         <Card className="textCenter pB40">
-            <h3 className="bodyEmphasized">Update baker stake</h3>
+            <h3 className="bodyEmphasized">Update baker restake earnings</h3>
             <p className="mV30">Choose to restake earnings or not, below.</p>
             <div className="mV30">
                 <Label>Current restake:</Label>

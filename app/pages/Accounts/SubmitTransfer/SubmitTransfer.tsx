@@ -235,6 +235,9 @@ export default function SubmitTransfer({ location }: Props) {
                 );
 
                 monitorTransactionStatus(dispatch, convertedTransaction);
+            } catch (e) {
+                // eslint-disable-next-line no-console
+                console.error(e);
             } finally {
                 const confirmedStateWithHash = {
                     transactionHash,

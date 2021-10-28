@@ -32,9 +32,10 @@ import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
+import { isMultiSig } from '~/utils/accountHelpers';
+import Label from '~/components/Label';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
-import { isMultiSig } from '~/utils/accountHelpers';
 
 interface PageProps {
     exchangeRate: Fraction;
@@ -280,11 +281,11 @@ function RestakeEarnings({
 
     return (
         <>
-            <p className="mT0">
-                Currently restake is{' '}
-                {restake ? <b>enabled</b> : <b>disabled</b>}.
-            </p>
-            <p>Select whether to restake earnings.</p>
+            <p className="mV30">Choose to restake earnings or not, below.</p>
+            <div className="mV30">
+                <Label>Current restake:</Label>
+                <span className="body1">{restake ? 'Yes' : 'No'}</span>
+            </div>
             <ButtonGroup
                 title="Enable restake earnings"
                 name="restake"
