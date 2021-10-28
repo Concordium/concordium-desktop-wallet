@@ -19,6 +19,11 @@ import useThunkDispatch from '~/store/useThunkDispatch';
 // milliseconds between updates of the accountInfo
 const accountInfoUpdateInterval = 30000;
 
+export const accountInfoFailedMessage = (message: string) =>
+    `Failed to load account information from your connected node due to: ${message}`;
+const updateTransactionsFailedMessage = (message: string) =>
+    `Failed to load transactions from external service due to: ${message}`;
+
 /**
  * Keeps account info and transactions for selected account in sync. Is dependant on a full re-mount when chosen account changes.
  */
@@ -53,9 +58,13 @@ export default function useAccountSync(onError: (message: string) => void) {
             return noOp;
         }
 
-        updateAccountInfo(account, dispatch);
+        updateAccountInfo(account, dispatch).catch((e: Error) =>
+            onError(accountInfoFailedMessage(e.message))
+        );
         const interval = setInterval(() => {
-            updateAccountInfo(account, dispatch);
+            updateAccountInfo(account, dispatch).catch((e: Error) =>
+                onError(accountInfoFailedMessage(e.message))
+            );
         }, accountInfoUpdateInterval);
 
         return () => {
@@ -80,7 +89,8 @@ export default function useAccountSync(onError: (message: string) => void) {
                     onFirstLoop() {
                         setUpdateLooped(true);
                     },
-                    onError,
+                    onError: (message) =>
+                        onError(updateTransactionsFailedMessage(message)),
                 })
             );
 

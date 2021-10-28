@@ -10,15 +10,19 @@ interface Props {
  */
 export default function ProtocolUpdateView({ protocolUpdate }: Props) {
     const [auxiliaryDataHash, setAuxiliaryDataHash] = useState<string>();
-    const auxiliaryData = Buffer.from(
-        protocolUpdate.specificationAuxiliaryData,
-        'base64'
-    );
 
     useEffect(() => {
-        const hash = window.cryptoMethods.sha256([auxiliaryData]);
-        setAuxiliaryDataHash(hash.toString('hex'));
-    }, [auxiliaryData]);
+        if (protocolUpdate.specificationAuxiliaryData) {
+            const auxiliaryData = Buffer.from(
+                protocolUpdate.specificationAuxiliaryData,
+                'base64'
+            );
+            const hash = Buffer.from(
+                window.cryptoMethods.sha256([auxiliaryData])
+            );
+            setAuxiliaryDataHash(hash.toString('hex'));
+        }
+    }, [protocolUpdate.specificationAuxiliaryData]);
 
     return (
         <>
@@ -36,7 +40,7 @@ export default function ProtocolUpdateView({ protocolUpdate }: Props) {
             </div>
             <div className="body2">
                 <h5 className="mB0">Specification auxiliary data hash</h5>
-                {auxiliaryDataHash}
+                {auxiliaryDataHash || 'No auxiliary data was attached'}
             </div>
         </>
     );

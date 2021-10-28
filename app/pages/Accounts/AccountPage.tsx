@@ -15,12 +15,17 @@ import SimpleErrorModal from '~/components/SimpleErrorModal';
 import AccountListPage from './AccountListPage';
 import AccountDetailsPage from './AccountDetailsPage';
 import useThunkDispatch from '~/store/useThunkDispatch';
+import { accountInfoFailedMessage } from './useAccountSync';
 
 const { Header } = MasterDetailPageLayout;
 
 async function handleLoad(dispatch: Dispatch) {
     const accounts = await loadAccounts(dispatch);
-    return loadAccountInfos(accounts, dispatch);
+    try {
+        await loadAccountInfos(accounts, dispatch);
+    } catch (e) {
+        throw new Error(accountInfoFailedMessage(e.message));
+    }
 }
 
 export default function AccountsPage() {
@@ -51,7 +56,7 @@ export default function AccountsPage() {
         <>
             <SimpleErrorModal
                 show={Boolean(error)}
-                header="Unable to update accounts"
+                header="Unable to load account information"
                 content={error}
                 onClick={() => setError(undefined)}
             />

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Added
+
+-   Added a GTU drop option for testnet and stagenet.
+
+### Changed
+
+-   Auxiliary data in an Update Protocol transaction is now optional.
+
 ## 1.2.0
 
 ### Added
