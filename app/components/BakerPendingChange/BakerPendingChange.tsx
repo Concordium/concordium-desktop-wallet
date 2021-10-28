@@ -10,7 +10,7 @@ type PendingChangeProps = {
 
 /** Render a bakers pending change */
 export default function PendingChange({ pending }: PendingChangeProps) {
-    const [status] = useConsensusStatus();
+    const status = useConsensusStatus();
     if (status === undefined) {
         return null;
     }

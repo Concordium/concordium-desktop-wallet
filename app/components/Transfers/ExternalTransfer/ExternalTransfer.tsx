@@ -40,7 +40,7 @@ export default function ExternalTransfer({
 }: Props) {
     const location = useLocation<TransferState>();
 
-    const [allowMemo] = useAsyncMemo(nodeSupportsMemo);
+    const allowMemo = useAsyncMemo(nodeSupportsMemo);
 
     const [subLocation, setSubLocation] = useState<string>(
         locations.pickAmount

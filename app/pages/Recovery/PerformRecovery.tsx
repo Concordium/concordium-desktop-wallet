@@ -69,7 +69,7 @@ export default function PerformRecovery({
 
     const [controller] = useState(new AbortController());
 
-    const [blockHash] = useAsyncMemo(getlastFinalizedBlockHash, () =>
+    const blockHash = useAsyncMemo(getlastFinalizedBlockHash, () =>
         setError(errorMessages.unableToReachNode)
     );
 

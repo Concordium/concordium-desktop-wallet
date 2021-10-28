@@ -26,7 +26,7 @@ export default function GenerateBakerKeys({
     const dispatch = useDispatch();
     const [error, setError] = useState<string>();
 
-    const [keys] = useAsyncMemo(
+    const keys = useAsyncMemo(
         async () => {
             if (!account) {
                 return undefined;

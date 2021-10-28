@@ -66,17 +66,11 @@ export const useAsyncMemo = <ReturnType>(
     handleError: (e: Error) => void = () => {},
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     deps?: any[]
-): [ReturnType | undefined, boolean] => {
+): ReturnType | undefined => {
     const [result, setResult] = useState<ReturnType>();
-    const [isLoading, setIsLoading] = useState(true);
     useEffect(() => {
-        setIsLoading(true);
-        // eslint-disable-next-line promise/catch-or-return
-        getResult()
-            .then(setResult)
-            .catch(handleError)
-            .finally(() => setIsLoading(false));
+        getResult().then(setResult).catch(handleError);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, deps);
-    return [result, isLoading];
+    return result;
 };
