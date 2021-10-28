@@ -51,6 +51,7 @@ export default function UpdateProtocol({
                 defaultValue={defaults.specificationUrl || undefined}
                 label="Specification URL:"
                 placeholder="Enter specification URL"
+                spellCheck="false"
                 rules={{ required: 'Specification URL is required' }}
             />
             <Form.TextArea
@@ -59,6 +60,7 @@ export default function UpdateProtocol({
                 defaultValue={defaults.specificationHash || undefined}
                 label="Specification Hash:"
                 placeholder="Paste specification hash here"
+                spellCheck="false"
                 rules={{
                     required: 'Specification hash is required',
                     minLength: lengthRule,
@@ -73,7 +75,6 @@ export default function UpdateProtocol({
                 buttonTitle="or browse to file"
                 defaultValue={defaults.specificationAuxiliaryData || undefined}
                 rules={{
-                    required: 'Specification Auxiliary Data is required',
                     validate: maxFileSizeKb(
                         auxiliaryDataMaxSizeKb,
                         `File size too big (max: ${auxiliaryDataMaxSizeKb}kb)`

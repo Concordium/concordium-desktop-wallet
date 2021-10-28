@@ -97,6 +97,11 @@ async function getTransactions(
     return { transactions, full: count === limit };
 }
 
+async function gtuDrop(address: string) {
+    const response = await walletProxy.put(`/v0/testnetGTUDrop/${address}`);
+    return response.data.submissionId;
+}
+
 const exposedMethods: HttpMethods = {
     get: httpsGet,
     getTransactions,
@@ -105,6 +110,7 @@ const exposedMethods: HttpMethods = {
         const response = await walletProxy.get('/v0/ip_info');
         return response.data;
     },
+    gtuDrop,
 };
 
 export default exposedMethods;

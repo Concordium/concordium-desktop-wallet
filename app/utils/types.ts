@@ -1108,7 +1108,7 @@ export interface ProtocolUpdate {
     message: string;
     specificationUrl: string;
     specificationHash: Hex;
-    specificationAuxiliaryData: string;
+    specificationAuxiliaryData?: string;
 }
 
 export interface GasRewards {
