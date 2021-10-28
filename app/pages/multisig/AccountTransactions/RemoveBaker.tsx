@@ -33,9 +33,9 @@ import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
+import { isMultiSig } from '~/utils/accountHelpers';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
-import { isMultiSig } from '~/utils/accountHelpers';
 
 interface PageProps {
     exchangeRate: Fraction;

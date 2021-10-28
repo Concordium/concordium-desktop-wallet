@@ -18,7 +18,6 @@ export default function MoreActions({ account, accountInfo }: Props) {
     );
     const hasUsedEncrypted = hasEncryptedBalance(account);
     const isBaker = Boolean(accountInfo?.accountBaker);
-    const hasBakerCooldown = Boolean(accountInfo?.accountBaker?.pendingChange);
 
     return (
         <>
@@ -96,12 +95,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     <ButtonNavLink
                         className="mB20:notLast flex width100"
                         to={routes.ACCOUNTS_REMOVE_BAKER}
-                        disabled={!accountInfo || hasBakerCooldown}
-                        title={
-                            hasBakerCooldown
-                                ? 'Account has pending baker change.'
-                                : undefined
-                        }
+                        disabled={!accountInfo}
                     >
                         Remove baker
                     </ButtonNavLink>
@@ -115,12 +109,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     <ButtonNavLink
                         className="mB20:notLast flex width100"
                         to={routes.ACCOUNTS_UPDATE_BAKER_STAKE}
-                        disabled={!accountInfo || hasBakerCooldown}
-                        title={
-                            hasBakerCooldown
-                                ? 'Account has pending baker change.'
-                                : undefined
-                        }
+                        disabled={!accountInfo}
                     >
                         Update baker stake
                     </ButtonNavLink>

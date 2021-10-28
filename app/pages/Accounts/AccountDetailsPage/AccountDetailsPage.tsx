@@ -41,7 +41,6 @@ export default withAccountSync(function DetailsPage() {
         account ? accountHasDeployedCredentialsSelector(account) : () => false
     );
     const isBaker = Boolean(accountInfo?.accountBaker);
-    const hasBakerCooldown = Boolean(accountInfo?.accountBaker?.pendingChange);
     const canTransfer = hasCredentials && Boolean(accountInfo);
 
     if (!account) {
@@ -90,7 +89,7 @@ export default withAccountSync(function DetailsPage() {
                         }
                     />
                     <Route path={routes.ACCOUNTS_REMOVE_BAKER}>
-                        {canTransfer && isBaker && !hasBakerCooldown ? (
+                        {canTransfer && isBaker ? (
                             <RemoveBaker />
                         ) : (
                             <ToAccounts />
@@ -104,7 +103,7 @@ export default withAccountSync(function DetailsPage() {
                         )}
                     </Route>
                     <Route path={routes.ACCOUNTS_UPDATE_BAKER_STAKE}>
-                        {canTransfer && isBaker && !hasBakerCooldown ? (
+                        {canTransfer && isBaker ? (
                             <UpdateBakerStake />
                         ) : (
                             <ToAccounts />

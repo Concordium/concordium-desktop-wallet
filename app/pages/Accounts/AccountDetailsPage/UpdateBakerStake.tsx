@@ -107,10 +107,13 @@ const UpdateBakerStakeForm = ensureChainData(
 
         if (pendingChange) {
             return (
-                <>
-                    Cannot update baker stake becuase{' '}
-                    <BakerPendingChange pending={pendingChange} />
-                </>
+                <p className="mT30 mB0">
+                    Cannot update baker stake at this time:
+                    <div className="bodyEmphasized textError mV10">
+                        <BakerPendingChange pending={pendingChange} />
+                    </div>
+                    It will be possible to proceed after this time has passed.
+                </p>
             );
         }
 

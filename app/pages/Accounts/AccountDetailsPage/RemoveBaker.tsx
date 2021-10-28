@@ -63,10 +63,13 @@ export default function RemoveBaker() {
         <Card className="textCenter pB40">
             <h3 className="bodyEmphasized">Remove baker</h3>
             {pendingChange ? (
-                <>
-                    Cannot remove baker, because{' '}
-                    <BakerPendingChange pending={pendingChange} />
-                </>
+                <p className="mT30 mB0">
+                    Cannot remove baker at this time:
+                    <div className="bodyEmphasized textError mV10">
+                        <BakerPendingChange pending={pendingChange} />
+                    </div>
+                    It will be possible to proceed after this time has passed.
+                </p>
             ) : (
                 <>
                     <p className="mT30">
