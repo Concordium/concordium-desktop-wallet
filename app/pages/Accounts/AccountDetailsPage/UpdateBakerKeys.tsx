@@ -92,14 +92,18 @@ export default function UpdateBakerKeys() {
             }
 
             const transaction = await makeTransaction(bakerKeys);
+            const serialized = stringify(transaction);
             const state: SubmitTransferLocationState = {
                 account,
-                transaction: stringify(transaction),
+                transaction: serialized,
                 cancelled: {
                     pathname: routes.ACCOUNTS_UPDATE_BAKER_KEYS,
                 },
                 confirmed: {
-                    pathname: routes.ACCOUNTS,
+                    pathname: routes.ACCOUNTS_FINAL_PAGE,
+                    state: {
+                        transaction: serialized,
+                    },
                 },
             };
 

@@ -87,7 +87,7 @@ const AddBakerWithAccount = ensureExchangeRateAndNonce(
                 }
 
                 const transaction = await makeTransaction(bakerKeys);
-
+                const serialized = stringify(transaction);
                 const state: SubmitTransferLocationState<AddBakerForm> = {
                     account,
                     cancelled: {
@@ -95,9 +95,12 @@ const AddBakerWithAccount = ensureExchangeRateAndNonce(
                         state: bakerData,
                     },
                     confirmed: {
-                        pathname: routes.ACCOUNTS,
+                        pathname: routes.ACCOUNTS_FINAL_PAGE,
+                        state: {
+                            transaction: serialized,
+                        },
                     },
-                    transaction: stringify(transaction),
+                    transaction: serialized,
                 };
                 dispatch(replace({ pathname: routes.SUBMITTRANSFER, state }));
             },

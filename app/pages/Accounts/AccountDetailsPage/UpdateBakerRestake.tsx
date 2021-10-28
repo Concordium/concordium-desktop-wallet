@@ -51,14 +51,19 @@ export default function UpdateBakerRestake() {
                 transaction.energyAmount
             );
 
+            const serialized = stringify(transaction);
+
             const state: SubmitTransferLocationState = {
                 account,
-                transaction: stringify(transaction),
+                transaction: serialized,
                 cancelled: {
                     pathname: routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS,
                 },
                 confirmed: {
-                    pathname: routes.ACCOUNTS,
+                    pathname: routes.ACCOUNTS_FINAL_PAGE,
+                    state: {
+                        transaction: serialized,
+                    },
                 },
             };
 

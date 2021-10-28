@@ -2,6 +2,7 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useLocation } from 'react-router-dom';
+import clsx from 'clsx';
 import { parse } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
 import { displayAsGTU } from '~/utils/gtu';
@@ -24,6 +25,11 @@ import {
     instanceOfScheduledTransferWithMemo,
     instanceOfEncryptedTransferWithMemo,
     instanceOfSimpleTransferWithMemo,
+    instanceOfAddBaker,
+    instanceOfRemoveBaker,
+    instanceOfUpdateBakerKeys,
+    instanceOfUpdateBakerRestakeEarnings,
+    instanceOfUpdateBakerStake,
 } from '~/utils/types';
 
 interface State {
@@ -80,6 +86,14 @@ function getSpecificsHandler(transaction: AccountTransaction) {
     ) {
         title = 'Shielded transfer submitted!';
         amount = transaction.payload.plainTransferAmount;
+    } else if (
+        instanceOfAddBaker(transaction) ||
+        instanceOfRemoveBaker(transaction) ||
+        instanceOfUpdateBakerKeys(transaction) ||
+        instanceOfUpdateBakerRestakeEarnings(transaction) ||
+        instanceOfUpdateBakerStake(transaction)
+    ) {
+        title = 'Baker update submitted!';
     } else {
         throw new Error(
             `Unsupported transaction type - please implement: ${transaction}`
@@ -123,11 +137,13 @@ export default function FinalPage(): JSX.Element {
             exitOnClick={() => dispatch(push(routes.ACCOUNTS))}
         >
             <h3 className="textCenter mB0">{handler.title}</h3>
-            <h1 className="textCenter mT10 mB0">
-                {displayAsGTU(handler.amount)}
-            </h1>
+            {handler.amount && (
+                <h1 className="textCenter mT10 mB0">
+                    {displayAsGTU(handler.amount)}
+                </h1>
+            )}
             <DisplayEstimatedFee
-                className="mT0"
+                className={clsx(handler.amount !== undefined && 'mT0')}
                 estimatedFee={transaction.estimatedFee}
             />
             {handler.note}

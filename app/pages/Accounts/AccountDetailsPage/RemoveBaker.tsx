@@ -41,15 +41,18 @@ export default function RemoveBaker() {
             exchangeRate,
             transaction.energyAmount
         );
-
+        const serialized = stringify(transaction);
         const state: SubmitTransferLocationState = {
             account,
-            transaction: stringify(transaction),
+            transaction: serialized,
             cancelled: {
                 pathname: routes.ACCOUNTS_REMOVE_BAKER,
             },
             confirmed: {
-                pathname: routes.ACCOUNTS,
+                pathname: routes.ACCOUNTS_FINAL_PAGE,
+                state: {
+                    transaction: serialized,
+                },
             },
         };
 
