@@ -29,6 +29,7 @@ import { SubmitTransferLocationState } from '../SubmitTransfer/SubmitTransfer';
 import { multiplyFraction } from '~/utils/basicHelpers';
 
 import styles from './AccountDetailsPage.module.scss';
+import BakerPendingChange from '~/components/BakerPendingChange';
 
 const LoadingComponent = () => <Loading text="Loading chain data" inline />;
 
@@ -97,6 +98,17 @@ const UpdateBakerStakeForm = ensureChainData(
 
         if (!accountInfo) {
             return <LoadingComponent />;
+        }
+
+        const pendingChange = accountInfo.accountBaker?.pendingChange;
+
+        if (pendingChange) {
+            return (
+                <>
+                    Cannot update baker stake becuase{' '}
+                    <BakerPendingChange pending={pendingChange} />
+                </>
+            );
         }
 
         return (

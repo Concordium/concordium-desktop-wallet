@@ -31,7 +31,7 @@ import UpdateBakerStakeProposalDetails from './proposal-details/UpdateBakerStake
 import { microGtuToGtu, toMicroUnits } from '~/utils/gtu';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import { getFormattedDateString } from '~/utils/timeHelpers';
-import PendingChange from '~/components/BakerPendingChange/BakerPendingChange';
+import PendingChange from '~/components/BakerPendingChange';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';

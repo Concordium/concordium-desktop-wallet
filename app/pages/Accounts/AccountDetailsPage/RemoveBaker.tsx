@@ -4,7 +4,10 @@ import { push } from 'connected-react-router';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
 import routes from '~/constants/routes.json';
-import { chosenAccountSelector } from '~/features/AccountSlice';
+import {
+    chosenAccountInfoSelector,
+    chosenAccountSelector,
+} from '~/features/AccountSlice';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import { stringify } from '~/utils/JSONHelper';
 import { createRemoveBakerTransaction } from '~/utils/transactionHelpers';
@@ -13,10 +16,14 @@ import { SubmitTransferLocationState } from '../SubmitTransfer/SubmitTransfer';
 import styles from './AccountDetailsPage.module.scss';
 import { multiplyFraction } from '~/utils/basicHelpers';
 import { getEnergyToMicroGtuRate } from '~/node/nodeHelpers';
+import BakerPendingChange from '~/components/BakerPendingChange';
 
 export default function RemoveBaker() {
     const account = useSelector(chosenAccountSelector);
+    const accountInfo = useSelector(chosenAccountInfoSelector);
     const dispatch = useDispatch();
+
+    const pendingChange = accountInfo?.accountBaker?.pendingChange;
 
     const next = useCallback(async () => {
         if (!account) {
@@ -52,14 +59,23 @@ export default function RemoveBaker() {
     return (
         <Card className="textCenter pB40">
             <h3 className="bodyEmphasized">Remove baker</h3>
-            <p className="mT30">
-                This will remove the baker status of the account. After the
-                grace period the full staked amount will be unlocked for
-                disposal.
-            </p>
-            <Button onClick={next} className={styles.bakerFlowContinue}>
-                Continue
-            </Button>
+            {pendingChange ? (
+                <>
+                    Cannot remove baker, because{' '}
+                    <BakerPendingChange pending={pendingChange} />
+                </>
+            ) : (
+                <>
+                    <p className="mT30">
+                        This will remove the baker status of the account. After
+                        the grace period the full staked amount will be unlocked
+                        for disposal.
+                    </p>
+                    <Button onClick={next} className={styles.bakerFlowContinue}>
+                        Continue
+                    </Button>
+                </>
+            )}
         </Card>
     );
 }
