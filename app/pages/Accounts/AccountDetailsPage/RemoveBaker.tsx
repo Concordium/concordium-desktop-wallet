@@ -14,6 +14,8 @@ import { multiplyFraction } from '~/utils/basicHelpers';
 import { getEnergyToMicroGtuRate } from '~/node/nodeHelpers';
 import BakerPendingChange from '~/components/BakerPendingChange';
 import { Account, AccountInfo } from '~/utils/types';
+import { useCalcBakerStakeCooldownUntil } from '~/utils/dataHooks';
+import { getFormattedDateString } from '~/utils/timeHelpers';
 
 interface Props {
     account: Account;
@@ -22,6 +24,7 @@ interface Props {
 
 export default function RemoveBaker({ account, accountInfo }: Props) {
     const dispatch = useDispatch();
+    const cooldownUntil = useCalcBakerStakeCooldownUntil();
 
     const pendingChange = accountInfo?.accountBaker?.pendingChange;
 
@@ -73,9 +76,20 @@ export default function RemoveBaker({ account, accountInfo }: Props) {
             ) : (
                 <>
                     <p className="mT30">
-                        This will remove the baker status of the account. After
-                        the grace period the full staked amount will be unlocked
-                        for disposal.
+                        This will remove the baker status of the account.
+                        {cooldownUntil && (
+                            <>
+                                This includes a grace period lasting until
+                                <div className="bodyEmphasized  mV10">
+                                    {getFormattedDateString(cooldownUntil)}
+                                </div>
+                                in which the baker stake will be frozen.
+                            </>
+                        )}
+                        <br />
+                        <br />
+                        After the grace period the full staked amount will be
+                        unlocked for disposal.
                     </p>
                     <Button onClick={next} className={styles.bakerFlowContinue}>
                         Continue

@@ -20,7 +20,10 @@ import {
     ChainData,
     ensureChainData,
 } from '~/pages/multisig/common/withChainData';
-import { useTransactionCostEstimate } from '~/utils/dataHooks';
+import {
+    useCalcBakerStakeCooldownUntil,
+    useTransactionCostEstimate,
+} from '~/utils/dataHooks';
 import { displayAsGTU, microGtuToGtu, toMicroUnits } from '~/utils/gtu';
 import { stringify } from '~/utils/JSONHelper';
 import { createUpdateBakerStakeTransaction } from '~/utils/transactionHelpers';
@@ -36,6 +39,7 @@ import { multiplyFraction } from '~/utils/basicHelpers';
 
 import styles from './AccountDetailsPage.module.scss';
 import BakerPendingChange from '~/components/BakerPendingChange';
+import { getFormattedDateString } from '~/utils/timeHelpers';
 
 const LoadingComponent = () => <Loading text="Loading chain data" inline />;
 
@@ -62,6 +66,7 @@ const UpdateBakerStakeForm = ensureChainData(
             exchangeRate,
             account?.signatureThreshold
         );
+        const cooldownUntil = useCalcBakerStakeCooldownUntil();
 
         const submit = useCallback(
             async ({ stake }: FormModel) => {
@@ -132,6 +137,15 @@ const UpdateBakerStakeForm = ensureChainData(
                     Enter your new desired amount to stake. If you raise the
                     stake it will take effect after two epochs, and if you lower
                     the stake it will take effect after the grace period.
+                    {cooldownUntil && (
+                        <>
+                            This grace period will last until
+                            <div className="bodyEmphasized  mV10">
+                                {getFormattedDateString(cooldownUntil)}
+                            </div>
+                            and the baker stake will be frozen in this period.
+                        </>
+                    )}
                 </p>
                 {accountInfo.accountBaker?.stakedAmount && (
                     <>
