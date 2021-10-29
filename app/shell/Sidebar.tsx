@@ -17,32 +17,32 @@ const links: SidebarLink[] = [
     {
         route: routes.ACCOUNTS,
         title: 'Accounts',
-        icon: <GtuIcon className="svgOffBlack" height="32" />,
+        icon: <GtuIcon height="32" />,
     },
     {
         route: routes.IDENTITIES,
         title: 'Identities',
-        icon: <FingerprintIcon className="svgOffBlack" height="34" />,
+        icon: <FingerprintIcon height="34" />,
     },
     {
         route: routes.ADDRESSBOOK,
         title: 'Address Book',
-        icon: <IdentityIcon className="svgOffBlack" height="25" />,
+        icon: <IdentityIcon height="25" />,
     },
     {
         route: routes.EXPORTIMPORT,
         title: 'Export/Import',
-        icon: <ImportExportIcon className="svgOffBlack" height="34" />,
+        icon: <ImportExportIcon height="34" />,
     },
     {
         route: routes.MULTISIGTRANSACTIONS,
         title: 'Multi Signature Transactions',
-        icon: <MultiSigIcon className="svgOffBlack" height="32" />,
+        icon: <MultiSigIcon height="32" />,
     },
     {
         route: routes.SETTINGS,
         title: 'Settings',
-        icon: <SettingsIcon className="svgOffBlack" height="36" />,
+        icon: <SettingsIcon height="36" />,
     },
 ];
 
@@ -62,7 +62,6 @@ export default function ConnectedSidebar() {
             links={links}
             version={pkg.version}
             child={statusComponents}
-            logoClassName="svgOffBlack"
         />
     );
 }

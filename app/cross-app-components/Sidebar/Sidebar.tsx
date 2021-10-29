@@ -18,7 +18,6 @@ export interface SidebarProps extends ClassNameAndStyle {
     version?: string;
     child?: JSX.Element;
     disabled: boolean;
-    logoClassName?: string;
 }
 
 export default function Sidebar({
@@ -27,7 +26,6 @@ export default function Sidebar({
     style,
     disabled = false,
     version,
-    logoClassName,
     child,
 }: SidebarProps) {
     const handleClick = (e: React.MouseEvent) => {
@@ -40,7 +38,7 @@ export default function Sidebar({
         <nav className={clsx(styles.root, className)} style={style}>
             <div className={styles.items}>
                 <div className={styles.item}>
-                    <LogoIcon height="57" className={clsx(logoClassName)} />
+                    <LogoIcon height="57" />
                 </div>
                 {links.map((l) => (
                     <NavLink
