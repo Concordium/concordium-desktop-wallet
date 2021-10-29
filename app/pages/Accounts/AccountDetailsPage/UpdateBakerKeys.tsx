@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Route, Switch } from 'react-router';
+import { Redirect, Route, Switch } from 'react-router';
 import { useDispatch } from 'react-redux';
 import { push, replace } from 'connected-react-router';
 import Button from '~/cross-app-components/Button';
@@ -7,13 +7,19 @@ import Card from '~/cross-app-components/Card';
 import routes from '~/constants/routes.json';
 import GenerateBakerKeys from './GenerateBakerKeys';
 import { BakerKeys } from '~/utils/rustInterface';
-import { Account, UpdateBakerKeysPayload } from '~/utils/types';
+import {
+    Account,
+    TransactionKindId,
+    UpdateBakerKeysPayload,
+} from '~/utils/types';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import { createUpdateBakerKeysTransaction } from '~/utils/transactionHelpers';
 import { SubmitTransactionLocationState } from '../SubmitTransaction/SubmitTransaction';
 import { stringify } from '~/utils/JSONHelper';
 import { multiplyFraction } from '~/utils/basicHelpers';
 import { getEnergyToMicroGtuRate } from '~/node/nodeHelpers';
+import { isMultiSig } from '~/utils/accountHelpers';
+import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
 
 import styles from './AccountDetailsPage.module.scss';
 
@@ -113,6 +119,17 @@ export default function UpdateBakerKeys({ account }: Props) {
         },
         [makeTransaction, dispatch, account]
     );
+
+    if (isMultiSig(account)) {
+        return (
+            <Redirect
+                to={createTransferWithAccountRoute(
+                    TransactionKindId.Update_baker_keys,
+                    account
+                )}
+            />
+        );
+    }
 
     return (
         <Switch>

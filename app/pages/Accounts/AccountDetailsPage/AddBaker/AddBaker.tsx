@@ -6,12 +6,19 @@ import { Redirect, Route, Switch } from 'react-router';
 import { AddBakerForm } from '~/components/AddBakerDetailsForm';
 import ensureExchangeRateAndNonce from '~/components/Transfers/ensureExchangeRateAndNonce';
 import routes from '~/constants/routes.json';
+import { isMultiSig } from '~/utils/accountHelpers';
+import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
 import { multiplyFraction } from '~/utils/basicHelpers';
 import { toMicroUnits } from '~/utils/gtu';
 import { stringify } from '~/utils/JSONHelper';
 import { BakerKeys } from '~/utils/rustInterface';
 import { createAddBakerTransaction } from '~/utils/transactionHelpers';
-import { Account, AddBakerPayload, Fraction } from '~/utils/types';
+import {
+    Account,
+    AddBakerPayload,
+    Fraction,
+    TransactionKindId,
+} from '~/utils/types';
 import { SubmitTransactionLocationState } from '../../SubmitTransaction/SubmitTransaction';
 import GenerateBakerKeys from '../GenerateBakerKeys';
 import AddBakerData from './AddBakerData';
@@ -46,7 +53,7 @@ const AddBaker = ensureExchangeRateAndNonce(
         );
 
         const makeTransaction = useCallback(
-            async (bakerKeys: BakerKeys) => {
+            (bakerKeys: BakerKeys) => {
                 if (!account?.address || !bakerData) {
                     return undefined;
                 }
@@ -85,7 +92,7 @@ const AddBaker = ensureExchangeRateAndNonce(
                     throw new Error('No account');
                 }
 
-                const transaction = await makeTransaction(bakerKeys);
+                const transaction = makeTransaction(bakerKeys);
                 const serialized = stringify(transaction);
                 const state: SubmitTransactionLocationState<AddBakerForm> = {
                     account,
@@ -105,6 +112,17 @@ const AddBaker = ensureExchangeRateAndNonce(
             },
             [dispatch, makeTransaction, bakerData, account]
         );
+
+        if (isMultiSig(account)) {
+            return (
+                <Redirect
+                    to={createTransferWithAccountRoute(
+                        TransactionKindId.Add_baker,
+                        account
+                    )}
+                />
+            );
+        }
 
         return (
             <Switch>

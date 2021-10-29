@@ -93,7 +93,7 @@ function getSpecificsHandler(transaction: AccountTransaction) {
         instanceOfUpdateBakerRestakeEarnings(transaction) ||
         instanceOfUpdateBakerStake(transaction)
     ) {
-        title = 'Baker update submitted!';
+        title = 'Baker transaction submitted!';
     } else {
         throw new Error(
             `Unsupported transaction type - please implement: ${transaction}`

@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
+import { Redirect } from 'react-router';
 import Form from '~/components/Form';
 import Label from '~/components/Label';
 import PickBakerStakeAmount from '~/components/PickBakerStakeAmount';
@@ -40,6 +41,8 @@ import { multiplyFraction } from '~/utils/basicHelpers';
 import styles from './AccountDetailsPage.module.scss';
 import BakerPendingChange from '~/components/BakerPendingChange';
 import { getFormattedDateString } from '~/utils/timeHelpers';
+import { isMultiSig } from '~/utils/accountHelpers';
+import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
 
 const LoadingComponent = () => <Loading text="Loading chain data" inline />;
 
@@ -107,6 +110,17 @@ const UpdateBakerStakeForm = ensureChainData(
 
         if (!account) {
             throw new Error('No account selected');
+        }
+
+        if (isMultiSig(account)) {
+            return (
+                <Redirect
+                    to={createTransferWithAccountRoute(
+                        TransactionKindId.Update_baker_stake,
+                        account
+                    )}
+                />
+            );
         }
 
         const minimumStake = BigInt(

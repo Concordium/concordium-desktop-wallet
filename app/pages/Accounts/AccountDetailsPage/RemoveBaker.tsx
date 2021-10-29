@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
+import { Redirect } from 'react-router';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
 import routes from '~/constants/routes.json';
@@ -13,9 +14,11 @@ import styles from './AccountDetailsPage.module.scss';
 import { multiplyFraction } from '~/utils/basicHelpers';
 import { getEnergyToMicroGtuRate } from '~/node/nodeHelpers';
 import BakerPendingChange from '~/components/BakerPendingChange';
-import { Account, AccountInfo } from '~/utils/types';
+import { Account, AccountInfo, TransactionKindId } from '~/utils/types';
 import { useCalcBakerStakeCooldownUntil } from '~/utils/dataHooks';
 import { getFormattedDateString } from '~/utils/timeHelpers';
+import { isMultiSig } from '~/utils/accountHelpers';
+import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
 
 interface Props {
     account: Account;
@@ -61,6 +64,17 @@ export default function RemoveBaker({ account, accountInfo }: Props) {
 
         dispatch(push({ pathname: routes.SUBMITTRANSFER, state }));
     }, [dispatch, account]);
+
+    if (isMultiSig(account)) {
+        return (
+            <Redirect
+                to={createTransferWithAccountRoute(
+                    TransactionKindId.Remove_baker,
+                    account
+                )}
+            />
+        );
+    }
 
     return (
         <Card className="textCenter pB40">

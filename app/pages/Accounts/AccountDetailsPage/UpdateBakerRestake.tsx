@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
+import { Redirect } from 'react-router';
 import Form from '~/components/Form';
 import PickBakerRestake from '~/components/PickBakerRestake';
 import Card from '~/cross-app-components/Card';
@@ -8,13 +9,20 @@ import routes from '~/constants/routes.json';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import { stringify } from '~/utils/JSONHelper';
 import { createUpdateBakerRestakeEarningsTransaction } from '~/utils/transactionHelpers';
-import { Account, AccountInfo, EqualRecord } from '~/utils/types';
+import {
+    Account,
+    AccountInfo,
+    EqualRecord,
+    TransactionKindId,
+} from '~/utils/types';
 import { SubmitTransactionLocationState } from '../SubmitTransaction/SubmitTransaction';
 import Label from '~/components/Label';
 import { getEnergyToMicroGtuRate } from '~/node/nodeHelpers';
 import { multiplyFraction } from '~/utils/basicHelpers';
 
 import styles from './AccountDetailsPage.module.scss';
+import { isMultiSig } from '~/utils/accountHelpers';
+import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
 
 interface FormModel {
     restake: boolean;
@@ -73,6 +81,17 @@ export default function UpdateBakerRestake({ account, accountInfo }: Props) {
 
     if (!account) {
         throw new Error('No account selected');
+    }
+
+    if (isMultiSig(account)) {
+        return (
+            <Redirect
+                to={createTransferWithAccountRoute(
+                    TransactionKindId.Update_baker_restake_earnings,
+                    account
+                )}
+            />
+        );
     }
 
     return (
