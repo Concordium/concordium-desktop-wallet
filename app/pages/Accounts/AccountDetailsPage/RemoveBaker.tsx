@@ -7,7 +7,7 @@ import routes from '~/constants/routes.json';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import { stringify } from '~/utils/JSONHelper';
 import { createRemoveBakerTransaction } from '~/utils/transactionHelpers';
-import { SubmitTransferLocationState } from '../SubmitTransfer/SubmitTransfer';
+import { SubmitTransactionLocationState } from '../SubmitTransaction/SubmitTransaction';
 
 import styles from './AccountDetailsPage.module.scss';
 import { multiplyFraction } from '~/utils/basicHelpers';
@@ -45,7 +45,7 @@ export default function RemoveBaker({ account, accountInfo }: Props) {
             transaction.energyAmount
         );
         const serialized = stringify(transaction);
-        const state: SubmitTransferLocationState = {
+        const state: SubmitTransactionLocationState = {
             account,
             transaction: serialized,
             cancelled: {

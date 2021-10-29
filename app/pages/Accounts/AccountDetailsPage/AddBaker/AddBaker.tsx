@@ -12,7 +12,7 @@ import { stringify } from '~/utils/JSONHelper';
 import { BakerKeys } from '~/utils/rustInterface';
 import { createAddBakerTransaction } from '~/utils/transactionHelpers';
 import { Account, AddBakerPayload, Fraction } from '~/utils/types';
-import { SubmitTransferLocationState } from '../../SubmitTransfer/SubmitTransfer';
+import { SubmitTransactionLocationState } from '../../SubmitTransaction/SubmitTransaction';
 import GenerateBakerKeys from '../GenerateBakerKeys';
 import AddBakerData from './AddBakerData';
 
@@ -87,7 +87,7 @@ const AddBaker = ensureExchangeRateAndNonce(
 
                 const transaction = await makeTransaction(bakerKeys);
                 const serialized = stringify(transaction);
-                const state: SubmitTransferLocationState<AddBakerForm> = {
+                const state: SubmitTransactionLocationState<AddBakerForm> = {
                     account,
                     cancelled: {
                         pathname: routes.ACCOUNTS_ADD_BAKER,

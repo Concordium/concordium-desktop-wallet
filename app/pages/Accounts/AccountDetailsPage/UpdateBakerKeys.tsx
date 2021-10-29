@@ -10,7 +10,7 @@ import { BakerKeys } from '~/utils/rustInterface';
 import { Account, UpdateBakerKeysPayload } from '~/utils/types';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import { createUpdateBakerKeysTransaction } from '~/utils/transactionHelpers';
-import { SubmitTransferLocationState } from '../SubmitTransfer/SubmitTransfer';
+import { SubmitTransactionLocationState } from '../SubmitTransaction/SubmitTransaction';
 import { stringify } from '~/utils/JSONHelper';
 import { multiplyFraction } from '~/utils/basicHelpers';
 import { getEnergyToMicroGtuRate } from '~/node/nodeHelpers';
@@ -95,7 +95,7 @@ export default function UpdateBakerKeys({ account }: Props) {
 
             const transaction = await makeTransaction(bakerKeys);
             const serialized = stringify(transaction);
-            const state: SubmitTransferLocationState = {
+            const state: SubmitTransactionLocationState = {
                 account,
                 transaction: serialized,
                 cancelled: {

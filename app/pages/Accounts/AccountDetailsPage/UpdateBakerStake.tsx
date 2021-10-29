@@ -34,7 +34,7 @@ import {
     NotOptional,
     TransactionKindId,
 } from '~/utils/types';
-import { SubmitTransferLocationState } from '../SubmitTransfer/SubmitTransfer';
+import { SubmitTransactionLocationState } from '../SubmitTransaction/SubmitTransaction';
 import { multiplyFraction } from '~/utils/basicHelpers';
 
 import styles from './AccountDetailsPage.module.scss';
@@ -86,7 +86,7 @@ const UpdateBakerStakeForm = ensureChainData(
                     transaction.energyAmount
                 );
                 const serialized = stringify(transaction);
-                const state: SubmitTransferLocationState = {
+                const state: SubmitTransactionLocationState = {
                     account,
                     transaction: serialized,
                     cancelled: {

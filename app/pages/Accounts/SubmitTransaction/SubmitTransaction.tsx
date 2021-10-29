@@ -46,9 +46,9 @@ import PrintButton from '~/components/PrintButton';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 
-import styles from './SubmitTransfer.module.scss';
+import styles from './SubmitTransaction.module.scss';
 
-export interface SubmitTransferLocationState<
+export interface SubmitTransactionLocationState<
     CancelledState = Record<string, unknown>,
     ConfirmedState = Record<string, unknown>
 > {
@@ -59,7 +59,7 @@ export interface SubmitTransferLocationState<
 }
 
 interface Props {
-    location: LocationDescriptorObject<SubmitTransferLocationState>;
+    location: LocationDescriptorObject<SubmitTransactionLocationState>;
 }
 
 async function attachCompletedPayload(
@@ -147,7 +147,7 @@ async function attachCompletedPayload(
  * Receives transaction to sign, using the ledger,
  * and then submits it.
  */
-export default function SubmitTransfer({ location }: Props) {
+export default function SubmitTransaction({ location }: Props) {
     const dispatch = useDispatch();
     const global = useSelector(globalSelector);
     const accountInfoMap = useSelector(accountsInfoSelector);

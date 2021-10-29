@@ -10,7 +10,7 @@ import AccountCreation from '../pages/AccountCreation/AccountCreationPage';
 import MultiSignatureRouter from '../pages/multisig/MultiSignatureRouter';
 import ExportImport from '../pages/exportImport/ExportImportPage';
 import PerformImport from '../pages/exportImport/PerformImport';
-import SubmitTransfer from '../pages/Accounts/SubmitTransfer';
+import SubmitTransaction from '../pages/Accounts/SubmitTransaction';
 import GenerateCredential from '../pages/GenerateCredential/GenerateCredentialPage';
 import ShowAccountAddress from '~/pages/Accounts/ShowAccountAddressFull';
 import AccountReport from '~/pages/Accounts/AccountDetailsPage/AccountReport';
@@ -28,7 +28,7 @@ export default function Routes(): JSX.Element {
                 component={genesisAccount}
             />
             <Route path={routes.SHOWADDRESS} component={ShowAccountAddress} />
-            <Route path={routes.SUBMITTRANSFER} component={SubmitTransfer} />
+            <Route path={routes.SUBMITTRANSFER} component={SubmitTransaction} />
             <Route path={routes.ACCOUNT_REPORT} component={AccountReport} />
             <Route path={routes.ACCOUNTCREATION} component={AccountCreation} />
             <Route path={routes.ACCOUNTS} component={AccountPage} />

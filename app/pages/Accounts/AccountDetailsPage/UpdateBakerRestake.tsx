@@ -9,7 +9,7 @@ import { getNextAccountNonce } from '~/node/nodeRequests';
 import { stringify } from '~/utils/JSONHelper';
 import { createUpdateBakerRestakeEarningsTransaction } from '~/utils/transactionHelpers';
 import { Account, AccountInfo, EqualRecord } from '~/utils/types';
-import { SubmitTransferLocationState } from '../SubmitTransfer/SubmitTransfer';
+import { SubmitTransactionLocationState } from '../SubmitTransaction/SubmitTransaction';
 import Label from '~/components/Label';
 import { getEnergyToMicroGtuRate } from '~/node/nodeHelpers';
 import { multiplyFraction } from '~/utils/basicHelpers';
@@ -52,7 +52,7 @@ export default function UpdateBakerRestake({ account, accountInfo }: Props) {
 
             const serialized = stringify(transaction);
 
-            const state: SubmitTransferLocationState = {
+            const state: SubmitTransactionLocationState = {
                 account,
                 transaction: serialized,
                 cancelled: {
