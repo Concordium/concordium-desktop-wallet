@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 
-export const useIsFirstRender = () => {
+export const useIsSubsequentRender = () => {
     const ref = useRef<boolean>(false);
 
     useEffect(() => {
@@ -11,10 +11,10 @@ export const useIsFirstRender = () => {
 };
 
 export const useUpdateEffect: typeof useEffect = (effect, deps) => {
-    const isFirstRender = useIsFirstRender();
+    const isSubsequentRender = useIsSubsequentRender();
 
     useEffect(() => {
-        if (!isFirstRender) {
+        if (!isSubsequentRender) {
             return undefined;
         }
         return effect();
