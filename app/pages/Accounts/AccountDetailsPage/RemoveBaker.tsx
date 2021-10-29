@@ -76,20 +76,19 @@ export default function RemoveBaker({ account, accountInfo }: Props) {
             ) : (
                 <>
                     <p className="mT30">
-                        This will remove the baker status of the account.
+                        This will remove the baker status of the account. After
+                        the grace period the full staked amount will be unlocked
+                        for disposal.
                         {cooldownUntil && (
                             <>
-                                This includes a grace period lasting until
+                                <br />
+                                <br />
+                                The grace period lasts until
                                 <div className="bodyEmphasized  mV10">
-                                    {getFormattedDateString(cooldownUntil)}
+                                    {getFormattedDateString(cooldownUntil)}.
                                 </div>
-                                in which the baker stake will be frozen.
                             </>
                         )}
-                        <br />
-                        <br />
-                        After the grace period the full staked amount will be
-                        unlocked for disposal.
                     </p>
                     <Button onClick={next} className={styles.bakerFlowContinue}>
                         Continue

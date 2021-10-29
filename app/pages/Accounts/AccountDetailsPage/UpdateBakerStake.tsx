@@ -139,11 +139,12 @@ const UpdateBakerStakeForm = ensureChainData(
                     the stake it will take effect after the grace period.
                     {cooldownUntil && (
                         <>
+                            <br />
+                            <br />
                             This grace period will last until
                             <div className="bodyEmphasized  mV10">
                                 {getFormattedDateString(cooldownUntil)}
                             </div>
-                            and the baker stake will be frozen in this period.
                         </>
                     )}
                 </p>
