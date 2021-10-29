@@ -12,6 +12,7 @@ import DisplayAddress from '~/components/DisplayAddress';
 
 import { Account, ClassName } from '../../utils/types';
 import CopyButton from '../../components/CopyButton';
+import VerifyAddress from './VerifyAddress';
 
 import styles from './Accounts.module.scss';
 
@@ -46,15 +47,16 @@ export default function ShowAccountAddress({
                 <ExpandIcon height="22" />
             </IconButton>
             <QRCode className="m20" value={account.address} size={200} />
-            <div className="flex">
+            <div className="flex mB20">
                 <DisplayAddress
                     outerClassName="mL20"
                     lineClassName="body3"
-                    lineLength={25}
+                    lineLength={10}
                     address={account.address}
                 />
                 <CopyButton className="mL20" value={account.address} />
             </div>
+            <VerifyAddress account={account} />
         </Component>
     );
 }

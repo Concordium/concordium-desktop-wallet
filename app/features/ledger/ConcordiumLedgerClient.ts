@@ -53,6 +53,8 @@ export default class ConcordiumLedgerClient {
 
     getPrfKeyRecovery = pipe(window.ledger.getPrfKeyRecovery, toBuffer);
 
+    verifyAddress = window.ledger.verifyAddress;
+
     signPublicInformationForIp = pipe(
         window.ledger.signPublicInformationForIp,
         toBuffer

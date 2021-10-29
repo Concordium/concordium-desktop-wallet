@@ -50,6 +50,7 @@ import signAuthorizationKeysUpdate from './SignAuthorizationKeysUpdate';
 import signAddIdentityProviderTransaction from './SignAddIdentityProvider';
 import signAddAnonymityRevokerTransaction from './SignAddAnonymityRevoker';
 import EmulatorTransport from './EmulatorTransport';
+import verifyAddress from './verifyAddress';
 
 /**
  * Concordium Ledger API.
@@ -102,6 +103,10 @@ export default class ConcordiumLedgerClientMain {
 
     getPrfKeyRecovery(identity: number): Promise<Buffer> {
         return getPrfKeyRecovery(this.transport, identity);
+    }
+
+    verifyAddress(path: number[]): Promise<void> {
+        return verifyAddress(this.transport, path);
     }
 
     signTransfer(

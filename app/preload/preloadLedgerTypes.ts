@@ -48,6 +48,7 @@ type LedgerCommands = {
     getPublicKey: (keypath: number[]) => Promise<Buffer>;
     getPublicKeySilent: (keypath: number[]) => ReturnBuffer;
     getSignedPublicKey: (keypath: number[]) => Promise<SignedPublicKey>;
+    verifyAddress: (keypath: number[]) => Promise<void>;
     getPrivateKeySeeds: (identity: number) => Promise<PrivateKeySeeds>;
     getPrfKeyDecrypt: (identity: number) => ReturnBuffer;
     getPrfKeyRecovery: (identity: number) => ReturnBuffer;
