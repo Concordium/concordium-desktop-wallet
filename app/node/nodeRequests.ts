@@ -37,22 +37,28 @@ export function getPeerList(includeBootstrappers = false) {
 
 export const getBlockSummary = wrapper(
     window.grpc.getBlockSummary,
-    (blockHash) => `unable to load blocksummary, on block: ${blockHash}`
+    (blockHash) => `Unable to load blocksummary, on block: ${blockHash}`
 );
 export const getAccountInfo = wrapper(
     window.grpc.getAccountInfo,
-    (address) => `unable to load accountInfo for ${address}`
+    (address) => `Unable to load accountInfo for ${address}`
 );
 export const getNextAccountNonce = wrapper(
     window.grpc.getNextAccountNonce,
     (address) => `Unable to fetch next nonce on address: ${address}`
 );
+export const getCryptographicParameters = wrapper(
+    window.grpc.getCryptographicParameters,
+    (blockHash) =>
+        `Unable to load cryptographic parameters, on block: ${blockHash}`
+);
+export const getAnonymityRevokers = wrapper(
+    window.grpc.getAnonymityRevokers,
+    (blockHash) => `Unable to load anonymity revokers, on block: ${blockHash}`
+);
+export const getIdentityProviders = wrapper(
+    window.grpc.getIdentityProviders,
+    (blockHash) => `Unable to load identity providers, on block: ${blockHash}`
+);
 
-export const {
-    getTransactionStatus,
-    getConsensusStatus,
-    getNodeInfo,
-    getCryptographicParameters,
-    getIdentityProviders,
-    getAnonymityRevokers,
-} = window.grpc;
+export const { getTransactionStatus, getConsensusStatus } = window.grpc;

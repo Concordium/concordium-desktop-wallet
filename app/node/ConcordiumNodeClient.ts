@@ -1,16 +1,9 @@
 import { credentials, Metadata, ServiceError } from '@grpc/grpc-js';
 import { P2PClient } from '~/proto/concordium_p2p_rpc_grpc_pb';
 import {
-    BlockHash,
-    Empty,
-    PeersRequest,
     SendTransactionRequest,
     BoolResponse,
-    NodeInfoResponse,
-    PeerListResponse,
-    JsonResponse,
 } from '~/proto/concordium_p2p_rpc_pb';
-import type { ArInfo, IpInfo } from '~/utils/types';
 
 interface GRPCClient extends P2PClient {
     waitForReady?(date: Date, cb: (error: ServiceError) => void): void;
@@ -62,85 +55,16 @@ export default class ConcordiumNodeClient {
         return meta;
     }
 
-    buildSendTransactionRequest(
-        payload: Uint8Array,
-        networkId: number
-    ): SendTransactionRequest {
+    async sendTransaction(transactionPayload: Uint8Array, networkId = 100) {
         const request = new SendTransactionRequest();
         request.setNetworkId(networkId);
-        request.setPayload(payload);
-        return request;
-    }
+        request.setPayload(transactionPayload);
 
-    async sendTransaction(transactionPayload: Uint8Array, networkId = 100) {
-        const request = this.buildSendTransactionRequest(
-            transactionPayload,
-            networkId
-        );
         const response = await this.sendRequest(
             this.client.sendTransaction,
             request
         );
         return BoolResponse.deserializeBinary(response).getValue();
-    }
-
-    async getCryptographicParameters(blockHashValue: string) {
-        const blockHash = new BlockHash();
-        blockHash.setBlockHash(blockHashValue);
-        const response = await this.sendRequest(
-            this.client.getCryptographicParameters,
-            blockHash
-        );
-        return JSON.parse(JsonResponse.deserializeBinary(response).getValue());
-    }
-
-    // N.B. Stays until getCryptographicParameters can be replaced.
-    async getConsensusStatus() {
-        const response = await this.sendRequest(
-            this.client.getConsensusStatus,
-            new Empty()
-        );
-        return JSON.parse(JsonResponse.deserializeBinary(response).getValue());
-    }
-
-    async getNodeInfo() {
-        const response = await this.sendRequest(
-            this.client.nodeInfo,
-            new Empty()
-        );
-        return NodeInfoResponse.deserializeBinary(response);
-    }
-
-    async getIdentityProviders(blockHashValue: string): Promise<IpInfo[]> {
-        const blockHash = new BlockHash();
-        blockHash.setBlockHash(blockHashValue);
-        const response = await this.sendRequest(
-            this.client.getIdentityProviders,
-            blockHash
-        );
-        return JSON.parse(JsonResponse.deserializeBinary(response).getValue());
-    }
-
-    async getAnonymityRevokers(blockHashValue: string): Promise<ArInfo[]> {
-        const blockHash = new BlockHash();
-        blockHash.setBlockHash(blockHashValue);
-        const response = await this.sendRequest(
-            this.client.getAnonymityRevokers,
-            blockHash
-        );
-        return JSON.parse(JsonResponse.deserializeBinary(response).getValue());
-    }
-
-    async getPeerList(
-        includeBootstrappers: boolean
-    ): Promise<PeerListResponse> {
-        const peersRequest = new PeersRequest();
-        peersRequest.setIncludeBootstrappers(includeBootstrappers);
-        const response = await this.sendRequest(
-            this.client.peerList,
-            peersRequest
-        );
-        return PeerListResponse.deserializeBinary(response);
     }
 
     sendRequest<T, Response extends Serializable>(

@@ -3,6 +3,7 @@ import {
     AccountInfo,
     BlockSummary,
     ConsensusStatus,
+    CryptographicParameters,
     NextAccountNonce,
     TransactionStatus,
     Versioned,
@@ -14,10 +15,7 @@ import {
     SaveDialogOptions,
     SaveDialogReturnValue,
 } from 'electron';
-import {
-    NodeInfoResponse,
-    PeerListResponse,
-} from '~/proto/concordium_p2p_rpc_pb';
+import { PeerListResponse } from '~/proto/concordium_p2p_rpc_pb';
 import {
     Account,
     Identity,
@@ -61,18 +59,36 @@ export interface Once {
     onVerificationKeysConfirmed: PutListener;
 }
 
+type ConsensusAndGlobalResultSuccess = {
+    successful: true;
+    response: {
+        consensusStatus: ConsensusStatus;
+        global: Versioned<CryptographicParameters>;
+    };
+};
+
+type ConsensusAndGlobalResultFailure = {
+    successful: false;
+    error: Error;
+};
+
+export type ConsensusAndGlobalResult =
+    | ConsensusAndGlobalResultSuccess
+    | ConsensusAndGlobalResultFailure;
+
 export type GRPC = {
     setLocation: (address: string, port: string) => void;
-    nodeConsensusAndGlobal: (address: string, port: string) => Promise<any>;
-
-    getNodeInfo: () => Promise<NodeInfoResponse>;
+    nodeConsensusAndGlobal: (
+        address: string,
+        port: string
+    ) => Promise<ConsensusAndGlobalResult>;
     sendTransaction: (
         transactionPayload: Uint8Array,
         networkId: number
     ) => Promise<boolean>;
     getCryptographicParameters: (
         blockHash: string
-    ) => Promise<Versioned<Global>>;
+    ) => Promise<Versioned<CryptographicParameters> | undefined>;
     getConsensusStatus: () => Promise<ConsensusStatus>;
     getTransactionStatus: (
         transactionId: string
@@ -85,8 +101,8 @@ export type GRPC = {
         address: string,
         blockHash: string
     ) => Promise<AccountInfo | undefined>;
-    getIdentityProviders: (blockHash: string) => Promise<IpInfo[]>;
-    getAnonymityRevokers: (blockHash: string) => Promise<ArInfo[]>;
+    getIdentityProviders: (blockHash: string) => Promise<IpInfo[] | undefined>;
+    getAnonymityRevokers: (blockHash: string) => Promise<ArInfo[] | undefined>;
     getPeerList: (includeBootstrappers: boolean) => Promise<PeerListResponse>;
 };
 

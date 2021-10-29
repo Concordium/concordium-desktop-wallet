@@ -16,7 +16,7 @@ export default function PendingChange({ pending }: PendingChangeProps) {
     }
     const changeAtDate = getFormattedDateString(
         epochDate(
-            pending.epoch,
+            Number(pending.epoch),
             status.epochDuration,
             new Date(status.currentEraGenesisTime)
         )

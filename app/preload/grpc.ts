@@ -1,34 +1,58 @@
-import { AccountAddress, ConsensusStatus } from '@concordium/node-sdk';
-import {
-    setClientLocation,
-    getAdvancedClient,
-    getClient,
-} from '~/node/GRPCClient';
-import ConcordiumNodeClient from '~/node/ConcordiumNodeClient';
-import { JsonResponse } from '~/proto/concordium_p2p_rpc_pb';
-import { GRPC } from '~/preload/preloadTypes';
+import { AccountAddress, ConcordiumNodeClient } from '@concordium/node-sdk';
+import { credentials, Metadata } from '@grpc/grpc-js';
+import SendTransactionClient from '~/node/ConcordiumNodeClient';
+import { GRPC, ConsensusAndGlobalResult } from '~/preload/preloadTypes';
+
+const defaultDeadlineMs = 15000;
+let client: ConcordiumNodeClient;
+let sendTransactionClient: SendTransactionClient;
+const metadata = new Metadata();
+metadata.add('authentication', 'rpcadmin');
+
+export function setClientLocation(address: string, port: string) {
+    sendTransactionClient = new SendTransactionClient(
+        address,
+        parseInt(port, 10),
+        defaultDeadlineMs
+    );
+    client = new ConcordiumNodeClient(
+        address,
+        parseInt(port, 10),
+        credentials.createInsecure(),
+        metadata,
+        defaultDeadlineMs
+    );
+}
 
 async function getConsensusStatusAndCryptographicParameters(
     address: string,
     port: string
-) {
+): Promise<ConsensusAndGlobalResult> {
     try {
         const nodeClient = new ConcordiumNodeClient(
             address,
-            Number.parseInt(port, 10)
+            Number.parseInt(port, 10),
+            credentials.createInsecure(),
+            metadata,
+            defaultDeadlineMs
         );
-        const consensusStatusSerialized = await nodeClient.getConsensusStatus();
-        const consensusStatus: ConsensusStatus = JSON.parse(
-            JsonResponse.deserializeBinary(consensusStatusSerialized).getValue()
-        );
-        const globalSerialized = await nodeClient.getCryptographicParameters(
+        const consensusStatus = await nodeClient.getConsensusStatus();
+        const global = await nodeClient.getCryptographicParameters(
             consensusStatus.lastFinalizedBlock
         );
+        if (!global) {
+            return {
+                successful: false,
+                error: new Error(
+                    'getCryptographicParameters returned undefined. '
+                ),
+            };
+        }
         return {
             successful: true,
             response: {
-                consensus: consensusStatusSerialized,
-                global: globalSerialized,
+                consensusStatus,
+                global,
             },
         };
     } catch (error) {
@@ -41,29 +65,26 @@ const exposedMethods: GRPC = {
     setLocation: async (address: string, port: string) => {
         return setClientLocation(address, port);
     },
-    getNodeInfo: () => getAdvancedClient().getNodeInfo(),
     sendTransaction: (transactionPayload: Uint8Array, networkId: number) =>
-        getAdvancedClient().sendTransaction(transactionPayload, networkId),
+        sendTransactionClient.sendTransaction(transactionPayload, networkId),
     getCryptographicParameters: (blockHash: string) =>
-        getAdvancedClient().getCryptographicParameters(blockHash),
-    getConsensusStatus: () => getClient().getConsensusStatus(),
+        client.getCryptographicParameters(blockHash),
+    getConsensusStatus: () => client.getConsensusStatus(),
     getTransactionStatus: (transactionId: string) =>
-        getClient().getTransactionStatus(transactionId),
+        client.getTransactionStatus(transactionId),
     getNextAccountNonce: (address: string) =>
-        getClient().getNextAccountNonce(new AccountAddress(address)),
-    getBlockSummary: (blockHash: string) =>
-        getClient().getBlockSummary(blockHash),
+        client.getNextAccountNonce(new AccountAddress(address)),
+    getBlockSummary: (blockHash: string) => client.getBlockSummary(blockHash),
     getAccountInfo: (addressRaw: string, blockHash: string) => {
         const address = new AccountAddress(addressRaw);
-        return getClient().getAccountInfo(address, blockHash);
+        return client.getAccountInfo(address, blockHash);
     },
     getIdentityProviders: (blockHash: string) =>
-        getAdvancedClient().getIdentityProviders(blockHash),
+        client.getIdentityProviders(blockHash),
     getAnonymityRevokers: (blockHash: string) =>
-        getAdvancedClient().getAnonymityRevokers(blockHash),
+        client.getAnonymityRevokers(blockHash),
     getPeerList: (includeBootstrappers: boolean) =>
-        getAdvancedClient().getPeerList(includeBootstrappers),
-
+        client.getPeerList(includeBootstrappers),
     // Creates a standalone GRPC client for testing the connection
     // to a node. This is used to verify that when changing connection
     // that the new node is on the same blockchain as the wallet was previously connected to.
