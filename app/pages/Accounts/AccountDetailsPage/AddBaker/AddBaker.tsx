@@ -1,12 +1,11 @@
 import { push, replace } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import React, { useCallback, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router';
 import { AddBakerForm } from '~/components/AddBakerDetailsForm';
 import ensureExchangeRateAndNonce from '~/components/Transfers/ensureExchangeRateAndNonce';
 import routes from '~/constants/routes.json';
-import { chosenAccountSelector } from '~/features/AccountSlice';
 import { multiplyFraction } from '~/utils/basicHelpers';
 import { toMicroUnits } from '~/utils/gtu';
 import { stringify } from '~/utils/JSONHelper';
@@ -26,7 +25,7 @@ interface Props {
     account: Account;
 }
 
-const AddBakerWithAccount = ensureExchangeRateAndNonce(
+const AddBaker = ensureExchangeRateAndNonce(
     ({ location, nonce, exchangeRate, account }: Props) => {
         const dispatch = useDispatch();
         const [bakerData, setBakerData] = useState<AddBakerForm>();
@@ -133,12 +132,4 @@ const AddBakerWithAccount = ensureExchangeRateAndNonce(
     }
 );
 
-export default function AddBaker({ location }: Pick<Props, 'location'>) {
-    const account = useSelector(chosenAccountSelector);
-
-    if (!account) {
-        throw new Error('No account selected');
-    }
-
-    return <AddBakerWithAccount account={account} location={location} />;
-}
+export default AddBaker;

@@ -1,14 +1,13 @@
 import React, { useCallback } from 'react';
 import { Route, Switch } from 'react-router';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { push, replace } from 'connected-react-router';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
 import routes from '~/constants/routes.json';
 import GenerateBakerKeys from './GenerateBakerKeys';
-import { chosenAccountSelector } from '~/features/AccountSlice';
 import { BakerKeys } from '~/utils/rustInterface';
-import { UpdateBakerKeysPayload } from '~/utils/types';
+import { Account, UpdateBakerKeysPayload } from '~/utils/types';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import { createUpdateBakerKeysTransaction } from '~/utils/transactionHelpers';
 import { SubmitTransferLocationState } from '../SubmitTransfer/SubmitTransfer';
@@ -48,8 +47,11 @@ function UpdateBakerKeysIntro() {
     );
 }
 
-export default function UpdateBakerKeys() {
-    const account = useSelector(chosenAccountSelector);
+interface Props {
+    account: Account;
+}
+
+export default function UpdateBakerKeys({ account }: Props) {
     const dispatch = useDispatch();
 
     const makeTransaction = useCallback(

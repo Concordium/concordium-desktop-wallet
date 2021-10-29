@@ -24,7 +24,13 @@ import { useTransactionCostEstimate } from '~/utils/dataHooks';
 import { displayAsGTU, microGtuToGtu, toMicroUnits } from '~/utils/gtu';
 import { stringify } from '~/utils/JSONHelper';
 import { createUpdateBakerStakeTransaction } from '~/utils/transactionHelpers';
-import { EqualRecord, NotOptional, TransactionKindId } from '~/utils/types';
+import {
+    Account,
+    AccountInfo,
+    EqualRecord,
+    NotOptional,
+    TransactionKindId,
+} from '~/utils/types';
 import { SubmitTransferLocationState } from '../SubmitTransfer/SubmitTransfer';
 import { multiplyFraction } from '~/utils/basicHelpers';
 
@@ -37,11 +43,14 @@ interface FormModel {
     stake: string;
 }
 
+interface Props extends NotOptional<ChainData>, NotOptional<ExchangeRate> {
+    account: Account;
+    accountInfo?: AccountInfo;
+}
+
 const fieldNames: EqualRecord<FormModel> = {
     stake: 'stake',
 };
-
-type Props = NotOptional<ChainData> & NotOptional<ExchangeRate>;
 
 const UpdateBakerStakeForm = ensureChainData(
     ensureExchangeRate(({ blockSummary, exchangeRate }: Props) => {
@@ -153,11 +162,13 @@ const UpdateBakerStakeForm = ensureChainData(
     LoadingComponent
 );
 
-export default function UpdateBakerStake() {
+export default function UpdateBakerStake(
+    props: Pick<Props, 'account' | 'accountInfo'>
+) {
     return (
         <Card className="textCenter pB40">
             <h3 className="bodyEmphasized">Update baker stake</h3>
-            <UpdateBakerStakeForm />
+            <UpdateBakerStakeForm {...props} />
         </Card>
     );
 }

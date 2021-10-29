@@ -1,13 +1,9 @@
 import React, { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
 import routes from '~/constants/routes.json';
-import {
-    chosenAccountInfoSelector,
-    chosenAccountSelector,
-} from '~/features/AccountSlice';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import { stringify } from '~/utils/JSONHelper';
 import { createRemoveBakerTransaction } from '~/utils/transactionHelpers';
@@ -17,10 +13,14 @@ import styles from './AccountDetailsPage.module.scss';
 import { multiplyFraction } from '~/utils/basicHelpers';
 import { getEnergyToMicroGtuRate } from '~/node/nodeHelpers';
 import BakerPendingChange from '~/components/BakerPendingChange';
+import { Account, AccountInfo } from '~/utils/types';
 
-export default function RemoveBaker() {
-    const account = useSelector(chosenAccountSelector);
-    const accountInfo = useSelector(chosenAccountInfoSelector);
+interface Props {
+    account: Account;
+    accountInfo?: AccountInfo;
+}
+
+export default function RemoveBaker({ account, accountInfo }: Props) {
     const dispatch = useDispatch();
 
     const pendingChange = accountInfo?.accountBaker?.pendingChange;

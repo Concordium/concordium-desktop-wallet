@@ -2,6 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, Route } from 'react-router';
 
+import { LocationDescriptorObject } from 'history';
 import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
 import {
     chosenAccountSelector,
@@ -29,6 +30,7 @@ import UpdateBakerKeys from './UpdateBakerKeys';
 import UpdateBakerStake from './UpdateBakerStake';
 import UpdateBakerRestake from './UpdateBakerRestake';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
+import { AddBakerForm } from '~/components/AddBakerDetailsForm';
 
 const { Master, Detail } = MasterDetailPageLayout;
 const ToAccounts = () => <Redirect to={routes.ACCOUNTS} />;
@@ -84,34 +86,52 @@ export default withAccountSync(function DetailsPage() {
                     </Route>
                     <Route
                         path={routes.ACCOUNTS_ADD_BAKER}
-                        component={
-                            canTransfer && !isBaker ? AddBaker : ToAccounts
+                        render={({ location }) =>
+                            canTransfer && !isBaker ? (
+                                <AddBaker
+                                    location={
+                                        location as LocationDescriptorObject<AddBakerForm>
+                                    }
+                                    account={account}
+                                />
+                            ) : (
+                                <ToAccounts />
+                            )
                         }
                     />
                     <Route path={routes.ACCOUNTS_REMOVE_BAKER}>
                         {canTransfer && isBaker ? (
-                            <RemoveBaker />
+                            <RemoveBaker
+                                account={account}
+                                accountInfo={accountInfo}
+                            />
                         ) : (
                             <ToAccounts />
                         )}
                     </Route>
                     <Route path={routes.ACCOUNTS_UPDATE_BAKER_KEYS}>
                         {canTransfer && isBaker ? (
-                            <UpdateBakerKeys />
+                            <UpdateBakerKeys account={account} />
                         ) : (
                             <ToAccounts />
                         )}
                     </Route>
                     <Route path={routes.ACCOUNTS_UPDATE_BAKER_STAKE}>
                         {canTransfer && isBaker ? (
-                            <UpdateBakerStake />
+                            <UpdateBakerStake
+                                account={account}
+                                accountInfo={accountInfo}
+                            />
                         ) : (
                             <ToAccounts />
                         )}
                     </Route>
                     <Route path={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}>
                         {canTransfer && isBaker ? (
-                            <UpdateBakerRestake />
+                            <UpdateBakerRestake
+                                account={account}
+                                accountInfo={accountInfo}
+                            />
                         ) : (
                             <ToAccounts />
                         )}

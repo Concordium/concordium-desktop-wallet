@@ -1,18 +1,14 @@
 import React, { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import Form from '~/components/Form';
 import PickBakerRestake from '~/components/PickBakerRestake';
 import Card from '~/cross-app-components/Card';
-import {
-    chosenAccountInfoSelector,
-    chosenAccountSelector,
-} from '~/features/AccountSlice';
 import routes from '~/constants/routes.json';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import { stringify } from '~/utils/JSONHelper';
 import { createUpdateBakerRestakeEarningsTransaction } from '~/utils/transactionHelpers';
-import { EqualRecord } from '~/utils/types';
+import { Account, AccountInfo, EqualRecord } from '~/utils/types';
 import { SubmitTransferLocationState } from '../SubmitTransfer/SubmitTransfer';
 import Label from '~/components/Label';
 import { getEnergyToMicroGtuRate } from '~/node/nodeHelpers';
@@ -24,13 +20,16 @@ interface FormModel {
     restake: boolean;
 }
 
+interface Props {
+    account: Account;
+    accountInfo?: AccountInfo;
+}
+
 const fieldNames: EqualRecord<FormModel> = {
     restake: 'restake',
 };
-export default function UpdateBakerRestake() {
+export default function UpdateBakerRestake({ account, accountInfo }: Props) {
     const dispatch = useDispatch();
-    const account = useSelector(chosenAccountSelector);
-    const accountInfo = useSelector(chosenAccountInfoSelector);
 
     const submit = useCallback(
         async ({ restake }: FormModel) => {
