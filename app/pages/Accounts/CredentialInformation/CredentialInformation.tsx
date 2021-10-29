@@ -120,32 +120,35 @@ export default function CredentialInformation({ account, accountInfo }: Props) {
                             left="Note:"
                             right={
                                 <>
-                                    {/* {c.isOwn || ( */}
-                                    <InputModal
-                                        open={showEditNote === c.credId}
-                                        onOpen={() => setShowEditNote(c.credId)}
-                                        onClose={() =>
-                                            setShowEditNote(undefined)
-                                        }
-                                        trigger={
-                                            <IconButton
-                                                className={styles.editNote}
-                                            >
-                                                <EditIcon />
-                                            </IconButton>
-                                        }
-                                        title="Set note for credential"
-                                        buttonText="Submit"
-                                        placeholder="Add note"
-                                        buttonOnClick={submitNote(c.credId)}
-                                        defaultValue={c.note}
-                                        validationRules={{
-                                            maxLength: {
-                                                value: CREDENTIAL_NOTE_MAX_LENGTH,
-                                                message: `Cannot be longer than ${CREDENTIAL_NOTE_MAX_LENGTH} characters`,
-                                            },
-                                        }}
-                                    />
+                                    {c.isOwn || (
+                                        <InputModal
+                                            open={showEditNote === c.credId}
+                                            onOpen={() =>
+                                                setShowEditNote(c.credId)
+                                            }
+                                            onClose={() =>
+                                                setShowEditNote(undefined)
+                                            }
+                                            trigger={
+                                                <IconButton
+                                                    className={styles.editNote}
+                                                >
+                                                    <EditIcon />
+                                                </IconButton>
+                                            }
+                                            title="Set note for credential"
+                                            buttonText="Submit"
+                                            placeholder="Add note"
+                                            buttonOnClick={submitNote(c.credId)}
+                                            defaultValue={c.note}
+                                            validationRules={{
+                                                maxLength: {
+                                                    value: CREDENTIAL_NOTE_MAX_LENGTH,
+                                                    message: `Cannot be longer than ${CREDENTIAL_NOTE_MAX_LENGTH} characters`,
+                                                },
+                                            }}
+                                        />
+                                    )}
                                     {c.note || <i>No note for credential</i>}
                                 </>
                             }
