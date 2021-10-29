@@ -297,44 +297,10 @@ function convertEncryptedTransferWithMemo(
     };
 }
 
-function convertAddBakerTransaction(): TypeSpecific {
-    return {
-        transactionKind: TransactionKindString.AddBaker,
-        subtotal: '0',
-        toAddress: '',
-    };
-}
-
-function convertRemoveBakerTransaction(): TypeSpecific {
-    return {
-        transactionKind: TransactionKindString.RemoveBaker,
-        subtotal: '0',
-        toAddress: '',
-    };
-}
-
-function convertUpdateBakerStakeTransaction(): TypeSpecific {
-    return {
-        transactionKind: TransactionKindString.UpdateBakerStake,
-        subtotal: '0',
-        toAddress: '',
-    };
-}
-
-function convertUpdateBakerKeysTransaction(): TypeSpecific {
-    return {
-        transactionKind: TransactionKindString.UpdateBakerKeys,
-        subtotal: '0',
-        toAddress: '',
-    };
-}
-
-function convertUpdateBakerRestakeTransaction(): TypeSpecific {
-    return {
-        transactionKind: TransactionKindString.UpdateBakerRestakeEarnings,
-        subtotal: '0',
-        toAddress: '',
-    };
+function getBaseTransaction(
+    transactionKind: TransactionKindString
+): TypeSpecific {
+    return { transactionKind, subtotal: '0', toAddress: '' };
 }
 
 /**
@@ -369,15 +335,21 @@ export async function convertAccountTransaction(
     } else if (instanceOfEncryptedTransferWithMemo(transaction)) {
         typeSpecific = convertEncryptedTransferWithMemo(transaction);
     } else if (instanceOfAddBaker(transaction)) {
-        typeSpecific = convertAddBakerTransaction();
+        typeSpecific = getBaseTransaction(TransactionKindString.AddBaker);
     } else if (instanceOfRemoveBaker(transaction)) {
-        typeSpecific = convertRemoveBakerTransaction();
+        typeSpecific = getBaseTransaction(TransactionKindString.RemoveBaker);
     } else if (instanceOfUpdateBakerStake(transaction)) {
-        typeSpecific = convertUpdateBakerStakeTransaction();
+        typeSpecific = getBaseTransaction(
+            TransactionKindString.UpdateBakerStake
+        );
     } else if (instanceOfUpdateBakerKeys(transaction)) {
-        typeSpecific = convertUpdateBakerKeysTransaction();
+        typeSpecific = getBaseTransaction(
+            TransactionKindString.UpdateBakerKeys
+        );
     } else if (instanceOfUpdateBakerRestakeEarnings(transaction)) {
-        typeSpecific = convertUpdateBakerRestakeTransaction();
+        typeSpecific = getBaseTransaction(
+            TransactionKindString.UpdateBakerRestakeEarnings
+        );
     } else {
         throw new Error('unsupported transaction type - please implement');
     }
