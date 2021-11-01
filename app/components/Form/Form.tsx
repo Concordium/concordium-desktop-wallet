@@ -23,6 +23,7 @@ import { FileInputProps, FileInputValue } from './FileInput/FileInput';
 import InlineNumber, { InlineNumberProps } from './InlineNumber';
 import GtuInput, { GtuInputProps } from './GtuInput';
 import InlineInput, { InlineInputProps } from './InlineInput';
+import DatePicker from './DatePicker';
 
 export type FormProps<TFormValues extends FieldValues = FieldValues> = Omit<
     FormHTMLAttributes<HTMLFormElement>,
@@ -116,6 +117,11 @@ Form.Timestamp = connectWithFormControlled<
     PropsOf<typeof InputTimestamp>
 >(InputTimestamp);
 (Form.Timestamp as FC).displayName = 'Form.Timestamp';
+
+Form.DatePicker = connectWithFormControlled<Date, PropsOf<typeof DatePicker>>(
+    DatePicker
+);
+(Form.DatePicker as FC).displayName = 'Form.DatePicker';
 
 Form.Submit = Submit;
 (Form.Submit as FC).displayName = 'Form.Submit';

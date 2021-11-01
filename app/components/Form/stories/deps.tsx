@@ -15,6 +15,7 @@ export const {
     Timestamp,
     File,
     InlineNumber,
+    DatePicker,
 } = Form;
 
 export const argTypes: Meta['argTypes'] = {
@@ -37,6 +38,7 @@ export const subcomponents: Meta['subcomponents'] = {
     'Form.InlineNumber': InlineNumber,
     'Form.Timestamp': Timestamp,
     'Form.File': File,
+    'Form.DatePicker': DatePicker,
     'Form.Submit': Submit,
 };
 
@@ -84,10 +86,11 @@ export const ValidationTemplate: Story<FormProps> = (args) => (
                 validate: maxFileSizeKb(1, 'File size too big (1kb allowed)'),
             }}
         />
-        <Form.Timestamp
+        <Form.DatePicker
             name="time"
+            placeholder="Date & time"
             rules={{
-                required: 'Field is required',
+                required: 'Time is required',
                 validate: futureDate(),
             }}
         />
@@ -113,10 +116,11 @@ export const AllFieldsTemplate: Story<FormProps> = (args) => (
     <Form {...args}>
         <Form.Input name="name" placeholder="Name" />
         <Form.TextArea name="comment" placeholder="Comment" />
-        <Form.Timestamp
+        <Form.DatePicker
             name="time"
+            placeholder="Date & time"
             rules={{
-                required: 'Field is required',
+                required: 'Time is required',
                 validate: futureDate(),
             }}
         />
