@@ -1,7 +1,9 @@
 import clsx from 'clsx';
 import React from 'react';
 import ReactDatePicker, { ReactDatePickerProps } from 'react-datepicker';
+import enGB from 'date-fns/locale/en-GB';
 import Label from '~/components/Label';
+import { ClassName } from '~/utils/types';
 import { CommonInputProps } from '../common';
 import ErrorMessage from '../ErrorMessage';
 
@@ -9,9 +11,12 @@ import styles from './DatePicker.module.scss';
 
 interface Props
     extends CommonInputProps,
+        ClassName,
         Pick<ReactDatePickerProps, 'readOnly' | 'disabled'> {
     value: Date | undefined;
     placeholder?: string;
+    minDate?: Date;
+    maxDate?: Date;
     onChange(v: Date): void;
     onBlur?(): void;
 }
@@ -21,14 +26,15 @@ export default function DatePicker({
     onChange,
     onBlur,
     label,
-    placeholder,
+    placeholder = 'DD-MM-YYYY at HH:MM:SS',
     isInvalid,
     error,
+    className,
     ...props
 }: Props) {
     return (
-        <div className={styles.root}>
-            {label && <Label>{label}</Label>}
+        <div className={clsx(styles.root, className)}>
+            {label && <Label className="mB5">{label}</Label>}
             <ReactDatePicker
                 selected={value}
                 onChange={onChange}
@@ -41,6 +47,7 @@ export default function DatePicker({
                 placeholderText={placeholder}
                 popperPlacement="bottom"
                 className={clsx(isInvalid && styles.fieldInvalid)}
+                locale={enGB}
                 {...props}
             />
             <ErrorMessage>{error}</ErrorMessage>

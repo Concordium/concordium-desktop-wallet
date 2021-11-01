@@ -38,3 +38,30 @@
         color: transparent;
     }
 }
+
+.react-datepicker__time-list {
+    overflow-y: overlay !important;
+}
+
+.react-datepicker__header {
+    color: $color-background;
+}
+
+.react-datepicker__day--keyboard-selected,
+.react-datepicker__day--selected,
+.react-datepicker__month-text--keyboard-selected,
+.react-datepicker__quarter-text--keyboard-selected,
+.react-datepicker__year-text--keyboard-selected,
+.react-datepicker__time-list-item--selected {
+    &,
+    &:hover {
+        background-color: $color-pale-blue !important;
+    }
+}
+
+.react-datepicker__day:hover,
+.react-datepicker__month-text:hover,
+.react-datepicker__quarter-text:hover,
+.react-datepicker__year-text:hover {
+    background-color: $color-background;
+}
