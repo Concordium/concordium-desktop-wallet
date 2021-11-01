@@ -21,5 +21,18 @@ const Template: Story<PropsOf<typeof DatePicker>> = (args) => {
 
 export const Primary = Template.bind({});
 Primary.args = {
+    placeholder: 'Select a date & time',
+};
+
+export const WithLabel = Template.bind({});
+WithLabel.args = {
     label: 'Date & time',
+    placeholder: 'Select a date & time',
+};
+
+export const Invalid = Template.bind({});
+Invalid.args = {
+    placeholder: 'Select a date & time',
+    isInvalid: true,
+    error: 'Date & time must be specified',
 };
