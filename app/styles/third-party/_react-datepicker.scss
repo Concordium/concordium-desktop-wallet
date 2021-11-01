@@ -1,0 +1,40 @@
+@import '~react-datepicker/dist/react-datepicker.css';
+
+.react-datepicker__triangle {
+    display: none;
+}
+
+.react-datepicker__input-container input {
+    border: none;
+    border-bottom: 1px solid $color-off-black;
+    text-align: center;
+    font-size: inherit;
+    font-family: $font-family;
+    font-weight: $font-weight-regular;
+    transition: border-color $form-transition;
+    background-color: transparent;
+    width: 100%;
+    color: $color-pale-blue;
+
+    &:disabled {
+        color: $color-text-faded;
+    }
+
+    &:read-only {
+        color: $color-text;
+    }
+
+    &:focus {
+        outline: none;
+        border-color: $form-color-focus;
+    }
+
+    &::placeholder {
+        color: $color-text-faded;
+        transition: color $form-transition;
+    }
+
+    &:focus::placeholder {
+        color: transparent;
+    }
+}
