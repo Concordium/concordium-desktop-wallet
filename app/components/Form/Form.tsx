@@ -17,7 +17,6 @@ import Input from './Input';
 import Checkbox from './Checkbox';
 import TextArea from './TextArea';
 import Submit from './Submit';
-import InputTimestamp from './InputTimestamp/InputTimestamp';
 import FileInput from './FileInput';
 import { FileInputProps, FileInputValue } from './FileInput/FileInput';
 import InlineNumber, { InlineNumberProps } from './InlineNumber';
@@ -111,12 +110,6 @@ Form.InlineInput = connectWithFormControlled<string, InlineInputProps>(
     InlineInput
 );
 (Form.InlineInput as FC).displayName = 'Form.InlineInput';
-
-Form.Timestamp = connectWithFormControlled<
-    Date,
-    PropsOf<typeof InputTimestamp>
->(InputTimestamp);
-(Form.Timestamp as FC).displayName = 'Form.Timestamp';
 
 Form.DatePicker = connectWithFormControlled<Date, PropsOf<typeof DatePicker>>(
     DatePicker
