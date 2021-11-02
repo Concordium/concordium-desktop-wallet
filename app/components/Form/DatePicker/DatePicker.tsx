@@ -12,11 +12,17 @@ import styles from './DatePicker.module.scss';
 interface Props
     extends CommonInputProps,
         ClassName,
-        Pick<ReactDatePickerProps, 'readOnly' | 'disabled'> {
+        Pick<
+            ReactDatePickerProps,
+            | 'readOnly'
+            | 'disabled'
+            | 'minDate'
+            | 'maxDate'
+            | 'minTime'
+            | 'maxTime'
+        > {
     value: Date | undefined;
     placeholder?: string;
-    minDate?: Date;
-    maxDate?: Date;
     onChange(v: Date): void;
     onBlur?(): void;
 }

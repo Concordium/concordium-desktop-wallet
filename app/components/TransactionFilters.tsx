@@ -4,9 +4,9 @@ import React, {
     useEffect,
     useImperativeHandle,
     useMemo,
-    useRef,
 } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { setHours, setMinutes, setSeconds, setMilliseconds } from 'date-fns';
 import {
     EqualRecord,
     NotOptional,
@@ -20,7 +20,6 @@ import {
     minDate,
     pastDate,
 } from '~/components/Form/util/validation';
-import { InputTimestampRef } from '~/components/Form/InputTimestamp/util';
 import { useUpdateEffect } from '~/utils/hooks';
 
 interface FilterForm
@@ -144,6 +143,20 @@ const pastDateValidator = allowOptional(
     pastDate('The time cannot be in the future')
 );
 
+const stripTime = (date: Date) =>
+    setHours(setMinutes(setSeconds(setMilliseconds(date, 0), 0), 0), 0);
+
+const isDateEqual = (left: Date | undefined, right: Date | undefined) => {
+    if (left === undefined && right === undefined) {
+        return true;
+    }
+    if (left === undefined || right === undefined) {
+        return false;
+    }
+
+    return stripTime(left).getTime() === stripTime(right).getTime();
+};
+
 type Callback = (filter: TransactionFilter) => Promise<unknown>;
 
 export interface TransactionFiltersRef {
@@ -175,9 +188,6 @@ const TransactionFilters = forwardRef<
     const fromDate = values?.fromDate;
     const toDate = values?.toDate;
 
-    const fromDateRef = useRef<InputTimestampRef>(null);
-    const toDateRef = useRef<InputTimestampRef>(null);
-
     const booleanFilters = useMemo(
         () => getActiveBooleanFilters(values || {}),
         [values]
@@ -203,9 +213,12 @@ const TransactionFilters = forwardRef<
         [fromDate, toDate, booleanFilters]
     );
 
-    const form = useForm<FilterForm>({ defaultValues });
+    const form = useForm<FilterForm>({ defaultValues, mode: 'onTouched' });
     const { reset, handleSubmit, watch, trigger } = form;
-    const { fromDate: fromDateValue } = watch([fieldNames.fromDate]);
+    const { fromDate: fromDateValue, toDate: toDateValue } = watch([
+        fieldNames.fromDate,
+        fieldNames.toDate,
+    ]);
 
     const submit = useCallback(
         (cb: Callback) => (fields: FilterForm) => {
@@ -240,9 +253,6 @@ const TransactionFilters = forwardRef<
     );
 
     const clear = useCallback((cb: Callback) => {
-        fromDateRef.current?.clear();
-        toDateRef.current?.clear();
-
         cb({});
     }, []);
 
@@ -268,7 +278,7 @@ const TransactionFilters = forwardRef<
     return (
         <FormProvider {...form}>
             <section className="pH40">
-                <Form.Timestamp
+                <Form.DatePicker
                     name={fieldNames.fromDate}
                     className="mT20"
                     label="From:"
@@ -277,9 +287,17 @@ const TransactionFilters = forwardRef<
                             pastDate: pastDateValidator,
                         },
                     }}
-                    ref={fromDateRef}
+                    maxDate={toDateValue ?? new Date()}
+                    minTime={setHours(setMinutes(new Date(), 0), 0)}
+                    maxTime={
+                        fromDateValue &&
+                        toDateValue &&
+                        isDateEqual(toDateValue, fromDateValue ?? undefined)
+                            ? toDateValue ?? undefined
+                            : setHours(setMinutes(new Date(), 59), 23)
+                    }
                 />
-                <Form.Timestamp
+                <Form.DatePicker
                     name={fieldNames.toDate}
                     className="mT20"
                     label="To:"
@@ -293,13 +311,26 @@ const TransactionFilters = forwardRef<
                                 return allowOptional(
                                     minDate(
                                         fromDateValue,
-                                        ' Must be after date specified in first date field'
+                                        'Must be after "from" date'
                                     )
                                 )(v);
                             },
                         },
                     }}
-                    ref={toDateRef}
+                    minDate={fromDateValue ?? undefined}
+                    maxDate={new Date()}
+                    minTime={
+                        toDateValue &&
+                        fromDateValue &&
+                        isDateEqual(toDateValue, fromDateValue ?? undefined)
+                            ? fromDateValue ?? undefined
+                            : setHours(setMinutes(new Date(), 0), 0)
+                    }
+                    maxTime={
+                        isDateEqual(new Date(), fromDateValue ?? undefined)
+                            ? new Date()
+                            : setHours(setMinutes(new Date(), 59), 23)
+                    }
                 />
                 <div className="m40 mB10 flexColumn">
                     {transactionFilters.map(({ field, display }) => (
