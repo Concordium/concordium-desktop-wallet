@@ -1,7 +1,9 @@
+/* eslint-disable import/no-duplicates */
 import clsx from 'clsx';
 import React from 'react';
 import ReactDatePicker, { ReactDatePickerProps } from 'react-datepicker';
 import enGB from 'date-fns/locale/en-GB';
+import { setHours, setMinutes } from 'date-fns';
 import Label from '~/components/Label';
 import { ClassName } from '~/utils/types';
 import { CommonInputProps } from '../common';
@@ -36,6 +38,8 @@ export default function DatePicker({
     isInvalid,
     error,
     className,
+    minTime = setHours(setMinutes(new Date(), 0), 0),
+    maxTime = setHours(setMinutes(new Date(), 59), 23),
     ...props
 }: Props) {
     return (
@@ -54,6 +58,8 @@ export default function DatePicker({
                 popperPlacement="bottom"
                 className={clsx(isInvalid && styles.fieldInvalid)}
                 locale={enGB}
+                minTime={minTime}
+                maxTime={maxTime}
                 {...props}
             />
             <ErrorMessage>{error}</ErrorMessage>

@@ -1,8 +1,9 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
+import { addMinutes } from 'date-fns';
 import Form from '~/components/Form';
 import { futureDate, maxDate } from '~/components/Form/util/validation';
-import { getDefaultExpiry, TimeConstants } from '~/utils/timeHelpers';
+import { getDefaultExpiry, isDateEqual } from '~/utils/timeHelpers';
 
 export interface MultiSignatureCreateProposalForm {
     effectiveTime: Date;
@@ -24,14 +25,22 @@ export default function SetExpiryAndEffectiveTime({
 }: Props) {
     const form = useForm<MultiSignatureCreateProposalForm>({
         mode: 'onTouched',
+        defaultValues: {
+            effectiveTime:
+                defaults.effectiveTime || addMinutes(getDefaultExpiry(), 5),
+            expiryTime: defaults.expiryTime || getDefaultExpiry(),
+        },
     });
-    const { effectiveTime } = form.watch(['effectiveTime']);
+    const { effectiveTime, expiryTime } = form.watch([
+        'effectiveTime',
+        'expiryTime',
+    ]);
 
     async function handleSubmit(
         fields: MultiSignatureCreateProposalForm
     ): Promise<void> {
-        const { effectiveTime: effective, expiryTime } = fields;
-        onContinue(effective, expiryTime);
+        const { effectiveTime: effective, expiryTime: expiry } = fields;
+        onContinue(effective, expiry);
     }
 
     return (
@@ -42,28 +51,22 @@ export default function SetExpiryAndEffectiveTime({
         >
             <div>
                 <h3>Choose effective time and expiry of the update</h3>
-                <Form.Timestamp
+                <Form.DatePicker
                     name="effectiveTime"
                     label="Effective Time"
                     className="mV40"
-                    defaultValue={
-                        defaults.effectiveTime ||
-                        new Date(
-                            getDefaultExpiry().getTime() +
-                                5 * TimeConstants.Minute
-                        )
-                    }
                     rules={{
                         required: 'Effective time is required',
                         validate: futureDate(
                             'Effective time must be in the future'
                         ),
                     }}
+                    minDate={new Date()}
+                    minTime={new Date()}
                 />
-                <Form.Timestamp
+                <Form.DatePicker
                     name="expiryTime"
                     label="Transaction Expiry Time"
-                    defaultValue={defaults.expiryTime || getDefaultExpiry()}
                     rules={{
                         required: 'Transaction expiry time is required',
                         validate: {
@@ -80,6 +83,14 @@ export default function SetExpiryAndEffectiveTime({
                             ),
                         },
                     }}
+                    minDate={effectiveTime ?? new Date()}
+                    minTime={
+                        effectiveTime &&
+                        expiryTime &&
+                        isDateEqual(effectiveTime, expiryTime)
+                            ? effectiveTime
+                            : undefined
+                    }
                 />
             </div>
             <Form.Submit>Continue</Form.Submit>

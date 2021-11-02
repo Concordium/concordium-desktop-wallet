@@ -6,7 +6,6 @@ import React, {
     useMemo,
 } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { setHours, setMinutes, setSeconds, setMilliseconds } from 'date-fns';
 import {
     EqualRecord,
     NotOptional,
@@ -21,6 +20,7 @@ import {
     pastDate,
 } from '~/components/Form/util/validation';
 import { useUpdateEffect } from '~/utils/hooks';
+import { isDateEqual } from '~/utils/timeHelpers';
 
 interface FilterForm
     extends Pick<
@@ -142,20 +142,6 @@ const getGroupValues = (group: TransactionKindString[], v: boolean) =>
 const pastDateValidator = allowOptional(
     pastDate('The time cannot be in the future')
 );
-
-const stripTime = (date: Date) =>
-    setHours(setMinutes(setSeconds(setMilliseconds(date, 0), 0), 0), 0);
-
-const isDateEqual = (left: Date | undefined, right: Date | undefined) => {
-    if (left === undefined && right === undefined) {
-        return true;
-    }
-    if (left === undefined || right === undefined) {
-        return false;
-    }
-
-    return stripTime(left).getTime() === stripTime(right).getTime();
-};
 
 type Callback = (filter: TransactionFilter) => Promise<unknown>;
 
@@ -288,13 +274,12 @@ const TransactionFilters = forwardRef<
                         },
                     }}
                     maxDate={toDateValue ?? new Date()}
-                    minTime={setHours(setMinutes(new Date(), 0), 0)}
                     maxTime={
                         fromDateValue &&
                         toDateValue &&
                         isDateEqual(toDateValue, fromDateValue ?? undefined)
                             ? toDateValue ?? undefined
-                            : setHours(setMinutes(new Date(), 59), 23)
+                            : undefined
                     }
                 />
                 <Form.DatePicker
@@ -324,12 +309,12 @@ const TransactionFilters = forwardRef<
                         fromDateValue &&
                         isDateEqual(toDateValue, fromDateValue ?? undefined)
                             ? fromDateValue ?? undefined
-                            : setHours(setMinutes(new Date(), 0), 0)
+                            : undefined
                     }
                     maxTime={
                         isDateEqual(new Date(), fromDateValue ?? undefined)
                             ? new Date()
-                            : setHours(setMinutes(new Date(), 59), 23)
+                            : undefined
                     }
                 />
                 <div className="m40 mB10 flexColumn">
