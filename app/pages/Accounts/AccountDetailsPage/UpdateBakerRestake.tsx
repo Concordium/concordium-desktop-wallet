@@ -6,37 +6,43 @@ import Form from '~/components/Form';
 import PickBakerRestake from '~/components/PickBakerRestake';
 import Card from '~/cross-app-components/Card';
 import routes from '~/constants/routes.json';
-import { getNextAccountNonce } from '~/node/nodeRequests';
 import { stringify } from '~/utils/JSONHelper';
 import { createUpdateBakerRestakeEarningsTransaction } from '~/utils/transactionHelpers';
 import {
-    Account,
     AccountInfo,
     EqualRecord,
+    NotOptional,
     TransactionKindId,
 } from '~/utils/types';
 import { SubmitTransactionLocationState } from '../SubmitTransaction/SubmitTransaction';
 import Label from '~/components/Label';
-import { getEnergyToMicroGtuRate } from '~/node/nodeHelpers';
-import { multiplyFraction } from '~/utils/basicHelpers';
 
 import styles from './AccountDetailsPage.module.scss';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
+import ensureExchangeRateAndNonce, {
+    ExchangeRateAndNonceProps,
+} from '~/components/Transfers/ensureExchangeRateAndNonce';
+import { multiplyFraction } from '~/utils/basicHelpers';
 
 interface FormModel {
     restake: boolean;
 }
 
-interface Props {
-    account: Account;
+interface Props extends NotOptional<ExchangeRateAndNonceProps> {
     accountInfo?: AccountInfo;
 }
 
 const fieldNames: EqualRecord<FormModel> = {
     restake: 'restake',
 };
-export default function UpdateBakerRestake({ account, accountInfo }: Props) {
+
+export default ensureExchangeRateAndNonce(function UpdateBakerRestake({
+    account,
+    accountInfo,
+    nonce,
+    exchangeRate,
+}: Props) {
     const dispatch = useDispatch();
 
     const submit = useCallback(
@@ -44,9 +50,6 @@ export default function UpdateBakerRestake({ account, accountInfo }: Props) {
             if (!account) {
                 throw new Error('No account selected');
             }
-
-            const { nonce } = await getNextAccountNonce(account.address);
-            const exchangeRate = await getEnergyToMicroGtuRate();
 
             const transaction = await createUpdateBakerRestakeEarningsTransaction(
                 account.address,
@@ -76,7 +79,7 @@ export default function UpdateBakerRestake({ account, accountInfo }: Props) {
 
             dispatch(push({ pathname: routes.SUBMITTRANSFER, state }));
         },
-        [account, dispatch]
+        [account, dispatch, nonce, exchangeRate]
     );
 
     if (!account) {
@@ -117,4 +120,4 @@ export default function UpdateBakerRestake({ account, accountInfo }: Props) {
             </Form>
         </Card>
     );
-}
+});

@@ -5,10 +5,6 @@ import { Redirect } from 'react-router';
 import Form from '~/components/Form';
 import Label from '~/components/Label';
 import PickBakerStakeAmount from '~/components/PickBakerStakeAmount';
-import {
-    ensureExchangeRate,
-    ExchangeRate,
-} from '~/components/Transfers/withExchangeRate';
 import Card from '~/cross-app-components/Card';
 import Loading from '~/cross-app-components/Loading';
 import routes from '~/constants/routes.json';
@@ -16,7 +12,6 @@ import {
     chosenAccountInfoSelector,
     chosenAccountSelector,
 } from '~/features/AccountSlice';
-import { getNextAccountNonce } from '~/node/nodeRequests';
 import {
     ChainData,
     ensureChainData,
@@ -29,7 +24,6 @@ import { displayAsGTU, microGtuToGtu, toMicroUnits } from '~/utils/gtu';
 import { stringify } from '~/utils/JSONHelper';
 import { createUpdateBakerStakeTransaction } from '~/utils/transactionHelpers';
 import {
-    Account,
     AccountInfo,
     EqualRecord,
     NotOptional,
@@ -43,6 +37,9 @@ import BakerPendingChange from '~/components/BakerPendingChange';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
+import ensureExchangeRateAndNonce, {
+    ExchangeRateAndNonceProps,
+} from '~/components/Transfers/ensureExchangeRateAndNonce';
 
 const LoadingComponent = () => <Loading text="Loading chain data" inline />;
 
@@ -50,8 +47,9 @@ interface FormModel {
     stake: string;
 }
 
-interface Props extends NotOptional<ChainData>, NotOptional<ExchangeRate> {
-    account: Account;
+interface Props
+    extends NotOptional<ExchangeRateAndNonceProps>,
+        NotOptional<ChainData> {
     accountInfo?: AccountInfo;
 }
 
@@ -59,8 +57,8 @@ const fieldNames: EqualRecord<FormModel> = {
     stake: 'stake',
 };
 
-const UpdateBakerStakeForm = ensureChainData(
-    ensureExchangeRate(({ blockSummary, exchangeRate }: Props) => {
+const UpdateBakerStakeForm = ensureExchangeRateAndNonce(
+    ensureChainData(({ blockSummary, exchangeRate, nonce }: Props) => {
         const dispatch = useDispatch();
         const account = useSelector(chosenAccountSelector);
         const accountInfo = useSelector(chosenAccountInfoSelector);
@@ -77,7 +75,6 @@ const UpdateBakerStakeForm = ensureChainData(
                     throw new Error('No account selected');
                 }
 
-                const { nonce } = await getNextAccountNonce(account.address);
                 const transaction = await createUpdateBakerStakeTransaction(
                     account.address,
                     { stake: toMicroUnits(stake) },
@@ -105,7 +102,7 @@ const UpdateBakerStakeForm = ensureChainData(
 
                 dispatch(push({ pathname: routes.SUBMITTRANSFER, state }));
             },
-            [account, dispatch, exchangeRate]
+            [account, dispatch, exchangeRate, nonce]
         );
 
         if (!account) {
@@ -187,8 +184,7 @@ const UpdateBakerStakeForm = ensureChainData(
                 </Form.Submit>
             </Form>
         );
-    }, LoadingComponent),
-    LoadingComponent
+    }, LoadingComponent)
 );
 
 export default function UpdateBakerStake(

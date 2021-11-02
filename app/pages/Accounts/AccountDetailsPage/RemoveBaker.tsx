@@ -5,43 +5,46 @@ import { Redirect } from 'react-router';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
 import routes from '~/constants/routes.json';
-import { getNextAccountNonce } from '~/node/nodeRequests';
 import { stringify } from '~/utils/JSONHelper';
 import { createRemoveBakerTransaction } from '~/utils/transactionHelpers';
 import { SubmitTransactionLocationState } from '../SubmitTransaction/SubmitTransaction';
 
 import styles from './AccountDetailsPage.module.scss';
 import { multiplyFraction } from '~/utils/basicHelpers';
-import { getEnergyToMicroGtuRate } from '~/node/nodeHelpers';
 import BakerPendingChange from '~/components/BakerPendingChange';
-import { Account, AccountInfo, TransactionKindId } from '~/utils/types';
+import { AccountInfo, NotOptional, TransactionKindId } from '~/utils/types';
 import { useCalcBakerStakeCooldownUntil } from '~/utils/dataHooks';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
+import ensureExchangeRateAndNonce, {
+    ExchangeRateAndNonceProps,
+} from '~/components/Transfers/ensureExchangeRateAndNonce';
 
-interface Props {
-    account: Account;
+interface Props extends NotOptional<ExchangeRateAndNonceProps> {
     accountInfo?: AccountInfo;
 }
 
-export default function RemoveBaker({ account, accountInfo }: Props) {
+export default ensureExchangeRateAndNonce(function RemoveBaker({
+    account,
+    accountInfo,
+    nonce,
+    exchangeRate,
+}: Props) {
     const dispatch = useDispatch();
     const cooldownUntil = useCalcBakerStakeCooldownUntil();
 
     const pendingChange = accountInfo?.accountBaker?.pendingChange;
 
-    const next = useCallback(async () => {
+    const next = useCallback(() => {
         if (!account) {
             throw new Error('No account selected');
         }
 
-        const { nonce } = await getNextAccountNonce(account.address);
-        const transaction = await createRemoveBakerTransaction(
+        const transaction = createRemoveBakerTransaction(
             account.address,
             nonce
         );
-        const exchangeRate = await getEnergyToMicroGtuRate();
 
         transaction.estimatedFee = multiplyFraction(
             exchangeRate,
@@ -63,7 +66,7 @@ export default function RemoveBaker({ account, accountInfo }: Props) {
         };
 
         dispatch(push({ pathname: routes.SUBMITTRANSFER, state }));
-    }, [dispatch, account]);
+    }, [dispatch, account, nonce, exchangeRate]);
 
     if (isMultiSig(account)) {
         return (
@@ -111,4 +114,4 @@ export default function RemoveBaker({ account, accountInfo }: Props) {
             )}
         </Card>
     );
-}
+});

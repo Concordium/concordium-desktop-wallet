@@ -4,7 +4,9 @@ import React, { useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router';
 import { AddBakerForm } from '~/components/AddBakerDetailsForm';
-import ensureExchangeRateAndNonce from '~/components/Transfers/ensureExchangeRateAndNonce';
+import ensureExchangeRateAndNonce, {
+    ExchangeRateAndNonceProps,
+} from '~/components/Transfers/ensureExchangeRateAndNonce';
 import routes from '~/constants/routes.json';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
@@ -13,23 +15,15 @@ import { toMicroUnits } from '~/utils/gtu';
 import { stringify } from '~/utils/JSONHelper';
 import { BakerKeys } from '~/utils/rustInterface';
 import { createAddBakerTransaction } from '~/utils/transactionHelpers';
-import {
-    Account,
-    AddBakerPayload,
-    Fraction,
-    TransactionKindId,
-} from '~/utils/types';
+import { AddBakerPayload, NotOptional, TransactionKindId } from '~/utils/types';
 import { SubmitTransactionLocationState } from '../../SubmitTransaction/SubmitTransaction';
 import GenerateBakerKeys from '../GenerateBakerKeys';
 import AddBakerData from './AddBakerData';
 
 const header = 'Add baker';
 
-interface Props {
+interface Props extends NotOptional<ExchangeRateAndNonceProps> {
     location: LocationDescriptorObject<AddBakerForm>;
-    exchangeRate: Fraction;
-    nonce: string;
-    account: Account;
 }
 
 const AddBaker = ensureExchangeRateAndNonce(

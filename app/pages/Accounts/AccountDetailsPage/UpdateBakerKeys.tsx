@@ -8,20 +8,21 @@ import routes from '~/constants/routes.json';
 import GenerateBakerKeys from './GenerateBakerKeys';
 import { BakerKeys } from '~/utils/rustInterface';
 import {
-    Account,
+    NotOptional,
     TransactionKindId,
     UpdateBakerKeysPayload,
 } from '~/utils/types';
-import { getNextAccountNonce } from '~/node/nodeRequests';
 import { createUpdateBakerKeysTransaction } from '~/utils/transactionHelpers';
 import { SubmitTransactionLocationState } from '../SubmitTransaction/SubmitTransaction';
 import { stringify } from '~/utils/JSONHelper';
 import { multiplyFraction } from '~/utils/basicHelpers';
-import { getEnergyToMicroGtuRate } from '~/node/nodeHelpers';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
 
 import styles from './AccountDetailsPage.module.scss';
+import ensureExchangeRateAndNonce, {
+    ExchangeRateAndNonceProps,
+} from '~/components/Transfers/ensureExchangeRateAndNonce';
 
 const header = 'Update baker keys';
 
@@ -53,15 +54,15 @@ function UpdateBakerKeysIntro() {
     );
 }
 
-interface Props {
-    account: Account;
-}
-
-export default function UpdateBakerKeys({ account }: Props) {
+export default ensureExchangeRateAndNonce(function UpdateBakerKeys({
+    account,
+    exchangeRate,
+    nonce,
+}: NotOptional<ExchangeRateAndNonceProps>) {
     const dispatch = useDispatch();
 
     const makeTransaction = useCallback(
-        async (bakerKeys: BakerKeys) => {
+        (bakerKeys: BakerKeys) => {
             if (!account?.address) {
                 return undefined;
             }
@@ -75,13 +76,10 @@ export default function UpdateBakerKeys({ account }: Props) {
                 proofAggregation: bakerKeys.proofAggregation,
             };
 
-            const accountNonce = await getNextAccountNonce(account.address);
-            const exchangeRate = await getEnergyToMicroGtuRate();
-
             const transaction = createUpdateBakerKeysTransaction(
                 account.address,
                 payload,
-                accountNonce.nonce
+                nonce
             );
             transaction.estimatedFee = multiplyFraction(
                 exchangeRate,
@@ -90,7 +88,7 @@ export default function UpdateBakerKeys({ account }: Props) {
 
             return transaction;
         },
-        [account?.address]
+        [account?.address, nonce, exchangeRate]
     );
 
     const next = useCallback(
@@ -143,4 +141,4 @@ export default function UpdateBakerKeys({ account }: Props) {
             <Route component={UpdateBakerKeysIntro} />
         </Switch>
     );
-}
+});
