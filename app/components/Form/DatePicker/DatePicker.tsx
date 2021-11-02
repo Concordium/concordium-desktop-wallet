@@ -10,6 +10,7 @@ import { CommonInputProps } from '../common';
 import ErrorMessage from '../ErrorMessage';
 
 import styles from './DatePicker.module.scss';
+import { isDateEqual } from '~/utils/timeHelpers';
 
 interface Props
     extends CommonInputProps,
@@ -38,8 +39,14 @@ export default function DatePicker({
     isInvalid,
     error,
     className,
-    minTime = setHours(setMinutes(new Date(), 0), 0),
-    maxTime = setHours(setMinutes(new Date(), 59), 23),
+    minDate,
+    maxDate,
+    minTime = value && minDate && isDateEqual(value, minDate)
+        ? minDate
+        : setHours(setMinutes(new Date(), 0), 0),
+    maxTime = value && maxDate && isDateEqual(value, maxDate)
+        ? maxDate
+        : setHours(setMinutes(new Date(), 59), 23),
     ...props
 }: Props) {
     return (
@@ -60,6 +67,8 @@ export default function DatePicker({
                 locale={enGB}
                 minTime={minTime}
                 maxTime={maxTime}
+                minDate={minDate}
+                maxDate={maxDate}
                 {...props}
             />
             <ErrorMessage>{error}</ErrorMessage>

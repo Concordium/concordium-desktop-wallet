@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { addMinutes } from 'date-fns';
 import Form from '~/components/Form';
 import { futureDate, maxDate } from '~/components/Form/util/validation';
-import { getDefaultExpiry, isDateEqual } from '~/utils/timeHelpers';
+import { getDefaultExpiry } from '~/utils/timeHelpers';
 
 export interface MultiSignatureCreateProposalForm {
     effectiveTime: Date;
@@ -31,16 +31,13 @@ export default function SetExpiryAndEffectiveTime({
             expiryTime: defaults.expiryTime || getDefaultExpiry(),
         },
     });
-    const { effectiveTime, expiryTime } = form.watch([
-        'effectiveTime',
-        'expiryTime',
-    ]);
+    const { effectiveTime } = form.watch(['effectiveTime']);
 
     async function handleSubmit(
         fields: MultiSignatureCreateProposalForm
     ): Promise<void> {
-        const { effectiveTime: effective, expiryTime: expiry } = fields;
-        onContinue(effective, expiry);
+        const { effectiveTime: effective, expiryTime } = fields;
+        onContinue(effective, expiryTime);
     }
 
     return (
@@ -62,7 +59,6 @@ export default function SetExpiryAndEffectiveTime({
                         ),
                     }}
                     minDate={new Date()}
-                    minTime={new Date()}
                 />
                 <Form.DatePicker
                     name="expiryTime"
@@ -83,14 +79,7 @@ export default function SetExpiryAndEffectiveTime({
                             ),
                         },
                     }}
-                    minDate={effectiveTime ?? new Date()}
-                    minTime={
-                        effectiveTime &&
-                        expiryTime &&
-                        isDateEqual(effectiveTime, expiryTime)
-                            ? effectiveTime
-                            : undefined
-                    }
+                    maxDate={effectiveTime ?? new Date()}
                 />
             </div>
             <Form.Submit>Continue</Form.Submit>

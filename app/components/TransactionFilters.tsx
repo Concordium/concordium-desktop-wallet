@@ -20,7 +20,6 @@ import {
     pastDate,
 } from '~/components/Form/util/validation';
 import { useUpdateEffect } from '~/utils/hooks';
-import { isDateEqual } from '~/utils/timeHelpers';
 
 interface FilterForm
     extends Pick<
@@ -274,13 +273,6 @@ const TransactionFilters = forwardRef<
                         },
                     }}
                     maxDate={toDateValue ?? new Date()}
-                    maxTime={
-                        fromDateValue &&
-                        toDateValue &&
-                        isDateEqual(toDateValue, fromDateValue ?? undefined)
-                            ? toDateValue ?? undefined
-                            : undefined
-                    }
                 />
                 <Form.DatePicker
                     name={fieldNames.toDate}
@@ -304,18 +296,6 @@ const TransactionFilters = forwardRef<
                     }}
                     minDate={fromDateValue ?? undefined}
                     maxDate={new Date()}
-                    minTime={
-                        toDateValue &&
-                        fromDateValue &&
-                        isDateEqual(toDateValue, fromDateValue ?? undefined)
-                            ? fromDateValue ?? undefined
-                            : undefined
-                    }
-                    maxTime={
-                        isDateEqual(new Date(), fromDateValue ?? undefined)
-                            ? new Date()
-                            : undefined
-                    }
                 />
                 <div className="m40 mB10 flexColumn">
                     {transactionFilters.map(({ field, display }) => (
