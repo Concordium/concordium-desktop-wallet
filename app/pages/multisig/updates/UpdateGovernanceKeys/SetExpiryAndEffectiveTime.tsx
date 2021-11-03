@@ -61,7 +61,7 @@ export default function SetExpiryAndEffectiveTime({
                     minDate={new Date()}
                 />
                 <Form.DatePicker
-                    className="body2"
+                    className="body2 mV40"
                     name="expiryTime"
                     label="Transaction Expiry Time"
                     rules={{

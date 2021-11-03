@@ -225,7 +225,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                                         transaction.
                                     </p>
                                     <DatePicker
-                                        className="body2"
+                                        className="body2 mV40"
                                         label="Transaction expiry time"
                                         name="expiry"
                                         isInvalid={
