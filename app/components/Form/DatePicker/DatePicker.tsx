@@ -8,9 +8,9 @@ import Label from '~/components/Label';
 import { ClassName } from '~/utils/types';
 import { CommonInputProps } from '../common';
 import ErrorMessage from '../ErrorMessage';
+import { isDateEqual } from '~/utils/timeHelpers';
 
 import styles from './DatePicker.module.scss';
-import { isDateEqual } from '~/utils/timeHelpers';
 
 interface Props
     extends CommonInputProps,
@@ -30,6 +30,14 @@ interface Props
     onBlur?(): void;
 }
 
+/**
+ * Component for picking date and time. Is also available as part of a <Form />.
+ *
+ * @example
+ * const [v, s] = useState();
+ *
+ * <DatePicker value={v} onChange={s} />
+ */
 export default function DatePicker({
     value,
     onChange,
