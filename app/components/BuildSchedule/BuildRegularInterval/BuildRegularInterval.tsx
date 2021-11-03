@@ -180,6 +180,7 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
                     </div>
                     <Form.DatePicker
                         name={fieldNames.startTime}
+                        className="body2"
                         label="Starting:"
                         defaultValue={
                             new Date(

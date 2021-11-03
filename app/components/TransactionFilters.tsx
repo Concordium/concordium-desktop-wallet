@@ -265,7 +265,7 @@ const TransactionFilters = forwardRef<
             <section className="pH40">
                 <Form.DatePicker
                     name={fieldNames.fromDate}
-                    className="mT20"
+                    className="mT20 body2"
                     label="From:"
                     rules={{
                         validate: {
@@ -276,7 +276,7 @@ const TransactionFilters = forwardRef<
                 />
                 <Form.DatePicker
                     name={fieldNames.toDate}
-                    className="mT20"
+                    className="mT20 body2"
                     label="To:"
                     rules={{
                         validate: {

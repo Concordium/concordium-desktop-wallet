@@ -346,6 +346,7 @@ function CreateTransferProposal({
                                 render={() => (
                                     <div className={styles.columnContent}>
                                         <DatePicker
+                                            className="body2"
                                             label="Transaction expiry time"
                                             name="expiry"
                                             isInvalid={

@@ -82,6 +82,7 @@ export default function BuildProposal({
                             consensusStatus={consensusStatus}
                         />
                         <Form.DatePicker
+                            className="body2"
                             name="effectiveTime"
                             label="Effective Time"
                             defaultValue={
@@ -100,6 +101,7 @@ export default function BuildProposal({
                             minDate={new Date()}
                         />
                         <Form.DatePicker
+                            className="body2"
                             name="expiryTime"
                             label="Transaction Expiry Time"
                             defaultValue={

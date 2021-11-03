@@ -51,7 +51,7 @@ export default function SetExpiryAndEffectiveTime({
                 <Form.DatePicker
                     name="effectiveTime"
                     label="Effective Time"
-                    className="mV40"
+                    className="body2 mV40"
                     rules={{
                         required: 'Effective time is required',
                         validate: futureDate(
@@ -61,6 +61,7 @@ export default function SetExpiryAndEffectiveTime({
                     minDate={new Date()}
                 />
                 <Form.DatePicker
+                    className="body2"
                     name="expiryTime"
                     label="Transaction Expiry Time"
                     rules={{

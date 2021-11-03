@@ -564,6 +564,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                                 render={() => (
                                     <div>
                                         <DatePicker
+                                            className="body2"
                                             label="Transaction expiry time"
                                             name="expiry"
                                             isInvalid={

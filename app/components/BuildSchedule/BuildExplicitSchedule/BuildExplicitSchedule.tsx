@@ -158,6 +158,7 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
                     />
                 </div>
                 <Form.DatePicker
+                    className="body2"
                     name={addSchedulePointFormNames.timestamp}
                     label="Release time:"
                     rules={{
