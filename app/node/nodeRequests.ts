@@ -1,6 +1,5 @@
 /**
  * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
- * The requests will be sent to the main thread, which will execute them.
  */
 
 /**
@@ -10,6 +9,9 @@ export function setClientLocation(address: string, port: string) {
     return window.grpc.setLocation(address, port);
 }
 
+/**
+ * Takes an async function, which might return undefined, and throws an error instead.
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function wrapper<T extends any[], V>(
     func: (...inputs: T) => Promise<V | undefined>,

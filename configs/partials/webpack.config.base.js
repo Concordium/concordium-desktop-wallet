@@ -96,5 +96,9 @@ module.exports = {
             /\.\.\/migrations/,
             '../util/noop.js'
         ),
+        new webpack.NormalModuleReplacementPlugin(
+            /\.\.\/pkg\/node_sdk_helpers/,
+            path.resolve(__dirname, '../..', 'internals/mocks/empty.js')
+        ),
     ],
 };
