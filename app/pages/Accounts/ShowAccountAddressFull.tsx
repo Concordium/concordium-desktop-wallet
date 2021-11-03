@@ -41,9 +41,9 @@ export default function ShowAccountAddress() {
                     <ShrinkIcon width="25" />
                 </IconButton>
 
-                <h2 className="m0 mBauto">Address: {account.name}</h2>
+                <h2 className="m0 mBauto">{account.name}</h2>
                 <QRCode className="mB50" size={512} value={account.address} />
-                <div className="flex mBauto">
+                <div className="flex alignCenter mBauto">
                     <DisplayAddress
                         outerClassName="body2 mL20"
                         lineLength={25}

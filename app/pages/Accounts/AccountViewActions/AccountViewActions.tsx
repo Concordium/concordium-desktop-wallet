@@ -11,10 +11,11 @@ import routes from '~/constants/routes.json';
 import { viewingShieldedSelector } from '~/features/TransactionSlice';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
 import ButtonNavLink from '~/components/ButtonNavLink';
-import styles from './AccountViewAction.module.scss';
 import { Account, AccountInfo } from '~/utils/types';
 import Button from '~/cross-app-components/Button';
 import { toggleAccountView } from '~/features/AccountSlice';
+
+import styles from './AccountViewAction.module.scss';
 
 interface ActionObject {
     action: string | ((dispatch: Dispatch) => void);
@@ -35,7 +36,7 @@ const changeView: ActionObject = {
     action: (dispatch) => toggleAccountView(dispatch),
     label: 'Change view',
     Image: BracketsImage,
-    imageClassName: 'mB15',
+    imageClassName: clsx(styles.actionImage, 'mB15'),
     height: 30,
     width: 48,
     isDisabled: () => false,
@@ -45,7 +46,7 @@ const shieldedActions: ActionObject[] = [
         action: routes.ACCOUNTS_ENCRYPTEDTRANSFER,
         label: 'Send',
         Image: SendEncryptedImage,
-        imageClassName: styles.actionImage,
+        imageClassName: clsx(styles.actionImage, 'mB5'),
         height: 35,
         isDisabled: (hasCredential: boolean, _, hasInfo) =>
             !hasCredential || !hasInfo,
@@ -54,7 +55,7 @@ const shieldedActions: ActionObject[] = [
         action: routes.ACCOUNTS_UNSHIELDAMOUNT,
         label: 'Unshield',
         Image: UnshieldImage,
-        imageClassName: styles.actionImage,
+        imageClassName: clsx(styles.actionImage, 'mB5'),
         height: 40,
         isDisabled: (hasCredential: boolean, _, hasInfo) =>
             !hasCredential || !hasInfo,
@@ -66,7 +67,7 @@ const unshieldedActions: ActionObject[] = [
         action: routes.ACCOUNTS_SIMPLETRANSFER,
         label: 'Send',
         Image: SendImage,
-        imageClassName: styles.actionImage,
+        imageClassName: clsx(styles.actionImage, 'mB5'),
         height: 30,
         isDisabled: (hasCredential: boolean, _, hasInfo) =>
             !hasCredential || !hasInfo,
@@ -75,7 +76,7 @@ const unshieldedActions: ActionObject[] = [
         action: routes.ACCOUNTS_SHIELDAMOUNT,
         label: 'Shield',
         Image: ShieldImage,
-        imageClassName: styles.actionImage,
+        imageClassName: clsx(styles.actionImage, 'mB5'),
         height: 30,
         isDisabled: (hasCredential: boolean, isMultiSig, hasInfo) =>
             !hasCredential || !hasInfo || isMultiSig,
