@@ -22,6 +22,7 @@ import {
 } from '~/features/AddressBookSlice';
 import Modal from '~/cross-app-components/Modal';
 import Button from '~/cross-app-components/Button';
+import IconButton from '~/cross-app-components/IconButton';
 import Card from '~/cross-app-components/Card';
 import Form from '../Form';
 
@@ -47,7 +48,9 @@ const fieldNames: NotOptional<EqualRecord<AddressBookEntryForm>> = {
 
 const noteMaxLength = 100;
 
-export default function UpsertAddress<TAs extends ElementType = typeof Button>({
+export default function UpsertAddress<
+    TAs extends ElementType = typeof IconButton
+>({
     onSubmit,
     initialValues,
     readOnly = false,
@@ -64,7 +67,7 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
         [isEditMode]
     );
 
-    const As = as || Button;
+    const As = as || IconButton;
 
     const upsertAddress = useCallback(
         async (values: AddressBookEntryForm) => {

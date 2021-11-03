@@ -50,7 +50,8 @@ const createWindow = async () => {
         await installExtensions();
     }
 
-    const titleSuffix = process.env.TARGET_NET || '';
+    const titleSuffix =
+        process.env.TARGET_NET === 'mainnet' ? '' : process.env.TARGET_NET;
     const commonMainPreferences: Electron.WebPreferences = {
         nodeIntegration: false,
         contextIsolation: true,
@@ -152,7 +153,10 @@ const createWindow = async () => {
 
     initializeIpcHandlers(mainWindow, printWindow, browserView);
 
-    if (process.env.NODE_ENV === 'production' && !process.env.TARGET_NET) {
+    if (
+        process.env.NODE_ENV === 'production' &&
+        process.env.TARGET_NET === 'mainnet'
+    ) {
         initAutoUpdate(mainWindow);
     }
 };

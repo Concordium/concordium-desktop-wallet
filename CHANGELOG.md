@@ -4,6 +4,16 @@
 
 ### Added
 
+-   Added a GTU drop option for testnet and stagenet.
+
+### Changed
+
+-   Auxiliary data in an Update Protocol transaction is now optional.
+
+## 1.2.0
+
+### Added
+
 -   Support for macOS running on M1 chipsets through Rosetta.
 -   It is now possible to view an account address QR-code in "fullscreen" mode.
 -   It is now possible to rename accounts and identities.
@@ -18,6 +28,7 @@
 -   It is now possible to set a default account, which will be selected initially when opening the app.
 -   "About" menu link has been added to native menu bar under "Help" for windows/linux. It is already accessible on mac under "Concordium desktop wallet" in the native menu.
 -   When an account is synchronizing transactions, it now shows with a spinning icon in the tab header of the transaction log.
+-   Added flows to make baker transactions from accounts with only one set of credentials possible without going through a multi-signature proposal flow.
 
 ### Changed
 

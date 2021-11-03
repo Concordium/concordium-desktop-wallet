@@ -154,6 +154,7 @@ export type HttpMethods = {
         transactionFilter: TransactionFilter
     ) => Promise<IncomingTransaction[]>;
     getIdProviders: () => Promise<IdentityProvider[]>;
+    gtuDrop: (address: string) => Promise<string>;
 };
 
 export type GeneralMethods = {

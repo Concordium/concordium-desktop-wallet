@@ -854,7 +854,7 @@ export function instanceOfUpdateBakerKeys(
 
 export function instanceOfRemoveBaker(
     object: AccountTransaction<TransactionPayload>
-): object is AddBaker {
+): object is RemoveBaker {
     return object.transactionKind === TransactionKindId.Remove_baker;
 }
 
@@ -1063,7 +1063,7 @@ export interface ProtocolUpdate {
     message: string;
     specificationUrl: string;
     specificationHash: Hex;
-    specificationAuxiliaryData: string;
+    specificationAuxiliaryData?: string;
 }
 
 export interface GasRewards {

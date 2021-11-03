@@ -12,15 +12,15 @@ import {
     updateExternalCredential,
 } from '~/features/CredentialSlice';
 import InputModal from '~/components/InputModal';
-import Button from '~/cross-app-components/Button';
 import {
     CREDENTIAL_NOTE_MAX_LENGTH,
     getNoteForOwnCredential,
 } from '~/utils/credentialHelper';
 import { identitiesSelector } from '~/features/IdentitySlice';
+import DisplayIdentityAttributes from './DisplayIdentityAttributes';
+import IconButton from '~/cross-app-components/IconButton';
 
 import styles from './CredentialInformation.module.scss';
-import DisplayIdentityAttributes from '../DisplayIdentityAttributes';
 
 interface Props {
     account: Account;
@@ -121,12 +121,11 @@ export default function CredentialInformation({ account, accountInfo }: Props) {
                                                 setShowEditNote(undefined)
                                             }
                                             trigger={
-                                                <Button
+                                                <IconButton
                                                     className={styles.editNote}
-                                                    clear
                                                 >
                                                     <EditIcon />
-                                                </Button>
+                                                </IconButton>
                                             }
                                             title="Set note for credential"
                                             buttonText="Submit"

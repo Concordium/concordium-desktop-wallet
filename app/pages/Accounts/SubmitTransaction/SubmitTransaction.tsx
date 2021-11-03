@@ -46,22 +46,20 @@ import PrintButton from '~/components/PrintButton';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 
-import styles from './SubmitTransfer.module.scss';
+import styles from './SubmitTransaction.module.scss';
 
-interface Location {
-    pathname: string;
-    state: Record<string, unknown>;
-}
-
-interface State {
+export interface SubmitTransactionLocationState<
+    CancelledState = Record<string, unknown>,
+    ConfirmedState = Record<string, unknown>
+> {
     transaction: string;
     account: Account;
-    cancelled: Location;
-    confirmed: Location;
+    cancelled: LocationDescriptorObject<CancelledState>;
+    confirmed: LocationDescriptorObject<ConfirmedState>;
 }
 
 interface Props {
-    location: LocationDescriptorObject<State>;
+    location: LocationDescriptorObject<SubmitTransactionLocationState>;
 }
 
 async function attachCompletedPayload(
@@ -149,7 +147,7 @@ async function attachCompletedPayload(
  * Receives transaction to sign, using the ledger,
  * and then submits it.
  */
-export default function SubmitTransfer({ location }: Props) {
+export default function SubmitTransaction({ location }: Props) {
     const dispatch = useDispatch();
     const global = useSelector(globalSelector);
     const accountInfoMap = useSelector(accountsInfoSelector);
@@ -229,21 +227,28 @@ export default function SubmitTransfer({ location }: Props) {
         const response = await sendTransaction(serializedTransaction);
 
         if (response) {
-            const convertedTransaction = await addPendingTransaction(
-                transaction,
-                transactionHash
-            );
-            monitorTransactionStatus(dispatch, convertedTransaction);
+            try {
+                // If an error happens here, it only means the transaction couldn't be added as pending, so no reason to show user an error.
+                const convertedTransaction = await addPendingTransaction(
+                    transaction,
+                    transactionHash
+                );
 
-            const confirmedStateWithHash = {
-                transactionHash,
-                ...confirmed.state,
-            };
-            const confirmedWithHash = {
-                ...confirmed,
-                state: confirmedStateWithHash,
-            };
-            dispatch(push(confirmedWithHash));
+                monitorTransactionStatus(dispatch, convertedTransaction);
+            } catch (e) {
+                // eslint-disable-next-line no-console
+                console.error(e);
+            } finally {
+                const confirmedStateWithHash = {
+                    transactionHash,
+                    ...confirmed.state,
+                };
+                const confirmedWithHash = {
+                    ...confirmed,
+                    state: confirmedStateWithHash,
+                };
+                dispatch(push(confirmedWithHash));
+            }
         } else {
             setRejected(true);
         }
@@ -257,7 +262,7 @@ export default function SubmitTransfer({ location }: Props) {
     return (
         <PageLayout>
             <PageLayout.Header>
-                <h1>Accounts | Submit Transfer</h1>
+                <h1>Accounts | Submit Transaction</h1>
             </PageLayout.Header>
             <PageLayout.Container
                 closeRoute={cancelled}
@@ -266,8 +271,8 @@ export default function SubmitTransfer({ location }: Props) {
             >
                 <SimpleErrorModal
                     show={rejected}
-                    header="Transfer rejected"
-                    content="Your transfer was rejected by the node."
+                    header="Transaction rejected"
+                    content="Your transaction was rejected by the node."
                     onClick={() => setRejected(false)}
                 />
                 <div className={styles.grid}>

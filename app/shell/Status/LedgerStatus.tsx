@@ -18,12 +18,14 @@ enum Status {
     NewDevice = 'New Device',
     OutDated = 'Outdated',
     Connected = 'Connected',
+    OpenApp = 'Open app',
 }
 
 function getStatusImage(status: Status) {
     switch (status) {
         case Status.NoWallet:
         case Status.OutDated:
+        case Status.OpenApp:
             return RejectedImage;
         case Status.NewDevice:
         case Status.Connected:
@@ -95,6 +97,9 @@ export default function LedgerStatus(): JSX.Element {
             setDisconnected(false);
             setStatusText(Status.Connected);
             submitHandler();
+        } else if (status === LedgerStatusType.OPEN_APP) {
+            setDisconnected(true);
+            setStatusText(Status.OpenApp);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status]);

@@ -2,7 +2,7 @@ import React from 'react';
 import Modal from '~/cross-app-components/Modal';
 import { Account } from '~/utils/types';
 import { noOp } from '~/utils/basicHelpers';
-import DecryptComponent from './DecryptComponent';
+import DecryptComponent from '../../DecryptComponent';
 
 export interface DecryptModalInput {
     show: boolean;

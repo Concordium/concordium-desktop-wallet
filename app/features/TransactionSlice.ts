@@ -267,29 +267,18 @@ export const updateTransactions = createAsyncThunk<
         { onFirstLoop, onError },
         { getState, dispatch, signal, requestId }
     ) => {
-        const release = await updateLock.acquire();
-
-        const state = getState() as RootState;
-        const account = chosenAccountSelector(state);
-
-        if (!account) {
-            return;
-        }
-
         const rejectIfInvalid = (reason: string) => {
             if (signal.aborted || latestUpdateRequestId !== requestId) {
-                release();
                 throw new Error(reason);
             }
         };
 
-        async function updateSubroutine(maxId: bigint, firstLoop = false) {
-            if (!account) {
-                throw new Error('Account missing');
-            }
-
+        async function updateSubroutine(
+            maxId: bigint,
+            address: string,
+            firstLoop = false
+        ) {
             let result;
-            const { address } = account;
 
             rejectIfInvalid('Update aborted before fetch');
 
@@ -325,15 +314,7 @@ export const updateTransactions = createAsyncThunk<
 
             rejectIfInvalid('Update aborted before reload');
 
-            const maxIdInStore = state.transactions.transactions
-                .map((t) => t.id)
-                .filter(isDefined)
-                .reduce<string | undefined>(
-                    (top, cur) => (!!top && top > cur ? top : cur),
-                    undefined
-                );
-
-            if (maxIdInStore !== result.newMaxId.toString()) {
+            if (maxId !== result.newMaxId) {
                 const reload = dispatch(reloadTransactions());
 
                 signal.onabort = () => reload.abort();
@@ -341,7 +322,6 @@ export const updateTransactions = createAsyncThunk<
             }
 
             if (maxId === result.newMaxId || result.isFinished) {
-                release();
                 return;
             }
 
@@ -349,13 +329,28 @@ export const updateTransactions = createAsyncThunk<
                 onFirstLoop();
             }
 
-            await updateSubroutine(result.newMaxId);
+            await updateSubroutine(result.newMaxId, address);
         }
 
-        await updateSubroutine(
-            account.maxTransactionId ? BigInt(account.maxTransactionId) : 0n,
-            true
-        );
+        const release = await updateLock.acquire();
+        try {
+            const state = getState() as RootState;
+            const account = chosenAccountSelector(state);
+
+            if (!account) {
+                return;
+            }
+
+            await updateSubroutine(
+                account.maxTransactionId
+                    ? BigInt(account.maxTransactionId)
+                    : 0n,
+                account.address,
+                true
+            );
+        } finally {
+            release();
+        }
     }
 );
 
