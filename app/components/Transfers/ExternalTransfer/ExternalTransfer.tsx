@@ -119,7 +119,9 @@ export default function ExternalTransfer({
             {subLocation === locations.pickRecipient && (
                 <>
                     <div className="mH30">
-                        <h3 className="textCenter">Select recipient</h3>
+                        <h3 className="textCenter bodyEmphasized">
+                            Select recipient
+                        </h3>
                         <PickRecipient
                             pickRecipient={selectRecipient}
                             senderAddress={senderAddress}

@@ -58,7 +58,7 @@ export default function withChainData<TProps extends ChainData>(
 export function ensureChainData<TProps extends ChainData>(
     Component: ComponentType<TProps>,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    FallBack: ComponentType<any>
+    FallBack: ComponentType<any> = () => null
 ) {
     return withChainData<TProps>((props) => {
         const { blockSummary } = props;

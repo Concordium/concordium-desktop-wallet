@@ -23,10 +23,15 @@ export default function PendingChange({ pending }: PendingChangeProps) {
     );
 
     return pending.change === 'RemoveBaker' ? (
-        <>Baker is being removed {changeAtDate}</>
+        <>
+            Baker is being removed on
+            <br />
+            {changeAtDate}
+        </>
     ) : (
         <>
-            Stake is set to be reduced to {displayAsGTU(pending.newStake)} at{' '}
+            Stake is set to be reduced to {displayAsGTU(pending.newStake)} on
+            <br />
             {changeAtDate}
         </>
     );

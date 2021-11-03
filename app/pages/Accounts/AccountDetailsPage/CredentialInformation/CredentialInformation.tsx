@@ -21,10 +21,10 @@ import {
     getNoteForOwnCredential,
 } from '~/utils/credentialHelper';
 import { identitiesSelector } from '~/features/IdentitySlice';
+import DisplayIdentityAttributes from './DisplayIdentityAttributes';
+import IconButton from '~/cross-app-components/IconButton';
 
 import styles from './CredentialInformation.module.scss';
-import DisplayIdentityAttributes from '../DisplayIdentityAttributes';
-import IconButton from '~/cross-app-components/IconButton';
 
 interface CredentialOfAccount
     extends Omit<CredentialDeploymentInformation, 'regId'> {

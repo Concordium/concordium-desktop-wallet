@@ -5,13 +5,13 @@ import Card from '~/cross-app-components/Card';
 import withExchangeRate from './withExchangeRate';
 import withNonce from './withNonce';
 
-interface Extra {
+export interface ExchangeRateAndNonceProps {
     exchangeRate?: Fraction;
     nonce?: string;
     account: Account;
 }
 
-function ensureExchangeRateAndNonce<TProps extends Extra>(
+function ensureExchangeRateAndNonce<TProps extends ExchangeRateAndNonceProps>(
     Component: ComponentType<TProps>
 ): ComponentType<TProps> {
     const ensureExchangeRateAndNonceComponent = (props: TProps) => {
@@ -34,8 +34,8 @@ function ensureExchangeRateAndNonce<TProps extends Extra>(
     return ensureExchangeRateAndNonceComponent;
 }
 
-export default function withExchangeRateAndNonce<TProps extends Extra>(
-    comp: ComponentType<TProps>
-) {
+export default function withExchangeRateAndNonce<
+    TProps extends ExchangeRateAndNonceProps
+>(comp: ComponentType<TProps>) {
     return withNonce(withExchangeRate(ensureExchangeRateAndNonce(comp)));
 }
