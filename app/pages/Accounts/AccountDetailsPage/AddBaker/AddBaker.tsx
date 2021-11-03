@@ -81,7 +81,7 @@ const AddBaker = ensureExchangeRateAndNonce(
         );
 
         const next = useCallback(
-            async (bakerKeys: BakerKeys) => {
+            (bakerKeys: BakerKeys) => {
                 if (!account) {
                     throw new Error('No account');
                 }

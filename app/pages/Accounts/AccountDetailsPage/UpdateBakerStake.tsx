@@ -70,12 +70,12 @@ const UpdateBakerStakeForm = ensureExchangeRateAndNonce(
         const cooldownUntil = useCalcBakerStakeCooldownUntil();
 
         const submit = useCallback(
-            async ({ stake }: FormModel) => {
+            ({ stake }: FormModel) => {
                 if (!account) {
                     throw new Error('No account selected');
                 }
 
-                const transaction = await createUpdateBakerStakeTransaction(
+                const transaction = createUpdateBakerStakeTransaction(
                     account.address,
                     { stake: toMicroUnits(stake) },
                     nonce

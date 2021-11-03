@@ -92,12 +92,12 @@ export default ensureExchangeRateAndNonce(function UpdateBakerKeys({
     );
 
     const next = useCallback(
-        async (bakerKeys: BakerKeys) => {
+        (bakerKeys: BakerKeys) => {
             if (!account) {
                 throw new Error('No account selected');
             }
 
-            const transaction = await makeTransaction(bakerKeys);
+            const transaction = makeTransaction(bakerKeys);
             const serialized = stringify(transaction);
             const state: SubmitTransactionLocationState = {
                 account,

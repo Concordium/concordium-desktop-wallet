@@ -46,12 +46,12 @@ export default ensureExchangeRateAndNonce(function UpdateBakerRestake({
     const dispatch = useDispatch();
 
     const submit = useCallback(
-        async ({ restake }: FormModel) => {
+        ({ restake }: FormModel) => {
             if (!account) {
                 throw new Error('No account selected');
             }
 
-            const transaction = await createUpdateBakerRestakeEarningsTransaction(
+            const transaction = createUpdateBakerRestakeEarningsTransaction(
                 account.address,
                 { restakeEarnings: restake },
                 nonce
