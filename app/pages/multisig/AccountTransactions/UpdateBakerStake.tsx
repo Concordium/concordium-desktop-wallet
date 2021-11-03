@@ -30,7 +30,6 @@ import SignTransaction from './SignTransaction';
 import PickAmount from './PickAmount';
 import UpdateBakerStakeProposalDetails from './proposal-details/UpdateBakerStakeProposalDetails';
 import { microGtuToGtu, toMicroUnits } from '~/utils/gtu';
-import InputTimestamp from '~/components/Form/InputTimestamp';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import PendingChange from '~/components/BakerPendingChange/BakerPendingChange';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
@@ -42,6 +41,7 @@ import {
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
 import { ensureChainData, ChainData } from '../common/withChainData';
+import DatePicker from '~/components/Form/DatePicker';
 
 function toMicroUnitsSafe(str: string | undefined) {
     if (str === undefined) {
@@ -224,7 +224,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                                         Choose the expiry date for the
                                         transaction.
                                     </p>
-                                    <InputTimestamp
+                                    <DatePicker
                                         label="Transaction expiry time"
                                         name="expiry"
                                         isInvalid={
@@ -233,6 +233,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                                         error={expiryTimeError}
                                         value={expiryTime}
                                         onChange={setExpiryTime}
+                                        minDate={new Date()}
                                     />
                                     <p className="mB0">
                                         Committing the transaction after this

@@ -23,7 +23,6 @@ import {
 } from '~/utils/dataHooks';
 import SignTransaction from './SignTransaction';
 import RemoveBakerProposalDetails from './proposal-details/RemoveBakerProposalDetails';
-import InputTimestamp from '~/components/Form/InputTimestamp';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import PendingChange from '~/components/BakerPendingChange/BakerPendingChange';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
@@ -34,6 +33,7 @@ import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
+import DatePicker from '~/components/Form/DatePicker';
 
 interface PageProps {
     exchangeRate: Fraction;
@@ -169,7 +169,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                         Choose the expiry date for the
                                         transaction.
                                     </p>
-                                    <InputTimestamp
+                                    <DatePicker
                                         label="Transaction expiry time"
                                         name="expiry"
                                         isInvalid={
@@ -178,6 +178,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                         error={expiryTimeError}
                                         value={expiryTime}
                                         onChange={setExpiryTime}
+                                        minDate={new Date()}
                                     />
                                     <p className="mB0">
                                         Committing the transaction after this

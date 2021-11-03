@@ -33,7 +33,6 @@ import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import { DownloadBakerCredentialsStep } from './AddBaker';
 import UpdateBakerKeysProposalDetails from './proposal-details/UpdateBakerKeysProposalDetails';
-import InputTimestamp from '~/components/Form/InputTimestamp';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
@@ -42,6 +41,7 @@ import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
+import DatePicker from '~/components/Form/DatePicker';
 
 const pageTitle = 'Multi Signature Transactions | Update Baker Keys';
 
@@ -226,7 +226,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                                         Choose the expiry date for the
                                         transaction.
                                     </p>
-                                    <InputTimestamp
+                                    <DatePicker
                                         label="Transaction expiry time"
                                         name="expiry"
                                         isInvalid={
@@ -235,6 +235,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                                         error={expiryTimeError}
                                         value={expiryTime}
                                         onChange={setExpiryTime}
+                                        minDate={new Date()}
                                     />
                                     <p className="mB0">
                                         Committing the transaction after this

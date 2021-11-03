@@ -29,7 +29,6 @@ import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import LoadingComponent from '../LoadingComponent';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { validateFee } from '~/utils/transactionHelpers';
-import InputTimestamp from '~/components/Form/InputTimestamp';
 import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
 import {
@@ -42,6 +41,7 @@ import { CredentialDetails, CredentialStatus } from './util';
 import DisplayAddress from '~/components/DisplayAddress';
 
 import styles from './UpdateAccountCredentials.module.scss';
+import DatePicker from '~/components/Form/DatePicker';
 
 const placeHolderText = (
     <h2 className={styles.LargePropertyValue}>To be determined</h2>
@@ -563,7 +563,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                                 }
                                 render={() => (
                                     <div>
-                                        <InputTimestamp
+                                        <DatePicker
                                             label="Transaction expiry time"
                                             name="expiry"
                                             isInvalid={
@@ -572,6 +572,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                                             error={expiryTimeError}
                                             value={expiryTime}
                                             onChange={setExpiryTime}
+                                            minDate={new Date()}
                                         />
                                         <p>
                                             Choose the expiry date for the
