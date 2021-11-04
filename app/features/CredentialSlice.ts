@@ -18,7 +18,7 @@ import {
     MakeOptional,
     CommitmentsRandomness,
 } from '~/utils/types';
-import { createNewCredential } from '~/utils/credentialHelper';
+import { createNewCredential, getCredId } from '~/utils/credentialHelper';
 import { ExternalCredential } from '~/database/types';
 import {
     deleteExternalCredentials,
@@ -210,12 +210,7 @@ export async function initializeGenesisCredential(
 ) {
     const credentialOnChain = Object.entries(
         accountInfo.accountCredentials
-    ).find(
-        ([, cred]) =>
-            (cred.value.type === 'initial'
-                ? cred.value.contents.regId
-                : cred.value.contents.credId) === credential.credId
-    );
+    ).find(([, cred]) => getCredId(cred) === credential.credId);
     if (!credentialOnChain) {
         throw new Error(
             `Unexpected missing reference to genesis credential on chain, with credId: ${credential.credId}`
@@ -247,10 +242,7 @@ export async function updateCredentialsStatus(
     const onChainCredentials = Object.entries(
         accountInfo.accountCredentials
     ).map(([index, versioned]) => {
-        const credId =
-            versioned.value.type === 'initial'
-                ? versioned.value.contents.regId
-                : versioned.value.contents.credId;
+        const credId = getCredId(versioned);
         return {
             ...versioned.value.contents,
             credId,

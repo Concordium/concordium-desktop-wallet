@@ -499,7 +499,7 @@ export function getAddressFromCredentialId(credId: string): Promise<string> {
     });
 }
 
-export function getCredId(
+export function computeCredId(
     prfKeySeed: string,
     credentialNumber: number,
     global: Global

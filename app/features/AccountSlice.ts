@@ -43,6 +43,7 @@ import {
 import { hasPendingTransactions } from '~/database/TransactionDao';
 import { accountSimpleView, defaultAccount } from '~/database/PreferencesDao';
 import { toStringBigInts } from '~/utils/JSONHelper';
+import { getCredId } from '~/utils/credentialHelper';
 
 export interface AccountState {
     simpleView: boolean;
@@ -270,11 +271,9 @@ async function initializeGenesisAccount(
     accountInfo: AccountInfo
 ) {
     const localCredentials = await getCredentialsOfAccount(account.address);
-    const firstCredential = accountInfo.accountCredentials[0].value;
+    const firstCredential = accountInfo.accountCredentials[0];
     const address = await getAddressFromCredentialId(
-        firstCredential.type === 'initial'
-            ? firstCredential.contents.regId
-            : firstCredential.contents.credId
+        getCredId(firstCredential)
     );
     const accountUpdate = {
         address,

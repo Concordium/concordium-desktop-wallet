@@ -15,6 +15,7 @@ import InputModal from '~/components/InputModal';
 import {
     CREDENTIAL_NOTE_MAX_LENGTH,
     getNoteForOwnCredential,
+    getCredId,
 } from '~/utils/credentialHelper';
 import { identitiesSelector } from '~/features/IdentitySlice';
 import DisplayIdentityAttributes from './DisplayIdentityAttributes';
@@ -41,19 +42,11 @@ export default function CredentialInformation({ account, accountInfo }: Props) {
         return null;
     }
 
-    const credentials = Object.values(accountInfo.accountCredentials)
-        .map((o) => o.value)
-        .map((cred) => {
+    const credentials = Object.values(accountInfo.accountCredentials).map(
+        (cred) => {
             const enrichedCred = {
-                ...cred.contents,
-                // The node returns the credId in the regId field for
-                // initial accounts, so we have to hack it a bit here.
-                // This can safely be removed, if the node is updated to
-                // be consistent and always use the credId field.
-                credId:
-                    cred.type === 'initial'
-                        ? cred.contents.regId
-                        : cred.contents.credId,
+                ...cred.value.contents,
+                credId: getCredId(cred),
                 isOwn: false,
                 note: undefined,
             };
@@ -69,7 +62,8 @@ export default function CredentialInformation({ account, accountInfo }: Props) {
                 getNoteForOwnCredential(identities, existingOwnCredential);
 
             return { ...enrichedCred, isOwn: !!existingOwnCredential, note };
-        });
+        }
+    );
 
     const submitNote = (credId: string) => (note: string) => {
         updateExternalCredential(dispatch, {
