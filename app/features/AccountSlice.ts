@@ -42,13 +42,13 @@ import {
 } from '../node/nodeHelpers';
 import { hasPendingTransactions } from '~/database/TransactionDao';
 import { accountSimpleView, defaultAccount } from '~/database/PreferencesDao';
-import { toStringBigInts } from '~/utils/JSONHelper';
+import { stringify, parse } from '~/utils/JSONHelper';
 import { getCredId } from '~/utils/credentialHelper';
 
 export interface AccountState {
     simpleView: boolean;
     accounts: Account[];
-    accountsInfo: Record<string, AccountInfo>;
+    accountsInfo: Record<string, string>;
     chosenAccountAddress: string;
     defaultAccount: string | undefined;
 }
@@ -166,7 +166,12 @@ export const initialAccountNameSelector = (identityId: number) => (
     )?.name;
 
 export const accountsInfoSelector = (state: RootState) =>
-    state.accounts.accountsInfo;
+    Object.entries(state.accounts.accountsInfo).reduce<
+        Record<string, AccountInfo>
+    >((acc, [addr, info]) => {
+        acc[addr] = parse(info) as AccountInfo;
+        return acc;
+    }, {});
 
 export const chosenAccountSelector = (state: RootState) =>
     state.accounts.accounts.find(
@@ -176,10 +181,14 @@ export const chosenAccountSelector = (state: RootState) =>
 export const chosenAccountInfoSelector = (
     state: RootState
 ): AccountInfo | undefined =>
-    state.accounts.accountsInfo?.[chosenAccountSelector(state)?.address ?? ''];
+    parse(
+        state.accounts.accountsInfo?.[
+            chosenAccountSelector(state)?.address ?? ''
+        ]
+    );
 
 export const accountInfoSelector = (account?: Account) => (state: RootState) =>
-    state.accounts.accountsInfo?.[account?.address ?? ''];
+    parse(state.accounts.accountsInfo?.[account?.address ?? '']);
 
 export const defaultAccountSelector = (state: RootState) =>
     state.accounts.accounts.find(
@@ -359,7 +368,7 @@ export async function loadAccountInfos(
     dispatch: Dispatch,
     resetInfo = true
 ) {
-    const map: Record<string, AccountInfo> = {};
+    const map: Record<string, string> = {};
 
     // We don't check that the address is valid for genesis account, because they have a credId as placeholder.
     // The lookup for accountInfo will still succeed, because the node will, given an invalid address, interpret it as a credId,
@@ -391,14 +400,15 @@ export async function loadAccountInfos(
                 account,
                 accountInfo
             );
-            map[address] = toStringBigInts(accountInfo);
+            map[address] = stringify(accountInfo);
         } else {
             if (!accountInfo) {
                 throw new Error(
                     'A confirmed account does not exist on the connected node. Please check that your node is up to date with the blockchain.'
                 );
             }
-            map[account.address] = toStringBigInts(accountInfo);
+
+            map[account.address] = stringify(accountInfo);
             await updateAccountFromAccountInfo(dispatch, account, accountInfo);
         }
     }
@@ -429,7 +439,7 @@ export async function updateAccountInfo(account: Account, dispatch: Dispatch) {
         return dispatch(
             updateAccountInfoEntry({
                 address: account.address,
-                accountInfo: toStringBigInts(accountInfo),
+                accountInfo: stringify(accountInfo),
             })
         );
     }

@@ -1,23 +1,32 @@
 const types = {
     BigInt: 'bigint',
+    Date: 'date',
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function stringify(input: any) {
-    return JSON.stringify(input, (_, v) => {
+    return JSON.stringify(input, function (k, v) {
         if (typeof v === types.BigInt) {
             return { '@type': types.BigInt, value: v.toString() };
+        }
+        if (this[k] instanceof Date) {
+            return { '@type': types.Date, value: v };
         }
         return v;
     });
 }
 
-export function parse(input: string) {
+export function parse(input: string | undefined) {
+    if (!input) {
+        return undefined;
+    }
     return JSON.parse(input, (_, v) => {
         if (v) {
             switch (v['@type']) {
                 case types.BigInt:
                     return BigInt(v.value);
+                case types.Date:
+                    return new Date(v.value);
                 default:
                     return v;
             }
@@ -39,24 +48,4 @@ export function intToString(jsonStruct: string, key: string) {
         new RegExp(`"${key}":\\s*([0-9]+)`, 'g'),
         `"${key}":"$1"`
     );
-}
-
-// Given any object/array, turn all bigint fields to strings;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function toStringBigInts(object: any): any {
-    if (Array.isArray(object)) {
-        return object.map(toStringBigInts);
-    }
-    if (typeof object === 'object' && object !== null) {
-        return Object.fromEntries(
-            Object.entries(object).map(([key, value]) => [
-                key,
-                toStringBigInts(value),
-            ])
-        );
-    }
-    if (typeof object === 'bigint') {
-        return object.toString();
-    }
-    return object;
 }
