@@ -15,7 +15,6 @@ import {
     SaveDialogOptions,
     SaveDialogReturnValue,
 } from 'electron';
-import { PeerListResponse } from '~/proto/concordium_p2p_rpc_pb';
 import {
     Account,
     Identity,
@@ -103,7 +102,7 @@ export type GRPC = {
     ) => Promise<AccountInfo | undefined>;
     getIdentityProviders: (blockHash: string) => Promise<IpInfo[] | undefined>;
     getAnonymityRevokers: (blockHash: string) => Promise<ArInfo[] | undefined>;
-    getPeerList: (includeBootstrappers: boolean) => Promise<PeerListResponse>;
+    getPeerList: (includeBootstrappers: boolean) => Promise<Uint8Array>; // We have to serialize/deserialize this
 };
 
 export type FileMethods = {

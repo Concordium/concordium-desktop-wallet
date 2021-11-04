@@ -1,3 +1,5 @@
+import { PeerListResponse } from '~/proto/concordium_p2p_rpc_pb';
+
 /**
  * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
  */
@@ -33,8 +35,10 @@ export function sendTransaction(
     return window.grpc.sendTransaction(transactionPayload, networkId);
 }
 
-export function getPeerList(includeBootstrappers = false) {
-    return window.grpc.getPeerList(includeBootstrappers);
+export async function getPeerList(includeBootstrappers = false) {
+    return PeerListResponse.deserializeBinary(
+        await window.grpc.getPeerList(includeBootstrappers)
+    );
 }
 
 export const getBlockSummary = wrapper(

@@ -83,8 +83,8 @@ const exposedMethods: GRPC = {
         client.getIdentityProviders(blockHash),
     getAnonymityRevokers: (blockHash: string) =>
         client.getAnonymityRevokers(blockHash),
-    getPeerList: (includeBootstrappers: boolean) =>
-        client.getPeerList(includeBootstrappers),
+    getPeerList: async (includeBootstrappers: boolean) =>
+        (await client.getPeerList(includeBootstrappers)).serializeBinary(),
     // Creates a standalone GRPC client for testing the connection
     // to a node. This is used to verify that when changing connection
     // that the new node is on the same blockchain as the wallet was previously connected to.
