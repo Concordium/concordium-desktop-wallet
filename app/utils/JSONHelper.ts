@@ -1,19 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 const types = {
     BigInt: 'bigint',
     Date: 'date',
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function replacer(this: any, k: string, v: any) {
+    if (typeof v === types.BigInt) {
+        return { '@type': types.BigInt, value: v.toString() };
+    }
+    if (this[k] instanceof Date) {
+        return { '@type': types.Date, value: v };
+    }
+    return v;
+}
+
 export function stringify(input: any) {
-    return JSON.stringify(input, function (k, v) {
-        if (typeof v === types.BigInt) {
-            return { '@type': types.BigInt, value: v.toString() };
-        }
-        if (this[k] instanceof Date) {
-            return { '@type': types.Date, value: v };
-        }
-        return v;
-    });
+    return JSON.stringify(input, replacer);
 }
 
 export function parse(input: string | undefined) {
