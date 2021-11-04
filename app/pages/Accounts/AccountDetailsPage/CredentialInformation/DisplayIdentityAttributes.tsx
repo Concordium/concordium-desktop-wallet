@@ -15,8 +15,7 @@ interface Props {
 }
 
 /**
- *  DIsplays the revealed Attributes of the chosen account.
- *  TODO: Use local credential to get attributes?
+ *  Displays the provided revealed attributes.
  */
 export default function DisplayIdentityAttributes({
     revealedAttributes,

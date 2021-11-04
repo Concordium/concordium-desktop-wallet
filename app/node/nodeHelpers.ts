@@ -1,4 +1,7 @@
-import { TransactionSummary } from '@concordium/node-sdk';
+import {
+    TransactionStatusEnum,
+    TransactionSummary,
+} from '@concordium/node-sdk/lib/src/types';
 import {
     getConsensusStatus,
     getAccountInfo,
@@ -152,13 +155,14 @@ export async function getStatus(
                 // interval and try again.
                 return;
             }
+            // if there is no response, the transaction is absent.
             if (!response) {
                 clearInterval(interval);
                 resolve({ status: TransactionStatus.Rejected, outcomes: {} });
                 return;
             }
 
-            if (response.status === 'finalized') {
+            if (response.status === TransactionStatusEnum.Finalized) {
                 clearInterval(interval);
                 resolve({
                     status: TransactionStatus.Finalized,
