@@ -39,7 +39,6 @@ test('parse/stringify should handle an object with a bigint field and preserves 
 
 test('parse/stringify handles a Date and preserves the value', () => {
     const x = new Date('2021-11-05T07:07:15.407Z');
-    console.log(parse(stringify(x)));
     expect(parse(stringify(x))).toStrictEqual(x);
 });
 
