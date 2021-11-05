@@ -44,6 +44,7 @@ import { hasPendingTransactions } from '~/database/TransactionDao';
 import { accountSimpleView, defaultAccount } from '~/database/PreferencesDao';
 import { stringify, parse } from '~/utils/JSONHelper';
 import { getCredId } from '~/utils/credentialHelper';
+import { mapRecordValues } from '~/utils/basicHelpers';
 
 export interface AccountState {
     simpleView: boolean;
@@ -112,7 +113,10 @@ const accountsSlice = createSlice({
                     state.defaultAccount || state.accounts[0]?.address || '';
             }
         },
-        setAccountInfos: (state, map) => {
+        setAccountInfos: (
+            state,
+            map: PayloadAction<Record<string, string>>
+        ) => {
             state.accountsInfo = map.payload;
         },
         setDefaultAccount(state, input: PayloadAction<Hex | undefined>) {
@@ -122,10 +126,16 @@ const accountsSlice = createSlice({
                 state.chosenAccountAddress = input.payload;
             }
         },
-        addToAccountInfos: (state, map) => {
+        addToAccountInfos: (
+            state,
+            map: PayloadAction<Record<string, string>>
+        ) => {
             state.accountsInfo = { ...state.accountsInfo, ...map.payload };
         },
-        updateAccountInfoEntry: (state, update) => {
+        updateAccountInfoEntry: (
+            state,
+            update: PayloadAction<{ address: string; accountInfo: string }>
+        ) => {
             const { address, accountInfo } = update.payload;
             state.accountsInfo[address] = accountInfo;
         },
@@ -166,12 +176,7 @@ export const initialAccountNameSelector = (identityId: number) => (
     )?.name;
 
 export const accountsInfoSelector = (state: RootState) =>
-    Object.entries(state.accounts.accountsInfo).reduce<
-        Record<string, AccountInfo>
-    >((acc, [addr, info]) => {
-        acc[addr] = parse(info) as AccountInfo;
-        return acc;
-    }, {});
+    mapRecordValues(state.accounts.accountsInfo, parse);
 
 export const chosenAccountSelector = (state: RootState) =>
     state.accounts.accounts.find(
@@ -197,14 +202,44 @@ export const defaultAccountSelector = (state: RootState) =>
 
 export const {
     chooseAccount,
-    updateAccounts,
-    setAccountInfos,
-    updateAccountInfoEntry,
-    updateAccountFields,
     nextConfirmedAccount,
     previousConfirmedAccount,
-    addToAccountInfos,
 } = accountsSlice.actions;
+
+const { updateAccounts, updateAccountFields } = accountsSlice.actions;
+
+function updateAccountInfoEntry(
+    dispatch: Dispatch,
+    address: string,
+    accountInfo: AccountInfo
+) {
+    dispatch(
+        accountsSlice.actions.updateAccountInfoEntry({
+            address,
+            accountInfo: stringify(accountInfo),
+        })
+    );
+}
+
+function setAccountInfos(
+    dispatch: Dispatch,
+    infos: Record<string, AccountInfo>
+) {
+    dispatch(
+        accountsSlice.actions.setAccountInfos(mapRecordValues(infos, stringify))
+    );
+}
+
+function addToAccountInfos(
+    dispatch: Dispatch,
+    infos: Record<string, AccountInfo>
+) {
+    dispatch(
+        accountsSlice.actions.addToAccountInfos(
+            mapRecordValues(infos, stringify)
+        )
+    );
+}
 
 // Load accounts into state, and updates their infos
 export async function loadAccounts(dispatch: Dispatch) {
@@ -368,7 +403,7 @@ export async function loadAccountInfos(
     dispatch: Dispatch,
     resetInfo = true
 ) {
-    const map: Record<string, string> = {};
+    const map: Record<string, AccountInfo> = {};
 
     // We don't check that the address is valid for genesis account, because they have a credId as placeholder.
     // The lookup for accountInfo will still succeed, because the node will, given an invalid address, interpret it as a credId,
@@ -400,7 +435,7 @@ export async function loadAccountInfos(
                 account,
                 accountInfo
             );
-            map[address] = stringify(accountInfo);
+            map[address] = accountInfo;
         } else {
             if (!accountInfo) {
                 throw new Error(
@@ -408,14 +443,14 @@ export async function loadAccountInfos(
                 );
             }
 
-            map[account.address] = stringify(accountInfo);
+            map[account.address] = accountInfo;
             await updateAccountFromAccountInfo(dispatch, account, accountInfo);
         }
     }
     if (resetInfo) {
-        return dispatch(setAccountInfos(map));
+        return setAccountInfos(dispatch, map);
     }
-    return dispatch(addToAccountInfos(map));
+    return addToAccountInfos(dispatch, map);
 }
 
 /**
@@ -426,7 +461,7 @@ export async function updateAccountInfoOfAddress(
     dispatch: Dispatch
 ) {
     const accountInfo = await getAccountInfoOfAddress(address);
-    return dispatch(updateAccountInfoEntry({ address, accountInfo }));
+    return updateAccountInfoEntry(dispatch, address, accountInfo);
 }
 
 /**
@@ -436,12 +471,7 @@ export async function updateAccountInfo(account: Account, dispatch: Dispatch) {
     const accountInfo = await getAccountInfoOfAddress(account.address);
     if (accountInfo && account.status === AccountStatus.Confirmed) {
         await updateAccountFromAccountInfo(dispatch, account, accountInfo);
-        return dispatch(
-            updateAccountInfoEntry({
-                address: account.address,
-                accountInfo: stringify(accountInfo),
-            })
-        );
+        return updateAccountInfoEntry(dispatch, account.address, accountInfo);
     }
     return Promise.resolve();
 }
