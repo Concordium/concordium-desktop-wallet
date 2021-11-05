@@ -52,7 +52,11 @@ export default withAccountSync(function DetailsPage() {
                         component={BuildSchedule}
                     />
                     <Route path={routes.ACCOUNTS_ADDRESS}>
-                        <ShowAccountAddress account={account} asCard />
+                        <ShowAccountAddress
+                            account={account}
+                            asCard
+                            allowVerify
+                        />
                     </Route>
                     <Route path={routes.ACCOUNTS_INSPECTRELEASESCHEDULE}>
                         <ShowReleaseSchedule accountInfo={accountInfo} />

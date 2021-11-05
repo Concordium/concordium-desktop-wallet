@@ -19,6 +19,7 @@ import styles from './Accounts.module.scss';
 interface Props extends ClassName {
     account: Account;
     asCard?: boolean;
+    allowVerify?: boolean;
 }
 
 /**
@@ -28,6 +29,7 @@ export default function ShowAccountAddress({
     className,
     account,
     asCard = false,
+    allowVerify = false,
 }: Props) {
     const dispatch = useDispatch();
     const Component = asCard ? Card : 'div';
@@ -56,7 +58,7 @@ export default function ShowAccountAddress({
                 />
                 <CopyButton className="mL20" value={account.address} />
             </div>
-            <VerifyAddress account={account} />
+            {allowVerify && <VerifyAddress account={account} />}
         </Component>
     );
 }
