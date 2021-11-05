@@ -1,13 +1,16 @@
+import { Buffer } from 'buffer/';
 import { Transport } from './Transport';
-import pathAsBuffer from './Path';
 
-const INS_VERIFY_ADDRESS = 0x36;
+const INS_VERIFY_ADDRESS = 0x00;
 
 export default async function verifyAddress(
     transport: Transport,
-    path: number[]
+    identity: number,
+    credentialNumber: number
 ): Promise<void> {
-    const data = pathAsBuffer(path);
+    const data = Buffer.alloc(8);
+    data.writeInt32BE(identity, 0);
+    data.writeInt32BE(credentialNumber, 4);
     const p1 = 0x00;
     const p2 = 0x00;
 

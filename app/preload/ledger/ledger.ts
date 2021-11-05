@@ -44,8 +44,8 @@ export default function exposedMethods(
             getLedgerClient().getPrfKeyRecovery(identity),
         getPrfKeyDecrypt: (identity: number) =>
             getLedgerClient().getPrfKeyDecrypt(identity),
-        verifyAddress: (keypath: number[]) =>
-            getLedgerClient().verifyAddress(keypath),
+        verifyAddress: (identity: number, credentialNumber: number) =>
+            getLedgerClient().verifyAddress(identity, credentialNumber),
         signTransfer: (transaction: AccountTransaction, keypath: number[]) => {
             return getLedgerClient().signTransfer(transaction, keypath);
         },

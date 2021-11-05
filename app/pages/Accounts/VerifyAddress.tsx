@@ -8,7 +8,6 @@ import MessageModal from '~/components/MessageModal';
 import Ledger from '~/components/ledger/Ledger';
 import { asyncNoOp } from '~/utils/basicHelpers';
 import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
-import { getAccountPath } from '~/features/ledger/Path';
 import { Account, ClassName } from '~/utils/types';
 
 import styles from './Accounts.module.scss';
@@ -44,13 +43,10 @@ export default function VerifyAddress({ account, className }: Props) {
         if (credential.credentialIndex !== 0) {
             setShowWarning(true);
         } else {
-            const path = getAccountPath({
-                identityIndex: credential.identityNumber,
-                accountIndex: credential.credentialNumber,
-                signatureIndex: 0, // Signature index is not used.
-            });
-
-            await ledger.verifyAddress(path);
+            await ledger.verifyAddress(
+                credential.identityNumber,
+                credential.credentialNumber
+            );
         }
     }
 
