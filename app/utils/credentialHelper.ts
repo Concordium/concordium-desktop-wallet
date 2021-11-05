@@ -103,13 +103,13 @@ export function getNoteForOwnCredential(
 }
 
 /**
- * Given a versioned credential, reutrns the credId.
+ * Given a versioned credential, returns the credId.
  */
 export function getCredId(
     cred: Versioned<InitialAccountCredential | NormalAccountCredential>
 ) {
     if (cred.v !== 0) {
-        throw new Error('Unsupprted credential version');
+        throw new Error('Unsupported credential version');
     }
     return cred.value.type === 'initial'
         ? cred.value.contents.regId
