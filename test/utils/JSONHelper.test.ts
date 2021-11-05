@@ -1,9 +1,4 @@
-import {
-    intToString,
-    parse,
-    stringify,
-    toStringBigInts,
-} from '../../app/utils/JSONHelper';
+import { intToString, parse, stringify } from '../../app/utils/JSONHelper';
 
 test('parse/stringify handles a number', () => {
     const x = 5;
@@ -20,7 +15,7 @@ test('parse/stringify handles a bigint and preserves the value', () => {
     expect(parse(stringify(x))).toBe(5n);
 });
 
-test('parse/stringify should not convert strings, that corresponds bigint literals, to bigints.', () => {
+test('parse/stringify should not convert strings, that corresponds to bigint literals, to bigints.', () => {
     const x = '5n';
     expect(parse(stringify(x))).toBe('5n');
 });
@@ -42,6 +37,34 @@ test('parse/stringify should handle an object with a bigint field and preserves 
     expect(y.text).toBe('2n');
 });
 
+test('parse/stringify handles a Date and preserves the value', () => {
+    const x = new Date('2021-11-05T07:07:15.407Z');
+    console.log(parse(stringify(x)));
+    expect(parse(stringify(x))).toStrictEqual(x);
+});
+
+test('parse/stringify should not convert strings, that corresponds to date literals, to dates.', () => {
+    const x = '2021-11-05T07:07:15.407Z';
+    expect(parse(stringify(x))).toBe('2021-11-05T07:07:15.407Z');
+});
+
+test('parse/stringify should handle a list of dates and preserve the values', () => {
+    const x = [
+        new Date('2021-11-05T07:07:15.407Z'),
+        new Date('2020-12-15T07:04:12.371Z'),
+    ];
+    const y = parse(stringify(x));
+    expect(y).toHaveLength(2);
+    expect(y[0]).toStrictEqual(new Date('2021-11-05T07:07:15.407Z'));
+    expect(y[1]).toStrictEqual(new Date('2020-12-15T07:04:12.371Z'));
+});
+
+test('parse/stringify should handle an object with a Date field and preserve the value', () => {
+    const x = { date: new Date('2021-11-05T07:07:15.407Z') };
+    const y = parse(stringify(x));
+    expect(y.date).toStrictEqual(new Date('2021-11-05T07:07:15.407Z'));
+});
+
 test('parse/stringify handles null', () => {
     const x = null;
     expect(parse(stringify(x))).toBeNull();
@@ -58,24 +81,4 @@ test('intToString converts large numbers', () => {
     const parsed = JSON.parse(jsonConverted);
     expect(parsed.nonce).toBe('900719925474099212');
     expect(parsed.number).toBe(10);
-});
-
-test('toStringBigInts convert bigint', () => {
-    expect(toStringBigInts(1n)).toBe('1');
-});
-
-test('toStringBigInts convert does not convert number', () => {
-    expect(toStringBigInts(1)).toBe(1);
-});
-
-test('toStringBigInts convert bigint field', () => {
-    expect(toStringBigInts({ v: 1n })).toStrictEqual({ v: '1' });
-});
-
-test('toStringBigInts convert bigint in array', () => {
-    expect(toStringBigInts(['a', 1n])).toStrictEqual(['a', '1']);
-});
-
-test('toStringBigInts convert bigint field in array', () => {
-    expect(toStringBigInts([{ v: 1n }])).toStrictEqual([{ v: '1' }]);
 });
