@@ -4,7 +4,7 @@ import { LocationDescriptorObject } from 'history';
 import PlusIcon from '@resources/svg/plus.svg';
 import { Account, TransactionFilter } from '~/utils/types';
 import PageLayout from '~/components/PageLayout';
-import AccountPageHeader from '../AccountPageHeader';
+import AccountPageHeader from '../../AccountPageHeader';
 import routes from '~/constants/routes.json';
 import Card from '~/cross-app-components/Card';
 import Button from '~/cross-app-components/Button';
@@ -19,11 +19,11 @@ import TransactionFilters, {
     TransactionFiltersRef,
 } from '~/components/TransactionFilters';
 import { containsEncrypted } from './util';
-import DecryptModal, { DecryptModalInput } from '../DecryptModal';
+import DecryptModal, { DecryptModalInput } from './DecryptModal';
 import MessageModal from '~/components/MessageModal';
+import Columns from '~/components/Columns';
 
 import styles from './AccountReport.module.scss';
-import Columns from '~/components/Columns';
 
 const decryptMessage = (name: string) =>
     `'${name}' has encrypted funds. To create a complete account report, we need to decrypt them. Otherwise this account will be skipped.`;

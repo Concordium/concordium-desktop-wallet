@@ -327,7 +327,6 @@ function CreateTransferProposal({
                                             onClickedRecipient={continueAction}
                                         />
                                         <UpsertAddress
-                                            clear
                                             className={styles.addRecipient}
                                             onSubmit={(e) => {
                                                 setRecipient(e);

@@ -1,9 +1,8 @@
 import React, { useEffect } from 'react';
-import clsx from 'clsx';
 import CopyIcon from '@resources/svg/copy.svg';
 import CheckmarkIcon from '@resources/svg/checkmark-blue.svg';
-import Button from '~/cross-app-components/Button';
 import { useTimeoutState } from '~/utils/hooks';
+import IconButton from '~/cross-app-components/IconButton';
 
 import styles from './CopyButton.module.scss';
 
@@ -37,12 +36,12 @@ export default function CopyButton({
     }
 
     return (
-        <Button
-            clear
-            className={clsx(className, styles.copyIcon)}
-            onClick={handleOnClick}
-        >
-            {copied ? <CheckmarkIcon width="18" /> : <CopyIcon width="18" />}
-        </Button>
+        <IconButton className={className} onClick={handleOnClick}>
+            {copied ? (
+                <CheckmarkIcon width="18" height="18" />
+            ) : (
+                <CopyIcon className={styles.copyIcon} width="18" height="18" />
+            )}
+        </IconButton>
     );
 }
