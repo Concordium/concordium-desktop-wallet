@@ -43,7 +43,7 @@ export default function DatePicker({
     onChange,
     onBlur,
     label,
-    placeholder = 'DD-MM-YYYY at HH:MM:SS',
+    placeholder = 'YYYY-MM-DD at HH:MM:SS',
     isInvalid,
     error,
     className,
@@ -68,7 +68,7 @@ export default function DatePicker({
                 timeCaption="Time"
                 timeFormat="HH:mm"
                 timeIntervals={15}
-                dateFormat="dd-MM-yyyy 'at' HH:mm:ss"
+                dateFormat="yyyy-MM-dd 'at' HH:mm:ss"
                 placeholderText={placeholder}
                 popperPlacement="bottom"
                 className={clsx(isInvalid && styles.fieldInvalid)}

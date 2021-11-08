@@ -1,4 +1,3 @@
-import { setHours, setMinutes, setSeconds, setMilliseconds } from 'date-fns';
 import { ensureNumberLength } from './basicHelpers';
 import { TimeStampUnit, YearMonth, YearMonthDate } from './types';
 
@@ -243,8 +242,12 @@ export function parseTime(timeStamp: string | bigint, unit?: TimeStampUnit) {
     return getFormattedDateString(dateFromTimeStamp(timeStamp, unit));
 }
 
-const stripTime = (date: Date) =>
-    setHours(setMinutes(setSeconds(setMilliseconds(date, 0), 0), 0), 0);
+const stripTime = (date: Date) => {
+    const clone = new Date(date.valueOf());
+    clone.setHours(0, 0, 0, 0);
+
+    return clone;
+};
 
 export const isDateEqual = (
     left: Date | undefined,
