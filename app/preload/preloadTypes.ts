@@ -24,6 +24,7 @@ import {
     IncomingTransaction,
     AccountAndCredentialPairs,
     TransactionFilter,
+    TransactionOrder,
 } from '~/utils/types';
 import { ExternalCredential } from '../database/types';
 import type LedgerCommands from './preloadLedgerTypes';
@@ -94,12 +95,11 @@ export type HttpMethods = {
     ) => Promise<HttpGetResponse<T>>;
     getTransactions: (
         address: string,
-        id: string
+        transactionFilter: TransactionFilter,
+        limit: number,
+        order: TransactionOrder,
+        id?: string
     ) => Promise<GetTransactionsResult>;
-    getNewestTransactions: (
-        address: string,
-        transactionFilter: TransactionFilter
-    ) => Promise<IncomingTransaction[]>;
     getIdProviders: () => Promise<IdentityProvider[]>;
     gtuDrop: (address: string) => Promise<string>;
 };
@@ -271,11 +271,6 @@ export type TransactionMethods = {
         transactions: TransferTransaction[]
     ) => Promise<TransferTransaction[]>;
     getTransaction: (id: string) => Promise<TransferTransaction | undefined>;
-    upsertTransactionsAndUpdateMaxId: (
-        transactions: TransferTransaction[],
-        address: string,
-        newMaxId: bigint
-    ) => Promise<TransferTransaction[]>;
 };
 
 export type WalletMethods = {

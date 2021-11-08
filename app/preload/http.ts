@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { ipcRenderer } from 'electron';
-import { walletProxytransactionLimit } from '../constants/externalConstants.json';
 import { getTargetNet, Net } from '~/utils/ConfigHelper';
 import urls from '../constants/urls.json';
 import { intToString, parse } from '~/utils/JSONHelper';
@@ -10,7 +9,7 @@ import {
     HttpGetResponse,
 } from '~/preload/preloadTypes';
 import ipcCommands from '~/constants/ipcCommands.json';
-import { IncomingTransaction, TransactionFilter } from '~/utils/types';
+import { TransactionFilter, TransactionOrder } from '~/utils/types';
 import { secondsSinceUnixEpoch } from '~/utils/timeHelpers';
 
 function getWalletProxy() {
@@ -47,10 +46,13 @@ async function httpsGet<T>(
  * Loads the newest transactions on the given address, using the given filters.
  * @param transactionFilter is used to filter the request, however only from/to date, and filters for reward types are currently used.
  */
-async function getNewestTransactions(
+async function getTransactions(
     address: string,
-    transactionFilter: TransactionFilter
-): Promise<IncomingTransaction[]> {
+    transactionFilter: TransactionFilter,
+    limitResults: number,
+    order: TransactionOrder,
+    id?: string
+): Promise<GetTransactionsResult> {
     let filters = '';
     if (transactionFilter.bakingReward === false) {
         filters += '&bakingRewards=n';
@@ -73,26 +75,16 @@ async function getNewestTransactions(
         );
         filters += `&blockTimeTo=${timestamp}`;
     }
-    const response = await walletProxy.get(
-        `/v1/accTransactions/${address}?limit=${walletProxytransactionLimit}&order=descending&includeRawRejectReason${filters}`,
-        {
-            transformResponse: (res) => parse(intToString(res, 'id')),
-        }
-    );
-    const { transactions } = response.data;
-    return transactions;
-}
 
-async function getTransactions(
-    address: string,
-    id: string
-): Promise<GetTransactionsResult> {
-    const response = await walletProxy.get(
-        `/v1/accTransactions/${address}?limit=${walletProxytransactionLimit}&from=${id}&includeRawRejectReason`,
-        {
-            transformResponse: (res) => parse(intToString(res, 'id')),
-        }
-    );
+    let proxyPath = `/v1/accTransactions/${address}?limit=${limitResults}&includeRawRejectReason${filters}&order=${order.toString()}`;
+    if (id) {
+        proxyPath += `&from=${id}`;
+    }
+
+    const response = await walletProxy.get(proxyPath, {
+        transformResponse: (res) => parse(intToString(res, 'id')),
+    });
+
     const { transactions, count, limit } = response.data;
     return { transactions, full: count === limit };
 }
@@ -105,7 +97,6 @@ async function gtuDrop(address: string) {
 const exposedMethods: HttpMethods = {
     get: httpsGet,
     getTransactions,
-    getNewestTransactions,
     getIdProviders: async () => {
         const response = await walletProxy.get('/v0/ip_info');
         return response.data;

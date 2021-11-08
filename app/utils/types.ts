@@ -1438,3 +1438,8 @@ export enum NodeConnectionStatus {
     Ready = 'Ready',
     Unavailable = 'Unavailable',
 }
+
+export enum TransactionOrder {
+    Ascending = 'ascending',
+    Descending = 'descending',
+}

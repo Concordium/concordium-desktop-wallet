@@ -6,10 +6,7 @@ import {
     TransactionStatus,
     TransferTransaction,
 } from '~/utils/types';
-import {
-    transactionTable,
-    accountsTable,
-} from '~/constants/databaseNames.json';
+import { transactionTable } from '~/constants/databaseNames.json';
 import { knex } from '~/database/knex';
 import { chunkArray, partition } from '~/utils/basicHelpers';
 import {
@@ -262,35 +259,6 @@ export async function insertTransactions(transactions: TransferTransaction[]) {
     return updatesAndAdditions.additions;
 }
 
-/**
- * Upserts the provided list of transactions into the database. The maximum
- * id is used to update the corresponding account.
- * @param transactions the array of transactions to upsert, coming from the wallet proxy post conversion
- * @param newMaxId the max of the id's in the array of transactions
- * @returns the newly added transactions, i.e. the array of transactions that were inserted and not updated
- */
-export async function upsertTransactionsAndUpdateMaxId(
-    transactions: TransferTransaction[],
-    address: string,
-    newMaxId: bigint
-) {
-    if (transactions.length === 0) {
-        return [];
-    }
-    const updatesAndAdditions = await findExistingTransactions(transactions);
-
-    await (await knex()).transaction(async (trx) => {
-        await upsertTransactionsTransactionally(updatesAndAdditions, trx);
-
-        await trx
-            .table(accountsTable)
-            .where({ address })
-            .update({ maxTransactionId: newMaxId.toString() });
-    });
-
-    return updatesAndAdditions.additions;
-}
-
 const exposedMethods: TransactionMethods = {
     getPending: getPendingTransactions,
     hasPending: hasPendingTransactions,
@@ -300,7 +268,6 @@ const exposedMethods: TransactionMethods = {
     update: updateTransaction,
     insert: insertTransactions,
     getTransaction,
-    upsertTransactionsAndUpdateMaxId,
 };
 
 export default exposedMethods;
