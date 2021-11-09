@@ -337,7 +337,7 @@ async function updateAccountFromAccountInfo(
 
     if (Object.keys(accountUpdate).length > 0) {
         await updateAccount(account.address, accountUpdate);
-        await dispatch(
+        dispatch(
             updateAccountFields({
                 address: account.address,
                 updatedFields: accountUpdate,

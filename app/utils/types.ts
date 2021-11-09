@@ -1443,3 +1443,8 @@ export enum TransactionOrder {
     Ascending = 'ascending',
     Descending = 'descending',
 }
+
+export interface DecryptedAmount {
+    transactionHash: string;
+    amount: string;
+}

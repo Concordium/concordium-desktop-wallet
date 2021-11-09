@@ -25,6 +25,7 @@ import {
     AccountAndCredentialPairs,
     TransactionFilter,
     TransactionOrder,
+    DecryptedAmount,
 } from '~/utils/types';
 import { ExternalCredential } from '../database/types';
 import type LedgerCommands from './preloadLedgerTypes';
@@ -278,6 +279,11 @@ export type WalletMethods = {
     insertWallet: (identifier: Hex, type: WalletType) => Promise<number>;
 };
 
+export type DecryptedAmountsMethods = {
+    insert: (entry: DecryptedAmount) => Promise<number[]>;
+    findEntries: (transactionHashes: string[]) => Promise<DecryptedAmount[]>;
+};
+
 export enum ViewResponseStatus {
     Success,
     Error,
@@ -322,6 +328,7 @@ export type Database = {
     settings: SettingsMethods;
     transaction: TransactionMethods;
     wallet: WalletMethods;
+    decyptedAmounts: DecryptedAmountsMethods;
 };
 
 export interface AutoUpdateMethods {

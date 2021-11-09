@@ -12,22 +12,19 @@ import {
     getTransactionsAscending,
     getTransactionsDescending,
 } from '../utils/httpRequests';
-import { decryptAmounts } from '../utils/rustInterface';
 import {
-    getTransactionsOfAccount,
     insertTransactions,
     updateTransaction,
 } from '../database/TransactionDao';
 import {
     TransferTransaction,
     TransactionStatus,
-    TransactionKindString,
     AccountTransaction,
     Dispatch,
     TransactionEvent,
-    Global,
     TransferTransactionWithNames,
     Account,
+    TransactionKindString,
 } from '../utils/types';
 import {
     isSuccessfulTransaction,
@@ -39,10 +36,11 @@ import {
     convertAccountTransaction,
 } from '../utils/TransactionConverters';
 // eslint-disable-next-line import/no-cycle
-import { chosenAccountSelector } from './AccountSlice';
+import { chosenAccountSelector, updateAllDecrypted } from './AccountSlice';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
 import { isDefined, noOp } from '~/utils/basicHelpers';
 import { GetTransactionsOutput } from '~/preload/preloadTypes';
+import { findEntries } from '~/database/DecryptedAmountsDao';
 
 export const transactionLogPageSize = 100;
 
@@ -113,6 +111,53 @@ async function getNewTransactions(
 }
 
 /**
+ * Enriches any encrypted transfers (with or without memo) with decrypted amounts, if they
+ * have previously been decrypted and had their amounts stored locally in the database.
+ * @param transactions an array of transactions from the wallet proxy
+ * @returns the transactions enriched with decrypted amounts, and a boolean indicating whether we had decrypted amounts for all the encrypted transfers
+ */
+async function enrichWithDecryptedAmounts(
+    transactions: TransferTransaction[]
+): Promise<{
+    withDecryptedAmounts: TransferTransaction[];
+    hasNotDecryptedTransfer: boolean;
+}> {
+    const encryptedTypes = [
+        TransactionKindString.EncryptedAmountTransfer,
+        TransactionKindString.EncryptedAmountTransferWithMemo,
+    ];
+
+    const encryptedTransactions = transactions.filter((t) =>
+        encryptedTypes.includes(t.transactionKind)
+    );
+    const decryptedAmounts = await findEntries(
+        encryptedTransactions.map(
+            (encryptedTransaction) => encryptedTransaction.transactionHash
+        )
+    );
+
+    let hasNotDecryptedTransfer = false;
+    const withDecryptedAmounts = transactions.map((t) => {
+        if (!encryptedTypes.includes(t.transactionKind)) {
+            return t;
+        }
+
+        const amount = decryptedAmounts.find(
+            (decrypted) => decrypted.transactionHash === t.transactionHash
+        )?.amount;
+        if (amount) {
+            return {
+                ...t,
+                decryptedAmount: amount,
+            };
+        }
+        hasNotDecryptedTransfer = true;
+        return t;
+    });
+    return { withDecryptedAmounts, hasNotDecryptedTransfer };
+}
+
+/**
  * Load transactions from the wallet proxy. Transactions retrieved from
  * the wallet proxy are filtered according to the account's filter.
  */
@@ -124,7 +169,7 @@ export const loadTransactions = createAsyncThunk(
             size = transactionLogPageSize,
             force = false,
         }: LoadTransactionsArgs,
-        { getState, requestId, signal }
+        { getState, dispatch, requestId, signal }
     ) => {
         const state = getState() as RootState;
         const account = chosenAccountSelector(state);
@@ -171,8 +216,16 @@ export const loadTransactions = createAsyncThunk(
                 (txn) => convertIncomingTransaction(txn, account.address)
             );
 
+            const {
+                withDecryptedAmounts,
+                hasNotDecryptedTransfer,
+            } = await enrichWithDecryptedAmounts(transactions);
+            if (hasNotDecryptedTransfer) {
+                await updateAllDecrypted(dispatch, account.address, false);
+            }
+
             return {
-                transactions,
+                transactions: withDecryptedAmounts,
                 more: transactionsResponseFromWalletProxy.full,
             };
         } finally {
@@ -186,7 +239,7 @@ export const loadNewTransactions = createAsyncThunk(
     ActionTypePrefix.Update,
     async (
         { size = transactionLogPageSize }: LoadTransactionsArgs,
-        { getState }
+        { getState, dispatch }
     ) => {
         const state = getState() as RootState;
         const account = chosenAccountSelector(state);
@@ -200,7 +253,16 @@ export const loadNewTransactions = createAsyncThunk(
             state.transactions.transactions,
             size
         );
-        return { transactions };
+
+        const {
+            withDecryptedAmounts,
+            hasNotDecryptedTransfer,
+        } = await enrichWithDecryptedAmounts(transactions);
+        if (hasNotDecryptedTransfer) {
+            await updateAllDecrypted(dispatch, account.address, false);
+        }
+
+        return { transactions: withDecryptedAmounts };
     }
 );
 
@@ -326,60 +388,6 @@ const { setTransactions, updateTransactionFields } = transactionSlice.actions;
 export const resetTransactions = () =>
     setTransactions({ transactions: [], more: false });
 
-// Decrypts the encrypted transfers in the given transacion list, using the prfKey.
-// This function expects the prfKey to match the account's prfKey,
-// and that the account is the receiver of the transactions.
-export async function decryptTransactions(
-    account: Account,
-    prfKey: string,
-    credentialNumber: number,
-    global: Global
-) {
-    const {
-        transactions: encryptedTransfers,
-    } = await getTransactionsOfAccount(account, [
-        TransactionKindString.EncryptedAmountTransfer,
-        TransactionKindString.EncryptedAmountTransferWithMemo,
-    ]);
-    const notDecrypted = encryptedTransfers.filter(
-        (t) =>
-            t.decryptedAmount === null &&
-            t.status === TransactionStatus.Finalized
-    );
-
-    if (notDecrypted.length === 0) {
-        return Promise.resolve();
-    }
-
-    const encryptedAmounts = notDecrypted.map((t) => {
-        if (!t.encrypted) {
-            throw new Error('Unexpected missing field');
-        }
-        if (t.fromAddress === account.address) {
-            return JSON.parse(t.encrypted).inputEncryptedAmount;
-        }
-        return JSON.parse(t.encrypted).encryptedAmount;
-    });
-
-    const decryptedAmounts = await decryptAmounts(
-        encryptedAmounts,
-        credentialNumber,
-        global,
-        prfKey
-    );
-
-    return Promise.all(
-        notDecrypted.map(async (transaction, index) =>
-            updateTransaction(
-                { id: transaction.id },
-                {
-                    decryptedAmount: decryptedAmounts[index],
-                }
-            )
-        )
-    );
-}
-
 // Add a pending transaction to storage
 export async function addPendingTransaction(
     transaction: AccountTransaction,
@@ -490,6 +498,15 @@ export const transactionsSelector = (
         .filter((transaction) =>
             isUnshieldedBalanceTransaction(transaction, address)
         )
+        .map(mapNames);
+};
+
+export const shieldedTransactionsSelector = (
+    state: RootState
+): TransferTransactionWithNames[] => {
+    const mapNames = attachNames(state);
+    return state.transactions.transactions
+        .filter(isShieldedBalanceTransaction)
         .map(mapNames);
 };
 
