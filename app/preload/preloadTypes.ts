@@ -258,6 +258,12 @@ export type TransactionMethods = {
         limit?: number,
         startId?: string
     ) => Promise<GetTransactionsOutput>;
+    getFilteredPending: (
+        address: string,
+        filteredTypes: TransactionKindString[],
+        fromDate?: Date,
+        toDate?: Date
+    ) => Promise<TransferTransaction[]>;
     hasEncryptedTransactions: (
         address: string,
         fromTime: string,
@@ -272,6 +278,7 @@ export type TransactionMethods = {
         transactions: TransferTransaction[]
     ) => Promise<TransferTransaction[]>;
     getTransaction: (id: string) => Promise<TransferTransaction | undefined>;
+    deleteTransaction: (transactionHash: string) => Promise<number>;
 };
 
 export type WalletMethods = {

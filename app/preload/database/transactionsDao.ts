@@ -23,6 +23,10 @@ async function updateTransaction(
         .update(updatedValues);
 }
 
+async function deleteTransaction(transactionHash: string): Promise<number> {
+    return (await knex())(transactionTable).where({ transactionHash }).del();
+}
+
 async function getPendingTransactions(): Promise<TransferTransaction[]> {
     const transactions = await (await knex())
         .select()
@@ -30,6 +34,30 @@ async function getPendingTransactions(): Promise<TransferTransaction[]> {
         .where({ status: TransactionStatus.Pending })
         .orderBy('id');
     return transactions;
+}
+
+async function getFilteredPendingTransactions(
+    address: string,
+    filteredTypes: TransactionKindString[] = [],
+    fromDate?: Date,
+    toDate?: Date
+): Promise<TransferTransaction[]> {
+    const fromTime = (fromDate?.getTime() ?? 0) / TimeStampUnit.seconds;
+    const toTime = (toDate?.getTime() ?? Date.now()) / TimeStampUnit.seconds;
+
+    const queryTransactions = (await knex())<TransferTransaction>(
+        transactionTable
+    )
+        .where({ status: TransactionStatus.Pending })
+        .whereIn('transactionKind', filteredTypes)
+        .andWhere((builder) =>
+            builder
+                .where({ fromAddress: address })
+                .andWhereBetween('blockTime', [fromTime, toTime])
+        )
+        .orderBy('blockTime', 'desc');
+
+    return queryTransactions;
 }
 
 async function getTransaction(
@@ -268,6 +296,8 @@ const exposedMethods: TransactionMethods = {
     update: updateTransaction,
     insert: insertTransactions,
     getTransaction,
+    getFilteredPending: getFilteredPendingTransactions,
+    deleteTransaction,
 };
 
 export default exposedMethods;

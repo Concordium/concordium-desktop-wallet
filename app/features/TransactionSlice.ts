@@ -13,6 +13,8 @@ import {
     getTransactionsDescending,
 } from '../utils/httpRequests';
 import {
+    deleteTransaction,
+    getFilteredPending,
     insertTransactions,
     updateTransaction,
 } from '../database/TransactionDao';
@@ -41,6 +43,7 @@ import { RejectReason } from '~/utils/node/RejectReasonHelper';
 import { isDefined, noOp } from '~/utils/basicHelpers';
 import { GetTransactionsOutput } from '~/preload/preloadTypes';
 import { findEntries } from '~/database/DecryptedAmountsDao';
+import { getActiveBooleanFilters } from '~/utils/accountHelpers';
 
 export const transactionLogPageSize = 100;
 
@@ -158,8 +161,9 @@ async function enrichWithDecryptedAmounts(
 }
 
 /**
- * Load transactions from the wallet proxy. Transactions retrieved from
- * the wallet proxy are filtered according to the account's filter.
+ * Load transactions from the wallet proxy and pending transactions
+ * from the database. The transactions retrieved from are
+ * filtered according to the account's filter.
  */
 export const loadTransactions = createAsyncThunk(
     ActionTypePrefix.Load,
@@ -224,8 +228,33 @@ export const loadTransactions = createAsyncThunk(
                 await updateAllDecrypted(dispatch, account.address, false);
             }
 
+            // We only want to load pending transactions that are not also received
+            // from the wallet proxy. There can be such transactions as the confirmation
+            // of sent transactions happens asynchronously from the loading of transactions.
+            // TODO This can be optimized so that the filtering is done in the database query.
+            const hashesFromProxy = withDecryptedAmounts.map(
+                (t) => t.transactionHash
+            );
+            const { fromDate, toDate } = account.transactionFilter;
+            const booleanFilters = getActiveBooleanFilters(
+                account.transactionFilter
+            );
+            const pendingTransactions = (
+                await getFilteredPending(
+                    account.address,
+                    booleanFilters,
+                    fromDate ? new Date(fromDate) : undefined,
+                    toDate ? new Date(toDate) : undefined
+                )
+            ).filter(
+                (pendingTransaction) =>
+                    !hashesFromProxy.includes(
+                        pendingTransaction.transactionHash
+                    )
+            );
+
             return {
-                transactions: withDecryptedAmounts,
+                transactions: [...pendingTransactions, ...withDecryptedAmounts],
                 more: transactionsResponseFromWalletProxy.full,
             };
         } finally {
@@ -254,10 +283,20 @@ export const loadNewTransactions = createAsyncThunk(
             size
         );
 
+        // Filter out any transactions that are already in the state.
+        // This can be the case for e.g. outgoing transactions that are
+        // added to the transaction state when sending them.
+        const existingHashes = state.transactions.transactions.map(
+            (t) => t.transactionHash
+        );
+        const newTransactions = transactions.filter(
+            (t) => !existingHashes.includes(t.transactionHash)
+        );
+
         const {
             withDecryptedAmounts,
             hasNotDecryptedTransfer,
-        } = await enrichWithDecryptedAmounts(transactions);
+        } = await enrichWithDecryptedAmounts(newTransactions);
         if (hasNotDecryptedTransfer) {
             await updateAllDecrypted(dispatch, account.address, false);
         }
@@ -402,8 +441,10 @@ export async function addPendingTransaction(
 }
 
 /**
- * Set the transaction's status to confirmed, update the cost and whether it suceeded
- * or not.
+ * Updates the transaction's status to confirmed in the state, and updates
+ * its cost depending on whether it succeeded or not. The transaction is
+ * removed from the local database, as a finalized transaction is available
+ * to us on the wallet proxy.
  */
 export async function confirmTransaction(
     dispatch: Dispatch,
@@ -440,7 +481,9 @@ export async function confirmTransaction(
         rejectReason,
         blockHash,
     };
-    updateTransaction({ transactionHash }, update);
+
+    await deleteTransaction(transactionHash);
+
     return dispatch(
         updateTransactionFields({
             hash: transactionHash,
