@@ -12,7 +12,7 @@ import signTransfer from './Transfer';
 import signPublicInformationForIp from './PublicInformationForIp';
 import {
     getPrfKeyDecrypt,
-    getPrivateKeySeeds,
+    getPrivateKeys,
     getPrfKeyRecovery,
 } from './ExportPrivateKeySeed';
 import {
@@ -38,7 +38,7 @@ import {
     AuthorizationKeysUpdate,
     AddIdentityProvider,
     AddAnonymityRevoker,
-    PrivateKeySeeds,
+    PrivateKeys,
 } from '~/utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
@@ -93,16 +93,16 @@ export default class ConcordiumLedgerClientMain {
         return getSignedPublicKey(this.transport, path);
     }
 
-    getPrivateKeySeeds(identity: number): Promise<PrivateKeySeeds> {
-        return getPrivateKeySeeds(this.transport, identity);
+    getPrivateKeys(identity: number, version: number): Promise<PrivateKeys> {
+        return getPrivateKeys(this.transport, identity, version);
     }
 
-    getPrfKeyDecrypt(identity: number): Promise<Buffer> {
-        return getPrfKeyDecrypt(this.transport, identity);
+    getPrfKeyDecrypt(identity: number, version: number): Promise<Buffer> {
+        return getPrfKeyDecrypt(this.transport, identity, version);
     }
 
-    getPrfKeyRecovery(identity: number): Promise<Buffer> {
-        return getPrfKeyRecovery(this.transport, identity);
+    getPrfKeyRecovery(identity: number, version: number): Promise<Buffer> {
+        return getPrfKeyRecovery(this.transport, identity, version);
     }
 
     verifyAddress(identity: number, credentialNumber: number): Promise<void> {

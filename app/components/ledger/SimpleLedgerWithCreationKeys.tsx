@@ -5,6 +5,7 @@ import Card from '~/cross-app-components/Card';
 import Button from '~/cross-app-components/Button';
 import PublicKeyDetails from '~/components/ledger/PublicKeyDetails';
 import { CreationKeys } from '~/utils/types';
+import { currentIdentityVersion } from '~/utils/identityHelpers';
 import { exportKeysFromLedger } from '~/utils/rustInterface';
 import { LedgerCallback } from './util';
 
@@ -21,6 +22,7 @@ interface Props {
     ledgerCallback: (keys: CreationKeys) => LedgerCallback;
     preCallback?: LedgerCallback<{ identityNumber: number }> | LedgerCallback;
     disabled?: boolean;
+    identityVersion?: number;
 }
 
 export default function SimpleLedgerWithCreationKeys({
@@ -31,6 +33,7 @@ export default function SimpleLedgerWithCreationKeys({
     preCallback,
     compareButtonClassName,
     disabled,
+    identityVersion = currentIdentityVersion,
 }: Props) {
     const [keys, setKeys] = useState<CreationKeys>();
     const [finishedComparing, setFinishedComparing] = useState(false);
@@ -64,11 +67,12 @@ export default function SimpleLedgerWithCreationKeys({
                 identity,
                 credentialNumber,
                 setMessage,
+                identityVersion,
                 ledger
             );
             setKeys(exportedKeys);
         },
-        [credentialNumber, identityNumber, preCallback]
+        [credentialNumber, identityNumber, preCallback, identityVersion]
     );
 
     const callback = useCallback(

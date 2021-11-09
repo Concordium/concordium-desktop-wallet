@@ -33,7 +33,7 @@ async function getPrfKeySeed(
     identityNumber: number
 ) {
     setMessage('Please allow recovering credentials');
-    const prfKeySeed = await ledger.getPrfKeyRecovery(identityNumber);
+    const prfKeySeed = await ledger.getPrfKeyRecovery(identityNumber, 0); // TODO use identity version.
     setMessage('Recovering credentials');
     return prfKeySeed.toString('hex');
 }
@@ -141,12 +141,12 @@ export default function PerformRecovery({
                 blockHash,
                 global,
                 identity.id,
+                identity.version,
                 controller
             );
             accounts.forEach((acc) => {
                 acc.identityName = identity.name;
             });
-            setEmptyIndices(0);
         } else {
             accounts = await recoverNewIdentity(
                 prfKeySeed,
@@ -154,8 +154,21 @@ export default function PerformRecovery({
                 global,
                 identityNumber,
                 walletId,
+                1,
                 controller
             );
+            // If there is no accounts recovered, try to recover using version 0 format.
+            if (!accounts.length) {
+                accounts = await recoverNewIdentity(
+                    prfKeySeed,
+                    blockHash,
+                    global,
+                    identityNumber,
+                    walletId,
+                    0,
+                    controller
+                );
+            }
             const identityName = getRecoveredIdentityName(identityNumber);
             accounts.forEach((acc) => {
                 acc.identityName = identityName;

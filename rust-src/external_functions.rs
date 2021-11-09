@@ -1,5 +1,6 @@
 use wasm_bindgen::prelude::*;
 use crate::{
+    helpers::*,
     aux_functions::*,
     genesis_account::*,
 };
@@ -31,9 +32,14 @@ pub fn create_id_request_ext(
 
 #[wasm_bindgen(js_name = generateUnsignedCredential)]
 pub fn generate_unsigned_credential_ext(
-    input: &str
+    input: &str,
+    id_cred_sec_raw: &str,
+    prf_key_raw: &str,
+    is_seed: bool,
 ) -> String {
-    match generate_unsigned_credential_aux(input) {
+    let prf_key = get_prf_key(prf_key_raw, is_seed).expect("Unable to read prf key");
+    let id_cred_sec = get_id_cred_sec(id_cred_sec_raw, is_seed).expect("Unable to read prf key");
+    match generate_unsigned_credential_aux(input, id_cred_sec, prf_key) {
         Ok(s) => s,
         Err(e) => format!("unable to generate unsigned credential due to: {}", e),
     }
@@ -64,9 +70,12 @@ pub fn get_credential_deployment_details_ext(
 
 #[wasm_bindgen]
 pub fn decrypt_amounts_ext(
-    input: &str
+    input: &str,
+    prf_key_raw: &str,
+    is_seed: bool,
 ) -> String {
-    match decrypt_amounts_aux(input) {
+    let prf_key = get_prf_key(prf_key_raw, is_seed).expect("Unable to read prf key");
+    match decrypt_amounts_aux(input, prf_key) {
         Ok(s) => s,
         Err(e) => format!("unable to decrypt transactions due to: {}", e),
     }
@@ -74,9 +83,12 @@ pub fn decrypt_amounts_ext(
 
 #[wasm_bindgen(js_name = createTransferToPublicData)]
 pub fn create_sec_to_pub_ext(
-    input: &str
+    input: &str,
+    prf_key_raw: &str,
+    is_seed: bool,
 ) -> String {
-    match create_sec_to_pub_aux(input) {
+    let prf_key = get_prf_key(prf_key_raw, is_seed).expect("Unable to read prf key");
+    match create_sec_to_pub_aux(input, prf_key) {
         Ok(s) => s,
         Err(e) => format!("unable to create transfer to public due to: {}", e),
     }
@@ -84,9 +96,12 @@ pub fn create_sec_to_pub_ext(
 
 #[wasm_bindgen(js_name = createTransferToEncryptedData)]
 pub fn create_pub_to_sec_ext(
-    input: &str
+    input: &str,
+    prf_key_raw: &str,
+    is_seed: bool,
 ) -> String {
-    match create_pub_to_sec_aux(input) {
+    let prf_key = get_prf_key(prf_key_raw, is_seed).expect("Unable to read prf key");
+    match create_pub_to_sec_aux(input, prf_key) {
         Ok(s) => s,
         Err(e) => format!("unable to create transfer to encrypted data due to: {}", e),
     }
@@ -94,9 +109,12 @@ pub fn create_pub_to_sec_ext(
 
 #[wasm_bindgen(js_name = createEncryptedTransferData)]
 pub fn create_encrypted_transfer_ext(
-    input: &str
+    input: &str,
+    prf_key_raw: &str,
+    is_seed: bool,
 ) -> String {
-    match create_encrypted_transfer_aux(input) {
+    let prf_key = get_prf_key(prf_key_raw, is_seed).expect("Unable to read prf key");
+    match create_encrypted_transfer_aux(input, prf_key) {
         Ok(s) => s,
         Err(e) => format!("unable to create encrypted transfer due to: {}", e),
     }
@@ -146,11 +164,13 @@ pub fn get_address_from_cred_id_ext(
 
 #[wasm_bindgen(js_name = getCredId)]
 pub fn calculate_cred_id_ext(
-    prf_key_seed: &str,
+    prf_key_raw: &str,
     cred_counter: u8,
-    global_context: &str
+    global_context: &str,
+    is_seed: bool
 ) -> String {
-    match calculate_cred_id(prf_key_seed, cred_counter, global_context) {
+    let prf_key = get_prf_key(prf_key_raw, is_seed).expect("Unable to read prf key");
+    match calculate_cred_id(prf_key, cred_counter, global_context) {
         Ok(s) => s,
         Err(e) => format!("unable to calculate credId due to: {}", e),
     }

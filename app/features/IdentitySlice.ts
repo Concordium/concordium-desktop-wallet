@@ -47,6 +47,10 @@ export const chosenIdentitySelector = (state: RootState) =>
         (i) => i.id === state.identities.chosenIdentityId
     );
 
+export const specificIdentitySelector = (identityId: number) => (
+    state: RootState
+) => state.identities.identities.find((i) => i.id === identityId);
+
 export async function loadIdentities(dispatch: Dispatch) {
     const identities: Identity[] = await getAllIdentities();
     dispatch(updateIdentities(identities));

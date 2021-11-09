@@ -38,12 +38,12 @@ export default function exposedMethods(
             getLedgerClient().getPublicKeySilent(keypath),
         getSignedPublicKey: (keypath: number[]) =>
             getLedgerClient().getSignedPublicKey(keypath),
-        getPrivateKeySeeds: (identity: number) =>
-            getLedgerClient().getPrivateKeySeeds(identity),
-        getPrfKeyRecovery: (identity: number) =>
-            getLedgerClient().getPrfKeyRecovery(identity),
-        getPrfKeyDecrypt: (identity: number) =>
-            getLedgerClient().getPrfKeyDecrypt(identity),
+        getPrivateKeys: (identity: number, version: number) =>
+            getLedgerClient().getPrivateKeys(identity, version),
+        getPrfKeyRecovery: (identity: number, version: number) =>
+            getLedgerClient().getPrfKeyRecovery(identity, version),
+        getPrfKeyDecrypt: (identity: number, version: number) =>
+            getLedgerClient().getPrfKeyDecrypt(identity, version),
         verifyAddress: (identity: number, credentialNumber: number) =>
             getLedgerClient().verifyAddress(identity, credentialNumber),
         signTransfer: (transaction: AccountTransaction, keypath: number[]) => {

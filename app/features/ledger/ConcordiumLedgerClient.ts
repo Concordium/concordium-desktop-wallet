@@ -17,7 +17,7 @@ import {
     Hex,
     AddIdentityProvider,
     AddAnonymityRevoker,
-    PrivateKeySeeds,
+    PrivateKeys,
 } from '~/utils/types';
 import { pipe } from '~/utils/basicHelpers';
 
@@ -39,9 +39,13 @@ export default class ConcordiumLedgerClient {
 
     getSignedPublicKey = window.ledger.getSignedPublicKey;
 
-    async getPrivateKeySeeds(identity: number): Promise<PrivateKeySeeds> {
-        const result: PrivateKeySeeds = await window.ledger.getPrivateKeySeeds(
-            identity
+    async getPrivateKeys(
+        identity: number,
+        version: number
+    ): Promise<PrivateKeys> {
+        const result: PrivateKeys = await window.ledger.getPrivateKeys(
+            identity,
+            version
         );
         return {
             prfKey: Buffer.from(result.prfKey),

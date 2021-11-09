@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer/';
 import {
-    PrivateKeySeeds,
+    PrivateKeys,
     PublicInformationForIp,
     SignedPublicKey,
     UnsignedCredentialDeploymentInformation,
@@ -52,9 +52,9 @@ type LedgerCommands = {
         identity: number,
         credentialNumber: number
     ) => Promise<void>;
-    getPrivateKeySeeds: (identity: number) => Promise<PrivateKeySeeds>;
-    getPrfKeyDecrypt: (identity: number) => ReturnBuffer;
-    getPrfKeyRecovery: (identity: number) => ReturnBuffer;
+    getPrivateKeys: (identity: number, version: number) => Promise<PrivateKeys>;
+    getPrfKeyDecrypt: (identity: number, version: number) => ReturnBuffer;
+    getPrfKeyRecovery: (identity: number, version: number) => ReturnBuffer;
     signTransfer: SignAccountTransaction<AccountTransaction>;
     signPublicInformationForIp: (
         publicInfoForIp: PublicInformationForIp,

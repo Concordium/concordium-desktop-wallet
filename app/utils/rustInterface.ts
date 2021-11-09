@@ -24,26 +24,29 @@ import { getDefaultExpiry, secondsSinceUnixEpoch } from './timeHelpers';
 import { getAccountPath } from '~/features/ledger/Path';
 import { stringify, parse } from './JSONHelper';
 import CredentialInfoLedgerDetails from '~/components/ledger/CredentialInfoLedgerDetails';
+import { currentIdentityVersion } from './identityHelpers';
 
 const rawWorker = new RustWorker();
 const worker = new PromiseWorker(rawWorker);
 
 /**
- * Returns the PrfKey and IdCredSec seeds for the given identity.
+ * Returns the PrfKey and IdCredSec for the given identity.
+ * identityVersion 0 gives the seeds, and 1 gives the BLS keys.
  */
 async function getSecretsFromLedger(
     ledger: ConcordiumLedgerClient,
     displayMessage: (message: string) => void,
-    identityNumber: number
+    identityNumber: number,
+    identityVersion: number
 ) {
     displayMessage('Please accept to create credential on device');
     const {
-        prfKey: prfKeySeed,
-        idCredSec: idCredSecSeed,
-    } = await ledger.getPrivateKeySeeds(identityNumber);
+        prfKey: prfKeyRaw,
+        idCredSec: idCredSecRaw,
+    } = await ledger.getPrivateKeys(identityNumber, identityVersion);
 
-    const prfKey = prfKeySeed.toString('hex');
-    const idCredSec = idCredSecSeed.toString('hex');
+    const prfKey = prfKeyRaw.toString('hex');
+    const idCredSec = idCredSecRaw.toString('hex');
     return { prfKey, idCredSec };
 }
 
@@ -51,6 +54,7 @@ export async function exportKeysFromLedger(
     identityNumber: number,
     credentialNumber: number,
     displayMessage: (message: string) => void,
+    identityVersion: number,
     ledger: ConcordiumLedgerClient
 ): Promise<CreationKeys> {
     const path = getAccountPath({
@@ -58,11 +62,11 @@ export async function exportKeysFromLedger(
         accountIndex: credentialNumber,
         signatureIndex: 0,
     });
-
     const { prfKey, idCredSec } = await getSecretsFromLedger(
         ledger,
         displayMessage,
-        identityNumber
+        identityNumber,
+        identityVersion
     );
     displayMessage(
         `Please confirm exporting
@@ -435,7 +439,8 @@ export async function createGenesisAccount(
     const { prfKey, idCredSec } = await getSecretsFromLedger(
         ledger,
         displayMessage,
-        identityNumber
+        identityNumber,
+        currentIdentityVersion
     );
     displayMessage('Please confirm exporting public-key on device');
     const publicKey = await ledger.getPublicKey(path);
@@ -502,7 +507,8 @@ export function getAddressFromCredentialId(credId: string): Promise<string> {
 export function getCredId(
     prfKeySeed: string,
     credentialNumber: number,
-    global: Global
+    global: Global,
+    identityVersion: number
 ): Promise<string> {
     return worker.postMessage({
         command: workerCommands.getCredId,

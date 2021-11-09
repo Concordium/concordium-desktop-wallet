@@ -11,6 +11,8 @@ import {
     RejectedIdentity,
 } from './types';
 
+export const currentIdentityVersion = 1;
+
 export const IDENTITY_NAME_MAX_LENGTH = 25;
 
 export const attributeNamesMap: {

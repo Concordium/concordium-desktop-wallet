@@ -27,6 +27,7 @@ import {
 } from '~/utils/types';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { addPendingTransaction } from '~/features/TransactionSlice';
+import { specificIdentitySelector } from '~/features/IdentitySlice';
 import { accountsInfoSelector } from '~/features/AccountSlice';
 import { globalSelector } from '~/features/GlobalSlice';
 import { getAccountPath } from '~/features/ledger/Path';
@@ -70,12 +71,14 @@ async function attachCompletedPayload(
     global: Global,
     credential: CredentialWithIdentityNumber,
     accountInfo: AccountInfo,
+    identityVersion: number,
     setMessage: (message: string) => void
 ) {
     const getPrfKey = async () => {
         setMessage('Please accept decrypt on device');
         const prfKeySeed = await ledger.getPrfKeyDecrypt(
-            credential.identityNumber
+            credential.identityNumber,
+            identityVersion
         );
         setMessage('Please wait');
         return prfKeySeed.toString('hex');
@@ -166,6 +169,9 @@ export default function SubmitTransfer({ location }: Props) {
         confirmed,
     } = location.state;
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const identity = useSelector(specificIdentitySelector(account.identityId));
+
     let transaction: AccountTransaction = parse(transactionJSON);
     const handler = findHandler(transaction);
 
@@ -194,12 +200,19 @@ export default function SubmitTransfer({ location }: Props) {
             );
         }
 
+        if (identity === undefined) {
+            throw new Error(
+                'The identity was not found. This is an internal error that should be reported'
+            );
+        }
+
         transaction = await attachCompletedPayload(
             transaction,
             ledger,
             global,
             credential,
             accountInfoMap[account.address],
+            identity.version,
             setMessage
         );
 

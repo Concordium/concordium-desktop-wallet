@@ -1445,7 +1445,7 @@ export enum PrintErrorTypes {
     NoPrinters = 'no valid printers available',
 }
 
-export type PrivateKeySeeds = {
+export type PrivateKeys = {
     idCredSec: Buffer;
     prfKey: Buffer;
 };
