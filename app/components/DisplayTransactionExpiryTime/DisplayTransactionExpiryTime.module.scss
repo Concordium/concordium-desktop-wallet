@@ -15,13 +15,11 @@
     }
 }
 
-.value,
-.placeholder {
-    font-size: $font-size-body1;
+.value {
+    font-size: $font-size-body2;
     margin: 0;
 }
 
-.note,
-.placeholder {
+.note {
     composes: textFaded from global;
 }

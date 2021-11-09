@@ -43,7 +43,6 @@ import {
 } from './SignTransaction';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import AddBakerProposalDetails from './proposal-details/AddBakerProposalDetails';
-import InputTimestamp from '~/components/Form/InputTimestamp';
 import LoadingComponent from './LoadingComponent';
 import {
     BakerSubRoutes,
@@ -53,6 +52,7 @@ import AddBakerDetailsForm from '~/components/AddBakerDetailsForm';
 import ExportBakerKeys from './ExportBakerKeys';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
+import DatePicker from '~/components/Form/DatePicker';
 import { isMultiSig } from '~/utils/accountHelpers';
 
 const pageTitle = 'Multi Signature Transactions | Add Baker';
@@ -293,7 +293,8 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                                         Choose the expiry date for the
                                         transaction.
                                     </p>
-                                    <InputTimestamp
+                                    <DatePicker
+                                        className="body2 mV40"
                                         label="Transaction expiry time"
                                         name="expiry"
                                         isInvalid={
@@ -302,6 +303,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                                         error={expiryTimeError}
                                         value={expiryTime}
                                         onChange={setExpiryTime}
+                                        minDate={new Date()}
                                     />
                                     <p className="mB0">
                                         Committing the transaction after this

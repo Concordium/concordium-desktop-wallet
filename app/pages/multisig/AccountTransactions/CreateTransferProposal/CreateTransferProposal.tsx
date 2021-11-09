@@ -28,7 +28,6 @@ import {
 } from '~/utils/transactionCosts';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import LoadingComponent from '../LoadingComponent';
-import InputTimestamp from '~/components/Form/InputTimestamp';
 import PickRecipient from '~/components/Transfers/PickRecipient';
 import { useTransactionExpiryState } from '~/utils/dataHooks';
 import {
@@ -45,6 +44,7 @@ import { isMultiSig, getAmountAtDisposal } from '~/utils/accountHelpers';
 import styles from './CreateTransferProposal.module.scss';
 import UpsertAddress from '~/components/UpsertAddress';
 import PickMemo from './PickMemo';
+import DatePicker from '~/components/Form/DatePicker';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
@@ -344,7 +344,8 @@ function CreateTransferProposal({
                                 }
                                 render={() => (
                                     <div className={styles.columnContent}>
-                                        <InputTimestamp
+                                        <DatePicker
+                                            className="body2 mV40"
                                             label="Transaction expiry time"
                                             name="expiry"
                                             isInvalid={
@@ -353,6 +354,7 @@ function CreateTransferProposal({
                                             error={expiryTimeError}
                                             value={expiryTime}
                                             onChange={setExpiryTime}
+                                            minDate={new Date()}
                                         />
                                         <p>
                                             Choose the expiry date for the
