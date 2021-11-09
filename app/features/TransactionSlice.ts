@@ -289,8 +289,12 @@ export const loadNewTransactions = createAsyncThunk(
         const existingHashes = state.transactions.transactions.map(
             (t) => t.transactionHash
         );
+        // We keep all transactions with an undefined transaction hash,
+        // as they are all rewards (which cannot be created by the wallet).
         const newTransactions = transactions.filter(
-            (t) => !existingHashes.includes(t.transactionHash)
+            (t) =>
+                t.transactionHash === undefined ||
+                !existingHashes.includes(t.transactionHash)
         );
 
         const {
