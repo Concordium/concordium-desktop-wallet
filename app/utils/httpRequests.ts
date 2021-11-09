@@ -1,5 +1,6 @@
 import {
     IdObjectRequest,
+    IncomingTransaction,
     TransactionFilter,
     TransactionOrder,
     Versioned,
@@ -10,6 +11,7 @@ import {
     IdentityTokenContainer,
     ErrorIdentityTokenContainer,
 } from './id/types';
+import { getActiveBooleanFilters } from './accountHelpers';
 
 /**
  * Performs a HTTP get request using IPC to the main thread.
@@ -28,19 +30,44 @@ export async function gtuDrop(address: string) {
     return window.http.gtuDrop(address);
 }
 
+/**
+ * Filters transactions on their type. This extra filtering is required
+ * as the wallet proxy does not support a fine grained filtering on
+ * types at this time.
+ * @param transactionFilter the filtering to apply to the transactions
+ */
+function filterTransactionsOnType(
+    transactionFilter: TransactionFilter,
+    transactions: IncomingTransaction[]
+) {
+    const allowedTypes = getActiveBooleanFilters(transactionFilter);
+    const filteredTransactions = transactions.filter((t) =>
+        allowedTypes.includes(t.details.type)
+    );
+    return filteredTransactions;
+}
+
 export async function getTransactionsAscending(
     address: string,
     transactionFilter: TransactionFilter,
     limit: number,
     id?: string
 ) {
-    return window.http.getTransactions(
+    const response = await window.http.getTransactions(
         address,
         transactionFilter,
         limit,
         TransactionOrder.Ascending,
         id
     );
+
+    return {
+        transactions: filterTransactionsOnType(
+            transactionFilter,
+            response.transactions
+        ),
+        full: response.full,
+    };
 }
 
 export async function getTransactionsDescending(
@@ -49,13 +76,20 @@ export async function getTransactionsDescending(
     limit: number,
     id?: string
 ) {
-    return window.http.getTransactions(
+    const response = await window.http.getTransactions(
         address,
         transactionFilter,
         limit,
         TransactionOrder.Descending,
         id
     );
+    return {
+        transactions: filterTransactionsOnType(
+            transactionFilter,
+            response.transactions
+        ),
+        full: response.full,
+    };
 }
 
 export async function getIdentityProviders() {

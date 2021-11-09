@@ -43,8 +43,14 @@ async function httpsGet<T>(
 }
 
 /**
- * Loads the newest transactions on the given address, using the given filters.
- * @param transactionFilter is used to filter the request, however only from/to date, and filters for reward types are currently used.
+ * Loads transactions from the wallet proxy for the account with the provided address. The supplied
+ * transaction filter is applied for reward filtering, and filtering based on dates. All other parts
+ * of the filter is ignored, as the wallet proxy does not support it!
+ * @param address the account address to get transactions for
+ * @param transactionFilter is used to filter the request, however only from/to date, and filters for reward types are currently used
+ * @param limitResults sets the maximum number of results the wallet proxy returns, the maximum is 1000
+ * @param order whether to order ascending or descending on the id
+ * @param id the id to get transactions from, is used for pagination and should not be used for anything else
  */
 async function getTransactions(
     address: string,
