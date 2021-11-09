@@ -4,7 +4,7 @@ import PromiseWorker from 'promise-worker';
 import RustWorker, { BakerKeyVariants } from './rust.worker';
 import {
     PublicInformationForIp,
-    Identity,
+    ConfirmedIdentity,
     IpInfo,
     ArInfo,
     Versioned,
@@ -141,7 +141,7 @@ export async function createIdentityRequestObjectLedger(
 }
 
 async function createUnsignedCredentialInfo(
-    identity: Identity,
+    identity: ConfirmedIdentity,
     credentialNumber: number,
     keys: CreationKeys,
     global: Global,
@@ -206,7 +206,7 @@ interface WithRandomness<Info> {
  * and the account number. The hardware wallet is used, as part of the constructed data has to be signed.
  */
 export async function createCredentialInfo(
-    identity: Identity,
+    identity: ConfirmedIdentity,
     credentialNumber: number,
     keys: CreationKeys,
     global: Global,
@@ -254,7 +254,7 @@ export async function createCredentialInfo(
  * N.B. This function is to construct a credential for a new account.
  */
 export async function createCredentialDetails(
-    identity: Identity,
+    identity: ConfirmedIdentity,
     credentialNumber: number,
     keys: CreationKeys,
     global: Global,

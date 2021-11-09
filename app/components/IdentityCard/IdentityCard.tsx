@@ -20,6 +20,7 @@ import {
     formatAttributeValue,
     compareAttributes,
     IDENTITY_NAME_MAX_LENGTH,
+    isConfirmedIdentity,
 } from '~/utils/identityHelpers';
 import Form from '../Form';
 import Button from '~/cross-app-components/Button';
@@ -85,9 +86,9 @@ function IdentityListElement({
     const [isEditing, setIsEditing] = useState(false);
     const dispatch = useDispatch();
     const identityProvider = JSON.parse(identity.identityProvider);
-    const identityObject: IdentityObject | null = JSON.parse(
-        identity.identityObject
-    )?.value;
+    const identityObject: IdentityObject | null = isConfirmedIdentity(identity)
+        ? JSON.parse(identity.identityObject).value
+        : null;
 
     const isRecovered = identity.status === IdentityStatus.Recovered;
 

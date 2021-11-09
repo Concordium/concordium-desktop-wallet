@@ -1,6 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
-import { Identity, IdentityProvider } from '~/utils/types';
+import { RejectedIdentity, IdentityProvider } from '~/utils/types';
 import SidedRow from '~/components/SidedRow';
 import CopyButton from '~/components/CopyButton';
 import ExternalLink from '~/components/ExternalLink';
@@ -12,7 +12,7 @@ import { getTargetNet, Net } from '~/utils/ConfigHelper';
 import styles from './IdentityCard.module.scss';
 
 interface FailedIdentityDetailsProps {
-    identity: Identity;
+    identity: RejectedIdentity;
 }
 
 function getOS() {

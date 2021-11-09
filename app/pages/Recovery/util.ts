@@ -80,6 +80,7 @@ export async function createRecoveredIdentity(
         identityProvider: '{}',
         randomness: '',
         walletId,
+        version: 0,
     };
 
     return identity;

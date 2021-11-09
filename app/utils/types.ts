@@ -104,18 +104,41 @@ export enum IdentityStatus {
 /**
  * This Interface models the structure of the identities stored in the database.
  */
-export interface Identity {
+interface BaseIdentity {
+    status: IdentityStatus;
     id: number;
     identityNumber: number;
     name: string;
-    identityObject: string;
-    status: IdentityStatus;
-    detail: string;
     codeUri: string;
     identityProvider: string;
     randomness: string;
     walletId: number;
+    version: number;
 }
+
+export interface ConfirmedIdentity extends BaseIdentity {
+    status: IdentityStatus.Confirmed;
+    identityObject: string;
+}
+
+export interface RejectedIdentity extends BaseIdentity {
+    status: IdentityStatus.RejectedAndWarned | IdentityStatus.Rejected;
+    detail: string;
+}
+
+export interface RecoveredIdentity extends Omit<BaseIdentity, 'codeUri'> {
+    status: IdentityStatus.Recovered | IdentityStatus.Genesis;
+}
+
+export interface PendingIdentity extends BaseIdentity {
+    status: IdentityStatus.Pending;
+}
+
+export type Identity =
+    | ConfirmedIdentity
+    | RejectedIdentity
+    | RecoveredIdentity
+    | PendingIdentity;
 
 // Statuses that an account can have.
 export enum AccountStatus {

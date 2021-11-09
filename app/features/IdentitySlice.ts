@@ -5,11 +5,11 @@ import { RootState } from '../store/store';
 import { loadAccounts } from './AccountSlice';
 import {
     getAllIdentities,
-    insertIdentity,
     updateIdentity,
     removeIdentityAndInitialAccount as removeIdentityAndInitialAccountInDatabase,
 } from '../database/IdentityDao';
-import { Identity, IdentityStatus, Dispatch } from '../utils/types';
+import { Identity, Dispatch } from '../utils/types';
+import { isConfirmedIdentity } from '~/utils/identityHelpers';
 
 interface IdentityState {
     identities: Identity[];
@@ -40,9 +40,7 @@ export const identitiesSelector = (state: RootState) =>
     state.identities.identities;
 
 export const confirmedIdentitiesSelector = (state: RootState) =>
-    state.identities.identities.filter(
-        (identity: Identity) => IdentityStatus.Confirmed === identity.status
-    );
+    state.identities.identities.filter(isConfirmedIdentity);
 
 export const chosenIdentitySelector = (state: RootState) =>
     state.identities.identities.find(
@@ -60,12 +58,6 @@ export async function removeIdentityAndInitialAccount(
 ) {
     await removeIdentityAndInitialAccountInDatabase(identityId);
     return Promise.all([loadAccounts(dispatch), loadIdentities(dispatch)]);
-}
-
-export async function importIdentities(
-    identities: Identity | Identity[] | Partial<Identity>
-) {
-    await insertIdentity(identities);
 }
 
 export async function editIdentityName(
