@@ -39,7 +39,6 @@ function createUnsignedCredential(
     rust: RustInterface,
     message: Record<string, string>
 ) {
-    console.log(message);
     return rust.generateUnsignedCredential(
         message.input,
         message.idCredSec,

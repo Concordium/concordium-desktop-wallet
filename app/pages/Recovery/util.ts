@@ -212,7 +212,6 @@ export async function recoverCredentials(
             global,
             identityVersion
         );
-        console.log(credId);
 
         const recovered = await recoverCredential(
             credId,

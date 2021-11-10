@@ -12,8 +12,8 @@ pub fn build_pub_info_for_ip_ext(
     prf_key_seed: &str,
 ) -> String {
     let raw_type = RawBlsType::Seed;
-    let prf_key = get_prf_key(prf_key_seed, raw_type).expect("Unable to read prf key");
-    let id_cred_sec = get_id_cred_sec(id_cred_sec_seed, raw_type).expect("Unable to read prf key");
+    let prf_key = get_prf_key(prf_key_seed, raw_type).expect("Unable to compute  prf key");
+    let id_cred_sec = get_id_cred_sec(id_cred_sec_seed, raw_type).expect("Unable to compute id cred sec");
     match build_pub_info_for_ip_aux(input, id_cred_sec, prf_key) {
         Ok(s) => s,
         Err(e) => format!("unable to build PublicInformationForIP due to: {}", e,),
@@ -28,8 +28,8 @@ pub fn create_id_request_ext(
     prf_key_seed: &str,
 ) -> String {
     let raw_type = RawBlsType::Seed;
-    let prf_key = get_prf_key(prf_key_seed, raw_type).expect("Unable to read prf key");
-    let id_cred_sec = get_id_cred_sec(id_cred_sec_seed, raw_type).expect("Unable to read prf key");
+    let prf_key = get_prf_key(prf_key_seed, raw_type).expect("Unable to compute prf key");
+    let id_cred_sec = get_id_cred_sec(id_cred_sec_seed, raw_type).expect("Unable to compute id cred sec");
     match create_id_request_aux(input, signature, id_cred_sec, prf_key) {
         Ok(s) => s,
         Err(e) => format!("unable to create request due to: {}", e,),
@@ -44,8 +44,8 @@ pub fn generate_unsigned_credential_ext(
     is_seed: bool,
 ) -> String {
     let raw_type = if is_seed { RawBlsType::SeedDeprecated } else { RawBlsType::Bls };
-    let prf_key = get_prf_key(prf_key_raw, raw_type).expect("Unable to read prf key");
-    let id_cred_sec = get_id_cred_sec(id_cred_sec_raw, raw_type).expect("Unable to read prf key");
+    let prf_key = get_prf_key(prf_key_raw, raw_type).expect("Unable to compute prf key");
+    let id_cred_sec = get_id_cred_sec(id_cred_sec_raw, raw_type).expect("Unable to compute id cred sec");
     match generate_unsigned_credential_aux(input, id_cred_sec, prf_key) {
         Ok(s) => s,
         Err(e) => format!("unable to generate unsigned credential due to: {}", e),
@@ -82,7 +82,7 @@ pub fn decrypt_amounts_ext(
     is_seed: bool,
 ) -> String {
     let raw_type = if is_seed { RawBlsType::SeedDeprecated } else { RawBlsType::Bls };
-    let prf_key = get_prf_key(prf_key_raw, raw_type).expect("Unable to read prf key");
+    let prf_key = get_prf_key(prf_key_raw, raw_type).expect("Unable to compute prf key");
     match decrypt_amounts_aux(input, prf_key) {
         Ok(s) => s,
         Err(e) => format!("unable to decrypt transactions due to: {}", e),
@@ -96,7 +96,7 @@ pub fn create_sec_to_pub_ext(
     is_seed: bool,
 ) -> String {
     let raw_type = if is_seed { RawBlsType::SeedDeprecated } else { RawBlsType::Bls };
-    let prf_key = get_prf_key(prf_key_raw, raw_type).expect("Unable to read prf key");
+    let prf_key = get_prf_key(prf_key_raw, raw_type).expect("Unable to compute prf key");
     match create_sec_to_pub_aux(input, prf_key) {
         Ok(s) => s,
         Err(e) => format!("unable to create transfer to public due to: {}", e),
@@ -110,7 +110,7 @@ pub fn create_pub_to_sec_ext(
     is_seed: bool,
 ) -> String {
     let raw_type = if is_seed { RawBlsType::SeedDeprecated } else { RawBlsType::Bls };
-    let prf_key = get_prf_key(prf_key_raw, raw_type).expect("Unable to read prf key");
+    let prf_key = get_prf_key(prf_key_raw, raw_type).expect("Unable to compute prf key");
     match create_pub_to_sec_aux(input, prf_key) {
         Ok(s) => s,
         Err(e) => format!("unable to create transfer to encrypted data due to: {}", e),
@@ -124,7 +124,7 @@ pub fn create_encrypted_transfer_ext(
     is_seed: bool,
 ) -> String {
     let raw_type = if is_seed { RawBlsType::SeedDeprecated } else { RawBlsType::Bls };
-    let prf_key = get_prf_key(prf_key_raw, raw_type).expect("Unable to read prf key");
+    let prf_key = get_prf_key(prf_key_raw, raw_type).expect("Unable to compute prf key");
     match create_encrypted_transfer_aux(input, prf_key) {
         Ok(s) => s,
         Err(e) => format!("unable to create encrypted transfer due to: {}", e),
@@ -138,8 +138,8 @@ pub fn create_genesis_account_ext(
     prf_key_raw: &str,
 ) -> String {
     let raw_type = RawBlsType::Bls;
-    let prf_key = get_prf_key(prf_key_raw, raw_type).expect("Unable to read prf key");
-    let id_cred_sec = get_id_cred_sec(id_cred_sec_raw, raw_type).expect("Unable to read prf key");
+    let prf_key = get_prf_key(prf_key_raw, raw_type).expect("Unable to compute prf key");
+    let id_cred_sec = get_id_cred_sec(id_cred_sec_raw, raw_type).expect("Unable to compute prf key");
     match create_genesis_account(input, id_cred_sec, prf_key) {
         Ok(s) => s,
         Err(e) => format!("unable to create genesis account due to: {}", e),
@@ -184,7 +184,7 @@ pub fn calculate_cred_id_ext(
     use_deprecated: bool
 ) -> String {
     let raw_type = if use_deprecated { RawBlsType::SeedDeprecated } else { RawBlsType::Seed };
-    let prf_key = get_prf_key(prf_key_seed, raw_type).expect("Unable to read prf_key");
+    let prf_key = get_prf_key(prf_key_seed, raw_type).expect("Unable to compute prf key");
     match calculate_cred_id(prf_key, cred_counter, global_context) {
         Ok(s) => s,
         Err(e) => format!("unable to calculate credId due to: {}", e),
