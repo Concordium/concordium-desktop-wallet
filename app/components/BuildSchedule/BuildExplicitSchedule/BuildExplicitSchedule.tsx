@@ -158,14 +158,16 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
                         }}
                     />
                 </div>
-                <Form.Timestamp
+                <Form.DatePicker
+                    className="body2"
                     name={addSchedulePointFormNames.timestamp}
                     label="Release time:"
                     rules={{
-                        required: 'Timestamp required',
-                        validate: futureDate('Must be future date'),
+                        required: 'Date and time required',
+                        validate: futureDate('Must be in the future'),
                     }}
                     defaultValue={getDefaultScheduledStartTime()}
+                    minDate={new Date()}
                 />
                 <Form.Submit size="small">Add</Form.Submit>
             </Form>

@@ -20,6 +20,7 @@ import TransferView from '~/components/Transfers/TransferView';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import ButtonGroup from '~/components/ButtonGroup';
 import { chosenAccountInfoSelector } from '~/features/AccountSlice';
+import ErrorMessage from '~/components/Form/ErrorMessage';
 
 import styles from './BuildSchedule.module.scss';
 
@@ -181,7 +182,7 @@ export default function BuildSchedule({ location }: Props) {
                         {displayAsGTU(amount)} to {recipient.name}
                     </h2>
                     <DisplayEstimatedFee estimatedFee={estimatedFee} />
-                    <p className={styles.errorLabel}>{amountError}</p>
+                    <ErrorMessage>{amountError}</ErrorMessage>
                 </div>
                 <ButtonGroup
                     buttons={[

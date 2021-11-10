@@ -23,7 +23,6 @@ import {
 import SignTransaction from './SignTransaction';
 import ButtonGroup from '~/components/ButtonGroup';
 import UpdateBakerRestakeEarningsProposalDetails from './proposal-details/UpdateBakerRestakeEarnings';
-import InputTimestamp from '~/components/Form/InputTimestamp';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
@@ -32,6 +31,7 @@ import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
+import DatePicker from '~/components/Form/DatePicker';
 import { isMultiSig } from '~/utils/accountHelpers';
 import Label from '~/components/Label';
 
@@ -197,7 +197,8 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                                         Choose the expiry date for the
                                         transaction.
                                     </p>
-                                    <InputTimestamp
+                                    <DatePicker
+                                        className="body2 mV40"
                                         label="Transaction expiry time"
                                         name="expiry"
                                         isInvalid={
@@ -206,6 +207,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                                         error={expiryTimeError}
                                         value={expiryTime}
                                         onChange={setExpiryTime}
+                                        minDate={new Date()}
                                     />
                                     <p className="mB0">
                                         Committing the transaction after this
