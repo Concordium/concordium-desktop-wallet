@@ -1448,3 +1448,8 @@ export interface DecryptedAmount {
     transactionHash: string;
     amount: string;
 }
+
+export interface CredentialNumberPrfKey {
+    prfKeySeed: string;
+    credentialNumber: number;
+}

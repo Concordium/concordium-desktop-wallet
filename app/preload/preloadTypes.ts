@@ -26,6 +26,7 @@ import {
     TransactionFilter,
     TransactionOrder,
     DecryptedAmount,
+    CredentialNumberPrfKey,
 } from '~/utils/types';
 import { ExternalCredential } from '../database/types';
 import type LedgerCommands from './preloadLedgerTypes';
@@ -351,12 +352,16 @@ export interface AccountReportMethods {
     single: (
         fileName: string,
         account: Account,
-        filters: TransactionFilter
+        filters: TransactionFilter,
+        global: Global,
+        keys: Record<string, CredentialNumberPrfKey>
     ) => Promise<void>;
     multiple: (
         fileName: string,
         accounts: Account[],
-        filters: TransactionFilter
+        filters: TransactionFilter,
+        global: Global,
+        keys: Record<string, CredentialNumberPrfKey>
     ) => Promise<void>;
     abort: () => void;
 }
