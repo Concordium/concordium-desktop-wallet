@@ -7,7 +7,7 @@ import withNonce from './withNonce';
 
 export interface ExchangeRateAndNonceProps {
     exchangeRate?: Fraction;
-    nonce?: string;
+    nonce?: bigint;
     account: Account;
 }
 

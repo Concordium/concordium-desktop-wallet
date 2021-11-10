@@ -16,6 +16,7 @@ import {
     toMicroUnits,
 } from '~/utils/gtu';
 import { getDefaultScheduledStartTime } from '~/utils/timeHelpers';
+import { toReleaseSchedule } from '~/utils/transactionHelpers';
 import Form from '../../Form';
 import { futureDate } from '../../Form/util/validation';
 import ScheduleList from '../../ScheduleList';
@@ -195,7 +196,7 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
                     </Card>
                     {!adding ? (
                         <ScheduleList
-                            schedule={schedule}
+                            schedule={schedule.map(toReleaseSchedule)}
                             removeFromSchedule={removeFromSchedule}
                         />
                     ) : null}

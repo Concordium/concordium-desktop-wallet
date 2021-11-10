@@ -202,22 +202,24 @@ export const getFormattedDateString = (date: Date): string => {
 /** Calculates the epoch index from a given date */
 export function getEpochIndexAt(
     epochAtDate: Date,
-    epochDurationMillis: number,
+    epochDurationMillis: bigint,
     genesisTime: Date
 ) {
     const genesis = genesisTime.getTime();
     const now = epochAtDate.getTime();
     const millisSinceGenesis = now - genesis;
-    return Math.floor(millisSinceGenesis / epochDurationMillis);
+    return Math.floor(millisSinceGenesis / Number(epochDurationMillis));
 }
 
 /** Calculates the start date of an epoch index */
 export function epochDate(
     epochIndex: number,
-    epochDurationMillis: number,
+    epochDurationMillis: bigint,
     genesisTime: Date
 ): Date {
-    return new Date(genesisTime.getTime() + epochIndex * epochDurationMillis);
+    return new Date(
+        genesisTime.getTime() + epochIndex * Number(epochDurationMillis)
+    );
 }
 
 /** Predicates whether a date is in the future based on the current time,

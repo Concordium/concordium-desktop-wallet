@@ -22,7 +22,7 @@ export default withChainData(function ElectionDifficultyView({
 
     const currentElectionDifficulty =
         blockSummary.updates.chainParameters.electionDifficulty;
-    const { slotDuration } = consensusStatus;
+    const slotDuration = Number(consensusStatus.slotDuration);
 
     return (
         <>

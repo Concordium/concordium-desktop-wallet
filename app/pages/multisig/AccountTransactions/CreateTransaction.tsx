@@ -21,7 +21,7 @@ interface Props {
     amount: string;
     memo?: string;
     schedule?: Schedule;
-    nonce: string;
+    nonce: bigint;
     expiryTime: Date;
 }
 

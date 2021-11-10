@@ -3,14 +3,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
+import {
+    InitialCredentialDeploymentValues,
+    CredentialDeploymentValues,
+} from '@concordium/node-sdk/lib/src/types';
 import Button from '~/cross-app-components/Button';
 import {
     Account,
     AccountInfo,
     CredentialDeploymentInformation,
-    TransactionKindId,
     Fraction,
     AddedCredential,
+    TransactionKindId,
 } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
 import AddCredential from './AddCredential';
@@ -219,7 +223,10 @@ interface State {
 
 interface AccountInfoCredential {
     credentialIndex: number;
-    credential: CredentialDeploymentInformation;
+    credential: (
+        | InitialCredentialDeploymentValues
+        | CredentialDeploymentValues
+    ) & { credId: string };
 }
 
 interface Props {
@@ -301,14 +308,17 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
             currentAccountInfo.accountCredentials
         ).map((accountCredential) => {
             const credentialIndex = parseInt(accountCredential[0], 10);
-            const cred = accountCredential[1].value.contents;
-            if (cred.regId) {
+            const cred = accountCredential[1].value;
+            if (cred.type === 'initial') {
                 return {
                     credentialIndex,
-                    credential: { ...cred, credId: cred.regId },
+                    credential: {
+                        ...cred.contents,
+                        credId: cred.contents.regId,
+                    },
                 };
             }
-            return { credentialIndex, credential: cred };
+            return { credentialIndex, credential: cred.contents };
         });
         setCurrentCredentials(credentialsForAccount);
 

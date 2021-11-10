@@ -39,12 +39,13 @@ import { collapseFraction } from '~/utils/basicHelpers';
 import { toMicroUnits, displayAsGTU } from '~/utils/gtu';
 import { useAsyncMemo } from '~/utils/hooks';
 import { nodeSupportsMemo } from '~/node/nodeHelpers';
+import { stringify } from '~/utils/JSONHelper';
 import { isMultiSig, getAmountAtDisposal } from '~/utils/accountHelpers';
-
-import styles from './CreateTransferProposal.module.scss';
 import UpsertAddress from '~/components/UpsertAddress';
 import PickMemo from './PickMemo';
 import DatePicker from '~/components/Form/DatePicker';
+
+import styles from './CreateTransferProposal.module.scss';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
@@ -159,7 +160,7 @@ function CreateTransferProposal({
             setAmountError(undefined);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [estimatedFee, amount, JSON.stringify(accountInfo)]);
+    }, [estimatedFee, amount, stringify(accountInfo)]);
 
     function continueAction(routerAction: typeof push = push) {
         const nextLocation = handler.creationLocationHandler(location);
