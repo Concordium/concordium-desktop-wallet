@@ -112,8 +112,8 @@ export async function createIdentityRequestObjectLedger(
     const pubInfoForIpString = await worker.postMessage({
         command: workerCommands.buildPublicInformationForIp,
         context: contextString,
-        idCredSec: keys.idCredSec,
-        prfKey: keys.prfKey,
+        idCredSecSeed: keys.idCredSec,
+        prfKeySeed: keys.prfKey,
     });
 
     const pubInfoForIp: PublicInformationForIp = JSON.parse(pubInfoForIpString);
@@ -135,8 +135,8 @@ export async function createIdentityRequestObjectLedger(
         command: workerCommands.createIdRequest,
         context: contextString,
         signature: signature.toString('hex'),
-        idCredSec: keys.idCredSec,
-        prfKey: keys.prfKey,
+        idCredSecSeed: keys.idCredSec,
+        prfKeySeed: keys.prfKey,
     });
     const data = JSON.parse(dataString);
 

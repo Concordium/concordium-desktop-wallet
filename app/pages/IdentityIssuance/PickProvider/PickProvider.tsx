@@ -8,15 +8,22 @@ import {
     IdentityProvider,
     PublicInformationForIp,
     CreationKeys,
+    Global,
 } from '~/utils/types';
 import Card from '~/cross-app-components/Card';
 import { globalSelector } from '~/features/GlobalSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getNextIdentityNumber } from '~/database/IdentityDao';
-import { createIdentityRequestObjectLedger } from '~/utils/rustInterface';
+import {
+    createIdentityRequestObjectLedger,
+    getCredIdFromSeed,
+} from '~/utils/rustInterface';
 import errorMessages from '~/constants/errorMessages.json';
 import SimpleLedgerWithCreationKeys from '~/components/ledger/SimpleLedgerWithCreationKeys';
 import PublicKeyDetails from '~/components/ledger/PublicKeyDetails';
+import { getAccountInfo } from '~/node/nodeRequests';
+import { getlastFinalizedBlockHash } from '~/node/nodeHelpers';
+import ChoiceModal from '~/components/ChoiceModal';
 
 import styles from './PickProvider.module.scss';
 import { ExternalIssuanceLocationState } from '../ExternalIssuance/ExternalIssuance';
@@ -39,6 +46,23 @@ const IPDetails = (info: PublicInformationForIp) => (
     </div>
 );
 
+async function HasPrfKeySeedBeenUsed(
+    prfKeySeed: string,
+    global: Global
+): Promise<boolean> {
+    const blockHash = await getlastFinalizedBlockHash();
+    // Check if this seed have been used with version 0 keygen.
+    let credId = await getCredIdFromSeed(prfKeySeed, 0, global, 0);
+    let info = await getAccountInfo(credId, blockHash);
+    if (info) {
+        return true;
+    }
+    // Check if this index have been used with version 1 keygen.
+    credId = await getCredIdFromSeed(prfKeySeed, 0, global, 1);
+    info = await getAccountInfo(credId, blockHash);
+    return Boolean(info);
+}
+
 interface Props {
     setProvider(provider: IdentityProvider): void;
     onError(message: string): void;
@@ -53,6 +77,7 @@ export default function IdentityIssuanceChooseProvider({
     setIsSigning,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
+    const [alreadyExists, setAlreadyExists] = useState(false);
     const [providers, setProviders] = useState<IdentityProvider[]>([]);
     const [
         nextLocationState,
@@ -83,7 +108,7 @@ export default function IdentityIssuanceChooseProvider({
     }
 
     const withLedger = useCallback(
-        (keys: CreationKeys) => {
+        (keySeeds: CreationKeys) => {
             return async (
                 ledger: ConcordiumLedgerClient,
                 setMessage: (message: string | JSX.Element) => void
@@ -106,9 +131,14 @@ export default function IdentityIssuanceChooseProvider({
                         walletId
                     );
 
+                    if (await HasPrfKeySeedBeenUsed(keySeeds.prfKey, global)) {
+                        setAlreadyExists(true);
+                        return;
+                    }
+
                     const idObj = await createIdentityRequestObjectLedger(
                         identityNumber,
-                        keys,
+                        keySeeds,
                         provider.ipInfo,
                         provider.arsInfos,
                         global,
@@ -139,6 +169,16 @@ export default function IdentityIssuanceChooseProvider({
 
     return (
         <>
+            <ChoiceModal
+                title="Identity index already in use!"
+                description="The next identity index on the current ledger has already been used on the chain. Please import or recover it."
+                open={alreadyExists}
+                disableClose
+                actions={[
+                    { label: 'Go to import', location: routes.EXPORTIMPORT },
+                    { label: 'Go to recovery', location: routes.RECOVERY },
+                ]}
+            />
             <h2 className={styles.header}>The identity provider</h2>
             <p className={styles.text}>
                 The next step of creating a new identity is to choose an
@@ -180,6 +220,7 @@ export default function IdentityIssuanceChooseProvider({
                     ledgerCallback={withLedger}
                     preCallback={getIdentityNumber}
                     disabled={!provider}
+                    identityVersion={0}
                 />
             </div>
         </>

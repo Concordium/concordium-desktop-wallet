@@ -96,21 +96,30 @@ pub fn generate_bls_key_deprecated(seed: &str) -> Result<Fr> {
     }
 }
 
-pub fn get_bls(s: &str, is_seed: bool) -> Result<Fr> {
-    if is_seed {
-        Ok(generate_bls_key_deprecated(&s)?)
-    } else {
-        let fr_numbers = [u64::from_str_radix(&s[48..64], 16)?, u64::from_str_radix(&s[32..48], 16)?, u64::from_str_radix(&s[16..32], 16)?, u64::from_str_radix(&s[0..16], 16)?];
-        Ok(Fr::from_repr(FrRepr(fr_numbers)).unwrap())
+#[derive(Copy, Clone)]
+pub enum RawBlsType {
+    Seed,
+    SeedDeprecated,
+    Bls
+}
+
+pub fn get_bls(s: &str, raw_type: RawBlsType) -> Result<Fr> {
+    match raw_type {
+        RawBlsType::SeedDeprecated => Ok(generate_bls_key_deprecated(&s)?),
+        RawBlsType::Seed => Ok(generate_bls_key(&s)?),
+        RawBlsType::Bls => {
+            let fr_numbers = [u64::from_str_radix(&s[48..64], 16)?, u64::from_str_radix(&s[32..48], 16)?, u64::from_str_radix(&s[16..32], 16)?, u64::from_str_radix(&s[0..16], 16)?];
+            Ok(Fr::from_repr(FrRepr(fr_numbers)).unwrap())
+        },
     }
 }
 
-pub fn get_prf_key<C: Curve<Scalar = Fr>>(raw: &str, is_seed: bool) -> Result<SecretKey<C>> {
-    Ok(SecretKey::new(get_bls(raw, is_seed)?))
+pub fn get_prf_key<C: Curve<Scalar = Fr>>(raw: &str, raw_type: RawBlsType) -> Result<SecretKey<C>> {
+    Ok(SecretKey::new(get_bls(raw, raw_type)?))
 }
 
-pub fn get_id_cred_sec<C: Curve<Scalar = Fr>>(raw: &str, is_seed: bool) -> Result<Value<C>> {
-    Ok(Value::new(get_bls(raw, is_seed)?))
+pub fn get_id_cred_sec<C: Curve<Scalar = Fr>>(raw: &str, raw_type: RawBlsType) -> Result<Value<C>> {
+    Ok(Value::new(get_bls(raw, raw_type)?))
 }
 
 pub fn generate_cred_id<C: Curve>(prf_key: &SecretKey<C>, cred_counter: u8, global_context: &GlobalContext<C>) -> Result<C> {

@@ -577,14 +577,11 @@ pub fn get_address_from_cred_id(cred_id: &str) -> Result<String> {
 }
 
 pub fn calculate_cred_id(
-    prf_key_seed: &str,
+    prf_key: PrfKey,
     cred_counter: u8,
     global_context: &str,
-    use_deprecated: bool
 ) -> Result<String> {
     let global_context = from_str(global_context)?;
-
-    let prf_key = PrfKey::new(if use_deprecated { generate_bls_key_deprecated(&prf_key_seed)? } else { generate_bls_key(&prf_key_seed)? });
 
     let cred_id = generate_cred_id::<ExampleCurve>(&prf_key, cred_counter, &global_context)?;
 

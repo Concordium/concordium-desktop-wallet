@@ -1,4 +1,4 @@
 {
     "identitySpacesBetweenWarning": 3,
-    "maxCredentialsOnIdentity": 5
+    "maxCredentialsOnIdentity": 25
 }

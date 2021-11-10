@@ -21,8 +21,8 @@ function buildPublicInformationForIp(
 ) {
     return rust.buildPublicInformationForIp(
         message.context,
-        message.idCredSec,
-        message.prfKey
+        message.idCredSecSeed,
+        message.prfKeySeed
     );
 }
 
@@ -30,8 +30,8 @@ function createIdRequest(rust: RustInterface, message: Record<string, string>) {
     return rust.createIdRequest(
         message.context,
         message.signature,
-        message.idCredSec,
-        message.prfKey
+        message.idCredSecSeed,
+        message.prfKeySeed
     );
 }
 
