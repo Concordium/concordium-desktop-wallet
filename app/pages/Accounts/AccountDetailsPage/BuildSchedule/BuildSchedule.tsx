@@ -17,10 +17,12 @@ import ExplicitSchedule from '~/components/BuildSchedule/BuildExplicitSchedule';
 import { BuildScheduleDefaults } from '~/components/BuildSchedule/util';
 import { scheduledTransferCost } from '~/utils/transactionCosts';
 import TransferView from '~/components/Transfers/TransferView';
-import styles from './BuildSchedule.module.scss';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import ButtonGroup from '~/components/ButtonGroup';
 import { chosenAccountInfoSelector } from '~/features/AccountSlice';
+import ErrorMessage from '~/components/Form/ErrorMessage';
+
+import styles from './BuildSchedule.module.scss';
 
 interface State {
     account: Account;
@@ -94,7 +96,7 @@ export default function BuildSchedule({ location }: Props) {
             setAmountError(undefined);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [estimatedFee, amount, JSON.stringify(accountInfo)]);
+    }, [estimatedFee, amount, stringify(accountInfo)]);
 
     const createTransaction = useCallback(
         (schedule: Schedule, recoverState: unknown) => {
@@ -107,7 +109,7 @@ export default function BuildSchedule({ location }: Props) {
                     account.address,
                     recipient.address,
                     schedule,
-                    nonce,
+                    parse(nonce),
                     memo
                 );
             } else {
@@ -115,7 +117,7 @@ export default function BuildSchedule({ location }: Props) {
                     account.address,
                     recipient.address,
                     schedule,
-                    nonce
+                    parse(nonce)
                 );
             }
             transaction.estimatedFee = estimatedFee;
@@ -180,7 +182,7 @@ export default function BuildSchedule({ location }: Props) {
                         {displayAsGTU(amount)} to {recipient.name}
                     </h2>
                     <DisplayEstimatedFee estimatedFee={estimatedFee} />
-                    <p className={styles.errorLabel}>{amountError}</p>
+                    <ErrorMessage>{amountError}</ErrorMessage>
                 </div>
                 <ButtonGroup
                     buttons={[

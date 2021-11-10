@@ -27,7 +27,7 @@ export const toRewardDistributionValue = ({
 });
 
 export const getSlotsPerYear = (consensusStatus: ConsensusStatus): number => {
-    const slotsPerSecond = 1000 / consensusStatus.slotDuration;
+    const slotsPerSecond = 1000 / Number(consensusStatus.slotDuration);
     const slotsPerYear = slotsPerSecond * 60 * 60 * 24 * 365.25;
     return slotsPerYear;
 };

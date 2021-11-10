@@ -1,5 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+    AccountInfo,
+    BlockSummary,
+    ConsensusStatus,
+    CryptographicParameters,
+    NextAccountNonce,
+    TransactionStatus,
+    Versioned,
+} from '@concordium/node-sdk';
+import {
     OpenDialogOptions,
     OpenDialogReturnValue,
     Rectangle,
@@ -24,6 +33,8 @@ import {
     IncomingTransaction,
     AccountAndCredentialPairs,
     TransactionFilter,
+    IpInfo,
+    ArInfo,
 } from '~/utils/types';
 import { ExternalCredential } from '../database/types';
 import type LedgerCommands from './preloadLedgerTypes';
@@ -47,10 +58,52 @@ export interface Once {
     onVerificationKeysConfirmed: PutListener;
 }
 
+type ConsensusAndGlobalResultSuccess = {
+    successful: true;
+    response: {
+        consensusStatus: ConsensusStatus;
+        global: Versioned<CryptographicParameters>;
+    };
+};
+
+type ConsensusAndGlobalResultFailure = {
+    successful: false;
+    error: Error;
+};
+
+export type ConsensusAndGlobalResult =
+    | ConsensusAndGlobalResultSuccess
+    | ConsensusAndGlobalResultFailure;
+
 export type GRPC = {
-    call: (command: string, input: Record<string, string>) => Promise<any>;
     setLocation: (address: string, port: string) => void;
-    nodeConsensusAndGlobal: (address: string, port: string) => Promise<any>;
+    nodeConsensusAndGlobal: (
+        address: string,
+        port: string
+    ) => Promise<ConsensusAndGlobalResult>;
+    sendTransaction: (
+        transactionPayload: Uint8Array,
+        networkId: number
+    ) => Promise<boolean>;
+    getCryptographicParameters: (
+        blockHash: string
+    ) => Promise<Versioned<CryptographicParameters> | undefined>;
+    getConsensusStatus: () => Promise<ConsensusStatus>;
+    getTransactionStatus: (
+        transactionId: string
+    ) => Promise<TransactionStatus | undefined>;
+    getNextAccountNonce: (
+        address: string
+    ) => Promise<NextAccountNonce | undefined>;
+    getBlockSummary: (blockHash: string) => Promise<BlockSummary | undefined>;
+    getAccountInfo: (
+        address: string,
+        blockHash: string
+    ) => Promise<AccountInfo | undefined>;
+    getIdentityProviders: (blockHash: string) => Promise<IpInfo[] | undefined>;
+    getAnonymityRevokers: (blockHash: string) => Promise<ArInfo[] | undefined>;
+    // We return a Uint8Array here, because PeerListResponse must be manually serialized/deserialized.
+    getPeerList: (includeBootstrappers: boolean) => Promise<Uint8Array>;
 };
 
 export type FileMethods = {

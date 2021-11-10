@@ -1,4 +1,8 @@
 import {
+    TransactionStatusEnum,
+    TransactionSummary,
+} from '@concordium/node-sdk/lib/src/types';
+import {
     getConsensusStatus,
     getAccountInfo,
     getCryptographicParameters,
@@ -6,9 +10,16 @@ import {
     getIdentityProviders,
     getAnonymityRevokers,
     getPeerList,
+    getTransactionStatus,
 } from './nodeRequests';
 import { PeerElement } from '../proto/concordium_p2p_rpc_pb';
-import { AccountInfo, Account, Global, Fraction } from '../utils/types';
+import {
+    AccountInfo,
+    Account,
+    Global,
+    Fraction,
+    TransactionStatus,
+} from '../utils/types';
 
 export interface AccountInfoPair {
     account: Account;
@@ -117,4 +128,47 @@ export async function isNodeUpToDate() {
 export async function nodeSupportsMemo() {
     const consensusStatus = await getConsensusStatus();
     return consensusStatus.protocolVersion >= 2;
+}
+
+export interface StatusResponse {
+    status: TransactionStatus;
+    outcomes: Record<string, TransactionSummary>;
+}
+
+/**
+ * Queries the node for the status of the transaction with the provided transaction hash.
+ * The polling will continue until the transaction becomes absent or finalized.
+ * @param transactionHash the hash of the transaction to get the status for
+ * @param pollingIntervalM, optional, interval between polling in milliSeconds, defaults to every 20 seconds.
+ */
+export async function getStatus(
+    transactionHash: string,
+    pollingIntervalMs = 20000
+): Promise<StatusResponse> {
+    return new Promise((resolve) => {
+        const interval = setInterval(async () => {
+            let response;
+            try {
+                response = await getTransactionStatus(transactionHash);
+            } catch (err) {
+                // This happens if the node cannot be reached. Just wait for the next
+                // interval and try again.
+                return;
+            }
+            // if there is no response, the transaction is absent.
+            if (!response) {
+                clearInterval(interval);
+                resolve({ status: TransactionStatus.Rejected, outcomes: {} });
+                return;
+            }
+
+            if (response.status === TransactionStatusEnum.Finalized) {
+                clearInterval(interval);
+                resolve({
+                    status: TransactionStatus.Finalized,
+                    outcomes: response.outcomes || {},
+                });
+            }
+        }, pollingIntervalMs);
+    });
 }

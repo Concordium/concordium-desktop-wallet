@@ -1,17 +1,7 @@
-import {
-    BoolResponse,
-    JsonResponse,
-    NodeInfoResponse,
-    PeerListResponse,
-} from '../proto/concordium_p2p_rpc_pb';
-import { BlockSummary, ConsensusStatus, AccountNonce } from './NodeApiTypes';
-import { AccountInfo, Global, Versioned, IpInfo, ArInfo } from '../utils/types';
-import { intToString } from '../utils/JSONHelper';
-import grpcMethods from '../constants/grpcMethods.json';
+import { PeerListResponse } from '~/proto/concordium_p2p_rpc_pb';
 
 /**
  * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
- * The requests will be sent to the main thread, which will execute them.
  */
 
 /**
@@ -22,134 +12,59 @@ export function setClientLocation(address: string, port: string) {
 }
 
 /**
- * Sends a command with GRPC to the node with the provided input.
- * @param command command to execute
- * @param input input for the command
+ * Takes an async function, which might return undefined, and throws an error instead.
  */
-async function sendPromise(
-    command: string,
-    input: Record<string, string> = {}
-): Promise<Uint8Array> {
-    const result = await window.grpc.call(command, input);
-    if (result.successful) {
-        return result.response;
-    }
-    throw result.error;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function wrapper<T extends any[], V>(
+    func: (...inputs: T) => Promise<V | undefined>,
+    getErrorMessage: (...inputs: T) => string
+): (...inputs: T) => Promise<V> {
+    return async (...inputs) => {
+        const result = await func(...inputs);
+        if (!result) {
+            throw new Error(getErrorMessage(...inputs));
+        }
+        return result;
+    };
 }
 
-/**
- * Executes the provided GRPC command towards the node with the provided
- * input.
- * @param command command to execute towards the node
- * @param input input for the command
- */
-async function sendPromiseParseResult(
-    command: string,
-    input?: Record<string, string>
-) {
-    const response = await sendPromise(command, input);
-    return JSON.parse(JsonResponse.deserializeBinary(response).getValue());
-}
-
-export async function sendTransaction(
+export function sendTransaction(
     transactionPayload: Uint8Array,
     networkId = 100
-): Promise<BoolResponse> {
-    const response = await sendPromise(grpcMethods.sendTransaction, {
-        transactionPayload: Buffer.from(transactionPayload).toString('hex'),
-        networkId: networkId.toString(),
-    });
-    return BoolResponse.deserializeBinary(response);
+) {
+    return window.grpc.sendTransaction(transactionPayload, networkId);
 }
 
-export async function getTransactionStatus(
-    transactionId: string
-): Promise<JsonResponse> {
-    const response = await sendPromise(grpcMethods.getTransactionStatus, {
-        transactionId,
-    });
-    return JsonResponse.deserializeBinary(response);
+export async function getPeerList(includeBootstrappers = false) {
+    return PeerListResponse.deserializeBinary(
+        await window.grpc.getPeerList(includeBootstrappers)
+    );
 }
 
-export async function getNextAccountNonce(
-    address: string
-): Promise<AccountNonce> {
-    const response = await sendPromise(grpcMethods.getNextAccountNonce, {
-        address,
-    });
-    const json = JsonResponse.deserializeBinary(response).getValue();
-    return JSON.parse(intToString(json, 'nonce'));
-}
+export const getBlockSummary = wrapper(
+    window.grpc.getBlockSummary,
+    (blockHash) => `Unable to load blocksummary, on block: ${blockHash}`
+);
+export const getAccountInfo = wrapper(
+    window.grpc.getAccountInfo,
+    (address) => `Unable to load accountInfo for ${address}`
+);
+export const getNextAccountNonce = wrapper(
+    window.grpc.getNextAccountNonce,
+    (address) => `Unable to fetch next nonce on address: ${address}`
+);
+export const getCryptographicParameters = wrapper(
+    window.grpc.getCryptographicParameters,
+    (blockHash) =>
+        `Unable to load cryptographic parameters, on block: ${blockHash}`
+);
+export const getAnonymityRevokers = wrapper(
+    window.grpc.getAnonymityRevokers,
+    (blockHash) => `Unable to load anonymity revokers, on block: ${blockHash}`
+);
+export const getIdentityProviders = wrapper(
+    window.grpc.getIdentityProviders,
+    (blockHash) => `Unable to load identity providers, on block: ${blockHash}`
+);
 
-/**
- * Retrieves the ConsensusStatus information from the node.
- */
-export function getConsensusStatus(): Promise<ConsensusStatus> {
-    return sendPromiseParseResult(grpcMethods.getConsensusStatus);
-}
-
-/**
- * Retrieves the list of identity providers at the given blockHash.
- */
-export async function getIdentityProviders(
-    blockHashValue: string
-): Promise<IpInfo[]> {
-    return sendPromiseParseResult(grpcMethods.getIdentityProviders, {
-        blockHashValue,
-    });
-}
-
-/**
- * Retrieves the list of anonymity revokers at the given blockHash.
- */
-export async function getAnonymityRevokers(
-    blockHashValue: string
-): Promise<ArInfo[]> {
-    return sendPromiseParseResult(grpcMethods.getAnonymityRevokers, {
-        blockHashValue,
-    });
-}
-
-/**
- * Retrieves the block summary for the provided block hash from the node.
- * @param blockHashValue the block hash to retrieve the block summary for
- */
-export function getBlockSummary(blockHashValue: string): Promise<BlockSummary> {
-    return sendPromiseParseResult(grpcMethods.getBlockSummary, {
-        blockHashValue,
-    });
-}
-
-export function getAccountInfo(
-    address: string,
-    blockHash: string
-): Promise<AccountInfo> {
-    return sendPromiseParseResult(grpcMethods.getAccountInfo, {
-        address,
-        blockHash,
-    });
-}
-
-export async function getNodeInfo(): Promise<NodeInfoResponse> {
-    const response = await sendPromise(grpcMethods.nodeInfo);
-    return NodeInfoResponse.deserializeBinary(response);
-}
-
-export async function getPeerList(
-    includeBootstrappers = false
-): Promise<PeerListResponse> {
-    const response = await sendPromise(grpcMethods.peerList, {
-        includeBootstrappers: includeBootstrappers
-            ? 'includeBootstrappers'
-            : '',
-    });
-    return PeerListResponse.deserializeBinary(response);
-}
-
-export async function getCryptographicParameters(
-    blockHashValue: string
-): Promise<Versioned<Global>> {
-    return sendPromiseParseResult(grpcMethods.getCryptographicParameters, {
-        blockHashValue,
-    });
-}
+export const { getTransactionStatus, getConsensusStatus } = window.grpc;

@@ -69,7 +69,10 @@ export default function AccountCreationPage(): JSX.Element {
     return (
         <PageLayout>
             <PageLayout.Header>
-                <h1> New Account | {getSubtitle(useLocation().pathname)}</h1>
+                <h1>
+                    <span className={styles.titlePrefix}>New account</span>
+                    {getSubtitle(useLocation().pathname)}
+                </h1>
             </PageLayout.Header>
             <PageLayout.Container
                 className={styles.container}

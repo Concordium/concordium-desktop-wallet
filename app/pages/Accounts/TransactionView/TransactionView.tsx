@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import clsx from 'clsx';
 import { useSelector } from 'react-redux';
 import TransactionListElement from '../TransactionList/TransactionListElement';
 import {
     TransferTransactionWithNames,
     TransactionStatus,
-    TransferTransaction,
+    StateUpdate,
 } from '~/utils/types';
 import { isFailed } from '~/utils/transactionHelpers';
 import SidedRow from '~/components/SidedRow';
@@ -17,6 +17,7 @@ import CloseButton from '~/cross-app-components/CloseButton';
 
 interface Props {
     transaction: TransferTransactionWithNames;
+    setTransaction: StateUpdate<TransferTransactionWithNames | undefined>;
     onClose?(): void;
 }
 
@@ -46,7 +47,7 @@ function CopiableListElement({
                     </p>
                 </div>
             }
-            right={<CopyButton value={value} />}
+            right={<CopyButton className={styles.copyButton} value={value} />}
         />
     );
 }
@@ -68,23 +69,17 @@ function displayRejectReason(transaction: TransferTransactionWithNames) {
 /**
  * Detailed view of the given transaction.
  */
-function TransactionView({ transaction, onClose }: Props) {
+function TransactionView({ transaction, onClose, setTransaction }: Props) {
     const transactions = useSelector(transactionsSelector);
-    const [
-        chosenTransaction,
-        setChosenTransaction,
-    ] = useState<TransferTransaction>(transaction);
 
     useEffect(() => {
-        if (chosenTransaction) {
+        if (transaction) {
             const upToDateChosenTransaction = transactions.find(
-                (t) => t.transactionHash === chosenTransaction.transactionHash
+                (t) => t.transactionHash === transaction.transactionHash
             );
-            if (upToDateChosenTransaction) {
-                setChosenTransaction(upToDateChosenTransaction);
-            }
+            setTransaction(upToDateChosenTransaction);
         }
-    }, [transactions, chosenTransaction, setChosenTransaction]);
+    }, [transactions, transaction, setTransaction]);
 
     return (
         <div className={styles.root}>
