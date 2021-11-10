@@ -348,6 +348,7 @@ dependencies = [
  "ff",
  "ffi_helpers",
  "hex",
+ "hkdf",
  "id",
  "keygen_bls",
  "libc",

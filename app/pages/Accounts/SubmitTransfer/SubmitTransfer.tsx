@@ -90,7 +90,8 @@ async function attachCompletedPayload(
             await getPrfKey(),
             global,
             accountInfo.accountEncryptedAmount,
-            credential.credentialNumber
+            credential.credentialNumber,
+            identityVersion
         );
 
         const payload = {
@@ -107,7 +108,8 @@ async function attachCompletedPayload(
             await getPrfKey(),
             global,
             accountInfo.accountEncryptedAmount,
-            credential.credentialNumber
+            credential.credentialNumber,
+            identityVersion
         );
         const payload = {
             ...transaction.payload,
@@ -132,7 +134,8 @@ async function attachCompletedPayload(
             await getPrfKey(),
             global,
             accountInfo.accountEncryptedAmount,
-            credential.credentialNumber
+            credential.credentialNumber,
+            identityVersion
         );
 
         const payload = {

@@ -1,5 +1,8 @@
 import { getAccountInfo } from '~/node/nodeRequests';
-import { getAddressFromCredentialId, getCredId } from '~/utils/rustInterface';
+import {
+    getAddressFromCredentialId,
+    getCredIdFromSeed,
+} from '~/utils/rustInterface';
 import {
     insertFromRecoveryExistingIdentity,
     insertFromRecoveryNewIdentity,
@@ -203,12 +206,13 @@ export async function recoverCredentials(
     const allRecovered = [];
     let credNumber = startingCredNumber;
     while (credNumber < maxCredentialsOnIdentity) {
-        const credId = await getCredId(
+        const credId = await getCredIdFromSeed(
             prfKeySeed,
             credNumber,
             global,
             identityVersion
         );
+        console.log(credId);
 
         const recovered = await recoverCredential(
             credId,

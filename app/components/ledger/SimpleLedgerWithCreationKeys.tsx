@@ -24,7 +24,6 @@ interface Props {
     disabled?: boolean;
     identityVersion?: number;
 }
-
 export default function SimpleLedgerWithCreationKeys({
     className,
     identityNumber,

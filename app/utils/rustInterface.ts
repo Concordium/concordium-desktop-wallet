@@ -29,6 +29,8 @@ import { currentIdentityVersion } from './identityHelpers';
 const rawWorker = new RustWorker();
 const worker = new PromiseWorker(rawWorker);
 
+const versionUsesSeed = (v: number) => v === 0;
+
 /**
  * Returns the PrfKey and IdCredSec for the given identity.
  * identityVersion 0 gives the seeds, and 1 gives the BLS keys.
@@ -171,8 +173,6 @@ async function createUnsignedCredentialInfo(
         randomness: {
             randomness: identity.randomness,
         },
-        prfKey: keys.prfKey,
-        idCredSec: keys.idCredSec,
     };
     if (address) {
         credentialInput.address = address;
@@ -181,6 +181,9 @@ async function createUnsignedCredentialInfo(
     const unsignedCredentialDeploymentInfoString = await worker.postMessage({
         command: workerCommands.createUnsignedCredential,
         input: stringify(credentialInput),
+        prfKey: keys.prfKey,
+        idCredSec: keys.idCredSec,
+        isSeed: versionUsesSeed(identity.version),
     });
 
     try {
@@ -325,17 +328,19 @@ export async function decryptAmounts(
     encryptedAmounts: string[],
     credentialNumber: number,
     global: Global,
-    prfKey: string
+    prfKey: string,
+    identityVersion: number
 ): Promise<string[]> {
     const input = {
         global,
         credentialNumber,
-        prfKey,
         encryptedAmounts,
     };
     const decryptedAmounts = await worker.postMessage({
         command: workerCommands.decryptAmounts,
         input: JSON.stringify(input),
+        prfKey,
+        isSeed: versionUsesSeed(identityVersion),
     });
     return JSON.parse(decryptedAmounts);
 }
@@ -345,12 +350,12 @@ export async function makeTransferToPublicData(
     prfKey: string,
     global: Global,
     accountEncryptedAmount: AccountEncryptedAmount,
-    accountNumber: number
+    accountNumber: number,
+    identityVersion: number
 ) {
     const input = {
         global,
         amount,
-        prfKey,
         accountNumber,
         incomingAmounts: accountEncryptedAmount.incomingAmounts,
         encryptedSelfAmount: accountEncryptedAmount.selfAmount,
@@ -362,6 +367,8 @@ export async function makeTransferToPublicData(
     const transferToPublicData = await worker.postMessage({
         command: workerCommands.createTransferToPublicData,
         input: JSON.stringify(input),
+        prfKey,
+        isSeed: versionUsesSeed(identityVersion),
     });
     return JSON.parse(transferToPublicData);
 }
@@ -371,12 +378,12 @@ export async function makeTransferToEncryptedData(
     prfKey: string,
     global: Global,
     accountEncryptedAmount: AccountEncryptedAmount,
-    accountNumber: number
+    accountNumber: number,
+    identityVersion: number
 ) {
     const input = {
         global,
         amount,
-        prfKey,
         accountNumber,
         incomingAmounts: accountEncryptedAmount.incomingAmounts,
         encryptedSelfAmount: accountEncryptedAmount.selfAmount,
@@ -388,6 +395,8 @@ export async function makeTransferToEncryptedData(
     const transferToSecretData = await worker.postMessage({
         command: workerCommands.createTransferToEncryptedData,
         input: JSON.stringify(input),
+        prfKey,
+        isSeed: versionUsesSeed(identityVersion),
     });
     return JSON.parse(transferToSecretData);
 }
@@ -398,13 +407,13 @@ export async function makeEncryptedTransferData(
     prfKey: string,
     global: Global,
     accountEncryptedAmount: AccountEncryptedAmount,
-    accountNumber: number
+    accountNumber: number,
+    identityVersion: number
 ) {
     const input = {
         global,
         amount,
         receiverPublicKey,
-        prfKey,
         accountNumber,
         incomingAmounts: accountEncryptedAmount.incomingAmounts,
         encryptedSelfAmount: accountEncryptedAmount.selfAmount,
@@ -416,6 +425,8 @@ export async function makeEncryptedTransferData(
     const encryptedTransferData = await worker.postMessage({
         command: workerCommands.createEncryptedTransferData,
         input: JSON.stringify(input),
+        prfKey,
+        isSeed: versionUsesSeed(identityVersion),
     });
     return JSON.parse(encryptedTransferData);
 }
@@ -504,7 +515,7 @@ export function getAddressFromCredentialId(credId: string): Promise<string> {
     });
 }
 
-export function getCredId(
+export function getCredIdFromSeed(
     prfKeySeed: string,
     credentialNumber: number,
     global: Global,
@@ -515,5 +526,6 @@ export function getCredId(
         prfKey: prfKeySeed,
         credentialNumber,
         global: stringify(global),
+        useDeprecated: versionUsesSeed(identityVersion),
     });
 }

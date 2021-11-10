@@ -39,15 +39,12 @@ type PrfKey = SecretKey<ExampleCurve>;
 
 pub fn build_pub_info_for_ip_aux(
     input: &str,
-    id_cred_sec_seed: &str,
-    prf_key_seed: &str,
+    id_cred_sec: Value<ExampleCurve>,
+    prf_key: PrfKey,
 ) -> Result<String> {
     let v: SerdeValue = from_str(input)?;
 
     let global_context: GlobalContext<ExampleCurve> = try_get(&v, "global")?;
-
-    let id_cred_sec = Value::new(generate_bls_key(id_cred_sec_seed)?);
-    let prf_key = PrfKey::new(generate_bls_key(prf_key_seed)?);
 
     let initial_acc_data = InitialAccountDataStruct {
         public_keys: try_get(&v, "publicKeys")?,
@@ -67,8 +64,8 @@ pub fn build_pub_info_for_ip_aux(
 pub fn create_id_request_aux(
     input: &str,
     signature: &str,
-    id_cred_sec_seed: &str,
-    prf_key_seed: &str,
+    id_cred_sec: Value<ExampleCurve>,
+    prf_key: PrfKey,
 ) -> Result<String> {
     let v: SerdeValue = from_str(input)?;
 
@@ -83,9 +80,6 @@ pub fn create_id_request_aux(
         ensure!(l > 0, "ArInfos should have at least 1 anonymity revoker.");
         Threshold(max((l - 1).try_into().unwrap_or(255), 1))
     };
-
-    let id_cred_sec = Value::new(generate_bls_key(id_cred_sec_seed)?);
-    let prf_key = PrfKey::new(generate_bls_key(prf_key_seed)?);
 
     let chi = CredentialHolderInfo::<ExampleCurve> {
         id_cred: IdCredentials { id_cred_sec },
@@ -583,11 +577,14 @@ pub fn get_address_from_cred_id(cred_id: &str) -> Result<String> {
 }
 
 pub fn calculate_cred_id(
-    prf_key: PrfKey,
+    prf_key_seed: &str,
     cred_counter: u8,
-    global_context: &str
+    global_context: &str,
+    use_deprecated: bool
 ) -> Result<String> {
     let global_context = from_str(global_context)?;
+
+    let prf_key = PrfKey::new(if use_deprecated { generate_bls_key_deprecated(&prf_key_seed)? } else { generate_bls_key(&prf_key_seed)? });
 
     let cred_id = generate_cred_id::<ExampleCurve>(&prf_key, cred_counter, &global_context)?;
 

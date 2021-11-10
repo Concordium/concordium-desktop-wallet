@@ -231,6 +231,7 @@ export default function AccountCreationGenerate({
                         ledgerCallback={createAccount}
                         credentialNumber={credentialNumber}
                         preCallback={checkWallet}
+                        identityVersion={identity.version}
                         compareButtonClassName="mT50"
                     />
                 </Columns.Column>

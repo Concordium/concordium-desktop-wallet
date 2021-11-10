@@ -456,6 +456,7 @@ export const resetTransactions = () =>
 export async function decryptTransactions(
     account: Account,
     prfKey: string,
+    identityVersion: number,
     credentialNumber: number,
     global: Global
 ) {
@@ -489,7 +490,8 @@ export async function decryptTransactions(
         encryptedAmounts,
         credentialNumber,
         global,
-        prfKey
+        prfKey,
+        identityVersion
     );
 
     return Promise.all(

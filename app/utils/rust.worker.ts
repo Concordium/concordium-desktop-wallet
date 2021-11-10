@@ -39,7 +39,13 @@ function createUnsignedCredential(
     rust: RustInterface,
     message: Record<string, string>
 ) {
-    return rust.generateUnsignedCredential(message.input);
+    console.log(message);
+    return rust.generateUnsignedCredential(
+        message.input,
+        message.idCredSec,
+        message.prfKey,
+        Boolean(message.isSeed)
+    );
 }
 
 function createCredentialInfo(
@@ -61,7 +67,11 @@ function createCredentialDetails(
 }
 
 function decryptAmounts(rust: RustInterface, message: Record<string, string>) {
-    const decryptedAmounts = rust.decrypt_amounts_ext(message.input);
+    const decryptedAmounts = rust.decrypt_amounts_ext(
+        message.input,
+        message.prfKey,
+        Boolean(message.isSeed)
+    );
     return decryptedAmounts;
 }
 
@@ -69,21 +79,33 @@ function createTransferToPublicData(
     rust: RustInterface,
     message: Record<string, string>
 ) {
-    return rust.createTransferToPublicData(message.input);
+    return rust.createTransferToPublicData(
+        message.input,
+        message.prfKey,
+        Boolean(message.isSeed)
+    );
 }
 
 function createTransferToEncryptedData(
     rust: RustInterface,
     message: Record<string, string>
 ) {
-    return rust.createTransferToEncryptedData(message.input);
+    return rust.createTransferToEncryptedData(
+        message.input,
+        message.prfKey,
+        Boolean(message.isSeed)
+    );
 }
 
 function createEncryptedTransferData(
     rust: RustInterface,
     message: Record<string, string>
 ) {
-    return rust.createEncryptedTransferData(message.input);
+    return rust.createEncryptedTransferData(
+        message.input,
+        message.prfKey,
+        Boolean(message.isSeed)
+    );
 }
 
 function createGenesisAccount(
@@ -120,7 +142,8 @@ function getCredId(rust: RustInterface, message: Record<string, string>) {
     return rust.getCredId(
         message.prfKey,
         parseInt(message.credentialNumber, 10),
-        message.global
+        message.global,
+        Boolean(message.useDeprecated)
     );
 }
 

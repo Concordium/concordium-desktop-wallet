@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::*;
 use crate::{
-    helpers::*,
+    helpers::{get_prf_key, get_id_cred_sec},
     aux_functions::*,
     genesis_account::*,
 };
@@ -11,7 +11,10 @@ pub fn build_pub_info_for_ip_ext(
     id_cred_sec_string: &str,
     prf_key_string: &str,
 ) -> String {
-    match build_pub_info_for_ip_aux(input, id_cred_sec_string, prf_key_string) {
+    let is_seed = false;
+    let prf_key = get_prf_key(prf_key_string, is_seed).expect("Unable to read prf key");
+    let id_cred_sec = get_id_cred_sec(id_cred_sec_string, is_seed).expect("Unable to read prf key");
+    match build_pub_info_for_ip_aux(input, id_cred_sec, prf_key) {
         Ok(s) => s,
         Err(e) => format!("unable to build PublicInformationForIP due to: {}", e,),
     }
@@ -21,10 +24,13 @@ pub fn build_pub_info_for_ip_ext(
 pub fn create_id_request_ext(
     input: &str,
     signature: &str,
-    id_cred_sec_seed: &str,
-    prf_key_seed: &str,
+    id_cred_sec_string: &str,
+    prf_key_string: &str,
 ) -> String {
-    match create_id_request_aux(input, signature, id_cred_sec_seed, prf_key_seed) {
+    let is_seed = false;
+    let prf_key = get_prf_key(prf_key_string, is_seed).expect("Unable to read prf key");
+    let id_cred_sec = get_id_cred_sec(id_cred_sec_string, is_seed).expect("Unable to read prf key");
+    match create_id_request_aux(input, signature, id_cred_sec, prf_key) {
         Ok(s) => s,
         Err(e) => format!("unable to create request due to: {}", e,),
     }
@@ -126,7 +132,10 @@ pub fn create_genesis_account_ext(
     id_cred_sec_string: &str,
     prf_key_string: &str,
 ) -> String {
-    match create_genesis_account(input, id_cred_sec_string, prf_key_string) {
+    let is_seed = false;
+    let prf_key = get_prf_key(prf_key_string, is_seed).expect("Unable to read prf key");
+    let id_cred_sec = get_id_cred_sec(id_cred_sec_string, is_seed).expect("Unable to read prf key");
+    match create_genesis_account(input, id_cred_sec, prf_key) {
         Ok(s) => s,
         Err(e) => format!("unable to create genesis account due to: {}", e),
     }
@@ -164,13 +173,12 @@ pub fn get_address_from_cred_id_ext(
 
 #[wasm_bindgen(js_name = getCredId)]
 pub fn calculate_cred_id_ext(
-    prf_key_raw: &str,
+    prf_key_seed: &str,
     cred_counter: u8,
     global_context: &str,
-    is_seed: bool
+    use_deprecated: bool
 ) -> String {
-    let prf_key = get_prf_key(prf_key_raw, is_seed).expect("Unable to read prf key");
-    match calculate_cred_id(prf_key, cred_counter, global_context) {
+    match calculate_cred_id(prf_key_seed, cred_counter, global_context, use_deprecated) {
         Ok(s) => s,
         Err(e) => format!("unable to calculate credId due to: {}", e),
     }
