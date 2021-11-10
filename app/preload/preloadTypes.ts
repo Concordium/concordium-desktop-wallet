@@ -102,7 +102,8 @@ export type GRPC = {
     ) => Promise<AccountInfo | undefined>;
     getIdentityProviders: (blockHash: string) => Promise<IpInfo[] | undefined>;
     getAnonymityRevokers: (blockHash: string) => Promise<ArInfo[] | undefined>;
-    getPeerList: (includeBootstrappers: boolean) => Promise<Uint8Array>; // We have to serialize/deserialize this
+    // We return a Uint8Array here, because PeerListResponse must be manually serialized/deserialized.
+    getPeerList: (includeBootstrappers: boolean) => Promise<Uint8Array>;
 };
 
 export type FileMethods = {
