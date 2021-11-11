@@ -1,7 +1,7 @@
 export const {
     getPending: getPendingTransactions,
     hasPending: hasPendingTransactions,
-    getFilteredPending,
+    getFilteredPendingTransactions,
     hasEncryptedTransactions,
     hasPendingShieldedBalanceTransfer,
     update: updateTransaction,

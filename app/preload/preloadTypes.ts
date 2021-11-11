@@ -98,6 +98,7 @@ export type HttpMethods = {
     getTransactions: (
         address: string,
         transactionFilter: TransactionFilter,
+        onlyEncrypted: boolean,
         limit: number,
         order: TransactionOrder,
         id?: string
@@ -259,7 +260,7 @@ export type TransactionMethods = {
         limit?: number,
         startId?: string
     ) => Promise<GetTransactionsOutput>;
-    getFilteredPending: (
+    getFilteredPendingTransactions: (
         address: string,
         filteredTypes: TransactionKindString[],
         fromDate?: Date,

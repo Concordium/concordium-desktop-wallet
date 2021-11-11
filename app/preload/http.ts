@@ -9,8 +9,13 @@ import {
     HttpGetResponse,
 } from '~/preload/preloadTypes';
 import ipcCommands from '~/constants/ipcCommands.json';
-import { TransactionFilter, TransactionOrder } from '~/utils/types';
+import {
+    IncomingTransaction,
+    TransactionFilter,
+    TransactionOrder,
+} from '~/utils/types';
 import { secondsSinceUnixEpoch } from '~/utils/timeHelpers';
+import { getActiveBooleanFilters } from '~/utils/accountHelpers';
 
 function getWalletProxy() {
     const targetNet = getTargetNet();
@@ -43,6 +48,23 @@ async function httpsGet<T>(
 }
 
 /**
+ * Filters transactions on their type. This extra filtering is required
+ * as the wallet proxy does not support a fine grained filtering on
+ * types at this time.
+ * @param transactionFilter the filtering to apply to the transactions
+ */
+function filterTransactionsOnType(
+    transactionFilter: TransactionFilter,
+    transactions: IncomingTransaction[]
+) {
+    const allowedTypes = getActiveBooleanFilters(transactionFilter);
+    const filteredTransactions = transactions.filter((t) =>
+        allowedTypes.includes(t.details.type)
+    );
+    return filteredTransactions;
+}
+
+/**
  * Loads transactions from the wallet proxy for the account with the provided address. The supplied
  * transaction filter is applied for reward filtering, and filtering based on dates. All other parts
  * of the filter is ignored, as the wallet proxy does not support it!
@@ -55,6 +77,7 @@ async function httpsGet<T>(
 async function getTransactions(
     address: string,
     transactionFilter: TransactionFilter,
+    onlyEncrypted: boolean,
     limitResults: number,
     order: TransactionOrder,
     id?: string
@@ -81,6 +104,9 @@ async function getTransactions(
         );
         filters += `&blockTimeTo=${timestamp}`;
     }
+    if (onlyEncrypted) {
+        filters += '&onlyEncrypted=y';
+    }
 
     let proxyPath = `/v1/accTransactions/${address}?limit=${limitResults}&includeRawRejectReason${filters}&order=${order.toString()}`;
     if (id) {
@@ -91,8 +117,21 @@ async function getTransactions(
         transformResponse: (res) => parse(intToString(res, 'id')),
     });
 
-    const { transactions, count, limit } = response.data;
-    return { transactions, full: count === limit };
+    const {
+        transactions,
+        count,
+        limit,
+    }: {
+        transactions: IncomingTransaction[];
+        count: number;
+        limit: number;
+    } = response.data;
+    const filteredTransactions = filterTransactionsOnType(
+        transactionFilter,
+        transactions
+    );
+
+    return { transactions: filteredTransactions, full: count === limit };
 }
 
 async function gtuDrop(address: string) {

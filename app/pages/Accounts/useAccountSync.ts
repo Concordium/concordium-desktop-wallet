@@ -9,6 +9,7 @@ import {
     resetTransactions,
     loadTransactions,
     loadNewTransactions,
+    viewingShieldedSelector,
 } from '~/features/TransactionSlice';
 import { noOp } from '~/utils/basicHelpers';
 import { AccountStatus } from '~/utils/types';
@@ -29,9 +30,14 @@ export default function useAccountSync(onError: (message: string) => void) {
     const dispatch = useThunkDispatch();
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
+    const viewingShielded = useSelector(viewingShieldedSelector);
     const abortUpdateRef = useRef(noOp);
     const [loadIsDone, setIsLoadDone] = useState(false);
-    const [localAccountAmount, setLocalAccountAmount] = useState<string>();
+    // A change to the newTransactionsFlag is used to signal that new
+    // transactions are available and should be loaded.
+    const [newTransactionsFlag, setNewTransactionsFlag] = useState<boolean>(
+        false
+    );
     const accountInfoLoaded = Boolean(accountInfo);
 
     // Periodically update the account info to keep it in sync
@@ -63,12 +69,16 @@ export default function useAccountSync(onError: (message: string) => void) {
         []
     );
 
+    const newTransactionsDependencyArray = [
+        accountInfo?.accountAmount,
+        JSON.stringify(accountInfo?.accountEncryptedAmount.incomingAmounts),
+    ];
     useEffect(() => {
         if (loadIsDone) {
-            setLocalAccountAmount(accountInfo?.accountAmount);
+            setNewTransactionsFlag(!newTransactionsFlag);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [accountInfo?.accountAmount]);
+    }, newTransactionsDependencyArray);
 
     // Load any new transactions if the account amount changes, as that indicates that a
     // transaction affected the account.
@@ -87,16 +97,18 @@ export default function useAccountSync(onError: (message: string) => void) {
 
         return () => {};
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [localAccountAmount]);
+    }, [newTransactionsFlag]);
 
     // Re-load transactions entirely from the wallet proxy if:
     // - the filter is changed
-    // - the status of the account changes, e.g. if it is confirmed
+    // - the status of the account changes, e.g. if it is confirmed,
+    // - the user switches between viewing shielded or unshielded transactions
     // given that the account info has already been loaded.
     const loadDependencyArray = [
         JSON.stringify(account?.transactionFilter),
         account?.status,
         accountInfoLoaded,
+        viewingShielded,
     ];
     useEffect(() => {
         if (!accountInfoLoaded) {

@@ -296,7 +296,7 @@ const exposedMethods: TransactionMethods = {
     update: updateTransaction,
     insert: insertTransactions,
     getTransaction,
-    getFilteredPending: getFilteredPendingTransactions,
+    getFilteredPendingTransactions,
     deleteTransaction,
 };
 

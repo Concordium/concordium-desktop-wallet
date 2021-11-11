@@ -3,8 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { decryptAccountBalance } from '~/features/AccountSlice';
 import { globalSelector } from '~/features/GlobalSlice';
 import {
-    reloadTransactions,
     shieldedTransactionsSelector,
+    updateTransactionFields,
 } from '~/features/TransactionSlice';
 import { Account, TransactionKindString } from '~/utils/types';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
@@ -103,12 +103,17 @@ export default function DecryptComponent({ account, onDecrypt }: Props) {
             dispatch
         );
 
-        // Reload the transaction log if we decrypted any transactions, so that they will
-        // be reloaded with their decrypted amounts present.
-        // TODO Instead of reloading (which queries the wallet proxy for no reason), we should
-        // update the state directly with the decryptedAmounts.
-        if (decryptedTransactions.length > 0) {
-            dispatch(reloadTransactions());
+        // Update the state to include the newly decrypted amounts.
+        for (const decryptedTransaction of decryptedTransactions) {
+            const update = {
+                decryptedAmount: decryptedTransaction.decryptedAmount,
+            };
+            dispatch(
+                updateTransactionFields({
+                    hash: decryptedTransaction.transactionHash,
+                    updatedFields: update,
+                })
+            );
         }
 
         if (onDecrypt) {

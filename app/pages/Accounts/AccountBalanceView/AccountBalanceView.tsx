@@ -8,7 +8,7 @@ import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
 import { displayAsGTU } from '~/utils/gtu';
 import {
-    setViewingShielded,
+    setViewingShieldedExternal,
     viewingShieldedSelector,
 } from '~/features/TransactionSlice';
 import {
@@ -45,7 +45,7 @@ export default function AccountBalanceView(): JSX.Element | null {
     const canChangeAccount = accounts.length > 1;
 
     if (isMultiSig && viewingShielded) {
-        dispatch(setViewingShielded(false));
+        setViewingShieldedExternal(dispatch, false);
     }
 
     const buttons = (
@@ -62,7 +62,7 @@ export default function AccountBalanceView(): JSX.Element | null {
                     styles.viewingShieldedButton,
                     !viewingShielded && styles.active
                 )}
-                onClick={() => dispatch(setViewingShielded(false))}
+                onClick={() => setViewingShieldedExternal(dispatch, false)}
             >
                 Balance
             </Button>
@@ -74,7 +74,7 @@ export default function AccountBalanceView(): JSX.Element | null {
                         styles.viewingShieldedButton,
                         viewingShielded && styles.active
                     )}
-                    onClick={() => dispatch(setViewingShielded(true))}
+                    onClick={() => setViewingShieldedExternal(dispatch, true)}
                 >
                     Shielded Balance
                 </Button>

@@ -31,7 +31,6 @@ async function enrichWithDecryptedAmounts(
     global: Global,
     transactions: TransferTransaction[]
 ): Promise<TransferTransaction[]> {
-    // TODO First 3 variables are duplicated from the other enrich function...
     const encryptedTypes = [
         TransactionKindString.EncryptedAmountTransfer,
         TransactionKindString.EncryptedAmountTransferWithMemo,
@@ -228,6 +227,7 @@ async function streamTransactions(
         } = await httpMethods.getTransactions(
             account.address,
             filterToUse,
+            false,
             limit,
             TransactionOrder.Descending,
             startId

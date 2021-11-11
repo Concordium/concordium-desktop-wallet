@@ -14,7 +14,7 @@ import {
 } from '../utils/httpRequests';
 import {
     deleteTransaction,
-    getFilteredPending,
+    getFilteredPendingTransactions,
     insertTransactions,
     updateTransaction,
 } from '../database/TransactionDao';
@@ -27,6 +27,7 @@ import {
     TransferTransactionWithNames,
     Account,
     TransactionKindString,
+    IncomingTransaction,
 } from '../utils/types';
 import {
     isSuccessfulTransaction,
@@ -88,6 +89,7 @@ const forceLock = new Mutex();
 async function getNewTransactions(
     account: Account,
     transactionsInState: TransferTransaction[],
+    onlyEncrypted: boolean,
     limit: number
 ): Promise<TransferTransaction[]> {
     const maxId = transactionsInState
@@ -98,16 +100,35 @@ async function getNewTransactions(
             undefined
         );
 
-    // TODO Keep getting new transactions until all have been received, as there could be more
-    // than what we can receive in a single query.
-    const transactionsResponseFromWalletProxy = await getTransactionsAscending(
-        account.address,
-        account.transactionFilter,
-        limit,
-        maxId
-    );
-    const transactionsInLocalFormat = transactionsResponseFromWalletProxy.transactions.map(
-        (txn) => convertIncomingTransaction(txn, account.address)
+    const transactions: IncomingTransaction[] = [];
+    let full = true;
+    let currentId = maxId;
+
+    // We have to ask for transactions until there are no more. This is needed as we could
+    // receive more than ${limit} transactions in one query to the wallet proxy.
+    while (full) {
+        const transactionsResponseFromWalletProxy = await getTransactionsAscending(
+            account.address,
+            account.transactionFilter,
+            onlyEncrypted,
+            limit,
+            currentId
+        );
+
+        transactions.push(...transactionsResponseFromWalletProxy.transactions);
+        if (transactionsResponseFromWalletProxy.transactions.length === 0) {
+            full = false;
+        } else {
+            currentId =
+                transactionsResponseFromWalletProxy.transactions[
+                    transactionsResponseFromWalletProxy.transactions.length - 1
+                ].id;
+            full = transactionsResponseFromWalletProxy.full;
+        }
+    }
+
+    const transactionsInLocalFormat = transactions.map((txn) =>
+        convertIncomingTransaction(txn, account.address)
     );
     const transactionsInDescendingOrder = transactionsInLocalFormat.reverse();
     return transactionsInDescendingOrder;
@@ -123,7 +144,7 @@ async function enrichWithDecryptedAmounts(
     transactions: TransferTransaction[]
 ): Promise<{
     withDecryptedAmounts: TransferTransaction[];
-    hasNotDecryptedTransfer: boolean;
+    allDecrypted: boolean;
 }> {
     const encryptedTypes = [
         TransactionKindString.EncryptedAmountTransfer,
@@ -139,7 +160,7 @@ async function enrichWithDecryptedAmounts(
         )
     );
 
-    let hasNotDecryptedTransfer = false;
+    let allDecrypted = true;
     const withDecryptedAmounts = transactions.map((t) => {
         if (!encryptedTypes.includes(t.transactionKind)) {
             return t;
@@ -154,16 +175,16 @@ async function enrichWithDecryptedAmounts(
                 decryptedAmount: amount,
             };
         }
-        hasNotDecryptedTransfer = true;
+        allDecrypted = false;
         return t;
     });
-    return { withDecryptedAmounts, hasNotDecryptedTransfer };
+    return { withDecryptedAmounts, allDecrypted };
 }
 
 /**
  * Load transactions from the wallet proxy and pending transactions
- * from the database. The transactions retrieved from are
- * filtered according to the account's filter.
+ * from the database. The transactions retrieved are filtered according
+ * to the account's filter.
  */
 export const loadTransactions = createAsyncThunk(
     ActionTypePrefix.Load,
@@ -213,6 +234,7 @@ export const loadTransactions = createAsyncThunk(
             const transactionsResponseFromWalletProxy = await getTransactionsDescending(
                 account.address,
                 account.transactionFilter,
+                state.transactions.viewingShielded,
                 size,
                 append ? minId : undefined
             );
@@ -222,36 +244,38 @@ export const loadTransactions = createAsyncThunk(
 
             const {
                 withDecryptedAmounts,
-                hasNotDecryptedTransfer,
+                allDecrypted,
             } = await enrichWithDecryptedAmounts(transactions);
-            if (hasNotDecryptedTransfer) {
+            if (!allDecrypted) {
                 await updateAllDecrypted(dispatch, account.address, false);
             }
 
             // We only want to load pending transactions that are not also received
             // from the wallet proxy. There can be such transactions as the confirmation
             // of sent transactions happens asynchronously from the loading of transactions.
-            // TODO This can be optimized so that the filtering is done in the database query.
-            const hashesFromProxy = withDecryptedAmounts.map(
-                (t) => t.transactionHash
-            );
-            const { fromDate, toDate } = account.transactionFilter;
-            const booleanFilters = getActiveBooleanFilters(
-                account.transactionFilter
-            );
-            const pendingTransactions = (
-                await getFilteredPending(
-                    account.address,
-                    booleanFilters,
-                    fromDate ? new Date(fromDate) : undefined,
-                    toDate ? new Date(toDate) : undefined
-                )
-            ).filter(
-                (pendingTransaction) =>
-                    !hashesFromProxy.includes(
-                        pendingTransaction.transactionHash
+            let pendingTransactions: TransferTransaction[] = [];
+            if (!append) {
+                const hashesFromProxy = withDecryptedAmounts.map(
+                    (t) => t.transactionHash
+                );
+                const { fromDate, toDate } = account.transactionFilter;
+                const booleanFilters = getActiveBooleanFilters(
+                    account.transactionFilter
+                );
+                pendingTransactions = (
+                    await getFilteredPendingTransactions(
+                        account.address,
+                        booleanFilters,
+                        fromDate ? new Date(fromDate) : undefined,
+                        toDate ? new Date(toDate) : undefined
                     )
-            );
+                ).filter(
+                    (pendingTransaction) =>
+                        !hashesFromProxy.includes(
+                            pendingTransaction.transactionHash
+                        )
+                );
+            }
 
             return {
                 transactions: [...pendingTransactions, ...withDecryptedAmounts],
@@ -280,6 +304,7 @@ export const loadNewTransactions = createAsyncThunk(
         const transactions = await getNewTransactions(
             account,
             state.transactions.transactions,
+            state.transactions.viewingShielded,
             size
         );
 
@@ -299,9 +324,9 @@ export const loadNewTransactions = createAsyncThunk(
 
         const {
             withDecryptedAmounts,
-            hasNotDecryptedTransfer,
+            allDecrypted,
         } = await enrichWithDecryptedAmounts(newTransactions);
-        if (hasNotDecryptedTransfer) {
+        if (!allDecrypted) {
             await updateAllDecrypted(dispatch, account.address, false);
         }
 
@@ -364,6 +389,9 @@ const transactionSlice = createSlice({
         setViewingShielded(state, viewingShielded) {
             state.viewingShielded = viewingShielded.payload;
         },
+        setHasMore(state, hasMore) {
+            state.hasMore = hasMore.payload;
+        },
         updateTransactionFields(state, update) {
             const { hash, updatedFields } = update.payload;
             const index = state.transactions.findIndex(
@@ -424,12 +452,24 @@ const transactionSlice = createSlice({
     },
 });
 
-export const { setViewingShielded } = transactionSlice.actions;
+export const {
+    setViewingShielded,
+    updateTransactionFields,
+} = transactionSlice.actions;
 
-const { setTransactions, updateTransactionFields } = transactionSlice.actions;
+const { setTransactions, setHasMore } = transactionSlice.actions;
 
 export const resetTransactions = () =>
     setTransactions({ transactions: [], more: false });
+
+export const setViewingShieldedExternal = (
+    dispatch: Dispatch,
+    value: boolean
+) => {
+    resetTransactions();
+    dispatch(setHasMore(false));
+    dispatch(setViewingShielded(value));
+};
 
 // Add a pending transaction to storage
 export async function addPendingTransaction(
