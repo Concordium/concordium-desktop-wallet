@@ -15,38 +15,14 @@ import {
 import { PeerElement } from '../proto/concordium_p2p_rpc_pb';
 import {
     AccountInfo,
-    Account,
     Global,
     Fraction,
     TransactionStatus,
 } from '../utils/types';
 
-export interface AccountInfoPair {
-    account: Account;
-    accountInfo: AccountInfo;
-}
-
 export async function getlastFinalizedBlockHash(): Promise<string> {
     const consensusStatus = await getConsensusStatus();
     return consensusStatus.lastFinalizedBlock;
-}
-/** Gets the accountInfos for each given accounts. returns a list of objects
- *   each containing an account and its accountInfo.
- */
-export async function getAccountInfos(
-    accounts: Account[]
-): Promise<AccountInfoPair[]> {
-    const blockHash = await getlastFinalizedBlockHash();
-    const accountInfos: AccountInfoPair[] = await Promise.all(
-        accounts.map(async (account) => {
-            const accountInfo = await getAccountInfo(
-                account.address,
-                blockHash
-            );
-            return { account, accountInfo };
-        })
-    );
-    return accountInfos;
 }
 
 /** Gets the accountInfo for the given address. */
@@ -54,7 +30,11 @@ export async function getAccountInfoOfAddress(
     address: string
 ): Promise<AccountInfo> {
     const blockHash = await getlastFinalizedBlockHash();
-    return getAccountInfo(address, blockHash);
+    const accountInfo = await getAccountInfo(address, blockHash);
+    if (!accountInfo) {
+        throw new Error(`Address:${address} does not represent an account.`);
+    }
+    return accountInfo;
 }
 
 export async function fetchLastFinalizedBlockSummary() {
