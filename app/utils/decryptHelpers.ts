@@ -21,28 +21,52 @@ export default async function decryptTransactions(
     credentialNumber: number,
     global: Global
 ) {
-    const encryptedAmounts = encryptedTransfers.map((t) => {
-        if (!t.encrypted) {
+    // Gather all the encrypted amounts, so that we can decrypt them in one go. We want to batch it
+    // as there is a significant performance hit if we decrypt one at a time.
+    const encryptedAmountForDecryption = [];
+    for (const encryptedTransfer of encryptedTransfers) {
+        if (!encryptedTransfer.encrypted) {
             throw new Error(
-                `One of the provided transfers did not contain an encrypted amount: ${t.transactionHash}`
+                `One of the provided transfers did not contain an encrypted amount: ${encryptedTransfer.transactionHash}`
             );
-        } else if (t.fromAddress === accountAddress) {
-            return JSON.parse(t.encrypted).inputEncryptedAmount;
         }
-        return JSON.parse(t.encrypted).encryptedAmount;
-    });
+
+        if (encryptedTransfer.fromAddress === accountAddress) {
+            encryptedAmountForDecryption.push(
+                JSON.parse(encryptedTransfer.encrypted).inputEncryptedAmount
+            );
+            encryptedAmountForDecryption.push(
+                JSON.parse(encryptedTransfer.encrypted).newSelfEncryptedAmount
+            );
+        } else {
+            encryptedAmountForDecryption.push(
+                JSON.parse(encryptedTransfer.encrypted).encryptedAmount
+            );
+        }
+    }
 
     const decryptedAmounts = await decryptAmounts(
-        encryptedAmounts,
+        encryptedAmountForDecryption,
         credentialNumber,
         global,
         prfKey
     );
 
+    let offset = 0;
     return encryptedTransfers.map((transaction, index) => {
+        if (transaction.fromAddress === accountAddress) {
+            const amount =
+                BigInt(decryptedAmounts[index + offset]) -
+                BigInt(decryptedAmounts[index + offset + 1]);
+            offset += 1;
+            return {
+                ...transaction,
+                decryptedAmount: amount.toString(),
+            };
+        }
         return {
             ...transaction,
-            decryptedAmount: decryptedAmounts[index],
+            decryptedAmount: decryptedAmounts[index + offset],
         };
     });
 }

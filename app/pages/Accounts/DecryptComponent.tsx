@@ -6,7 +6,11 @@ import {
     shieldedTransactionsSelector,
     updateTransactionFields,
 } from '~/features/TransactionSlice';
-import { Account, TransactionKindString } from '~/utils/types';
+import {
+    Account,
+    TransactionKindString,
+    TransactionStatus,
+} from '~/utils/types';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import Ledger from '~/components/ledger/Ledger';
 import { asyncNoOp } from '~/utils/basicHelpers';
@@ -30,14 +34,18 @@ interface Props {
 export default function DecryptComponent({ account, onDecrypt }: Props) {
     const dispatch = useDispatch();
     const global = useSelector(globalSelector);
-    const shieldedTransactions = useSelector(
-        shieldedTransactionsSelector
-    ).filter((t) =>
-        [
-            TransactionKindString.EncryptedAmountTransfer,
-            TransactionKindString.EncryptedAmountTransferWithMemo,
-        ].includes(t.transactionKind)
-    );
+    const shieldedTransactions = useSelector(shieldedTransactionsSelector)
+        .filter((t) =>
+            [
+                TransactionKindString.EncryptedAmountTransfer,
+                TransactionKindString.EncryptedAmountTransferWithMemo,
+            ].includes(t.transactionKind)
+        )
+        .filter(
+            (t) =>
+                t.status !== TransactionStatus.Pending &&
+                t.status !== TransactionStatus.Rejected
+        );
 
     async function ledgerCall(
         ledger: ConcordiumLedgerClient,

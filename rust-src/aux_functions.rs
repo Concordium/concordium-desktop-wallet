@@ -18,7 +18,7 @@ use dodis_yampolskiy_prf as prf;
 use hex::FromHex;
 use pairing::bls12_381::{Bls12, Fr, G1};
 use serde_json::{from_str, Value as SerdeValue};
-use std::{cmp::max, collections::BTreeMap, convert::TryInto};
+use std::{cmp::max, collections::BTreeMap, convert::TryInto, io::Cursor};
 type ExampleCurve = G1;
 use ed25519_dalek as ed25519;
 use eddsa_ed25519::*;
@@ -305,6 +305,8 @@ pub fn get_credential_deployment_details_aux(
     Ok(response.to_string())
 }
 
+static TABLE_BYTES: &[u8] = include_bytes!("table_bytes.bin");
+
 pub fn decrypt_amounts_aux(
     input: &str,
 ) -> Result<String> {
@@ -324,8 +326,7 @@ pub fn decrypt_amounts_aux(
         scalar,
     };
 
-    let m = 1 << 16;
-    let table = BabyStepGiantStep::new(global_context.encryption_in_exponent_generator(), m);
+    let table = (&mut Cursor::new(TABLE_BYTES)).get()?;
 
     let amounts: Vec<Amount> = encrypted_amounts.iter().map(|encrypted_amount| {
         encrypted_transfers::decrypt_amount::<ExampleCurve>(
