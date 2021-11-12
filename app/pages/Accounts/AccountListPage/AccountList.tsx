@@ -6,7 +6,7 @@ import {
     accountsInfoSelector,
     chosenAccountSelector,
 } from '~/features/AccountSlice';
-import { setViewingShieldedExternal } from '~/features/TransactionSlice';
+import { setViewingShieldedAndReset } from '~/features/TransactionSlice';
 import AccountCard from '~/components/AccountCard';
 import CardList from '~/cross-app-components/CardList';
 import { Account, AccountStatus } from '~/utils/types';
@@ -40,7 +40,7 @@ export default function AccountList() {
                         canSelectAccount(a)
                             ? (shielded) => {
                                   dispatch(chooseAccount(a.address));
-                                  setViewingShieldedExternal(
+                                  setViewingShieldedAndReset(
                                       dispatch,
                                       shielded
                                   );

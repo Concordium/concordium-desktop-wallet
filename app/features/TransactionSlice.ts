@@ -462,7 +462,7 @@ const { setTransactions, setHasMore } = transactionSlice.actions;
 export const resetTransactions = () =>
     setTransactions({ transactions: [], more: false });
 
-export const setViewingShieldedExternal = (
+export const setViewingShieldedAndReset = (
     dispatch: Dispatch,
     value: boolean
 ) => {
