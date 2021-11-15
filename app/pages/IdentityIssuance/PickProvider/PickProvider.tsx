@@ -21,7 +21,7 @@ import {
 import errorMessages from '~/constants/errorMessages.json';
 import SimpleLedgerWithCreationKeys from '~/components/ledger/SimpleLedgerWithCreationKeys';
 import PublicKeyDetails from '~/components/ledger/PublicKeyDetails';
-import { getAccountInfo } from '~/node/nodeRequests';
+import { getAccountInfoOfCredential } from '~/node/nodeRequests';
 import { getlastFinalizedBlockHash } from '~/node/nodeHelpers';
 import ChoiceModal from '~/components/ChoiceModal';
 
@@ -53,13 +53,13 @@ async function HasPrfKeySeedBeenUsed(
     const blockHash = await getlastFinalizedBlockHash();
     // Check if this seed have been used with version 0 keygen.
     let credId = await computeCredIdFromSeed(prfKeySeed, 0, global, 0);
-    let info = await getAccountInfo(credId, blockHash);
+    let info = await getAccountInfoOfCredential(credId, blockHash);
     if (info) {
         return true;
     }
     // Check if this index have been used with version 1 keygen.
     credId = await computeCredIdFromSeed(prfKeySeed, 0, global, 1);
-    info = await getAccountInfo(credId, blockHash);
+    info = await getAccountInfoOfCredential(credId, blockHash);
     return Boolean(info);
 }
 

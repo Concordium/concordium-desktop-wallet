@@ -75,6 +75,11 @@ export type ConsensusAndGlobalResult =
     | ConsensusAndGlobalResultSuccess
     | ConsensusAndGlobalResultFailure;
 
+type GetAccountInfo = (
+    address: string,
+    blockHash: string
+) => Promise<AccountInfo | undefined>;
+
 export type GRPC = {
     setLocation: (address: string, port: string) => void;
     nodeConsensusAndGlobal: (
@@ -96,10 +101,8 @@ export type GRPC = {
         address: string
     ) => Promise<NextAccountNonce | undefined>;
     getBlockSummary: (blockHash: string) => Promise<BlockSummary | undefined>;
-    getAccountInfo: (
-        address: string,
-        blockHash: string
-    ) => Promise<AccountInfo | undefined>;
+    getAccountInfoOfCredential: GetAccountInfo;
+    getAccountInfo: GetAccountInfo;
     getIdentityProviders: (blockHash: string) => Promise<IpInfo[] | undefined>;
     getAnonymityRevokers: (blockHash: string) => Promise<ArInfo[] | undefined>;
     // We return a Uint8Array here, because PeerListResponse must be manually serialized/deserialized.

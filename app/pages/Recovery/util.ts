@@ -1,4 +1,3 @@
-import { getAccountInfo } from '~/node/nodeRequests';
 import {
     getAddressFromCredentialId,
     computeCredIdFromSeed,
@@ -24,6 +23,7 @@ import { maxCredentialsOnIdentity } from '~/constants/recoveryConstants.json';
 import { createAccount } from '~/utils/accountHelpers';
 import { getNextCredentialNumber } from '~/database/CredentialDao';
 import AbortController from '~/utils/AbortController';
+import { getAccountInfoOfCredential } from '~/node/nodeRequests';
 
 export enum Status {
     Initial = 'Waiting...',
@@ -141,7 +141,7 @@ async function recoverCredential(
     credentialNumber: number,
     identityId: number
 ) {
-    const accountInfo = await getAccountInfo(credId, blockHash);
+    const accountInfo = await getAccountInfoOfCredential(credId, blockHash);
 
     // The presence of an accountInfo implies that the credential has been deployed.
     // if it is not present, the credential has not been deployed, and we don't need to save anything.
