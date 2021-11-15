@@ -23,12 +23,12 @@ import {
 function getMockedScheduledTransfer(scheduleLength: number) {
     const address = '3UbdTrP5kcEioJRCyiCacAdpAYfyezPSVfrys8QDsHJUiVXjKf';
     const spy = jest.spyOn(NodeRequests, 'getNextAccountNonce');
-    spy.mockReturnValue(Promise.resolve({ nonce: '0' }));
+    spy.mockReturnValue(Promise.resolve({ allFinal: true, nonce: 0n }));
     return createScheduledTransferTransaction(
         address,
         address,
         createRegularIntervalSchedule(100n, scheduleLength, 0, 1),
-        '1'
+        1n
     );
 }
 

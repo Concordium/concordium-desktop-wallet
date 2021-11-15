@@ -2,7 +2,10 @@ import React from 'react';
 import { useRouteMatch } from 'react-router';
 import routes from '~/constants/routes.json';
 import { AddressBookEntry, ScheduledTransfer } from '~/utils/types';
-import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
+import {
+    getScheduledTransferAmount,
+    toReleaseSchedule,
+} from '~/utils/transactionHelpers';
 import { displayAsGTU } from '~/utils/gtu';
 import DisplayFee from '~/components/DisplayFee';
 import ScheduleList from '~/components/ScheduleList';
@@ -58,7 +61,9 @@ export default function DisplayScheduledTransfer({
                 />
             )}
             <h5 className={styles.title}>Individual Releases:</h5>
-            <ScheduleList schedule={transaction.payload.schedule} />
+            <ScheduleList
+                schedule={transaction.payload.schedule.map(toReleaseSchedule)}
+            />
         </div>
     );
 }

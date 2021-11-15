@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import EditIcon from '@resources/svg/edit.svg';
-import {
-    Account,
-    AccountInfo,
-    CredentialDeploymentInformation,
-} from '~/utils/types';
+import { Account, AccountInfo } from '~/utils/types';
 import { formatDate } from '~/utils/timeHelpers';
 import CopyButton from '~/components/CopyButton';
 import Card from '~/cross-app-components/Card';
@@ -19,18 +15,13 @@ import InputModal from '~/components/InputModal';
 import {
     CREDENTIAL_NOTE_MAX_LENGTH,
     getNoteForOwnCredential,
+    getCredId,
 } from '~/utils/credentialHelper';
 import { identitiesSelector } from '~/features/IdentitySlice';
 import DisplayIdentityAttributes from './DisplayIdentityAttributes';
 import IconButton from '~/cross-app-components/IconButton';
 
 import styles from './CredentialInformation.module.scss';
-
-interface CredentialOfAccount
-    extends Omit<CredentialDeploymentInformation, 'regId'> {
-    isOwn: boolean;
-    note: string | undefined;
-}
 
 interface Props {
     account: Account;
@@ -51,21 +42,14 @@ export default function CredentialInformation({ account, accountInfo }: Props) {
         return null;
     }
 
-    const credentials = Object.values(accountInfo.accountCredentials)
-        .map((o) => o.value.contents)
-        .map((cred) => {
-            let enrichedCred: CredentialOfAccount = {
-                ...cred,
+    const credentials = Object.values(accountInfo.accountCredentials).map(
+        (cred) => {
+            const enrichedCred = {
+                ...cred.value.contents,
+                credId: getCredId(cred),
                 isOwn: false,
                 note: undefined,
             };
-            // The node returns the credId in the regId field for
-            // initial accounts, so we have to hack it a bit here.
-            // This can safely be removed, if the node is updated to
-            // be consistent and always use the credId field.
-            if (cred.regId) {
-                enrichedCred = { ...enrichedCred, credId: cred.regId };
-            }
 
             const existingOwnCredential = ownCredentials.find(
                 (c) => c.credId === enrichedCred.credId
@@ -78,7 +62,8 @@ export default function CredentialInformation({ account, accountInfo }: Props) {
                 getNoteForOwnCredential(identities, existingOwnCredential);
 
             return { ...enrichedCred, isOwn: !!existingOwnCredential, note };
-        });
+        }
+    );
 
     const submitNote = (credId: string) => (note: string) => {
         updateExternalCredential(dispatch, {
@@ -100,7 +85,7 @@ export default function CredentialInformation({ account, accountInfo }: Props) {
                 </p>
             </div>
             <div className={styles.credentialList}>
-                {credentials.map((c: CredentialOfAccount) => (
+                {credentials.map((c) => (
                     <div className={styles.listElement} key={c.credId}>
                         <SidedRow
                             className={styles.listElementRow}
@@ -165,7 +150,9 @@ export default function CredentialInformation({ account, accountInfo }: Props) {
                         />
                         <div className={styles.attributesRow}>
                             <em>Revealed attributes:</em>
-                            <DisplayIdentityAttributes credential={c} />
+                            <DisplayIdentityAttributes
+                                revealedAttributes={c.policy.revealedAttributes}
+                            />
                         </div>
                     </div>
                 ))}
