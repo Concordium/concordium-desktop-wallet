@@ -77,7 +77,6 @@ function filterTransactionsOnType(
 async function getTransactions(
     address: string,
     transactionFilter: TransactionFilter,
-    onlyEncrypted: boolean,
     limitResults: number,
     order: TransactionOrder,
     id?: string
@@ -103,9 +102,6 @@ async function getTransactions(
             new Date(transactionFilter.toDate)
         );
         filters += `&blockTimeTo=${timestamp}`;
-    }
-    if (onlyEncrypted) {
-        filters += '&onlyEncrypted=y';
     }
 
     let proxyPath = `/v1/accTransactions/${address}?limit=${limitResults}&includeRawRejectReason${filters}&order=${order.toString()}`;

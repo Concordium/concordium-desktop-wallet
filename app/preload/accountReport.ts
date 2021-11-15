@@ -227,7 +227,6 @@ async function streamTransactions(
         } = await httpMethods.getTransactions(
             account.address,
             filterToUse,
-            false,
             limit,
             TransactionOrder.Descending,
             startId

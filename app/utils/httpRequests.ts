@@ -31,14 +31,12 @@ export async function gtuDrop(address: string) {
 export async function getTransactionsAscending(
     address: string,
     transactionFilter: TransactionFilter,
-    onlyEncrypted: boolean,
     limit: number,
     id?: string
 ) {
     const response = await window.http.getTransactions(
         address,
         transactionFilter,
-        onlyEncrypted,
         limit,
         TransactionOrder.Ascending,
         id
@@ -53,14 +51,12 @@ export async function getTransactionsAscending(
 export async function getTransactionsDescending(
     address: string,
     transactionFilter: TransactionFilter,
-    onlyEncrypted: boolean,
     limit: number,
     id?: string
 ) {
     const response = await window.http.getTransactions(
         address,
         transactionFilter,
-        onlyEncrypted,
         limit,
         TransactionOrder.Descending,
         id

@@ -98,7 +98,6 @@ export type HttpMethods = {
     getTransactions: (
         address: string,
         transactionFilter: TransactionFilter,
-        onlyEncrypted: boolean,
         limit: number,
         order: TransactionOrder,
         id?: string

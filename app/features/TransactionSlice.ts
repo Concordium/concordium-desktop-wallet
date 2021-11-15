@@ -89,7 +89,6 @@ const forceLock = new Mutex();
 async function getNewTransactions(
     account: Account,
     transactionsInState: TransferTransaction[],
-    onlyEncrypted: boolean,
     limit: number
 ): Promise<TransferTransaction[]> {
     const maxId = transactionsInState
@@ -110,7 +109,6 @@ async function getNewTransactions(
         const transactionsResponseFromWalletProxy = await getTransactionsAscending(
             account.address,
             account.transactionFilter,
-            onlyEncrypted,
             limit,
             currentId
         );
@@ -234,7 +232,6 @@ export const loadTransactions = createAsyncThunk(
             const transactionsResponseFromWalletProxy = await getTransactionsDescending(
                 account.address,
                 account.transactionFilter,
-                state.transactions.viewingShielded,
                 size,
                 append ? minId : undefined
             );
@@ -304,7 +301,6 @@ export const loadNewTransactions = createAsyncThunk(
         const transactions = await getNewTransactions(
             account,
             state.transactions.transactions,
-            state.transactions.viewingShielded,
             size
         );
 
