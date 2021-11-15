@@ -4,8 +4,6 @@ import React, {
     Fragment,
     useCallback,
     useContext,
-    useEffect,
-    useRef,
 } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import InfiniteLoader from 'react-window-infinite-loader';
@@ -22,7 +20,6 @@ import {
     loadTransactions,
     transactionLogPageSize,
 } from '~/features/TransactionSlice';
-import { chosenAccountSelector } from '~/features/AccountSlice';
 import TransactionListHeader, {
     transactionListHeaderHeight,
 } from './TransactionListHeader';
@@ -80,14 +77,11 @@ const ListElement = forwardRef<HTMLDivElement, PropsOf<'div'>>(
 export default function InfiniteTransactionList({
     transactions,
     onTransactionClick,
+    abortRef,
 }: TransactionListProps) {
     const dispatch = useThunkDispatch();
-    const account = useSelector(chosenAccountSelector);
     const loading = useSelector(loadingTransactionsSelector);
     const hasMore = useSelector(hasMoreTransactionsSelector);
-    const abortRef = useRef<((reason?: string) => void) | undefined>(undefined);
-
-    useEffect(() => () => abortRef.current?.(), [account?.address]);
 
     const loadMore = useCallback(async () => {
         if (loading || !hasMore) {
@@ -101,8 +95,10 @@ export default function InfiniteTransactionList({
             })
         );
 
-        abortRef.current = load.abort;
-    }, [dispatch, loading, hasMore]);
+        if (abortRef !== undefined) {
+            abortRef.current = load.abort;
+        }
+    }, [dispatch, loading, hasMore, abortRef]);
 
     const groups = useTransactionGroups(transactions);
     const headersAndTransactions = groups.flat(2);

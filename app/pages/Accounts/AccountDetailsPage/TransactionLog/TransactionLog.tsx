@@ -16,7 +16,13 @@ import TransactionLogFilters from '../TransactionLogFilters';
 import styles from './TransactionLog.module.scss';
 import TransactionsHeader from '../../TransactionsHeader';
 
-export default function TransactionLog() {
+interface Props {
+    abortRef: React.MutableRefObject<
+        ((reason?: string | undefined) => void) | undefined
+    >;
+}
+
+export default function TransactionLog({ abortRef }: Props) {
     const transactions = useSelector(transactionsSelector);
     const hasMoreTransactions = useSelector(hasMoreTransactionsSelector);
     const [chosenTransaction, setChosenTransaction] = useState<
@@ -54,6 +60,7 @@ export default function TransactionLog() {
                     >
                         <TransactionList
                             infinite={infinite}
+                            abortRef={abortRef}
                             transactions={transactions}
                             onTransactionClick={setChosenTransaction}
                         />
