@@ -23,6 +23,7 @@ import { convertIncomingTransaction } from '~/utils/TransactionConverters';
 import httpMethods from './http';
 import decryptAmountsDao from './database/decryptedAmountsDao';
 import decryptTransactions from '~/utils/decryptHelpers';
+import { hasEncryptedBalance } from '~/utils/accountHelpers';
 
 async function enrichWithDecryptedAmounts(
     credentialNumber: number,
@@ -239,8 +240,9 @@ async function streamTransactions(
 
         let transactions;
         if (
-            filter.encryptedAmountTransfer ||
-            filter.encryptedAmountTransferWithMemo
+            hasEncryptedBalance(account) &&
+            (filter.encryptedAmountTransfer ||
+                filter.encryptedAmountTransferWithMemo)
         ) {
             transactions = await enrichWithDecryptedAmounts(
                 entry.credentialNumber,

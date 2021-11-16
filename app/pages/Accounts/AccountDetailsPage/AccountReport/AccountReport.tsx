@@ -126,9 +126,11 @@ export default function AccountReport({ location }: Props) {
                             prfKeySeed,
                         };
                         prfKeyMap = updatedPrfKeyMap;
+                        accountsToReport.push(account);
                     }
+                } else {
+                    accountsToReport.push(account);
                 }
-                accountsToReport.push(account);
             }
             const accountsLength = accountsToReport.length;
 
