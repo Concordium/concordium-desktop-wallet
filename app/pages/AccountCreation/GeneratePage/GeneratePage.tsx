@@ -67,7 +67,7 @@ export default function AccountCreationGenerate({
 
         try {
             const response = await sendTransaction(payload);
-            if (response.getValue()) {
+            if (response) {
                 return;
             }
         } catch (e) {

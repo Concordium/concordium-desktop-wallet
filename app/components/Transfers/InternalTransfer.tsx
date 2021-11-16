@@ -20,7 +20,7 @@ import ensureExchangeRateAndNonce from '~/components/Transfers/ensureExchangeRat
 
 interface Specific<T> {
     amountHeader: string;
-    createTransaction: (address: string, amount: bigint, nonce: string) => T;
+    createTransaction: (address: string, amount: bigint, nonce: bigint) => T;
     location: string;
     transactionKind: TransactionKindId;
 }
@@ -29,7 +29,7 @@ interface Props<T> {
     account: Account;
     specific: Specific<T>;
     exchangeRate: Fraction;
-    nonce: string;
+    nonce: bigint;
     disableClose?: boolean;
 }
 

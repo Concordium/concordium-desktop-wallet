@@ -29,7 +29,7 @@ export default function ExportBakerCredentials({
             return;
         }
         const fileString = JSON.stringify({
-            bakerId: accountInfo.accountIndex,
+            bakerId: accountInfo.accountIndex.toString(),
             aggregationSignKey: bakerKeys.aggregationSecret,
             aggregationVerifyKey: bakerKeys.aggregationPublic,
             electionPrivateKey: bakerKeys.electionSecret,

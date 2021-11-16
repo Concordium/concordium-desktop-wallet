@@ -5,4 +5,5 @@ import { BlockSummary } from '~/node/NodeApiTypes';
 // we should update this extraction.
 // eslint-disable-next-line import/prefer-default-export
 export const getCurrentValue = (blockSummary: BlockSummary) =>
-    blockSummary.specialEvents[0].foundationAccount;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (blockSummary as any).specialEvents[0].foundationAccount;

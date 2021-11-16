@@ -1,8 +1,8 @@
 import React from 'react';
+import type { BakerPendingChange } from '@concordium/node-sdk';
 import { useConsensusStatus } from '~/utils/dataHooks';
 import { displayAsGTU } from '~/utils/gtu';
 import { epochDate, getFormattedDateString } from '~/utils/timeHelpers';
-import { BakerPendingChange } from '~/utils/types';
 
 type PendingChangeProps = {
     pending: BakerPendingChange;
@@ -16,7 +16,7 @@ export default function PendingChange({ pending }: PendingChangeProps) {
     }
     const changeAtDate = getFormattedDateString(
         epochDate(
-            pending.epoch,
+            Number(pending.epoch),
             status.epochDuration,
             new Date(status.currentEraGenesisTime)
         )

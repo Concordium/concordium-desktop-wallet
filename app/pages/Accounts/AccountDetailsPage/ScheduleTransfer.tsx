@@ -19,7 +19,7 @@ import { isMultiSig } from '~/utils/accountHelpers';
 interface Props {
     account: Account;
     exchangeRate: Fraction;
-    nonce: string;
+    nonce: bigint;
 }
 
 /**
@@ -49,7 +49,7 @@ function ScheduleTransfer({ account, exchangeRate, nonce }: Props) {
                 pathname: routes.ACCOUNTS_SCHEDULED_TRANSFER,
                 state: {
                     account,
-                    nonce,
+                    nonce: stringify(nonce),
                     memo,
                     amount: toMicroUnits(amount).toString(),
                     recipient,

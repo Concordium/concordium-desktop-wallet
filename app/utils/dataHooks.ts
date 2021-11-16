@@ -176,7 +176,7 @@ export function useCalcBakerStakeCooldownUntil() {
     const nextEpochIndex = currentEpochIndex + 1;
 
     const cooldownUntilEpochIndex =
-        nextEpochIndex + chainParameters.bakerCooldownEpochs;
+        nextEpochIndex + Number(chainParameters.bakerCooldownEpochs);
 
     return epochDate(
         cooldownUntilEpochIndex,

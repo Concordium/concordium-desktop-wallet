@@ -134,7 +134,7 @@ export interface CreateTransactionInput {
     amount: bigint;
     schedule: Schedule;
     signatureAmount: number;
-    nonce: string;
+    nonce: bigint;
     expiryTime: Date;
     memo: string;
 }
