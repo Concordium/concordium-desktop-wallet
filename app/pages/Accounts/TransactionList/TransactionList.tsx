@@ -16,8 +16,17 @@ function TransactionList({
     infinite = false,
     ...props
 }: Props): JSX.Element | null {
-    const List = infinite ? InfiniteTransactionList : FiniteTransactionList;
-    return <List {...props} />;
+    // If the first transaction in the list changes, then (if an infinite list), the component
+    // has to be reset, otherwise the infinite loader messes up the UI.
+    const key = props.transactions[0]?.transactionHash
+        ? props.transactions[0]?.transactionHash
+        : props.transactions[0]?.id;
+    const List = infinite ? (
+        <InfiniteTransactionList key={key} {...props} />
+    ) : (
+        <FiniteTransactionList {...props} />
+    );
+    return List;
 }
 
 export default TransactionList;
