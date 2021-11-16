@@ -594,7 +594,6 @@ export async function addExternalAccount(
         status: AccountStatus.Confirmed,
         address: accountAddress,
         signatureThreshold,
-        maxTransactionId: '0',
         isInitial: false,
         transactionFilter: {},
     };

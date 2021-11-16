@@ -201,7 +201,6 @@ export interface Account {
     incomingAmounts?: string;
     transactionFilter: TransactionFilter;
     selfAmounts?: string;
-    maxTransactionId: string;
     deploymentTransactionId?: string;
     isInitial: boolean;
 }
