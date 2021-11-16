@@ -226,7 +226,7 @@ export default function SubmitTransaction({ location }: Props) {
         const transactionHash = transactionHashBuffer.toString('hex');
         const response = await sendTransaction(serializedTransaction);
 
-        if (response.getValue()) {
+        if (response) {
             try {
                 // If an error happens here, it only means the transaction couldn't be added as pending, so no reason to show user an error.
                 const convertedTransaction = await addPendingTransaction(

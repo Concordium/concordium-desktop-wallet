@@ -1,10 +1,13 @@
 import { getAccountInfo } from '~/node/nodeRequests';
-import { getAddressFromCredentialId, getCredId } from '~/utils/rustInterface';
+import {
+    getAddressFromCredentialId,
+    computeCredId,
+} from '~/utils/rustInterface';
 import {
     insertFromRecoveryExistingIdentity,
     insertFromRecoveryNewIdentity,
 } from '~/database/AccountDao';
-import { createNewCredential } from '~/utils/credentialHelper';
+import { createNewCredential, getCredId } from '~/utils/credentialHelper';
 import {
     AccountStatus,
     AccountInfo,
@@ -101,10 +104,7 @@ function extractCredentialIndexAndPolicy(
 ): CredentialIndexAndPolicy {
     const credentialOnChain = Object.entries(
         accountInfo.accountCredentials
-    ).find(
-        ([, cred]) =>
-            (cred.value.contents.credId || cred.value.contents.regId) === credId
-    );
+    ).find(([, cred]) => getCredId(cred) === credId);
 
     if (!credentialOnChain) {
         return {
@@ -146,10 +146,9 @@ async function recoverCredential(
         return undefined;
     }
 
-    const firstCredential = accountInfo.accountCredentials[0].value.contents;
-    const address = await getAddressFromCredentialId(
-        firstCredential.regId || firstCredential.credId
-    );
+    const firstCredential = accountInfo.accountCredentials[0];
+    const firstCredId = getCredId(firstCredential);
+    const address = await getAddressFromCredentialId(firstCredId);
 
     const { credentialIndex, policy } = extractCredentialIndexAndPolicy(
         credId,
@@ -199,7 +198,7 @@ export async function recoverCredentials(
     const allRecovered = [];
     let credNumber = startingCredNumber;
     while (credNumber < maxCredentialsOnIdentity) {
-        const credId = await getCredId(prfKeySeed, credNumber, global);
+        const credId = await computeCredId(prfKeySeed, credNumber, global);
 
         const recovered = await recoverCredential(
             credId,

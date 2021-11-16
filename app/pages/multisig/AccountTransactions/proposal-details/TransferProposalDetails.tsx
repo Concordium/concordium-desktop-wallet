@@ -11,6 +11,7 @@ import ScheduleList from '~/components/ScheduleList';
 import { AccountDetail, AmountDetail, Details, PlainDetail } from './shared';
 import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import DisplayMemo from '~/components/Transfers/DisplayMemo';
+import { toReleaseSchedule } from '~/utils/transactionHelpers';
 
 interface Props {
     transactionType:
@@ -56,7 +57,9 @@ export default function TransferProposalDetails({
                 <PlainDetail
                     title="Release Schedule"
                     value={schedule}
-                    format={(s) => <ScheduleList schedule={s} />}
+                    format={(s) => (
+                        <ScheduleList schedule={s.map(toReleaseSchedule)} />
+                    )}
                 />
             ) : null}
             <DisplayTransactionExpiryTime expiryTime={expiryTime} />

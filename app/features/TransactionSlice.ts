@@ -6,6 +6,7 @@ import {
     isFulfilled,
 } from '@reduxjs/toolkit';
 import { Mutex, MutexInterface } from 'async-mutex';
+import { TransactionSummary } from '@concordium/node-sdk';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
 import { getNewestTransactions, getTransactions } from '../utils/httpRequests';
@@ -23,14 +24,12 @@ import {
     TransactionKindString,
     AccountTransaction,
     Dispatch,
-    TransactionEvent,
     Global,
     TransferTransactionWithNames,
     IncomingTransaction,
     Account,
 } from '../utils/types';
 import {
-    isSuccessfulTransaction,
     isShieldedBalanceTransaction,
     isUnshieldedBalanceTransaction,
 } from '../utils/transactionHelpers';
@@ -525,34 +524,29 @@ export async function confirmTransaction(
     dispatch: Dispatch,
     transactionHash: string,
     blockHash: string,
-    event: TransactionEvent
+    event: TransactionSummary
 ) {
-    const success = isSuccessfulTransaction(event);
-    const { cost } = event;
-
+    let status = TransactionStatus.Finalized;
     let rejectReason;
-    if (!success) {
-        if (!event.result.rejectReason) {
+
+    if (event.result.outcome === 'reject') {
+        status = TransactionStatus.Failed;
+        const rejectReasonContent = event.result.rejectReason;
+        if (!rejectReasonContent) {
             throw new Error('Missing rejection reason in transaction event');
         }
 
         rejectReason =
-            RejectReason[
-                event.result.rejectReason.tag as keyof typeof RejectReason
-            ];
+            RejectReason[rejectReasonContent.tag as keyof typeof RejectReason];
         if (rejectReason === undefined) {
             // If the reject reason was not known, then just store it directly as a string anyway.
-            rejectReason = event.result.rejectReason.tag;
+            rejectReason = rejectReasonContent.tag;
         }
     }
 
-    const status = success
-        ? TransactionStatus.Finalized
-        : TransactionStatus.Failed;
-
     const update = {
         status,
-        cost: cost.toString(),
+        cost: event.cost.toString(),
         rejectReason,
         blockHash,
     };

@@ -119,6 +119,7 @@ contextBridge.exposeInMainWorld(
     Exposed.writeImageToClipboard,
     initializeClipboardMethods
 );
+
 contextBridge.exposeInMainWorld(Exposed.files, initializeFilesMethods);
 contextBridge.exposeInMainWorld(Exposed.cryptoMethods, initializeCryptoMethods);
 contextBridge.exposeInMainWorld(
