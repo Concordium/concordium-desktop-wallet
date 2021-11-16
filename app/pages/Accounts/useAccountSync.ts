@@ -129,7 +129,7 @@ export default function useAccountSync(onError: (message: string) => void) {
                 force: true,
             })
         );
-        setIsLoadDone(true);
+        load.then(() => setIsLoadDone(true)).catch(noOp);
 
         return () => {
             load.abort();
