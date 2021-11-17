@@ -81,7 +81,8 @@ export default function BuildProposal({
                             blockSummary={blockSummary}
                             consensusStatus={consensusStatus}
                         />
-                        <Form.Timestamp
+                        <Form.DatePicker
+                            className="body2 mV40"
                             name="effectiveTime"
                             label="Effective Time"
                             defaultValue={
@@ -97,8 +98,10 @@ export default function BuildProposal({
                                     'Effective time must be in the future'
                                 ),
                             }}
+                            minDate={new Date()}
                         />
-                        <Form.Timestamp
+                        <Form.DatePicker
+                            className="body2 mV40"
                             name="expiryTime"
                             label="Transaction Expiry Time"
                             defaultValue={
@@ -120,6 +123,7 @@ export default function BuildProposal({
                                     ),
                                 },
                             }}
+                            maxDate={effective ?? new Date()}
                         />
                     </>
                 </div>

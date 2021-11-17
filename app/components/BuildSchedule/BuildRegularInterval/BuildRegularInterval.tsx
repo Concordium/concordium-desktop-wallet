@@ -178,8 +178,9 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
                             {errors[fieldNames.releases]?.message}
                         </ErrorMessage>
                     </div>
-                    <Form.Timestamp
+                    <Form.DatePicker
                         name={fieldNames.startTime}
+                        className="body2"
                         label="Starting:"
                         defaultValue={
                             new Date(
@@ -191,6 +192,7 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
                             required: true,
                             validate: futureDate('Time must be in the future'),
                         }}
+                        minDate={new Date()}
                     />
                     <Form.Submit
                         className={styles.submitButton}
