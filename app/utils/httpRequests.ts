@@ -34,18 +34,13 @@ export async function getTransactionsAscending(
     limit: number,
     id?: string
 ) {
-    const response = await window.http.getTransactions(
+    return window.http.getTransactions(
         address,
         transactionFilter,
         limit,
         TransactionOrder.Ascending,
         id
     );
-
-    return {
-        transactions: response.transactions,
-        full: response.full,
-    };
 }
 
 export async function getTransactionsDescending(
@@ -54,17 +49,13 @@ export async function getTransactionsDescending(
     limit: number,
     id?: string
 ) {
-    const response = await window.http.getTransactions(
+    return window.http.getTransactions(
         address,
         transactionFilter,
         limit,
         TransactionOrder.Descending,
         id
     );
-    return {
-        transactions: response.transactions,
-        full: response.full,
-    };
 }
 
 export async function getIdentityProviders() {

@@ -9,7 +9,7 @@ import { Global, TransferTransaction } from './types';
  * Note: If the PRF key and account mismatches, then this method
  * will run indefinitely.
  * @param encryptedTransfers the encrypted transfers to decrypt
- * @param the account that the transactions are for
+ * @param accountAddress the account that the transactions are for
  * @param prfKey the PRF key that matches the account
  * @param credentialNumber the credential number to decrypt for
  * @param global the global cryptographic parameters for the chain

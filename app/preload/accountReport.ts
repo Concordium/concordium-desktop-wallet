@@ -48,6 +48,30 @@ async function enrichWithDecryptedAmounts(
 
     const withDecryptedAmounts: TransferTransaction[] = [];
 
+    const toDecrypt: TransferTransaction[] = [];
+    for (const t of transactions) {
+        if (encryptedTypes.includes(t.transactionKind)) {
+            const amount = decryptedAmounts.find(
+                (decrypted) => decrypted.transactionHash === t.transactionHash
+            )?.amount;
+            if (!amount) {
+                toDecrypt.push(t);
+            }
+        }
+    }
+
+    const decryptedTransactions = await decryptTransactions(
+        toDecrypt,
+        address,
+        prfKeySeed,
+        credentialNumber,
+        global
+    );
+    const decryptedAmountsMap = new Map<string, string>();
+    for (const dt of decryptedTransactions) {
+        decryptedAmountsMap.set(dt.transactionHash, dt.decryptedAmount);
+    }
+
     for (const t of transactions) {
         if (!encryptedTypes.includes(t.transactionKind)) {
             withDecryptedAmounts.push(t);
@@ -58,20 +82,18 @@ async function enrichWithDecryptedAmounts(
             if (amount) {
                 withDecryptedAmounts.push({ ...t, decryptedAmount: amount });
             } else {
-                const decryptedTransaction = (
-                    await decryptTransactions(
-                        [t],
-                        address,
-                        prfKeySeed,
-                        credentialNumber,
-                        global
-                    )
-                )[0];
+                const decryptedAmount = decryptedAmountsMap.get(
+                    t.transactionHash
+                );
+                if (!decryptedAmount) {
+                    throw new Error('Internal error. This should never occur.');
+                }
+
                 await decryptAmountsDao.insert({
-                    transactionHash: decryptedTransaction.transactionHash,
-                    amount: decryptedTransaction.decryptedAmount,
+                    transactionHash: t.transactionHash,
+                    amount: decryptedAmount,
                 });
-                withDecryptedAmounts.push(decryptedTransaction);
+                withDecryptedAmounts.push({ ...t, decryptedAmount });
             }
         }
     }

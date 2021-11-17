@@ -1,6 +1,5 @@
 import { Knex } from 'knex';
 import {
-    Account,
     TimeStampUnit,
     TransactionKindString,
     TransactionStatus,
@@ -9,10 +8,7 @@ import {
 import { transactionTable } from '~/constants/databaseNames.json';
 import { knex } from '~/database/knex';
 import { chunkArray, partition } from '~/utils/basicHelpers';
-import {
-    GetTransactionsOutput,
-    TransactionMethods,
-} from '~/preload/preloadTypes';
+import { TransactionMethods } from '~/preload/preloadTypes';
 
 async function updateTransaction(
     identifier: Record<string, unknown>,
@@ -77,106 +73,6 @@ async function hasPendingTransactions(fromAddress: string) {
         .select()
         .table(transactionTable)
         .where({ status: TransactionStatus.Pending, fromAddress })
-        .first();
-    return Boolean(transaction);
-}
-
-/**
- * Extracts the most recent transactions for a given account.
- *
- * To achieve this we search in the database by block time, which
- * is extended until we have reached the number of results we are
- * interested in. If there are not enough results, then less are
- * returned when we conclude there are no more available transactions.
- * @param account the account to get transactions for
- * @param filteredTypes filtering on the transaction kind
- * @param limit maximum number of transactions to return
- * @returns a list of the most recent transactions for the account
- */
-async function getTransactionsOfAccount(
-    account: Account,
-    filteredTypes: TransactionKindString[] = [],
-    fromDate?: Date,
-    toDate?: Date,
-    limit?: number,
-    startId?: string
-): Promise<GetTransactionsOutput> {
-    const { address } = account;
-
-    const fromLimit = (fromDate?.getTime() ?? 0) / TimeStampUnit.seconds;
-
-    const toTime = (toDate?.getTime() ?? Date.now()) / TimeStampUnit.seconds;
-    let expandHours = 1;
-    let fromTime: number;
-    let transactions;
-    let more = true;
-
-    do {
-        fromTime = Math.max(fromLimit, toTime - 60 * 60 * expandHours);
-
-        const localScopedFromTime = fromTime;
-        const querytransactions = (await knex())<TransferTransaction>(
-            transactionTable
-        )
-            .whereIn('transactionKind', filteredTypes)
-            .andWhere((builder) =>
-                builder
-                    .where({ toAddress: address })
-                    .andWhereBetween('blockTime', [localScopedFromTime, toTime])
-                    .orWhere((orBuilder) =>
-                        orBuilder
-                            .where({ fromAddress: address })
-                            .andWhereBetween('blockTime', [
-                                localScopedFromTime,
-                                toTime,
-                            ])
-                    )
-            )
-            .orderBy('blockTime', 'desc');
-
-        if (startId) {
-            querytransactions.andWhereRaw(` CAST(id as int) < ${startId}`);
-        }
-
-        if (limit) {
-            querytransactions.limit(limit + 1);
-        }
-
-        transactions = await querytransactions;
-
-        expandHours *= 2;
-        more = !!limit && transactions.length > limit;
-    } while (!more && fromTime > fromLimit);
-
-    return {
-        transactions: transactions.slice(0, limit),
-        more,
-    };
-}
-
-async function hasEncryptedTransactions(
-    address: string,
-    fromTime: string,
-    toTime: string
-): Promise<boolean> {
-    const transaction = await (await knex())
-        .select()
-        .table(transactionTable)
-        .whereIn('transactionKind', [
-            TransactionKindString.EncryptedAmountTransfer,
-            TransactionKindString.EncryptedAmountTransferWithMemo,
-        ])
-        .andWhere((builder) =>
-            builder
-                .where({ toAddress: address })
-                .andWhereBetween('blockTime', [fromTime, toTime])
-                .orWhere((orBuilder) =>
-                    orBuilder
-                        .where({ fromAddress: address })
-                        .andWhereBetween('blockTime', [fromTime, toTime])
-                )
-        )
-        .whereNull('decryptedAmount')
         .first();
     return Boolean(transaction);
 }
@@ -290,9 +186,7 @@ export async function insertTransactions(transactions: TransferTransaction[]) {
 const exposedMethods: TransactionMethods = {
     getPending: getPendingTransactions,
     hasPending: hasPendingTransactions,
-    getTransactionsForAccount: getTransactionsOfAccount,
     hasPendingShieldedBalanceTransfer,
-    hasEncryptedTransactions,
     update: updateTransaction,
     insert: insertTransactions,
     getTransaction,

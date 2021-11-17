@@ -20,7 +20,7 @@ export async function up(knex: Knex): Promise<void> {
             table.dropColumn('maxTransactionId');
         });
 
-        // Delete all transactions are we now retrieve transactions from the wallet proxy,
+        // Delete all transactions as we now retrieve transactions from the wallet proxy,
         // instead of keeping a local copy of all of them.
         await t.table(transactionTable).del();
     });

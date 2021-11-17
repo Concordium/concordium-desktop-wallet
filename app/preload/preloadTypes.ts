@@ -304,25 +304,12 @@ export interface GetTransactionsOutput {
 export type TransactionMethods = {
     getPending: () => Promise<TransferTransaction[]>;
     hasPending: (address: string) => Promise<boolean>;
-    getTransactionsForAccount: (
-        address: Account,
-        filteredTypes: TransactionKindString[],
-        fromDate?: Date,
-        toDate?: Date,
-        limit?: number,
-        startId?: string
-    ) => Promise<GetTransactionsOutput>;
     getFilteredPendingTransactions: (
         address: string,
         filteredTypes: TransactionKindString[],
         fromDate?: Date,
         toDate?: Date
     ) => Promise<TransferTransaction[]>;
-    hasEncryptedTransactions: (
-        address: string,
-        fromTime: string,
-        toTime: string
-    ) => Promise<boolean>;
     hasPendingShieldedBalanceTransfer: (address: string) => Promise<boolean>;
     update: (
         identifier: Record<string, unknown>,
