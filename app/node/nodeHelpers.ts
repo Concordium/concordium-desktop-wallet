@@ -32,7 +32,9 @@ export async function getAccountInfoOfAddress(
     const blockHash = await getlastFinalizedBlockHash();
     const accountInfo = await getAccountInfo(address, blockHash);
     if (!accountInfo) {
-        throw new Error(`Address:${address} does not represent an account.`);
+        throw new Error(
+            `Address ${address} does not represent an account on the connected node. Please check that your node is up to date with the blockchain.`
+        );
     }
     return accountInfo;
 }
