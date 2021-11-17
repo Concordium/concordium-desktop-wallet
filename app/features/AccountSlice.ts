@@ -36,15 +36,19 @@ import {
 } from '../utils/types';
 import { createAccount, isValidAddress } from '../utils/accountHelpers';
 import {
-    getAccountInfos,
     getAccountInfoOfAddress,
     getStatus,
+    getlastFinalizedBlockHash,
 } from '../node/nodeHelpers';
 import { hasPendingTransactions } from '~/database/TransactionDao';
 import { accountSimpleView, defaultAccount } from '~/database/PreferencesDao';
 import { stringify, parse } from '~/utils/JSONHelper';
 import { getCredId } from '~/utils/credentialHelper';
 import { mapRecordValues } from '~/utils/basicHelpers';
+import {
+    getAccountInfo,
+    getAccountInfoOfCredential,
+} from '~/node/nodeRequests';
 
 export interface AccountState {
     simpleView: boolean;
@@ -405,48 +409,56 @@ export async function loadAccountInfos(
 ) {
     const map: Record<string, AccountInfo> = {};
 
-    // We don't check that the address is valid for genesis account, because they have a credId as placeholder.
+    const confirmedAccounts = accounts.filter(
+        (account) =>
+            isValidAddress(account.address) &&
+            account.status === AccountStatus.Confirmed
+    );
+
+    // We don't check that the addresses is valid for genesis accounts, because they have credId's as placeholders.
     // The lookup for accountInfo will still succeed, because the node will, given an invalid address, interpret it as a credId,
     // and return the associated accounts's info.
     // Can only be safely removed, if there are no more genesis accounts in circulation, either in
     // databases or in old exports.
-    const confirmedAccounts = accounts.filter(
-        (account) =>
-            (isValidAddress(account.address) &&
-                account.status === AccountStatus.Confirmed) ||
-            AccountStatus.Genesis === account.status
+    const genesisAccounts = accounts.filter(
+        (account) => AccountStatus.Genesis === account.status
     );
 
-    if (confirmedAccounts.length === 0) {
+    if (confirmedAccounts.length + genesisAccounts.length === 0) {
         return Promise.resolve();
     }
-    const accountInfos = await getAccountInfos(confirmedAccounts);
-    for (let i = 0; i < accountInfos.length; i += 1) {
-        const { account, accountInfo } = accountInfos[i];
-        if (account.status === AccountStatus.Genesis) {
-            if (!accountInfo) {
-                throw new Error(
-                    `Genesis Account '${account.name}' not found on chain. Associated credId: ${account.address}` // account.address contains the placeholder credId
-                );
-            }
-            // eslint-disable-next-line no-await-in-loop
-            const address = await initializeGenesisAccount(
-                dispatch,
-                account,
-                accountInfo
-            );
-            map[address] = accountInfo;
-        } else {
-            if (!accountInfo) {
-                throw new Error(
-                    'A confirmed account does not exist on the connected node. Please check that your node is up to date with the blockchain.'
-                );
-            }
 
-            map[account.address] = accountInfo;
-            await updateAccountFromAccountInfo(dispatch, account, accountInfo);
+    const blockHash = await getlastFinalizedBlockHash();
+    for (const account of confirmedAccounts) {
+        const accountInfo = await getAccountInfo(account.address, blockHash);
+        if (!accountInfo) {
+            throw new Error(
+                'A confirmed account does not exist on the connected node. Please check that your node is up to date with the blockchain.'
+            );
         }
+        map[account.address] = accountInfo;
+        await updateAccountFromAccountInfo(dispatch, account, accountInfo);
     }
+
+    for (const account of genesisAccounts) {
+        const accountInfo = await getAccountInfoOfCredential(
+            // account.address contains the placeholder credId
+            account.address,
+            blockHash
+        );
+        if (!accountInfo) {
+            throw new Error(
+                `Genesis Account '${account.name}' not found on chain. Associated credId: ${account.address}`
+            );
+        }
+        const address = await initializeGenesisAccount(
+            dispatch,
+            account,
+            accountInfo
+        );
+        map[address] = accountInfo;
+    }
+
     if (resetInfo) {
         return setAccountInfos(dispatch, map);
     }
