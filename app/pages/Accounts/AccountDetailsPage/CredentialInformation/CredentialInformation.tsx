@@ -18,7 +18,7 @@ import {
     getCredId,
 } from '~/utils/credentialHelper';
 import { identitiesSelector } from '~/features/IdentitySlice';
-import DisplayIdentityAttributes from './DisplayIdentityAttributes';
+import DisplayIdentityAttributes from '~/components/DisplayIdentityAttributes';
 import IconButton from '~/cross-app-components/IconButton';
 
 import styles from './CredentialInformation.module.scss';
@@ -151,7 +151,8 @@ export default function CredentialInformation({ account, accountInfo }: Props) {
                         <div className={styles.attributesRow}>
                             <em>Revealed attributes:</em>
                             <DisplayIdentityAttributes
-                                revealedAttributes={c.policy.revealedAttributes}
+                                className="pT10"
+                                attributes={c.policy.revealedAttributes}
                             />
                         </div>
                     </div>
