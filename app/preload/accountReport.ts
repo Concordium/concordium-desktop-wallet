@@ -13,7 +13,7 @@ import {
     CredentialNumberPrfKey,
 } from '~/utils/types';
 import exportTransactionFields from '~/constants/exportTransactionFields.json';
-import { getISOFormat } from '~/utils/timeHelpers';
+import { getISOFormat, secondsSinceUnixEpoch } from '~/utils/timeHelpers';
 import transactionKindNames from '~/constants/transactionKindNames.json';
 import { AccountReportMethods } from './preloadTypes';
 import { isShieldedBalanceTransaction } from '~/utils/transactionHelpers';
@@ -226,8 +226,7 @@ async function streamTransactions(
     };
 
     const limit = 1000;
-    let toDate = filter.toDate ? new Date(filter.toDate) : undefined;
-
+    const fromDate = filter.fromDate ? new Date(filter.fromDate) : undefined;
     let filterToUse = filter;
 
     let startId = '';
@@ -246,7 +245,7 @@ async function streamTransactions(
 
         const {
             transactions: incomingTransactions,
-            full: more,
+            full,
         } = await httpMethods.getTransactions(
             account.address,
             filterToUse,
@@ -254,9 +253,21 @@ async function streamTransactions(
             TransactionOrder.Descending,
             startId
         );
-        const rawTransactions = incomingTransactions.map((txn) =>
-            convertIncomingTransaction(txn, account.address)
-        );
+        const filteredTransactions = incomingTransactions
+            .filter((t) =>
+                fromDate
+                    ? Number(t.blockTime) >= secondsSinceUnixEpoch(fromDate)
+                    : true
+            )
+            .map((txn) => convertIncomingTransaction(txn, account.address));
+
+        // If we filtered away some transactions, then this is the final page we needed to
+        // fetch from the wallet proxy, as this means that we have reached the from date (if
+        // one was set).
+        let more = full;
+        if (filteredTransactions.length < incomingTransactions.length) {
+            more = false;
+        }
 
         const entry = keys[account.address];
 
@@ -271,29 +282,16 @@ async function streamTransactions(
                 entry.prfKeySeed,
                 account.address,
                 global,
-                rawTransactions
+                filteredTransactions
             );
         } else {
-            transactions = rawTransactions;
+            transactions = filteredTransactions;
         }
 
         hasMore = more;
-        const smallestBlockTime = transactions.reduce(
-            (acc, t) =>
-                acc === 0 || Number(t.blockTime) < acc
-                    ? Number(t.blockTime)
-                    : acc,
-            0
-        );
-
-        const transactionsToSave = more
-            ? transactions.filter(
-                  (t) => Number(t.blockTime) !== smallestBlockTime
-              )
-            : transactions;
 
         const withNames: TransferTransactionWithNames[] = await Promise.all(
-            transactionsToSave.map(async (t) => ({
+            transactions.map(async (t) => ({
                 ...t,
                 fromName: await getAddressName(t.fromAddress),
                 toName: await getAddressName(t.toAddress),
@@ -306,15 +304,16 @@ async function streamTransactions(
         stream.write('\n');
 
         if (more) {
-            toDate = new Date(smallestBlockTime * 1000);
-
-            // Filter with reduced toDate
+            // Filter without dates, as the wallet proxy does not perform well
+            // with fromDate and toDate. The filtering on dates is handled in-memory
+            // above.
             filterToUse = {
                 ...filterToUse,
-                toDate: toDate.toString(),
+                toDate: undefined,
+                fromDate: undefined,
             };
 
-            startId = transactionsToSave.reduce(idReducer, 0n).toString();
+            startId = transactions.reduce(idReducer, 0n).toString();
         }
     }
 }
