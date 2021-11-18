@@ -192,7 +192,7 @@ export const loadTransactions = createAsyncThunk(
             size = transactionLogPageSize,
             force = false,
         }: LoadTransactionsArgs,
-        { getState, dispatch }
+        { getState, dispatch, requestId, signal }
     ) => {
         const state = getState() as RootState;
         const account = chosenAccountSelector(state);
@@ -206,6 +206,16 @@ export const loadTransactions = createAsyncThunk(
             release = await forceLock.acquire();
         }
 
+        const rejectIfInvalid = (reason: string) => {
+            if (
+                signal.aborted ||
+                (requestId !== latestLoadingRequestId && !force)
+            ) {
+                release?.();
+                throw new Error(reason);
+            }
+        };
+
         const minId = state.transactions.transactions
             .map((t) => t.id)
             .filter(isDefined)
@@ -215,6 +225,7 @@ export const loadTransactions = createAsyncThunk(
             );
 
         try {
+            rejectIfInvalid('Load of transactions on wallet proxy aborted');
             let transactionsResponseFromWalletProxy;
             try {
                 transactionsResponseFromWalletProxy = await getTransactionsDescending(
