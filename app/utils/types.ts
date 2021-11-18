@@ -201,7 +201,6 @@ export interface Account {
     incomingAmounts?: string;
     transactionFilter: TransactionFilter;
     selfAmounts?: string;
-    maxTransactionId: string;
     deploymentTransactionId?: string;
     isInitial: boolean;
 }
@@ -1382,4 +1381,19 @@ export enum NodeConnectionStatus {
     CatchingUp = 'Catching up',
     Ready = 'Ready',
     Unavailable = 'Unavailable',
+}
+
+export enum TransactionOrder {
+    Ascending = 'ascending',
+    Descending = 'descending',
+}
+
+export interface DecryptedAmount {
+    transactionHash: string;
+    amount: string;
+}
+
+export interface CredentialNumberPrfKey {
+    prfKeySeed: string;
+    credentialNumber: number;
 }
