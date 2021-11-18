@@ -21,6 +21,7 @@ export default function IdentityView() {
                 identityId={identity.id}
                 identityName={identity.name}
                 isRejected={identity.status === IdentityStatus.Rejected}
+                detail={identity.detail}
             />
             <IdentityCard identity={identity} showAttributes canEdit />
         </>

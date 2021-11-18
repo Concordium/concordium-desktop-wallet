@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ChoiceModal from '~/components/ChoiceModal';
 import routes from '~/constants/routes.json';
@@ -11,15 +11,18 @@ interface Props {
     identityId: number;
     identityName: string;
     isRejected: boolean;
+    detail: string;
 }
 
 /**
- * Modal, which appears on rejected identities/initial accounts.
+ * Modal that should be shown to the user when an identity/initial account
+ * creation has been rejected.
  */
 export default function FailedIdentityModal({
     identityId,
     identityName,
     isRejected,
+    detail,
 }: Props) {
     const [modalOpen, setModalOpen] = useState(false);
     const dispatch = useDispatch();
@@ -35,11 +38,29 @@ export default function FailedIdentityModal({
         }
     }, [isRejected, setModalOpen]);
 
+    const decriptionComponent = useMemo(() => {
+        return (
+            <>
+                <p>
+                    Unfortunately something went wrong with your new identity (
+                    {identityName}) and initial account ({initialAccountName}).
+                </p>
+                <p className="textError textCenter">{detail}</p>
+                <p>
+                    You can either go back and try again, or try again later.
+                    The identity can be removed by deleting the identity card in
+                    the identity view. This will automatically delete the
+                    related initial account as well
+                </p>
+            </>
+        );
+    }, [identityName, initialAccountName, detail]);
+
     return (
         <ChoiceModal
             disableClose
             title="The identity and initial account creation failed"
-            description={`Unfortunately something went wrong with your new identity (${identityName}) and initial account (${initialAccountName}). You can either go back and try again, or try again later. The identity can be removed by deleting the identity card in the identity view. This will automatically delete the related initial account as well.`}
+            description={decriptionComponent}
             open={modalOpen}
             actions={[
                 {

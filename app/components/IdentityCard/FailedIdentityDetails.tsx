@@ -72,6 +72,7 @@ ${getOS()}`;
                 <p className="textError textCenter">
                     Identity issuance failed.
                 </p>
+                <p className="textError textCenter">{identity.detail}</p>
             </div>
         );
     }
@@ -79,6 +80,7 @@ ${getOS()}`;
     return (
         <div className={clsx('body3 p20', styles.failedDetails)}>
             <p className="textError textCenter">Identity issuance failed.</p>
+            <p className="textError textCenter">{identity.detail}</p>
             {mail && (
                 <>
                     <p className={clsx(styles.failedDetailsLine, 'pV10')}>
