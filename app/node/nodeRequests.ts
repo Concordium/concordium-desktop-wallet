@@ -45,10 +45,6 @@ export const getBlockSummary = wrapper(
     window.grpc.getBlockSummary,
     (blockHash) => `Unable to load blocksummary, on block: ${blockHash}`
 );
-export const getAccountInfo = wrapper(
-    window.grpc.getAccountInfo,
-    (address) => `Unable to load accountInfo for ${address}`
-);
 export const getNextAccountNonce = wrapper(
     window.grpc.getNextAccountNonce,
     (address) => `Unable to fetch next nonce on address: ${address}`
@@ -67,4 +63,9 @@ export const getIdentityProviders = wrapper(
     (blockHash) => `Unable to load identity providers, on block: ${blockHash}`
 );
 
-export const { getTransactionStatus, getConsensusStatus } = window.grpc;
+export const {
+    getTransactionStatus,
+    getConsensusStatus,
+    getAccountInfo,
+    getAccountInfoOfCredential,
+} = window.grpc;

@@ -38,8 +38,12 @@ export default function NodeStatus(): JSX.Element {
     );
     const statusText = useSelector((s: RootState) => s.misc.nodeStatus);
     const setStatusText = useCallback(
-        (status: NodeConnectionStatus) => dispatch(setNodeStatus(status)),
-        [dispatch]
+        (status: NodeConnectionStatus) => {
+            if (status !== statusText) {
+                dispatch(setNodeStatus(status));
+            }
+        },
+        [dispatch, statusText]
     );
 
     const setStatus = useCallback(
@@ -72,6 +76,7 @@ export default function NodeStatus(): JSX.Element {
 
     useEffect(() => {
         const controller = new AbortController();
+        controller.start();
         setStatus(controller);
         return () => controller.abort();
     }, [connectionSettings?.value, setStatus]);

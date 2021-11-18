@@ -1,4 +1,8 @@
-import { AccountAddress, ConcordiumNodeClient } from '@concordium/node-sdk';
+import {
+    AccountAddress,
+    CredentialRegistrationId,
+    ConcordiumNodeClient,
+} from '@concordium/node-sdk';
 import { credentials, Metadata } from '@grpc/grpc-js';
 import SendTransactionClient from '~/node/ConcordiumNodeClient';
 import { GRPC, ConsensusAndGlobalResult } from '~/preload/preloadTypes';
@@ -75,9 +79,14 @@ const exposedMethods: GRPC = {
     getNextAccountNonce: (address: string) =>
         client.getNextAccountNonce(new AccountAddress(address)),
     getBlockSummary: (blockHash: string) => client.getBlockSummary(blockHash),
-    getAccountInfo: (addressRaw: string, blockHash: string) => {
-        const address = new AccountAddress(addressRaw);
-        return client.getAccountInfo(address, blockHash);
+    getAccountInfo: (address: string, blockHash: string) => {
+        return client.getAccountInfo(new AccountAddress(address), blockHash);
+    },
+    getAccountInfoOfCredential: (credId: string, blockHash: string) => {
+        return client.getAccountInfo(
+            new CredentialRegistrationId(credId),
+            blockHash
+        );
     },
     getIdentityProviders: (blockHash: string) =>
         client.getIdentityProviders(blockHash),

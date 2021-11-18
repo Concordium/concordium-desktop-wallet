@@ -385,7 +385,6 @@ async function buildAccountReportForMultipleAccounts(
         middleMan.end();
 
         if (abortController.isAborted) {
-            archive.abort();
             break;
         }
     }
@@ -394,7 +393,11 @@ async function buildAccountReportForMultipleAccounts(
     const finishedWriting = new Promise<void>((resolve) =>
         stream.once('finish', resolve)
     );
-    archive.finalize();
+    if (abortController.isAborted) {
+        archive.abort();
+    } else {
+        archive.finalize();
+    }
     abortController.finish();
     return finishedWriting;
 }
