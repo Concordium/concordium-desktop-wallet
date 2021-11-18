@@ -4,14 +4,14 @@ import React, {
     Fragment,
     useCallback,
     useContext,
-    useEffect,
-    useRef,
+    useState,
 } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import InfiniteLoader from 'react-window-infinite-loader';
 import { VariableSizeList as List } from 'react-window';
 
 import { useSelector } from 'react-redux';
+import { unwrapResult } from '@reduxjs/toolkit';
 import { PropsOf, TransferTransaction } from '~/utils/types';
 import useTransactionGroups, {
     TransactionsByDateTuple,
@@ -22,7 +22,6 @@ import {
     loadTransactions,
     transactionLogPageSize,
 } from '~/features/TransactionSlice';
-import { chosenAccountSelector } from '~/features/AccountSlice';
 import TransactionListHeader, {
     transactionListHeaderHeight,
 } from './TransactionListHeader';
@@ -33,6 +32,7 @@ import { TransactionListProps } from './util';
 import useThunkDispatch from '~/store/useThunkDispatch';
 
 import styles from './TransactionList.module.scss';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 type HeaderOrTransaction = string | TransferTransaction;
 
@@ -80,17 +80,15 @@ const ListElement = forwardRef<HTMLDivElement, PropsOf<'div'>>(
 export default function InfiniteTransactionList({
     transactions,
     onTransactionClick,
+    abortRef,
 }: TransactionListProps) {
     const dispatch = useThunkDispatch();
-    const account = useSelector(chosenAccountSelector);
     const loading = useSelector(loadingTransactionsSelector);
     const hasMore = useSelector(hasMoreTransactionsSelector);
-    const abortRef = useRef<((reason?: string) => void) | undefined>(undefined);
-
-    useEffect(() => () => abortRef.current?.(), [account?.address]);
+    const [error, setError] = useState<string | undefined>();
 
     const loadMore = useCallback(async () => {
-        if (loading || !hasMore) {
+        if (loading || !hasMore || error) {
             return;
         }
         const load = dispatch(
@@ -100,9 +98,16 @@ export default function InfiniteTransactionList({
                 force: true,
             })
         );
+        load.then(unwrapResult).catch((e) => {
+            if (e.name !== 'AbortError') {
+                setError(e.message);
+            }
+        });
 
-        abortRef.current = load.abort;
-    }, [dispatch, loading, hasMore]);
+        if (abortRef !== undefined) {
+            abortRef.current = load.abort;
+        }
+    }, [dispatch, loading, hasMore, abortRef, error]);
 
     const groups = useTransactionGroups(transactions);
     const headersAndTransactions = groups.flat(2);
@@ -112,59 +117,70 @@ export default function InfiniteTransactionList({
         : headersAndTransactions.length;
 
     return (
-        <StickyContext.Provider value={{ groups }}>
-            <AutoSizer>
-                {({ height, width }) => (
-                    <InfiniteLoader
-                        isItemLoaded={(i) => i < headersAndTransactions.length}
-                        itemCount={itemCount}
-                        loadMoreItems={loadMore}
-                    >
-                        {({ onItemsRendered, ref }) => (
-                            <List
-                                onItemsRendered={onItemsRendered}
-                                ref={ref}
-                                className={styles.infinite}
-                                width={width}
-                                height={height}
-                                itemCount={headersAndTransactions.length}
-                                itemSize={(i) =>
-                                    getHeight(headersAndTransactions[i])
-                                }
-                                itemKey={(i) =>
-                                    getKey(headersAndTransactions[i])
-                                }
-                                innerElementType={ListElement}
-                            >
-                                {({ style, index }) => {
-                                    const item = headersAndTransactions[index];
-
-                                    if (isHeader(item)) {
-                                        return (
-                                            <span
-                                                className={
-                                                    styles.transactionGroupHeaderPlaceholder
-                                                }
-                                                style={style}
-                                            />
-                                        ); // Handled in "innerElementType"
+        <>
+            <SimpleErrorModal
+                show={Boolean(error)}
+                header="Unable to load transactions"
+                content={error}
+                onClick={() => setError(undefined)}
+            />
+            <StickyContext.Provider value={{ groups }}>
+                <AutoSizer>
+                    {({ height, width }) => (
+                        <InfiniteLoader
+                            isItemLoaded={(i) =>
+                                i < headersAndTransactions.length
+                            }
+                            itemCount={itemCount}
+                            loadMoreItems={loadMore}
+                        >
+                            {({ onItemsRendered, ref }) => (
+                                <List
+                                    onItemsRendered={onItemsRendered}
+                                    ref={ref}
+                                    className={styles.infinite}
+                                    width={width}
+                                    height={height}
+                                    itemCount={headersAndTransactions.length}
+                                    itemSize={(i) =>
+                                        getHeight(headersAndTransactions[i])
                                     }
+                                    itemKey={(i) =>
+                                        getKey(headersAndTransactions[i])
+                                    }
+                                    innerElementType={ListElement}
+                                >
+                                    {({ style, index }) => {
+                                        const item =
+                                            headersAndTransactions[index];
 
-                                    return (
-                                        <TransactionListElement
-                                            style={style}
-                                            onClick={() =>
-                                                onTransactionClick(item)
-                                            }
-                                            transaction={item}
-                                        />
-                                    );
-                                }}
-                            </List>
-                        )}
-                    </InfiniteLoader>
-                )}
-            </AutoSizer>
-        </StickyContext.Provider>
+                                        if (isHeader(item)) {
+                                            return (
+                                                <span
+                                                    className={
+                                                        styles.transactionGroupHeaderPlaceholder
+                                                    }
+                                                    style={style}
+                                                />
+                                            ); // Handled in "innerElementType"
+                                        }
+
+                                        return (
+                                            <TransactionListElement
+                                                style={style}
+                                                onClick={() =>
+                                                    onTransactionClick(item)
+                                                }
+                                                transaction={item}
+                                            />
+                                        );
+                                    }}
+                                </List>
+                            )}
+                        </InfiniteLoader>
+                    )}
+                </AutoSizer>
+            </StickyContext.Provider>
+        </>
     );
 }

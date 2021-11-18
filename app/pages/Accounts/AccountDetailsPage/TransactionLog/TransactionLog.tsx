@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import TabbedCard from '~/components/TabbedCard';
 import { TabbedCardTabRef } from '~/components/TabbedCard/TabbedCardTab';
 import {
+    hasMoreTransactionsSelector,
     transactionLogPageSize,
     transactionsSelector,
 } from '~/features/TransactionSlice';
@@ -15,14 +16,23 @@ import TransactionLogFilters from '../TransactionLogFilters';
 import styles from './TransactionLog.module.scss';
 import TransactionsHeader from '../../TransactionsHeader';
 
-export default function TransactionLog() {
+interface Props {
+    abortRef: React.MutableRefObject<
+        ((reason?: string | undefined) => void) | undefined
+    >;
+}
+
+export default function TransactionLog({ abortRef }: Props) {
     const transactions = useSelector(transactionsSelector);
+    const hasMoreTransactions = useSelector(hasMoreTransactionsSelector);
     const [chosenTransaction, setChosenTransaction] = useState<
         TransferTransaction | undefined
     >();
     const infinite = useMemo(
-        () => transactions.length >= transactionLogPageSize,
-        [transactions.length]
+        () =>
+            transactions.length >= transactionLogPageSize ||
+            hasMoreTransactions,
+        [transactions.length, hasMoreTransactions]
     );
     const [showingLog, setShowingLog] = useState(true);
 
@@ -50,6 +60,7 @@ export default function TransactionLog() {
                     >
                         <TransactionList
                             infinite={infinite}
+                            abortRef={abortRef}
                             transactions={transactions}
                             onTransactionClick={setChosenTransaction}
                         />
