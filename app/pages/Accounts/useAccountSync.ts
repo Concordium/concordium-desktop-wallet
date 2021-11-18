@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { unwrapResult } from '@reduxjs/toolkit';
 import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
@@ -129,7 +130,9 @@ export default function useAccountSync(onError: (message: string) => void) {
                 force: true,
             })
         );
-        load.then(() => setIsLoadDone(true)).catch(noOp);
+        load.then(unwrapResult)
+            .then(() => setIsLoadDone(true))
+            .catch((error) => onError(error.message));
 
         return () => {
             load.abort();

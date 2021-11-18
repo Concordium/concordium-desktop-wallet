@@ -44,6 +44,7 @@ import { isDefined, noOp } from '~/utils/basicHelpers';
 import { GetTransactionsOutput } from '~/preload/preloadTypes';
 import { findEntries } from '~/database/DecryptedAmountsDao';
 import { getActiveBooleanFilters } from '~/utils/accountHelpers';
+import * as errorMessages from '~/constants/errorMessages.json';
 
 export const transactionLogPageSize = 100;
 
@@ -228,12 +229,18 @@ export const loadTransactions = createAsyncThunk(
         try {
             rejectIfInvalid('Redux load aborted');
 
-            const transactionsResponseFromWalletProxy = await getTransactionsDescending(
-                account.address,
-                account.transactionFilter,
-                size,
-                append ? minId : undefined
-            );
+            let transactionsResponseFromWalletProxy;
+            try {
+                transactionsResponseFromWalletProxy = await getTransactionsDescending(
+                    account.address,
+                    account.transactionFilter,
+                    size,
+                    append ? minId : undefined
+                );
+            } catch (e) {
+                throw new Error(errorMessages.unableToReachWalletProxy);
+            }
+
             const transactions = transactionsResponseFromWalletProxy.transactions.map(
                 (txn) => convertIncomingTransaction(txn, account.address)
             );
