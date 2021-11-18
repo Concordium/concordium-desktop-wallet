@@ -41,7 +41,7 @@ function PrintFormatSimpleTransfer({
     const { amount } = transaction.payload;
     const body = (
         <>
-            <h1>Transaction - Send GTU</h1>
+            <h1>Transaction - Send CCD</h1>
             {table(
                 standardTableHeader,
                 <tbody>

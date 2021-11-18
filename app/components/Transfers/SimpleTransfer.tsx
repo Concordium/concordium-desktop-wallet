@@ -116,7 +116,7 @@ function SimpleTransfer({
             exitFunction={
                 disableClose ? undefined : () => dispatch(push(routes.ACCOUNTS))
             }
-            amountHeader="Send GTU"
+            amountHeader="Send CCD"
             senderAddress={account.address}
             transactionKind={TransactionKindId.Simple_transfer}
         />

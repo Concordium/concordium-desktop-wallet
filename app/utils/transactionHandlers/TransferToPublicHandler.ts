@@ -5,7 +5,7 @@ import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 
 type TransactionType = TransferToPublic;
 
-const TYPE = 'Unshield GTU';
+const TYPE = 'Unshield CCD';
 
 export default class TransferToPublicHandler
     extends TransferHandler<TransactionType>

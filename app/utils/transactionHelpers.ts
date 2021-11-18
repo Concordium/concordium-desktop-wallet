@@ -555,7 +555,7 @@ export function validateShieldedAmount(
     estimatedFee: bigint | undefined
 ): string | undefined {
     if (!isValidGTUString(amountToValidate)) {
-        return 'Value is not a valid GTU amount';
+        return 'Value is not a valid CCD amount';
     }
     const amountToValidateMicroGTU = toMicroUnits(amountToValidate);
     if (
@@ -582,7 +582,7 @@ export function validateTransferAmount(
     estimatedFee: bigint | undefined
 ): string | undefined {
     if (!isValidGTUString(amountToValidate)) {
-        return 'Value is not a valid GTU amount';
+        return 'Value is not a valid CCD amount';
     }
     const amountToValidateMicroGTU = toMicroUnits(amountToValidate);
     if (
@@ -618,7 +618,7 @@ export function validateBakerStake(
     estimatedFee: bigint | undefined
 ): string | undefined {
     if (!isValidGTUString(amountToValidate)) {
-        return 'Value is not a valid GTU amount';
+        return 'Value is not a valid CCD amount';
     }
     const amount = toMicroUnits(amountToValidate);
     if (bakerStakeThreshold && bakerStakeThreshold > amount) {

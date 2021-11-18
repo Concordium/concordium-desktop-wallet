@@ -62,7 +62,7 @@ function ScheduleTransfer({ account, exchangeRate, nonce }: Props) {
     return (
         <ExternalTransfer
             toConfirmTransfer={toBuildSchedule}
-            amountHeader="Send GTU with a schedule"
+            amountHeader="Send CCD with a schedule"
             senderAddress={account.address}
             transactionKind={TransactionKindId.Simple_transfer}
         />

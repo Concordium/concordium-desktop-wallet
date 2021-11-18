@@ -76,7 +76,7 @@ export default function MintRateInput({
                 className={styles.field}
                 title={`Annual mint rate (~${mintRateDescriptionFormat(
                     parseFloat(annualRate ?? '') * 100
-                )}% new GTU per year)`}
+                )}% new CCD per year)`}
                 allowFractions={6}
                 value={annualRate}
                 onChange={setAnnualRate}
