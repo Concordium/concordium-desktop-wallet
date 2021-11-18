@@ -132,7 +132,11 @@ export default function useAccountSync(onError: (message: string) => void) {
         );
         load.then(unwrapResult)
             .then(() => setIsLoadDone(true))
-            .catch((error) => onError(error.message));
+            .catch((error) => {
+                if (error.name !== 'AbortError') {
+                    onError(error.message);
+                }
+            });
 
         return () => {
             load.abort();

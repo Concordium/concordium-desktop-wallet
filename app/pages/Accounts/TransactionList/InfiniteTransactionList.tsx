@@ -99,7 +99,9 @@ export default function InfiniteTransactionList({
             })
         );
         load.then(unwrapResult).catch((e) => {
-            setError(e.message);
+            if (e.name !== 'AbortError') {
+                setError(e.message);
+            }
         });
 
         if (abortRef !== undefined) {
