@@ -85,7 +85,6 @@ export default function AccountReport({ location }: Props) {
                     credentialNumber: number,
                     prfKeySeed: string
                 ) => {
-                    setShowDecrypt({ show: false });
                     resolve({
                         decrypted,
                         address,
@@ -132,6 +131,7 @@ export default function AccountReport({ location }: Props) {
                     accountsToReport.push(account);
                 }
             }
+            setShowDecrypt({ show: false });
             const accountsLength = accountsToReport.length;
 
             if (accountsLength === 0) {
