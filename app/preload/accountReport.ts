@@ -253,19 +253,21 @@ async function streamTransactions(
             TransactionOrder.Descending,
             startId
         );
-        const filteredTransactions = incomingTransactions
-            .filter((t) =>
-                fromDate
-                    ? Number(t.blockTime) >= secondsSinceUnixEpoch(fromDate)
-                    : true
-            )
-            .map((txn) => convertIncomingTransaction(txn, account.address));
+
+        let convertedTransactions = incomingTransactions.map((txn) =>
+            convertIncomingTransaction(txn, account.address)
+        );
+        if (fromDate) {
+            convertedTransactions = convertedTransactions.filter(
+                (t) => Number(t.blockTime) >= secondsSinceUnixEpoch(fromDate)
+            );
+        }
 
         // If we filtered away some transactions, then this is the final page we needed to
         // fetch from the wallet proxy, as this means that we have reached the from date (if
         // one was set).
         let more = full;
-        if (filteredTransactions.length < incomingTransactions.length) {
+        if (convertedTransactions.length < incomingTransactions.length) {
             more = false;
         }
 
@@ -282,10 +284,10 @@ async function streamTransactions(
                 entry.prfKeySeed,
                 account.address,
                 global,
-                filteredTransactions
+                convertedTransactions
             );
         } else {
-            transactions = filteredTransactions;
+            transactions = convertedTransactions;
         }
 
         hasMore = more;
