@@ -1,3 +1,8 @@
+import {
+    InitialAccountCredential,
+    NormalAccountCredential,
+    Versioned,
+} from '@concordium/node-sdk';
 import { getCredentialsOfAccount } from '~/database/CredentialDao';
 import { getWalletId } from '~/database/WalletDao';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
@@ -95,4 +100,18 @@ export function getNoteForOwnCredential(
     }
 
     return `Credential from "${identityName}"`;
+}
+
+/**
+ * Given a versioned credential, returns the credId.
+ */
+export function getCredId(
+    cred: Versioned<InitialAccountCredential | NormalAccountCredential>
+) {
+    if (cred.v !== 0) {
+        throw new Error('Unsupported credential version');
+    }
+    return cred.value.type === 'initial'
+        ? cred.value.contents.regId
+        : cred.value.contents.credId;
 }

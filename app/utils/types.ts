@@ -6,6 +6,8 @@ import type { RegisterOptions } from 'react-hook-form';
 import { RejectReason } from './node/RejectReasonHelper';
 import type { ExternalCredential, Genesis } from '~/database/types';
 
+export { AccountInfo, AccountEncryptedAmount } from '@concordium/node-sdk/';
+
 export type Dispatch = GenericDispatch<AnyAction>;
 
 export type Hex = string;
@@ -199,7 +201,6 @@ export interface Account {
     incomingAmounts?: string;
     transactionFilter: TransactionFilter;
     selfAmounts?: string;
-    maxTransactionId: string;
     deploymentTransactionId?: string;
     isInitial: boolean;
 }
@@ -533,56 +534,9 @@ export interface TransferTransactionWithNames extends TransferTransaction {
 
 export type EncryptedAmount = Hex;
 
-export interface AccountEncryptedAmount {
-    selfAmount: EncryptedAmount;
-    incomingAmounts: EncryptedAmount[];
-    startIndex: number;
-    numAggregated?: number;
-}
-
 export interface TypedCredentialDeploymentInformation {
     contents: CredentialDeploymentInformation;
     type: string;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AccountReleaseSchedule = any; // TODO
-
-interface AccountBakerDetails {
-    restakeEarnings: boolean;
-    bakerId: number;
-    bakerAggregationVerifyKey: string;
-    bakerElectionVerifyKey: string;
-    bakerSignatureVerifyKey: string;
-    stakedAmount: string;
-    pendingChange?: BakerPendingChange;
-}
-
-export type BakerPendingChange =
-    | {
-          change: 'ReduceStake';
-          newStake: string;
-          epoch: number;
-      }
-    | {
-          change: 'RemoveBaker';
-          epoch: number;
-      };
-
-// Reflects the structure given by the node,
-// in a getAccountInforequest
-export interface AccountInfo {
-    accountAmount: string;
-    accountEncryptionKey: string;
-    accountThreshold: number;
-    accountReleaseSchedule: AccountReleaseSchedule;
-    accountBaker?: AccountBakerDetails;
-    accountEncryptedAmount: AccountEncryptedAmount;
-    accountCredentials: Record<
-        number,
-        Versioned<TypedCredentialDeploymentInformation>
-    >;
-    accountIndex: number;
 }
 
 // Reflects the type, which the account Release Schedule is comprised of.
@@ -911,7 +865,7 @@ export function instanceOfUpdateBakerKeys(
 
 export function instanceOfRemoveBaker(
     object: AccountTransaction<TransactionPayload>
-): object is AddBaker {
+): object is RemoveBaker {
     return object.transactionKind === TransactionKindId.Remove_baker;
 }
 
@@ -1293,16 +1247,6 @@ interface RejectReasonWithContents {
     contents: any;
 }
 
-interface EventResult {
-    outcome: string;
-    rejectReason?: RejectReasonWithContents;
-}
-
-export interface TransactionEvent {
-    result: EventResult;
-    cost: string;
-}
-
 export type ClassName = Pick<HTMLAttributes<HTMLElement>, 'className'>;
 export type Style = Pick<HTMLAttributes<HTMLElement>, 'style'>;
 
@@ -1449,4 +1393,19 @@ export enum NodeConnectionStatus {
     CatchingUp = 'Catching up',
     Ready = 'Ready',
     Unavailable = 'Unavailable',
+}
+
+export enum TransactionOrder {
+    Ascending = 'ascending',
+    Descending = 'descending',
+}
+
+export interface DecryptedAmount {
+    transactionHash: string;
+    amount: string;
+}
+
+export interface CredentialNumberPrfKey {
+    prfKeySeed: string;
+    credentialNumber: number;
 }

@@ -11,7 +11,6 @@ import {
     Fraction,
 } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
-import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { createRemoveBakerTransaction } from '~/utils/transactionHelpers';
 import routes from '~/constants/routes.json';
@@ -22,7 +21,7 @@ import {
 import SignTransaction from './SignTransaction';
 import RemoveBakerProposalDetails from './proposal-details/RemoveBakerProposalDetails';
 import { getFormattedDateString } from '~/utils/timeHelpers';
-import PendingChange from '~/components/BakerPendingChange/BakerPendingChange';
+import PendingChange from '~/components/BakerPendingChange';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
@@ -32,6 +31,9 @@ import {
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
 import ChooseExpiry from './ChooseExpiry';
+import { isMultiSig } from '~/utils/accountHelpers';
+
+import styles from './MultisignatureAccountTransactions.module.scss';
 
 interface PageProps {
     exchangeRate: Fraction;
@@ -117,8 +119,9 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
-                                        filter={(_, info) =>
-                                            info?.accountBaker !== undefined
+                                        filter={(a, info) =>
+                                            info?.accountBaker !== undefined &&
+                                            isMultiSig(a)
                                         }
                                         onAccountClicked={() => {
                                             dispatch(
@@ -146,7 +149,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                                 </>
                                             ) : undefined
                                         }
-                                        messageWhenEmpty="There are no baker accounts "
+                                        messageWhenEmpty="There are no baker accounts that require multiple signatures"
                                     />
                                 </div>
                             </div>

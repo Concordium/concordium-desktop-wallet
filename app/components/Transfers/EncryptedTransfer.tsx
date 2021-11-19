@@ -20,7 +20,7 @@ import ensureNoPendingShieldedBalance from './ensureNoPendingShieldedBalance';
 interface Props {
     account: Account;
     exchangeRate: Fraction;
-    nonce: string;
+    nonce: bigint;
     disableClose?: boolean;
 }
 

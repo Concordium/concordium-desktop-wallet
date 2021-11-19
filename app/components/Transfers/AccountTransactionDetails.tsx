@@ -95,6 +95,25 @@ export default function AccountTransactionDetails({ transaction }: Props) {
     if (instanceOfRegisterData(transaction)) {
         return <DisplayRegisterData transaction={transaction} />;
     }
+    if (instanceOfScheduledTransfer(transaction)) {
+        return (
+            <DisplayScheduleTransfer
+                transaction={transaction}
+                to={to}
+                fromName={fromName}
+            />
+        );
+    }
+    if (instanceOfScheduledTransferWithMemo(transaction)) {
+        return (
+            <DisplayScheduleTransfer
+                transaction={transaction}
+                to={to}
+                fromName={fromName}
+                memo={transaction.payload.memo}
+            />
+        );
+    }
     if (instanceOfAddBaker(transaction)) {
         return <DisplayAddBaker transaction={transaction} />;
     }
@@ -118,25 +137,6 @@ export default function AccountTransactionDetails({ transaction }: Props) {
             <DisplayInternalTransfer
                 transaction={transaction}
                 fromName={fromName}
-            />
-        );
-    }
-    if (instanceOfScheduledTransfer(transaction)) {
-        return (
-            <DisplayScheduleTransfer
-                transaction={transaction}
-                to={to}
-                fromName={fromName}
-            />
-        );
-    }
-    if (instanceOfScheduledTransferWithMemo(transaction)) {
-        return (
-            <DisplayScheduleTransfer
-                transaction={transaction}
-                to={to}
-                fromName={fromName}
-                memo={transaction.payload.memo}
             />
         );
     }

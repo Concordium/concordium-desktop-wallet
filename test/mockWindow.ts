@@ -11,3 +11,7 @@ Object.defineProperty(window, 'database', {
         externalCredential: {},
     })),
 });
+
+Object.defineProperty(window, 'grpc', {
+    get: jest.fn(() => ({})),
+});

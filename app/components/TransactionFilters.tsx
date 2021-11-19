@@ -4,7 +4,6 @@ import React, {
     useEffect,
     useImperativeHandle,
     useMemo,
-    useRef,
 } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
@@ -20,7 +19,6 @@ import {
     minDate,
     pastDate,
 } from '~/components/Form/util/validation';
-import { InputTimestampRef } from '~/components/Form/InputTimestamp/util';
 import { useUpdateEffect } from '~/utils/hooks';
 
 interface FilterForm
@@ -175,9 +173,6 @@ const TransactionFilters = forwardRef<
     const fromDate = values?.fromDate;
     const toDate = values?.toDate;
 
-    const fromDateRef = useRef<InputTimestampRef>(null);
-    const toDateRef = useRef<InputTimestampRef>(null);
-
     const booleanFilters = useMemo(
         () => getActiveBooleanFilters(values || {}),
         [values]
@@ -203,9 +198,12 @@ const TransactionFilters = forwardRef<
         [fromDate, toDate, booleanFilters]
     );
 
-    const form = useForm<FilterForm>({ defaultValues });
+    const form = useForm<FilterForm>({ defaultValues, mode: 'onTouched' });
     const { reset, handleSubmit, watch, trigger } = form;
-    const { fromDate: fromDateValue } = watch([fieldNames.fromDate]);
+    const { fromDate: fromDateValue, toDate: toDateValue } = watch([
+        fieldNames.fromDate,
+        fieldNames.toDate,
+    ]);
 
     const submit = useCallback(
         (cb: Callback) => (fields: FilterForm) => {
@@ -240,9 +238,6 @@ const TransactionFilters = forwardRef<
     );
 
     const clear = useCallback((cb: Callback) => {
-        fromDateRef.current?.clear();
-        toDateRef.current?.clear();
-
         cb({});
     }, []);
 
@@ -268,20 +263,20 @@ const TransactionFilters = forwardRef<
     return (
         <FormProvider {...form}>
             <section className="pH40">
-                <Form.Timestamp
+                <Form.DatePicker
                     name={fieldNames.fromDate}
-                    className="mT20"
+                    className="mT20 body2"
                     label="From:"
                     rules={{
                         validate: {
                             pastDate: pastDateValidator,
                         },
                     }}
-                    ref={fromDateRef}
+                    maxDate={toDateValue ?? new Date()}
                 />
-                <Form.Timestamp
+                <Form.DatePicker
                     name={fieldNames.toDate}
-                    className="mT20"
+                    className="mT20 body2"
                     label="To:"
                     rules={{
                         validate: {
@@ -293,13 +288,14 @@ const TransactionFilters = forwardRef<
                                 return allowOptional(
                                     minDate(
                                         fromDateValue,
-                                        ' Must be after date specified in first date field'
+                                        'Must be after "from" date'
                                     )
                                 )(v);
                             },
                         },
                     }}
-                    ref={toDateRef}
+                    minDate={fromDateValue ?? undefined}
+                    maxDate={new Date()}
                 />
                 <div className="m40 mB10 flexColumn">
                     {transactionFilters.map(({ field, display }) => (

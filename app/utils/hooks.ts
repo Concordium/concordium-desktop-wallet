@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 
-export const useIsFirstRender = () => {
+export const useIsSubsequentRender = () => {
     const ref = useRef<boolean>(false);
 
     useEffect(() => {
@@ -11,10 +11,10 @@ export const useIsFirstRender = () => {
 };
 
 export const useUpdateEffect: typeof useEffect = (effect, deps) => {
-    const isFirstRender = useIsFirstRender();
+    const isSubsequentRender = useIsSubsequentRender();
 
     useEffect(() => {
-        if (!isFirstRender) {
+        if (!isSubsequentRender) {
             return undefined;
         }
         return effect();
@@ -63,12 +63,14 @@ export const useTimeoutState = <TValue>(
 
 export const useAsyncMemo = <ReturnType>(
     getResult: () => Promise<ReturnType>,
-    handleError: (e: Error) => void = () => {}
-) => {
+    handleError: (e: Error) => void = () => {},
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    deps?: any[]
+): ReturnType | undefined => {
     const [result, setResult] = useState<ReturnType>();
     useEffect(() => {
         getResult().then(setResult).catch(handleError);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, deps);
     return result;
 };

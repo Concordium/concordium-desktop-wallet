@@ -8,16 +8,98 @@ import {
     TransactionStatus,
     TransferTransactionWithNames,
     TransactionFilter,
+    TransactionOrder,
+    Global,
+    CredentialNumberPrfKey,
 } from '~/utils/types';
 import exportTransactionFields from '~/constants/exportTransactionFields.json';
-import { getISOFormat } from '~/utils/timeHelpers';
+import { getISOFormat, secondsSinceUnixEpoch } from '~/utils/timeHelpers';
 import transactionKindNames from '~/constants/transactionKindNames.json';
-import transactionMethods from './database/transactionsDao';
 import { AccountReportMethods } from './preloadTypes';
-import { getActiveBooleanFilters } from '~/utils/accountHelpers';
 import { isShieldedBalanceTransaction } from '~/utils/transactionHelpers';
 import AbortController from '~/utils/AbortController';
 import { getEntryName } from './database/addressBookDao';
+import { convertIncomingTransaction } from '~/utils/TransactionConverters';
+import httpMethods from './http';
+import decryptAmountsDao from './database/decryptedAmountsDao';
+import decryptTransactions from '~/utils/decryptHelpers';
+import { hasEncryptedBalance } from '~/utils/accountHelpers';
+
+async function enrichWithDecryptedAmounts(
+    credentialNumber: number,
+    prfKeySeed: string,
+    address: string,
+    global: Global,
+    transactions: TransferTransaction[]
+): Promise<TransferTransaction[]> {
+    const encryptedTypes = [
+        TransactionKindString.EncryptedAmountTransfer,
+        TransactionKindString.EncryptedAmountTransferWithMemo,
+    ];
+
+    const encryptedTransactions = transactions.filter((t) =>
+        encryptedTypes.includes(t.transactionKind)
+    );
+    const decryptedAmounts = await decryptAmountsDao.findEntries(
+        encryptedTransactions.map(
+            (encryptedTransaction) => encryptedTransaction.transactionHash
+        )
+    );
+
+    const withDecryptedAmounts: TransferTransaction[] = [];
+
+    const toDecrypt: TransferTransaction[] = [];
+    for (const t of transactions) {
+        if (encryptedTypes.includes(t.transactionKind)) {
+            const amount = decryptedAmounts.find(
+                (decrypted) => decrypted.transactionHash === t.transactionHash
+            )?.amount;
+            if (!amount) {
+                toDecrypt.push(t);
+            }
+        }
+    }
+
+    const decryptedTransactions = await decryptTransactions(
+        toDecrypt,
+        address,
+        prfKeySeed,
+        credentialNumber,
+        global
+    );
+    const decryptedAmountsMap = new Map<string, string>();
+    for (const dt of decryptedTransactions) {
+        decryptedAmountsMap.set(dt.transactionHash, dt.decryptedAmount);
+    }
+
+    for (const t of transactions) {
+        if (!encryptedTypes.includes(t.transactionKind)) {
+            withDecryptedAmounts.push(t);
+        } else {
+            const amount = decryptedAmounts.find(
+                (decrypted) => decrypted.transactionHash === t.transactionHash
+            )?.amount;
+            if (amount) {
+                withDecryptedAmounts.push({ ...t, decryptedAmount: amount });
+            } else {
+                const decryptedAmount = decryptedAmountsMap.get(
+                    t.transactionHash
+                );
+                if (!decryptedAmount) {
+                    throw new Error('Internal error. This should never occur.');
+                }
+
+                await decryptAmountsDao.insert({
+                    transactionHash: t.transactionHash,
+                    amount: decryptedAmount,
+                });
+                withDecryptedAmounts.push({ ...t, decryptedAmount });
+            }
+        }
+    }
+
+    return withDecryptedAmounts;
+}
 
 function calculatePublicBalanceChange(
     transaction: TransferTransaction,
@@ -129,6 +211,8 @@ async function streamTransactions(
     stream: Writable,
     account: Account,
     filter: TransactionFilter,
+    global: Global,
+    keys: Record<string, CredentialNumberPrfKey>,
     abortController: AbortController
 ) {
     const getAddressName = async (address: string) => {
@@ -141,11 +225,9 @@ async function streamTransactions(
         return getEntryName(address);
     };
 
-    const limit = 10000;
-    const filteredTypes = getActiveBooleanFilters(filter);
-
+    const limit = 1000;
     const fromDate = filter.fromDate ? new Date(filter.fromDate) : undefined;
-    let toDate = filter.toDate ? new Date(filter.toDate) : undefined;
+    let filterToUse = filter;
 
     let startId = '';
     let hasMore = true;
@@ -162,33 +244,56 @@ async function streamTransactions(
         }
 
         const {
-            transactions,
-            more,
-        } = await transactionMethods.getTransactionsForAccount(
-            account,
-            filteredTypes,
-            fromDate,
-            toDate,
+            transactions: incomingTransactions,
+            full,
+        } = await httpMethods.getTransactions(
+            account.address,
+            filterToUse,
             limit,
+            TransactionOrder.Descending,
             startId
         );
-        hasMore = more;
-        const smallestBlockTime = transactions.reduce(
-            (acc, t) =>
-                acc === 0 || Number(t.blockTime) < acc
-                    ? Number(t.blockTime)
-                    : acc,
-            0
-        );
 
-        const transactionsToSave = more
-            ? transactions.filter(
-                  (t) => Number(t.blockTime) !== smallestBlockTime
-              )
-            : transactions;
+        let convertedTransactions = incomingTransactions.map((txn) =>
+            convertIncomingTransaction(txn, account.address)
+        );
+        if (fromDate) {
+            convertedTransactions = convertedTransactions.filter(
+                (t) => Number(t.blockTime) >= secondsSinceUnixEpoch(fromDate)
+            );
+        }
+
+        // If we filtered away some transactions, then this is the final page we needed to
+        // fetch from the wallet proxy, as this means that we have reached the from date (if
+        // one was set).
+        let more = full;
+        if (convertedTransactions.length < incomingTransactions.length) {
+            more = false;
+        }
+
+        const entry = keys[account.address];
+
+        let transactions;
+        if (
+            hasEncryptedBalance(account) &&
+            (filter.encryptedAmountTransfer ||
+                filter.encryptedAmountTransferWithMemo)
+        ) {
+            transactions = await enrichWithDecryptedAmounts(
+                entry.credentialNumber,
+                entry.prfKeySeed,
+                account.address,
+                global,
+                convertedTransactions
+            );
+        } else {
+            transactions = convertedTransactions;
+        }
+
+        hasMore = more;
 
         const withNames: TransferTransactionWithNames[] = await Promise.all(
-            transactionsToSave.map(async (t) => ({
+            transactions.map(async (t) => ({
                 ...t,
                 fromName: await getAddressName(t.fromAddress),
                 toName: await getAddressName(t.toAddress),
@@ -201,8 +306,16 @@ async function streamTransactions(
         stream.write('\n');
 
         if (more) {
-            toDate = new Date(smallestBlockTime * 1000);
-            startId = transactionsToSave.reduce(idReducer, 0n).toString();
+            // Filter without dates, as the wallet proxy does not perform well
+            // with fromDate and toDate. The filtering on dates is handled in-memory
+            // above.
+            filterToUse = {
+                ...filterToUse,
+                toDate: undefined,
+                fromDate: undefined,
+            };
+
+            startId = transactions.reduce(idReducer, 0n).toString();
         }
     }
 }
@@ -214,6 +327,8 @@ async function buildAccountReportForSingleAccount(
     fileName: string,
     account: Account,
     filter: TransactionFilter,
+    global: Global,
+    keys: Record<string, CredentialNumberPrfKey>,
     abortController: AbortController
 ) {
     abortController.start();
@@ -222,7 +337,14 @@ async function buildAccountReportForSingleAccount(
     const finishedWriting = new Promise<void>((resolve) =>
         stream.once('finish', resolve)
     );
-    await streamTransactions(stream, account, filter, abortController);
+    await streamTransactions(
+        stream,
+        account,
+        filter,
+        global,
+        keys,
+        abortController
+    );
     stream.end();
     abortController.finish();
     return finishedWriting;
@@ -235,6 +357,8 @@ async function buildAccountReportForMultipleAccounts(
     fileName: string,
     accounts: Account[],
     filter: TransactionFilter,
+    global: Global,
+    keys: Record<string, CredentialNumberPrfKey>,
     abortController: AbortController
 ) {
     abortController.start();
@@ -251,11 +375,17 @@ async function buildAccountReportForMultipleAccounts(
         archive.append(middleMan, { name });
 
         // build report
-        await streamTransactions(middleMan, account, filter, abortController);
+        await streamTransactions(
+            middleMan,
+            account,
+            filter,
+            global,
+            keys,
+            abortController
+        );
         middleMan.end();
 
         if (abortController.isAborted) {
-            archive.abort();
             break;
         }
     }
@@ -264,7 +394,11 @@ async function buildAccountReportForMultipleAccounts(
     const finishedWriting = new Promise<void>((resolve) =>
         stream.once('finish', resolve)
     );
-    archive.finalize();
+    if (abortController.isAborted) {
+        archive.abort();
+    } else {
+        archive.finalize();
+    }
     abortController.finish();
     return finishedWriting;
 }
