@@ -65,22 +65,27 @@ ${getOS()}`;
 
     const [copied, setCopied] = useTimeoutState(false, 2000);
 
+    const failedDetails = (
+        <>
+            <p className="textError textCenter mB5">
+                Identity issuance failed:
+            </p>
+            <p className="textError textCenter body3 mT0">{identity.detail}</p>
+        </>
+    );
+
     const targetNet = getTargetNet();
     if (targetNet !== Net.Mainnet) {
         return (
             <div className={clsx('body3 p20', styles.failedDetails)}>
-                <p className="textError textCenter">
-                    Identity issuance failed.
-                </p>
-                <p className="textError textCenter">{identity.detail}</p>
+                {failedDetails}
             </div>
         );
     }
 
     return (
         <div className={clsx('body3 p20', styles.failedDetails)}>
-            <p className="textError textCenter">Identity issuance failed.</p>
-            <p className="textError textCenter">{identity.detail}</p>
+            {failedDetails}
             {mail && (
                 <>
                     <p className={clsx(styles.failedDetailsLine, 'pV10')}>
