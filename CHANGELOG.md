@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+-   Updated UI to reflect the rename of GTU to CCD, meaning anywhere tokens were referred to as GTU, it now says CCD. The GTU icon has also been replaced with the icon representing CCD.
+
 ## 1.2.0
 
 ### Added
