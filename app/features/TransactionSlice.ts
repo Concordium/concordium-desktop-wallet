@@ -83,7 +83,7 @@ const forceLock = new Mutex();
  * current maximum id of a transaction in the local state. The result is reversed to keep the
  * sorting (on id) consistently descending.
  * @param account the account to get new transactions for
- * @param transactions the current transactions in the state
+ * @param transactions the current transactions in the state, assumed to be sorted descendingly
  * @param limit the maximum number of transactions to ask the wallet proxy for
  */
 async function getNewTransactions(
@@ -91,13 +91,9 @@ async function getNewTransactions(
     transactionsInState: TransferTransaction[],
     limit: number
 ): Promise<TransferTransaction[]> {
-    const maxId = transactionsInState
-        .map((t) => t.id)
-        .filter(isDefined)
-        .reduce<string | undefined>(
-            (max, cur) => (!max || max < cur ? cur : max),
-            undefined
-        );
+    // As the transactions in the state are in descending order on their id, the maxId
+    // can be found as the first item with an id (if any exist).
+    const maxId = transactionsInState.map((t) => t.id).filter(isDefined)[0];
 
     const transactions: IncomingTransaction[] = [];
     let full = true;
@@ -216,13 +212,12 @@ export const loadTransactions = createAsyncThunk(
             }
         };
 
-        const minId = state.transactions.transactions
+        // The array of transactions is sorted in descending order on the id. Therefore the
+        // minimum id can be found as the final transaction in the array.
+        const transactionIdArray = state.transactions.transactions
             .map((t) => t.id)
-            .filter(isDefined)
-            .reduce<string | undefined>(
-                (min, cur) => (!min || min > cur ? cur : min),
-                undefined
-            );
+            .filter(isDefined);
+        const minId = transactionIdArray[transactionIdArray.length - 1];
 
         try {
             rejectIfInvalid('Load of transactions on wallet proxy aborted');
