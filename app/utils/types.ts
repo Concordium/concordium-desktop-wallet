@@ -571,6 +571,7 @@ export interface IpInfo {
 export interface IdentityProviderMetaData {
     issuanceStart: string;
     icon: string;
+    support: string;
 }
 
 // Anonymity Revoker information

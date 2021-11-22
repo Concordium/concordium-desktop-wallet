@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import clsx from 'clsx';
 import { Identity, IdentityProvider } from '~/utils/types';
 import SidedRow from '~/components/SidedRow';
@@ -6,8 +6,11 @@ import CopyButton from '~/components/CopyButton';
 import ExternalLink from '~/components/ExternalLink';
 import { getSessionId } from '~/utils/identityHelpers';
 import pkg from '~/package.json';
-import { useTimeoutState } from '~/utils/hooks';
+import { useTimeoutState, useAsyncMemo } from '~/utils/hooks';
 import { getTargetNet, Net } from '~/utils/ConfigHelper';
+import { getIdentityProviders } from '~/utils/httpRequests';
+import Loading from '~/cross-app-components/Loading';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 import styles from './IdentityCard.module.scss';
 
@@ -29,25 +32,28 @@ function getOS() {
     }
 }
 
-function getIdentityProviderMail(identityProvider: number): string | undefined {
-    switch (identityProvider) {
-        case 1:
-            return 'concordium-idiss@notabene.id';
-        default:
-            return undefined;
-    }
+async function getIdentityProviderMail(
+    ipIdentity: number
+): Promise<string | undefined> {
+    const providers = await getIdentityProviders();
+    const provider = providers.find((p) => p.ipInfo.ipIdentity === ipIdentity);
+    return provider?.metadata?.support;
 }
 
 export default function FailedIdentityDetails({
     identity,
 }: FailedIdentityDetailsProps) {
+    const [failedConnect, setFailedConnect] = useState(false);
     const sessionId = getSessionId(identity);
     const identityProvider: IdentityProvider = JSON.parse(
         identity.identityProvider
     );
     const identityProviderName = identityProvider.ipInfo.ipDescription.name;
-    const mail = getIdentityProviderMail(identityProvider.ipInfo.ipIdentity);
-    const { url } = identityProvider.ipInfo.ipDescription;
+    const mail = useAsyncMemo(
+        async () => getIdentityProviderMail(identityProvider.ipInfo.ipIdentity),
+        () => setFailedConnect(true),
+        [identityProvider.ipInfo.ipIdentity]
+    );
     const cc = 'idiss@concordium.software';
     const subject = `Issuance Reference: ${sessionId}`;
     const body = `Hi! My identity issuance failed.
@@ -83,58 +89,50 @@ ${getOS()}`;
         );
     }
 
+    if (mail === undefined) {
+        return (
+            <div className={clsx('body3 p20', styles.failedDetails)}>
+                <SimpleErrorModal
+                    show={failedConnect}
+                    header="Unable to load identity provider email. Please check your internet connection."
+                    onClick={() => setFailedConnect(false)}
+                />
+                {failedDetails}
+                <Loading className="pV20" inline />
+            </div>
+        );
+    }
+
     return (
         <div className={clsx('body3 p20', styles.failedDetails)}>
             {failedDetails}
-            {mail && (
-                <>
-                    <p className={clsx(styles.failedDetailsLine, 'pV10')}>
-                        For more information and support, you can contact{' '}
-                        {identityProviderName} (and Concordium on CC) via
-                    </p>
-                    <SidedRow
-                        className={styles.failedDetailsLine}
-                        left={
-                            <ExternalLink
-                                href={`mailto:${mail}?cc=${cc}&subject=${subject}&body=${encodeURIComponent(
-                                    body
-                                )}`}
-                            >
-                                {mail}
-                            </ExternalLink>
-                        }
-                        right={<CopyButton value={mail} />}
-                    />
-                    <SidedRow
-                        className={styles.failedDetailsLine}
-                        left={`Optional CC: ${cc}`}
-                        right={<CopyButton value={cc} />}
-                    />
-                    <p className={clsx(styles.failedDetailsLine, 'pV20')}>
-                        If clicking the e-mail link doesn’t open your e-mail
-                        client with an autofilled e-mail, you can enter the
-                        following information in your e-mail.
-                    </p>
-                </>
-            )}
-            {Boolean(mail) || (
-                <>
-                    <p className={clsx(styles.failedDetailsLine, 'pV10')}>
-                        We don’t have the support email for{' '}
-                        {identityProviderName} yet, but you can check their
-                        website.
-                    </p>
-                    <SidedRow
-                        className={styles.failedDetailsLine}
-                        left={<ExternalLink href={url}>{url}</ExternalLink>}
-                        right={<CopyButton value={url} />}
-                    />
-                    <p className={clsx(styles.failedDetailsLine, 'pV20')}>
-                        When seeking support please include the following
-                        information.
-                    </p>
-                </>
-            )}
+            <p className={clsx(styles.failedDetailsLine, 'pV10')}>
+                For more information and support, you can contact{' '}
+                {identityProviderName} (and Concordium on CC) via
+            </p>
+            <SidedRow
+                className={styles.failedDetailsLine}
+                left={
+                    <ExternalLink
+                        href={`mailto:${mail}?cc=${cc}&subject=${subject}&body=${encodeURIComponent(
+                            body
+                        )}`}
+                    >
+                        {mail}
+                    </ExternalLink>
+                }
+                right={<CopyButton value={mail} />}
+            />
+            <SidedRow
+                className={styles.failedDetailsLine}
+                left={`Optional CC: ${cc}`}
+                right={<CopyButton value={cc} />}
+            />
+            <p className={clsx(styles.failedDetailsLine, 'pV20')}>
+                If clicking the e-mail link doesn’t open your e-mail client with
+                an autofilled e-mail, you can enter the following information in
+                your e-mail.
+            </p>
             <div
                 className={clsx(
                     styles.failedDetailsBodyContainer,
