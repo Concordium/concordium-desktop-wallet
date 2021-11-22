@@ -38,7 +38,7 @@ export default function FailedIdentityModal({
         }
     }, [isRejected, setModalOpen]);
 
-    const decriptionComponent = useMemo(() => {
+    const description = useMemo(() => {
         return (
             <>
                 <p>
@@ -60,7 +60,7 @@ export default function FailedIdentityModal({
         <ChoiceModal
             disableClose
             title="The identity and initial account creation failed"
-            description={decriptionComponent}
+            description={description}
             open={modalOpen}
             actions={[
                 {
