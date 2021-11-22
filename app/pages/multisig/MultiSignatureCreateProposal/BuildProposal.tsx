@@ -37,7 +37,6 @@ export default function BuildProposal({
     const form = useForm<FieldValues & MultiSignatureCreateProposalForm>({
         mode: 'onTouched',
     });
-    const displayType = UpdateType[type];
     const { effectiveTime: effective } = form.watch(['effectiveTime']);
     const UpdateComponent = handler.update;
 
@@ -72,8 +71,7 @@ export default function BuildProposal({
             >
                 <div className={styles.proposal}>
                     <p className="mT0">
-                        Add all the details for the {displayType} transaction
-                        below.
+                        Add all the details for the transaction below.
                     </p>
                     <>
                         <UpdateComponent
