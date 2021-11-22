@@ -25,7 +25,7 @@ import { multiplyFraction } from '~/utils/basicHelpers';
 interface Props {
     account: Account;
     exchangeRate: Fraction;
-    nonce: string;
+    nonce: bigint;
     disableClose?: boolean;
 }
 

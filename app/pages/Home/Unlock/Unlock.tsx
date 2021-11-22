@@ -38,15 +38,25 @@ export default function Unlock() {
         async ({ password }: UnlockForm) => {
             window.database.general.setPassword(password);
             window.database.general.invalidateKnexSingleton();
-            const dbMigrated = await window.database.general.migrate();
-            if (dbMigrated) {
-                await initApplication(dispatch);
-                dispatch(push({ pathname: routes.ACCOUNTS }));
-            } else {
+            const hasAccess = await window.database.general.checkAccess();
+            if (!hasAccess) {
                 // The password was incorrect.
                 setValidationError('Invalid password');
                 form.trigger();
+                return;
             }
+            const dbMigrated = await window.database.general.migrate();
+            if (!dbMigrated) {
+                // The migration failed.
+                setValidationError(
+                    'Database migrations failed, please contact support'
+                );
+                form.trigger();
+                return;
+            }
+
+            await initApplication(dispatch);
+            dispatch(push({ pathname: routes.ACCOUNTS }));
         },
         [dispatch, form]
     );

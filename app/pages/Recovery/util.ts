@@ -1,10 +1,12 @@
-import { getAccountInfo } from '~/node/nodeRequests';
-import { getAddressFromCredentialId, getCredId } from '~/utils/rustInterface';
+import {
+    getAddressFromCredentialId,
+    computeCredId,
+} from '~/utils/rustInterface';
 import {
     insertFromRecoveryExistingIdentity,
     insertFromRecoveryNewIdentity,
 } from '~/database/AccountDao';
-import { createNewCredential } from '~/utils/credentialHelper';
+import { createNewCredential, getCredId } from '~/utils/credentialHelper';
 import {
     AccountStatus,
     AccountInfo,
@@ -21,6 +23,7 @@ import { maxCredentialsOnIdentity } from '~/constants/recoveryConstants.json';
 import { createAccount } from '~/utils/accountHelpers';
 import { getNextCredentialNumber } from '~/database/CredentialDao';
 import AbortController from '~/utils/AbortController';
+import { getAccountInfoOfCredential } from '~/node/nodeRequests';
 
 export enum Status {
     Initial = 'Waiting...',
@@ -101,10 +104,7 @@ function extractCredentialIndexAndPolicy(
 ): CredentialIndexAndPolicy {
     const credentialOnChain = Object.entries(
         accountInfo.accountCredentials
-    ).find(
-        ([, cred]) =>
-            (cred.value.contents.credId || cred.value.contents.regId) === credId
-    );
+    ).find(([, cred]) => getCredId(cred) === credId);
 
     if (!credentialOnChain) {
         return {
@@ -138,7 +138,7 @@ async function recoverCredential(
     credentialNumber: number,
     identityId: number
 ) {
-    const accountInfo = await getAccountInfo(credId, blockHash);
+    const accountInfo = await getAccountInfoOfCredential(credId, blockHash);
 
     // The presence of an accountInfo implies that the credential has been deployed.
     // if it is not present, the credential has not been deployed, and we don't need to save anything.
@@ -146,10 +146,9 @@ async function recoverCredential(
         return undefined;
     }
 
-    const firstCredential = accountInfo.accountCredentials[0].value.contents;
-    const address = await getAddressFromCredentialId(
-        firstCredential.regId || firstCredential.credId
-    );
+    const firstCredential = accountInfo.accountCredentials[0];
+    const firstCredId = getCredId(firstCredential);
+    const address = await getAddressFromCredentialId(firstCredId);
 
     const { credentialIndex, policy } = extractCredentialIndexAndPolicy(
         credId,
@@ -199,7 +198,7 @@ export async function recoverCredentials(
     const allRecovered = [];
     let credNumber = startingCredNumber;
     while (credNumber < maxCredentialsOnIdentity) {
-        const credId = await getCredId(prfKeySeed, credNumber, global);
+        const credId = await computeCredId(prfKeySeed, credNumber, global);
 
         const recovered = await recoverCredential(
             credId,

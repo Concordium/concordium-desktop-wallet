@@ -175,3 +175,18 @@ export function pipe<A extends any[], B, C>(
 ): (...args: A) => C {
     return (...args) => b(a(...args));
 }
+
+/**
+ * Helper to map the values of a record.
+ */
+export function mapRecordValues<K extends string | number | symbol, V, T>(
+    record: Record<K, V>,
+    map: (value: V) => T
+): Record<K, T> {
+    const result = {} as Record<K, T>;
+    const entries = Object.entries(record) as [K, V][];
+    return entries.reduce((acc, [k, v]) => {
+        acc[k as K] = map(v);
+        return acc;
+    }, result);
+}

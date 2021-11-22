@@ -21,6 +21,11 @@ import {
     EncryptedTransferWithMemo,
     instanceOfScheduledTransferWithMemo,
     instanceOfEncryptedTransferWithMemo,
+    instanceOfAddBaker,
+    instanceOfRemoveBaker,
+    instanceOfUpdateBakerStake,
+    instanceOfUpdateBakerKeys,
+    instanceOfUpdateBakerRestakeEarnings,
 } from './types';
 import { getScheduledTransferAmount } from './transactionHelpers';
 import { collapseFraction, abs } from './basicHelpers';
@@ -292,6 +297,12 @@ function convertEncryptedTransferWithMemo(
     };
 }
 
+function getBaseTransaction(
+    transactionKind: TransactionKindString
+): TypeSpecific {
+    return { transactionKind, subtotal: '0', toAddress: '' };
+}
+
 /**
  * Converts an Account Transaction, so that it fits local Transfer Transaction model and
  * can be entered into the local database.
@@ -323,6 +334,22 @@ export async function convertAccountTransaction(
         typeSpecific = convertEncryptedTransfer(transaction);
     } else if (instanceOfEncryptedTransferWithMemo(transaction)) {
         typeSpecific = convertEncryptedTransferWithMemo(transaction);
+    } else if (instanceOfAddBaker(transaction)) {
+        typeSpecific = getBaseTransaction(TransactionKindString.AddBaker);
+    } else if (instanceOfRemoveBaker(transaction)) {
+        typeSpecific = getBaseTransaction(TransactionKindString.RemoveBaker);
+    } else if (instanceOfUpdateBakerStake(transaction)) {
+        typeSpecific = getBaseTransaction(
+            TransactionKindString.UpdateBakerStake
+        );
+    } else if (instanceOfUpdateBakerKeys(transaction)) {
+        typeSpecific = getBaseTransaction(
+            TransactionKindString.UpdateBakerKeys
+        );
+    } else if (instanceOfUpdateBakerRestakeEarnings(transaction)) {
+        typeSpecific = getBaseTransaction(
+            TransactionKindString.UpdateBakerRestakeEarnings
+        );
     } else {
         throw new Error('unsupported transaction type - please implement');
     }

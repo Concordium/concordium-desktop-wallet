@@ -46,7 +46,8 @@
         }
     }
 
-    input:focus + & {
+    input:focus:not(:read-only) + &,
+    .wrapper:hover input:not(:disabled):not(:read-only) + & {
         box-shadow: 0 0 0 2px $form-color-focus inset;
     }
 

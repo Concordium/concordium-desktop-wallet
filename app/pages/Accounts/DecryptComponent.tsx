@@ -3,10 +3,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { decryptAccountBalance } from '~/features/AccountSlice';
 import { globalSelector } from '~/features/GlobalSlice';
 import {
-    decryptTransactions,
-    reloadTransactions,
+    shieldedTransactionsSelector,
+    updateTransactionFields,
 } from '~/features/TransactionSlice';
-import { Account } from '~/utils/types';
+import {
+    Account,
+    TransactionKindString,
+    TransactionStatus,
+} from '~/utils/types';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import Ledger from '~/components/ledger/Ledger';
 import { asyncNoOp } from '~/utils/basicHelpers';
@@ -14,6 +18,8 @@ import Card from '~/cross-app-components/Card';
 import Button from '~/cross-app-components/Button';
 import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
 import errorMessages from '~/constants/errorMessages.json';
+import { findEntries, insert } from '~/database/DecryptedAmountsDao';
+import decryptTransactions from '~/utils/decryptHelpers';
 
 interface Props {
     account: Account;
@@ -21,12 +27,25 @@ interface Props {
 }
 
 /**
- * Wrapper for the ledger component, for decrypting the account'
- * shielded balance and transactions.
+ * Wrapper around the Ledger component. Used for decrypting an account's
+ * shielded balance, and any shielded transactions currently in the state
+ * that have not been decrypted previously.
  */
 export default function DecryptComponent({ account, onDecrypt }: Props) {
     const dispatch = useDispatch();
     const global = useSelector(globalSelector);
+    const shieldedTransactions = useSelector(shieldedTransactionsSelector)
+        .filter((t) =>
+            [
+                TransactionKindString.EncryptedAmountTransfer,
+                TransactionKindString.EncryptedAmountTransferWithMemo,
+            ].includes(t.transactionKind)
+        )
+        .filter(
+            (t) =>
+                t.status !== TransactionStatus.Pending &&
+                t.status !== TransactionStatus.Rejected
+        );
 
     async function ledgerCall(
         ledger: ConcordiumLedgerClient,
@@ -60,7 +79,30 @@ export default function DecryptComponent({ account, onDecrypt }: Props) {
         setMessage('Please wait');
         const prfKey = prfKeySeed.toString('hex');
 
-        await decryptTransactions(account, prfKey, credentialNumber, global);
+        // Determine which transactions we have not already decrypted, and decrypt only those.
+        const decryptedAmountHashes = (
+            await findEntries(
+                shieldedTransactions.map((t) => t.transactionHash)
+            )
+        ).map((r) => r.transactionHash);
+        const missingDecryptedAmount = shieldedTransactions.filter(
+            (t) => !decryptedAmountHashes.includes(t.transactionHash)
+        );
+        const decryptedTransactions = await decryptTransactions(
+            missingDecryptedAmount,
+            account.address,
+            prfKey,
+            credentialNumber,
+            global
+        );
+
+        for (const transaction of decryptedTransactions) {
+            await insert({
+                transactionHash: transaction.transactionHash,
+                amount: transaction.decryptedAmount,
+            });
+        }
+
         await decryptAccountBalance(
             prfKey,
             account,
@@ -68,7 +110,19 @@ export default function DecryptComponent({ account, onDecrypt }: Props) {
             global,
             dispatch
         );
-        await dispatch(reloadTransactions());
+
+        // Update the state to include the newly decrypted amounts.
+        for (const decryptedTransaction of decryptedTransactions) {
+            const update = {
+                decryptedAmount: decryptedTransaction.decryptedAmount,
+            };
+            dispatch(
+                updateTransactionFields({
+                    hash: decryptedTransaction.transactionHash,
+                    updatedFields: update,
+                })
+            );
+        }
 
         if (onDecrypt) {
             onDecrypt();

@@ -17,12 +17,12 @@ import Input from './Input';
 import Checkbox from './Checkbox';
 import TextArea from './TextArea';
 import Submit from './Submit';
-import InputTimestamp from './InputTimestamp/InputTimestamp';
 import FileInput from './FileInput';
 import { FileInputProps, FileInputValue } from './FileInput/FileInput';
 import InlineNumber, { InlineNumberProps } from './InlineNumber';
 import GtuInput, { GtuInputProps } from './GtuInput';
 import InlineInput, { InlineInputProps } from './InlineInput';
+import DatePicker from './DatePicker';
 
 export type FormProps<TFormValues extends FieldValues = FieldValues> = Omit<
     FormHTMLAttributes<HTMLFormElement>,
@@ -111,11 +111,10 @@ Form.InlineInput = connectWithFormControlled<string, InlineInputProps>(
 );
 (Form.InlineInput as FC).displayName = 'Form.InlineInput';
 
-Form.Timestamp = connectWithFormControlled<
-    Date,
-    PropsOf<typeof InputTimestamp>
->(InputTimestamp);
-(Form.Timestamp as FC).displayName = 'Form.Timestamp';
+Form.DatePicker = connectWithFormControlled<Date, PropsOf<typeof DatePicker>>(
+    DatePicker
+);
+(Form.DatePicker as FC).displayName = 'Form.DatePicker';
 
 Form.Submit = Submit;
 (Form.Submit as FC).displayName = 'Form.Submit';

@@ -29,6 +29,7 @@ import initializeDatabasePreferencesMethods from './database/preferencesDao';
 import initializeDatabaseSettingsMethods from './database/settingsDao';
 import initializeDatabaseTransactionsMethods from './database/transactionsDao';
 import initializeDatabaseWalletMethods from './database/walletDao';
+import initializeDatabaseDecryptedAmountMethods from './database/decryptedAmountsDao';
 import autoUpdateMethods from './autoUpdate';
 import accountReportMethods from './accountReport';
 
@@ -119,6 +120,7 @@ contextBridge.exposeInMainWorld(
     Exposed.writeImageToClipboard,
     initializeClipboardMethods
 );
+
 contextBridge.exposeInMainWorld(Exposed.files, initializeFilesMethods);
 contextBridge.exposeInMainWorld(Exposed.cryptoMethods, initializeCryptoMethods);
 contextBridge.exposeInMainWorld(
@@ -141,6 +143,7 @@ const databaseMethods: Database = {
     settings: initializeDatabaseSettingsMethods,
     transaction: initializeDatabaseTransactionsMethods,
     wallet: initializeDatabaseWalletMethods,
+    decyptedAmounts: initializeDatabaseDecryptedAmountMethods,
 };
 
 contextBridge.exposeInMainWorld(Exposed.database, databaseMethods);
