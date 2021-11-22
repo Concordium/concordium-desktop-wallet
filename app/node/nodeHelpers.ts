@@ -25,7 +25,10 @@ export async function getlastFinalizedBlockHash(): Promise<string> {
     return consensusStatus.lastFinalizedBlock;
 }
 
-/** Gets the accountInfo for the given address. */
+/**
+ * Gets the accountInfo for the given address.
+ * Throws an error, if the node doesn't return an accountInfo object.
+ */
 export async function getAccountInfoOfAddress(
     address: string
 ): Promise<AccountInfo> {

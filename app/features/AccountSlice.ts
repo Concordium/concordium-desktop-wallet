@@ -467,6 +467,7 @@ export async function loadAccountInfos(
 
 /**
  * Updates the account info, of the account with the given address, in the state.
+ * If given an address of an account that doesn't exist on chain, this throws an error.
  */
 export async function updateAccountInfoOfAddress(
     address: string,
@@ -478,14 +479,12 @@ export async function updateAccountInfoOfAddress(
 
 /**
  * Updates the given account's accountInfo, in the state, and check if there is updates to the account.
+ * If given an address of an account that doesn't exist on chain, this throws an error.
  */
 export async function updateAccountInfo(account: Account, dispatch: Dispatch) {
     const accountInfo = await getAccountInfoOfAddress(account.address);
-    if (accountInfo && account.status === AccountStatus.Confirmed) {
-        await updateAccountFromAccountInfo(dispatch, account, accountInfo);
-        return updateAccountInfoEntry(dispatch, account.address, accountInfo);
-    }
-    return Promise.resolve();
+    await updateAccountFromAccountInfo(dispatch, account, accountInfo);
+    return updateAccountInfoEntry(dispatch, account.address, accountInfo);
 }
 
 // Add an account with pending status..
