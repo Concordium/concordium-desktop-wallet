@@ -5,10 +5,12 @@
 ### Added
 
 -   Added a GTU drop option for testnet and stagenet.
+-   In the case of a failed identity, the error details received from the identity provider are now displayed to the user.
 
 ### Changed
 
 -   Auxiliary data in an Update Protocol transaction is now optional.
+-   Updated terms and conditions.
 
 ## 1.2.0
 
