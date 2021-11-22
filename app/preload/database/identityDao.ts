@@ -72,11 +72,14 @@ async function removeIdentity(id: number, trx: Knex.Transaction) {
  * initial account.
  * @param identityId the identity to reject
  */
-async function rejectIdentityAndInitialAccount(identityId: number) {
+async function rejectIdentityAndInitialAccount(
+    identityId: number,
+    detail: string
+) {
     (await knex()).transaction(async (trx) => {
         await trx(identitiesTable)
             .where({ id: identityId })
-            .update({ status: IdentityStatus.Rejected });
+            .update({ status: IdentityStatus.Rejected, detail });
         await trx(accountsTable)
             .where({ identityId, isInitial: 1 })
             .update({ status: AccountStatus.Rejected });
