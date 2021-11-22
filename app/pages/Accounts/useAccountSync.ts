@@ -44,7 +44,7 @@ export default function useAccountSync(onError: (message: string) => void) {
     // Periodically update the account info to keep it in sync
     // with the information from the node.
     useEffect(() => {
-        if (!account) {
+        if (!account || account.status !== AccountStatus.Confirmed) {
             return noOp;
         }
 
