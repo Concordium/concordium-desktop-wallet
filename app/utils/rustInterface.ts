@@ -350,9 +350,10 @@ export async function makeTransferToPublicData(
         accountNumber,
         incomingAmounts: accountEncryptedAmount.incomingAmounts,
         encryptedSelfAmount: accountEncryptedAmount.selfAmount,
-        aggIndex:
+        aggIndex: (
             accountEncryptedAmount.startIndex +
-            BigInt(accountEncryptedAmount.incomingAmounts.length),
+            BigInt(accountEncryptedAmount.incomingAmounts.length)
+        ).toString(),
     };
 
     const transferToPublicData = await worker.postMessage({
@@ -376,9 +377,6 @@ export async function makeTransferToEncryptedData(
         accountNumber,
         incomingAmounts: accountEncryptedAmount.incomingAmounts,
         encryptedSelfAmount: accountEncryptedAmount.selfAmount,
-        aggIndex:
-            accountEncryptedAmount.startIndex +
-            BigInt(accountEncryptedAmount.incomingAmounts.length),
     };
 
     const transferToSecretData = await worker.postMessage({
@@ -404,9 +402,10 @@ export async function makeEncryptedTransferData(
         accountNumber,
         incomingAmounts: accountEncryptedAmount.incomingAmounts,
         encryptedSelfAmount: accountEncryptedAmount.selfAmount,
-        aggIndex:
+        aggIndex: (
             accountEncryptedAmount.startIndex +
-            BigInt(accountEncryptedAmount.incomingAmounts.length),
+            BigInt(accountEncryptedAmount.incomingAmounts.length)
+        ).toString(),
     };
 
     const encryptedTransferData = await worker.postMessage({

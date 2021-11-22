@@ -10,6 +10,7 @@
 ### Changed
 
 -   Auxiliary data in an Update Protocol transaction is now optional.
+-   Updated terms and conditions.
 
 ## 1.2.0
 
