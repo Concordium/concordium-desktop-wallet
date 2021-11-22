@@ -256,7 +256,10 @@ export type IdentityMethods = {
     insert: (identity: Partial<Identity> | Identity[]) => Promise<number[]>;
     update: (id: number, updatedValues: Partial<Identity>) => Promise<number>;
     getIdentitiesForWallet: (walletId: number) => Promise<Identity[]>;
-    rejectIdentityAndInitialAccount: (identityId: number) => Promise<void>;
+    rejectIdentityAndInitialAccount: (
+        identityId: number,
+        detail: string
+    ) => Promise<void>;
     removeIdentityAndInitialAccount: (identityId: number) => Promise<void>;
     confirmIdentity: (
         identityId: number,
