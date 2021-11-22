@@ -1,6 +1,5 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import GtuIcon from '@resources/svg/gtu.svg';
 import FingerprintIcon from '@resources/svg/fingerprint.svg';
 import IdentityIcon from '@resources/svg/identity.svg';
 import ImportExportIcon from '@resources/svg/import-export.svg';
@@ -9,15 +8,18 @@ import SettingsIcon from '@resources/svg/settings.svg';
 import Sidebar, { SidebarLink } from '~/cross-app-components/Sidebar';
 import routes from '~/constants/routes.json';
 import pkg from '~/package.json';
-
-import Status from './Status';
 import { RootState } from '~/store/store';
+import { getGTUSymbol } from '~/utils/gtu';
+
+import Status from '../Status';
+
+import styles from './Sidebar.module.scss';
 
 const links: SidebarLink[] = [
     {
         route: routes.ACCOUNTS,
         title: 'Accounts',
-        icon: <GtuIcon height="32" />,
+        icon: <div className={styles.ccdIcon}>{getGTUSymbol()}</div>,
     },
     {
         route: routes.IDENTITIES,
