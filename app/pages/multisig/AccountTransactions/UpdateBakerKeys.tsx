@@ -245,7 +245,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                                         .then(() =>
                                             dispatch(
                                                 push(
-                                                    `${url}/${BakerSubRoutes.sign}`
+                                                    `${url}/${AccountTransactionSubRoutes.sign}`
                                                 )
                                             )
                                         )

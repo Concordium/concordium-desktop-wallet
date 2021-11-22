@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
-import InputTimestamp from '~/components/Form/InputTimestamp';
 import Button from '~/cross-app-components/Button';
+import DatePicker from '~/components/Form/DatePicker';
 import { useTransactionExpiryState } from '~/utils/dataHooks';
 import styles from './MultisignatureAccountTransactions.module.scss';
 
@@ -23,13 +23,15 @@ export default function ChooseExpiry({ onClick, buttonText, children }: Props) {
                 <p className="mT0">
                     Choose the expiry date for the transaction.
                 </p>
-                <InputTimestamp
+                <DatePicker
+                    className="body2 mV40"
                     label="Transaction expiry time"
                     name="expiry"
                     isInvalid={expiryTimeError !== undefined}
                     error={expiryTimeError}
                     value={expiryTime}
                     onChange={setExpiryTime}
+                    minDate={new Date()}
                 />
                 <p className="mB0">
                     Committing the transaction after this date, will result in

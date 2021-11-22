@@ -77,7 +77,7 @@ function RegisterData({ exchangeRate }: PageProps) {
     const goToSubRoute = useCallback(
         (subRoute: AccountTransactionSubRoutes) =>
             dispatch(push(`${url}/${subRoute}`)),
-        [url]
+        [dispatch, url]
     );
 
     const [expiryTime, setExpiryTime] = useState<Date>();

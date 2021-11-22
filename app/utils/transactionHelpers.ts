@@ -163,7 +163,7 @@ export function createSimpleTransferWithMemoTransaction(
  */
 export function createRegisterDataTransaction(
     fromAddress: string,
-    nonce: string,
+    nonce: bigint,
     data: string,
     signatureAmount = 1,
     expiry = getDefaultExpiry()

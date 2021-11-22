@@ -10,7 +10,6 @@ import {
 import { push } from 'connected-react-router';
 import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
-import Button from '~/cross-app-components/Button';
 import { BlockSummary } from '~/node/NodeApiTypes';
 import {
     Account,
@@ -32,10 +31,7 @@ import { getNextAccountNonce } from '~/node/nodeRequests';
 import { createAddBakerTransaction } from '~/utils/transactionHelpers';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import routes from '~/constants/routes.json';
-import {
-    useTransactionCostEstimate,
-    useTransactionExpiryState,
-} from '~/utils/dataHooks';
+import { useTransactionCostEstimate } from '~/utils/dataHooks';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import {
     signUsingLedger,
@@ -249,7 +245,9 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${BakerSubRoutes.stake}`}>
+                    <Route
+                        path={`${path}/${AccountTransactionSubRoutes.stake}`}
+                    >
                         {!account ? (
                             <Redirect to={path} />
                         ) : (
@@ -313,7 +311,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                                         .then(() =>
                                             dispatch(
                                                 push(
-                                                    `${url}/${BakerSubRoutes.sign}`
+                                                    `${url}/${AccountTransactionSubRoutes.sign}`
                                                 )
                                             )
                                         )

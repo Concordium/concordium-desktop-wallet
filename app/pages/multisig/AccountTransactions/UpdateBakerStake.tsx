@@ -40,10 +40,9 @@ import {
 } from '~/utils/accountRouterHelpers';
 import { ensureChainData, ChainData } from '../common/withChainData';
 import ChooseExpiry from './ChooseExpiry';
-import DatePicker from '~/components/Form/DatePicker';
+import { isMultiSig } from '~/utils/accountHelpers';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
-import { isMultiSig } from '~/utils/accountHelpers';
 
 function toMicroUnitsSafe(str: string | undefined) {
     if (str === undefined) {
