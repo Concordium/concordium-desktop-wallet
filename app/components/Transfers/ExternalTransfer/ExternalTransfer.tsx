@@ -130,6 +130,7 @@ export default function ExternalTransfer({
                     <UpsertAddress
                         className={styles.addRecipient}
                         onSubmit={selectRecipient}
+                        allowAlias={false}
                     >
                         <PlusIcon />
                     </UpsertAddress>
