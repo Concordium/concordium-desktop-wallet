@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import clsx from 'clsx';
 import { Identity, IdentityProvider } from '~/utils/types';
 import SidedRow from '~/components/SidedRow';
@@ -76,7 +76,7 @@ ${getOS()}`;
         [identityProvider.ipInfo.ipIdentity]
     );
 
-    const loadSupportMail = useCallback(() => {
+    const loadSupportMail = useCallback(async () => {
         let supportMail;
         try {
             supportMail = await getIdentityProviderMail(
