@@ -15,7 +15,7 @@ interface Props {
  */
 function UnshieldAmount({ account, disableClose = false }: Props) {
     const specific = {
-        amountHeader: 'Unshield GTU',
+        amountHeader: 'Unshield CCD',
         createTransaction: createUnshieldAmountTransaction,
         location: routes.ACCOUNTS_UNSHIELDAMOUNT,
         transactionKind: TransactionKindId.Transfer_to_public,

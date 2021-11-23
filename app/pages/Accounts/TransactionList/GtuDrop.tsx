@@ -22,10 +22,10 @@ import styles from './TransactionList.module.scss';
 const microGtuDropAmount = '2000000000';
 
 /**
- * Sends a GTU drop request to the wallet proxy. If successful a pending
- * transaction for the GTU drop is inserted into the database, and the
+ * Sends a CCD drop request to the wallet proxy. If successful a pending
+ * transaction for the CCD drop is inserted into the database, and the
  * local state is updated so that the transaction will be displayed.
- * @param the account address to request the GTU drop for
+ * @param the account address to request the CCD drop for
  */
 async function handleGtuDrop(
     dispatch: ThunkDispatch<unknown, unknown, AnyAction>,
@@ -41,7 +41,7 @@ async function handleGtuDrop(
         submissionId = await gtuDrop(address);
     } catch {
         setError(
-            'The GTU drop service was not reachable. Please try again later.'
+            'The CCD drop service was not reachable. Please try again later.'
         );
         return;
     }
@@ -70,7 +70,7 @@ async function handleGtuDrop(
 
 /**
  * Component that is used to inform the user about the option
- * to get a GTU drop, and to ask the wallet proxy for the GTU
+ * to get a CCD drop, and to ask the wallet proxy for the CCD
  * drop transfer to the current account.
  */
 export default function GtuDrop() {
@@ -97,9 +97,9 @@ export default function GtuDrop() {
                     styles.cardPadding
                 )}
             >
-                <h3 className="textCenter mV0">{netName} GTU drop</h3>
+                <h3 className="textCenter mV0">{netName} CCD drop</h3>
                 <p>
-                    On the Concordium {netName} you can request some GTU to be
+                    On the Concordium {netName} you can request some CCD to be
                     deposited to an account to get you started.
                 </p>
                 <Button

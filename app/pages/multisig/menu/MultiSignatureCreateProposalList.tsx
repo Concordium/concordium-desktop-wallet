@@ -18,7 +18,7 @@ const updateInstructionTypes: [TransactionTypes, UpdateType, string][] = [
     [
         TransactionTypes.UpdateInstruction,
         UpdateType.UpdateMicroGTUPerEuro,
-        'Update µGTU per Euro',
+        'Update µCCD per Euro',
     ],
     [
         TransactionTypes.UpdateInstruction,
@@ -110,12 +110,12 @@ const accountTransactionTypes: [
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Simple_transfer,
-        'Send GTU',
+        'Send CCD',
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Transfer_with_schedule,
-        'Send GTU with a schedule',
+        'Send CCD with a schedule',
     ],
     [
         TransactionTypes.AccountTransaction,

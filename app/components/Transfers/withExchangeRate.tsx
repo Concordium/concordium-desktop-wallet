@@ -11,7 +11,7 @@ export interface ExchangeRate {
 }
 
 /**
- * Component that injects the current exchange rate between energy and gtu into the props.
+ * Component that injects the current exchange rate between energy and ccd into the props.
  */
 export default function withExchangeRate<TProps extends ExchangeRate>(
     Component: ComponentType<TProps>

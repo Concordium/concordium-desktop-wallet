@@ -131,7 +131,7 @@ export function rejectReasonToDisplayText(
         case RejectReason.InvalidIndexOnEncryptedTransfer:
             return 'The provided shielded transfer index is out of bounds';
         case RejectReason.ZeroScheduledAmount:
-            return 'Attempt to transfer 0 GTU with schedule';
+            return 'Attempt to transfer 0 CCD with schedule';
         case RejectReason.NonIncreasingSchedule:
             return 'Attempt to transfer amount with non-increasing schedule';
         case RejectReason.FirstScheduledReleaseExpired:

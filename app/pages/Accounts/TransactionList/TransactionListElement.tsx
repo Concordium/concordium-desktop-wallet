@@ -162,7 +162,7 @@ function parseAmount(transaction: TransferTransaction, isOutgoing: boolean) {
                 TransactionKindString.TransferToPublic ===
                 transaction.transactionKind
             ) {
-                // A transfer to public is the only transaction, where we pay a cost and receive gtu on the public balance.
+                // A transfer to public is the only transaction, where we pay a cost and receive ccd on the public balance.
                 return buildOutgoingAmountStrings(
                     -BigInt(transaction.subtotal),
                     cost
