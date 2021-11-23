@@ -6,7 +6,7 @@ import routes from '~/constants/routes.json';
 import { createCredentialDetails } from '~/utils/rustInterface';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import {
-    Identity,
+    ConfirmedIdentity,
     CredentialDeploymentDetails,
     CommitmentsRandomness,
     CreationKeys,
@@ -39,7 +39,7 @@ import styles from './GeneratePage.module.scss';
 
 interface Props {
     accountName: string;
-    identity: Identity;
+    identity: ConfirmedIdentity;
     attributes: AttributeKeyName[];
 }
 
@@ -231,6 +231,7 @@ export default function AccountCreationGenerate({
                         ledgerCallback={createAccount}
                         credentialNumber={credentialNumber}
                         preCallback={checkWallet}
+                        identityVersion={identity.version}
                         compareButtonClassName="mT50"
                     />
                 </Columns.Column>

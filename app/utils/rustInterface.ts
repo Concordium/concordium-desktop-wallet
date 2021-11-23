@@ -5,7 +5,7 @@ import { AccountEncryptedAmount } from '@concordium/node-sdk/';
 import RustWorker, { BakerKeyVariants } from './rust.worker';
 import {
     PublicInformationForIp,
-    Identity,
+    ConfirmedIdentity,
     IpInfo,
     ArInfo,
     Versioned,
@@ -24,26 +24,31 @@ import { getDefaultExpiry, secondsSinceUnixEpoch } from './timeHelpers';
 import { getAccountPath } from '~/features/ledger/Path';
 import { stringify, parse } from './JSONHelper';
 import CredentialInfoLedgerDetails from '~/components/ledger/CredentialInfoLedgerDetails';
+import { currentIdentityVersion } from './identityHelpers';
 
 const rawWorker = new RustWorker();
 const worker = new PromiseWorker(rawWorker);
 
+const versionUsesDeprecatedKeyGen = (v: number) => v === 0;
+
 /**
- * Returns the PrfKey and IdCredSec seeds for the given identity.
+ * Returns the PrfKey and IdCredSec for the given identity.
+ * identityVersion 0 gives the seeds, and 1 gives the BLS keys.
  */
 async function getSecretsFromLedger(
     ledger: ConcordiumLedgerClient,
     displayMessage: (message: string) => void,
-    identityNumber: number
+    identityNumber: number,
+    identityVersion: number
 ) {
     displayMessage('Please accept to create credential on device');
     const {
-        prfKey: prfKeySeed,
-        idCredSec: idCredSecSeed,
-    } = await ledger.getPrivateKeySeeds(identityNumber);
+        prfKey: prfKeyRaw,
+        idCredSec: idCredSecRaw,
+    } = await ledger.getPrivateKeySeeds(identityNumber, identityVersion);
 
-    const prfKey = prfKeySeed.toString('hex');
-    const idCredSec = idCredSecSeed.toString('hex');
+    const prfKey = prfKeyRaw.toString('hex');
+    const idCredSec = idCredSecRaw.toString('hex');
     return { prfKey, idCredSec };
 }
 
@@ -51,6 +56,7 @@ export async function exportKeysFromLedger(
     identityNumber: number,
     credentialNumber: number,
     displayMessage: (message: string) => void,
+    identityVersion: number,
     ledger: ConcordiumLedgerClient
 ): Promise<CreationKeys> {
     const path = getAccountPath({
@@ -58,11 +64,11 @@ export async function exportKeysFromLedger(
         accountIndex: credentialNumber,
         signatureIndex: 0,
     });
-
     const { prfKey, idCredSec } = await getSecretsFromLedger(
         ledger,
         displayMessage,
-        identityNumber
+        identityNumber,
+        identityVersion
     );
     displayMessage(
         `Please confirm exporting
@@ -106,8 +112,8 @@ export async function createIdentityRequestObjectLedger(
     const pubInfoForIpString = await worker.postMessage({
         command: workerCommands.buildPublicInformationForIp,
         context: contextString,
-        idCredSec: keys.idCredSec,
-        prfKey: keys.prfKey,
+        idCredSecSeed: keys.idCredSec,
+        prfKeySeed: keys.prfKey,
     });
 
     const pubInfoForIp: PublicInformationForIp = JSON.parse(pubInfoForIpString);
@@ -129,8 +135,8 @@ export async function createIdentityRequestObjectLedger(
         command: workerCommands.createIdRequest,
         context: contextString,
         signature: signature.toString('hex'),
-        idCredSec: keys.idCredSec,
-        prfKey: keys.prfKey,
+        idCredSecSeed: keys.idCredSec,
+        prfKeySeed: keys.prfKey,
     });
     const data = JSON.parse(dataString);
 
@@ -141,7 +147,7 @@ export async function createIdentityRequestObjectLedger(
 }
 
 async function createUnsignedCredentialInfo(
-    identity: Identity,
+    identity: ConfirmedIdentity,
     credentialNumber: number,
     keys: CreationKeys,
     global: Global,
@@ -167,8 +173,6 @@ async function createUnsignedCredentialInfo(
         randomness: {
             randomness: identity.randomness,
         },
-        prfKey: keys.prfKey,
-        idCredSec: keys.idCredSec,
     };
     if (address) {
         credentialInput.address = address;
@@ -177,6 +181,9 @@ async function createUnsignedCredentialInfo(
     const unsignedCredentialDeploymentInfoString = await worker.postMessage({
         command: workerCommands.createUnsignedCredential,
         input: stringify(credentialInput),
+        prfKey: keys.prfKey,
+        idCredSec: keys.idCredSec,
+        useDeprecated: versionUsesDeprecatedKeyGen(identity.version),
     });
 
     try {
@@ -206,7 +213,7 @@ interface WithRandomness<Info> {
  * and the account number. The hardware wallet is used, as part of the constructed data has to be signed.
  */
 export async function createCredentialInfo(
-    identity: Identity,
+    identity: ConfirmedIdentity,
     credentialNumber: number,
     keys: CreationKeys,
     global: Global,
@@ -254,7 +261,7 @@ export async function createCredentialInfo(
  * N.B. This function is to construct a credential for a new account.
  */
 export async function createCredentialDetails(
-    identity: Identity,
+    identity: ConfirmedIdentity,
     credentialNumber: number,
     keys: CreationKeys,
     global: Global,
@@ -321,17 +328,19 @@ export async function decryptAmounts(
     encryptedAmounts: string[],
     credentialNumber: number,
     global: Global,
-    prfKey: string
+    prfKey: string,
+    identityVersion: number
 ): Promise<string[]> {
     const input = {
         global,
         credentialNumber,
-        prfKey,
         encryptedAmounts,
     };
     const decryptedAmounts = await worker.postMessage({
         command: workerCommands.decryptAmounts,
         input: JSON.stringify(input),
+        prfKey,
+        useDeprecated: versionUsesDeprecatedKeyGen(identityVersion),
     });
     return JSON.parse(decryptedAmounts);
 }
@@ -341,12 +350,12 @@ export async function makeTransferToPublicData(
     prfKey: string,
     global: Global,
     accountEncryptedAmount: AccountEncryptedAmount,
-    accountNumber: number
+    accountNumber: number,
+    identityVersion: number
 ) {
     const input = {
         global,
         amount,
-        prfKey,
         accountNumber,
         incomingAmounts: accountEncryptedAmount.incomingAmounts,
         encryptedSelfAmount: accountEncryptedAmount.selfAmount,
@@ -359,6 +368,8 @@ export async function makeTransferToPublicData(
     const transferToPublicData = await worker.postMessage({
         command: workerCommands.createTransferToPublicData,
         input: JSON.stringify(input),
+        prfKey,
+        useDeprecated: versionUsesDeprecatedKeyGen(identityVersion),
     });
     return JSON.parse(transferToPublicData);
 }
@@ -368,12 +379,12 @@ export async function makeTransferToEncryptedData(
     prfKey: string,
     global: Global,
     accountEncryptedAmount: AccountEncryptedAmount,
-    accountNumber: number
+    accountNumber: number,
+    identityVersion: number
 ) {
     const input = {
         global,
         amount,
-        prfKey,
         accountNumber,
         incomingAmounts: accountEncryptedAmount.incomingAmounts,
         encryptedSelfAmount: accountEncryptedAmount.selfAmount,
@@ -382,6 +393,8 @@ export async function makeTransferToEncryptedData(
     const transferToSecretData = await worker.postMessage({
         command: workerCommands.createTransferToEncryptedData,
         input: JSON.stringify(input),
+        prfKey,
+        useDeprecated: versionUsesDeprecatedKeyGen(identityVersion),
     });
     return JSON.parse(transferToSecretData);
 }
@@ -392,13 +405,13 @@ export async function makeEncryptedTransferData(
     prfKey: string,
     global: Global,
     accountEncryptedAmount: AccountEncryptedAmount,
-    accountNumber: number
+    accountNumber: number,
+    identityVersion: number
 ) {
     const input = {
         global,
         amount,
         receiverPublicKey,
-        prfKey,
         accountNumber,
         incomingAmounts: accountEncryptedAmount.incomingAmounts,
         encryptedSelfAmount: accountEncryptedAmount.selfAmount,
@@ -411,6 +424,8 @@ export async function makeEncryptedTransferData(
     const encryptedTransferData = await worker.postMessage({
         command: workerCommands.createEncryptedTransferData,
         input: JSON.stringify(input),
+        prfKey,
+        useDeprecated: versionUsesDeprecatedKeyGen(identityVersion),
     });
     return JSON.parse(encryptedTransferData);
 }
@@ -434,7 +449,8 @@ export async function createGenesisAccount(
     const { prfKey, idCredSec } = await getSecretsFromLedger(
         ledger,
         displayMessage,
-        identityNumber
+        identityNumber,
+        currentIdentityVersion
     );
     displayMessage('Please confirm exporting public-key on device');
     const publicKey = await ledger.getPublicKey(path);
@@ -498,15 +514,17 @@ export function getAddressFromCredentialId(credId: string): Promise<string> {
     });
 }
 
-export function computeCredId(
+export function computeCredIdFromSeed(
     prfKeySeed: string,
     credentialNumber: number,
-    global: Global
+    global: Global,
+    identityVersion: number
 ): Promise<string> {
     return worker.postMessage({
         command: workerCommands.getCredId,
         prfKey: prfKeySeed,
         credentialNumber,
         global: stringify(global),
+        useDeprecated: versionUsesDeprecatedKeyGen(identityVersion),
     });
 }

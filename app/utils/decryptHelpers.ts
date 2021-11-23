@@ -18,6 +18,7 @@ export default async function decryptTransactions(
     encryptedTransfers: TransferTransaction[],
     accountAddress: string,
     prfKey: string,
+    identityVersion: number,
     credentialNumber: number,
     global: Global
 ) {
@@ -49,7 +50,8 @@ export default async function decryptTransactions(
         encryptedAmountForDecryption,
         credentialNumber,
         global,
-        prfKey
+        prfKey,
+        identityVersion
     );
 
     let offset = 0;

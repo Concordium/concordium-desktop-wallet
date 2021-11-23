@@ -269,7 +269,7 @@ export type IdentityMethods = {
         addressBookEntry: AddressBookEntry
     ) => Promise<void>;
     insertPendingIdentityAndInitialAccount: (
-        identity: Partial<Identity>,
+        identity: Omit<Identity, 'id'>,
         initialAccount: Omit<Account, 'identityId'>
     ) => Promise<number>;
 };

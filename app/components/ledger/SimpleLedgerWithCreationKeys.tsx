@@ -21,8 +21,8 @@ interface Props {
     ledgerCallback: (keys: CreationKeys) => LedgerCallback;
     preCallback?: LedgerCallback<{ identityNumber: number }> | LedgerCallback;
     disabled?: boolean;
+    identityVersion: number;
 }
-
 export default function SimpleLedgerWithCreationKeys({
     className,
     identityNumber,
@@ -31,6 +31,7 @@ export default function SimpleLedgerWithCreationKeys({
     preCallback,
     compareButtonClassName,
     disabled,
+    identityVersion,
 }: Props) {
     const [keys, setKeys] = useState<CreationKeys>();
     const [finishedComparing, setFinishedComparing] = useState(false);
@@ -64,11 +65,12 @@ export default function SimpleLedgerWithCreationKeys({
                 identity,
                 credentialNumber,
                 setMessage,
+                identityVersion,
                 ledger
             );
             setKeys(exportedKeys);
         },
-        [credentialNumber, identityNumber, preCallback]
+        [credentialNumber, identityNumber, preCallback, identityVersion]
     );
 
     const callback = useCallback(

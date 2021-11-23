@@ -39,9 +39,13 @@ export default class ConcordiumLedgerClient {
 
     getSignedPublicKey = window.ledger.getSignedPublicKey;
 
-    async getPrivateKeySeeds(identity: number): Promise<PrivateKeySeeds> {
+    async getPrivateKeySeeds(
+        identity: number,
+        version: number
+    ): Promise<PrivateKeySeeds> {
         const result: PrivateKeySeeds = await window.ledger.getPrivateKeySeeds(
-            identity
+            identity,
+            version
         );
         return {
             prfKey: Buffer.from(result.prfKey),

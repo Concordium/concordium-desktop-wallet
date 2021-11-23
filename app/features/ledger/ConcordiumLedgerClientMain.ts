@@ -92,16 +92,19 @@ export default class ConcordiumLedgerClientMain {
         return getSignedPublicKey(this.transport, path);
     }
 
-    getPrivateKeySeeds(identity: number): Promise<PrivateKeySeeds> {
-        return getPrivateKeySeeds(this.transport, identity);
+    getPrivateKeySeeds(
+        identity: number,
+        version: number
+    ): Promise<PrivateKeySeeds> {
+        return getPrivateKeySeeds(this.transport, identity, version);
     }
 
-    getPrfKeyDecrypt(identity: number): Promise<Buffer> {
-        return getPrfKeyDecrypt(this.transport, identity);
+    getPrfKeyDecrypt(identity: number, version: number): Promise<Buffer> {
+        return getPrfKeyDecrypt(this.transport, identity, version);
     }
 
-    getPrfKeyRecovery(identity: number): Promise<Buffer> {
-        return getPrfKeyRecovery(this.transport, identity);
+    getPrfKeyRecovery(identity: number, version: number): Promise<Buffer> {
+        return getPrfKeyRecovery(this.transport, identity, version);
     }
 
     signTransfer(

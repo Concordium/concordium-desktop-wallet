@@ -154,6 +154,15 @@ async function removeIdentityAndInitialAccount(identityId: number) {
     });
 }
 
+export async function getIdentityVersion(
+    identityId: number
+): Promise<number | undefined> {
+    const identity = await (await knex())<Identity>(identitiesTable)
+        .where({ id: identityId })
+        .first();
+    return identity?.version;
+}
+
 const exposedMethods: IdentityMethods = {
     getNextIdentityNumber,
     insert: insertIdentity,

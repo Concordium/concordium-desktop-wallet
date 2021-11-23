@@ -19,6 +19,7 @@ import { AccountReportMethods } from './preloadTypes';
 import { isShieldedBalanceTransaction } from '~/utils/transactionHelpers';
 import AbortController from '~/utils/AbortController';
 import { getEntryName } from './database/addressBookDao';
+import { getIdentityVersion } from './database/identityDao';
 import { convertIncomingTransaction } from '~/utils/TransactionConverters';
 import httpMethods from './http';
 import decryptAmountsDao from './database/decryptedAmountsDao';
@@ -28,6 +29,7 @@ import { hasEncryptedBalance } from '~/utils/accountHelpers';
 async function enrichWithDecryptedAmounts(
     credentialNumber: number,
     prfKeySeed: string,
+    identityVersion: number,
     address: string,
     global: Global,
     transactions: TransferTransaction[]
@@ -64,6 +66,7 @@ async function enrichWithDecryptedAmounts(
         toDecrypt,
         address,
         prfKeySeed,
+        identityVersion,
         credentialNumber,
         global
     );
@@ -225,6 +228,12 @@ async function streamTransactions(
         return getEntryName(address);
     };
 
+    const identityVersion = await getIdentityVersion(account.identityId);
+
+    if (identityVersion === undefined) {
+        throw new Error(`Unable to find identity of account: ${account.name}`);
+    }
+
     const limit = 1000;
     const fromDate = filter.fromDate ? new Date(filter.fromDate) : undefined;
     let filterToUse = filter;
@@ -282,6 +291,7 @@ async function streamTransactions(
             transactions = await enrichWithDecryptedAmounts(
                 entry.credentialNumber,
                 entry.prfKeySeed,
+                identityVersion,
                 account.address,
                 global,
                 convertedTransactions

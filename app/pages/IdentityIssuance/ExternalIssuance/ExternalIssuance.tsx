@@ -12,7 +12,6 @@ import {
     SignedIdRequest,
     IdObjectRequest,
     Versioned,
-    Identity,
     IdentityStatus,
     AccountStatus,
     Account,
@@ -112,7 +111,7 @@ async function generateIdentity(
         // at the identity provider at this point. This requires a change to the
         // identity providers, and cannot be fixed before that has been implemented.
 
-        const identity: Partial<Identity> = {
+        const identity = {
             identityNumber,
             name: identityName,
             status: IdentityStatus.Pending,
@@ -120,6 +119,7 @@ async function generateIdentity(
             identityProvider: JSON.stringify(provider),
             randomness,
             walletId,
+            version: 1,
         };
 
         const accountAddress = await getAddressFromCredentialId(

@@ -2,6 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { decryptAccountBalance } from '~/features/AccountSlice';
 import { globalSelector } from '~/features/GlobalSlice';
+import { specificIdentitySelector } from '~/features/IdentitySlice';
 import {
     shieldedTransactionsSelector,
     updateTransactionFields,
@@ -34,6 +35,7 @@ interface Props {
 export default function DecryptComponent({ account, onDecrypt }: Props) {
     const dispatch = useDispatch();
     const global = useSelector(globalSelector);
+    const identity = useSelector(specificIdentitySelector(account.identityId));
     const shieldedTransactions = useSelector(shieldedTransactionsSelector)
         .filter((t) =>
             [
@@ -61,6 +63,12 @@ export default function DecryptComponent({ account, onDecrypt }: Props) {
             );
         }
 
+        if (identity === undefined) {
+            throw new Error(
+                'The identity was not found. This is an internal error that should be reported'
+            );
+        }
+
         const credential = await findLocalDeployedCredentialWithWallet(
             account.address,
             ledger
@@ -74,7 +82,8 @@ export default function DecryptComponent({ account, onDecrypt }: Props) {
 
         setMessage('Please accept decrypt on device');
         const prfKeySeed = await ledger.getPrfKeyDecrypt(
-            credential.identityNumber
+            credential.identityNumber,
+            identity.version
         );
         setMessage('Please wait');
         const prfKey = prfKeySeed.toString('hex');
@@ -92,6 +101,7 @@ export default function DecryptComponent({ account, onDecrypt }: Props) {
             missingDecryptedAmount,
             account.address,
             prfKey,
+            identity.version,
             credentialNumber,
             global
         );
@@ -104,8 +114,9 @@ export default function DecryptComponent({ account, onDecrypt }: Props) {
         }
 
         await decryptAccountBalance(
-            prfKey,
             account,
+            prfKey,
+            identity.version,
             credentialNumber,
             global,
             dispatch

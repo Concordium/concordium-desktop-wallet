@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { specificIdentitySelector } from '~/features/IdentitySlice';
 import Modal from '~/cross-app-components/Modal';
 import { Account } from '~/utils/types';
 import { noOp, asyncNoOp } from '~/utils/basicHelpers';
@@ -35,6 +36,7 @@ export default function DecryptModal({
     onFinish = noOp,
 }: DecryptModalInput) {
     const global = useSelector(globalSelector);
+    const identity = useSelector(specificIdentitySelector(account?.identityId));
 
     async function ledgerCall(
         ledger: ConcordiumLedgerClient,
@@ -46,6 +48,12 @@ export default function DecryptModal({
 
         if (!global) {
             throw new Error(errorMessages.missingGlobal);
+        }
+
+        if (identity === undefined) {
+            throw new Error(
+                'The identity was not found. This is an internal error that should be reported'
+            );
         }
 
         if (account.identityNumber === undefined) {
@@ -67,7 +75,8 @@ export default function DecryptModal({
 
         setMessage('Please accept decrypt on device');
         const prfKeySeed = await ledger.getPrfKeyDecrypt(
-            credential.identityNumber
+            credential.identityNumber,
+            identity.version
         );
         setMessage('Please wait');
         const prfKey = prfKeySeed.toString('hex');
