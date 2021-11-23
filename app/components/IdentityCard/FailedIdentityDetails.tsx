@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { Identity, IdentityProvider } from '~/utils/types';
 import SidedRow from '~/components/SidedRow';
@@ -6,13 +6,14 @@ import CopyButton from '~/components/CopyButton';
 import ExternalLink from '~/components/ExternalLink';
 import { getSessionId } from '~/utils/identityHelpers';
 import pkg from '~/package.json';
-import { useTimeoutState, useAsyncMemo } from '~/utils/hooks';
+import { useTimeoutState } from '~/utils/hooks';
 import { getTargetNet, Net } from '~/utils/ConfigHelper';
 import { getIdentityProviders } from '~/utils/httpRequests';
 import Loading from '~/cross-app-components/Loading';
-import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 import styles from './IdentityCard.module.scss';
+
+const getEmailTryTimeout = 5000;
 
 interface FailedIdentityDetailsProps {
     identity: Identity;
@@ -43,17 +44,13 @@ async function getIdentityProviderMail(
 export default function FailedIdentityDetails({
     identity,
 }: FailedIdentityDetailsProps) {
-    const [failedConnect, setFailedConnect] = useState(false);
+    const [connecting, setConnecting] = useState(true);
+    const [mail, setMail] = useState<string>();
     const sessionId = getSessionId(identity);
     const identityProvider: IdentityProvider = JSON.parse(
         identity.identityProvider
     );
     const identityProviderName = identityProvider.ipInfo.ipDescription.name;
-    const mail = useAsyncMemo(
-        async () => getIdentityProviderMail(identityProvider.ipInfo.ipIdentity),
-        () => setFailedConnect(true),
-        [identityProvider.ipInfo.ipIdentity]
-    );
     const cc = 'idiss@concordium.software';
     const subject = `Issuance Reference: ${sessionId}`;
     const body = `Hi! My identity issuance failed.
@@ -70,6 +67,38 @@ Operating system:
 ${getOS()}`;
 
     const [copied, setCopied] = useTimeoutState(false, 2000);
+
+    useEffect(
+        () => () => {
+            setMail(undefined);
+            setConnecting(true);
+        },
+        [identityProvider.ipInfo.ipIdentity]
+    );
+
+    const loadSupportMail = useCallback(() => {
+        let supportMail;
+        try {
+            supportMail = await getIdentityProviderMail(
+                identityProvider.ipInfo.ipIdentity
+            );
+        } catch {
+            // continue regardless of error
+        }
+        setConnecting(false);
+        if (supportMail) {
+            setMail(supportMail);
+        } else {
+            setTimeout(() => setConnecting(true), getEmailTryTimeout);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+        if (connecting && !mail) {
+            loadSupportMail();
+        }
+    }, [connecting, mail, loadSupportMail]);
 
     const failedDetails = (
         <>
@@ -92,13 +121,15 @@ ${getOS()}`;
     if (mail === undefined) {
         return (
             <div className={clsx('body3 p20', styles.failedDetails)}>
-                <SimpleErrorModal
-                    show={failedConnect}
-                    header="Unable to load identity provider email. Please check your internet connection."
-                    onClick={() => setFailedConnect(false)}
-                />
                 {failedDetails}
-                <Loading className="pV20" inline />
+                {connecting && <Loading className="pV20" inline />}
+                {!connecting && (
+                    <div>
+                        {' '}
+                        Unable to load identity provider support information.
+                        Please check your internet connection.{' '}
+                    </div>
+                )}
             </div>
         );
     }
