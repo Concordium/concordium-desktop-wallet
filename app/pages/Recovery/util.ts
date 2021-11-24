@@ -17,6 +17,7 @@ import {
     Versioned,
     AccountAndCredentialPairs,
     Identity,
+    IdentityVersion,
 } from '~/utils/types';
 import { getCurrentYearMonth } from '~/utils/timeHelpers';
 import { maxCredentialsOnIdentity } from '~/constants/recoveryConstants.json';
@@ -39,13 +40,13 @@ export function getRecoveredIdentityName(identityNumber: number) {
  * Creates an placeholder identity,
  * @param walletId the wallet on which the identity is created.
  * @param identityNumber the identity's number on the wallet.
- * @param identityVersion the version, which the identity's PRF key and IdCredSec was generated with.
+ * @param identityVersion the version, which the identity's PRF key and IdCredSec were generated with.
  * @returns the id of the created identity.
  */
 export async function createRecoveredIdentity(
     walletId: number,
     identityNumber: number,
-    identityVersion: number
+    identityVersion: IdentityVersion
 ): Promise<Omit<Identity, 'id'>> {
     const createdAt = getCurrentYearMonth();
     const validTo = getCurrentYearMonth();
@@ -195,7 +196,7 @@ export async function recoverCredentials(
     identityId: number,
     blockHash: string,
     global: Global,
-    identityVersion: number,
+    identityVersion: IdentityVersion,
     controller: AbortController,
     startingCredNumber = 0
 ): Promise<AccountAndCredentialPairs> {
@@ -243,7 +244,7 @@ export async function recoverFromIdentity(
     blockHash: string,
     global: Global,
     identityId: number,
-    identityVersion: number,
+    identityVersion: IdentityVersion,
     controller: AbortController
 ) {
     const nextCredentialNumber = await getNextCredentialNumber(identityId);
@@ -279,7 +280,7 @@ export async function recoverNewIdentity(
     global: Global,
     identityNumber: number,
     walletId: number,
-    identityVersion: number,
+    identityVersion: IdentityVersion,
     controller: AbortController
 ) {
     const recovered = await recoverCredentials(

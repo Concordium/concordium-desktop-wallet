@@ -17,6 +17,7 @@ import {
     UnsignedCredentialDeploymentInformation,
     CreationKeys,
     CommitmentsRandomness,
+    IdentityVersion,
 } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
@@ -24,28 +25,26 @@ import { getDefaultExpiry, secondsSinceUnixEpoch } from './timeHelpers';
 import { getAccountPath } from '~/features/ledger/Path';
 import { stringify, parse } from './JSONHelper';
 import CredentialInfoLedgerDetails from '~/components/ledger/CredentialInfoLedgerDetails';
-import { currentIdentityVersion } from './identityHelpers';
 
 const rawWorker = new RustWorker();
 const worker = new PromiseWorker(rawWorker);
 
-const versionUsesDeprecatedKeyGen = (v: number) => v === 0;
+const identityCreatedUsingDeprecatedKeyGen = (version: IdentityVersion) =>
+    version === 0;
 
 /**
- * Returns the PrfKey and IdCredSec for the given identity.
- * identityVersion 0 gives the seeds, and 1 gives the BLS keys.
+ * Returns the PrfKey and IdCredSec seeds for the given identity.
  */
 async function getSecretsFromLedger(
     ledger: ConcordiumLedgerClient,
     displayMessage: (message: string) => void,
-    identityNumber: number,
-    identityVersion: number
+    identityNumber: number
 ) {
     displayMessage('Please accept to create credential on device');
     const {
         prfKey: prfKeyRaw,
         idCredSec: idCredSecRaw,
-    } = await ledger.getPrivateKeySeeds(identityNumber, identityVersion);
+    } = await ledger.getPrivateKeySeeds(identityNumber);
 
     const prfKey = prfKeyRaw.toString('hex');
     const idCredSec = idCredSecRaw.toString('hex');
@@ -56,7 +55,6 @@ export async function exportKeysFromLedger(
     identityNumber: number,
     credentialNumber: number,
     displayMessage: (message: string) => void,
-    identityVersion: number,
     ledger: ConcordiumLedgerClient
 ): Promise<CreationKeys> {
     const path = getAccountPath({
@@ -67,8 +65,7 @@ export async function exportKeysFromLedger(
     const { prfKey, idCredSec } = await getSecretsFromLedger(
         ledger,
         displayMessage,
-        identityNumber,
-        identityVersion
+        identityNumber
     );
     displayMessage(
         `Please confirm exporting
@@ -183,7 +180,7 @@ async function createUnsignedCredentialInfo(
         input: stringify(credentialInput),
         prfKey: keys.prfKey,
         idCredSec: keys.idCredSec,
-        useDeprecated: versionUsesDeprecatedKeyGen(identity.version),
+        useDeprecated: identityCreatedUsingDeprecatedKeyGen(identity.version),
     });
 
     try {
@@ -329,7 +326,7 @@ export async function decryptAmounts(
     credentialNumber: number,
     global: Global,
     prfKey: string,
-    identityVersion: number
+    identityVersion: IdentityVersion
 ): Promise<string[]> {
     const input = {
         global,
@@ -340,7 +337,7 @@ export async function decryptAmounts(
         command: workerCommands.decryptAmounts,
         input: JSON.stringify(input),
         prfKey,
-        useDeprecated: versionUsesDeprecatedKeyGen(identityVersion),
+        useDeprecated: identityCreatedUsingDeprecatedKeyGen(identityVersion),
     });
     return JSON.parse(decryptedAmounts);
 }
@@ -351,7 +348,7 @@ export async function makeTransferToPublicData(
     global: Global,
     accountEncryptedAmount: AccountEncryptedAmount,
     accountNumber: number,
-    identityVersion: number
+    identityVersion: IdentityVersion
 ) {
     const input = {
         global,
@@ -369,7 +366,7 @@ export async function makeTransferToPublicData(
         command: workerCommands.createTransferToPublicData,
         input: JSON.stringify(input),
         prfKey,
-        useDeprecated: versionUsesDeprecatedKeyGen(identityVersion),
+        useDeprecated: identityCreatedUsingDeprecatedKeyGen(identityVersion),
     });
     return JSON.parse(transferToPublicData);
 }
@@ -380,7 +377,7 @@ export async function makeTransferToEncryptedData(
     global: Global,
     accountEncryptedAmount: AccountEncryptedAmount,
     accountNumber: number,
-    identityVersion: number
+    identityVersion: IdentityVersion
 ) {
     const input = {
         global,
@@ -394,7 +391,7 @@ export async function makeTransferToEncryptedData(
         command: workerCommands.createTransferToEncryptedData,
         input: JSON.stringify(input),
         prfKey,
-        useDeprecated: versionUsesDeprecatedKeyGen(identityVersion),
+        useDeprecated: identityCreatedUsingDeprecatedKeyGen(identityVersion),
     });
     return JSON.parse(transferToSecretData);
 }
@@ -406,7 +403,7 @@ export async function makeEncryptedTransferData(
     global: Global,
     accountEncryptedAmount: AccountEncryptedAmount,
     accountNumber: number,
-    identityVersion: number
+    identityVersion: IdentityVersion
 ) {
     const input = {
         global,
@@ -425,7 +422,7 @@ export async function makeEncryptedTransferData(
         command: workerCommands.createEncryptedTransferData,
         input: JSON.stringify(input),
         prfKey,
-        useDeprecated: versionUsesDeprecatedKeyGen(identityVersion),
+        useDeprecated: identityCreatedUsingDeprecatedKeyGen(identityVersion),
     });
     return JSON.parse(encryptedTransferData);
 }
@@ -449,8 +446,7 @@ export async function createGenesisAccount(
     const { prfKey, idCredSec } = await getSecretsFromLedger(
         ledger,
         displayMessage,
-        identityNumber,
-        currentIdentityVersion
+        identityNumber
     );
     displayMessage('Please confirm exporting public-key on device');
     const publicKey = await ledger.getPublicKey(path);
@@ -518,13 +514,13 @@ export function computeCredIdFromSeed(
     prfKeySeed: string,
     credentialNumber: number,
     global: Global,
-    identityVersion: number
+    identityVersion: IdentityVersion
 ): Promise<string> {
     return worker.postMessage({
         command: workerCommands.getCredId,
         prfKey: prfKeySeed,
         credentialNumber,
         global: stringify(global),
-        useDeprecated: versionUsesDeprecatedKeyGen(identityVersion),
+        useDeprecated: identityCreatedUsingDeprecatedKeyGen(identityVersion),
     });
 }

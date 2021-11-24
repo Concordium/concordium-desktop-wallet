@@ -33,6 +33,7 @@ import {
     Identity,
     TransactionFilter,
     Hex,
+    IdentityVersion,
 } from '../utils/types';
 import { createAccount, isValidAddress } from '../utils/accountHelpers';
 import {
@@ -560,7 +561,7 @@ export async function confirmAccount(
 export async function decryptAccountBalance(
     account: Account,
     prfKey: string,
-    identityVersion: number,
+    identityVersion: IdentityVersion,
     credentialNumber: number,
     global: Global,
     dispatch: Dispatch

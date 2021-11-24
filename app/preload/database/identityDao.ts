@@ -15,6 +15,7 @@ import {
     AddressBookEntry,
     Identity,
     IdentityStatus,
+    IdentityVersion,
 } from '~/utils/types';
 import { IdentityMethods } from '~/preload/preloadTypes';
 
@@ -156,7 +157,7 @@ async function removeIdentityAndInitialAccount(identityId: number) {
 
 export async function getIdentityVersion(
     identityId: number
-): Promise<number | undefined> {
+): Promise<IdentityVersion | undefined> {
     const identity = await (await knex())<Identity>(identitiesTable)
         .where({ id: identityId })
         .first();

@@ -1,5 +1,5 @@
 import { decryptAmounts } from './rustInterface';
-import { Global, TransferTransaction } from './types';
+import { Global, IdentityVersion, TransferTransaction } from './types';
 
 /**
  * Decrypts the encrypted transfers in the provided transaction list. This is
@@ -18,7 +18,7 @@ export default async function decryptTransactions(
     encryptedTransfers: TransferTransaction[],
     accountAddress: string,
     prfKey: string,
-    identityVersion: number,
+    identityVersion: IdentityVersion,
     credentialNumber: number,
     global: Global
 ) {

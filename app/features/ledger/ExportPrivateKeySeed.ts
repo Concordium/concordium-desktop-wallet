@@ -6,16 +6,7 @@ const INS_EXPORT_PRIVATE_KEY_SEED = 0x05;
 const P1_PRF_KEY = 0;
 const P1_PRF_KEY_RECOVERY = 1;
 const P1_BOTH_KEYS = 2;
-
-function getP2(version: number): number {
-    switch (version) {
-        case 0:
-        case 1:
-            return 0x01;
-        default:
-            throw new Error('Unknown identity version');
-    }
-}
+const P2_SEEDS = 1;
 
 function requestKeys(
     transport: Transport,
@@ -31,13 +22,12 @@ function requestKeys(
 
 export async function getPrivateKeySeeds(
     transport: Transport,
-    identity: number,
-    version: number
+    identity: number
 ): Promise<PrivateKeySeeds> {
     const response = await requestKeys(
         transport,
         P1_BOTH_KEYS,
-        getP2(version),
+        P2_SEEDS,
         identity
     );
     const prfKey = response.slice(0, 32);
@@ -47,13 +37,12 @@ export async function getPrivateKeySeeds(
 
 export async function getPrfKeyDecrypt(
     transport: Transport,
-    identity: number,
-    version: number
+    identity: number
 ): Promise<Buffer> {
     const response = await requestKeys(
         transport,
         P1_PRF_KEY,
-        getP2(version),
+        P2_SEEDS,
         identity
     );
     return response.slice(0, 32);
@@ -61,13 +50,12 @@ export async function getPrfKeyDecrypt(
 
 export async function getPrfKeyRecovery(
     transport: Transport,
-    identity: number,
-    version: number
+    identity: number
 ): Promise<Buffer> {
     const response = await requestKeys(
         transport,
         P1_PRF_KEY_RECOVERY,
-        getP2(version),
+        P2_SEEDS,
         identity
     );
     return response.slice(0, 32);

@@ -46,7 +46,7 @@ const IPDetails = (info: PublicInformationForIp) => (
     </div>
 );
 
-async function HasPrfKeySeedBeenUsed(
+async function hasPrfKeySeedBeenUsed(
     prfKeySeed: string,
     global: Global
 ): Promise<boolean> {
@@ -131,7 +131,7 @@ export default function IdentityIssuanceChooseProvider({
                         walletId
                     );
 
-                    if (await HasPrfKeySeedBeenUsed(keySeeds.prfKey, global)) {
+                    if (await hasPrfKeySeedBeenUsed(keySeeds.prfKey, global)) {
                         setAlreadyExists(true);
                         return;
                     }
@@ -171,7 +171,7 @@ export default function IdentityIssuanceChooseProvider({
         <>
             <ChoiceModal
                 title="Identity index already in use!"
-                description="The next identity index on the current ledger has already been used on the chain. Please import or recover it."
+                description="The next identity index on the current Ledger has already been used on the chain. Please import or recover it."
                 open={alreadyExists}
                 disableClose
                 actions={[
@@ -220,7 +220,6 @@ export default function IdentityIssuanceChooseProvider({
                     ledgerCallback={withLedger}
                     preCallback={getIdentityNumber}
                     disabled={!provider}
-                    identityVersion={0}
                 />
             </div>
         </>

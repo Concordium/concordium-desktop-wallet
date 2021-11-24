@@ -24,6 +24,7 @@ import {
     instanceOfEncryptedTransfer,
     instanceOfEncryptedTransferWithMemo,
     MultiSignatureTransactionStatus,
+    IdentityVersion,
 } from '~/utils/types';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { addPendingTransaction } from '~/features/TransactionSlice';
@@ -69,14 +70,13 @@ async function attachCompletedPayload(
     global: Global,
     credential: CredentialWithIdentityNumber,
     accountInfo: AccountInfo,
-    identityVersion: number,
+    identityVersion: IdentityVersion,
     setMessage: (message: string) => void
 ) {
     const getPrfKey = async () => {
         setMessage('Please accept decrypt on device');
         const prfKeySeed = await ledger.getPrfKeyDecrypt(
-            credential.identityNumber,
-            identityVersion
+            credential.identityNumber
         );
         setMessage('Please wait');
         return prfKeySeed.toString('hex');

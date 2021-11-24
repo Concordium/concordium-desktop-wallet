@@ -9,9 +9,11 @@ import {
     ConfirmedIdentity,
     RecoveredIdentity,
     RejectedIdentity,
+    IdentityVersion,
 } from './types';
 
-export const currentIdentityVersion = 1;
+// Version that current identities are created with.
+export const currentIdentityVersion: IdentityVersion = 1;
 
 export const IDENTITY_NAME_MAX_LENGTH = 25;
 

@@ -11,6 +11,7 @@ import {
     TransactionOrder,
     Global,
     CredentialNumberPrfKey,
+    IdentityVersion,
 } from '~/utils/types';
 import exportTransactionFields from '~/constants/exportTransactionFields.json';
 import { getISOFormat, secondsSinceUnixEpoch } from '~/utils/timeHelpers';
@@ -29,7 +30,7 @@ import { hasEncryptedBalance } from '~/utils/accountHelpers';
 async function enrichWithDecryptedAmounts(
     credentialNumber: number,
     prfKeySeed: string,
-    identityVersion: number,
+    identityVersion: IdentityVersion,
     address: string,
     global: Global,
     transactions: TransferTransaction[]

@@ -140,7 +140,6 @@ export default function SignCredential({ onSigned }: Props): JSX.Element {
             ledgerCallback={sign}
             credentialNumber={credentialNumber}
             preCallback={checkWallet}
-            identityVersion={identity.version}
         />
     );
 }
