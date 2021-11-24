@@ -47,7 +47,7 @@ export const chosenIdentitySelector = (state: RootState) =>
         (i) => i.id === state.identities.chosenIdentityId
     );
 
-export const specificIdentitySelector = (identityId?: number) => (
+export const specificIdentitySelector = (identityId: number) => (
     state: RootState
 ) => state.identities.identities.find((i) => i.id === identityId);
 
