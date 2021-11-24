@@ -101,12 +101,14 @@ ${getOS()}`;
     }, []);
 
     const controller = useMemo(() => new AbortController(), []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => () => controller.abort(), []);
     useEffect(() => {
         if (connecting && !mail) {
             controller.start();
             loadSupportMail(controller);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [connecting, mail, loadSupportMail]);
 
     const failedDetails = (
