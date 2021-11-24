@@ -22,7 +22,9 @@ import { getEntryName } from './database/addressBookDao';
 import { convertIncomingTransaction } from '~/utils/TransactionConverters';
 import httpMethods from './http';
 import decryptAmountsDao from './database/decryptedAmountsDao';
-import decryptTransactions from '~/utils/decryptHelpers';
+import decryptTransactions, {
+    isSuccessfulEncryptedTransaction,
+} from '~/utils/decryptHelpers';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
 
 async function enrichWithDecryptedAmounts(
@@ -32,13 +34,8 @@ async function enrichWithDecryptedAmounts(
     global: Global,
     transactions: TransferTransaction[]
 ): Promise<TransferTransaction[]> {
-    const encryptedTypes = [
-        TransactionKindString.EncryptedAmountTransfer,
-        TransactionKindString.EncryptedAmountTransferWithMemo,
-    ];
-
-    const encryptedTransactions = transactions.filter((t) =>
-        encryptedTypes.includes(t.transactionKind)
+    const encryptedTransactions = transactions.filter(
+        isSuccessfulEncryptedTransaction
     );
     const decryptedAmounts = await decryptAmountsDao.findEntries(
         encryptedTransactions.map(
@@ -47,10 +44,9 @@ async function enrichWithDecryptedAmounts(
     );
 
     const withDecryptedAmounts: TransferTransaction[] = [];
-
     const toDecrypt: TransferTransaction[] = [];
     for (const t of transactions) {
-        if (encryptedTypes.includes(t.transactionKind)) {
+        if (isSuccessfulEncryptedTransaction(t)) {
             const amount = decryptedAmounts.find(
                 (decrypted) => decrypted.transactionHash === t.transactionHash
             )?.amount;
@@ -73,7 +69,7 @@ async function enrichWithDecryptedAmounts(
     }
 
     for (const t of transactions) {
-        if (!encryptedTypes.includes(t.transactionKind)) {
+        if (!isSuccessfulEncryptedTransaction(t)) {
             withDecryptedAmounts.push(t);
         } else {
             const amount = decryptedAmounts.find(
