@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import clsx from 'clsx';
 import { Identity, IdentityProvider } from '~/utils/types';
 import SidedRow from '~/components/SidedRow';
@@ -7,6 +7,7 @@ import ExternalLink from '~/components/ExternalLink';
 import { getSessionId } from '~/utils/identityHelpers';
 import pkg from '~/package.json';
 import { useTimeoutState } from '~/utils/hooks';
+import AbortController from '~/utils/AbortController';
 import { getTargetNet, Net } from '~/utils/ConfigHelper';
 import { getIdentityProviders } from '~/utils/httpRequests';
 import Loading from '~/cross-app-components/Loading';
@@ -76,7 +77,7 @@ ${getOS()}`;
         [identityProvider.ipInfo.ipIdentity]
     );
 
-    const loadSupportMail = useCallback(async () => {
+    const loadSupportMail = useCallback(async (controller: AbortController) => {
         let supportMail;
         try {
             supportMail = await getIdentityProviderMail(
@@ -85,18 +86,26 @@ ${getOS()}`;
         } catch {
             // continue regardless of error
         }
-        setConnecting(false);
-        if (supportMail) {
-            setMail(supportMail);
-        } else {
-            setTimeout(() => setConnecting(true), getEmailTryTimeout);
+        if (!controller.isAborted) {
+            setConnecting(false);
+            if (supportMail) {
+                setMail(supportMail);
+            } else {
+                setTimeout(
+                    () => controller.isAborted || setConnecting(true),
+                    getEmailTryTimeout
+                );
+            }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const controller = useMemo(() => new AbortController(), []);
+    useEffect(() => () => controller.abort(), []);
     useEffect(() => {
         if (connecting && !mail) {
-            loadSupportMail();
+            controller.start();
+            loadSupportMail(controller);
         }
     }, [connecting, mail, loadSupportMail]);
 
