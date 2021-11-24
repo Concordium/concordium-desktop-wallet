@@ -48,7 +48,7 @@ export default function ExternalTransfer({
 
     const [amount, setAmount] = useState<string>(
         location?.state?.amount ?? '0.00'
-    ); // This is a string, to allows user input in GTU
+    ); // This is a string, to allows user input in CCD
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>(
         location?.state?.recipient
     );
@@ -130,6 +130,7 @@ export default function ExternalTransfer({
                     <UpsertAddress
                         className={styles.addRecipient}
                         onSubmit={selectRecipient}
+                        allowAlias={false}
                     >
                         <PlusIcon />
                     </UpsertAddress>

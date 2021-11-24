@@ -51,9 +51,9 @@ export default function FiniteTransactionList({
     }
 
     if (transactions.length === 0 && !loading) {
-        // Only present a GTU drop when not on mainnet, and if no transaction filter
+        // Only present a CCD drop when not on mainnet, and if no transaction filter
         // has ever been set. We expect to have an endpoint available in the wallet proxy
-        // at a later point that will determine whether a GTU drop is available for the given
+        // at a later point that will determine whether a CCD drop is available for the given
         // account, so this solution is expected to be temporary.
         if (
             !isMainnet &&

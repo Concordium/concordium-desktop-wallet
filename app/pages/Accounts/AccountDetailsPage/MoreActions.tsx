@@ -42,7 +42,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     to={routes.ACCOUNTS_CREATESCHEDULEDTRANSFER}
                     disabled={!accountInfo}
                 >
-                    Send GTU with a schedule
+                    Send CCD with a schedule
                 </ButtonNavLink>
             )}
             <ButtonNavLink

@@ -25,13 +25,13 @@ export default function UpdateBakerStakeThreshold({
     return (
         <>
             <div className="body1">
-                <Label>Current baker stake threshold (µGTU)</Label>
+                <Label>Current baker stake threshold (µCCD)</Label>
                 {currentBakerStakeThreshold.toString()}
             </div>
             <Form.Input
                 className="body1"
                 name={fieldNames.threshold}
-                label="New baker stake threshold (µGTU)"
+                label="New baker stake threshold (µCCD)"
                 defaultValue={currentBakerStakeThreshold.toString()}
                 rules={{
                     required: 'Threshold is required',

@@ -8,7 +8,7 @@ import {
 } from './numberStringHelpers';
 
 export function getGTUSymbol(): string {
-    return '\u01E4';
+    return '\u03FE';
 }
 
 export const microGTUPerGTU = 1000000n;
@@ -16,7 +16,7 @@ const separator = '.';
 
 /**
  * Given an ambigous input, convert it into a bigint.
- * N.B. In case the input is a string, it is assumed that it represents the value in microGTU.
+ * N.B. In case the input is a string, it is assumed that it represents the value in microCCD.
  */
 function toBigInt(input: bigint | string): bigint {
     if (typeof input === 'string') {
@@ -24,14 +24,14 @@ function toBigInt(input: bigint | string): bigint {
             return BigInt(input);
         } catch (e) {
             throw new Error(
-                'Given string that was not a valid microGTU string.'
+                'Given string that was not a valid microCCD string.'
             );
         }
     }
     return input;
 }
 
-// Checks that the input is a valid GTU string.
+// Checks that the input is a valid CCD string.
 export const isValidGTUString = isValidResolutionString(
     microGTUPerGTU,
     false,
@@ -40,25 +40,25 @@ export const isValidGTUString = isValidResolutionString(
 );
 
 /**
- * expects the fractional part of the a GTU string.
- * i.e. from an amount of 10.001, the subGTU string is 001.
+ * expects the fractional part of the a CCD string.
+ * i.e. from an amount of 10.001, the subCCD string is 001.
  */
 const parseSubGTU = parseSubNumber(getPowerOf10(microGTUPerGTU));
 
 /**
- * Convert a microGTU amount to a gtu string.
+ * Convert a microCCD amount to a gtu string.
  * Should be used for user interaction.
  * N.B. Gives the absolute value of the amount.
- * N.B. In case the input is a string, it is assumed that it represents the value in microGTU.
+ * N.B. In case the input is a string, it is assumed that it represents the value in microCCD.
  */
 export const microGtuToGtu = toFraction(microGTUPerGTU);
 
 /**
- * Given a GTU string, convert to microGTU
+ * Given a CCD string, convert to microCCD
  */
 export function toMicroUnits(amount: string): bigint {
     if (!isValidGTUString(amount)) {
-        throw new Error('Given string that was not a valid GTU string.');
+        throw new Error('Given string that was not a valid CCD string.');
     }
     if (amount.includes(separator)) {
         const separatorIndex = amount.indexOf(separator);
@@ -72,10 +72,10 @@ export function toMicroUnits(amount: string): bigint {
 const formatGtuString = formatNumberStringWithDigits(2);
 
 /**
- * Given a microGTU amount, returns the same amount in GTU
+ * Given a microCCD amount, returns the same amount in CCD
  * in a displayable format.
- * Allows input type string, because microGTU from external sources are strings.
- * N.B. In case the input is a string, it is assumed that it represents the value in microGTU.
+ * Allows input type string, because microCCD from external sources are strings.
+ * N.B. In case the input is a string, it is assumed that it represents the value in microCCD.
  */
 export function displayAsGTU(microGTUAmount: bigint | string) {
     const amount: bigint = toBigInt(microGTUAmount);
