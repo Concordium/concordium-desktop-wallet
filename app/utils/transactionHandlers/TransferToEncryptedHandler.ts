@@ -5,7 +5,7 @@ import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 
 type TransactionType = TransferToEncrypted;
 
-const TYPE = 'Shield GTU';
+const TYPE = 'Shield CCD';
 
 export default class TransferToEncryptedHandler
     extends TransferHandler<TransactionType>

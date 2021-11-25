@@ -8,6 +8,8 @@ import React, {
 import { SubmitHandler, Validate } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { isAlias } from '@concordium/node-sdk/lib/src/alias';
+import { AccountAddress } from '@concordium/node-sdk/lib/src/types/accountAddress';
 import {
     AddressBookEntry,
     EqualRecord,
@@ -27,10 +29,12 @@ import Card from '~/cross-app-components/Card';
 import Form from '../Form';
 
 import styles from './UpsertAddress.module.scss';
+import { chosenAccountSelector } from '~/features/AccountSlice';
 
 type Props = PropsWithChildren<{
     initialValues?: AddressBookEntryForm;
     readOnly?: boolean;
+    allowAlias?: boolean;
     onSubmit?(entry: AddressBookEntry): void;
 }>;
 
@@ -54,12 +58,14 @@ export default function UpsertAddress<
     onSubmit,
     initialValues,
     readOnly = false,
+    allowAlias = true,
     as,
     ...asProps
 }: UpsertAddressProps<TAs>) {
     const [open, setOpen] = useState(false);
     const dispatch = useDispatch();
     const entries = useSelector(addressBookSelector);
+    const account = useSelector(chosenAccountSelector);
 
     const isEditMode = initialValues !== undefined;
     const header = useMemo(
@@ -83,6 +89,20 @@ export default function UpsertAddress<
             return addToAddressBook(dispatch, entry);
         },
         [isEditMode, initialValues, dispatch, readOnly]
+    );
+
+    const addressNotAlias: Validate = useCallback(
+        (address: string) => {
+            if (!allowAlias && account) {
+                const accountAddress = new AccountAddress(account.address);
+                return (
+                    !isAlias(accountAddress, new AccountAddress(address)) ||
+                    'The recipient should not be an alias of the sending account.'
+                );
+            }
+            return true;
+        },
+        [account, allowAlias]
     );
 
     const addressUnique: Validate = useCallback(
@@ -149,6 +169,7 @@ export default function UpsertAddress<
                                 validate: {
                                     ...commonAddressValidators.validate,
                                     addressUnique,
+                                    addressNotAlias,
                                 },
                             }}
                             placeholder="Paste the account address here"

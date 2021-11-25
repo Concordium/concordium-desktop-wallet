@@ -7,11 +7,7 @@ import {
     shieldedTransactionsSelector,
     updateTransactionFields,
 } from '~/features/TransactionSlice';
-import {
-    Account,
-    TransactionKindString,
-    TransactionStatus,
-} from '~/utils/types';
+import { Account } from '~/utils/types';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import Ledger from '~/components/ledger/Ledger';
 import { asyncNoOp } from '~/utils/basicHelpers';
@@ -20,7 +16,9 @@ import Button from '~/cross-app-components/Button';
 import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
 import errorMessages from '~/constants/errorMessages.json';
 import { findEntries, insert } from '~/database/DecryptedAmountsDao';
-import decryptTransactions from '~/utils/decryptHelpers';
+import decryptTransactions, {
+    isSuccessfulEncryptedTransaction,
+} from '~/utils/decryptHelpers';
 
 interface Props {
     account: Account;
@@ -36,18 +34,9 @@ export default function DecryptComponent({ account, onDecrypt }: Props) {
     const dispatch = useDispatch();
     const global = useSelector(globalSelector);
     const identity = useSelector(specificIdentitySelector(account.identityId));
-    const shieldedTransactions = useSelector(shieldedTransactionsSelector)
-        .filter((t) =>
-            [
-                TransactionKindString.EncryptedAmountTransfer,
-                TransactionKindString.EncryptedAmountTransferWithMemo,
-            ].includes(t.transactionKind)
-        )
-        .filter(
-            (t) =>
-                t.status !== TransactionStatus.Pending &&
-                t.status !== TransactionStatus.Rejected
-        );
+    const shieldedTransactions = useSelector(
+        shieldedTransactionsSelector
+    ).filter(isSuccessfulEncryptedTransaction);
 
     async function ledgerCall(
         ledger: ConcordiumLedgerClient,

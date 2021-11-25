@@ -26,7 +26,6 @@ import {
     Dispatch,
     TransferTransactionWithNames,
     Account,
-    TransactionKindString,
     IncomingTransaction,
 } from '../utils/types';
 import {
@@ -45,6 +44,7 @@ import { GetTransactionsOutput } from '~/preload/preloadTypes';
 import { findEntries } from '~/database/DecryptedAmountsDao';
 import { getActiveBooleanFilters } from '~/utils/accountHelpers';
 import * as errorMessages from '~/constants/errorMessages.json';
+import { isSuccessfulEncryptedTransaction } from '~/utils/decryptHelpers';
 
 export const transactionLogPageSize = 100;
 
@@ -140,13 +140,8 @@ async function enrichWithDecryptedAmounts(
     withDecryptedAmounts: TransferTransaction[];
     allDecrypted: boolean;
 }> {
-    const encryptedTypes = [
-        TransactionKindString.EncryptedAmountTransfer,
-        TransactionKindString.EncryptedAmountTransferWithMemo,
-    ];
-
-    const encryptedTransactions = transactions.filter((t) =>
-        encryptedTypes.includes(t.transactionKind)
+    const encryptedTransactions = transactions.filter(
+        isSuccessfulEncryptedTransaction
     );
     const decryptedAmounts = await findEntries(
         encryptedTransactions.map(
@@ -156,7 +151,7 @@ async function enrichWithDecryptedAmounts(
 
     let allDecrypted = true;
     const withDecryptedAmounts = transactions.map((t) => {
-        if (!encryptedTypes.includes(t.transactionKind)) {
+        if (!isSuccessfulEncryptedTransaction(t)) {
             return t;
         }
 
