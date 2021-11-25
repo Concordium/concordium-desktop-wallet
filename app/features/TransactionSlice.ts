@@ -252,10 +252,9 @@ async function getTransactions(
 
             loadedTransactions.push(...transactions);
 
-            // If the result from the wallet proxy was full, but the number of transactions
-            // were fewer than a "full page", then this means we filtered away some results in-memory. In this
-            // case we should gather more transactions to retrieve a "full page" if possible.
-            if (full && transactions.length < size) {
+            // If we got a full page from the wallet proxy, but after filtering it did not
+            // result in a full local page, then we have to gather more transactions.
+            if (full && loadedTransactions.length < size) {
                 currentMinId = minId;
             } else {
                 // In this case we either received all possible transactions from the wallet proxy
