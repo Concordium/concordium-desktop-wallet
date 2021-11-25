@@ -29,6 +29,8 @@ import {
     IncomingTransaction,
     TransactionFilter,
     BooleanFilters,
+    OriginType,
+    TransactionKindString,
 } from '../utils/types';
 import {
     isShieldedBalanceTransaction,
@@ -224,15 +226,20 @@ async function enrichWithDecryptedAmounts(
 
 async function getTransactions(
     accountAddress: string,
-    filter: TransactionFilter,
+    accountFilter: TransactionFilter,
     size: number,
     fromMinId: string | undefined,
-    rejectIfInvalid: (reason: string) => void
+    rejectIfInvalid: (reason: string) => void,
+    loadShielded: boolean
 ): Promise<{ transactions: TransferTransaction[]; more: boolean }> {
     const loadedTransactions: IncomingTransaction[] = [];
     let fetchMore = true;
     let fullResult = false;
     let currentMinId = fromMinId;
+
+    const filter = loadShielded
+        ? shieldedOnlyFilter(accountFilter)
+        : accountFilter;
 
     try {
         while (fetchMore) {
@@ -250,7 +257,21 @@ async function getTransactions(
                 currentMinId
             );
 
-            loadedTransactions.push(...transactions);
+            // If NOT loading shielded transactions, then we have to remove all shielded transfers that
+            // the account did not send. Only the ones where the account was the sender are shown (to show their cost).
+            if (!loadShielded) {
+                const transactionsWithoutIncomingShielded = transactions.filter(
+                    (t) =>
+                        ![
+                            TransactionKindString.EncryptedAmountTransfer,
+                            TransactionKindString.EncryptedAmountTransferWithMemo,
+                        ].includes(t.details.type) ||
+                        t.origin.type === OriginType.Self
+                );
+                loadedTransactions.push(...transactionsWithoutIncomingShielded);
+            } else {
+                loadedTransactions.push(...transactions);
+            }
 
             // If we got a full page from the wallet proxy, but after filtering it did not
             // result in a full local page, then we have to gather more transactions.
@@ -321,17 +342,15 @@ export const loadTransactions = createAsyncThunk(
             .map((t) => t.id)
             .filter(isDefined);
         const minId = transactionIdArray[transactionIdArray.length - 1];
-        const filter = loadShielded
-            ? shieldedOnlyFilter(account.transactionFilter)
-            : account.transactionFilter;
 
         try {
             const { transactions, more } = await getTransactions(
                 account.address,
-                filter,
+                account.transactionFilter,
                 size,
                 append ? minId : undefined,
-                rejectIfInvalid
+                rejectIfInvalid,
+                loadShielded
             );
 
             const {
