@@ -34,11 +34,6 @@ export default function useAccountSync(onError: (message: string) => void) {
     const viewingShielded = useSelector(viewingShieldedSelector);
     const abortUpdateRef = useRef(noOp);
     const [loadIsDone, setIsLoadDone] = useState(false);
-    // A change to the newTransactionsFlag is used to signal that new
-    // transactions are available and should be loaded.
-    const [newTransactionsFlag, setNewTransactionsFlag] = useState<boolean>(
-        false
-    );
     const accountInfoLoaded = Boolean(accountInfo);
 
     // Periodically update the account info to keep it in sync
@@ -70,27 +65,35 @@ export default function useAccountSync(onError: (message: string) => void) {
         []
     );
 
-    const newTransactionsDependencyArray = [
-        accountInfo?.accountAmount,
-        JSON.stringify(accountInfo?.accountEncryptedAmount.incomingAmounts),
-    ];
+    // Load any new shielded transactions if the shielded amount changes.
     useEffect(() => {
-        if (loadIsDone) {
-            setNewTransactionsFlag(!newTransactionsFlag);
+        if (
+            loadIsDone &&
+            viewingShielded &&
+            !account?.transactionFilter.toDate
+        ) {
+            const load = dispatch(
+                loadNewTransactions({ loadNewShielded: true })
+            );
+            return () => {
+                load.abort();
+            };
         }
+        return () => {};
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, newTransactionsDependencyArray);
+    }, [JSON.stringify(accountInfo?.accountEncryptedAmount.incomingAmounts)]);
 
     // Load any new transactions if the account amount changes, as that indicates that a
     // transaction affected the account.
     useEffect(() => {
-        if (loadIsDone) {
+        if (
+            loadIsDone &&
+            !viewingShielded &&
+            !account?.transactionFilter.toDate
+        ) {
             const load = dispatch(
-                loadNewTransactions({
-                    showLoading: true,
-                })
+                loadNewTransactions({ loadNewShielded: false })
             );
-
             return () => {
                 load.abort();
             };
@@ -98,7 +101,7 @@ export default function useAccountSync(onError: (message: string) => void) {
 
         return () => {};
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [newTransactionsFlag]);
+    }, [accountInfo?.accountAmount]);
 
     // Re-load transactions entirely from the wallet proxy if:
     // - the filter is changed
@@ -128,6 +131,7 @@ export default function useAccountSync(onError: (message: string) => void) {
             loadTransactions({
                 showLoading: true,
                 force: true,
+                loadShielded: viewingShielded,
             })
         );
         load.then(unwrapResult)
