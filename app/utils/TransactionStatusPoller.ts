@@ -58,7 +58,7 @@ export function updateAccountCredentialsPerformConsequence(
     removeExternalCredentials(dispatch, transaction.payload.removedCredIds);
 }
 
-async function ShieldedTransferConsequence(
+function ShieldedTransferConsequence(
     dispatch: Dispatch,
     transaction: TransferTransaction
 ) {
