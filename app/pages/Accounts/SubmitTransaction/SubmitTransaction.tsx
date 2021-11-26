@@ -244,18 +244,18 @@ export default function SubmitTransaction({ location }: Props) {
         const response = await sendTransaction(serializedTransaction);
 
         if (response) {
-            // Save the decrypted amount for shielded transfers, so the user doesn't have to decrypt them later.
-            if (
-                instanceOfEncryptedTransfer(transaction) ||
-                instanceOfEncryptedTransferWithMemo(transaction)
-            ) {
-                await insert({
-                    transactionHash,
-                    amount: transaction.payload.plainTransferAmount,
-                });
-            }
-
             try {
+                // Save the decrypted amount for shielded transfers, so the user doesn't have to decrypt them later.
+                if (
+                    instanceOfEncryptedTransfer(transaction) ||
+                    instanceOfEncryptedTransferWithMemo(transaction)
+                ) {
+                    await insert({
+                        transactionHash,
+                        amount: transaction.payload.plainTransferAmount,
+                    });
+                }
+
                 // If an error happens here, it only means the transaction couldn't be added as pending, so no reason to show user an error.
                 const convertedTransaction = await addPendingTransaction(
                     transaction,
