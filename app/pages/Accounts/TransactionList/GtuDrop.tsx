@@ -65,7 +65,7 @@ async function handleGtuDrop(
         return;
     }
 
-    dispatch(reloadTransactions());
+    dispatch(reloadTransactions({ onlyLoadShielded: false }));
 }
 
 /**
