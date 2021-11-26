@@ -32,6 +32,7 @@ import {
     insertExternalCredentials,
     removeExternalCredentials,
 } from '~/features/CredentialSlice';
+import { insert } from '~/database/DecryptedAmountsDao';
 
 /**
  * Given an UpdateAccountCredentials transaction, update the local state
@@ -58,7 +59,7 @@ export function updateAccountCredentialsPerformConsequence(
     removeExternalCredentials(dispatch, transaction.payload.removedCredIds);
 }
 
-function ShieldedTransferConsequence(
+async function ShieldedTransferConsequence(
     dispatch: Dispatch,
     transaction: TransferTransaction
 ) {
@@ -68,6 +69,12 @@ function ShieldedTransferConsequence(
     const { newSelfEncryptedAmount, remainingDecryptedAmount } = parse(
         transaction.encrypted
     );
+    if (transaction.decryptedAmount) {
+        await insert({
+            transactionHash: transaction.transactionHash,
+            amount: transaction.decryptedAmount,
+        });
+    }
     return updateShieldedBalance(
         dispatch,
         transaction.fromAddress,
