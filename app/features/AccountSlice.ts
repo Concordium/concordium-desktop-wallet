@@ -33,6 +33,7 @@ import {
     Identity,
     TransactionFilter,
     Hex,
+    IdentityVersion,
 } from '../utils/types';
 import { createAccount, isValidAddress } from '../utils/accountHelpers';
 import {
@@ -558,8 +559,9 @@ export async function confirmAccount(
 // Decrypts the shielded account balance of the given account, using the prfKey.
 // This function expects the prfKey to match the account's prfKey.
 export async function decryptAccountBalance(
-    prfKey: string,
     account: Account,
+    prfKey: string,
+    identityVersion: IdentityVersion,
     credentialNumber: number,
     global: Global,
     dispatch: Dispatch
@@ -574,7 +576,8 @@ export async function decryptAccountBalance(
         encryptedAmounts,
         credentialNumber,
         global,
-        prfKey
+        prfKey,
+        identityVersion
     );
 
     const totalDecrypted = decryptedAmounts

@@ -24,9 +24,11 @@ import {
     instanceOfEncryptedTransfer,
     instanceOfEncryptedTransferWithMemo,
     MultiSignatureTransactionStatus,
+    IdentityVersion,
 } from '~/utils/types';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { addPendingTransaction } from '~/features/TransactionSlice';
+import { specificIdentitySelector } from '~/features/IdentitySlice';
 import { accountsInfoSelector } from '~/features/AccountSlice';
 import { globalSelector } from '~/features/GlobalSlice';
 import { getAccountPath } from '~/features/ledger/Path';
@@ -68,6 +70,7 @@ async function attachCompletedPayload(
     global: Global,
     credential: CredentialWithIdentityNumber,
     accountInfo: AccountInfo,
+    identityVersion: IdentityVersion,
     setMessage: (message: string) => void
 ) {
     const getPrfKey = async () => {
@@ -85,7 +88,8 @@ async function attachCompletedPayload(
             await getPrfKey(),
             global,
             accountInfo.accountEncryptedAmount,
-            credential.credentialNumber
+            credential.credentialNumber,
+            identityVersion
         );
 
         const payload = {
@@ -102,7 +106,8 @@ async function attachCompletedPayload(
             await getPrfKey(),
             global,
             accountInfo.accountEncryptedAmount,
-            credential.credentialNumber
+            credential.credentialNumber,
+            identityVersion
         );
         const payload = {
             ...transaction.payload,
@@ -127,7 +132,8 @@ async function attachCompletedPayload(
             await getPrfKey(),
             global,
             accountInfo.accountEncryptedAmount,
-            credential.credentialNumber
+            credential.credentialNumber,
+            identityVersion
         );
 
         const payload = {
@@ -164,6 +170,9 @@ export default function SubmitTransaction({ location }: Props) {
         confirmed,
     } = location.state;
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const identity = useSelector(specificIdentitySelector(account.identityId));
+
     let transaction: AccountTransaction = parse(transactionJSON);
     const handler = findHandler(transaction);
 
@@ -192,12 +201,19 @@ export default function SubmitTransaction({ location }: Props) {
             );
         }
 
+        if (identity === undefined) {
+            throw new Error(
+                'The identity was not found. This is an internal error that should be reported'
+            );
+        }
+
         transaction = await attachCompletedPayload(
             transaction,
             ledger,
             global,
             credential,
             accountInfoMap[account.address],
+            identity.version,
             setMessage
         );
 

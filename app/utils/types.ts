@@ -103,21 +103,50 @@ export enum IdentityStatus {
     Genesis = 'genesis',
 }
 
-/**
- * This Interface models the structure of the identities stored in the database.
- */
-export interface Identity {
+// IdentityVersion = 0 means that the identity was created using the legacy BLS12-381 key generation,
+// decoding the seed as UTF-8.
+// IdentityVersion = 1 means that the identity was created using the corrected BLS12-381 key generation,
+// decoding the seed as Hex.
+export type IdentityVersion = 1 | 0;
+
+interface BaseIdentity {
+    status: IdentityStatus;
     id: number;
     identityNumber: number;
     name: string;
-    identityObject: string;
-    status: IdentityStatus;
-    detail: string;
     codeUri: string;
     identityProvider: string;
     randomness: string;
     walletId: number;
+    version: IdentityVersion;
 }
+
+export interface ConfirmedIdentity extends BaseIdentity {
+    status: IdentityStatus.Confirmed;
+    identityObject: string;
+}
+
+export interface RejectedIdentity extends BaseIdentity {
+    status: IdentityStatus.RejectedAndWarned | IdentityStatus.Rejected;
+    detail: string;
+}
+
+export interface RecoveredIdentity extends Omit<BaseIdentity, 'codeUri'> {
+    status: IdentityStatus.Recovered | IdentityStatus.Genesis;
+}
+
+export interface PendingIdentity extends BaseIdentity {
+    status: IdentityStatus.Pending;
+}
+
+/**
+ * This Interface models the structure of the identities stored in the database.
+ */
+export type Identity =
+    | ConfirmedIdentity
+    | RejectedIdentity
+    | RecoveredIdentity
+    | PendingIdentity;
 
 // Statuses that an account can have.
 export enum AccountStatus {

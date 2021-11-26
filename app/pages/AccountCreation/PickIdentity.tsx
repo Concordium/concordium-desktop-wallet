@@ -5,7 +5,7 @@ import clsx from 'clsx';
 import { confirmedIdentitiesSelector } from '~/features/IdentitySlice';
 import routes from '~/constants/routes.json';
 import IdentityCard from '~/components/IdentityCard';
-import { Identity } from '~/utils/types';
+import { ConfirmedIdentity } from '~/utils/types';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
@@ -14,9 +14,9 @@ import styles from './AccountCreation.module.scss';
 import CardList from '~/cross-app-components/CardList';
 
 interface Props {
-    identity: Identity | undefined;
+    identity: ConfirmedIdentity | undefined;
     resetChosenAttributes(): void;
-    setIdentity(identity: Identity): void;
+    setIdentity(identity: ConfirmedIdentity): void;
 }
 
 export default function AccountCreationPickIdentity({

@@ -2,6 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { decryptAccountBalance } from '~/features/AccountSlice';
 import { globalSelector } from '~/features/GlobalSlice';
+import { specificIdentitySelector } from '~/features/IdentitySlice';
 import {
     shieldedTransactionsSelector,
     updateTransactionFields,
@@ -32,6 +33,7 @@ interface Props {
 export default function DecryptComponent({ account, onDecrypt }: Props) {
     const dispatch = useDispatch();
     const global = useSelector(globalSelector);
+    const identity = useSelector(specificIdentitySelector(account.identityId));
     const shieldedTransactions = useSelector(
         shieldedTransactionsSelector
     ).filter(isSuccessfulEncryptedTransaction);
@@ -47,6 +49,12 @@ export default function DecryptComponent({ account, onDecrypt }: Props) {
         if (account.identityNumber === undefined) {
             throw new Error(
                 'The account is missing an identity number. This is an internal error that should be reported'
+            );
+        }
+
+        if (identity === undefined) {
+            throw new Error(
+                'The identity was not found. This is an internal error that should be reported'
             );
         }
 
@@ -81,6 +89,7 @@ export default function DecryptComponent({ account, onDecrypt }: Props) {
             missingDecryptedAmount,
             account.address,
             prfKey,
+            identity.version,
             credentialNumber,
             global
         );
@@ -93,8 +102,9 @@ export default function DecryptComponent({ account, onDecrypt }: Props) {
         }
 
         await decryptAccountBalance(
-            prfKey,
             account,
+            prfKey,
+            identity.version,
             credentialNumber,
             global,
             dispatch

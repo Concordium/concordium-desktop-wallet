@@ -15,6 +15,7 @@ import {
     AddressBookEntry,
     Identity,
     IdentityStatus,
+    IdentityVersion,
 } from '~/utils/types';
 import { IdentityMethods } from '~/preload/preloadTypes';
 
@@ -152,6 +153,15 @@ async function removeIdentityAndInitialAccount(identityId: number) {
             .then(trx.commit)
             .catch(trx.rollback);
     });
+}
+
+export async function getIdentityVersion(
+    identityId: number
+): Promise<IdentityVersion | undefined> {
+    const identity = await (await knex())<Identity>(identitiesTable)
+        .where({ id: identityId })
+        .first();
+    return identity?.version;
 }
 
 const exposedMethods: IdentityMethods = {

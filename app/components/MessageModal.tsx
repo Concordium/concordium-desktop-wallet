@@ -4,6 +4,7 @@ import Button from '~/cross-app-components/Button';
 
 interface Props {
     title: string;
+    message?: string;
     buttonText: string;
     open: boolean;
     onClose(): void;
@@ -13,6 +14,7 @@ interface Props {
 export default function MessageModal({
     title,
     buttonText,
+    message,
     open,
     onClose,
     disableClose,
@@ -20,6 +22,7 @@ export default function MessageModal({
     return (
         <Modal onClose={onClose} open={open} disableClose={disableClose}>
             <h2>{title}</h2>
+            {Boolean(message) && <p>{message}</p>}
             <Button onClick={onClose} className="mT50">
                 {buttonText}
             </Button>

@@ -36,8 +36,8 @@ type ExampleAttributeList = AttributeList<BaseField, AttributeKind>;
 **/
 pub fn create_genesis_account (
     input: &str,
-    id_cred_sec_seed: &str,
-    prf_key_seed: &str,
+    id_cred_sec: Value<ExampleCurve>,
+    prf_key: prf::SecretKey<ExampleCurve>,
 ) -> Result<String> {
     let v: SerdeValue = from_str(input)?;
 
@@ -47,9 +47,6 @@ pub fn create_genesis_account (
     let ip_info: IpInfo<Bls12> = try_get(&v, "ipInfo")?;
     let global_context: GlobalContext<ExampleCurve> = try_get(&v, "global")?;
     let cred_counter: u8 = try_get(&v, "credentialNumber")?;
-
-    let id_cred_sec = Value::new(generate_bls_key(id_cred_sec_seed)?);
-    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls_key(prf_key_seed)?);
 
     let initial_acc_data = InitialAccountDataStruct {
         public_keys: try_get(&v, "publicKeys")?,
