@@ -278,17 +278,23 @@ export function initAccounts(dispatch: Dispatch) {
 // determine whether the account has received or sent new funds,
 // and in that case return the the state of the account that should be updated to reflect that.
 async function updateAccountEncryptedAmount(
-    account: Account,
+    address: string,
     accountEncryptedAmount: AccountEncryptedAmount
 ): Promise<Partial<Account>> {
     const { incomingAmounts } = accountEncryptedAmount;
     const selfAmounts = accountEncryptedAmount.selfAmount;
     const incomingAmountsString = JSON.stringify(incomingAmounts);
-
+    // Get the account and hasPending from the database at the same time, to avoid race condition with transaction finalization.
+    const account = await getAccount(address);
+    if (!account) {
+        throw new Error(
+            `Account, ${address}, was unexpectedly not in the database`
+        );
+    }
+    const hasPending = await hasPendingTransactions(address);
     const incoming = account.incomingAmounts !== incomingAmountsString;
     const checkExternalSelfUpdate =
-        account.selfAmounts !== selfAmounts &&
-        !(await hasPendingTransactions(account.address));
+        account.selfAmounts !== selfAmounts && !hasPending;
 
     if (incoming || checkExternalSelfUpdate) {
         return {
@@ -382,7 +388,7 @@ async function updateAccountFromAccountInfo(
     }
 
     const encryptedAmountsUpdate = await updateAccountEncryptedAmount(
-        account,
+        account.address,
         accountInfo.accountEncryptedAmount
     );
 
