@@ -22,7 +22,6 @@ interface Props {
     preCallback?: LedgerCallback<{ identityNumber: number }> | LedgerCallback;
     disabled?: boolean;
 }
-
 export default function SimpleLedgerWithCreationKeys({
     className,
     identityNumber,

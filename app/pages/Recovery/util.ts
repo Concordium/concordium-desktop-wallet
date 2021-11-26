@@ -1,6 +1,6 @@
 import {
     getAddressFromCredentialId,
-    computeCredId,
+    computeCredIdFromSeed,
 } from '~/utils/rustInterface';
 import {
     insertFromRecoveryExistingIdentity,
@@ -17,6 +17,7 @@ import {
     Versioned,
     AccountAndCredentialPairs,
     Identity,
+    IdentityVersion,
 } from '~/utils/types';
 import { getCurrentYearMonth } from '~/utils/timeHelpers';
 import { maxCredentialsOnIdentity } from '~/constants/recoveryConstants.json';
@@ -39,11 +40,13 @@ export function getRecoveredIdentityName(identityNumber: number) {
  * Creates an placeholder identity,
  * @param walletId the wallet on which the identity is created.
  * @param identityNumber the identity's number on the wallet.
+ * @param identityVersion the version, which the identity's PRF key and IdCredSec were generated with.
  * @returns the id of the created identity.
  */
 export async function createRecoveredIdentity(
     walletId: number,
-    identityNumber: number
+    identityNumber: number,
+    identityVersion: IdentityVersion
 ): Promise<Omit<Identity, 'id'>> {
     const createdAt = getCurrentYearMonth();
     const validTo = getCurrentYearMonth();
@@ -83,6 +86,7 @@ export async function createRecoveredIdentity(
         identityProvider: '{}',
         randomness: '',
         walletId,
+        version: identityVersion,
     };
 
     return identity;
@@ -192,13 +196,19 @@ export async function recoverCredentials(
     identityId: number,
     blockHash: string,
     global: Global,
+    identityVersion: IdentityVersion,
     controller: AbortController,
     startingCredNumber = 0
 ): Promise<AccountAndCredentialPairs> {
     const allRecovered = [];
     let credNumber = startingCredNumber;
     while (credNumber < maxCredentialsOnIdentity) {
-        const credId = await computeCredId(prfKeySeed, credNumber, global);
+        const credId = await computeCredIdFromSeed(
+            prfKeySeed,
+            credNumber,
+            global,
+            identityVersion
+        );
 
         const recovered = await recoverCredential(
             credId,
@@ -234,6 +244,7 @@ export async function recoverFromIdentity(
     blockHash: string,
     global: Global,
     identityId: number,
+    identityVersion: IdentityVersion,
     controller: AbortController
 ) {
     const nextCredentialNumber = await getNextCredentialNumber(identityId);
@@ -242,6 +253,7 @@ export async function recoverFromIdentity(
         identityId,
         blockHash,
         global,
+        identityVersion,
         controller,
         nextCredentialNumber
     );
@@ -268,6 +280,7 @@ export async function recoverNewIdentity(
     global: Global,
     identityNumber: number,
     walletId: number,
+    identityVersion: IdentityVersion,
     controller: AbortController
 ) {
     const recovered = await recoverCredentials(
@@ -275,6 +288,7 @@ export async function recoverNewIdentity(
         0,
         blockHash,
         global,
+        identityVersion,
         controller
     );
 
@@ -282,7 +296,8 @@ export async function recoverNewIdentity(
     if (recovered.length && !controller.isAborted) {
         const identity = await createRecoveredIdentity(
             walletId,
-            identityNumber
+            identityNumber,
+            identityVersion
         );
         if (recovered.length > 0) {
             await insertFromRecoveryNewIdentity(recovered, identity);

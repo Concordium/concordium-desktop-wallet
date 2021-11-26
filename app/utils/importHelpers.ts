@@ -51,6 +51,8 @@ interface AttachedEntities {
     attachedAccounts: Account[];
 }
 
+type KeyofUnion<T> = T extends T ? keyof T : never;
+
 export type AddMessage<IdType = string | number> = (
     id: IdType,
     message: string
@@ -153,7 +155,7 @@ export function updateWalletIdReference<T extends HasWalletId>(
  * @param fields the fields that defines equality between the entries
  * @returns true if the entry is a duplicate of an element in the existing list
  */
-export function isDuplicate<T>(entry: T, list: T[], fields: (keyof T)[]) {
+export function isDuplicate<T>(entry: T, list: T[], fields: KeyofUnion<T>[]) {
     return list.some((listElement) =>
         fields
             .map((field) => listElement[field] === entry[field])
@@ -746,7 +748,7 @@ export async function importWallets(
 export function hasNoDuplicate<T>(
     entry: T,
     list: T[],
-    fields: (keyof T)[],
+    fields: KeyofUnion<T>[],
     commonFields: (keyof T)[] | undefined = undefined
 ) {
     if (isDuplicate(entry, list, fields)) {

@@ -4,7 +4,16 @@ import {
     ChosenAttributes,
     AttributeKey,
     AttributeKeyName,
+    PendingIdentity,
+    IdentityStatus,
+    ConfirmedIdentity,
+    RecoveredIdentity,
+    RejectedIdentity,
+    IdentityVersion,
 } from './types';
+
+// Version that current identities are created with.
+export const currentIdentityVersion: IdentityVersion = 1;
 
 export const IDENTITY_NAME_MAX_LENGTH = 25;
 
@@ -111,7 +120,39 @@ export function compareAttributes(
     return attr1 - attr2;
 }
 
-export function getSessionId(identity: Identity) {
+export function getSessionId(
+    identity: PendingIdentity | RejectedIdentity | ConfirmedIdentity
+) {
     const hash = window.cryptoMethods.sha256([identity.codeUri]);
     return Buffer.from(hash).toString('hex');
+}
+
+export function isConfirmedIdentity(
+    identity: Identity
+): identity is ConfirmedIdentity {
+    return identity.status === IdentityStatus.Confirmed;
+}
+
+export function isPendingIdentity(
+    identity: Identity
+): identity is PendingIdentity {
+    return identity.status === IdentityStatus.Pending;
+}
+
+export function isRecoveredIdentity(
+    identity: Identity
+): identity is RecoveredIdentity {
+    return (
+        identity.status === IdentityStatus.Recovered ||
+        identity.status === IdentityStatus.Genesis
+    );
+}
+
+export function isRejectedIdentity(
+    identity: Identity
+): identity is RejectedIdentity {
+    return (
+        identity.status === IdentityStatus.Rejected ||
+        identity.status === IdentityStatus.RejectedAndWarned
+    );
 }

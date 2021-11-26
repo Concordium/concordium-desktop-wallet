@@ -127,7 +127,24 @@ async function getTransactions(
         transactions
     );
 
-    return { transactions: filteredTransactions, full: count === limit };
+    let minId;
+    let maxId;
+    if (transactions.length > 0) {
+        if (order === TransactionOrder.Descending) {
+            minId = transactions[transactions.length - 1].id;
+            maxId = transactions[0].id;
+        } else {
+            maxId = transactions[transactions.length - 1].id;
+            minId = transactions[0].id;
+        }
+    }
+
+    return {
+        transactions: filteredTransactions,
+        full: count === limit,
+        minId,
+        maxId,
+    };
 }
 
 async function gtuDrop(address: string) {

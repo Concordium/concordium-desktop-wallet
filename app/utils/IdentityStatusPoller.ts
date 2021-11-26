@@ -3,13 +3,14 @@ import {
     Credential,
     Dispatch,
     Identity,
-    IdentityStatus,
+    PendingIdentity,
 } from './types';
 import { getIdObject } from './httpRequests';
 import { getAccountsOfIdentity } from '../database/AccountDao';
 import { loadIdentities } from '../features/IdentitySlice';
 import { loadAccounts } from '../features/AccountSlice';
 import { isInitialAccount } from './accountHelpers';
+import { isPendingIdentity } from './identityHelpers';
 import {
     confirmIdentity,
     getAllIdentities,
@@ -88,7 +89,7 @@ async function findInitialAccount(identity: Identity) {
 }
 
 export async function resumeIdentityStatusPolling(
-    identity: Identity,
+    identity: PendingIdentity,
     dispatch: Dispatch
 ) {
     const { name: identityName, codeUri: location, id } = identity;
@@ -109,6 +110,6 @@ export async function resumeIdentityStatusPolling(
 export default async function listenForIdentityStatus(dispatch: Dispatch) {
     const identities = await getAllIdentities();
     identities
-        .filter((identity) => identity.status === IdentityStatus.Pending)
+        .filter(isPendingIdentity)
         .forEach((identity) => resumeIdentityStatusPolling(identity, dispatch));
 }

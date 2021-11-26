@@ -4,6 +4,7 @@ import {
     TransactionKindString,
     TransactionStatus,
     TransferTransaction,
+    IdentityVersion,
 } from './types';
 
 const encryptedTypes = [
@@ -48,6 +49,7 @@ export default async function decryptTransactions(
     encryptedTransfers: TransferTransaction[],
     accountAddress: string,
     prfKey: string,
+    identityVersion: IdentityVersion,
     credentialNumber: number,
     global: Global
 ) {
@@ -79,7 +81,8 @@ export default async function decryptTransactions(
         encryptedAmountForDecryption,
         credentialNumber,
         global,
-        prfKey
+        prfKey,
+        identityVersion
     );
 
     let offset = 0;

@@ -21,6 +21,7 @@ import {
     loadingTransactionsSelector,
     loadTransactions,
     transactionLogPageSize,
+    viewingShieldedSelector,
 } from '~/features/TransactionSlice';
 import TransactionListHeader, {
     transactionListHeaderHeight,
@@ -85,6 +86,7 @@ export default function InfiniteTransactionList({
     const dispatch = useThunkDispatch();
     const loading = useSelector(loadingTransactionsSelector);
     const hasMore = useSelector(hasMoreTransactionsSelector);
+    const isViewingShielded = useSelector(viewingShieldedSelector);
     const [error, setError] = useState<string | undefined>();
 
     const loadMore = useCallback(async () => {
@@ -96,6 +98,7 @@ export default function InfiniteTransactionList({
                 showLoading: true,
                 append: true,
                 force: true,
+                onlyLoadShielded: isViewingShielded,
             })
         );
         load.then(unwrapResult).catch((e) => {
@@ -107,7 +110,7 @@ export default function InfiniteTransactionList({
         if (abortRef !== undefined) {
             abortRef.current = load.abort;
         }
-    }, [dispatch, loading, hasMore, abortRef, error]);
+    }, [dispatch, loading, hasMore, abortRef, error, isViewingShielded]);
 
     const groups = useTransactionGroups(transactions);
     const headersAndTransactions = groups.flat(2);

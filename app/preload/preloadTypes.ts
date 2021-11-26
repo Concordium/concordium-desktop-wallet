@@ -138,6 +138,8 @@ export type CryptoMethods = {
 export type GetTransactionsResult = {
     transactions: IncomingTransaction[];
     full: boolean;
+    minId?: string;
+    maxId?: string;
 };
 
 export interface HttpGetResponse<T> {
@@ -269,7 +271,7 @@ export type IdentityMethods = {
         addressBookEntry: AddressBookEntry
     ) => Promise<void>;
     insertPendingIdentityAndInitialAccount: (
-        identity: Partial<Identity>,
+        identity: Omit<Identity, 'id'>,
         initialAccount: Omit<Account, 'identityId'>
     ) => Promise<number>;
 };

@@ -1,9 +1,9 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { IdentityStatus } from '~/utils/types';
 import { chosenIdentitySelector } from '~/features/IdentitySlice';
 import IdentityCard from '~/components/IdentityCard';
 import FailedIdentityModal from '~/components/FailedIdentityModal';
+import { isRejectedIdentity } from '~/utils/identityHelpers';
 
 /**
  * Detailed view of the chosen identity.
@@ -17,12 +17,9 @@ export default function IdentityView() {
 
     return (
         <>
-            <FailedIdentityModal
-                identityId={identity.id}
-                identityName={identity.name}
-                isRejected={identity.status === IdentityStatus.Rejected}
-                detail={identity.detail}
-            />
+            {isRejectedIdentity(identity) && (
+                <FailedIdentityModal identity={identity} />
+            )}
             <IdentityCard identity={identity} showAttributes canEdit />
         </>
     );
