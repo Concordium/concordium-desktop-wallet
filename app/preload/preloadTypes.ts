@@ -138,6 +138,8 @@ export type CryptoMethods = {
 export type GetTransactionsResult = {
     transactions: IncomingTransaction[];
     full: boolean;
+    minId?: string;
+    maxId?: string;
 };
 
 export interface HttpGetResponse<T> {
