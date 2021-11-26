@@ -98,7 +98,7 @@ export default function InfiniteTransactionList({
                 showLoading: true,
                 append: true,
                 force: true,
-                loadShielded: isViewingShielded,
+                onlyLoadShielded: isViewingShielded,
             })
         );
         load.then(unwrapResult).catch((e) => {

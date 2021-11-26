@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { unwrapResult } from '@reduxjs/toolkit';
 import {
@@ -36,6 +36,21 @@ export default function useAccountSync(onError: (message: string) => void) {
     const [loadIsDone, setIsLoadDone] = useState(false);
     const accountInfoLoaded = Boolean(accountInfo);
 
+    const loadNew = useCallback(
+        (onlyLoadNewShielded: boolean) => {
+            if (loadIsDone && !account?.transactionFilter.toDate) {
+                const load = dispatch(
+                    loadNewTransactions({ onlyLoadNewShielded })
+                );
+                return () => {
+                    load.abort();
+                };
+            }
+            return () => {};
+        },
+        [loadIsDone, account?.transactionFilter.toDate, dispatch]
+    );
+
     // Periodically update the account info to keep it in sync
     // with the information from the node.
     useEffect(() => {
@@ -67,17 +82,8 @@ export default function useAccountSync(onError: (message: string) => void) {
 
     // Load any new shielded transactions if the shielded amount changes.
     useEffect(() => {
-        if (
-            loadIsDone &&
-            viewingShielded &&
-            !account?.transactionFilter.toDate
-        ) {
-            const load = dispatch(
-                loadNewTransactions({ loadNewShielded: true })
-            );
-            return () => {
-                load.abort();
-            };
+        if (viewingShielded) {
+            return loadNew(true);
         }
         return () => {};
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -86,19 +92,9 @@ export default function useAccountSync(onError: (message: string) => void) {
     // Load any new transactions if the account amount changes, as that indicates that a
     // transaction affected the account.
     useEffect(() => {
-        if (
-            loadIsDone &&
-            !viewingShielded &&
-            !account?.transactionFilter.toDate
-        ) {
-            const load = dispatch(
-                loadNewTransactions({ loadNewShielded: false })
-            );
-            return () => {
-                load.abort();
-            };
+        if (!viewingShielded) {
+            return loadNew(false);
         }
-
         return () => {};
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [accountInfo?.accountAmount]);
@@ -117,7 +113,10 @@ export default function useAccountSync(onError: (message: string) => void) {
     useEffect(() => {
         if (!accountInfoLoaded) {
             // Do not load anything until we also have the account info
-            // available.
+            // available. We use this to prevent fetching new transactions on
+            // a balance change, as those effects react on the first available
+            // accountInfo and we don't want them to do anything until after the
+            // first load has completed.
             return noOp;
         }
 
@@ -131,7 +130,7 @@ export default function useAccountSync(onError: (message: string) => void) {
             loadTransactions({
                 showLoading: true,
                 force: true,
-                loadShielded: viewingShielded,
+                onlyLoadShielded: viewingShielded,
             })
         );
         load.then(unwrapResult)

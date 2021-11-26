@@ -79,7 +79,7 @@ interface LoadTransactionsArgs {
     /**
      * If true only shielded transactions will be loaded.
      */
-    loadShielded: boolean;
+    onlyLoadShielded: boolean;
 }
 
 let latestLoadingRequestId: string | undefined;
@@ -137,13 +137,13 @@ function shieldedOnlyFilter(filter: TransactionFilter): TransactionFilter {
  * @param account the account to get new transactions for
  * @param transactions the current transactions in the state, assumed to be sorted descendingly
  * @param limit the maximum number of transactions to ask the wallet proxy for
- * @param loadShielded whether the transactions that should be retrieved are shielded transactions or not
+ * @param onlyLoadShielded whether the transactions that should be retrieved are shielded transactions or not
  */
 async function getNewTransactions(
     account: Account,
     transactionsInState: TransferTransaction[],
     limit: number,
-    loadShielded: boolean
+    onlyLoadShielded: boolean
 ): Promise<TransferTransaction[]> {
     // As the transactions in the state are in descending order on their id, the maxId
     // can be found as the first item with an id (if any exist).
@@ -152,7 +152,7 @@ async function getNewTransactions(
     const transactions: IncomingTransaction[] = [];
     let full = true;
     let currentMaxId = maxId;
-    const filter = loadShielded
+    const filter = onlyLoadShielded
         ? shieldedOnlyFilter(account.transactionFilter)
         : account.transactionFilter;
 
@@ -310,7 +310,7 @@ export const loadTransactions = createAsyncThunk(
             append = false,
             size = transactionLogPageSize,
             force = false,
-            loadShielded,
+            onlyLoadShielded,
         }: LoadTransactionsArgs,
         { getState, dispatch, requestId, signal }
     ) => {
@@ -350,7 +350,7 @@ export const loadTransactions = createAsyncThunk(
                 size,
                 append ? minId : undefined,
                 rejectIfInvalid,
-                loadShielded
+                onlyLoadShielded
             );
 
             const {
@@ -401,7 +401,7 @@ export const loadTransactions = createAsyncThunk(
 
 export const loadNewTransactions = createAsyncThunk(
     ActionTypePrefix.Update,
-    async (input: { loadNewShielded: boolean }, { getState, dispatch }) => {
+    async (input: { onlyLoadNewShielded: boolean }, { getState, dispatch }) => {
         const state = getState() as RootState;
         const account = chosenAccountSelector(state);
 
@@ -413,7 +413,7 @@ export const loadNewTransactions = createAsyncThunk(
             account,
             state.transactions.transactions,
             transactionLogPageSize,
-            input.loadNewShielded
+            input.onlyLoadNewShielded
         );
 
         // Filter out any transactions that are already in the state.
@@ -450,7 +450,7 @@ export const loadNewTransactions = createAsyncThunk(
 export const reloadTransactions = createAsyncThunk(
     ActionTypePrefix.Reload,
     async (
-        input: { loadShielded: boolean },
+        input: { onlyLoadShielded: boolean },
         { dispatch, getState, signal }
     ) => {
         // If a forced load is running, wait for it to finish, to reload with updated length of transactions.
@@ -467,7 +467,7 @@ export const reloadTransactions = createAsyncThunk(
         const load = dispatch(
             loadTransactions({
                 size: Math.max(transactions.length, transactionLogPageSize),
-                loadShielded: input.loadShielded,
+                onlyLoadShielded: input.onlyLoadShielded,
             })
         );
 
