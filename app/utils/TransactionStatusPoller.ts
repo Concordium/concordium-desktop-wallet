@@ -11,7 +11,6 @@ import {
     UpdateAccountCredentials,
     Transaction,
     TransferTransaction,
-    TransactionKindString,
 } from './types';
 import {
     confirmTransaction,
@@ -33,7 +32,6 @@ import {
     insertExternalCredentials,
     removeExternalCredentials,
 } from '~/features/CredentialSlice';
-import { insert } from '~/database/DecryptedAmountsDao';
 
 /**
  * Given an UpdateAccountCredentials transaction, update the local state
@@ -70,19 +68,6 @@ async function ShieldedTransferConsequence(
     const { newSelfEncryptedAmount, remainingDecryptedAmount } = parse(
         transaction.encrypted
     );
-    // Save the decrypted amount for shielded transfers, so the user doesn't have to decrypt them later.
-    if (
-        [
-            TransactionKindString.EncryptedAmountTransfer,
-            TransactionKindString.EncryptedAmountTransferWithMemo,
-        ].includes(transaction.transactionKind) &&
-        transaction.decryptedAmount
-    ) {
-        await insert({
-            transactionHash: transaction.transactionHash,
-            amount: transaction.decryptedAmount,
-        });
-    }
     return updateShieldedBalance(
         dispatch,
         transaction.fromAddress,

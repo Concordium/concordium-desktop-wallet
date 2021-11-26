@@ -47,6 +47,7 @@ import Card from '~/cross-app-components/Card';
 import PrintButton from '~/components/PrintButton';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import findHandler from '~/utils/transactionHandlers/HandlerFinder';
+import { insert } from '~/database/DecryptedAmountsDao';
 
 import styles from './SubmitTransaction.module.scss';
 
@@ -243,6 +244,17 @@ export default function SubmitTransaction({ location }: Props) {
         const response = await sendTransaction(serializedTransaction);
 
         if (response) {
+            // Save the decrypted amount for shielded transfers, so the user doesn't have to decrypt them later.
+            if (
+                instanceOfEncryptedTransfer(transaction) ||
+                instanceOfEncryptedTransferWithMemo(transaction)
+            ) {
+                await insert({
+                    transactionHash,
+                    amount: transaction.payload.plainTransferAmount,
+                });
+            }
+
             try {
                 // If an error happens here, it only means the transaction couldn't be added as pending, so no reason to show user an error.
                 const convertedTransaction = await addPendingTransaction(
