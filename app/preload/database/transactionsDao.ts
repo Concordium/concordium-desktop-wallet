@@ -50,7 +50,13 @@ async function getFilteredPendingTransactions(
             builder
                 .where({ fromAddress: address })
                 .andWhereBetween('blockTime', [fromTime, toTime])
+                .orWhere((orBuilder) =>
+                    orBuilder
+                        .where({ toAddress: address })
+                        .andWhereBetween('blockTime', [fromTime, toTime])
+                )
         )
+
         .orderBy('blockTime', 'desc');
 
     return queryTransactions;
