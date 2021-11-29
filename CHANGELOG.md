@@ -1,17 +1,24 @@
 # Changelog
 
-## Unreleased
+## 1.3.0
 
 ### Added
 
 -   Added a GTU drop option for testnet and stagenet.
 -   In the case of a failed identity, the error details received from the identity provider are now displayed to the user.
+-   UI flows for baker transactions for singler signer accounts.
 
 ### Changed
 
 -   Auxiliary data in an Update Protocol transaction is now optional.
 -   Updated terms and conditions.
 -   Updated UI to reflect the rename of GTU to CCD, meaning anywhere tokens were referred to as GTU, it now says CCD. The GTU icon has also been replaced with the icon representing CCD.
+-   Datetimes are now selected with a date picker from a calendar.
+-   Finalized transactions are no longer stored in the local database, but are instead always fetched from the wallet proxy when needed.
+
+### Fixed
+
+-   Failed database migrations errors are now shown correctly to the user.
 
 ## 1.2.0
 
