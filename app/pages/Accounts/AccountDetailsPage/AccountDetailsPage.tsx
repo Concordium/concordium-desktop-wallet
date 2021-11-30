@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, Route } from 'react-router';
 
@@ -43,6 +43,14 @@ export default withAccountSync(function DetailsPage() {
     const hasCredentials = useSelector(
         account ? accountHasDeployedCredentialsSelector(account) : () => false
     );
+    const abortRef = useRef<((reason?: string) => void) | undefined>(undefined);
+    useEffect(() => {
+        const { current } = abortRef;
+        return () => {
+            current?.();
+        };
+    }, [account?.address]);
+
     const isBaker = Boolean(accountInfo?.accountBaker);
     const canTransfer = hasCredentials && Boolean(accountInfo);
     const accountChanged = !useIsSubsequentRender();
@@ -147,7 +155,7 @@ export default withAccountSync(function DetailsPage() {
                         {viewingShielded && !account.allDecrypted ? (
                             <DecryptComponent account={account} />
                         ) : (
-                            <TransactionLog />
+                            <TransactionLog abortRef={abortRef} />
                         )}
                     </Route>
                 </BasicTransferRoutes>

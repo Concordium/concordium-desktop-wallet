@@ -101,8 +101,8 @@ export default class ConcordiumLedgerClientMain {
         return getPrfKeyDecrypt(this.transport, identity, version);
     }
 
-    getPrfKeyRecovery(identity: number, version: number): Promise<Buffer> {
-        return getPrfKeyRecovery(this.transport, identity, version);
+    getPrfKeyRecovery(identity: number): Promise<Buffer> {
+        return getPrfKeyRecovery(this.transport, identity);
     }
 
     verifyAddress(identity: number, credentialNumber: number): Promise<void> {

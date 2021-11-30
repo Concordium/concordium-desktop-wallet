@@ -23,6 +23,7 @@ import { getAddressFromCredentialId } from '~/utils/rustInterface';
 import generalStyles from '../IdentityIssuance.module.scss';
 import styles from './ExternalIssuance.module.scss';
 import { createInitialAccount } from '~/utils/accountHelpers';
+import { currentIdentityVersion } from '~/utils/identityHelpers';
 import { insertPendingIdentityAndInitialAccount } from '~/database/IdentityDao';
 import { getElementRectangle } from '~/utils/htmlHelpers';
 import { ViewResponseStatus } from '~/preload/preloadTypes';
@@ -119,7 +120,7 @@ async function generateIdentity(
             identityProvider: JSON.stringify(provider),
             randomness,
             walletId,
-            version: 1,
+            version: currentIdentityVersion,
         };
 
         const accountAddress = await getAddressFromCredentialId(

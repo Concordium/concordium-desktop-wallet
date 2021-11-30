@@ -28,15 +28,20 @@ export default function ExportBakerCredentials({
         if (accountInfo === undefined) {
             return;
         }
+        // We have to manually insert the bakerId into the JSON, because JS integers only supports 53bit precision, and JSON.stringify doesn't handle bigints.
         const fileString = JSON.stringify({
-            bakerId: accountInfo.accountIndex.toString(),
+            bakerId: 0, // Placeholder
             aggregationSignKey: bakerKeys.aggregationSecret,
             aggregationVerifyKey: bakerKeys.aggregationPublic,
             electionPrivateKey: bakerKeys.electionSecret,
             electionVerifyKey: bakerKeys.electionPublic,
             signatureSignKey: bakerKeys.signatureSecret,
             signatureVerifyKey: bakerKeys.signaturePublic,
-        });
+        }).replace(
+            '"bakerId":0',
+            `"bakerId":${accountInfo.accountIndex.toString()}`
+        );
+
         const success = await saveFile(fileString, {
             title: 'Save Baker Credentials',
             defaultPath: 'baker-credentials.json',

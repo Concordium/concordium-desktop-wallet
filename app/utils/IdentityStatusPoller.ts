@@ -38,7 +38,10 @@ export async function confirmIdentityAndInitialAccount(
     // The identity provider failed the identity creation request. Clean up the
     // identity and account in the database and refresh the state.
     if (idObjectResponse.error) {
-        await rejectIdentityAndInitialAccount(identityId);
+        await rejectIdentityAndInitialAccount(
+            identityId,
+            idObjectResponse.error.message
+        );
         await loadIdentities(dispatch);
         await loadAccounts(dispatch);
         return;

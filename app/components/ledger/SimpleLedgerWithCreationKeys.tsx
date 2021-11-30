@@ -4,7 +4,8 @@ import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import Card from '~/cross-app-components/Card';
 import Button from '~/cross-app-components/Button';
 import PublicKeyDetails from '~/components/ledger/PublicKeyDetails';
-import { CreationKeys } from '~/utils/types';
+import { CreationKeys, IdentityVersion } from '~/utils/types';
+
 import { exportKeysFromLedger } from '~/utils/rustInterface';
 import { LedgerCallback } from './util';
 
@@ -21,7 +22,7 @@ interface Props {
     ledgerCallback: (keys: CreationKeys) => LedgerCallback;
     preCallback?: LedgerCallback<{ identityNumber: number }> | LedgerCallback;
     disabled?: boolean;
-    identityVersion: number;
+    identityVersion: IdentityVersion;
 }
 export default function SimpleLedgerWithCreationKeys({
     className,

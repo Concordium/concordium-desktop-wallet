@@ -5,7 +5,7 @@ const versionField = 'version';
 
 export async function up(knex: Knex): Promise<void> {
     return knex.schema.alterTable(identitiesTable, (table) => {
-        table.integer(versionField).defaultTo(0);
+        table.integer(versionField).defaultTo(0).notNullable();
     });
 }
 

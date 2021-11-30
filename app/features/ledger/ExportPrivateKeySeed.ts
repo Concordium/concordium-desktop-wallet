@@ -6,11 +6,12 @@ const INS_EXPORT_PRIVATE_KEY_SEED = 0x05;
 const P1_PRF_KEY = 0;
 const P1_PRF_KEY_RECOVERY = 1;
 const P1_BOTH_KEYS = 2;
+const P2_SEEDS = 1;
 
 function getP2(version: number): number {
     switch (version) {
         case 0:
-            return 0x01;
+            return P2_SEEDS;
         case 1:
             return 0x02;
         default:
@@ -60,15 +61,17 @@ export async function getPrfKeyDecrypt(
     return response.slice(0, 32);
 }
 
+/**
+ * Recovery always exports the seed, because it needs to check both versions.
+ */
 export async function getPrfKeyRecovery(
     transport: Transport,
-    identity: number,
-    version: number
+    identity: number
 ): Promise<Buffer> {
     const response = await requestKeys(
         transport,
         P1_PRF_KEY_RECOVERY,
-        getP2(version),
+        P2_SEEDS,
         identity
     );
     return response.slice(0, 32);

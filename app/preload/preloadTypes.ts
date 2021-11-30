@@ -33,6 +33,9 @@ import {
     IncomingTransaction,
     AccountAndCredentialPairs,
     TransactionFilter,
+    TransactionOrder,
+    DecryptedAmount,
+    CredentialNumberPrfKey,
     IpInfo,
     ArInfo,
 } from '~/utils/types';
@@ -135,6 +138,8 @@ export type CryptoMethods = {
 export type GetTransactionsResult = {
     transactions: IncomingTransaction[];
     full: boolean;
+    minId?: string;
+    maxId?: string;
 };
 
 export interface HttpGetResponse<T> {
@@ -150,12 +155,11 @@ export type HttpMethods = {
     ) => Promise<HttpGetResponse<T>>;
     getTransactions: (
         address: string,
-        id: string
+        transactionFilter: TransactionFilter,
+        limit: number,
+        order: TransactionOrder,
+        id?: string
     ) => Promise<GetTransactionsResult>;
-    getNewestTransactions: (
-        address: string,
-        transactionFilter: TransactionFilter
-    ) => Promise<IncomingTransaction[]>;
     getIdProviders: () => Promise<IdentityProvider[]>;
     gtuDrop: (address: string) => Promise<string>;
 };
@@ -254,7 +258,10 @@ export type IdentityMethods = {
     insert: (identity: Partial<Identity> | Identity[]) => Promise<number[]>;
     update: (id: number, updatedValues: Partial<Identity>) => Promise<number>;
     getIdentitiesForWallet: (walletId: number) => Promise<Identity[]>;
-    rejectIdentityAndInitialAccount: (identityId: number) => Promise<void>;
+    rejectIdentityAndInitialAccount: (
+        identityId: number,
+        detail: string
+    ) => Promise<void>;
     removeIdentityAndInitialAccount: (identityId: number) => Promise<void>;
     confirmIdentity: (
         identityId: number,
@@ -305,19 +312,12 @@ export interface GetTransactionsOutput {
 export type TransactionMethods = {
     getPending: () => Promise<TransferTransaction[]>;
     hasPending: (address: string) => Promise<boolean>;
-    getTransactionsForAccount: (
-        address: Account,
+    getFilteredPendingTransactions: (
+        address: string,
         filteredTypes: TransactionKindString[],
         fromDate?: Date,
-        toDate?: Date,
-        limit?: number,
-        startId?: string
-    ) => Promise<GetTransactionsOutput>;
-    hasEncryptedTransactions: (
-        address: string,
-        fromTime: string,
-        toTime: string
-    ) => Promise<boolean>;
+        toDate?: Date
+    ) => Promise<TransferTransaction[]>;
     hasPendingShieldedBalanceTransfer: (address: string) => Promise<boolean>;
     update: (
         identifier: Record<string, unknown>,
@@ -327,16 +327,17 @@ export type TransactionMethods = {
         transactions: TransferTransaction[]
     ) => Promise<TransferTransaction[]>;
     getTransaction: (id: string) => Promise<TransferTransaction | undefined>;
-    upsertTransactionsAndUpdateMaxId: (
-        transactions: TransferTransaction[],
-        address: string,
-        newMaxId: bigint
-    ) => Promise<TransferTransaction[]>;
+    deleteTransaction: (transactionHash: string) => Promise<number>;
 };
 
 export type WalletMethods = {
     getWalletId: (identifier: Hex) => Promise<number | undefined>;
     insertWallet: (identifier: Hex, type: WalletType) => Promise<number>;
+};
+
+export type DecryptedAmountsMethods = {
+    insert: (entry: DecryptedAmount) => Promise<number[]>;
+    findEntries: (transactionHashes: string[]) => Promise<DecryptedAmount[]>;
 };
 
 export enum ViewResponseStatus {
@@ -383,6 +384,7 @@ export type Database = {
     settings: SettingsMethods;
     transaction: TransactionMethods;
     wallet: WalletMethods;
+    decyptedAmounts: DecryptedAmountsMethods;
 };
 
 export interface AutoUpdateMethods {
@@ -398,12 +400,16 @@ export interface AccountReportMethods {
     single: (
         fileName: string,
         account: Account,
-        filters: TransactionFilter
+        filters: TransactionFilter,
+        global: Global,
+        keys: Record<string, CredentialNumberPrfKey>
     ) => Promise<void>;
     multiple: (
         fileName: string,
         accounts: Account[],
-        filters: TransactionFilter
+        filters: TransactionFilter,
+        global: Global,
+        keys: Record<string, CredentialNumberPrfKey>
     ) => Promise<void>;
     abort: () => void;
 }

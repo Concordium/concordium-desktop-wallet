@@ -54,7 +54,7 @@ type LedgerCommands = {
     ) => Promise<void>;
     getPrivateKeys: (identity: number, version: number) => Promise<PrivateKeys>;
     getPrfKeyDecrypt: (identity: number, version: number) => ReturnBuffer;
-    getPrfKeyRecovery: (identity: number, version: number) => ReturnBuffer;
+    getPrfKeyRecovery: (identity: number) => ReturnBuffer;
     signTransfer: SignAccountTransaction<AccountTransaction>;
     signPublicInformationForIp: (
         publicInfoForIp: PublicInformationForIp,

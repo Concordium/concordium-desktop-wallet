@@ -2,7 +2,12 @@ import React, { useState, useCallback, useRef } from 'react';
 import clsx from 'clsx';
 import { LocationDescriptorObject } from 'history';
 import PlusIcon from '@resources/svg/plus.svg';
-import { Account, TransactionFilter } from '~/utils/types';
+import { useSelector } from 'react-redux';
+import {
+    Account,
+    CredentialNumberPrfKey,
+    TransactionFilter,
+} from '~/utils/types';
 import PageLayout from '~/components/PageLayout';
 import AccountPageHeader from '../../AccountPageHeader';
 import routes from '~/constants/routes.json';
@@ -18,12 +23,13 @@ import DisplayAddress from '~/components/DisplayAddress';
 import TransactionFilters, {
     TransactionFiltersRef,
 } from '~/components/TransactionFilters';
-import { containsEncrypted } from './util';
 import DecryptModal, { DecryptModalInput } from './DecryptModal';
 import MessageModal from '~/components/MessageModal';
 import Columns from '~/components/Columns';
 
 import styles from './AccountReport.module.scss';
+import { hasEncryptedBalance } from '~/utils/accountHelpers';
+import { globalSelector } from '~/features/GlobalSlice';
 
 const decryptMessage = (name: string) =>
     `'${name}' has encrypted funds. To create a complete account report, we need to decrypt them. Otherwise this account will be skipped.`;
@@ -41,6 +47,13 @@ interface Props {
  * Allows the user to enable filters and to choose accounts.
  */
 export default function AccountReport({ location }: Props) {
+    const global = useSelector(globalSelector);
+    if (!global) {
+        throw new Error(
+            'Global must be available before we can make the account report'
+        );
+    }
+
     const [showError, setShowError] = useState<ModalErrorInput>({
         show: false,
     });
@@ -56,31 +69,69 @@ export default function AccountReport({ location }: Props) {
     const filtersRef = useRef<TransactionFiltersRef>(null);
 
     function promptDecrypt(account: Account) {
-        return new Promise((resolve) => {
+        return new Promise<{
+            decrypted: boolean;
+            address: string;
+            credentialNumber: number;
+            prfKeySeed: string;
+        }>((resolve) => {
             setShowDecrypt({
                 show: true,
                 header: decryptMessage(account.name),
                 account,
-                onFinish: (decrypted) => {
-                    setShowDecrypt({ show: false });
-                    resolve(decrypted);
+                onFinish: (
+                    decrypted: boolean,
+                    address: string,
+                    credentialNumber: number,
+                    prfKeySeed: string
+                ) => {
+                    resolve({
+                        decrypted,
+                        address,
+                        credentialNumber,
+                        prfKeySeed,
+                    });
                 },
             });
         });
     }
 
-    /** Constructs the account report(s).
-     * If there are multiple chosen accounts, the reports will be bundled into a zip file
+    /**
+     * Constructs one or more account reports. If there are multiple chosen accounts,
+     * then the reports will be bundled into a zip file.
      */
     const makeReport = useCallback(
         async (filters: TransactionFilter) => {
+            let prfKeyMap: Record<string, CredentialNumberPrfKey> = {};
             const accountsToReport: Account[] = [];
             for (const account of accounts) {
-                const hasEncrypted = await containsEncrypted(account, filters);
-                if (!hasEncrypted || (await promptDecrypt(account))) {
+                const hasEncrypted = hasEncryptedBalance(account);
+                const includeEncryptedTransfers =
+                    filters.encryptedAmountTransfer ||
+                    filters.encryptedAmountTransferWithMemo;
+                if (hasEncrypted && includeEncryptedTransfers) {
+                    const {
+                        decrypted,
+                        address,
+                        credentialNumber,
+                        prfKeySeed,
+                    } = await promptDecrypt(account);
+                    if (decrypted) {
+                        const updatedPrfKeyMap = {
+                            ...prfKeyMap,
+                        };
+                        updatedPrfKeyMap[address] = {
+                            credentialNumber,
+                            prfKeySeed,
+                        };
+                        prfKeyMap = updatedPrfKeyMap;
+                        accountsToReport.push(account);
+                    }
+                } else {
                     accountsToReport.push(account);
                 }
             }
+            setShowDecrypt({ show: false });
             const accountsLength = accountsToReport.length;
 
             if (accountsLength === 0) {
@@ -119,13 +170,17 @@ export default function AccountReport({ location }: Props) {
                     await window.accountReport.multiple(
                         fileName,
                         accountsToReport,
-                        filters
+                        filters,
+                        global,
+                        prfKeyMap
                     );
                 } else {
                     await window.accountReport.single(
                         fileName,
                         accountsToReport[0],
-                        filters
+                        filters,
+                        global,
+                        prfKeyMap
                     );
                 }
                 setMakingReport(false);
@@ -140,7 +195,7 @@ export default function AccountReport({ location }: Props) {
                 return Promise.resolve();
             }
         },
-        [accounts]
+        [accounts, global]
     );
 
     // add account to the list of chosen accounts, and exit adding mode.

@@ -43,7 +43,7 @@ function createUnsignedCredential(
         message.input,
         message.idCredSec,
         message.prfKey,
-        Boolean(message.isSeed)
+        Boolean(message.useDeprecated)
     );
 }
 
@@ -69,7 +69,7 @@ function decryptAmounts(rust: RustInterface, message: Record<string, string>) {
     const decryptedAmounts = rust.decrypt_amounts_ext(
         message.input,
         message.prfKey,
-        Boolean(message.isSeed)
+        Boolean(message.useDeprecated)
     );
     return decryptedAmounts;
 }
@@ -81,7 +81,7 @@ function createTransferToPublicData(
     return rust.createTransferToPublicData(
         message.input,
         message.prfKey,
-        Boolean(message.isSeed)
+        Boolean(message.useDeprecated)
     );
 }
 
@@ -92,7 +92,7 @@ function createTransferToEncryptedData(
     return rust.createTransferToEncryptedData(
         message.input,
         message.prfKey,
-        Boolean(message.isSeed)
+        Boolean(message.useDeprecated)
     );
 }
 
@@ -103,7 +103,7 @@ function createEncryptedTransferData(
     return rust.createEncryptedTransferData(
         message.input,
         message.prfKey,
-        Boolean(message.isSeed)
+        Boolean(message.useDeprecated)
     );
 }
 

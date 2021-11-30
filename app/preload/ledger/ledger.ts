@@ -40,8 +40,8 @@ export default function exposedMethods(
             getLedgerClient().getSignedPublicKey(keypath),
         getPrivateKeys: (identity: number, version: number) =>
             getLedgerClient().getPrivateKeys(identity, version),
-        getPrfKeyRecovery: (identity: number, version: number) =>
-            getLedgerClient().getPrfKeyRecovery(identity, version),
+        getPrfKeyRecovery: (identity: number) =>
+            getLedgerClient().getPrfKeyRecovery(identity),
         getPrfKeyDecrypt: (identity: number, version: number) =>
             getLedgerClient().getPrfKeyDecrypt(identity, version),
         verifyAddress: (identity: number, credentialNumber: number) =>

@@ -24,6 +24,7 @@ import {
     instanceOfEncryptedTransfer,
     instanceOfEncryptedTransferWithMemo,
     MultiSignatureTransactionStatus,
+    IdentityVersion,
 } from '~/utils/types';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { addPendingTransaction } from '~/features/TransactionSlice';
@@ -46,6 +47,7 @@ import Card from '~/cross-app-components/Card';
 import PrintButton from '~/components/PrintButton';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import findHandler from '~/utils/transactionHandlers/HandlerFinder';
+import { insert } from '~/database/DecryptedAmountsDao';
 
 import styles from './SubmitTransaction.module.scss';
 
@@ -69,7 +71,7 @@ async function attachCompletedPayload(
     global: Global,
     credential: CredentialWithIdentityNumber,
     accountInfo: AccountInfo,
-    identityVersion: number,
+    identityVersion: IdentityVersion,
     setMessage: (message: string) => void
 ) {
     const getPrfKey = async () => {
@@ -244,6 +246,17 @@ export default function SubmitTransaction({ location }: Props) {
 
         if (response) {
             try {
+                // Save the decrypted amount for shielded transfers, so the user doesn't have to decrypt them later.
+                if (
+                    instanceOfEncryptedTransfer(transaction) ||
+                    instanceOfEncryptedTransferWithMemo(transaction)
+                ) {
+                    await insert({
+                        transactionHash,
+                        amount: transaction.payload.plainTransferAmount,
+                    });
+                }
+
                 // If an error happens here, it only means the transaction couldn't be added as pending, so no reason to show user an error.
                 const convertedTransaction = await addPendingTransaction(
                     transaction,
