@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import clsx from 'clsx';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import CloseButton from '~/cross-app-components/CloseButton';
@@ -8,6 +9,7 @@ import MessageModal from '~/components/MessageModal';
 import Ledger from '~/components/ledger/Ledger';
 import { asyncNoOp } from '~/utils/basicHelpers';
 import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
+import { specificIdentitySelector } from '~/features/IdentitySlice';
 import { Account, ClassName } from '~/utils/types';
 
 import styles from './Accounts.module.scss';
@@ -21,12 +23,13 @@ interface Props extends ClassName {
  */
 export default function VerifyAddress({ account, className }: Props) {
     const [opened, setOpened] = useState(false);
-    const [showWarning, setShowWarning] = useState(false);
+    const [warning, setWarning] = useState<string>();
+    const identity = useSelector(specificIdentitySelector(account.identityId));
 
     async function ledgerCall(ledger: ConcordiumLedgerClient) {
-        if (account.identityNumber === undefined) {
+        if (identity === undefined) {
             throw new Error(
-                'The account is missing an identity number. This is an internal error that should be reported'
+                'No identity was found for this account. This is an internal error that should be reported.'
             );
         }
 
@@ -34,30 +37,38 @@ export default function VerifyAddress({ account, className }: Props) {
             account.address,
             ledger
         );
+
         if (credential === undefined) {
             throw new Error(
-                'Unable to decrypt shielded balance and encrypted transfers. Please verify that the connected wallet is for this account.'
+                'No credentials, that were created by the current Ledger, were found on this account. Please verify that the connected Ledger is for this account.'
             );
         }
 
         if (credential.credentialIndex !== 0) {
-            setShowWarning(true);
+            setWarning(
+                "An account's address is derived from the initial credential on that account. The initial credential on this account was not created from the currently connected Ledger, and therefore it is not possible to verify the address of the account."
+            );
+        } else if (identity.version === 0) {
+            setWarning(
+                'The identity used to create this account uses a deprecated version of the key generation. It is recommended to create a new identity and use accounts on that instead.'
+            );
         } else {
             await ledger.verifyAddress(
                 credential.identityNumber,
                 credential.credentialNumber
             );
+            setOpened(false);
         }
     }
 
     return (
         <>
             <MessageModal
-                title="Unable to verify Address."
-                message="An account's address is computed using the first credential, and your current Ledger device did not generate that."
+                title="Unable to verify account address."
+                message={warning}
                 buttonText="Okay"
-                onClose={() => setShowWarning(false)}
-                open={showWarning}
+                onClose={() => setWarning(undefined)}
+                open={Boolean(warning)}
                 disableClose
             />
             <Ledger ledgerCallback={ledgerCall}>

@@ -9,8 +9,8 @@ export default async function verifyAddress(
     credentialNumber: number
 ): Promise<void> {
     const data = Buffer.alloc(8);
-    data.writeInt32BE(identity, 0);
-    data.writeInt32BE(credentialNumber, 4);
+    data.writeUInt32BE(identity, 0);
+    data.writeUInt32BE(credentialNumber, 4);
     const p1 = 0x00;
     const p2 = 0x00;
 

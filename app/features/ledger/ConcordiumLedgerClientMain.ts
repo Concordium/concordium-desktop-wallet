@@ -39,6 +39,7 @@ import {
     AddIdentityProvider,
     AddAnonymityRevoker,
     PrivateKeys,
+    IdentityVersion,
 } from '~/utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
@@ -93,11 +94,17 @@ export default class ConcordiumLedgerClientMain {
         return getSignedPublicKey(this.transport, path);
     }
 
-    getPrivateKeys(identity: number, version: number): Promise<PrivateKeys> {
+    getPrivateKeys(
+        identity: number,
+        version: IdentityVersion
+    ): Promise<PrivateKeys> {
         return getPrivateKeys(this.transport, identity, version);
     }
 
-    getPrfKeyDecrypt(identity: number, version: number): Promise<Buffer> {
+    getPrfKeyDecrypt(
+        identity: number,
+        version: IdentityVersion
+    ): Promise<Buffer> {
         return getPrfKeyDecrypt(this.transport, identity, version);
     }
 

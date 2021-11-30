@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer/';
 import { Transport } from './Transport';
-import { PrivateKeys } from '~/utils/types';
+import { IdentityVersion, PrivateKeys } from '~/utils/types';
 
 const INS_EXPORT_PRIVATE_KEY_SEED = 0x05;
 const P1_PRF_KEY = 0;
@@ -8,7 +8,7 @@ const P1_PRF_KEY_RECOVERY = 1;
 const P1_BOTH_KEYS = 2;
 const P2_SEEDS = 1;
 
-function getP2(version: number): number {
+function getP2(version: IdentityVersion): number {
     switch (version) {
         case 0:
             return P2_SEEDS;
@@ -31,10 +31,15 @@ function requestKeys(
     return transport.send(0xe0, INS_EXPORT_PRIVATE_KEY_SEED, p1, p2, data);
 }
 
+/**
+ * Requests the prf key and id cred sec for the identity number from the connected Ledger, with "create credential" on the display.
+ * @param identity the identity index for which to get the keys for.
+ * @param version the version, which the identity was created with. If 0, we request the keys' seeds, otherwise the actual bls keys.
+ */
 export async function getPrivateKeys(
     transport: Transport,
     identity: number,
-    version: number
+    version: IdentityVersion
 ): Promise<PrivateKeys> {
     const response = await requestKeys(
         transport,
@@ -47,10 +52,15 @@ export async function getPrivateKeys(
     return { idCredSec, prfKey };
 }
 
+/**
+ * Requests the prf key for the identity number from the connected Ledger, with "decrypt" on the display.
+ * @param identity the identity index for which to get the prf key for.
+ * @param version the version, which the identity was created with. If 0, we request the prf key's seed, otherwise the actual bls key.
+ */
 export async function getPrfKeyDecrypt(
     transport: Transport,
     identity: number,
-    version: number
+    version: IdentityVersion
 ): Promise<Buffer> {
     const response = await requestKeys(
         transport,

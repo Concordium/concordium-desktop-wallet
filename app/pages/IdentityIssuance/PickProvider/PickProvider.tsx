@@ -30,6 +30,12 @@ import { ExternalIssuanceLocationState } from '../ExternalIssuance/ExternalIssua
 import CardList from '~/cross-app-components/CardList';
 import pairWallet from '~/utils/WalletPairing';
 
+/* Always use identity version 0 here, because that makes the Ledger return
+ * the seeds, and we need to check whether either version has been used
+ * before.
+ */
+const identityVersion = 0;
+
 const IPDetails = (info: PublicInformationForIp) => (
     <div className="textLeft">
         <p className="mT0">Please confirm details on ledger:</p>
@@ -220,7 +226,7 @@ export default function IdentityIssuanceChooseProvider({
                     ledgerCallback={withLedger}
                     preCallback={getIdentityNumber}
                     disabled={!provider}
-                    identityVersion={0}
+                    identityVersion={identityVersion}
                 />
             </div>
         </>
