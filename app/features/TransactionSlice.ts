@@ -147,7 +147,9 @@ async function getNewTransactions(
 ): Promise<TransferTransaction[]> {
     // As the transactions in the state are in descending order on their id, the maxId
     // can be found as the first item with an id (if any exist).
-    const maxId = transactionsInState.find((t) => t.id !== undefined)?.id;
+    const maxId = transactionsInState.find(
+        (t) => t.id !== undefined && t.id !== null
+    )?.id;
 
     const transactions: IncomingTransaction[] = [];
     let full = true;

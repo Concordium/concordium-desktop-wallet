@@ -12,6 +12,7 @@ import { displayTargetNet, getTargetNet } from '~/utils/ConfigHelper';
 import { getGTUSymbol, microGtuToGtu } from '~/utils/gtu';
 import { gtuDrop } from '~/utils/httpRequests';
 import { secondsSinceUnixEpoch } from '~/utils/timeHelpers';
+import { monitorTransactionStatus } from '~/utils/TransactionStatusPoller';
 import {
     TransactionKindString,
     TransactionStatus,
@@ -58,6 +59,7 @@ async function handleGtuDrop(
             subtotal: microGtuDropAmount,
         };
         await insertTransactions([gtuDropTransaction]);
+        monitorTransactionStatus(dispatch, gtuDropTransaction);
     } catch {
         setError(
             'An internal error occurred. Please try again. If the problem persists, please contact support.'
