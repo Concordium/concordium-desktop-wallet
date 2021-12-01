@@ -18,7 +18,7 @@ import {
     AddIdentityProvider,
     AddAnonymityRevoker,
     PrivateKeys,
-    IdentityVersion,
+    BlsKeyTypes,
 } from '~/utils/types';
 import { pipe } from '~/utils/basicHelpers';
 
@@ -42,7 +42,7 @@ export default class ConcordiumLedgerClient {
 
     async getPrivateKeys(
         identity: number,
-        version: IdentityVersion
+        version: BlsKeyTypes
     ): Promise<PrivateKeys> {
         const result: PrivateKeys = await window.ledger.getPrivateKeys(
             identity,

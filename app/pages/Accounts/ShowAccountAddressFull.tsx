@@ -10,6 +10,7 @@ import routes from '~/constants/routes.json';
 import IconButton from '~/cross-app-components/IconButton';
 import AccountPageHeader from './AccountPageHeader';
 import DisplayAddress from '~/components/DisplayAddress';
+import VerifyAddress, { useCanVerify } from './VerifyAddress';
 
 import styles from './Accounts.module.scss';
 
@@ -19,10 +20,25 @@ import styles from './Accounts.module.scss';
 export default function ShowAccountAddress() {
     const dispatch = useDispatch();
     const account = useSelector(chosenAccountSelector);
+    const reasonForNotBeingVerifiable = useCanVerify(account);
 
     if (!account) {
         return null;
     }
+
+    const display = (
+        <>
+            <QRCode className="mB50" size={512} value={account.address} />
+            <div className="flex alignCenter mBauto">
+                <DisplayAddress
+                    outerClassName="body2 mL20"
+                    lineLength={25}
+                    address={account.address}
+                />
+                <CopyButton className="mL20" value={account.address} />
+            </div>
+        </>
+    );
 
     return (
         <PageLayout>
@@ -42,15 +58,21 @@ export default function ShowAccountAddress() {
                 </IconButton>
 
                 <h2 className="m0 mBauto">{account.name}</h2>
-                <QRCode className="mB50" size={512} value={account.address} />
-                <div className="flex alignCenter mBauto">
-                    <DisplayAddress
-                        outerClassName="body2 mL20"
-                        lineLength={25}
-                        address={account.address}
+                {reasonForNotBeingVerifiable && (
+                    <>
+                        {display}
+                        <p className="textCenter">
+                            {reasonForNotBeingVerifiable}
+                        </p>
+                    </>
+                )}
+                {!reasonForNotBeingVerifiable && (
+                    <VerifyAddress
+                        account={account}
+                        className="mBauto mTauto"
+                        display={display}
                     />
-                    <CopyButton className="mL20" value={account.address} />
-                </div>
+                )}
             </PageLayout.Container>
         </PageLayout>
     );

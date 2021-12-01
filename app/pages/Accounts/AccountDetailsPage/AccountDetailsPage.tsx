@@ -76,11 +76,7 @@ export default withAccountSync(function DetailsPage() {
                         component={accountChanged ? ToAccounts : BuildSchedule}
                     />
                     <Route path={routes.ACCOUNTS_ADDRESS}>
-                        <ShowAccountAddress
-                            account={account}
-                            asCard
-                            allowVerify
-                        />
+                        <ShowAccountAddress account={account} asCard />
                     </Route>
                     <Route path={routes.ACCOUNTS_INSPECTRELEASESCHEDULE}>
                         <ShowReleaseSchedule accountInfo={accountInfo} />

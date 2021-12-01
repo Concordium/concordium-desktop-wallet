@@ -10,6 +10,7 @@ import {
     RecoveredIdentity,
     RejectedIdentity,
     IdentityVersion,
+    BlsKeyTypes,
 } from './types';
 
 // Version that current identities are created with.
@@ -155,4 +156,11 @@ export function isRejectedIdentity(
         identity.status === IdentityStatus.Rejected ||
         identity.status === IdentityStatus.RejectedAndWarned
     );
+}
+
+export function getKeyExportType(version: IdentityVersion) {
+    if (version === 0) {
+        return BlsKeyTypes.Seed;
+    }
+    return BlsKeyTypes.Key;
 }

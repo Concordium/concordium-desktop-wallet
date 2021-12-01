@@ -9,6 +9,7 @@ import {
     PublicInformationForIp,
     CreationKeys,
     Global,
+    BlsKeyTypes,
 } from '~/utils/types';
 import Card from '~/cross-app-components/Card';
 import { globalSelector } from '~/features/GlobalSlice';
@@ -29,12 +30,6 @@ import styles from './PickProvider.module.scss';
 import { ExternalIssuanceLocationState } from '../ExternalIssuance/ExternalIssuance';
 import CardList from '~/cross-app-components/CardList';
 import pairWallet from '~/utils/WalletPairing';
-
-/* Always use identity version 0 here, because that makes the Ledger return
- * the seeds, and we need to check whether either version has been used
- * before.
- */
-const identityVersion = 0;
 
 const IPDetails = (info: PublicInformationForIp) => (
     <div className="textLeft">
@@ -226,7 +221,7 @@ export default function IdentityIssuanceChooseProvider({
                     ledgerCallback={withLedger}
                     preCallback={getIdentityNumber}
                     disabled={!provider}
-                    identityVersion={identityVersion}
+                    exportType={BlsKeyTypes.Seed}
                 />
             </div>
         </>

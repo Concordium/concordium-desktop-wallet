@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer/';
 import { Transport } from './Transport';
-import { IdentityVersion, PrivateKeys } from '~/utils/types';
+import { BlsKeyTypes, PrivateKeys } from '~/utils/types';
 
 const INS_EXPORT_PRIVATE_KEY_SEED = 0x05;
 const P1_PRF_KEY = 0;
@@ -8,11 +8,11 @@ const P1_PRF_KEY_RECOVERY = 1;
 const P1_BOTH_KEYS = 2;
 const P2_SEEDS = 1;
 
-function getP2(version: IdentityVersion): number {
+function getP2(version: BlsKeyTypes): number {
     switch (version) {
-        case 0:
+        case BlsKeyTypes.Seed:
             return P2_SEEDS;
-        case 1:
+        case BlsKeyTypes.Key:
             return 0x02;
         default:
             throw new Error('Unknown identity version');
@@ -39,7 +39,7 @@ function requestKeys(
 export async function getPrivateKeys(
     transport: Transport,
     identity: number,
-    version: IdentityVersion
+    version: BlsKeyTypes
 ): Promise<PrivateKeys> {
     const response = await requestKeys(
         transport,
@@ -60,7 +60,7 @@ export async function getPrivateKeys(
 export async function getPrfKeyDecrypt(
     transport: Transport,
     identity: number,
-    version: IdentityVersion
+    version: BlsKeyTypes
 ): Promise<Buffer> {
     const response = await requestKeys(
         transport,

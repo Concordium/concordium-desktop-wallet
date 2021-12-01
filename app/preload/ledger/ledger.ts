@@ -25,7 +25,7 @@ import {
     UpdateAccountCredentials,
     AddIdentityProvider,
     AddAnonymityRevoker,
-    IdentityVersion,
+    BlsKeyTypes,
 } from '~/utils/types';
 import { LedgerCommands } from '~/preload/preloadTypes';
 
@@ -39,11 +39,11 @@ export default function exposedMethods(
             getLedgerClient().getPublicKeySilent(keypath),
         getSignedPublicKey: (keypath: number[]) =>
             getLedgerClient().getSignedPublicKey(keypath),
-        getPrivateKeys: (identity: number, version: IdentityVersion) =>
+        getPrivateKeys: (identity: number, version: BlsKeyTypes) =>
             getLedgerClient().getPrivateKeys(identity, version),
         getPrfKeyRecovery: (identity: number) =>
             getLedgerClient().getPrfKeyRecovery(identity),
-        getPrfKeyDecrypt: (identity: number, version: IdentityVersion) =>
+        getPrfKeyDecrypt: (identity: number, version: BlsKeyTypes) =>
             getLedgerClient().getPrfKeyDecrypt(identity, version),
         verifyAddress: (identity: number, credentialNumber: number) =>
             getLedgerClient().verifyAddress(identity, credentialNumber),

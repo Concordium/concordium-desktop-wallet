@@ -1,50 +1,85 @@
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState, ReactElement } from 'react';
 import clsx from 'clsx';
+import { useSelector } from 'react-redux';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import CloseButton from '~/cross-app-components/CloseButton';
 import Button from '~/cross-app-components/Button';
-import Card from '~/cross-app-components/Card';
 import MessageModal from '~/components/MessageModal';
 import Ledger from '~/components/ledger/Ledger';
 import { asyncNoOp } from '~/utils/basicHelpers';
-import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
+import {
+    findLocalDeployedCredential,
+    hasFirstCredential,
+} from '~/utils/credentialHelper';
 import { specificIdentitySelector } from '~/features/IdentitySlice';
+import { walletIdSelector } from '~/features/WalletSlice';
 import { Account, ClassName } from '~/utils/types';
-
-import styles from './Accounts.module.scss';
+import { useAsyncMemo } from '~/utils/hooks';
 
 interface Props extends ClassName {
     account: Account;
+    display: ReactElement;
+}
+
+export function useCanVerify(account?: Account) {
+    if (!account) {
+        throw new Error('no account');
+    }
+    const identity = useSelector(specificIdentitySelector(account.identityId));
+
+    const hasFirst = useAsyncMemo(
+        () => hasFirstCredential(account.address),
+        () => {},
+        [account.address]
+    );
+
+    const reasonForNotVerifable = useAsyncMemo(
+        async () => {
+            if (identity === undefined) {
+                return 'No identity was found for this account. This is an internal error that should be reported.';
+            }
+            if (hasFirst === false) {
+                return "An account's address is derived from the initial credential on that account. The initial credential is not in this wallet, and therefore it is not possible to verify the address of the account.";
+            }
+            if (identity.version === 0) {
+                return 'The identity used to create this account uses a deprecated version of the key generation. It is recommended to create a new identity and use accounts on that instead.';
+            }
+            return undefined;
+        },
+        () => {},
+        [identity, hasFirst]
+    );
+
+    return reasonForNotVerifable;
 }
 
 /**
  * Allows the user to verify the address of the current account, on the ledger.
  */
-export default function VerifyAddress({ account, className }: Props) {
+export default function VerifyAddress({ account, display, className }: Props) {
     const [opened, setOpened] = useState(false);
     const [warning, setWarning] = useState<string>();
     const identity = useSelector(specificIdentitySelector(account.identityId));
+    const walletId = useSelector(walletIdSelector);
+    const credential = useAsyncMemo(
+        () =>
+            walletId
+                ? findLocalDeployedCredential(walletId, account.address)
+                : Promise.resolve(undefined),
+        () => {},
+        [walletId, account.address]
+    );
 
     async function ledgerCall(ledger: ConcordiumLedgerClient) {
-        if (identity === undefined) {
-            throw new Error(
-                'No identity was found for this account. This is an internal error that should be reported.'
-            );
-        }
-
-        const credential = await findLocalDeployedCredentialWithWallet(
-            account.address,
-            ledger
-        );
-
+        setOpened(true);
         if (credential === undefined) {
-            throw new Error(
+            setWarning(
                 'No credentials, that were created by the current Ledger, were found on this account. Please verify that the connected Ledger is for this account.'
             );
-        }
-
-        if (credential.credentialIndex !== 0) {
+        } else if (identity === undefined) {
+            setWarning(
+                'No identity was found for this account. This is an internal error that should be reported.'
+            );
+        } else if (credential.credentialIndex !== 0) {
             setWarning(
                 "An account's address is derived from the initial credential on that account. The initial credential on this account was not created from the currently connected Ledger, and therefore it is not possible to verify the address of the account."
             );
@@ -57,8 +92,8 @@ export default function VerifyAddress({ account, className }: Props) {
                 credential.identityNumber,
                 credential.credentialNumber
             );
-            setOpened(false);
         }
+        setOpened(false);
     }
 
     return (
@@ -75,27 +110,10 @@ export default function VerifyAddress({ account, className }: Props) {
                 {({ isReady, statusView, submitHandler = asyncNoOp }) => (
                     <>
                         {opened || (
-                            <Button
-                                size="big"
-                                className="mT20"
-                                onClick={() => setOpened(true)}
-                            >
-                                Verify Address on Ledger device
-                            </Button>
-                        )}
-                        {opened && (
-                            <Card
-                                className={clsx(
-                                    styles.verifyAddress,
-                                    className,
-                                    'flexColumn textCenter mT20'
-                                )}
-                            >
-                                <CloseButton
-                                    onClick={() => setOpened(false)}
-                                    className={styles.verifyAddressCloseButton}
-                                />
-                                <h3 className="mB40">Verify Address</h3>
+                            <div className={clsx(className, 'flexColumn')}>
+                                <h3 className="mB40 mT0">
+                                    Unlock Ledger to verify and show address
+                                </h3>
                                 {statusView}
                                 <Button
                                     size="big"
@@ -103,10 +121,11 @@ export default function VerifyAddress({ account, className }: Props) {
                                     className="m40"
                                     onClick={submitHandler}
                                 >
-                                    Verify Address
+                                    Show and Verify Address
                                 </Button>
-                            </Card>
+                            </div>
                         )}
+                        {opened && display}
                     </>
                 )}
             </Ledger>

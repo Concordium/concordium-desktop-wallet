@@ -12,14 +12,13 @@ import DisplayAddress from '~/components/DisplayAddress';
 
 import { Account, ClassName } from '../../utils/types';
 import CopyButton from '../../components/CopyButton';
-import VerifyAddress from './VerifyAddress';
+import VerifyAddress, { useCanVerify } from './VerifyAddress';
 
 import styles from './Accounts.module.scss';
 
 interface Props extends ClassName {
     account: Account;
     asCard?: boolean;
-    allowVerify?: boolean;
 }
 
 /**
@@ -29,10 +28,28 @@ export default function ShowAccountAddress({
     className,
     account,
     asCard = false,
-    allowVerify = false,
 }: Props) {
     const dispatch = useDispatch();
     const Component = asCard ? Card : 'div';
+    const reasonForNotBeingVerifiable = useCanVerify(account);
+
+    const display = (
+        <>
+            <QRCode className="m20" value={account.address} size={200} />
+            <div className={styles.displayAddress}>
+                <DisplayAddress
+                    outerClassName="mH40"
+                    lineClassName="body3"
+                    lineLength={10}
+                    address={account.address}
+                />
+                <CopyButton
+                    className={styles.displayAddressCopy}
+                    value={account.address}
+                />
+            </div>
+        </>
+    );
 
     return (
         <Component
@@ -48,17 +65,16 @@ export default function ShowAccountAddress({
             >
                 <ExpandIcon height="22" />
             </IconButton>
-            <QRCode className="m20" value={account.address} size={200} />
-            <div className="flex mB20">
-                <DisplayAddress
-                    outerClassName="mL20"
-                    lineClassName="body3"
-                    lineLength={10}
-                    address={account.address}
-                />
-                <CopyButton className="mL20" value={account.address} />
-            </div>
-            {allowVerify && <VerifyAddress account={account} />}
+
+            {reasonForNotBeingVerifiable && (
+                <>
+                    {display}
+                    <p>{reasonForNotBeingVerifiable}</p>
+                </>
+            )}
+            {!reasonForNotBeingVerifiable && (
+                <VerifyAddress account={account} display={display} />
+            )}
         </Component>
     );
 }
