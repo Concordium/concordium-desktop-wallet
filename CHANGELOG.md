@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+-   Added support for the register data transaction.
+
 ## 1.3.0
 
 ### Added
