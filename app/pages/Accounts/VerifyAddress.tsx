@@ -73,6 +73,7 @@ export default function VerifyAddress({ account, display, className }: Props) {
             }
             setOpened(false);
         },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         [credential?.identityNumber, credential?.credentialNumber]
     );
 
