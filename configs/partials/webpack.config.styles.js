@@ -21,6 +21,7 @@ module.exports = (isProd) => ({
             // Extract all .global.css to style.css as is
             {
                 test: /\.global\.css$/,
+                exclude: /node_modules/,
                 use: [
                     getOutputLoader(isProd),
                     {
@@ -34,6 +35,7 @@ module.exports = (isProd) => ({
             // Pipe other styles through css modules and append to style.css
             {
                 test: /\.module\.css$/,
+                exclude: /node_modules/,
                 use: [
                     getOutputLoader(isProd),
                     {
@@ -50,6 +52,7 @@ module.exports = (isProd) => ({
             // Add SASS support  - compile all .global.scss files and pipe it to style.css
             {
                 test: /\.global\.(scss|sass)$/,
+                exclude: /node_modules/,
                 use: [
                     getOutputLoader(isProd),
                     {
@@ -73,6 +76,7 @@ module.exports = (isProd) => ({
             // Add SASS support  - compile all .module.scss files and pipe it to style.css
             {
                 test: /\.module\.(scss|sass)$/,
+                exclude: /node_modules/,
                 use: [
                     getOutputLoader(isProd),
                     '@teamsupercell/typings-for-css-modules-loader',

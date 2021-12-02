@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+const webpack = require('webpack');
 const { merge } = require('webpack-merge');
 const { baseConfig, assetsConfig, stylesConfig } = require('./partials');
 const CheckNodeEnv = require('../internals/scripts/CheckNodeEnv');
@@ -9,7 +10,6 @@ CheckNodeEnv('development');
 DeleteSourceMaps();
 
 module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
-    devtool: 'none',
     mode: 'production',
     target: 'electron-main',
     entry: [
@@ -21,4 +21,12 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
         path: fromRoot('./app'),
         filename: 'preload.dev.js',
     },
+    experiments: {
+        syncWebAssembly: true,
+    },
+    plugins: [
+        new webpack.EnvironmentPlugin({
+            NODE_ENV: 'development',
+        }),
+    ],
 });

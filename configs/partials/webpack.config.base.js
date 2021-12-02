@@ -21,6 +21,7 @@ module.exports = {
         rules: [
             {
                 test: /\.worker\.ts?$/,
+                exclude: /node_modules/,
                 use: [
                     {
                         loader: 'worker-loader',
@@ -55,7 +56,9 @@ module.exports = {
     output: {
         path: path.join(__dirname, '..', 'app'),
         // https://github.com/webpack/webpack/issues/1114
-        libraryTarget: 'commonjs2',
+        library: {
+            type: 'commonjs2',
+        },
         webassemblyModuleFilename: 'crypto.wasm',
     },
 
@@ -70,21 +73,51 @@ module.exports = {
                 extensions,
             }),
         ],
+        fallback: {
+            assert: require.resolve('assert'),
+            buffer: require.resolve('buffer'),
+            console: require.resolve('console-browserify'),
+            constants: require.resolve('constants-browserify'),
+            crypto: require.resolve('crypto-browserify'),
+            domain: require.resolve('domain-browser'),
+            events: require.resolve('events'),
+            http: require.resolve('stream-http'),
+            https: require.resolve('https-browserify'),
+            os: require.resolve('os-browserify/browser'),
+            path: require.resolve('path-browserify'),
+            punycode: require.resolve('punycode'),
+            // process: require.resolve('process/browser'),
+            querystring: require.resolve('querystring-es3'),
+            stream: require.resolve('stream-browserify'),
+            string_decoder: require.resolve('string_decoder'),
+            sys: require.resolve('util'),
+            timers: require.resolve('timers-browserify'),
+            tty: require.resolve('tty-browserify'),
+            url: require.resolve('url'),
+            util: require.resolve('util'),
+            vm: require.resolve('vm-browserify'),
+            zlib: require.resolve('browserify-zlib'),
+        },
     },
 
     optimization: {
-        namedModules: true,
-        noEmitOnErrors: false,
+        moduleIds: 'named',
+        emitOnErrors: true,
     },
 
     plugins: [
         new webpack.EnvironmentPlugin({
-            NODE_ENV: 'production',
             TARGET_NET: 'mainnet',
             LEDGER_EMULATOR_URL: '',
+            DEBUG_PROD: false,
+            START_MINIMIZED: false,
+            E2E_BUILD: false,
         }),
         new WasmPackPlugin({
             crateDirectory: path.resolve(__dirname, '.'),
+        }),
+        new webpack.ProvidePlugin({
+            Buffer: ['buffer/', 'Buffer'],
         }),
         new webpack.NormalModuleReplacementPlugin(
             /\.\.\/migrations/,

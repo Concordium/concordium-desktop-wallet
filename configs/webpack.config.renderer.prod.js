@@ -16,8 +16,15 @@ const { fromRoot } = require('./helpers/pathHelpers');
 CheckNodeEnv('production');
 DeleteSourceMaps();
 
+const devtoolsConfig =
+    process.env.DEBUG_PROD === 'true'
+        ? {
+              devtool: 'source-map',
+          }
+        : {};
+
 module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
-    devtool: process.env.DEBUG_PROD === 'true' ? 'source-map' : 'none',
+    ...devtoolsConfig,
     mode: 'production',
     target: 'web',
     entry: [
@@ -27,7 +34,6 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
     ],
 
     output: {
-        libraryTarget: 'var',
         path: fromRoot('./app/dist'),
         publicPath: './dist/',
         filename: 'renderer.prod.js',

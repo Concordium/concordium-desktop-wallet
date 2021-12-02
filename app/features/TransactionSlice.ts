@@ -47,7 +47,7 @@ import { isDefined, noOp } from '~/utils/basicHelpers';
 import { GetTransactionsOutput } from '~/preload/preloadTypes';
 import { findEntries } from '~/database/DecryptedAmountsDao';
 import { getActiveBooleanFilters } from '~/utils/accountHelpers';
-import * as errorMessages from '~/constants/errorMessages.json';
+import errorMessages from '~/constants/errorMessages.json';
 import { isSuccessfulEncryptedTransaction } from '~/utils/decryptHelpers';
 
 export const transactionLogPageSize = 100;

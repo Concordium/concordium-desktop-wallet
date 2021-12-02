@@ -47,7 +47,7 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(false), {
 
     mode: 'development',
 
-    target: 'web',
+    target: ['web', 'electron-renderer'],
 
     entry: [
         'core-js',
@@ -59,15 +59,49 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(false), {
     ],
 
     output: {
-        libraryTarget: 'var',
-        publicPath: `http://localhost:${port}/dist/`,
+        publicPath: '/',
         filename: 'renderer.dev.js',
+        library: {
+            type: 'umd',
+        },
+    },
+
+    experiments: {
+        syncWebAssembly: true,
     },
 
     resolve: {
         alias: {
             'react-dom': '@hot-loader/react-dom',
         },
+        fallback: {
+            assert: require.resolve('assert'),
+            buffer: require.resolve('buffer'),
+            console: require.resolve('console-browserify'),
+            constants: require.resolve('constants-browserify'),
+            crypto: require.resolve('crypto-browserify'),
+            domain: require.resolve('domain-browser'),
+            events: require.resolve('events'),
+            http: require.resolve('stream-http'),
+            https: require.resolve('https-browserify'),
+            os: require.resolve('os-browserify/browser'),
+            path: require.resolve('path-browserify'),
+            punycode: require.resolve('punycode'),
+            // process: require.resolve('process/browser'),
+            querystring: require.resolve('querystring-es3'),
+            stream: require.resolve('stream-browserify'),
+            string_decoder: require.resolve('string_decoder'),
+            sys: require.resolve('util'),
+            timers: require.resolve('timers-browserify'),
+            tty: require.resolve('tty-browserify'),
+            url: require.resolve('url'),
+            util: require.resolve('util'),
+            vm: require.resolve('vm-browserify'),
+            zlib: require.resolve('browserify-zlib'),
+        },
+    },
+    optimization: {
+        emitOnErrors: false,
     },
     plugins: [
         requiredByDLLConfig
@@ -78,11 +112,9 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(false), {
                   sourceType: 'var',
               }),
 
-        new webpack.HotModuleReplacementPlugin({
-            multiStep: true,
+        new webpack.ProvidePlugin({
+            Buffer: ['buffer/', 'Buffer'],
         }),
-
-        new webpack.NoEmitOnErrorsPlugin(),
 
         /**
          * Create global constants which can be configured at compile time.
@@ -112,25 +144,24 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(false), {
 
     devServer: {
         port,
-        publicPath,
         compress: true,
-        noInfo: false,
-        stats: 'errors-only',
-        inline: true,
-        lazy: false,
         hot: true,
         headers: { 'Access-Control-Allow-Origin': '*' },
-        contentBase: path.join(__dirname, 'dist'),
-        watchOptions: {
-            aggregateTimeout: 300,
-            ignored: /node_modules/,
-            poll: 100,
+        static: {
+            // directory: path.join(__dirname, 'dist'),
+            // watch: true,
+            publicPath: '/',
+            // watchOptions: {
+            //     aggregateTimeout: 300,
+            //     ignored: /node_modules/,
+            //     poll: 100,
+            // },
         },
         historyApiFallback: {
             verbose: true,
             disableDotRule: false,
         },
-        before() {
+        onBeforeSetupMiddleware() {
             if (process.env.START_HOT) {
                 console.log('Starting Main Process...');
                 spawn('npm', ['run', 'start:dev'], {

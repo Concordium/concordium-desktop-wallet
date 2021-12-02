@@ -1,21 +1,18 @@
 import { Setting, SettingGroup, Settings } from '../utils/types';
-import {
-    settingsGroupTable,
-    settingsTable,
-} from '../constants/databaseNames.json';
+import databaseNames from '../constants/databaseNames.json';
 
 /**
  * A select all from the setting table.
  */
 export async function getAllSettings(): Promise<Setting[]> {
-    return window.database.general.selectAll(settingsTable);
+    return window.database.general.selectAll(databaseNames.settingsTable);
 }
 
 /**
  * A select all from the setting group table.
  */
 export async function getSettingGroups(): Promise<SettingGroup[]> {
-    return window.database.general.selectAll(settingsGroupTable);
+    return window.database.general.selectAll(databaseNames.settingsGroupTable);
 }
 
 /**

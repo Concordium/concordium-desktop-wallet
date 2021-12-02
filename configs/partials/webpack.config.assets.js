@@ -10,6 +10,7 @@ module.exports.config = {
             // WOFF Font
             {
                 test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
+                exclude: /node_modules/,
                 use: {
                     loader: 'url-loader',
                     options: {
@@ -21,6 +22,7 @@ module.exports.config = {
             // WOFF2 Font
             {
                 test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
+                exclude: /node_modules/,
                 use: {
                     loader: 'url-loader',
                     options: {
@@ -32,6 +34,7 @@ module.exports.config = {
             // TTF Font
             {
                 test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+                exclude: /node_modules/,
                 use: {
                     loader: 'url-loader',
                     options: {
@@ -43,12 +46,13 @@ module.exports.config = {
             // EOT Font
             {
                 test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
+                exclude: /node_modules/,
                 use: 'file-loader',
             },
             // SVG Font
             {
                 test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-                exclude: pathToSvgAssets,
+                exclude: [pathToSvgAssets, /node_modules/],
                 use: {
                     loader: 'url-loader',
                     options: {
@@ -61,11 +65,13 @@ module.exports.config = {
             {
                 test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
                 include: pathToSvgAssets,
+                exclude: /node_modules/,
                 use: ['@svgr/webpack'],
             },
             // Common Image Formats
             {
                 test: /\.(?:ico|gif|png|jpg|jpeg|webp)$/,
+                exclude: /node_modules/,
                 use: 'url-loader',
             },
         ],

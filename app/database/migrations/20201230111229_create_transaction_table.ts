@@ -1,9 +1,9 @@
 import { Knex } from 'knex';
-import { transactionTable } from '../../constants/databaseNames.json';
+import databaseNames from '../../constants/databaseNames.json';
 
 export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable(
-        transactionTable,
+        databaseNames.transactionTable,
         (table: Knex.TableBuilder) => {
             // Type Fields
             table.boolean('remote');
@@ -36,5 +36,5 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(knex: Knex): Promise<void> {
-    return knex.schema.dropTable(transactionTable);
+    return knex.schema.dropTable(databaseNames.transactionTable);
 }

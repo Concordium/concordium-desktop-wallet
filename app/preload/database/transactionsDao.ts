@@ -5,7 +5,7 @@ import {
     TransactionStatus,
     TransferTransaction,
 } from '~/utils/types';
-import { transactionTable } from '~/constants/databaseNames.json';
+import databaseNames from '~/constants/databaseNames.json';
 import { knex } from '~/database/knex';
 import { chunkArray, partition } from '~/utils/basicHelpers';
 import { TransactionMethods } from '~/preload/preloadTypes';
@@ -14,19 +14,21 @@ async function updateTransaction(
     identifier: Record<string, unknown>,
     updatedValues: Partial<TransferTransaction>
 ) {
-    return (await knex())(transactionTable)
+    return (await knex())(databaseNames.transactionTable)
         .where(identifier)
         .update(updatedValues);
 }
 
 async function deleteTransaction(transactionHash: string): Promise<number> {
-    return (await knex())(transactionTable).where({ transactionHash }).del();
+    return (await knex())(databaseNames.transactionTable)
+        .where({ transactionHash })
+        .del();
 }
 
 async function getPendingTransactions(): Promise<TransferTransaction[]> {
     const transactions = await (await knex())
         .select()
-        .table(transactionTable)
+        .table(databaseNames.transactionTable)
         .where({ status: TransactionStatus.Pending })
         .orderBy('id');
     return transactions;
@@ -42,7 +44,7 @@ async function getFilteredPendingTransactions(
     const toTime = (toDate?.getTime() ?? Date.now()) / TimeStampUnit.seconds;
 
     const queryTransactions = (await knex())<TransferTransaction>(
-        transactionTable
+        databaseNames.transactionTable
     )
         .where({ status: TransactionStatus.Pending })
         .whereIn('transactionKind', filteredTypes)
@@ -66,7 +68,7 @@ async function getTransaction(
     id: string
 ): Promise<TransferTransaction | undefined> {
     const transaction = await (await knex())<TransferTransaction>(
-        transactionTable
+        databaseNames.transactionTable
     )
         .select()
         .where({ id })
@@ -77,7 +79,7 @@ async function getTransaction(
 async function hasPendingTransactions(fromAddress: string) {
     const transaction = await (await knex())
         .select()
-        .table(transactionTable)
+        .table(databaseNames.transactionTable)
         .where({ status: TransactionStatus.Pending, fromAddress })
         .first();
     return Boolean(transaction);
@@ -86,7 +88,7 @@ async function hasPendingTransactions(fromAddress: string) {
 async function hasPendingShieldedBalanceTransfer(fromAddress: string) {
     const transaction = await (await knex())
         .select()
-        .table(transactionTable)
+        .table(databaseNames.transactionTable)
         .whereIn('transactionKind', [
             TransactionKindString.EncryptedAmountTransfer,
             TransactionKindString.EncryptedAmountTransferWithMemo,
@@ -119,7 +121,7 @@ async function findExistingTransactions(
         .map((t) => t.transactionHash || '')
         .filter((hash) => hash);
     let existingTransactions: TransferTransaction[] = await knexConnection
-        .table(transactionTable)
+        .table(databaseNames.transactionTable)
         .whereIn('transactionHash', hashes)
         .select();
 
@@ -135,7 +137,7 @@ async function findExistingTransactions(
 
     const ids = additionsOnHash.map((t) => t.id || '').filter((id) => id);
     existingTransactions = await knexConnection
-        .table(transactionTable)
+        .table(databaseNames.transactionTable)
         .whereIn('id', ids)
         .select();
 
@@ -159,20 +161,23 @@ async function upsertTransactionsTransactionally(
     const additionChunks = chunkArray(additions, 50);
 
     for (const additionChunk of additionChunks) {
-        await trx.table(transactionTable).insert(additionChunk);
+        await trx.table(databaseNames.transactionTable).insert(additionChunk);
     }
 
     for (const updatedTransaction of hashUpdates) {
         const { transactionHash, ...otherFields } = updatedTransaction;
         await trx
-            .table(transactionTable)
+            .table(databaseNames.transactionTable)
             .where({ transactionHash })
             .update(otherFields);
     }
 
     for (const updatedTransaction of idUpdates) {
         const { id, ...otherFields } = updatedTransaction;
-        await trx.table(transactionTable).where({ id }).update(otherFields);
+        await trx
+            .table(databaseNames.transactionTable)
+            .where({ id })
+            .update(otherFields);
     }
 }
 

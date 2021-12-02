@@ -3,8 +3,12 @@ import { createHash, verify } from 'crypto';
 import { createReadStream, readFileSync } from 'fs';
 import type { UpdateInfo } from 'electron-updater';
 
-import { publicKeyUrl } from '~/constants/verification.json';
-import { build } from '../../../package.json';
+import verification from '~/constants/verification.json';
+
+import packageJson from '../../../package.json';
+
+const { publicKeyUrl } = verification;
+const { build } = packageJson;
 
 /**
  * UpdateInfo interface doesn't seem to be aligned with actual content.
