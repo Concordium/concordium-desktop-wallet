@@ -10,7 +10,7 @@ import routes from '~/constants/routes.json';
 import IconButton from '~/cross-app-components/IconButton';
 import AccountPageHeader from './AccountPageHeader';
 import DisplayAddress from '~/components/DisplayAddress';
-import VerifyAddress, { useCanVerify } from './VerifyAddress';
+import VerifyAddress from './VerifyAddress';
 
 import styles from './Accounts.module.scss';
 
@@ -20,7 +20,6 @@ import styles from './Accounts.module.scss';
 export default function ShowAccountAddress() {
     const dispatch = useDispatch();
     const account = useSelector(chosenAccountSelector);
-    const reasonForNotBeingVerifiable = useCanVerify(account);
 
     if (!account) {
         return null;
@@ -58,21 +57,11 @@ export default function ShowAccountAddress() {
                 </IconButton>
 
                 <h2 className="m0 mBauto">{account.name}</h2>
-                {reasonForNotBeingVerifiable && (
-                    <>
-                        {display}
-                        <p className="textCenter">
-                            {reasonForNotBeingVerifiable}
-                        </p>
-                    </>
-                )}
-                {!reasonForNotBeingVerifiable && (
-                    <VerifyAddress
-                        account={account}
-                        className="mBauto mTauto"
-                        display={display}
-                    />
-                )}
+                <VerifyAddress
+                    account={account}
+                    className="mBauto mTauto"
+                    display={display}
+                />
             </PageLayout.Container>
         </PageLayout>
     );

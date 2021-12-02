@@ -3,7 +3,6 @@ import { useDispatch } from 'react-redux';
 import QRCode from 'qrcode.react';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
-
 import ExpandIcon from '@resources/svg/expand.svg';
 import Card from '~/cross-app-components/Card';
 import routes from '~/constants/routes.json';
@@ -12,7 +11,7 @@ import DisplayAddress from '~/components/DisplayAddress';
 
 import { Account, ClassName } from '../../utils/types';
 import CopyButton from '../../components/CopyButton';
-import VerifyAddress, { useCanVerify } from './VerifyAddress';
+import VerifyAddress from './VerifyAddress';
 
 import styles from './Accounts.module.scss';
 
@@ -31,7 +30,6 @@ export default function ShowAccountAddress({
 }: Props) {
     const dispatch = useDispatch();
     const Component = asCard ? Card : 'div';
-    const reasonForNotBeingVerifiable = useCanVerify(account);
 
     const display = (
         <>
@@ -66,15 +64,7 @@ export default function ShowAccountAddress({
                 <ExpandIcon height="22" />
             </IconButton>
 
-            {reasonForNotBeingVerifiable && (
-                <>
-                    {display}
-                    <p>{reasonForNotBeingVerifiable}</p>
-                </>
-            )}
-            {!reasonForNotBeingVerifiable && (
-                <VerifyAddress account={account} display={display} />
-            )}
+            <VerifyAddress account={account} display={display} />
         </Component>
     );
 }

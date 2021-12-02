@@ -19,6 +19,7 @@ import { findEntries, insert } from '~/database/DecryptedAmountsDao';
 import decryptTransactions, {
     isSuccessfulEncryptedTransaction,
 } from '~/utils/decryptHelpers';
+import { getKeyExportType } from '~/utils/identityHelpers';
 
 interface Props {
     account: Account;
@@ -72,7 +73,7 @@ export default function DecryptComponent({ account, onDecrypt }: Props) {
         setMessage('Please accept decrypt on device');
         const prfKeySeed = await ledger.getPrfKeyDecrypt(
             credential.identityNumber,
-            identity.version
+            getKeyExportType(identity.version)
         );
         setMessage('Please wait');
         const prfKey = prfKeySeed.toString('hex');

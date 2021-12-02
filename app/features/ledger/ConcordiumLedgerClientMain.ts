@@ -96,13 +96,13 @@ export default class ConcordiumLedgerClientMain {
 
     getPrivateKeys(
         identity: number,
-        version: BlsKeyTypes
+        keyType: BlsKeyTypes
     ): Promise<PrivateKeys> {
-        return getPrivateKeys(this.transport, identity, version);
+        return getPrivateKeys(this.transport, identity, keyType);
     }
 
-    getPrfKeyDecrypt(identity: number, version: BlsKeyTypes): Promise<Buffer> {
-        return getPrfKeyDecrypt(this.transport, identity, version);
+    getPrfKeyDecrypt(identity: number, keyType: BlsKeyTypes): Promise<Buffer> {
+        return getPrfKeyDecrypt(this.transport, identity, keyType);
     }
 
     getPrfKeyRecovery(identity: number): Promise<Buffer> {

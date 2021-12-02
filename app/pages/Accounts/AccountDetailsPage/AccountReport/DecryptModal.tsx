@@ -11,6 +11,7 @@ import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
 import Ledger from '~/components/ledger/Ledger';
 import Card from '~/cross-app-components/Card';
 import Button from '~/cross-app-components/Button';
+import { getKeyExportType } from '~/utils/identityHelpers';
 
 export interface DecryptModalInput {
     show: boolean;
@@ -76,7 +77,7 @@ export default function DecryptModal({
         setMessage('Please accept decrypt on device');
         const prfKeySeed = await ledger.getPrfKeyDecrypt(
             credential.identityNumber,
-            identity.version
+            getKeyExportType(identity.version)
         );
         setMessage('Please wait');
         const prfKey = prfKeySeed.toString('hex');

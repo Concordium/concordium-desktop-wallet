@@ -48,6 +48,7 @@ import PrintButton from '~/components/PrintButton';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 import { insert } from '~/database/DecryptedAmountsDao';
+import { getKeyExportType } from '~/utils/identityHelpers';
 
 import styles from './SubmitTransaction.module.scss';
 
@@ -78,7 +79,7 @@ async function attachCompletedPayload(
         setMessage('Please accept decrypt on device');
         const prfKeySeed = await ledger.getPrfKeyDecrypt(
             credential.identityNumber,
-            identityVersion
+            getKeyExportType(identityVersion)
         );
         setMessage('Please wait');
         return prfKeySeed.toString('hex');

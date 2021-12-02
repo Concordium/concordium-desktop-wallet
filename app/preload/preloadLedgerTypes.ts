@@ -20,7 +20,7 @@ import {
     UpdateAccountCredentials,
     AccountTransaction,
     AddAnonymityRevoker,
-    IdentityVersion,
+    BlsKeyTypes,
 } from '~/utils/types';
 import { AppAndVersion } from '../features/ledger/GetAppAndVersion';
 import { AccountPathInput } from '../features/ledger/Path';
@@ -55,12 +55,9 @@ type LedgerCommands = {
     ) => Promise<void>;
     getPrivateKeys: (
         identity: number,
-        version: IdentityVersion
+        keyType: BlsKeyTypes
     ) => Promise<PrivateKeys>;
-    getPrfKeyDecrypt: (
-        identity: number,
-        version: IdentityVersion
-    ) => ReturnBuffer;
+    getPrfKeyDecrypt: (identity: number, keyType: BlsKeyTypes) => ReturnBuffer;
     getPrfKeyRecovery: (identity: number) => ReturnBuffer;
     signTransfer: SignAccountTransaction<AccountTransaction>;
     signPublicInformationForIp: (

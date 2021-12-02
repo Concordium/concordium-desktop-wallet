@@ -42,11 +42,11 @@ export default class ConcordiumLedgerClient {
 
     async getPrivateKeys(
         identity: number,
-        version: BlsKeyTypes
+        keyType: BlsKeyTypes
     ): Promise<PrivateKeys> {
         const result: PrivateKeys = await window.ledger.getPrivateKeys(
             identity,
-            version
+            keyType
         );
         return {
             prfKey: Buffer.from(result.prfKey),

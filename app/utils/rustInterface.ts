@@ -18,6 +18,7 @@ import {
     CreationKeys,
     CommitmentsRandomness,
     IdentityVersion,
+    BlsKeyTypes,
 } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
@@ -25,7 +26,6 @@ import { getDefaultExpiry, secondsSinceUnixEpoch } from './timeHelpers';
 import { getAccountPath } from '~/features/ledger/Path';
 import { stringify, parse } from './JSONHelper';
 import CredentialInfoLedgerDetails from '~/components/ledger/CredentialInfoLedgerDetails';
-import { currentIdentityVersion } from './identityHelpers';
 
 const rawWorker = new RustWorker();
 const worker = new PromiseWorker(rawWorker);
@@ -41,13 +41,13 @@ async function getSecretsFromLedger(
     ledger: ConcordiumLedgerClient,
     displayMessage: (message: string) => void,
     identityNumber: number,
-    identityVersion: IdentityVersion
+    keyType: BlsKeyTypes
 ) {
     displayMessage('Please accept to create credential on device');
     const {
         prfKey: prfKeyRaw,
         idCredSec: idCredSecRaw,
-    } = await ledger.getPrivateKeys(identityNumber, identityVersion);
+    } = await ledger.getPrivateKeys(identityNumber, keyType);
 
     const prfKey = prfKeyRaw.toString('hex');
     const idCredSec = idCredSecRaw.toString('hex');
@@ -58,7 +58,7 @@ export async function exportKeysFromLedger(
     identityNumber: number,
     credentialNumber: number,
     displayMessage: (message: string) => void,
-    identityVersion: IdentityVersion,
+    keyType: BlsKeyTypes,
     ledger: ConcordiumLedgerClient
 ): Promise<CreationKeys> {
     const path = getAccountPath({
@@ -70,7 +70,7 @@ export async function exportKeysFromLedger(
         ledger,
         displayMessage,
         identityNumber,
-        identityVersion
+        keyType
     );
     displayMessage(
         `Please confirm exporting
@@ -452,7 +452,7 @@ export async function createGenesisAccount(
         ledger,
         displayMessage,
         identityNumber,
-        currentIdentityVersion
+        BlsKeyTypes.Key
     );
     displayMessage('Please confirm exporting public-key on device');
     const publicKey = await ledger.getPublicKey(path);
