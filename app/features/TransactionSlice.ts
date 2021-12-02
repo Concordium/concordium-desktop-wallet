@@ -26,8 +26,11 @@ import {
     Dispatch,
     TransferTransactionWithNames,
     Account,
-    TransactionKindString,
     IncomingTransaction,
+    TransactionFilter,
+    BooleanFilters,
+    OriginType,
+    TransactionKindString,
 } from '../utils/types';
 import {
     isShieldedBalanceTransaction,
@@ -45,6 +48,7 @@ import { GetTransactionsOutput } from '~/preload/preloadTypes';
 import { findEntries } from '~/database/DecryptedAmountsDao';
 import { getActiveBooleanFilters } from '~/utils/accountHelpers';
 import * as errorMessages from '~/constants/errorMessages.json';
+import { isSuccessfulEncryptedTransaction } from '~/utils/decryptHelpers';
 
 export const transactionLogPageSize = 100;
 
@@ -72,10 +76,58 @@ interface LoadTransactionsArgs {
      * It will also make the load always run, even though subsequent loads are dispatched before this finishes.
      */
     force?: boolean;
+    /**
+     * If true only shielded transactions will be loaded.
+     */
+    onlyLoadShielded: boolean;
 }
 
 let latestLoadingRequestId: string | undefined;
 const forceLock = new Mutex();
+
+/**
+ * Converts a filter into a filter that only includes transaction
+ * types that affect the shielded balance.
+ * @param filter the transaction filter to convert
+ */
+function shieldedOnlyFilter(filter: TransactionFilter): TransactionFilter {
+    // We use this required type to ensure that if a new transaction type
+    // is added, then the compiler will complain.
+    const allFalseFilter: Required<BooleanFilters> = {
+        encryptedAmountTransfer: false,
+        encryptedAmountTransferWithMemo: false,
+        transferToEncrypted: false,
+        transferToPublic: false,
+        addBaker: false,
+        bakingReward: false,
+        blockReward: false,
+        deployModule: false,
+        finalizationReward: false,
+        initContract: false,
+        registerData: false,
+        removeBaker: false,
+        transfer: false,
+        transferWithMemo: false,
+        transferWithSchedule: false,
+        transferWithScheduleAndMemo: false,
+        update: false,
+        updateBakerKeys: false,
+        updateCredentials: false,
+        updateCredentialKeys: false,
+        updateBakerStake: false,
+        updateBakerRestakeEarnings: false,
+    };
+
+    return {
+        ...allFalseFilter,
+        encryptedAmountTransfer: filter.encryptedAmountTransfer,
+        encryptedAmountTransferWithMemo: filter.encryptedAmountTransferWithMemo,
+        transferToEncrypted: filter.transferToEncrypted,
+        transferToPublic: filter.transferToPublic,
+        fromDate: filter.fromDate,
+        toDate: filter.toDate,
+    };
+}
 
 /**
  * Get any transactions that are newer than the newest transaction in the local state. The
@@ -83,44 +135,44 @@ const forceLock = new Mutex();
  * current maximum id of a transaction in the local state. The result is reversed to keep the
  * sorting (on id) consistently descending.
  * @param account the account to get new transactions for
- * @param transactions the current transactions in the state
+ * @param transactions the current transactions in the state, assumed to be sorted descendingly
  * @param limit the maximum number of transactions to ask the wallet proxy for
+ * @param onlyLoadShielded whether the transactions that should be retrieved are shielded transactions or not
  */
 async function getNewTransactions(
     account: Account,
     transactionsInState: TransferTransaction[],
-    limit: number
+    limit: number,
+    onlyLoadShielded: boolean
 ): Promise<TransferTransaction[]> {
-    const maxId = transactionsInState
-        .map((t) => t.id)
-        .filter(isDefined)
-        .reduce<string | undefined>(
-            (max, cur) => (!max || max < cur ? cur : max),
-            undefined
-        );
+    // As the transactions in the state are in descending order on their id, the maxId
+    // can be found as the first item with an id (if any exist).
+    const maxId = transactionsInState.find(
+        (t) => t.id !== undefined && t.id !== null
+    )?.id;
 
     const transactions: IncomingTransaction[] = [];
     let full = true;
-    let currentId = maxId;
+    let currentMaxId = maxId;
+    const filter = onlyLoadShielded
+        ? shieldedOnlyFilter(account.transactionFilter)
+        : account.transactionFilter;
 
     // We have to ask for transactions until there are no more. This is needed as we could
     // receive more than ${limit} transactions in one query to the wallet proxy.
     while (full) {
         const transactionsResponseFromWalletProxy = await getTransactionsAscending(
             account.address,
-            account.transactionFilter,
+            filter,
             limit,
-            currentId
+            currentMaxId
         );
 
         transactions.push(...transactionsResponseFromWalletProxy.transactions);
         if (transactionsResponseFromWalletProxy.transactions.length === 0) {
             full = false;
         } else {
-            currentId =
-                transactionsResponseFromWalletProxy.transactions[
-                    transactionsResponseFromWalletProxy.transactions.length - 1
-                ].id;
+            currentMaxId = transactionsResponseFromWalletProxy.maxId;
             full = transactionsResponseFromWalletProxy.full;
         }
     }
@@ -144,13 +196,8 @@ async function enrichWithDecryptedAmounts(
     withDecryptedAmounts: TransferTransaction[];
     allDecrypted: boolean;
 }> {
-    const encryptedTypes = [
-        TransactionKindString.EncryptedAmountTransfer,
-        TransactionKindString.EncryptedAmountTransferWithMemo,
-    ];
-
-    const encryptedTransactions = transactions.filter((t) =>
-        encryptedTypes.includes(t.transactionKind)
+    const encryptedTransactions = transactions.filter(
+        isSuccessfulEncryptedTransaction
     );
     const decryptedAmounts = await findEntries(
         encryptedTransactions.map(
@@ -160,7 +207,7 @@ async function enrichWithDecryptedAmounts(
 
     let allDecrypted = true;
     const withDecryptedAmounts = transactions.map((t) => {
-        if (!encryptedTypes.includes(t.transactionKind)) {
+        if (!isSuccessfulEncryptedTransaction(t)) {
             return t;
         }
 
@@ -179,6 +226,80 @@ async function enrichWithDecryptedAmounts(
     return { withDecryptedAmounts, allDecrypted };
 }
 
+async function getTransactions(
+    accountAddress: string,
+    accountFilter: TransactionFilter,
+    size: number,
+    fromMinId: string | undefined,
+    rejectIfInvalid: (reason: string) => void,
+    loadShielded: boolean
+): Promise<{ transactions: TransferTransaction[]; more: boolean }> {
+    const loadedTransactions: IncomingTransaction[] = [];
+    let fetchMore = true;
+    let fullResult = false;
+    let currentMinId = fromMinId;
+
+    const filter = loadShielded
+        ? shieldedOnlyFilter(accountFilter)
+        : accountFilter;
+
+    try {
+        while (fetchMore) {
+            rejectIfInvalid(
+                'Load of transactions from wallet proxy has been aborted.'
+            );
+            const {
+                transactions,
+                full,
+                minId,
+            } = await getTransactionsDescending(
+                accountAddress,
+                filter,
+                size,
+                currentMinId
+            );
+
+            // If NOT loading shielded transactions, then we have to remove all shielded transfers that
+            // the account did not send. Only the ones where the account was the sender are shown (to show their cost).
+            if (!loadShielded) {
+                const transactionsWithoutIncomingShielded = transactions.filter(
+                    (t) =>
+                        ![
+                            TransactionKindString.EncryptedAmountTransfer,
+                            TransactionKindString.EncryptedAmountTransferWithMemo,
+                        ].includes(t.details.type) ||
+                        t.origin.type === OriginType.Self
+                );
+                loadedTransactions.push(...transactionsWithoutIncomingShielded);
+            } else {
+                loadedTransactions.push(...transactions);
+            }
+
+            // If we got a full page from the wallet proxy, but after filtering it did not
+            // result in a full local page, then we have to gather more transactions.
+            if (full && loadedTransactions.length < size) {
+                currentMinId = minId;
+            } else {
+                // In this case we either received all possible transactions from the wallet proxy
+                // with the currently applied filter, or the page was a full page where no transaction
+                // was filtered on our application side. This means we can stop.
+                fetchMore = false;
+
+                // Save whether there are more transactions that could be fetched if wanted.
+                fullResult = full;
+            }
+        }
+    } catch (e) {
+        throw new Error(errorMessages.unableToReachWalletProxy);
+    }
+
+    const transactions = loadedTransactions.map((t) =>
+        convertIncomingTransaction(t, accountAddress)
+    );
+
+    return { transactions, more: fullResult };
+}
+
 /**
  * Load transactions from the wallet proxy and pending transactions
  * from the database. The transactions retrieved are filtered according
@@ -191,6 +312,7 @@ export const loadTransactions = createAsyncThunk(
             append = false,
             size = transactionLogPageSize,
             force = false,
+            onlyLoadShielded,
         }: LoadTransactionsArgs,
         { getState, dispatch, requestId, signal }
     ) => {
@@ -216,30 +338,21 @@ export const loadTransactions = createAsyncThunk(
             }
         };
 
-        const minId = state.transactions.transactions
+        // The array of transactions is sorted in descending order on the id. Therefore the
+        // minimum id can be found as the final transaction in the array.
+        const transactionIdArray = state.transactions.transactions
             .map((t) => t.id)
-            .filter(isDefined)
-            .reduce<string | undefined>(
-                (min, cur) => (!min || min > cur ? cur : min),
-                undefined
-            );
+            .filter(isDefined);
+        const minId = transactionIdArray[transactionIdArray.length - 1];
 
         try {
-            rejectIfInvalid('Load of transactions on wallet proxy aborted');
-            let transactionsResponseFromWalletProxy;
-            try {
-                transactionsResponseFromWalletProxy = await getTransactionsDescending(
-                    account.address,
-                    account.transactionFilter,
-                    size,
-                    append ? minId : undefined
-                );
-            } catch (e) {
-                throw new Error(errorMessages.unableToReachWalletProxy);
-            }
-
-            const transactions = transactionsResponseFromWalletProxy.transactions.map(
-                (txn) => convertIncomingTransaction(txn, account.address)
+            const { transactions, more } = await getTransactions(
+                account.address,
+                account.transactionFilter,
+                size,
+                append ? minId : undefined,
+                rejectIfInvalid,
+                onlyLoadShielded
             );
 
             const {
@@ -279,7 +392,7 @@ export const loadTransactions = createAsyncThunk(
 
             return {
                 transactions: [...pendingTransactions, ...withDecryptedAmounts],
-                more: transactionsResponseFromWalletProxy.full,
+                more,
             };
         } finally {
             // Push release of lock to end of async queue, as this will wait for redux to update with loaded transactions.
@@ -290,10 +403,7 @@ export const loadTransactions = createAsyncThunk(
 
 export const loadNewTransactions = createAsyncThunk(
     ActionTypePrefix.Update,
-    async (
-        { size = transactionLogPageSize }: LoadTransactionsArgs,
-        { getState, dispatch }
-    ) => {
+    async (input: { onlyLoadNewShielded: boolean }, { getState, dispatch }) => {
         const state = getState() as RootState;
         const account = chosenAccountSelector(state);
 
@@ -304,7 +414,8 @@ export const loadNewTransactions = createAsyncThunk(
         const transactions = await getNewTransactions(
             account,
             state.transactions.transactions,
-            size
+            transactionLogPageSize,
+            input.onlyLoadNewShielded
         );
 
         // Filter out any transactions that are already in the state.
@@ -340,7 +451,10 @@ export const loadNewTransactions = createAsyncThunk(
  */
 export const reloadTransactions = createAsyncThunk(
     ActionTypePrefix.Reload,
-    async (_, { dispatch, getState, signal }) => {
+    async (
+        input: { onlyLoadShielded: boolean },
+        { dispatch, getState, signal }
+    ) => {
         // If a forced load is running, wait for it to finish, to reload with updated length of transactions.
         await forceLock.waitForUnlock();
 
@@ -355,6 +469,7 @@ export const reloadTransactions = createAsyncThunk(
         const load = dispatch(
             loadTransactions({
                 size: Math.max(transactions.length, transactionLogPageSize),
+                onlyLoadShielded: input.onlyLoadShielded,
             })
         );
 

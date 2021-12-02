@@ -2,7 +2,7 @@ import React from 'react';
 import { AttributeKey } from '@concordium/node-sdk';
 import attributeNamesJson from '~/constants/attributeNames.json';
 import SidedRow from '~/components/SidedRow';
-import { AttributeKeyName } from '~/utils/types';
+import { AttributeKeyName, ClassName } from '~/utils/types';
 import {
     formatAttributeValue,
     compareAttributes,
@@ -10,21 +10,22 @@ import {
 
 const attributeNames: Record<string, string> = attributeNamesJson;
 
-interface Props {
-    revealedAttributes: Record<AttributeKey, string>;
+interface Props extends ClassName {
+    attributes: Record<AttributeKey | string, string>;
 }
 
 /**
- *  Displays the provided revealed attributes.
+ *  Displays the provided attributes.
  */
 export default function DisplayIdentityAttributes({
-    revealedAttributes,
+    attributes,
+    className,
 }: Props): JSX.Element | null {
-    const attributeKeys = Object.keys(revealedAttributes);
+    const attributeKeys = Object.keys(attributes);
 
     if (attributeKeys.length === 0) {
         return (
-            <div className="pT10">
+            <div className={className}>
                 This credential has no identity data revealed
             </div>
         );
@@ -36,12 +37,12 @@ export default function DisplayIdentityAttributes({
                 .sort(compareAttributes)
                 .map((attributeKey: AttributeKeyName) => (
                     <SidedRow
-                        className="pT10"
+                        className={className}
                         key={attributeKey}
-                        left={attributeNames[attributeKey]}
+                        left={attributeNames[attributeKey] || attributeKey}
                         right={formatAttributeValue(
                             attributeKey,
-                            revealedAttributes[attributeKey]
+                            attributes[attributeKey]
                         )}
                     />
                 ))}

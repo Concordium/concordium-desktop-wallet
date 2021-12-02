@@ -15,6 +15,7 @@ import {
     AddressBookEntry,
     Identity,
     IdentityStatus,
+    IdentityVersion,
 } from '~/utils/types';
 import { IdentityMethods } from '~/preload/preloadTypes';
 
@@ -72,11 +73,14 @@ async function removeIdentity(id: number, trx: Knex.Transaction) {
  * initial account.
  * @param identityId the identity to reject
  */
-async function rejectIdentityAndInitialAccount(identityId: number) {
+async function rejectIdentityAndInitialAccount(
+    identityId: number,
+    detail: string
+) {
     (await knex()).transaction(async (trx) => {
         await trx(identitiesTable)
             .where({ id: identityId })
-            .update({ status: IdentityStatus.Rejected });
+            .update({ status: IdentityStatus.Rejected, detail });
         await trx(accountsTable)
             .where({ identityId, isInitial: 1 })
             .update({ status: AccountStatus.Rejected });
@@ -149,6 +153,15 @@ async function removeIdentityAndInitialAccount(identityId: number) {
             .then(trx.commit)
             .catch(trx.rollback);
     });
+}
+
+export async function getIdentityVersion(
+    identityId: number
+): Promise<IdentityVersion | undefined> {
+    const identity = await (await knex())<Identity>(identitiesTable)
+        .where({ id: identityId })
+        .first();
+    return identity?.version;
 }
 
 const exposedMethods: IdentityMethods = {

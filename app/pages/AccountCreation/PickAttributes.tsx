@@ -2,7 +2,7 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import routes from '~/constants/routes.json';
-import { Identity, AttributeKeyName } from '~/utils/types';
+import { ConfirmedIdentity, AttributeKeyName } from '~/utils/types';
 import IdentityCard from '~/components/IdentityCard';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
@@ -12,7 +12,7 @@ import SelectIdentityAttributes from '~/components/SelectIdentityAttributes';
 import styles from './AccountCreation.module.scss';
 
 interface Props {
-    identity: Identity;
+    identity: ConfirmedIdentity;
     setChosenAttributes: (attributes: AttributeKeyName[]) => void;
     chosenAttributes: AttributeKeyName[] | undefined;
 }

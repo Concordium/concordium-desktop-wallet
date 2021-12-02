@@ -33,6 +33,7 @@ import {
     Identity,
     TransactionFilter,
     Hex,
+    IdentityVersion,
 } from '../utils/types';
 import { createAccount, isValidAddress } from '../utils/accountHelpers';
 import {
@@ -277,17 +278,23 @@ export function initAccounts(dispatch: Dispatch) {
 // determine whether the account has received or sent new funds,
 // and in that case return the the state of the account that should be updated to reflect that.
 async function updateAccountEncryptedAmount(
-    account: Account,
+    address: string,
     accountEncryptedAmount: AccountEncryptedAmount
 ): Promise<Partial<Account>> {
     const { incomingAmounts } = accountEncryptedAmount;
     const selfAmounts = accountEncryptedAmount.selfAmount;
     const incomingAmountsString = JSON.stringify(incomingAmounts);
-
+    // Get the account and hasPending from the database at the same time, to avoid race condition with transaction finalization.
+    const account = await getAccount(address);
+    if (!account) {
+        throw new Error(
+            `Account, ${address}, was unexpectedly not in the database`
+        );
+    }
+    const hasPending = await hasPendingTransactions(address);
     const incoming = account.incomingAmounts !== incomingAmountsString;
     const checkExternalSelfUpdate =
-        account.selfAmounts !== selfAmounts &&
-        !(await hasPendingTransactions(account.address));
+        account.selfAmounts !== selfAmounts && !hasPending;
 
     if (incoming || checkExternalSelfUpdate) {
         return {
@@ -381,7 +388,7 @@ async function updateAccountFromAccountInfo(
     }
 
     const encryptedAmountsUpdate = await updateAccountEncryptedAmount(
-        account,
+        account.address,
         accountInfo.accountEncryptedAmount
     );
 
@@ -467,6 +474,7 @@ export async function loadAccountInfos(
 
 /**
  * Updates the account info, of the account with the given address, in the state.
+ * If given an address of an account that doesn't exist on chain, this throws an error.
  */
 export async function updateAccountInfoOfAddress(
     address: string,
@@ -478,14 +486,12 @@ export async function updateAccountInfoOfAddress(
 
 /**
  * Updates the given account's accountInfo, in the state, and check if there is updates to the account.
+ * If given an address of an account that doesn't exist on chain, this throws an error.
  */
 export async function updateAccountInfo(account: Account, dispatch: Dispatch) {
     const accountInfo = await getAccountInfoOfAddress(account.address);
-    if (accountInfo && account.status === AccountStatus.Confirmed) {
-        await updateAccountFromAccountInfo(dispatch, account, accountInfo);
-        return updateAccountInfoEntry(dispatch, account.address, accountInfo);
-    }
-    return Promise.resolve();
+    await updateAccountFromAccountInfo(dispatch, account, accountInfo);
+    return updateAccountInfoEntry(dispatch, account.address, accountInfo);
 }
 
 // Add an account with pending status..
@@ -559,8 +565,9 @@ export async function confirmAccount(
 // Decrypts the shielded account balance of the given account, using the prfKey.
 // This function expects the prfKey to match the account's prfKey.
 export async function decryptAccountBalance(
-    prfKey: string,
     account: Account,
+    prfKey: string,
+    identityVersion: IdentityVersion,
     credentialNumber: number,
     global: Global,
     dispatch: Dispatch
@@ -575,7 +582,8 @@ export async function decryptAccountBalance(
         encryptedAmounts,
         credentialNumber,
         global,
-        prfKey
+        prfKey,
+        identityVersion
     );
 
     const totalDecrypted = decryptedAmounts

@@ -1,5 +1,36 @@
 import { decryptAmounts } from './rustInterface';
-import { Global, TransferTransaction } from './types';
+import {
+    Global,
+    TransactionKindString,
+    TransactionStatus,
+    TransferTransaction,
+    IdentityVersion,
+} from './types';
+
+const encryptedTypes = [
+    TransactionKindString.EncryptedAmountTransfer,
+    TransactionKindString.EncryptedAmountTransferWithMemo,
+];
+
+/**
+ * Checks whether a transaction is an encrypted transfer that is successful, as in
+ * not being a pending, rejected or failed transaction. Checking for this means that
+ * one can assume that the 'encrypted' field is present.
+ * @param transaction the transaction to test
+ * @returns true if the transaction is an encrypted transfer (with or without memo), and not pending, rejected or failed.
+ */
+export function isSuccessfulEncryptedTransaction(
+    transaction: TransferTransaction
+) {
+    return (
+        encryptedTypes.includes(transaction.transactionKind) &&
+        ![
+            TransactionStatus.Pending,
+            TransactionStatus.Rejected,
+            TransactionStatus.Failed,
+        ].includes(transaction.status)
+    );
+}
 
 /**
  * Decrypts the encrypted transfers in the provided transaction list. This is
@@ -18,6 +49,7 @@ export default async function decryptTransactions(
     encryptedTransfers: TransferTransaction[],
     accountAddress: string,
     prfKey: string,
+    identityVersion: IdentityVersion,
     credentialNumber: number,
     global: Global
 ) {
@@ -49,7 +81,8 @@ export default async function decryptTransactions(
         encryptedAmountForDecryption,
         credentialNumber,
         global,
-        prfKey
+        prfKey,
+        identityVersion
     );
 
     let offset = 0;

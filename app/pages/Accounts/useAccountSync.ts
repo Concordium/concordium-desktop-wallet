@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { unwrapResult } from '@reduxjs/toolkit';
 import {
@@ -34,17 +34,27 @@ export default function useAccountSync(onError: (message: string) => void) {
     const viewingShielded = useSelector(viewingShieldedSelector);
     const abortUpdateRef = useRef(noOp);
     const [loadIsDone, setIsLoadDone] = useState(false);
-    // A change to the newTransactionsFlag is used to signal that new
-    // transactions are available and should be loaded.
-    const [newTransactionsFlag, setNewTransactionsFlag] = useState<boolean>(
-        false
-    );
     const accountInfoLoaded = Boolean(accountInfo);
+
+    const loadNew = useCallback(
+        (onlyLoadNewShielded: boolean) => {
+            if (loadIsDone && !account?.transactionFilter.toDate) {
+                const load = dispatch(
+                    loadNewTransactions({ onlyLoadNewShielded })
+                );
+                return () => {
+                    load.abort();
+                };
+            }
+            return () => {};
+        },
+        [loadIsDone, account?.transactionFilter.toDate, dispatch]
+    );
 
     // Periodically update the account info to keep it in sync
     // with the information from the node.
     useEffect(() => {
-        if (!account) {
+        if (!account || account.status !== AccountStatus.Confirmed) {
             return noOp;
         }
 
@@ -70,35 +80,24 @@ export default function useAccountSync(onError: (message: string) => void) {
         []
     );
 
-    const newTransactionsDependencyArray = [
-        accountInfo?.accountAmount,
-        JSON.stringify(accountInfo?.accountEncryptedAmount.incomingAmounts),
-    ];
+    // Load any new shielded transactions if the shielded amount changes.
     useEffect(() => {
-        if (loadIsDone) {
-            setNewTransactionsFlag(!newTransactionsFlag);
+        if (viewingShielded) {
+            return loadNew(true);
         }
+        return () => {};
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, newTransactionsDependencyArray);
+    }, [JSON.stringify(accountInfo?.accountEncryptedAmount.incomingAmounts)]);
 
     // Load any new transactions if the account amount changes, as that indicates that a
     // transaction affected the account.
     useEffect(() => {
-        if (loadIsDone) {
-            const load = dispatch(
-                loadNewTransactions({
-                    showLoading: true,
-                })
-            );
-
-            return () => {
-                load.abort();
-            };
+        if (!viewingShielded) {
+            return loadNew(false);
         }
-
         return () => {};
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [newTransactionsFlag]);
+    }, [accountInfo?.accountAmount]);
 
     // Re-load transactions entirely from the wallet proxy if:
     // - the filter is changed
@@ -114,7 +113,10 @@ export default function useAccountSync(onError: (message: string) => void) {
     useEffect(() => {
         if (!accountInfoLoaded) {
             // Do not load anything until we also have the account info
-            // available.
+            // available. We use this to prevent fetching new transactions on
+            // a balance change, as those effects react on the first available
+            // accountInfo and we don't want them to do anything until after the
+            // first load has completed.
             return noOp;
         }
 
@@ -128,6 +130,7 @@ export default function useAccountSync(onError: (message: string) => void) {
             loadTransactions({
                 showLoading: true,
                 force: true,
+                onlyLoadShielded: viewingShielded,
             })
         );
         load.then(unwrapResult)

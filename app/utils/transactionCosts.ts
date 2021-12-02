@@ -257,7 +257,7 @@ function energyToCost(energy: bigint, exchangeRate: Fraction): Fraction {
 }
 
 /**
- *  Given the signatureAmount and payloadSize, returns the estimated MicroGTU cost of the transaction type.
+ *  Given the signatureAmount and payloadSize, returns the estimated MicroCCD cost of the transaction type.
  */
 export function getTransactionKindCost(
     transactionKind: TransactionKindId,
@@ -277,7 +277,7 @@ export function getTransactionKindCost(
 
 /**
  *  Given the signatureAmount and a transaction returns
- * the estimated MicroGTU cost of the transaction.
+ * the estimated MicroCCD cost of the transaction.
  */
 export default function getTransactionCost(
     transaction: AccountTransaction,
@@ -290,7 +290,7 @@ export default function getTransactionCost(
 
 /**
  *  Given the signatureAmount returns a function, which given the current schedule length,
- * will return the estimated MicroGTU cost of a scheduled transfer.
+ * will return the estimated MicroCCD cost of a scheduled transfer.
  */
 export function scheduledTransferCost(
     energyToMicroGtu: Fraction,

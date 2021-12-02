@@ -333,6 +333,7 @@ function CreateTransferProposal({
                                                 setRecipient(e);
                                                 continueAction();
                                             }}
+                                            allowAlias={false}
                                         >
                                             <PlusIcon />
                                         </UpsertAddress>
