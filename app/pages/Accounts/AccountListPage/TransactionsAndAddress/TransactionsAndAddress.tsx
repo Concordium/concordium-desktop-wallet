@@ -32,6 +32,7 @@ export default function TransfersAndAddress({ account }: Props) {
                 {chosenTransaction ? (
                     <TransactionView
                         transaction={chosenTransaction}
+                        setTransaction={setChosenTransaction}
                         onClose={() => setChosenTransaction(undefined)}
                     />
                 ) : (

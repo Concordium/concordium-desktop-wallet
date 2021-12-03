@@ -1,7 +1,7 @@
 @import 'config/bundle';
 
 .accountBalanceView {
-    background-color: $color-black;
+    background-color: $color-off-black;
     text-align: center;
     padding-bottom: 10px;
     padding-top: 15px;
@@ -42,6 +42,7 @@
 
 .viewingShieldedButton {
     text-decoration: underline;
+    z-index: 1;
 }
 
 .active {
@@ -86,7 +87,7 @@
     z-index: 1;
 
     :global(.shield_svg__lock) {
-        fill: $color-black;
+        fill: $color-off-black;
     }
 }
 

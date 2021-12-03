@@ -8,7 +8,7 @@ import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
 import { displayAsGTU } from '~/utils/gtu';
 import {
-    setViewingShielded,
+    setViewingShieldedAndReset,
     viewingShieldedSelector,
 } from '~/features/TransactionSlice';
 import {
@@ -45,7 +45,7 @@ export default function AccountBalanceView(): JSX.Element | null {
     const canChangeAccount = accounts.length > 1;
 
     if (isMultiSig && viewingShielded) {
-        dispatch(setViewingShielded(false));
+        setViewingShieldedAndReset(dispatch, false);
     }
 
     const buttons = (
@@ -62,7 +62,7 @@ export default function AccountBalanceView(): JSX.Element | null {
                     styles.viewingShieldedButton,
                     !viewingShielded && styles.active
                 )}
-                onClick={() => dispatch(setViewingShielded(false))}
+                onClick={() => setViewingShieldedAndReset(dispatch, false)}
             >
                 Balance
             </Button>
@@ -74,7 +74,7 @@ export default function AccountBalanceView(): JSX.Element | null {
                         styles.viewingShieldedButton,
                         viewingShielded && styles.active
                     )}
-                    onClick={() => dispatch(setViewingShielded(true))}
+                    onClick={() => setViewingShieldedAndReset(dispatch, true)}
                 >
                     Shielded Balance
                 </Button>
@@ -130,7 +130,9 @@ export default function AccountBalanceView(): JSX.Element | null {
                 {accountBaker && (
                     <div className={styles.bakerRow}>
                         <BakerImage className={styles.bakerImage} height="18" />
-                        <h3 className="m0">{accountBaker.bakerId}</h3>
+                        <h3 className="m0">
+                            {accountBaker.bakerId.toString()}
+                        </h3>
                     </div>
                 )}
             </>

@@ -47,8 +47,6 @@ export default function SignCredential({ onSigned }: Props): JSX.Element {
         control,
     });
 
-    const shouldRedirect = !address || !identity;
-
     const [credentialNumber, setCredentialNumber] = useState<number>();
     useEffect(() => {
         if (identity?.id === undefined) {
@@ -128,13 +126,13 @@ export default function SignCredential({ onSigned }: Props): JSX.Element {
         }
     }
 
-    if (shouldRedirect) {
+    if (!address || !identity) {
         return <Redirect to={routes.GENERATE_CREDENTIAL_PICKIDENTITY} />;
     }
 
     return (
         <SimpleLedgerWithCreationKeys
-            identityNumber={identity?.identityNumber || 0}
+            identityNumber={identity.identityNumber}
             className={clsx(
                 generalStyles.card,
                 splitViewStyles.sign,

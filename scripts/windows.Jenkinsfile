@@ -11,12 +11,13 @@ pipeline {
                     # Extract version number
                     VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
 
-                    if [ -z $TARGET_NET ]; then
-                      FILENAME_EXE="concordium-desktop-wallet-${VERSION}.exe"
+                    if [[ $TARGET_NET = "mainnet" ]]; then
+                        FILENAME_EXE="concordium-desktop-wallet-${VERSION}.exe"
                     else
-                       FILENAME_EXE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.exe"
+                        FILENAME_EXE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.exe"
                     fi
-                    OUT_FILENAME_EXE="${VERSION}/${FILENAME_EXE}"
+                    
+                    OUT_FILENAME_EXE="${VERSION}/${TARGET_NET}/${FILENAME_EXE}"
 
                     check_uniqueness() {
                         # Fail if file already exists
@@ -26,8 +27,11 @@ pipeline {
                             false
                         fi
                     }
+
+                    OUT_FILENAME_LATEST_WINDOWS="${VERSION}/${TARGET_NET}/latest.yml"
                     
                     check_uniqueness "${OUT_FILENAME_EXE}"
+                    check_uniqueness "${OUT_FILENAME_LATEST_WINDOWS}"
 
                     # Print system info
                     node --version
@@ -45,6 +49,7 @@ pipeline {
 
                     # Push to s3
                     aws s3 cp "release/${FILENAME_EXE}" "${S3_BUCKET}/${OUT_FILENAME_EXE}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+                    aws s3 cp "release/latest.yml" "${S3_BUCKET}/${OUT_FILENAME_LATEST_WINDOWS}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
                 '''.stripIndent()
             }
         }

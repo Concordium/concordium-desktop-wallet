@@ -10,9 +10,9 @@ import routes from '~/constants/routes.json';
 
 import AccountBalanceView from '../AccountBalanceView';
 import AccountViewActions from '../AccountViewActions';
-import FailedInitialAccount from '../FailedInitialAccount';
+import FailedInitialAccount from './FailedInitialAccount';
 import BasicTransferRoutes from '../BasicTransferRoutes';
-import TransactionsAndAddress from './TransactionsAndAddress/TransactionsAndAddress';
+import TransactionsAndAddress from './TransactionsAndAddress';
 import DecryptComponent from '../DecryptComponent';
 import withAccountSync from '../withAccountSync';
 import { AccountStatus } from '~/utils/types';

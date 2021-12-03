@@ -28,7 +28,6 @@ import {
 } from '~/utils/transactionCosts';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import LoadingComponent from '../LoadingComponent';
-import InputTimestamp from '~/components/Form/InputTimestamp';
 import PickRecipient from '~/components/Transfers/PickRecipient';
 import { useTransactionExpiryState } from '~/utils/dataHooks';
 import {
@@ -40,11 +39,13 @@ import { collapseFraction, throwLoggedError } from '~/utils/basicHelpers';
 import { toMicroUnits, displayAsGTU } from '~/utils/gtu';
 import { useAsyncMemo } from '~/utils/hooks';
 import { nodeSupportsMemo } from '~/node/nodeHelpers';
+import { stringify } from '~/utils/JSONHelper';
 import { isMultiSig, getAmountAtDisposal } from '~/utils/accountHelpers';
-
-import styles from './CreateTransferProposal.module.scss';
 import UpsertAddress from '~/components/UpsertAddress';
 import PickMemo from './PickMemo';
+import DatePicker from '~/components/Form/DatePicker';
+
+import styles from './CreateTransferProposal.module.scss';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
@@ -159,7 +160,7 @@ function CreateTransferProposal({
             setAmountError(undefined);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [estimatedFee, amount, JSON.stringify(accountInfo)]);
+    }, [estimatedFee, amount, stringify(accountInfo)]);
 
     function continueAction(routerAction: typeof push = push) {
         const nextLocation = handler.creationLocationHandler(location);
@@ -327,12 +328,12 @@ function CreateTransferProposal({
                                             onClickedRecipient={continueAction}
                                         />
                                         <UpsertAddress
-                                            clear
                                             className={styles.addRecipient}
                                             onSubmit={(e) => {
                                                 setRecipient(e);
                                                 continueAction();
                                             }}
+                                            allowAlias={false}
                                         >
                                             <PlusIcon />
                                         </UpsertAddress>
@@ -345,7 +346,8 @@ function CreateTransferProposal({
                                 }
                                 render={() => (
                                     <div className={styles.columnContent}>
-                                        <InputTimestamp
+                                        <DatePicker
+                                            className="body2 mV40"
                                             label="Transaction expiry time"
                                             name="expiry"
                                             isInvalid={
@@ -354,6 +356,7 @@ function CreateTransferProposal({
                                             error={expiryTimeError}
                                             value={expiryTime}
                                             onChange={setExpiryTime}
+                                            minDate={new Date()}
                                         />
                                         <p>
                                             Choose the expiry date for the

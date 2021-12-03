@@ -7,7 +7,7 @@ import routes from '~/constants/routes.json';
 import { createCredentialDetails } from '~/utils/rustInterface';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import {
-    Identity,
+    ConfirmedIdentity,
     CredentialDeploymentDetails,
     CommitmentsRandomness,
     CreationKeys,
@@ -41,7 +41,7 @@ import styles from './GeneratePage.module.scss';
 
 interface Props {
     accountName: string;
-    identity: Identity;
+    identity: ConfirmedIdentity;
     attributes: AttributeKeyName[];
 }
 
@@ -69,7 +69,7 @@ export default function AccountCreationGenerate({
 
         try {
             const response = await sendTransaction(payload);
-            if (response.getValue()) {
+            if (response) {
                 return;
             }
         } catch (e) {

@@ -12,7 +12,6 @@ import {
     Fraction,
 } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
-import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { createRemoveBakerTransaction } from '~/utils/transactionHelpers';
 import routes from '~/constants/routes.json';
@@ -23,9 +22,8 @@ import {
 } from '~/utils/dataHooks';
 import SignTransaction from './SignTransaction';
 import RemoveBakerProposalDetails from './proposal-details/RemoveBakerProposalDetails';
-import InputTimestamp from '~/components/Form/InputTimestamp';
 import { getFormattedDateString } from '~/utils/timeHelpers';
-import PendingChange from '~/components/BakerPendingChange/BakerPendingChange';
+import PendingChange from '~/components/BakerPendingChange';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
@@ -34,6 +32,10 @@ import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
+import DatePicker from '~/components/Form/DatePicker';
+import { isMultiSig } from '~/utils/accountHelpers';
+
+import styles from './MultisignatureAccountTransactions.module.scss';
 
 interface PageProps {
     exchangeRate: Fraction;
@@ -129,8 +131,9 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
-                                        filter={(_, info) =>
-                                            info?.accountBaker !== undefined
+                                        filter={(a, info) =>
+                                            info?.accountBaker !== undefined &&
+                                            isMultiSig(a)
                                         }
                                         onAccountClicked={() => {
                                             dispatch(
@@ -158,7 +161,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                                 </>
                                             ) : undefined
                                         }
-                                        messageWhenEmpty="There are no baker accounts "
+                                        messageWhenEmpty="There are no baker accounts that require multiple signatures"
                                     />
                                 </div>
                             </div>
@@ -175,7 +178,8 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                         Choose the expiry date for the
                                         transaction.
                                     </p>
-                                    <InputTimestamp
+                                    <DatePicker
+                                        className="body2 mV40"
                                         label="Transaction expiry time"
                                         name="expiry"
                                         isInvalid={
@@ -184,6 +188,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                         error={expiryTimeError}
                                         value={expiryTime}
                                         onChange={setExpiryTime}
+                                        minDate={new Date()}
                                     />
                                     <p className="mB0">
                                         Committing the transaction after this

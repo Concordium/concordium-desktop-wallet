@@ -18,10 +18,10 @@ import {
 } from '~/features/TransactionSlice';
 import { getPendingTransactions } from '~/database/TransactionDao';
 import {
-    getStatus,
     isSuccessfulTransaction,
     isShieldedBalanceTransaction,
 } from './transactionHelpers';
+import { getStatus } from '~/node/nodeHelpers';
 import { getTransactionHash } from './transactionHash';
 import {
     updateAccountInfoOfAddress,

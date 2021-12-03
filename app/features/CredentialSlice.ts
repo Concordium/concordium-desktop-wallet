@@ -18,7 +18,7 @@ import {
     MakeOptional,
     CommitmentsRandomness,
 } from '~/utils/types';
-import { createNewCredential } from '~/utils/credentialHelper';
+import { createNewCredential, getCredId } from '~/utils/credentialHelper';
 import { ExternalCredential } from '~/database/types';
 import {
     deleteExternalCredentials,
@@ -211,11 +211,7 @@ export async function initializeGenesisCredential(
 ) {
     const credentialOnChain = Object.entries(
         accountInfo.accountCredentials
-    ).find(
-        ([, cred]) =>
-            (cred.value.contents.credId || cred.value.contents.regId) ===
-            credential.credId
-    );
+    ).find(([, cred]) => getCredId(cred) === credential.credId);
     if (!credentialOnChain) {
         throwLoggedError(
             `Unexpected missing reference to genesis credential on chain, with credId: ${credential.credId}`
@@ -244,25 +240,22 @@ export async function updateCredentialsStatus(
     accountInfo: AccountInfo
 ) {
     const localCredentials = await getCredentialsOfAccount(accountAddress);
-    const onChainCredentials: [
-        CredentialDeploymentInformation,
-        number
-    ][] = Object.entries(accountInfo.accountCredentials).map(
-        ([index, versioned]) => {
-            const { regId, credId, ...content } = versioned.value.contents;
-            return [
-                { ...content, credId: regId || credId },
-                parseInt(index, 10),
-            ];
-        }
-    );
+    const onChainCredentials = Object.entries(
+        accountInfo.accountCredentials
+    ).map(([index, versioned]) => {
+        const credId = getCredId(versioned);
+        return {
+            ...versioned.value.contents,
+            credId,
+            credentialIndex: parseInt(index, 10),
+        };
+    });
     // Find any credentials, which have been removed from the account, and remove their (former) index.
     const removed = localCredentials.filter(
         (cred) =>
             instanceOfDeployedCredential(cred) &&
             !onChainCredentials.some(
-                ([onChainCredential]) =>
-                    cred.credId === onChainCredential.credId
+                (onChainCredential) => cred.credId === onChainCredential.credId
             )
     );
 
@@ -274,11 +267,10 @@ export async function updateCredentialsStatus(
     for (const cred of localCredentials) {
         if (!instanceOfDeployedCredential(cred)) {
             const onChainReference = onChainCredentials.find(
-                ([onChainCredential]) =>
-                    cred.credId === onChainCredential.credId
+                (onChainCredential) => cred.credId === onChainCredential.credId
             );
             if (onChainReference) {
-                const [, credentialIndex] = onChainReference;
+                const { credentialIndex } = onChainReference;
                 await updateCredentialIndex(
                     dispatch,
                     cred.credId,

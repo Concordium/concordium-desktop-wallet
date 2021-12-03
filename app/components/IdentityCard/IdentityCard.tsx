@@ -13,13 +13,11 @@ import {
     AttributeKeyName,
 } from '~/utils/types';
 import { formatDate } from '~/utils/timeHelpers';
+import { filterRecordEntries } from '~/utils/basicHelpers';
 import Card from '~/cross-app-components/Card';
-import SidedRow from '../SidedRow';
 import {
-    attributeNamesMap,
-    formatAttributeValue,
-    compareAttributes,
     IDENTITY_NAME_MAX_LENGTH,
+    isConfirmedIdentity,
 } from '~/utils/identityHelpers';
 import Form from '../Form';
 import Button from '~/cross-app-components/Button';
@@ -27,6 +25,7 @@ import { useUpdateEffect } from '~/utils/hooks';
 import { editIdentityName } from '~/features/IdentitySlice';
 import DeleteIdentity from './DeleteIdentity';
 import FailedIdentityDetails from './FailedIdentityDetails';
+import DisplayIdentityAttributes from '~/components/DisplayIdentityAttributes';
 
 import styles from './IdentityCard.module.scss';
 
@@ -85,9 +84,9 @@ function IdentityListElement({
     const [isEditing, setIsEditing] = useState(false);
     const dispatch = useDispatch();
     const identityProvider = JSON.parse(identity.identityProvider);
-    const identityObject: IdentityObject | null = JSON.parse(
-        identity.identityObject
-    )?.value;
+    const identityObject: IdentityObject | null = isConfirmedIdentity(identity)
+        ? JSON.parse(identity.identityObject).value
+        : null;
 
     const isRecovered = identity.status === IdentityStatus.Recovered;
 
@@ -185,31 +184,15 @@ function IdentityListElement({
             </div>
             {showAttributes && !isRecovered && identityObject && (
                 <div className={styles.details}>
-                    {Object.entries(
-                        identityObject.attributeList.chosenAttributes ?? {}
-                    )
-                        .filter(
-                            ([k]) =>
+                    <DisplayIdentityAttributes
+                        className={styles.detailsRow}
+                        attributes={filterRecordEntries(
+                            identityObject.attributeList.chosenAttributes ?? {},
+                            (k) =>
                                 showAttributes === true ||
                                 showAttributes.includes(k as AttributeKeyName)
-                        )
-                        .sort(([k1], [k2]) =>
-                            compareAttributes(
-                                k1 as AttributeKeyName,
-                                k2 as AttributeKeyName
-                            )
-                        )
-                        .map(([k, v]) => (
-                            <SidedRow
-                                className={styles.detailsRow}
-                                key={k}
-                                left={attributeNamesMap[k as AttributeKeyName]}
-                                right={formatAttributeValue(
-                                    k as AttributeKeyName,
-                                    v
-                                )}
-                            />
-                        ))}
+                        )}
+                    />
                 </div>
             )}
             {showAttributes &&

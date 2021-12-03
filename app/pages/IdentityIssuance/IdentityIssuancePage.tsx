@@ -100,7 +100,10 @@ export default function IdentityIssuancePage(): JSX.Element {
     return (
         <PageLayout>
             <PageLayout.Header>
-                <h1>New identity | {getSubtitle(useLocation().pathname)}</h1>
+                <h1>
+                    <span className={styles.titlePrefix}>New identity</span>
+                    {getSubtitle(useLocation().pathname)}
+                </h1>
             </PageLayout.Header>
             <ErrorModal
                 header="Unable to create identity"

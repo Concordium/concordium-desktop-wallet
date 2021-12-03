@@ -1,45 +1,58 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ChoiceModal from '~/components/ChoiceModal';
 import routes from '~/constants/routes.json';
 import { initialAccountNameSelector } from '~/features/AccountSlice';
 import { loadIdentities } from '~/features/IdentitySlice';
 import { updateIdentity } from '~/database/IdentityDao';
-import { IdentityStatus } from '~/utils/types';
+import { IdentityStatus, RejectedIdentity } from '~/utils/types';
 
 interface Props {
-    identityId: number;
-    identityName: string;
-    isRejected: boolean;
+    identity: RejectedIdentity;
 }
 
 /**
- * Modal, which appears on rejected identities/initial accounts.
+ * Modal that should be shown to the user when an identity/initial account
+ * creation has been rejected.
  */
-export default function FailedIdentityModal({
-    identityId,
-    identityName,
-    isRejected,
-}: Props) {
+export default function FailedIdentityModal({ identity }: Props) {
     const [modalOpen, setModalOpen] = useState(false);
     const dispatch = useDispatch();
     const initialAccountName = useSelector(
-        initialAccountNameSelector(identityId)
+        initialAccountNameSelector(identity.id)
     );
 
     useEffect(() => {
-        if (isRejected) {
+        if (identity.status === IdentityStatus.Rejected) {
             setModalOpen(true);
         } else {
             setModalOpen(false);
         }
-    }, [isRejected, setModalOpen]);
+    }, [identity.status, setModalOpen]);
+
+    const description = useMemo(() => {
+        return (
+            <>
+                <p>
+                    Unfortunately something went wrong with your new identity (
+                    {identity.name}) and initial account ({initialAccountName}).
+                </p>
+                <p className="textError textCenter">{identity.detail}</p>
+                <p>
+                    You can either go back and try again, or try again later.
+                    The identity can be removed by deleting the identity card in
+                    the identity view. This will automatically delete the
+                    related initial account as well
+                </p>
+            </>
+        );
+    }, [identity.name, initialAccountName, identity.detail]);
 
     return (
         <ChoiceModal
             disableClose
             title="The identity and initial account creation failed"
-            description={`Unfortunately something went wrong with your new identity (${identityName}) and initial account (${initialAccountName}). You can either go back and try again, or try again later. The identity can be removed by deleting the identity card in the identity view. This will automatically delete the related initial account as well.`}
+            description={description}
             open={modalOpen}
             actions={[
                 {
@@ -47,7 +60,7 @@ export default function FailedIdentityModal({
                     location: {
                         pathname: routes.IDENTITYISSUANCE,
                         state: {
-                            identityName,
+                            identityName: identity.name,
                             initialAccountName,
                         },
                     },
@@ -56,9 +69,9 @@ export default function FailedIdentityModal({
             ]}
             postAction={async () => {
                 window.log.info(
-                    `User has been warned of failed identity ${identityId}`
+                    `User has been warned of failed identity ${identity.id}`
                 );
-                await updateIdentity(identityId, {
+                await updateIdentity(identity.id, {
                     status: IdentityStatus.RejectedAndWarned,
                 });
                 await loadIdentities(dispatch);

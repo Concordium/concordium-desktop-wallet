@@ -181,3 +181,35 @@ export function throwLoggedError(message: string): never {
     window.log.error(error);
     throw error;
 }
+
+/**
+ * Helper to map the values of a record.
+ */
+export function mapRecordValues<K extends string | number | symbol, V, T>(
+    record: Record<K, V>,
+    map: (value: V) => T
+): Record<K, T> {
+    const result = {} as Record<K, T>;
+    const entries = Object.entries(record) as [K, V][];
+    return entries.reduce((acc, [k, v]) => {
+        acc[k as K] = map(v);
+        return acc;
+    }, result);
+}
+
+/**
+ * Helper to run a filter on the entries of a record.
+ */
+export function filterRecordEntries<K extends string | number | symbol, V>(
+    record: Record<K, V>,
+    filter: (key: K, value: V) => boolean
+): Record<K, V> {
+    const result = {} as Record<K, V>;
+    const entries = Object.entries(record) as [K, V][];
+    return entries.reduce((acc, [k, v]) => {
+        if (filter(k, v)) {
+            acc[k as K] = v;
+        }
+        return acc;
+    }, result);
+}

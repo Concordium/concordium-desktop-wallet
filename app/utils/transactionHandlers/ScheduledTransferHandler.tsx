@@ -22,7 +22,7 @@ import {
 
 type TransactionType = ScheduledTransfer;
 
-export const TYPE = 'Send GTU with a schedule';
+export const TYPE = 'Send CCD with a schedule';
 
 export function getFileNameForExport(
     transaction: ScheduledTransfer,

@@ -160,7 +160,7 @@ const SubmittedProposalView = withChainData<Props>(
             } else {
                 throwLoggedError(`Unexpected Transaction type: ${transaction}`);
             }
-            const submitted = (await sendTransaction(payload)).getValue();
+            const submitted = await sendTransaction(payload);
             const modifiedProposal: MultiSignatureTransaction = {
                 ...proposal,
             };

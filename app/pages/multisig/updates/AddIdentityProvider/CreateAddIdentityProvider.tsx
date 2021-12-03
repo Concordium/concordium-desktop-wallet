@@ -52,13 +52,13 @@ export default function CreateAddIdentityProvider({
 }: UpdateProps): JSX.Element | null {
     const identityProviders = useIdentityProviders();
     const ipIdentityMustBeUnique = useCallback<Validate>(
-        identityProviders
-            ? (v) =>
-                  !identityProviders
+        (v) =>
+            identityProviders
+                ? !identityProviders
                       .map((provider) => provider.ipIdentity.toString())
                       .includes(v) ||
                   `This ${fieldDisplays.ipIdentity} is already in use`
-            : () => 'Identity providers have not been loaded yet',
+                : 'Identity providers have not been loaded yet',
         [identityProviders]
     );
 

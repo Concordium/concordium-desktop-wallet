@@ -1,10 +1,10 @@
+import { VerifyKey } from '@concordium/node-sdk';
 import {
     AccessStructure,
     AccessStructureEnum,
     AuthorizationKeysUpdate,
     KeyIndexWithStatus,
     KeyUpdateEntryStatus,
-    VerifyKey,
 } from '../../app/utils/types';
 import { removeRemovedKeys } from '../../app/pages/multisig/updates/UpdateGovernanceKeys/util';
 

@@ -12,7 +12,6 @@ import {
     SignedIdRequest,
     IdObjectRequest,
     Versioned,
-    Identity,
     IdentityStatus,
     AccountStatus,
     Account,
@@ -24,6 +23,7 @@ import { getAddressFromCredentialId } from '~/utils/rustInterface';
 import generalStyles from '../IdentityIssuance.module.scss';
 import styles from './ExternalIssuance.module.scss';
 import { createInitialAccount } from '~/utils/accountHelpers';
+import { currentIdentityVersion } from '~/utils/identityHelpers';
 import { insertPendingIdentityAndInitialAccount } from '~/database/IdentityDao';
 import { getElementRectangle } from '~/utils/htmlHelpers';
 import { ViewResponseStatus } from '~/preload/preloadTypes';
@@ -117,7 +117,7 @@ async function generateIdentity(
         // at the identity provider at this point. This requires a change to the
         // identity providers, and cannot be fixed before that has been implemented.
 
-        const identity: Partial<Identity> = {
+        const identity = {
             identityNumber,
             name: identityName,
             status: IdentityStatus.Pending,
@@ -125,6 +125,7 @@ async function generateIdentity(
             identityProvider: JSON.stringify(provider),
             randomness,
             walletId,
+            version: currentIdentityVersion,
         };
 
         const accountAddress = await getAddressFromCredentialId(
