@@ -545,7 +545,6 @@ export async function confirmAccount(
             });
             break;
         case TransactionStatus.Finalized:
-            window.log.info('account creation was successful.');
             await updateAccount(accountAddress, {
                 status: AccountStatus.Confirmed,
             });

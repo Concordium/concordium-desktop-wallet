@@ -166,9 +166,7 @@ export default function AccountCreationGenerate({
                         randomness
                     );
                     await sendCredential(credentialDeploymentDetails);
-                    window.log.info(
-                        `Sent credential deployment to node with id: ${credentialDeploymentDetails.transactionId}`
-                    );
+                    window.log.info(`Sent credential deployment to node`);
                     confirmAccount(
                         dispatch,
                         credentialDeploymentDetails.accountAddress,
@@ -195,11 +193,9 @@ export default function AccountCreationGenerate({
     async function checkWallet(ledger: ConcordiumLedgerClient) {
         const walletId = await pairWallet(ledger, dispatch);
         if (walletId !== identity.walletId) {
-            const error = new Error(
+            throw new Error(
                 'The chosen identity was not created using the connected wallet.'
             );
-            window.log.warn(error);
-            throw error;
         }
     }
 

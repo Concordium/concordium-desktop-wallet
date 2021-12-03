@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+-   Added logging, which can be exported from the application menu.
+
 ## 1.3.0
 
 ### Added
@@ -10,7 +16,6 @@
 
 ### Changed
 
--   Added logging, which can be exported from the application menu.
 -   Auxiliary data in an Update Protocol transaction is now optional.
 -   Updated terms and conditions.
 -   Updated UI to reflect the rename of GTU to CCD, meaning anywhere tokens were referred to as GTU, it now says CCD. The GTU icon has also been replaced with the icon representing CCD.

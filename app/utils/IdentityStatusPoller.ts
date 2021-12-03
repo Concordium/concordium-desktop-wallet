@@ -72,7 +72,7 @@ export async function confirmIdentityAndInitialAccount(
         readOnly: true,
     };
 
-    window.log.info(`Identity Issuance Successful, id: ${identityId}`);
+    window.log.info(`Identity Issuance Successful`);
     await confirmIdentity(
         identityId,
         JSON.stringify(token.identityObject),
@@ -100,9 +100,7 @@ export async function resumeIdentityStatusPolling(
     const { name: identityName, codeUri: location, id } = identity;
     const initialAccount = await findInitialAccount(identity);
     if (!initialAccount) {
-        throwLoggedError(
-            `Unexpected missing initial account on ${identity.name}.`
-        );
+        throwLoggedError(`Unexpected missing initial account.`);
     }
     const { name: accountName } = initialAccount;
     return confirmIdentityAndInitialAccount(

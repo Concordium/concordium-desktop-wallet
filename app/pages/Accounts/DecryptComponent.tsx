@@ -48,7 +48,7 @@ export default function DecryptComponent({ account, onDecrypt }: Props) {
 
         if (account.identityNumber === undefined) {
             window.log.error(
-                `Decrypt encountered account without identity number. Address: ${account.address}`
+                `Decrypt encountered account without identity number.`
             );
             throw new Error(
                 'The account is missing an identity number. This is an internal error that should be reported'

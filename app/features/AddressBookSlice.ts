@@ -8,6 +8,7 @@ import {
     removeEntry,
 } from '../database/AddressBookDao';
 import { AddressBookEntry, Dispatch } from '../utils/types';
+import { throwLoggedError } from '~/utils/basicHelpers';
 
 interface AddressBookState {
     addressBook: AddressBookEntry[];
@@ -47,7 +48,6 @@ export async function addToAddressBook(
     dispatch: Dispatch,
     entry: AddressBookEntry
 ) {
-    window.log.info(`adding to address book, address: ${entry.address}`);
     await insertEntry(entry);
     loadAddressBook(dispatch);
 }
@@ -56,7 +56,6 @@ export async function removeFromAddressBook(
     dispatch: Dispatch,
     entry: Partial<AddressBookEntry>
 ) {
-    window.log.info(`removing from address book, address: ${entry.address}`);
     await removeEntry(entry);
     loadAddressBook(dispatch);
 }
