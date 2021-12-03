@@ -16,6 +16,9 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
         'regenerator-runtime/runtime',
         fromRoot('./app/preload/preload.ts'),
     ],
+    experiments: {
+        syncWebAssembly: true,
+    },
     output: {
         path: fromRoot('./app/dist'),
         publicPath: './dist/',
