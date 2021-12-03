@@ -52,7 +52,6 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(false), {
     entry: [
         'core-js',
         'regenerator-runtime/runtime',
-        `webpack-dev-server/client?http://localhost:${port}/`,
         'webpack/hot/only-dev-server',
         require.resolve('../app/index.tsx'),
     ],
