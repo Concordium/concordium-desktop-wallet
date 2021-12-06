@@ -1,11 +1,10 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useLocation } from 'react-router-dom';
 import { stringify } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
 import PickAmount from './PickAmount';
-import FinalPage from './FinalPage';
 import {
     Account,
     TransferToEncrypted,
@@ -14,7 +13,6 @@ import {
     Fraction,
 } from '~/utils/types';
 import { toMicroUnits } from '~/utils/gtu';
-import locations from '~/constants/transferLocations.json';
 import { TransferState } from '~/utils/transactionTypes';
 import { getTransactionKindCost } from '~/utils/transactionCosts';
 import TransferView from './TransferView';
@@ -22,7 +20,7 @@ import ensureExchangeRateAndNonce from '~/components/Transfers/ensureExchangeRat
 
 interface Specific<T> {
     amountHeader: string;
-    createTransaction: (address: string, amount: bigint, nonce: string) => T;
+    createTransaction: (address: string, amount: bigint, nonce: bigint) => T;
     location: string;
     transactionKind: TransactionKindId;
 }
@@ -31,7 +29,8 @@ interface Props<T> {
     account: Account;
     specific: Specific<T>;
     exchangeRate: Fraction;
-    nonce: string;
+    nonce: bigint;
+    disableClose?: boolean;
 }
 
 /**
@@ -42,6 +41,7 @@ function InternalTransfer<T extends TransferToPublic | TransferToEncrypted>({
     specific,
     exchangeRate,
     nonce,
+    disableClose = false,
 }: Props<T>) {
     const dispatch = useDispatch();
     const location = useLocation<TransferState>();
@@ -49,10 +49,6 @@ function InternalTransfer<T extends TransferToPublic | TransferToEncrypted>({
     const estimatedFee = useMemo(
         () => getTransactionKindCost(specific.transactionKind, exchangeRate),
         [specific.transactionKind, exchangeRate]
-    );
-
-    const [subLocation, setSubLocation] = useState<string>(
-        location?.state?.initialPage || locations.pickAmount
     );
 
     const toConfirmTransfer = useCallback(
@@ -70,16 +66,14 @@ function InternalTransfer<T extends TransferToPublic | TransferToEncrypted>({
                     pathname: routes.SUBMITTRANSFER,
                     state: {
                         confirmed: {
-                            pathname: specific.location,
+                            pathname: routes.ACCOUNTS_FINAL_PAGE,
                             state: {
-                                initialPage: locations.transferSubmitted,
                                 transaction: transactionJSON,
                             },
                         },
                         cancelled: {
                             pathname: specific.location,
                             state: {
-                                initialPage: locations.pickAmount,
                                 amount,
                             },
                         },
@@ -94,23 +88,19 @@ function InternalTransfer<T extends TransferToPublic | TransferToEncrypted>({
 
     return (
         <TransferView
-            showBack={subLocation === locations.confirmTransfer}
-            exitOnClick={() => dispatch(push(routes.ACCOUNTS))}
-            backOnClick={() => setSubLocation(locations.pickAmount)}
+            showBack={false}
+            exitOnClick={
+                disableClose ? undefined : () => dispatch(push(routes.ACCOUNTS))
+            }
         >
-            {subLocation === locations.pickAmount && (
-                <PickAmount
-                    header={specific.amountHeader}
-                    estimatedFee={estimatedFee}
-                    defaultAmount={location?.state?.amount ?? ''}
-                    toPickRecipient={undefined}
-                    toConfirmTransfer={toConfirmTransfer}
-                    transactionKind={specific.transactionKind}
-                />
-            )}
-            {subLocation === locations.transferSubmitted && (
-                <FinalPage location={location} />
-            )}
+            <PickAmount
+                header={specific.amountHeader}
+                estimatedFee={estimatedFee}
+                defaultAmount={location?.state?.amount ?? ''}
+                toPickRecipient={undefined}
+                toConfirmTransfer={toConfirmTransfer}
+                transactionKind={specific.transactionKind}
+            />
         </TransferView>
     );
 }

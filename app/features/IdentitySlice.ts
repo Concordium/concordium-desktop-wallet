@@ -1,12 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
+// eslint-disable-next-line import/no-cycle
+import { loadAccounts } from './AccountSlice';
 import {
     getAllIdentities,
-    insertIdentity,
     updateIdentity,
+    removeIdentityAndInitialAccount as removeIdentityAndInitialAccountInDatabase,
 } from '../database/IdentityDao';
-import { Identity, IdentityStatus, Dispatch } from '../utils/types';
+import { Identity, Dispatch } from '../utils/types';
+import { isConfirmedIdentity } from '~/utils/identityHelpers';
 
 interface IdentityState {
     identities: Identity[];
@@ -37,31 +40,28 @@ export const identitiesSelector = (state: RootState) =>
     state.identities.identities;
 
 export const confirmedIdentitiesSelector = (state: RootState) =>
-    state.identities.identities.filter(
-        (identity: Identity) => IdentityStatus.Confirmed === identity.status
-    );
-
-export const confirmedAndGenesisIdentitiesSelector = (state: RootState) =>
-    state.identities.identities.filter((identity: Identity) =>
-        [IdentityStatus.Confirmed, IdentityStatus.Genesis].includes(
-            identity.status
-        )
-    );
+    state.identities.identities.filter(isConfirmedIdentity);
 
 export const chosenIdentitySelector = (state: RootState) =>
     state.identities.identities.find(
         (i) => i.id === state.identities.chosenIdentityId
     );
 
+export const specificIdentitySelector = (identityId: number) => (
+    state: RootState
+) => state.identities.identities.find((i) => i.id === identityId);
+
 export async function loadIdentities(dispatch: Dispatch) {
     const identities: Identity[] = await getAllIdentities();
     dispatch(updateIdentities(identities));
 }
 
-export async function importIdentities(
-    identities: Identity | Identity[] | Partial<Identity>
+export async function removeIdentityAndInitialAccount(
+    dispatch: Dispatch,
+    identityId: number
 ) {
-    await insertIdentity(identities);
+    await removeIdentityAndInitialAccountInDatabase(identityId);
+    return Promise.all([loadAccounts(dispatch), loadIdentities(dispatch)]);
 }
 
 export async function editIdentityName(

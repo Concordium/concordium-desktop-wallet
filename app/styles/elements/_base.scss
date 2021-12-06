@@ -4,7 +4,7 @@
 
 body {
     word-wrap: break-word;
-    background-color: $color-off-white;
+    background-color: $color-background;
     margin: 0;
     overflow: overlay;
     color: $color-text;
@@ -21,21 +21,13 @@ body {
 }
 ::-webkit-scrollbar-thumb {
     cursor: pointer;
-    height: 6px;
+    height: 30px;
     border: 6px solid rgba(0, 0, 0, 0);
     background-clip: padding-box;
     border-radius: 10px;
     background-color: rgba(0, 0, 0, 0.15);
     box-shadow: inset -1px -1px 0 rgba(0, 0, 0, 0.05),
         inset 1px 1px 0 rgba(0, 0, 0, 0.05);
-}
-::-webkit-scrollbar-button {
-    width: 0;
-    height: 0;
-    display: none;
-}
-::-webkit-scrollbar-corner {
-    background-color: transparent;
 }
 
 a {

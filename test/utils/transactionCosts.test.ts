@@ -1,3 +1,4 @@
+import '../mockWindow';
 import {
     getScheduledTransferPayloadSize,
     getTransactionEnergyCost,
@@ -22,12 +23,12 @@ import {
 function getMockedScheduledTransfer(scheduleLength: number) {
     const address = '3UbdTrP5kcEioJRCyiCacAdpAYfyezPSVfrys8QDsHJUiVXjKf';
     const spy = jest.spyOn(NodeRequests, 'getNextAccountNonce');
-    spy.mockReturnValue(Promise.resolve({ nonce: '0' }));
+    spy.mockReturnValue(Promise.resolve({ allFinal: true, nonce: 0n }));
     return createScheduledTransferTransaction(
         address,
         address,
         createRegularIntervalSchedule(100n, scheduleLength, 0, 1),
-        '1'
+        1n
     );
 }
 
@@ -64,7 +65,7 @@ test('getTransactionEnergyCost with scheduled transfer', async () => {
     const transaction = getMockedScheduledTransfer(scheduleLength);
 
     const numKeys = 11;
-    const payloadSize = getScheduledTransferPayloadSize(scheduleLength);
+    const payloadSize = getScheduledTransferPayloadSize(scheduleLength, 0);
     const transactionSize = BigInt(payloadSize) + transactionHeaderSize;
     const typeCost =
         energyConstants.ScheduledTransferPerRelease * BigInt(scheduleLength);
@@ -106,6 +107,6 @@ test('test getScheduledTransferPayloadSize', async () => {
 
     expect(
         serializedPayload.length ===
-            getScheduledTransferPayloadSize(scheduleLength)
+            getScheduledTransferPayloadSize(scheduleLength, 0)
     ).toBeTruthy();
 });

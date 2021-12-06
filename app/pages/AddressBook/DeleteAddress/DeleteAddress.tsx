@@ -5,6 +5,7 @@ import Button from '~/cross-app-components/Button';
 import Modal from '~/cross-app-components/Modal';
 
 import styles from './DeleteAddress.module.scss';
+import IconButton from '~/cross-app-components/IconButton';
 
 interface DeleteAddressProps {
     entry: AddressBookEntry;
@@ -25,9 +26,9 @@ export default function DeleteAddress({ entry, onRemove }: DeleteAddressProps) {
             onOpen={() => setOpen(true)}
             open={open}
             trigger={
-                <Button clear className={styles.deleteButton}>
+                <IconButton className={styles.deleteButton}>
                     <BinIcon className={styles.binIcon} />
-                </Button>
+                </IconButton>
             }
         >
             <h2 className="mV50">

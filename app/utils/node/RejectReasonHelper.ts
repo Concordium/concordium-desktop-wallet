@@ -125,13 +125,13 @@ export function rejectReasonToDisplayText(
         case RejectReason.InvalidEncryptedAmountTransferProof:
             return 'The shielded amount transfer has an invalid proof';
         case RejectReason.InvalidTransferToPublicProof:
-            return 'The shielding has an invalid proof';
+            return 'The unshield amount has an invalid proof';
         case RejectReason.EncryptedAmountSelfTransfer:
             return 'An shielded amount transfer from the account to itself is not allowed';
         case RejectReason.InvalidIndexOnEncryptedTransfer:
             return 'The provided shielded transfer index is out of bounds';
         case RejectReason.ZeroScheduledAmount:
-            return 'Attempt to transfer 0 GTU with schedule';
+            return 'Attempt to transfer 0 CCD with schedule';
         case RejectReason.NonIncreasingSchedule:
             return 'Attempt to transfer amount with non-increasing schedule';
         case RejectReason.FirstScheduledReleaseExpired:

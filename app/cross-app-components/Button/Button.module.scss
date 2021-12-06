@@ -72,7 +72,6 @@
 
     &Huge {
         height: 76px;
-        font-size: $font-size-h2;
     }
 
     &WithIcon {
@@ -89,7 +88,7 @@
     }
 
     &Inverted {
-        @include shadowBorder($color-text);
+        @include shadowBorder($color-grey);
 
         background-color: $color-white;
         transition: box-shadow $anim-easing $anim-timing,
@@ -102,7 +101,7 @@
         }
 
         &:disabled {
-            @include shadowBorder($color-text-faded);
+            @include shadowBorder($color-light-grey);
 
             color: $color-text-faded;
         }

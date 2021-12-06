@@ -1,14 +1,14 @@
 import React from 'react';
 import clsx from 'clsx';
 import BinIcon from '@resources/svg/bin.svg';
+import { ReleaseSchedule } from '@concordium/node-sdk/';
 import Button from '~/cross-app-components/Button';
 import { displayAsGTU } from '~/utils/gtu';
-import { parseTime } from '~/utils/timeHelpers';
-import { Schedule, TimeStampUnit } from '~/utils/types';
+import { getFormattedDateString } from '~/utils/timeHelpers';
 import styles from './ScheduleList.module.scss';
 
 interface Props {
-    schedule: Schedule;
+    schedule: ReleaseSchedule[];
     removeFromSchedule?: (index: number) => void;
     className?: string;
     elementClassName?: string;
@@ -26,15 +26,15 @@ export default function ScheduleList({
         <div className={clsx(styles.scheduleList, className)}>
             {schedule.map((schedulePoint, index) => (
                 <div
-                    key={schedulePoint.timestamp + schedulePoint.amount}
+                    key={
+                        schedulePoint.timestamp.toString() +
+                        schedulePoint.amount.toString()
+                    }
                     className={clsx(styles.scheduleListRow, elementClassName)}
                 >
                     <div>
                         {showIndex ?? `${index + 1}. `}
-                        {parseTime(
-                            schedulePoint.timestamp,
-                            TimeStampUnit.milliSeconds
-                        )}
+                        {getFormattedDateString(schedulePoint.timestamp)}
                     </div>
                     <div>
                         {displayAsGTU(schedulePoint.amount)}{' '}

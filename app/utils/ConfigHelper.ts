@@ -5,13 +5,17 @@ export enum Net {
 }
 
 export function getTargetNet() {
-    switch (process.env.TARGET_NET?.toLowerCase()) {
+    switch (process.env.TARGET_NET) {
         case 'testnet':
             return Net.Testnet;
         case 'stagenet':
             return Net.Stagenet;
-        default:
+        case 'mainnet':
             return Net.Mainnet;
+        default:
+            throw new Error(
+                `An invalid value for target net was set: [${process.env.TARGET_NET}]`
+            );
     }
 }
 

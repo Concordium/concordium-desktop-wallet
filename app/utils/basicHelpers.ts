@@ -21,7 +21,7 @@ export function partition<T>(
  * @param str the string to check for hexadecimal
  */
 export function isHex(str: string): boolean {
-    return /^[A-F0-9]+$/i.test(str);
+    return /^[A-F0-9]+$/i.test(str) && str.length % 2 === 0;
 }
 
 /**
@@ -30,20 +30,6 @@ export function isHex(str: string): boolean {
  */
 export function onlyDigitsNoLeadingZeroes(value: string): boolean {
     return /^(?:[1-9][0-9]*|0)$/.test(value);
-}
-
-/** Given a list of elements, a function to parse the elements to string array,
- * and the names of the elements' fields, outputs
- * csv string, with the names first, and the values of each element per line.
- */
-export function toCSV(elements: string[][], fieldNames: string[]): string {
-    if (elements.find((element) => element.length !== fieldNames.length)) {
-        throw new Error('invalid formatted input');
-    }
-
-    return `${fieldNames.join(',')}\n${elements
-        .map((element) => element.join(','))
-        .join('\n')}`;
 }
 
 /**
@@ -152,6 +138,16 @@ export function collapseFraction({ numerator, denominator }: Fraction): bigint {
     return 1n + quotient;
 }
 
+export function multiplyFraction(
+    { numerator, denominator }: Fraction,
+    factor: bigint | string
+): Fraction {
+    return {
+        numerator: numerator * BigInt(factor),
+        denominator,
+    };
+}
+
 /**
  * Returns the absolute value of the given bigint.
  */
@@ -161,6 +157,11 @@ export function abs(value: bigint) {
 
 export function max(first: bigint, second: bigint) {
     return first > second ? first : second;
+}
+
+export function isASCII(value: string) {
+    // eslint-disable-next-line no-control-regex
+    return /[^\u0000-\u007f]/.test(value);
 }
 
 /**
@@ -173,4 +174,36 @@ export function pipe<A extends any[], B, C>(
     b: (arg: B) => C
 ): (...args: A) => C {
     return (...args) => b(a(...args));
+}
+
+/**
+ * Helper to map the values of a record.
+ */
+export function mapRecordValues<K extends string | number | symbol, V, T>(
+    record: Record<K, V>,
+    map: (value: V) => T
+): Record<K, T> {
+    const result = {} as Record<K, T>;
+    const entries = Object.entries(record) as [K, V][];
+    return entries.reduce((acc, [k, v]) => {
+        acc[k as K] = map(v);
+        return acc;
+    }, result);
+}
+
+/**
+ * Helper to run a filter on the entries of a record.
+ */
+export function filterRecordEntries<K extends string | number | symbol, V>(
+    record: Record<K, V>,
+    filter: (key: K, value: V) => boolean
+): Record<K, V> {
+    const result = {} as Record<K, V>;
+    const entries = Object.entries(record) as [K, V][];
+    return entries.reduce((acc, [k, v]) => {
+        if (filter(k, v)) {
+            acc[k as K] = v;
+        }
+        return acc;
+    }, result);
 }

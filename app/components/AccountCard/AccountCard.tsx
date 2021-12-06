@@ -2,7 +2,7 @@ import React, { useEffect, useState, SyntheticEvent } from 'react';
 import { useSelector } from 'react-redux';
 import clsx from 'clsx';
 import MultiSigIcon from '@resources/svg/multisig.svg';
-import PendingImage from '@resources/svg/pending-small.svg';
+import PendingImage from '@resources/svg/pending-arrows.svg';
 import RejectedImage from '@resources/svg/warning.svg';
 import ShieldImage from '@resources/svg/shield.svg';
 import BakerImage from '@resources/svg/baker.svg';
@@ -11,7 +11,11 @@ import LedgerImage from '@resources/svg/ledger.svg';
 import InfoImage from '@resources/svg/info.svg';
 import { displayAsGTU } from '~/utils/gtu';
 import { AccountInfo, Account, AccountStatus, ClassName } from '~/utils/types';
-import { isInitialAccount, isMultiCred } from '~/utils/accountHelpers';
+import {
+    isInitialAccount,
+    isMultiCred,
+    getPublicAccountAmounts,
+} from '~/utils/accountHelpers';
 import SidedRow from '~/components/SidedRow';
 import { walletIdSelector } from '~/features/WalletSlice';
 import { findLocalDeployedCredential } from '~/utils/credentialHelper';
@@ -286,14 +290,10 @@ export default function AccountCard({
     const shielded = account.totalDecrypted
         ? BigInt(account.totalDecrypted)
         : 0n;
-    const unShielded = accountInfo ? BigInt(accountInfo.accountAmount) : 0n;
-    const scheduled =
-        accountInfo && accountInfo.accountReleaseSchedule
-            ? BigInt(accountInfo.accountReleaseSchedule.total)
-            : 0n;
     const accountBaker = accountInfo?.accountBaker;
-    const stakedAmount = accountBaker ? BigInt(accountBaker.stakedAmount) : 0n;
-    const amountAtDisposal = unShielded - scheduled - stakedAmount;
+    const { total: unShielded, staked, atDisposal } = getPublicAccountAmounts(
+        accountInfo
+    );
 
     return (
         <AccountCardView
@@ -301,8 +301,8 @@ export default function AccountCard({
             hasEncryptedFunds={!account.allDecrypted}
             shielded={shielded}
             unShielded={unShielded}
-            amountAtDisposal={amountAtDisposal}
-            stakedAmount={stakedAmount}
+            amountAtDisposal={atDisposal}
+            stakedAmount={staked}
             connected={connected}
             hasDeployedCredentials={accountHasDeployedCredentials}
             accountName={account.name}

@@ -51,7 +51,7 @@ export interface TransferState {
     amount: string;
     transaction: string;
     recipient: AddressBookEntry;
-    initialPage: string;
+    memo?: string;
 }
 
 export type UpdateComponent = (props: UpdateProps) => JSX.Element | null;
@@ -134,8 +134,9 @@ export interface CreateTransactionInput {
     amount: bigint;
     schedule: Schedule;
     signatureAmount: number;
-    nonce: string;
+    nonce: bigint;
     expiryTime: Date;
+    memo: string;
 }
 
 /**

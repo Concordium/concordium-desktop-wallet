@@ -1,5 +1,6 @@
 import React from 'react';
 import { ExportKeyType, PublicKeyExportFormat } from '~/utils/types';
+import PublicKeyDetails from '~/components/ledger/PublicKeyDetails';
 
 export interface PrintFormatProps {
     publicKeyExport: PublicKeyExportFormat;
@@ -30,7 +31,7 @@ export default function PrintFormat({
         <div>
             <h2>{keyTypeText}</h2>
             <h3>Public-key</h3>
-            <b>{publicKeyExport.key.verifyKey}</b>
+            <PublicKeyDetails publicKey={publicKeyExport.key.verifyKey} />
             <h3>Identicon</h3>
             <img src={image} alt="" />
             <h3>Note</h3>

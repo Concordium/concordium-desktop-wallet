@@ -8,14 +8,22 @@ import {
     IdentityProvider,
     PublicInformationForIp,
     CreationKeys,
+    Global,
 } from '~/utils/types';
 import Card from '~/cross-app-components/Card';
 import { globalSelector } from '~/features/GlobalSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getNextIdentityNumber } from '~/database/IdentityDao';
-import { createIdentityRequestObjectLedger } from '~/utils/rustInterface';
+import {
+    createIdentityRequestObjectLedger,
+    computeCredIdFromSeed,
+} from '~/utils/rustInterface';
 import errorMessages from '~/constants/errorMessages.json';
 import SimpleLedgerWithCreationKeys from '~/components/ledger/SimpleLedgerWithCreationKeys';
+import PublicKeyDetails from '~/components/ledger/PublicKeyDetails';
+import { getAccountInfoOfCredential } from '~/node/nodeRequests';
+import { getlastFinalizedBlockHash } from '~/node/nodeHelpers';
+import ChoiceModal from '~/components/ChoiceModal';
 
 import styles from './PickProvider.module.scss';
 import { ExternalIssuanceLocationState } from '../ExternalIssuance/ExternalIssuance';
@@ -25,20 +33,35 @@ import pairWallet from '~/utils/WalletPairing';
 const IPDetails = (info: PublicInformationForIp) => (
     <div className="textLeft">
         <p className="mT0">Please confirm details on ledger:</p>
+        <div>
+            <b>Public key:</b>
+            <PublicKeyDetails
+                className="mV40"
+                publicKey={info.publicKeys.keys[0].verifyKey}
+            />
+        </div>
         <p>
-            <b>Identity Credentials Public (IdCredPub):</b> {info.idCredPub}
-        </p>
-        <p>
-            <b>Registration ID (RegId):</b> {info.regId}
-        </p>
-        <p>
-            <b>Public key:</b> {info.publicKeys.keys[0].verifyKey}
-        </p>
-        <p>
-            <b>Threshold:</b> {info.publicKeys.threshold}
+            <b>Signature Threshold:</b> {info.publicKeys.threshold}
         </p>
     </div>
 );
+
+async function hasPrfKeySeedBeenUsed(
+    prfKeySeed: string,
+    global: Global
+): Promise<boolean> {
+    const blockHash = await getlastFinalizedBlockHash();
+    // Check if this seed have been used with version 0 keygen.
+    let credId = await computeCredIdFromSeed(prfKeySeed, 0, global, 0);
+    let info = await getAccountInfoOfCredential(credId, blockHash);
+    if (info) {
+        return true;
+    }
+    // Check if this index have been used with version 1 keygen.
+    credId = await computeCredIdFromSeed(prfKeySeed, 0, global, 1);
+    info = await getAccountInfoOfCredential(credId, blockHash);
+    return Boolean(info);
+}
 
 interface Props {
     setProvider(provider: IdentityProvider): void;
@@ -54,6 +77,7 @@ export default function IdentityIssuanceChooseProvider({
     setIsSigning,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
+    const [alreadyExists, setAlreadyExists] = useState(false);
     const [providers, setProviders] = useState<IdentityProvider[]>([]);
     const [
         nextLocationState,
@@ -84,7 +108,7 @@ export default function IdentityIssuanceChooseProvider({
     }
 
     const withLedger = useCallback(
-        (keys: CreationKeys) => {
+        (keySeeds: CreationKeys) => {
             return async (
                 ledger: ConcordiumLedgerClient,
                 setMessage: (message: string | JSX.Element) => void
@@ -107,9 +131,14 @@ export default function IdentityIssuanceChooseProvider({
                         walletId
                     );
 
+                    if (await hasPrfKeySeedBeenUsed(keySeeds.prfKey, global)) {
+                        setAlreadyExists(true);
+                        return;
+                    }
+
                     const idObj = await createIdentityRequestObjectLedger(
                         identityNumber,
-                        keys,
+                        keySeeds,
                         provider.ipInfo,
                         provider.arsInfos,
                         global,
@@ -140,6 +169,16 @@ export default function IdentityIssuanceChooseProvider({
 
     return (
         <>
+            <ChoiceModal
+                title="Identity index already in use!"
+                description="The next identity index on the current Ledger has already been used on the chain. Please import or recover it."
+                open={alreadyExists}
+                disableClose
+                actions={[
+                    { label: 'Go to import', location: routes.EXPORTIMPORT },
+                    { label: 'Go to recovery', location: routes.RECOVERY },
+                ]}
+            />
             <h2 className={styles.header}>The identity provider</h2>
             <p className={styles.text}>
                 The next step of creating a new identity is to choose an

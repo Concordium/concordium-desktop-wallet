@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
+import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateSettingEntry } from '~/features/SettingsSlice';
 import { globalSelector } from '~/features/GlobalSlice';
-import { Global, Setting, Versioned } from '~/utils/types';
+import { Setting } from '~/utils/types';
 import startClient from '~/node/nodeConnector';
 import Card from '~/cross-app-components/Card';
 import Form from '~/components/Form';
 import ConnectionStatusComponent, {
     Status,
 } from '~/components/ConnectionStatusComponent';
-import { JsonResponse } from '~/proto/concordium_p2p_rpc_pb';
-import { ConsensusStatus } from '~/node/NodeApiTypes';
 import getGenesis from '~/database/GenesisDao';
 import { displayTargetNet, getTargetNet, Net } from '~/utils/ConfigHelper';
 import genesisBlocks from '~/constants/genesis.json';
@@ -20,6 +19,7 @@ import styles from './ConnectionSettingElement.module.scss';
 interface Props {
     displayText: string;
     setting: Setting;
+    className?: string;
 }
 
 const portRangeMax = 65535;
@@ -52,24 +52,19 @@ async function getConsensusAndGlobalFromNode(address: string, port: string) {
             'The node consensus status and cryptographic parameters could not be retrieved'
         );
     }
-
-    const consensusStatus: ConsensusStatus = JSON.parse(
-        JsonResponse.deserializeBinary(result.response.consensus).getValue()
-    );
-
-    const nodeVersionedGlobal: Versioned<Global> = JSON.parse(
-        JsonResponse.deserializeBinary(result.response.global).getValue()
-    );
-    const nodeGlobal = nodeVersionedGlobal.value;
-
-    return { consensusStatus, nodeGlobal };
+    const { global, consensusStatus } = result.response;
+    return { consensusStatus, nodeGlobal: global.value };
 }
 
 /**
  * A component for connection settings that are updated automatically on changes.
  * N.B. right now is fixed to node location setting.
  */
-export default function ConnectionSetting({ displayText, setting }: Props) {
+export default function ConnectionSetting({
+    displayText,
+    setting,
+    className,
+}: Props) {
     const dispatch = useDispatch();
     const startValues = JSON.parse(setting.value);
     const global = useSelector(globalSelector);
@@ -152,7 +147,7 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
     }
 
     return (
-        <Card className={styles.connection}>
+        <Card className={clsx(styles.connection, className)}>
             <h3>{displayText}</h3>
             <Form
                 className="mT50"

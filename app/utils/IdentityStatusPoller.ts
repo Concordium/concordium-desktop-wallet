@@ -3,17 +3,18 @@ import {
     Credential,
     Dispatch,
     Identity,
-    IdentityStatus,
+    PendingIdentity,
 } from './types';
 import { getIdObject } from './httpRequests';
 import { getAccountsOfIdentity } from '../database/AccountDao';
 import { loadIdentities } from '../features/IdentitySlice';
 import { loadAccounts } from '../features/AccountSlice';
 import { isInitialAccount } from './accountHelpers';
+import { isPendingIdentity } from './identityHelpers';
 import {
     confirmIdentity,
     getAllIdentities,
-    rejectIdentityAndDeleteInitialAccount,
+    rejectIdentityAndInitialAccount,
 } from '../database/IdentityDao';
 import { loadCredentials } from '~/features/CredentialSlice';
 import { loadAddressBook } from '~/features/AddressBookSlice';
@@ -37,7 +38,10 @@ export async function confirmIdentityAndInitialAccount(
     // The identity provider failed the identity creation request. Clean up the
     // identity and account in the database and refresh the state.
     if (idObjectResponse.error) {
-        await rejectIdentityAndDeleteInitialAccount(identityId);
+        await rejectIdentityAndInitialAccount(
+            identityId,
+            idObjectResponse.error.message
+        );
         await loadIdentities(dispatch);
         await loadAccounts(dispatch);
         return;
@@ -85,7 +89,7 @@ async function findInitialAccount(identity: Identity) {
 }
 
 export async function resumeIdentityStatusPolling(
-    identity: Identity,
+    identity: PendingIdentity,
     dispatch: Dispatch
 ) {
     const { name: identityName, codeUri: location, id } = identity;
@@ -106,6 +110,6 @@ export async function resumeIdentityStatusPolling(
 export default async function listenForIdentityStatus(dispatch: Dispatch) {
     const identities = await getAllIdentities();
     identities
-        .filter((identity) => identity.status === IdentityStatus.Pending)
+        .filter(isPendingIdentity)
         .forEach((identity) => resumeIdentityStatusPolling(identity, dispatch));
 }

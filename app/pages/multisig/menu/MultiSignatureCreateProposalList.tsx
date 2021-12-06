@@ -18,7 +18,7 @@ const updateInstructionTypes: [TransactionTypes, UpdateType, string][] = [
     [
         TransactionTypes.UpdateInstruction,
         UpdateType.UpdateMicroGTUPerEuro,
-        'Update µGTU per Euro',
+        'Update µCCD per Euro',
     ],
     [
         TransactionTypes.UpdateInstruction,
@@ -85,6 +85,16 @@ const updateInstructionTypes: [TransactionTypes, UpdateType, string][] = [
         UpdateType.UpdateLevel2KeysUsingLevel1Keys,
         'Update level 2 keys using level 1 keys',
     ],
+    [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.AddIdentityProvider,
+        'Add identity provider',
+    ],
+    [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.AddAnonymityRevoker,
+        'Add anonymity revoker',
+    ],
 ];
 
 const accountTransactionTypes: [
@@ -100,12 +110,12 @@ const accountTransactionTypes: [
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Simple_transfer,
-        'Send GTU',
+        'Send CCD',
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Transfer_with_schedule,
-        'Send GTU with a schedule',
+        'Send CCD with a schedule',
     ],
     [
         TransactionTypes.AccountTransaction,

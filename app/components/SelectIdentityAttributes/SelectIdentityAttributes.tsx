@@ -8,7 +8,7 @@ import {
 } from '~/utils/identityHelpers';
 import {
     ClassName,
-    Identity,
+    ConfirmedIdentity,
     IdentityObject,
     AttributeKeyName,
 } from '~/utils/types';
@@ -24,7 +24,7 @@ const revealableAttributes: AttributeKeyName[] = [
 ];
 
 interface Props extends ClassName {
-    identity: Identity;
+    identity: ConfirmedIdentity;
     setChosenAttributes: (attributes: AttributeKeyName[]) => void;
     chosenAttributes: AttributeKeyName[] | undefined;
 }

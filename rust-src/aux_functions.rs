@@ -14,7 +14,7 @@ extern "C" {
 use crypto_common::{types::{KeyIndex, Amount, TransactionTime}, *};
 use encrypted_transfers::types::{AggregatedDecryptedAmount, EncryptedAmount, EncryptedAmountAggIndex};
 use elgamal::BabyStepGiantStep;
-use dodis_yampolskiy_prf as prf;
+use dodis_yampolskiy_prf::SecretKey;
 use hex::FromHex;
 use pairing::bls12_381::{Bls12, Fr, G1};
 use serde_json::{from_str, Value as SerdeValue};
@@ -35,17 +35,16 @@ use id::{
 };
 use pedersen_scheme::Value;
 
+type PrfKey = SecretKey<ExampleCurve>;
+
 pub fn build_pub_info_for_ip_aux(
     input: &str,
-    id_cred_sec_seed: &str,
-    prf_key_seed: &str,
+    id_cred_sec: Value<ExampleCurve>,
+    prf_key: PrfKey,
 ) -> Result<String> {
     let v: SerdeValue = from_str(input)?;
 
     let global_context: GlobalContext<ExampleCurve> = try_get(&v, "global")?;
-
-    let id_cred_sec = Value::new(generate_bls_key(id_cred_sec_seed)?);
-    let prf_key = prf::SecretKey::new(generate_bls_key(prf_key_seed)?);
 
     let initial_acc_data = InitialAccountDataStruct {
         public_keys: try_get(&v, "publicKeys")?,
@@ -65,8 +64,8 @@ pub fn build_pub_info_for_ip_aux(
 pub fn create_id_request_aux(
     input: &str,
     signature: &str,
-    id_cred_sec_seed: &str,
-    prf_key_seed: &str,
+    id_cred_sec: Value<ExampleCurve>,
+    prf_key: PrfKey,
 ) -> Result<String> {
     let v: SerdeValue = from_str(input)?;
 
@@ -81,9 +80,6 @@ pub fn create_id_request_aux(
         ensure!(l > 0, "ArInfos should have at least 1 anonymity revoker.");
         Threshold(max((l - 1).try_into().unwrap_or(255), 1))
     };
-
-    let id_cred_sec = Value::new(generate_bls_key(id_cred_sec_seed)?);
-    let prf_key = prf::SecretKey::new(generate_bls_key(prf_key_seed)?);
 
     let chi = CredentialHolderInfo::<ExampleCurve> {
         id_cred: IdCredentials { id_cred_sec },
@@ -119,7 +115,9 @@ pub fn create_id_request_aux(
 }
 
 pub fn generate_unsigned_credential_aux(
-    input: &str
+    input: &str,
+    id_cred_sec: Value<ExampleCurve>,
+    prf_key: PrfKey,
 ) -> Result<String> {
     let v: SerdeValue = from_str(input)?;
     let ip_info: IpInfo<Bls12> = try_get(&v, "ipInfo")?;
@@ -140,12 +138,6 @@ pub fn generate_unsigned_credential_aux(
         keys: build_key_map(&public_keys),
         threshold: try_get(&v, "threshold")?,
     };
-
-    let id_string: String = try_get(&v, "idCredSec")?;
-    let id_cred_sec = Value::new(generate_bls_key(&id_string)?);
-
-    let prf_key_string: String = try_get(&v, "prfKey")?;
-    let prf_key = prf::SecretKey::new(generate_bls_key(&prf_key_string)?);
 
     let chi = CredentialHolderInfo::<ExampleCurve> {
         id_cred: IdCredentials { id_cred_sec },
@@ -307,12 +299,10 @@ pub fn get_credential_deployment_details_aux(
 
 pub fn decrypt_amounts_aux(
     input: &str,
+    prf_key: PrfKey
 ) -> Result<String> {
     let v: SerdeValue = from_str(input)?;
     let encrypted_amounts: Vec<EncryptedAmount<ExampleCurve>> = try_get(&v, "encryptedAmounts")?;
-
-    let prf_key_string: String = try_get(&v, "prfKey")?;
-    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls_key(&prf_key_string)?);
 
     let credential_number: u8 = try_get(&v, "credentialNumber")?;
 
@@ -340,11 +330,9 @@ pub fn decrypt_amounts_aux(
 
 pub fn create_sec_to_pub_aux(
     input: &str,
+    prf_key: PrfKey
 ) -> Result<String> {
     let v: SerdeValue = from_str(input)?;
-
-    let prf_key_string: String = try_get(&v, "prfKey")?;
-    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls_key(&prf_key_string)?);
 
     let account_number: u8 = try_get(&v, "accountNumber")?;
 
@@ -359,7 +347,8 @@ pub fn create_sec_to_pub_aux(
 
     let incoming_amounts: Vec<EncryptedAmount<ExampleCurve>> = try_get(&v, "incomingAmounts")?;
     let self_amount: EncryptedAmount<ExampleCurve> = try_get(&v, "encryptedSelfAmount")?;
-    let agg_index: EncryptedAmountAggIndex = try_get(&v, "aggIndex")?;
+    let index: u64 = try_get::<String>(&v, "aggIndex")?.parse::<u64>()?;
+    let agg_index = EncryptedAmountAggIndex{ index };
     let to_transfer: Amount = try_get(&v, "amount")?;
 
     let input_amount = incoming_amounts.iter().fold(self_amount, |acc, amount| encrypted_transfers::aggregate(&acc,amount));
@@ -411,11 +400,9 @@ pub fn create_sec_to_pub_aux(
 
 pub fn create_pub_to_sec_aux(
     input: &str,
+    prf_key: PrfKey
 ) -> Result<String> {
     let v: SerdeValue = from_str(input)?;
-
-    let prf_key_string: String = try_get(&v, "prfKey")?;
-    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls_key(&prf_key_string)?);
 
     let account_number: u8 = try_get(&v, "accountNumber")?;
 
@@ -457,11 +444,9 @@ pub fn create_pub_to_sec_aux(
 
 pub fn create_encrypted_transfer_aux(
     input: &str,
-) -> Result<String> {
+    prf_key: PrfKey
+)  -> Result<String> {
     let v: SerdeValue = from_str(input)?;
-
-    let prf_key_string: String = try_get(&v, "prfKey")?;
-    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls_key(&prf_key_string)?);
 
     let account_number: u8 = try_get(&v, "accountNumber")?;
 
@@ -478,7 +463,8 @@ pub fn create_encrypted_transfer_aux(
 
     let incoming_amounts: Vec<EncryptedAmount<ExampleCurve>> = try_get(&v, "incomingAmounts")?;
     let self_amount: EncryptedAmount<ExampleCurve> = try_get(&v, "encryptedSelfAmount")?;
-    let agg_index: EncryptedAmountAggIndex = try_get(&v, "aggIndex")?;
+    let index: u64 = try_get::<String>(&v, "aggIndex")?.parse::<u64>()?;
+    let agg_index = EncryptedAmountAggIndex{ index };
     let to_transfer: Amount = try_get(&v, "amount")?;
 
     let input_amount = incoming_amounts.iter().fold(self_amount, |acc, amount| encrypted_transfers::aggregate(&acc,amount));
@@ -590,4 +576,16 @@ pub fn generate_baker_keys(sender: &AccountAddress, key_variant: BakerKeyVariant
 pub fn get_address_from_cred_id(cred_id: &str) -> Result<String> {
     let cred_id_parsed: ExampleCurve = base16_decode_string(cred_id)?;
     Ok(AccountAddress::new(&cred_id_parsed).to_string())
+}
+
+pub fn calculate_cred_id(
+    prf_key: PrfKey,
+    cred_counter: u8,
+    global_context: &str,
+) -> Result<String> {
+    let global_context = from_str(global_context)?;
+
+    let cred_id = generate_cred_id::<ExampleCurve>(&prf_key, cred_counter, &global_context)?;
+
+    Ok(base16_encode_string(&cred_id))
 }

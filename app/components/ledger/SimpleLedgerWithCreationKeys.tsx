@@ -22,7 +22,6 @@ interface Props {
     preCallback?: LedgerCallback<{ identityNumber: number }> | LedgerCallback;
     disabled?: boolean;
 }
-
 export default function SimpleLedgerWithCreationKeys({
     className,
     identityNumber,
@@ -93,7 +92,8 @@ export default function SimpleLedgerWithCreationKeys({
                     {showComparing && (
                         <Card className={className} header="Compare public key">
                             <PublicKeyDetails
-                                publickey={keys?.publicKey || ''}
+                                className="mV40"
+                                publicKey={keys?.publicKey || ''}
                             />
                             <Button
                                 onClick={() => {

@@ -3,14 +3,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
+import {
+    InitialCredentialDeploymentValues,
+    CredentialDeploymentValues,
+} from '@concordium/node-sdk/lib/src/types';
 import Button from '~/cross-app-components/Button';
 import {
     Account,
     AccountInfo,
     CredentialDeploymentInformation,
-    TransactionKindId,
     Fraction,
     AddedCredential,
+    TransactionKindId,
 } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
 import AddCredential from './AddCredential';
@@ -29,7 +33,6 @@ import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import LoadingComponent from '../LoadingComponent';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { validateFee } from '~/utils/transactionHelpers';
-import InputTimestamp from '~/components/Form/InputTimestamp';
 import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
 import {
@@ -39,8 +42,10 @@ import {
 import { getNoteForOwnCredential } from '~/utils/credentialHelper';
 import { identitiesSelector } from '~/features/IdentitySlice';
 import { CredentialDetails, CredentialStatus } from './util';
+import DisplayAddress from '~/components/DisplayAddress';
 
 import styles from './UpdateAccountCredentials.module.scss';
+import DatePicker from '~/components/Form/DatePicker';
 
 const placeHolderText = (
     <h2 className={styles.LargePropertyValue}>To be determined</h2>
@@ -96,7 +101,13 @@ function displayAccount(account: Account | undefined) {
             <h2 className="mV0">
                 {account ? account.name : 'Choose an account on the right'}
             </h2>
-            <p className="textFaded mB40 mT5 body4">{account?.address}</p>
+            {account ? (
+                <DisplayAddress
+                    outerClassName="mB5 mT5"
+                    lineClassName="textFaded body4"
+                    address={account?.address}
+                />
+            ) : null}
         </>
     );
 }
@@ -212,7 +223,10 @@ interface State {
 
 interface AccountInfoCredential {
     credentialIndex: number;
-    credential: CredentialDeploymentInformation;
+    credential: (
+        | InitialCredentialDeploymentValues
+        | CredentialDeploymentValues
+    ) & { credId: string };
 }
 
 interface Props {
@@ -294,14 +308,17 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
             currentAccountInfo.accountCredentials
         ).map((accountCredential) => {
             const credentialIndex = parseInt(accountCredential[0], 10);
-            const cred = accountCredential[1].value.contents;
-            if (cred.regId) {
+            const cred = accountCredential[1].value;
+            if (cred.type === 'initial') {
                 return {
                     credentialIndex,
-                    credential: { ...cred, credId: cred.regId },
+                    credential: {
+                        ...cred.contents,
+                        credId: cred.contents.regId,
+                    },
                 };
             }
-            return { credentialIndex, credential: cred };
+            return { credentialIndex, credential: cred.contents };
         });
         setCurrentCredentials(credentialsForAccount);
 
@@ -556,7 +573,8 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                                 }
                                 render={() => (
                                     <div>
-                                        <InputTimestamp
+                                        <DatePicker
+                                            className="body2"
                                             label="Transaction expiry time"
                                             name="expiry"
                                             isInvalid={
@@ -565,6 +583,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                                             error={expiryTimeError}
                                             value={expiryTime}
                                             onChange={setExpiryTime}
+                                            minDate={new Date()}
                                         />
                                         <p>
                                             Choose the expiry date for the
@@ -595,6 +614,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                                             !hasEncryptedBalance(acc)
                                         }
                                         onAccountClicked={onContinue}
+                                        messageWhenEmpty="There are no accounts, which can update its credentials"
                                     />
                                 )}
                             />

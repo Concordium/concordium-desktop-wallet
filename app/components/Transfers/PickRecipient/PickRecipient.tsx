@@ -1,6 +1,8 @@
 import React from 'react';
 import clsx from 'clsx';
 
+import { AccountAddress } from '@concordium/node-sdk/lib/src/types/accountAddress';
+import { isAlias } from '@concordium/node-sdk/lib/src/alias';
 import { AddressBookEntry } from '~/utils/types';
 import AddressBookEntryButton from '~/components/AddressBookEntryButton';
 import AddressBookSearchList from '../../AddressBookSearchList';
@@ -15,8 +17,8 @@ interface Props {
 }
 
 /**
- * Allows the user to pick a entry in the AddressBook.
- * @param senderAddress optional parameter, if given, the AddressBookEntry with the given address will be filtered out of the list.
+ * Allows the user to pick an entry from the address book.
+ * @param senderAddress if provided any address book entry that is an alias of that address will not be selectable
  */
 export default function PickRecipient({
     pickRecipient,
@@ -24,9 +26,13 @@ export default function PickRecipient({
     recipient,
     onClickedRecipient = noOp,
 }: Props) {
-    const filter = senderAddress
-        ? (abe: AddressBookEntry) => abe.address !== senderAddress
-        : undefined;
+    let filter;
+    if (senderAddress) {
+        const senderAccountAddress = new AccountAddress(senderAddress);
+        filter = (entry: AddressBookEntry) =>
+            !isAlias(senderAccountAddress, new AccountAddress(entry.address));
+    }
+
     return (
         <div className={styles.root}>
             <AddressBookSearchList className={styles.search} filter={filter}>

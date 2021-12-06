@@ -5,7 +5,7 @@ export async function up(knex: Knex): Promise<void> {
     return knex
         .table('setting_group')
         .insert([
-            { name: settingKeys.multiSignatureSettings },
+            { name: 'multisig' },
             { name: settingKeys.nodeSettings },
             { name: settingKeys.passwordSettings },
         ]);

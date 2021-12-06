@@ -31,13 +31,8 @@ export default {
     ],
 } as Meta;
 
-const Template: Story<SidebarProps<true>> = (args) => (
-    <Sidebar
-        {...args}
-        hasThemeSwitch
-        version="1.0.0"
-        style={{ position: 'absolute' }}
-    />
+const Template: Story<SidebarProps> = (args) => (
+    <Sidebar {...args} version="1.0.0" style={{ position: 'absolute' }} />
 );
 
 const links: SidebarLink[] = [
@@ -81,7 +76,6 @@ Light.args = {
 export const Dark = Template.bind({});
 Dark.args = {
     links,
-    isDark: true,
 };
 Dark.parameters = {
     backgrounds: {

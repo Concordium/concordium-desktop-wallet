@@ -1,5 +1,19 @@
 import { formatDate } from './timeHelpers';
-import { ChosenAttributes, AttributeKey, AttributeKeyName } from './types';
+import {
+    Identity,
+    ChosenAttributes,
+    AttributeKey,
+    AttributeKeyName,
+    PendingIdentity,
+    IdentityStatus,
+    ConfirmedIdentity,
+    RecoveredIdentity,
+    RejectedIdentity,
+    IdentityVersion,
+} from './types';
+
+// Version that current identities are created with.
+export const currentIdentityVersion: IdentityVersion = 1;
 
 export const IDENTITY_NAME_MAX_LENGTH = 25;
 
@@ -64,10 +78,11 @@ const parseDocType = (docType: DocumentType) => {
     }
 };
 
-export const formatAttributeValue = (
+export function formatAttributeValue(
     key: AttributeKeyName,
     value: ChosenAttributes[typeof key]
-): string => {
+): string;
+export function formatAttributeValue(key: string, value: string): string {
     switch (key) {
         case 'idDocExpiresAt':
         case 'idDocIssuedAt':
@@ -80,11 +95,64 @@ export const formatAttributeValue = (
         default:
             return value;
     }
-};
+}
 
+/**
+ * Compare two attribute key names.
+ * Tags, that are not in AttributeKey, are considered larger than those in AttributeKey.
+ * This is to ensure that in a sorted ascending list, unknown attributes are placed at the end of the list.
+ */
 export function compareAttributes(
-    AttributeTag1: AttributeKeyName,
-    AttributeTag2: AttributeKeyName
+    attributeTag1: AttributeKeyName | string,
+    attributeTag2: AttributeKeyName | string
 ) {
-    return AttributeKey[AttributeTag1] - AttributeKey[AttributeTag2];
+    const attr1 = AttributeKey[attributeTag1 as AttributeKeyName];
+    const attr2 = AttributeKey[attributeTag2 as AttributeKeyName];
+    if (attr1 === undefined && attr2 === undefined) {
+        return attributeTag1.localeCompare(attributeTag2);
+    }
+    if (attr1 === undefined) {
+        return 1;
+    }
+    if (attr2 === undefined) {
+        return -1;
+    }
+    return attr1 - attr2;
+}
+
+export function getSessionId(
+    identity: PendingIdentity | RejectedIdentity | ConfirmedIdentity
+) {
+    const hash = window.cryptoMethods.sha256([identity.codeUri]);
+    return Buffer.from(hash).toString('hex');
+}
+
+export function isConfirmedIdentity(
+    identity: Identity
+): identity is ConfirmedIdentity {
+    return identity.status === IdentityStatus.Confirmed;
+}
+
+export function isPendingIdentity(
+    identity: Identity
+): identity is PendingIdentity {
+    return identity.status === IdentityStatus.Pending;
+}
+
+export function isRecoveredIdentity(
+    identity: Identity
+): identity is RecoveredIdentity {
+    return (
+        identity.status === IdentityStatus.Recovered ||
+        identity.status === IdentityStatus.Genesis
+    );
+}
+
+export function isRejectedIdentity(
+    identity: Identity
+): identity is RejectedIdentity {
+    return (
+        identity.status === IdentityStatus.Rejected ||
+        identity.status === IdentityStatus.RejectedAndWarned
+    );
 }

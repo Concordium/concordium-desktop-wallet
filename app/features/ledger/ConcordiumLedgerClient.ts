@@ -15,8 +15,10 @@ import {
     UpdateAccountCredentials,
     AuthorizationKeysUpdate,
     Hex,
+    AddIdentityProvider,
+    AddAnonymityRevoker,
+    PrivateKeySeeds,
 } from '~/utils/types';
-import { stringify } from '~/utils/JSONHelper';
 import { pipe } from '~/utils/basicHelpers';
 
 async function toBuffer(promisedBuffer: Promise<Buffer>): Promise<Buffer> {
@@ -37,9 +39,19 @@ export default class ConcordiumLedgerClient {
 
     getSignedPublicKey = window.ledger.getSignedPublicKey;
 
-    getIdCredSec = pipe(window.ledger.getIdCredSec, toBuffer);
+    async getPrivateKeySeeds(identity: number): Promise<PrivateKeySeeds> {
+        const result: PrivateKeySeeds = await window.ledger.getPrivateKeySeeds(
+            identity
+        );
+        return {
+            prfKey: Buffer.from(result.prfKey),
+            idCredSec: Buffer.from(result.idCredSec),
+        };
+    }
 
-    getPrfKey = pipe(window.ledger.getPrfKey, toBuffer);
+    getPrfKeyDecrypt = pipe(window.ledger.getPrfKeyDecrypt, toBuffer);
+
+    getPrfKeyRecovery = pipe(window.ledger.getPrfKeyRecovery, toBuffer);
 
     signPublicInformationForIp = pipe(
         window.ledger.signPublicInformationForIp,
@@ -57,9 +69,7 @@ export default class ConcordiumLedgerClient {
         transaction: AccountTransaction,
         path: number[]
     ): Promise<Buffer> {
-        return toBuffer(
-            window.ledger.signTransfer(stringify(transaction), path)
-        );
+        return toBuffer(window.ledger.signTransfer(transaction, path));
     }
 
     signUpdateCredentialTransaction(
@@ -71,10 +81,7 @@ export default class ConcordiumLedgerClient {
         window.once.onAwaitVerificationKey(onAwaitVerificationKeyConfirmation);
         window.once.onVerificationKeysConfirmed(onVerificationKeysConfirmed);
         return toBuffer(
-            window.ledger.signUpdateCredentialTransaction(
-                stringify(transaction),
-                path
-            )
+            window.ledger.signUpdateCredentialTransaction(transaction, path)
         );
     }
 
@@ -86,7 +93,7 @@ export default class ConcordiumLedgerClient {
         return toBuffer(
             window.ledger.signCredentialDeploymentOnNewAccount(
                 credentialDeployment,
-                stringify(expiry),
+                expiry,
                 path
             )
         );
@@ -99,7 +106,7 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         return toBuffer(
             window.ledger.signMicroGtuPerEuro(
-                stringify(transaction),
+                transaction,
                 serializedPayload,
                 path
             )
@@ -113,7 +120,7 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         return toBuffer(
             window.ledger.signEuroPerEnergy(
-                stringify(transaction),
+                transaction,
                 serializedPayload,
                 path
             )
@@ -127,7 +134,7 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         return toBuffer(
             window.ledger.signTransactionFeeDistribution(
-                stringify(transaction),
+                transaction,
                 serializedPayload,
                 path
             )
@@ -141,7 +148,7 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         return toBuffer(
             window.ledger.signFoundationAccount(
-                stringify(transaction),
+                transaction,
                 serializedPayload,
                 path
             )
@@ -155,7 +162,7 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         return toBuffer(
             window.ledger.signMintDistribution(
-                stringify(transaction),
+                transaction,
                 serializedPayload,
                 path
             )
@@ -169,7 +176,7 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         return toBuffer(
             window.ledger.signProtocolUpdate(
-                stringify(transaction),
+                transaction,
                 serializedPayload,
                 path
             )
@@ -182,11 +189,7 @@ export default class ConcordiumLedgerClient {
         path: number[]
     ): Promise<Buffer> {
         return toBuffer(
-            window.ledger.signGasRewards(
-                stringify(transaction),
-                serializedPayload,
-                path
-            )
+            window.ledger.signGasRewards(transaction, serializedPayload, path)
         );
     }
 
@@ -197,7 +200,7 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         return toBuffer(
             window.ledger.signBakerStakeThreshold(
-                stringify(transaction),
+                transaction,
                 serializedPayload,
                 path
             )
@@ -211,7 +214,7 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         return toBuffer(
             window.ledger.signElectionDifficulty(
-                stringify(transaction),
+                transaction,
                 serializedPayload,
                 path
             )
@@ -226,10 +229,38 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         return toBuffer(
             window.ledger.signHigherLevelKeysUpdate(
-                stringify(transaction),
+                transaction,
                 serializedPayload,
                 path,
                 INS
+            )
+        );
+    }
+
+    signAddIdentityProvider(
+        transaction: UpdateInstruction<AddIdentityProvider>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return toBuffer(
+            window.ledger.signAddIdentityProvider(
+                transaction,
+                serializedPayload,
+                path
+            )
+        );
+    }
+
+    signAddAnonymityRevoker(
+        transaction: UpdateInstruction<AddAnonymityRevoker>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return toBuffer(
+            window.ledger.signAddAnonymityRevoker(
+                transaction,
+                serializedPayload,
+                path
             )
         );
     }
@@ -242,7 +273,7 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         return toBuffer(
             window.ledger.signAuthorizationKeysUpdate(
-                stringify(transaction),
+                transaction,
                 serializedPayload,
                 path,
                 INS

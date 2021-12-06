@@ -4,6 +4,7 @@ import {
     openRoute,
     readyToShow,
     didFinishLoad,
+    logFromMain,
 } from '~/constants/ipcRendererCommands.json';
 import {
     onAwaitVerificationKey,
@@ -24,9 +25,13 @@ import initializeDatabaseExternalCredentialMethods from './database/externalCred
 import initializeDatabaseIdentityMethods from './database/identityDao';
 import initializeDatabaseGenesisAndGlobalMethods from './database/genesisAndGlobalDao';
 import initializeDatabaseMultiSignatureTransactionMethods from './database/multiSignatureProposalDao';
+import initializeDatabasePreferencesMethods from './database/preferencesDao';
 import initializeDatabaseSettingsMethods from './database/settingsDao';
 import initializeDatabaseTransactionsMethods from './database/transactionsDao';
 import initializeDatabaseWalletMethods from './database/walletDao';
+import initializeDatabaseDecryptedAmountMethods from './database/decryptedAmountsDao';
+import autoUpdateMethods from './autoUpdate';
+import accountReportMethods from './accountReport';
 
 import ipcCommands from '~/constants/ipcCommands.json';
 
@@ -55,6 +60,9 @@ const Exposed: EqualRecord<WindowFunctions> = {
     openUrl: 'openUrl',
     removeAllListeners: 'removeAllListeners',
     view: 'view',
+    autoUpdate: 'autoUpdate',
+    accountReport: 'accountReport',
+    platform: 'platform',
 };
 
 const eventEmitter = new EventEmitter();
@@ -64,6 +72,7 @@ const listenImpl: Listen = {
     readyToShow: (func) => ipcRenderer.on(readyToShow, func),
     didFinishLoad: (func) => ipcRenderer.on(didFinishLoad, func),
     ledgerChannel: (func) => eventEmitter.on(listenChannel, func),
+    logFromMain: (func) => ipcRenderer.on(logFromMain, func),
 };
 
 const removeListener: Listen = {
@@ -71,6 +80,7 @@ const removeListener: Listen = {
     readyToShow: (func) => ipcRenderer.off(readyToShow, func),
     didFinishLoad: (func) => ipcRenderer.off(didFinishLoad, func),
     ledgerChannel: (func) => eventEmitter.off(listenChannel, func),
+    logFromMain: (func) => ipcRenderer.off(logFromMain, func),
 };
 
 const onceImpl: Once = {
@@ -103,12 +113,14 @@ contextBridge.exposeInMainWorld(Exposed.printElement, (body: string) =>
 contextBridge.exposeInMainWorld(Exposed.openUrl, (href: string) =>
     ipcRenderer.invoke(ipcCommands.openUrl, href)
 );
+contextBridge.exposeInMainWorld(Exposed.platform, process.platform);
 
 contextBridge.exposeInMainWorld(Exposed.grpc, initializeGrpcMethods);
 contextBridge.exposeInMainWorld(
     Exposed.writeImageToClipboard,
     initializeClipboardMethods
 );
+
 contextBridge.exposeInMainWorld(Exposed.files, initializeFilesMethods);
 contextBridge.exposeInMainWorld(Exposed.cryptoMethods, initializeCryptoMethods);
 contextBridge.exposeInMainWorld(
@@ -127,9 +139,13 @@ const databaseMethods: Database = {
     identity: initializeDatabaseIdentityMethods,
     genesisAndGlobal: initializeDatabaseGenesisAndGlobalMethods,
     multiSignatureTransaction: initializeDatabaseMultiSignatureTransactionMethods,
+    preferences: initializeDatabasePreferencesMethods,
     settings: initializeDatabaseSettingsMethods,
     transaction: initializeDatabaseTransactionsMethods,
     wallet: initializeDatabaseWalletMethods,
+    decyptedAmounts: initializeDatabaseDecryptedAmountMethods,
 };
 
 contextBridge.exposeInMainWorld(Exposed.database, databaseMethods);
+contextBridge.exposeInMainWorld(Exposed.autoUpdate, autoUpdateMethods);
+contextBridge.exposeInMainWorld(Exposed.accountReport, accountReportMethods);

@@ -48,23 +48,19 @@
     display: inline-flex;
     flex-direction: column;
     align-items: center;
-
-    & > * {
-        display: block;
-    }
+    margin-right: 2px;
 }
 
 .copy {
     right: 23px;
 }
 
-.icon {
-    fill: $color-grey;
-    transition: transform $anim-easing $anim-timing;
+.edit {
+    padding-right: 6px;
+    padding-top: 6px;
 
-    &:hover {
-        transform: scale(1.1);
-        fill: darken($color-grey, 3);
+    svg {
+        fill: $color-grey;
     }
 }
 

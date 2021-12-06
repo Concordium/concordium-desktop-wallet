@@ -21,8 +21,8 @@ function buildPublicInformationForIp(
 ) {
     return rust.buildPublicInformationForIp(
         message.context,
-        message.idCredSec,
-        message.prfKey
+        message.idCredSecSeed,
+        message.prfKeySeed
     );
 }
 
@@ -30,8 +30,8 @@ function createIdRequest(rust: RustInterface, message: Record<string, string>) {
     return rust.createIdRequest(
         message.context,
         message.signature,
-        message.idCredSec,
-        message.prfKey
+        message.idCredSecSeed,
+        message.prfKeySeed
     );
 }
 
@@ -39,7 +39,12 @@ function createUnsignedCredential(
     rust: RustInterface,
     message: Record<string, string>
 ) {
-    return rust.generateUnsignedCredential(message.input);
+    return rust.generateUnsignedCredential(
+        message.input,
+        message.idCredSec,
+        message.prfKey,
+        Boolean(message.useDeprecated)
+    );
 }
 
 function createCredentialInfo(
@@ -61,7 +66,11 @@ function createCredentialDetails(
 }
 
 function decryptAmounts(rust: RustInterface, message: Record<string, string>) {
-    const decryptedAmounts = rust.decrypt_amounts_ext(message.input);
+    const decryptedAmounts = rust.decrypt_amounts_ext(
+        message.input,
+        message.prfKey,
+        Boolean(message.useDeprecated)
+    );
     return decryptedAmounts;
 }
 
@@ -69,21 +78,33 @@ function createTransferToPublicData(
     rust: RustInterface,
     message: Record<string, string>
 ) {
-    return rust.createTransferToPublicData(message.input);
+    return rust.createTransferToPublicData(
+        message.input,
+        message.prfKey,
+        Boolean(message.useDeprecated)
+    );
 }
 
 function createTransferToEncryptedData(
     rust: RustInterface,
     message: Record<string, string>
 ) {
-    return rust.createTransferToEncryptedData(message.input);
+    return rust.createTransferToEncryptedData(
+        message.input,
+        message.prfKey,
+        Boolean(message.useDeprecated)
+    );
 }
 
 function createEncryptedTransferData(
     rust: RustInterface,
     message: Record<string, string>
 ) {
-    return rust.createEncryptedTransferData(message.input);
+    return rust.createEncryptedTransferData(
+        message.input,
+        message.prfKey,
+        Boolean(message.useDeprecated)
+    );
 }
 
 function createGenesisAccount(
@@ -116,6 +137,15 @@ function getAddressFromCredId(
     return rust.getAddressFromCredId(message.credId);
 }
 
+function getCredId(rust: RustInterface, message: Record<string, string>) {
+    return rust.getCredId(
+        message.prfKey,
+        parseInt(message.credentialNumber, 10),
+        message.global,
+        Boolean(message.useDeprecated)
+    );
+}
+
 function mapCommand(command: string) {
     switch (command) {
         case workerCommands.buildPublicInformationForIp:
@@ -142,6 +172,8 @@ function mapCommand(command: string) {
             return generateBakerKeys;
         case workerCommands.getAddressFromCredId:
             return getAddressFromCredId;
+        case workerCommands.getCredId:
+            return getCredId;
         default:
             return () => 'unknown command';
     }

@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-types */
+import type { Buffer } from 'buffer/';
 import type { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import type { HTMLAttributes } from 'react';
 import type { RegisterOptions } from 'react-hook-form';
 import { RejectReason } from './node/RejectReasonHelper';
 import type { ExternalCredential, Genesis } from '~/database/types';
+
+export { AccountInfo, AccountEncryptedAmount } from '@concordium/node-sdk/';
 
 export type Dispatch = GenericDispatch<AnyAction>;
 
@@ -93,26 +96,57 @@ export interface IdentityObject {
 export enum IdentityStatus {
     Confirmed = 'confirmed',
     Rejected = 'rejected',
+    RejectedAndWarned = 'rejectedAndWarned',
     Pending = 'pending',
+    Recovered = 'recovered',
     // eslint-disable-next-line no-shadow
     Genesis = 'genesis',
+}
+
+// IdentityVersion = 0 means that the identity was created using the legacy BLS12-381 key generation,
+// decoding the seed as UTF-8.
+// IdentityVersion = 1 means that the identity was created using the corrected BLS12-381 key generation,
+// decoding the seed as Hex.
+export type IdentityVersion = 1 | 0;
+
+interface BaseIdentity {
+    status: IdentityStatus;
+    id: number;
+    identityNumber: number;
+    name: string;
+    codeUri: string;
+    identityProvider: string;
+    randomness: string;
+    walletId: number;
+    version: IdentityVersion;
+}
+
+export interface ConfirmedIdentity extends BaseIdentity {
+    status: IdentityStatus.Confirmed;
+    identityObject: string;
+}
+
+export interface RejectedIdentity extends BaseIdentity {
+    status: IdentityStatus.RejectedAndWarned | IdentityStatus.Rejected;
+    detail: string;
+}
+
+export interface RecoveredIdentity extends Omit<BaseIdentity, 'codeUri'> {
+    status: IdentityStatus.Recovered | IdentityStatus.Genesis;
+}
+
+export interface PendingIdentity extends BaseIdentity {
+    status: IdentityStatus.Pending;
 }
 
 /**
  * This Interface models the structure of the identities stored in the database.
  */
-export interface Identity {
-    id: number;
-    identityNumber: number;
-    name: string;
-    identityObject: string;
-    status: IdentityStatus;
-    detail: string;
-    codeUri: string;
-    identityProvider: string;
-    randomness: string;
-    walletId: number;
-}
+export type Identity =
+    | ConfirmedIdentity
+    | RejectedIdentity
+    | RecoveredIdentity
+    | PendingIdentity;
 
 // Statuses that an account can have.
 export enum AccountStatus {
@@ -121,28 +155,6 @@ export enum AccountStatus {
     Pending = 'pending',
     // eslint-disable-next-line no-shadow
     Genesis = 'genesis',
-}
-
-/**
- * This Interface models the structure of the accounts stored in the database
- */
-
-export interface Account {
-    name: string;
-    address: Hex;
-    identityId: number;
-    identityName?: string;
-    identityNumber?: number;
-    status: AccountStatus;
-    signatureThreshold?: number;
-    totalDecrypted?: string;
-    allDecrypted?: boolean;
-    incomingAmounts?: string;
-    rewardFilter: string;
-    selfAmounts?: string;
-    maxTransactionId: string;
-    deploymentTransactionId?: string;
-    isInitial: boolean;
 }
 
 export enum TransactionKindString {
@@ -165,6 +177,9 @@ export enum TransactionKindString {
     TransferWithSchedule = 'transferWithSchedule',
     UpdateCredentials = 'updateCredentials',
     RegisterData = 'registerData',
+    TransferWithMemo = 'transferWithMemo',
+    EncryptedAmountTransferWithMemo = 'encryptedAmountTransferWithMemo',
+    TransferWithScheduleAndMemo = 'transferWithScheduleAndMemo',
 }
 
 // The ids of the different types of an AccountTransaction.
@@ -185,7 +200,40 @@ export enum TransactionKindId {
     Transfer_with_schedule = 19,
     Update_credentials = 20,
     Register_data = 21,
+    Simple_transfer_with_memo = 22,
+    Encrypted_transfer_with_memo = 23,
+    Transfer_with_schedule_and_memo = 24,
 }
+
+export type BooleanFilters = { [P in TransactionKindString]?: boolean };
+type DateString = string;
+
+export interface TransactionFilter extends BooleanFilters {
+    fromDate?: DateString;
+    toDate?: DateString;
+}
+
+/**
+ * This Interface models the structure of the accounts stored in the database
+ */
+
+export interface Account {
+    name: string;
+    address: Hex;
+    identityId: number;
+    identityName?: string;
+    identityNumber?: number;
+    status: AccountStatus;
+    signatureThreshold?: number;
+    totalDecrypted?: string;
+    allDecrypted?: boolean;
+    incomingAmounts?: string;
+    transactionFilter: TransactionFilter;
+    selfAmounts?: string;
+    deploymentTransactionId?: string;
+    isInitial: boolean;
+}
+
 export interface SimpleTransferPayload {
     amount: string;
     toAddress: string;
@@ -296,10 +344,19 @@ export interface AccountTransaction<
     payload: PayloadType;
 }
 
-export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
+type WithMemo<Base extends {}> = Base & {
+    memo: string;
+};
+export type SimpleTransferWithMemoPayload = WithMemo<SimpleTransferPayload>;
+export type EncryptedTransferWithMemoPayload = WithMemo<EncryptedTransferPayload>;
+export type ScheduledTransferWithMemoPayload = WithMemo<ScheduledTransferPayload>;
 
 export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
+export type SimpleTransferWithMemo = AccountTransaction<SimpleTransferWithMemoPayload>;
 export type EncryptedTransfer = AccountTransaction<EncryptedTransferPayload>;
+export type EncryptedTransferWithMemo = AccountTransaction<EncryptedTransferWithMemoPayload>;
+export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
+export type ScheduledTransferWithMemo = AccountTransaction<ScheduledTransferWithMemoPayload>;
 export type TransferToEncrypted = AccountTransaction<TransferToEncryptedPayload>;
 export type UpdateAccountCredentials = AccountTransaction<UpdateAccountCredentialsPayload>;
 export type TransferToPublic = AccountTransaction<TransferToPublicPayload>;
@@ -490,6 +547,7 @@ export interface TransferTransaction {
     status: TransactionStatus;
     rejectReason?: RejectReason | string;
     decryptedAmount?: string;
+    memo?: string;
 }
 
 export interface TransferTransactionWithNames extends TransferTransaction {
@@ -499,56 +557,9 @@ export interface TransferTransactionWithNames extends TransferTransaction {
 
 export type EncryptedAmount = Hex;
 
-export interface AccountEncryptedAmount {
-    selfAmount: EncryptedAmount;
-    incomingAmounts: EncryptedAmount[];
-    startIndex: number;
-    numAggregated?: number;
-}
-
 export interface TypedCredentialDeploymentInformation {
     contents: CredentialDeploymentInformation;
     type: string;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AccountReleaseSchedule = any; // TODO
-
-interface AccountBakerDetails {
-    restakeEarnings: boolean;
-    bakerId: number;
-    bakerAggregationVerifyKey: string;
-    bakerElectionVerifyKey: string;
-    bakerSignatureVerifyKey: string;
-    stakedAmount: string;
-    pendingChange?: BakerPendingChange;
-}
-
-export type BakerPendingChange =
-    | {
-          change: 'ReduceStake';
-          newStake: string;
-          epoch: number;
-      }
-    | {
-          change: 'RemoveBaker';
-          epoch: number;
-      };
-
-// Reflects the structure given by the node,
-// in a getAccountInforequest
-export interface AccountInfo {
-    accountAmount: string;
-    accountEncryptionKey: string;
-    accountThreshold: number;
-    accountReleaseSchedule: AccountReleaseSchedule;
-    accountBaker?: AccountBakerDetails;
-    accountEncryptedAmount: AccountEncryptedAmount;
-    accountCredentials: Record<
-        number,
-        Versioned<TypedCredentialDeploymentInformation>
-    >;
-    accountIndex: number;
 }
 
 // Reflects the type, which the account Release Schedule is comprised of.
@@ -565,6 +576,17 @@ export interface Description {
     description: string;
 }
 
+export interface SerializedTextWithLength {
+    data: Buffer;
+    length: Buffer;
+}
+
+export interface SerializedDescription {
+    name: SerializedTextWithLength;
+    url: SerializedTextWithLength;
+    description: SerializedTextWithLength;
+}
+
 // Identity Provider information
 export interface IpInfo {
     ipIdentity: number;
@@ -578,6 +600,7 @@ export interface IpInfo {
 export interface IdentityProviderMetaData {
     issuanceStart: string;
     icon: string;
+    support: string;
 }
 
 // Anonymity Revoker information
@@ -698,7 +721,9 @@ export type UpdateInstructionPayload =
     | BakerStakeThreshold
     | ElectionDifficulty
     | HigherLevelKeyUpdate
-    | AuthorizationKeysUpdate;
+    | AuthorizationKeysUpdate
+    | AddAnonymityRevoker
+    | AddIdentityProvider;
 
 // An actual signature, which goes into an account transaction.
 export type Signature = Hex;
@@ -745,6 +770,8 @@ export enum UpdateType {
     UpdateLevel1KeysUsingLevel1Keys,
     UpdateLevel2KeysUsingRootKeys,
     UpdateLevel2KeysUsingLevel1Keys,
+    AddAnonymityRevoker,
+    AddIdentityProvider,
 }
 
 export enum RootKeysUpdateTypes {
@@ -784,7 +811,14 @@ export function instanceOfAccountTransactionWithSignature(
 export function instanceOfSimpleTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is SimpleTransfer {
-    return object.transactionKind === TransactionKindId.Simple_transfer;
+    return TransactionKindId.Simple_transfer === object.transactionKind;
+}
+export function instanceOfSimpleTransferWithMemo(
+    object: AccountTransaction<TransactionPayload>
+): object is SimpleTransferWithMemo {
+    return (
+        TransactionKindId.Simple_transfer_with_memo === object.transactionKind
+    );
 }
 
 export function instanceOfTransferToEncrypted(
@@ -805,10 +839,28 @@ export function instanceOfEncryptedTransfer(
     return object.transactionKind === TransactionKindId.Encrypted_transfer;
 }
 
+export function instanceOfEncryptedTransferWithMemo(
+    object: AccountTransaction<TransactionPayload>
+): object is EncryptedTransferWithMemo {
+    return (
+        object.transactionKind ===
+        TransactionKindId.Encrypted_transfer_with_memo
+    );
+}
+
 export function instanceOfScheduledTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is ScheduledTransfer {
     return object.transactionKind === TransactionKindId.Transfer_with_schedule;
+}
+
+export function instanceOfScheduledTransferWithMemo(
+    object: AccountTransaction<TransactionPayload>
+): object is ScheduledTransferWithMemo {
+    return (
+        object.transactionKind ===
+        TransactionKindId.Transfer_with_schedule_and_memo
+    );
 }
 
 export function instanceOfUpdateAccountCredentials(
@@ -831,7 +883,7 @@ export function instanceOfUpdateBakerKeys(
 
 export function instanceOfRemoveBaker(
     object: AccountTransaction<TransactionPayload>
-): object is AddBaker {
+): object is RemoveBaker {
     return object.transactionKind === TransactionKindId.Remove_baker;
 }
 
@@ -857,6 +909,18 @@ export function isExchangeRate(
         UpdateType.UpdateMicroGTUPerEuro === transaction.type ||
         UpdateType.UpdateEuroPerEnergy === transaction.type
     );
+}
+
+export function isAddIdentityProvider(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<AddIdentityProvider> {
+    return UpdateType.AddIdentityProvider === transaction.type;
+}
+
+export function isAddAnonymityRevoker(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<AddAnonymityRevoker> {
+    return UpdateType.AddAnonymityRevoker === transaction.type;
 }
 
 export function isTransactionFeeDistribution(
@@ -1001,6 +1065,9 @@ export type ExchangeRate = Fraction;
  */
 export type RewardFraction = Word32;
 
+export type AddIdentityProvider = IpInfo;
+export type AddAnonymityRevoker = ArInfo;
+
 export interface TransactionFeeDistribution {
     baker: RewardFraction;
     gasAccount: RewardFraction;
@@ -1025,7 +1092,7 @@ export interface ProtocolUpdate {
     message: string;
     specificationUrl: string;
     specificationHash: Hex;
-    specificationAuxiliaryData: string;
+    specificationAuxiliaryData?: string;
 }
 
 export interface GasRewards {
@@ -1114,6 +1181,7 @@ export interface TransactionDetails {
     inputEncryptedAmount?: EncryptedAmount;
     type: TransactionKindString;
     outcome: string;
+    memo?: Hex;
 }
 
 export interface TransactionOrigin {
@@ -1197,27 +1265,10 @@ interface RejectReasonWithContents {
     contents: any;
 }
 
-interface EventResult {
-    outcome: string;
-    rejectReason?: RejectReasonWithContents;
-}
-
-export interface TransactionEvent {
-    result: EventResult;
-    cost: string;
-}
-
-export interface Action {
-    label: string;
-    location?: string;
-}
-
 export type ClassName = Pick<HTMLAttributes<HTMLElement>, 'className'>;
+export type Style = Pick<HTMLAttributes<HTMLElement>, 'style'>;
 
-export type ClassNameAndStyle = Pick<
-    HTMLAttributes<HTMLElement>,
-    'style' | 'className'
->;
+export type ClassNameAndStyle = ClassName & Style;
 
 // Source: https://github.com/emotion-js/emotion/blob/master/packages/styled-base/types/helper.d.ts
 // A more precise version of just React.ComponentPropsWithRef on its own
@@ -1272,6 +1323,8 @@ export type PolymorphicComponentProps<
     C extends React.ElementType,
     Props = {}
 > = InheritableElementProps<C, Props & AsProp<C>>;
+
+export type StateUpdate<Type> = React.Dispatch<React.SetStateAction<Type>>;
 
 export enum TransactionTypes {
     UpdateInstruction,
@@ -1341,4 +1394,36 @@ export enum PrintErrorTypes {
     Cancelled = 'cancelled',
     Failed = 'failed',
     NoPrinters = 'no valid printers available',
+}
+
+export type PrivateKeySeeds = {
+    idCredSec: Buffer;
+    prfKey: Buffer;
+};
+
+export type AccountAndCredentialPairs = {
+    account: Account;
+    credential: Credential;
+}[];
+
+export enum NodeConnectionStatus {
+    Pinging = 'Pinging',
+    CatchingUp = 'Catching up',
+    Ready = 'Ready',
+    Unavailable = 'Unavailable',
+}
+
+export enum TransactionOrder {
+    Ascending = 'ascending',
+    Descending = 'descending',
+}
+
+export interface DecryptedAmount {
+    transactionHash: string;
+    amount: string;
+}
+
+export interface CredentialNumberPrfKey {
+    prfKeySeed: string;
+    credentialNumber: number;
 }

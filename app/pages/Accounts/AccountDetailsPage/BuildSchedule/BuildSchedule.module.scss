@@ -1,0 +1,21 @@
+@import 'config/bundle';
+
+.buildSchedule {
+    text-align: center;
+    position: relative;
+
+    > div {
+        margin-bottom: 40px;
+    }
+}
+
+.title {
+    margin-top: 20px;
+    margin-bottom: 50px;
+}
+
+.buildScheduleCommon {
+    > *:not(:last-child) {
+        margin-bottom: 40px;
+    }
+}

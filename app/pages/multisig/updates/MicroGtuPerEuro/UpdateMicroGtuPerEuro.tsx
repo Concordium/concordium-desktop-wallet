@@ -33,14 +33,14 @@ export default function UpdateMicroGtuPerEuroRate({
         <>
             <RelativeRateField
                 {...commonFieldProps}
-                label="Current micro GTU per euro rate"
+                label="Current micro CCD per euro rate"
                 value={currentValue}
                 disabled
             />
             <FormRelativeRateField
                 {...commonFieldProps}
                 name={fieldNames.microGtuPerEuroRate}
-                label="New micro GTU per euro rate"
+                label="New micro CCD per euro rate"
                 defaultValue={defaults.microGtuPerEuroRate || currentValue}
                 rules={{
                     validate: {

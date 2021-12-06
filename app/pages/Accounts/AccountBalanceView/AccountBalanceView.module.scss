@@ -1,9 +1,10 @@
 @import 'config/bundle';
 
 .accountBalanceView {
-    background-color: $color-black;
+    background-color: $color-off-black;
     text-align: center;
     padding-bottom: 10px;
+    padding-top: 15px;
     height: 300px;
     position: relative;
     overflow: hidden;
@@ -41,6 +42,7 @@
 
 .viewingShieldedButton {
     text-decoration: underline;
+    z-index: 1;
 }
 
 .active {
@@ -56,7 +58,7 @@
 .bakerRow {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
+    margin-top: 25px;
 }
 
 .bakerImage {
@@ -85,21 +87,29 @@
     z-index: 1;
 
     :global(.shield_svg__lock) {
-        fill: $color-black;
+        fill: $color-off-black;
     }
+}
+
+.accountNameWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 -20px;
+    width: calc(100% + 40px);
+    border-bottom: 2px solid rgba($color-grey, 0.3);
+    margin-bottom: 10px;
+    padding: 0 15px 10px;
 }
 
 .accountName {
     position: relative;
-    width: calc(100% + 40px);
-    margin: -5px -20px 0;
-    display: flex;
+    max-width: calc(100% - 40px);
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     color: $color-pale-blue;
-    padding: 0 20px 10px;
-    margin-bottom: 10px;
-    border-bottom: 2px solid rgba($color-grey, 0.3);
+    padding: 0 20px;
 }
 
 .accountNameHeader {
@@ -112,10 +122,27 @@
     max-width: 100%;
 }
 
+.prevAccountIcon,
+.nextAccountIcon {
+    width: 10px;
+
+    path {
+        fill: rgba($color-pale-blue, 0.7);
+    }
+
+    &:hover path {
+        fill: $color-pale-blue;
+    }
+}
+
+.nextAccountIcon {
+    transform: rotate(180deg);
+}
+
 .editNameButton {
     width: auto;
     position: absolute;
-    right: 20px;
+    right: 10px;
     display: inline-flex;
 
     svg {
@@ -133,4 +160,10 @@
             fill: $color-pale-blue;
         }
     }
+}
+
+.defaultButton {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
 }

@@ -2,23 +2,13 @@
 
 .deleteButton {
     margin-top: 10px;
-    margin-right: 4px;
 }
 
 .binIcon {
     width: 15px;
-    transition: transform $anim-easing $anim-timing;
 
     path {
         fill: $color-salmon-red;
-    }
-
-    &:hover {
-        transform: scale(1.1);
-
-        path {
-            fill: darken($color-salmon-red, 3);
-        }
     }
 }
 

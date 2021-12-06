@@ -8,6 +8,7 @@ import {
 } from 'react-hook-form';
 
 import Switch from '~/cross-app-components/Switch';
+import { PropsOf } from '~/utils/types';
 import {
     connectWithFormControlled,
     connectWithFormUncontrolled,
@@ -16,14 +17,12 @@ import Input from './Input';
 import Checkbox from './Checkbox';
 import TextArea from './TextArea';
 import Submit from './Submit';
-import InputTimestamp, {
-    InputTimestampProps,
-} from './InputTimestamp/InputTimestamp';
 import FileInput from './FileInput';
 import { FileInputProps, FileInputValue } from './FileInput/FileInput';
 import InlineNumber, { InlineNumberProps } from './InlineNumber';
 import GtuInput, { GtuInputProps } from './GtuInput';
 import InlineInput, { InlineInputProps } from './InlineInput';
+import DatePicker from './DatePicker';
 
 export type FormProps<TFormValues extends FieldValues = FieldValues> = Omit<
     FormHTMLAttributes<HTMLFormElement>,
@@ -112,10 +111,10 @@ Form.InlineInput = connectWithFormControlled<string, InlineInputProps>(
 );
 (Form.InlineInput as FC).displayName = 'Form.InlineInput';
 
-Form.Timestamp = connectWithFormControlled<Date, InputTimestampProps>(
-    InputTimestamp
+Form.DatePicker = connectWithFormControlled<Date, PropsOf<typeof DatePicker>>(
+    DatePicker
 );
-(Form.Timestamp as FC).displayName = 'Form.Timestamp';
+(Form.DatePicker as FC).displayName = 'Form.DatePicker';
 
 Form.Submit = Submit;
 (Form.Submit as FC).displayName = 'Form.Submit';

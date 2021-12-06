@@ -2,13 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import { displayAsGTU } from '~/utils/gtu';
 
-import {
-    getScheduledTransferAmount,
-    lookupName,
-} from '~/utils/transactionHelpers';
+import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
+import { lookupName } from '~/utils/addressBookHelpers';
 import {
     AccountTransaction,
     instanceOfSimpleTransfer,
+    instanceOfSimpleTransferWithMemo,
     MultiSignatureTransactionStatus,
     ScheduledTransfer,
     ScheduledTransferPayload,
@@ -22,12 +21,22 @@ type GtuTransferTransaction = AccountTransaction<
     SimpleTransferPayload | ScheduledTransferPayload
 >;
 
-function getAmount(transaction: GtuTransferTransaction): bigint {
-    if (instanceOfSimpleTransfer(transaction)) {
-        return BigInt(transaction.payload.amount);
+function getSpecifics(
+    transaction: GtuTransferTransaction
+): { amount: bigint; title: string } {
+    if (
+        instanceOfSimpleTransfer(transaction) ||
+        instanceOfSimpleTransferWithMemo(transaction)
+    ) {
+        return {
+            amount: BigInt(transaction.payload.amount),
+            title: 'CCD Transfer',
+        };
     }
-
-    return getScheduledTransferAmount(transaction as ScheduledTransfer);
+    return {
+        amount: getScheduledTransferAmount(transaction as ScheduledTransfer),
+        title: 'CCD Transfer with a Schedule',
+    };
 }
 
 interface GtuTransferProposalStatusProps
@@ -44,10 +53,7 @@ export default function GtuTransferProposalStatus({
     const [senderName, setSenderName] = useState<string | undefined>();
     const [receiverName, setReceiverName] = useState<string | undefined>();
 
-    const amount = getAmount(transaction);
-    const title = instanceOfSimpleTransfer(transaction)
-        ? 'GTU Transfer'
-        : 'GTU Transfer with a Schedule';
+    const { amount, title } = getSpecifics(transaction);
 
     useEffect(() => {
         lookupName(transaction.sender).then(setSenderName);
@@ -61,7 +67,7 @@ export default function GtuTransferProposalStatus({
         <ProposalStatusView
             {...proposalStatusViewProps}
             headerLeft={senderName || transaction.sender}
-            headerRight="GTU Transfer"
+            headerRight="CCD Transfer"
             status={status}
             title={title}
         >

@@ -1,9 +1,9 @@
 import { createSlice, Dispatch, PayloadAction } from '@reduxjs/toolkit';
 
 export enum NotificationLevel {
-    Info,
-    Error,
-    Update,
+    Info = 'info',
+    Error = 'error',
+    Update = 'update',
 }
 
 let nextId = 0;
@@ -14,6 +14,7 @@ interface NotificationBase {
 
 interface UpdateNotification extends NotificationBase {
     level: NotificationLevel.Update;
+    version: string;
 }
 
 export interface Notification extends NotificationBase {
@@ -34,10 +35,11 @@ const { actions, reducer } = createSlice({
         pushNotification(state, action: PayloadAction<Notification>) {
             state.notifications.push({ ...action.payload });
         },
-        triggerUpdateNotification(state) {
+        triggerUpdateNotification(state, action: PayloadAction<string>) {
             state.notifications.push({
                 level: NotificationLevel.Update,
                 id: nextId,
+                version: action.payload,
             });
 
             nextId += 1;

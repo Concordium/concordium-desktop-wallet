@@ -1,6 +1,26 @@
 # Changelog
 
-## Unreleased
+## 1.3.0
+
+### Added
+
+-   Added a GTU drop option for testnet and stagenet.
+-   In the case of a failed identity, the error details received from the identity provider are now displayed to the user.
+-   UI flows for baker transactions for single signer accounts.
+
+### Changed
+
+-   Auxiliary data in an Update Protocol transaction is now optional.
+-   Updated terms and conditions.
+-   Updated UI to reflect the rename of GTU to CCD, meaning anywhere tokens were referred to as GTU, it now says CCD. The GTU icon has also been replaced with the icon representing CCD.
+-   Datetimes are now selected with a date picker from a calendar.
+-   Finalized transactions are no longer stored in the local database, but are instead always fetched from the wallet proxy when needed.
+
+### Fixed
+
+-   Failed database migrations errors are now shown correctly to the user.
+
+## 1.2.0
 
 ### Added
 
@@ -9,12 +29,24 @@
 -   It is now possible to rename accounts and identities.
 -   Added an option to add an address book entry while creating a transfer transaction.
 -   Added an introductory screen to set up a node connection for first time users.
+-   Now shows connected node status in side bar.
+-   It is now possible to remove a failed identity.
+-   Added reference (sessionId) on failed identities, for support.
+-   Added support for memo transactions.
+-   Added algorithm to recover lost accounts and credentials.
+-   Application will automatically search for updates and prompt the user to download and install them (Windows, macOS and AppImage for Linux).
+-   It is now possible to set a default account, which will be selected initially when opening the app.
+-   "About" menu link has been added to native menu bar under "Help" for windows/linux. It is already accessible on mac under "Concordium desktop wallet" in the native menu.
+-   When an account is synchronizing transactions, it now shows with a spinning icon in the tab header of the transaction log.
+-   Added flows to make baker transactions from accounts with only one set of credentials possible without going through a multi-signature proposal flow.
 
 ### Changed
 
 -   The native menu bar has been updated to only contain relevant items. Terms and conditions and the license notices have been moved to the menu bar. The menu bar is now accessible on Windows and Linux. Press
 -   The accounts page has been updated to make it clearer that multi credential accounts are not able to use shielded transactions.
 -   Transactions in the 'Transfers' list in the account view are now grouped by dates.
+-   Account page has changed, now featuring two different ways to view accounts: a simple, quick overview of all accounts, and a detailed view of a single account. All actions previously found under "More" will now be found in "detailed view" for the specific account.
+-   Account page can be viewed in its entirety (though with limited use) without being connected to a node.
 
 ### Fixed
 

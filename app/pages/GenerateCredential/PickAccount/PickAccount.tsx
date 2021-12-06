@@ -110,9 +110,8 @@ export default function PickAccount({ onNext }: Props): JSX.Element {
         address,
         name: accountName || 'Name pending',
         identityId: -1,
-        maxTransactionId: '',
         isInitial: false,
-        rewardFilter: '[]',
+        transactionFilter: {},
     };
 
     let accountDisplay;

@@ -1,0 +1,27 @@
+@import 'config/bundle';
+@import '../../common';
+
+.releaseScheduleTitle {
+    margin: 0;
+    margin-bottom: 20px;
+    color: $color-pale-blue;
+    width: 100%;
+}
+
+.releaseScheduleListHeader {
+    composes: fillCardPadding;
+    background-color: $color-light-blue;
+    color: $color-pale-blue;
+    padding: 2px 20px;
+}
+
+.releaseScheduleElement {
+    composes: cardPadding;
+    composes: greySeparator;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.releaseSchedule {
+    composes: fillCardPadding;
+}

@@ -93,4 +93,8 @@ export default class LedgerEmulatorObserverImpl implements LedgerObserver {
             this.concordiumClient.closeTransport();
         }
     }
+
+    async resetTransport(mainWindow: EventEmitter) {
+        throw new Error(`Not implemented for the emulator: ${mainWindow}`);
+    }
 }

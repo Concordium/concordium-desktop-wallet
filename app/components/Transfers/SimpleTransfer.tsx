@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { Redirect } from 'react-router';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
@@ -11,58 +11,71 @@ import {
     Fraction,
 } from '../../utils/types';
 import { toMicroUnits } from '../../utils/gtu';
-import locations from '../../constants/transferLocations.json';
-import { createSimpleTransferTransaction } from '../../utils/transactionHelpers';
+import {
+    createSimpleTransferTransaction,
+    createSimpleTransferWithMemoTransaction,
+} from '../../utils/transactionHelpers';
 import ExternalTransfer from '~/components/Transfers/ExternalTransfer';
 
 import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
-import { getTransactionKindCost } from '~/utils/transactionCosts';
 import ensureExchangeRateAndNonce from '~/components/Transfers/ensureExchangeRateAndNonce';
 import { isMultiSig } from '~/utils/accountHelpers';
+import { multiplyFraction } from '~/utils/basicHelpers';
 
 interface Props {
     account: Account;
     exchangeRate: Fraction;
-    nonce: string;
+    nonce: bigint;
+    disableClose?: boolean;
 }
 
 /**
  * Controls the flow of creating a simple transfer.
  */
-function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
+function SimpleTransfer({
+    account,
+    exchangeRate,
+    nonce,
+    disableClose = false,
+}: Props) {
     const dispatch = useDispatch();
 
-    const estimatedFee = useMemo(
-        () =>
-            getTransactionKindCost(
-                TransactionKindId.Simple_transfer,
-                exchangeRate
-            ),
-        [exchangeRate]
-    );
-
     const toConfirmTransfer = useCallback(
-        async (amount: string, recipient: AddressBookEntry) => {
+        async (amount: string, recipient: AddressBookEntry, memo?: string) => {
             if (!recipient) {
                 throw new Error('Unexpected missing recipient');
             }
 
-            const transaction = await createSimpleTransferTransaction(
-                account.address,
-                toMicroUnits(amount),
-                recipient.address,
-                nonce
+            let transaction;
+            if (memo) {
+                transaction = await createSimpleTransferWithMemoTransaction(
+                    account.address,
+                    toMicroUnits(amount),
+                    recipient.address,
+                    nonce,
+                    memo
+                );
+            } else {
+                transaction = await createSimpleTransferTransaction(
+                    account.address,
+                    toMicroUnits(amount),
+                    recipient.address,
+                    nonce
+                );
+            }
+
+            transaction.estimatedFee = multiplyFraction(
+                exchangeRate,
+                transaction.energyAmount
             );
-            transaction.estimatedFee = estimatedFee;
 
             dispatch(
                 push({
                     pathname: routes.SUBMITTRANSFER,
                     state: {
                         confirmed: {
-                            pathname: routes.ACCOUNTS_SIMPLETRANSFER,
+                            pathname: routes.ACCOUNTS_FINAL_PAGE,
                             state: {
-                                initialPage: locations.transferSubmitted,
                                 transaction: stringify(transaction),
                                 recipient,
                             },
@@ -70,8 +83,8 @@ function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
                         cancelled: {
                             pathname: routes.ACCOUNTS_SIMPLETRANSFER,
                             state: {
-                                initialPage: locations.pickAmount,
                                 amount,
+                                memo,
                                 recipient,
                             },
                         },
@@ -82,7 +95,7 @@ function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
             );
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [JSON.stringify(account), estimatedFee]
+        [JSON.stringify(account)]
     );
 
     if (isMultiSig(account)) {
@@ -98,10 +111,12 @@ function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
 
     return (
         <ExternalTransfer
-            estimatedFee={estimatedFee}
+            exchangeRate={exchangeRate}
             toConfirmTransfer={toConfirmTransfer}
-            exitFunction={() => dispatch(push(routes.ACCOUNTS))}
-            amountHeader="Send GTU"
+            exitFunction={
+                disableClose ? undefined : () => dispatch(push(routes.ACCOUNTS))
+            }
+            amountHeader="Send CCD"
             senderAddress={account.address}
             transactionKind={TransactionKindId.Simple_transfer}
         />

@@ -1,4 +1,9 @@
-import { IdObjectRequest, Versioned } from './types';
+import {
+    IdObjectRequest,
+    TransactionFilter,
+    TransactionOrder,
+    Versioned,
+} from './types';
 import {
     DoneIdentityTokenContainer,
     IdentityProviderIdentityStatus,
@@ -19,8 +24,38 @@ export async function httpGet<T>(
     return window.http.get<T>(urlString, params);
 }
 
-export async function getTransactions(address: string, id = '0') {
-    return window.http.getTransactions(address, id);
+export async function gtuDrop(address: string) {
+    return window.http.gtuDrop(address);
+}
+
+export async function getTransactionsAscending(
+    address: string,
+    transactionFilter: TransactionFilter,
+    limit: number,
+    id?: string
+) {
+    return window.http.getTransactions(
+        address,
+        transactionFilter,
+        limit,
+        TransactionOrder.Ascending,
+        id
+    );
+}
+
+export async function getTransactionsDescending(
+    address: string,
+    transactionFilter: TransactionFilter,
+    limit: number,
+    id?: string
+) {
+    return window.http.getTransactions(
+        address,
+        transactionFilter,
+        limit,
+        TransactionOrder.Descending,
+        id
+    );
 }
 
 export async function getIdentityProviders() {

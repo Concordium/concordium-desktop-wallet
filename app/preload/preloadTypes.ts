@@ -1,5 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+    AccountInfo,
+    BlockSummary,
+    ConsensusStatus,
+    CryptographicParameters,
+    NextAccountNonce,
+    TransactionStatus,
+    Versioned,
+} from '@concordium/node-sdk';
+import {
     OpenDialogOptions,
     OpenDialogReturnValue,
     Rectangle,
@@ -22,20 +31,29 @@ import {
     WalletType,
     IdentityProvider,
     IncomingTransaction,
+    AccountAndCredentialPairs,
+    TransactionFilter,
+    TransactionOrder,
+    DecryptedAmount,
+    CredentialNumberPrfKey,
+    IpInfo,
+    ArInfo,
 } from '~/utils/types';
-import { ExternalCredential, GetTransactionsOutput } from '../database/types';
+import { ExternalCredential } from '../database/types';
 import type LedgerCommands from './preloadLedgerTypes';
 
 export type { default as LedgerCommands } from './preloadLedgerTypes';
 
 export type Listener = (event: any, ...args: any[]) => void;
 type PutListener = (callback: Listener) => void;
+type PutListenerWithUnsub = (callback: Listener) => () => void;
 
 export interface Listen {
     openRoute: PutListener;
     readyToShow: PutListener;
     didFinishLoad: PutListener;
     ledgerChannel: PutListener;
+    logFromMain: PutListener;
 }
 
 export interface Once {
@@ -43,22 +61,61 @@ export interface Once {
     onVerificationKeysConfirmed: PutListener;
 }
 
-export type GRPC = {
-    call: (command: string, input: Record<string, string>) => Promise<any>;
-    setLocation: (address: string, port: string) => void;
-    nodeConsensusAndGlobal: (address: string, port: string) => Promise<any>;
+type ConsensusAndGlobalResultSuccess = {
+    successful: true;
+    response: {
+        consensusStatus: ConsensusStatus;
+        global: Versioned<CryptographicParameters>;
+    };
 };
 
-export interface SaveFileData {
-    filename: string;
-    data: Buffer;
-}
+type ConsensusAndGlobalResultFailure = {
+    successful: false;
+    error: Error;
+};
+
+export type ConsensusAndGlobalResult =
+    | ConsensusAndGlobalResultSuccess
+    | ConsensusAndGlobalResultFailure;
+
+type GetAccountInfo = (
+    address: string,
+    blockHash: string
+) => Promise<AccountInfo | undefined>;
+
+export type GRPC = {
+    setLocation: (address: string, port: string) => void;
+    nodeConsensusAndGlobal: (
+        address: string,
+        port: string
+    ) => Promise<ConsensusAndGlobalResult>;
+    sendTransaction: (
+        transactionPayload: Uint8Array,
+        networkId: number
+    ) => Promise<boolean>;
+    getCryptographicParameters: (
+        blockHash: string
+    ) => Promise<Versioned<CryptographicParameters> | undefined>;
+    getConsensusStatus: () => Promise<ConsensusStatus>;
+    getTransactionStatus: (
+        transactionId: string
+    ) => Promise<TransactionStatus | undefined>;
+    getNextAccountNonce: (
+        address: string
+    ) => Promise<NextAccountNonce | undefined>;
+    getBlockSummary: (blockHash: string) => Promise<BlockSummary | undefined>;
+    getAccountInfoOfCredential: GetAccountInfo;
+    getAccountInfo: GetAccountInfo;
+    getIdentityProviders: (blockHash: string) => Promise<IpInfo[] | undefined>;
+    getAnonymityRevokers: (blockHash: string) => Promise<ArInfo[] | undefined>;
+    // We return a Uint8Array here, because PeerListResponse must be manually serialized/deserialized.
+    getPeerList: (includeBootstrappers: boolean) => Promise<Uint8Array>;
+};
 
 export type FileMethods = {
     databaseExists: () => Promise<boolean>;
     saveFile: (filepath: string, data: string | Buffer) => Promise<boolean>;
     saveFileDialog: (opts: SaveDialogOptions) => Promise<SaveDialogReturnValue>;
-    saveZipFileDialog: (files: SaveFileData[]) => Promise<false | void>;
     openFileDialog: (opts: OpenDialogOptions) => Promise<OpenDialogReturnValue>;
 };
 
@@ -75,12 +132,14 @@ export type DecryptionResult = DecryptionData | DecryptionError;
 export type CryptoMethods = {
     encrypt: (data: string, password: string) => EncryptedData;
     decrypt: (data: EncryptedData, password: string) => DecryptionResult;
-    sha256: (data: (Buffer | Uint8Array)[]) => Buffer;
+    sha256: (data: (string | Buffer | Uint8Array)[]) => Buffer;
 };
 
 export type GetTransactionsResult = {
     transactions: IncomingTransaction[];
     full: boolean;
+    minId?: string;
+    maxId?: string;
 };
 
 export interface HttpGetResponse<T> {
@@ -96,9 +155,13 @@ export type HttpMethods = {
     ) => Promise<HttpGetResponse<T>>;
     getTransactions: (
         address: string,
-        id: string
+        transactionFilter: TransactionFilter,
+        limit: number,
+        order: TransactionOrder,
+        id?: string
     ) => Promise<GetTransactionsResult>;
     getIdProviders: () => Promise<IdentityProvider[]>;
+    gtuDrop: (address: string) => Promise<string>;
 };
 
 export type GeneralMethods = {
@@ -124,11 +187,17 @@ export type AccountMethods = {
         values: Partial<Account>
     ) => Promise<number>;
     findAccounts: (condition: Partial<Account>) => Promise<Account[]>;
-    removeInitialAccount: (identityNumber: number) => Promise<number>;
-    confirmInitialAccount: (
+    updateInitialAccount: (
         identityNumber: number,
         values: Partial<Account>
     ) => Promise<number>;
+    insertFromRecoveryNewIdentity: (
+        recovered: AccountAndCredentialPairs,
+        identity: Omit<Identity, 'id'>
+    ) => Promise<void>;
+    insertFromRecoveryExistingIdentity: (
+        recovered: AccountAndCredentialPairs
+    ) => Promise<void>;
 };
 
 export type AddressBookMethods = {
@@ -189,9 +258,11 @@ export type IdentityMethods = {
     insert: (identity: Partial<Identity> | Identity[]) => Promise<number[]>;
     update: (id: number, updatedValues: Partial<Identity>) => Promise<number>;
     getIdentitiesForWallet: (walletId: number) => Promise<Identity[]>;
-    rejectIdentityAndDeleteInitialAccount: (
-        identityId: number
+    rejectIdentityAndInitialAccount: (
+        identityId: number,
+        detail: string
     ) => Promise<void>;
+    removeIdentityAndInitialAccount: (identityId: number) => Promise<void>;
     confirmIdentity: (
         identityId: number,
         identityObjectJson: string,
@@ -200,7 +271,7 @@ export type IdentityMethods = {
         addressBookEntry: AddressBookEntry
     ) => Promise<void>;
     insertPendingIdentityAndInitialAccount: (
-        identity: Partial<Identity>,
+        identity: Omit<Identity, 'id'>,
         initialAccount: Omit<Account, 'identityId'>
     ) => Promise<number>;
 };
@@ -219,30 +290,44 @@ export type MultiSignatureTransactionMethods = {
     getMaxOpenNonceOnAccount: (address: string) => Promise<bigint>;
 };
 
+export interface PreferenceAccessor<V = string> {
+    get(): Promise<V | null>;
+    set(v: V): Promise<void>;
+}
+
+export interface PreferencesMethods {
+    defaultAccount: PreferenceAccessor<Hex>;
+    accountSimpleView: PreferenceAccessor<boolean>;
+}
+
 export type SettingsMethods = {
     update: (setting: Setting) => Promise<number>;
 };
 
+export interface GetTransactionsOutput {
+    transactions: TransferTransaction[];
+    more: boolean;
+}
+
 export type TransactionMethods = {
     getPending: () => Promise<TransferTransaction[]>;
     hasPending: (address: string) => Promise<boolean>;
-    getTransactionsForAccount: (
-        account: Account,
-        filteredTypes: TransactionKindString[],
-        limit?: number
-    ) => Promise<GetTransactionsOutput>;
-    hasEncryptedTransactions: (
+    getFilteredPendingTransactions: (
         address: string,
-        fromTime: string,
-        toTime: string
-    ) => Promise<boolean>;
+        filteredTypes: TransactionKindString[],
+        fromDate?: Date,
+        toDate?: Date
+    ) => Promise<TransferTransaction[]>;
+    hasPendingShieldedBalanceTransfer: (address: string) => Promise<boolean>;
     update: (
         identifier: Record<string, unknown>,
         updatedValues: Partial<TransferTransaction>
     ) => Promise<number>;
     insert: (
-        transactions: Partial<TransferTransaction>[]
-    ) => Promise<Partial<TransferTransaction>[]>;
+        transactions: TransferTransaction[]
+    ) => Promise<TransferTransaction[]>;
+    getTransaction: (id: string) => Promise<TransferTransaction | undefined>;
+    deleteTransaction: (transactionHash: string) => Promise<number>;
 };
 
 export type WalletMethods = {
@@ -250,10 +335,35 @@ export type WalletMethods = {
     insertWallet: (identifier: Hex, type: WalletType) => Promise<number>;
 };
 
-type ViewResponse = {
-    error?: string;
-    result: string;
+export type DecryptedAmountsMethods = {
+    insert: (entry: DecryptedAmount) => Promise<number[]>;
+    findEntries: (transactionHashes: string[]) => Promise<DecryptedAmount[]>;
 };
+
+export enum ViewResponseStatus {
+    Success,
+    Error,
+    Aborted,
+}
+
+interface ViewResponseSuccess {
+    result: string;
+    status: ViewResponseStatus.Success;
+}
+
+interface ViewResponseError {
+    error: string;
+    status: ViewResponseStatus.Error;
+}
+
+interface ViewResponseAborted {
+    status: ViewResponseStatus.Aborted;
+}
+
+export type ViewResponse =
+    | ViewResponseSuccess
+    | ViewResponseError
+    | ViewResponseAborted;
 
 export type BrowserViewMethods = {
     createView: (location: string, rect: Rectangle) => Promise<ViewResponse>;
@@ -270,10 +380,39 @@ export type Database = {
     identity: IdentityMethods;
     genesisAndGlobal: GenesisAndGlobalMethods;
     multiSignatureTransaction: MultiSignatureTransactionMethods;
+    preferences: PreferencesMethods;
     settings: SettingsMethods;
     transaction: TransactionMethods;
     wallet: WalletMethods;
+    decyptedAmounts: DecryptedAmountsMethods;
 };
+
+export interface AutoUpdateMethods {
+    onUpdateAvailable: PutListenerWithUnsub;
+    onUpdateDownloaded: PutListenerWithUnsub;
+    onVerificationSuccess: PutListenerWithUnsub;
+    onError: PutListenerWithUnsub;
+    triggerUpdate(): void;
+    quitAndInstall(): void;
+}
+
+export interface AccountReportMethods {
+    single: (
+        fileName: string,
+        account: Account,
+        filters: TransactionFilter,
+        global: Global,
+        keys: Record<string, CredentialNumberPrfKey>
+    ) => Promise<void>;
+    multiple: (
+        fileName: string,
+        accounts: Account[],
+        filters: TransactionFilter,
+        global: Global,
+        keys: Record<string, CredentialNumberPrfKey>
+    ) => Promise<void>;
+    abort: () => void;
+}
 
 export interface WindowFunctions {
     addListener: Listen;
@@ -290,4 +429,7 @@ export interface WindowFunctions {
     writeImageToClipboard: (dataUrl: string) => void;
     openUrl: (href: string) => any;
     removeAllListeners: (channel: string) => void;
+    platform: NodeJS.Platform;
+    autoUpdate: AutoUpdateMethods;
+    accountReport: AccountReportMethods;
 }

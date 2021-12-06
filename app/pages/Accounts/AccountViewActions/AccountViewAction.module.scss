@@ -13,6 +13,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-around;
+    align-items: center;
     padding: 20px;
     font-size: $font-size-body3;
     box-shadow: 0 0 0 1px $color-grey inset;
@@ -25,5 +26,9 @@
 }
 
 .actionImage {
-    margin-bottom: 5px;
+    @include svgColorTransition;
+
+    .actionButton:hover & {
+        @include svgColor($color-pale-blue);
+    }
 }

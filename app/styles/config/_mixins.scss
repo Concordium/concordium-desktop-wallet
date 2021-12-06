@@ -14,3 +14,25 @@
 @mixin shadowBorder($color: $color-grey, $width: 1px) {
     box-shadow: 0 0 0 $width $color inset;
 }
+
+@mixin withFirstLastMods() {
+    &,
+    &\:notFirst:not(:first-child),
+    &\:notLast:not(:last-child),
+    &\:first:first-child,
+    &\:last:last-child {
+        @content;
+    }
+}
+
+@mixin svgColor($color) {
+    path:not(.inverse):not([class*='__inverse']) {
+        fill: $color;
+    }
+}
+
+@mixin svgColorTransition($timing: $anim-timing, $curve: linear) {
+    path:not(.inverse):not([class*='__inverse']) {
+        transition: fill $timing $curve;
+    }
+}

@@ -7,16 +7,15 @@ export default function useMultiFieldFocus(onBlur?: () => void) {
     const [isFocused, setIsFocused] = useState(false);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    const debouncedBlur = useCallback(
-        debounce((focus: boolean) => {
-            if (onBlur && !focus) {
-                onBlur();
-            }
-        }, 0),
-        [onBlur]
-    );
+    const debouncedSetIsFocused = useCallback(debounce(setIsFocused, 50), [
+        setIsFocused,
+    ]);
 
-    useUpdateEffect(() => debouncedBlur(isFocused), [isFocused, debouncedBlur]);
+    useUpdateEffect(() => {
+        if (onBlur && !isFocused) {
+            onBlur();
+        }
+    }, [isFocused]);
 
-    return { isFocused, setIsFocused };
+    return { isFocused, setIsFocused: debouncedSetIsFocused };
 }

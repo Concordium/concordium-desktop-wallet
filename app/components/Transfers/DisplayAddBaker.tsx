@@ -1,12 +1,16 @@
 import React from 'react';
+import { useRouteMatch } from 'react-router';
 import { AddBaker } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
 import DisplayFee from '~/components/DisplayFee';
 import { useAccountName } from '~/utils/dataHooks';
-import styles from './transferDetails.module.scss';
 import PublicKey from '~/pages/multisig/common/PublicKey/PublicKey';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
+import DisplayAddress from '../DisplayAddress';
+import routes from '~/constants/routes.json';
+
+import styles from './transferDetails.module.scss';
 
 interface Props {
     transaction: AddBaker;
@@ -17,11 +21,16 @@ interface Props {
  */
 export default function DisplayAddBaker({ transaction }: Props) {
     const senderName = useAccountName(transaction.sender);
+    const isSingleSig = useRouteMatch(routes.SUBMITTRANSFER);
+
     return (
         <>
             <h5 className={styles.title}>From Account:</h5>
             <p className={styles.name}>{senderName}</p>
-            <p className={styles.address}>{transaction.sender}</p>
+            <DisplayAddress
+                address={transaction.sender}
+                lineClassName={styles.address}
+            />
             <h5 className={styles.title}>Staked amount:</h5>
             <p className={styles.amount}>
                 {displayAsGTU(transaction.payload.bakingStake)}
@@ -44,9 +53,11 @@ export default function DisplayAddBaker({ transaction }: Props) {
                 name="Aggregation verify key"
                 publicKey={transaction.payload.aggregationVerifyKey}
             />
-            <DisplayTransactionExpiryTime
-                expiryTime={dateFromTimeStamp(transaction.expiry)}
-            />
+            {Boolean(isSingleSig) || (
+                <DisplayTransactionExpiryTime
+                    expiryTime={dateFromTimeStamp(transaction.expiry)}
+                />
+            )}
         </>
     );
 }

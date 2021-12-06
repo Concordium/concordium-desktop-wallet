@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { Knex } from 'knex';
 import { knex } from '~/database/knex';
 import {
     identitiesTable,
@@ -6,6 +7,7 @@ import {
     credentialsTable,
     addressBookTable,
 } from '~/constants/databaseNames.json';
+import { removeInitialAccount, serializeAccountFields } from './accountDao';
 import {
     Account,
     Credential,
@@ -13,6 +15,7 @@ import {
     AddressBookEntry,
     Identity,
     IdentityStatus,
+    IdentityVersion,
 } from '~/utils/types';
 import { IdentityMethods } from '~/preload/preloadTypes';
 
@@ -23,11 +26,22 @@ import { IdentityMethods } from '~/preload/preloadTypes';
  * @returns the id for the next identity to be created by the given wallet
  */
 export async function getNextIdentityNumber(walletId: number): Promise<number> {
-    const model = (await knex())
-        .table(identitiesTable)
-        .where('walletId', walletId);
-    const totalCount = await model.clone().count();
-    return parseInt(totalCount[0]['count(*)'].toString(), 10);
+    const maxIdentityNumber = await (await knex())
+        .table<Identity>(identitiesTable)
+        .where('walletId', walletId)
+        .max<{ maxIdentityNumber: number }>(
+            'identityNumber as maxIdentityNumber'
+        )
+        .first();
+
+    if (
+        maxIdentityNumber === undefined ||
+        maxIdentityNumber.maxIdentityNumber === null
+    ) {
+        return 0;
+    }
+
+    return maxIdentityNumber.maxIdentityNumber + 1;
 }
 
 async function insertIdentity(identity: Partial<Identity> | Identity[]) {
@@ -49,17 +63,27 @@ async function getIdentitiesForWallet(walletId: number): Promise<Identity[]> {
     return (await knex()).select().table(identitiesTable).where({ walletId });
 }
 
+async function removeIdentity(id: number, trx: Knex.Transaction) {
+    const table = (await knex())(identitiesTable).transacting(trx);
+    return table.where({ id }).del();
+}
+
 /**
  * Transactionally sets an identity to 'Rejected' and deletes its corresponding
  * initial account.
  * @param identityId the identity to reject
  */
-async function rejectIdentityAndDeleteInitialAccount(identityId: number) {
+async function rejectIdentityAndInitialAccount(
+    identityId: number,
+    detail: string
+) {
     (await knex()).transaction(async (trx) => {
         await trx(identitiesTable)
             .where({ id: identityId })
-            .update({ status: IdentityStatus.Rejected });
-        await trx(accountsTable).where({ identityId, isInitial: 1 }).del();
+            .update({ status: IdentityStatus.Rejected, detail });
+        await trx(accountsTable)
+            .where({ identityId, isInitial: 1 })
+            .update({ status: AccountStatus.Rejected });
     });
 }
 
@@ -79,7 +103,9 @@ async function insertPendingIdentityAndInitialAccount(
             ...initialAccount,
             identityId,
         };
-        await trx.table(accountsTable).insert(initialAccountWithIdentityId);
+        await trx
+            .table(accountsTable)
+            .insert(serializeAccountFields(initialAccountWithIdentityId));
         return identityId;
     });
 }
@@ -117,12 +143,34 @@ async function confirmIdentity(
     });
 }
 
+async function removeIdentityAndInitialAccount(identityId: number) {
+    const db = await knex();
+    await db.transaction((trx) => {
+        removeInitialAccount(identityId, trx)
+            .then(() => {
+                return removeIdentity(identityId, trx);
+            })
+            .then(trx.commit)
+            .catch(trx.rollback);
+    });
+}
+
+export async function getIdentityVersion(
+    identityId: number
+): Promise<IdentityVersion | undefined> {
+    const identity = await (await knex())<Identity>(identitiesTable)
+        .where({ id: identityId })
+        .first();
+    return identity?.version;
+}
+
 const exposedMethods: IdentityMethods = {
     getNextIdentityNumber,
     insert: insertIdentity,
     update: updateIdentity,
     getIdentitiesForWallet,
-    rejectIdentityAndDeleteInitialAccount,
+    rejectIdentityAndInitialAccount,
+    removeIdentityAndInitialAccount,
     confirmIdentity,
     insertPendingIdentityAndInitialAccount,
 };

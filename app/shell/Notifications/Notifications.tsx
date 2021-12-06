@@ -2,6 +2,7 @@ import { AnimatePresence } from 'framer-motion';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Notification from '~/components/Notification';
+import AppUpdateNotification from '~/components/AppUpdateNotification';
 import Portal from '~/cross-app-components/Portal';
 import {
     NotificationLevel,
@@ -24,11 +25,11 @@ export default function Notifications() {
             <AnimatePresence>
                 {notifications.map((n) =>
                     n.level === NotificationLevel.Update ? (
-                        // TODO: Replace with update notification
-                        <Notification
+                        <AppUpdateNotification
                             key={n.id}
-                            level={n.level}
-                            onCloseClick={() => handleClose(n.id)}
+                            onClose={() => handleClose(n.id)}
+                            onUpdate={() => window.autoUpdate.triggerUpdate()}
+                            version={n.version}
                         />
                     ) : (
                         <Notification

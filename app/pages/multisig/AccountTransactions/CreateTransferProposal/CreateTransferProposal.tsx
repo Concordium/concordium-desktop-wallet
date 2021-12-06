@@ -28,17 +28,24 @@ import {
 } from '~/utils/transactionCosts';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import LoadingComponent from '../LoadingComponent';
-import InputTimestamp from '~/components/Form/InputTimestamp';
 import PickRecipient from '~/components/Transfers/PickRecipient';
 import { useTransactionExpiryState } from '~/utils/dataHooks';
-import { isMultiSig } from '~/utils/accountHelpers';
-import { accountsSelector, accountInfoSelector } from '~/features/AccountSlice';
-import { amountAtDisposal } from '~/utils/transactionHelpers';
+import {
+    confirmedAccountsSelector,
+    accountInfoSelector,
+} from '~/features/AccountSlice';
+import { validateMemo } from '~/utils/transactionHelpers';
 import { collapseFraction } from '~/utils/basicHelpers';
 import { toMicroUnits, displayAsGTU } from '~/utils/gtu';
+import { useAsyncMemo } from '~/utils/hooks';
+import { nodeSupportsMemo } from '~/node/nodeHelpers';
+import { stringify } from '~/utils/JSONHelper';
+import { isMultiSig, getAmountAtDisposal } from '~/utils/accountHelpers';
+import UpsertAddress from '~/components/UpsertAddress';
+import PickMemo from './PickMemo';
+import DatePicker from '~/components/Form/DatePicker';
 
 import styles from './CreateTransferProposal.module.scss';
-import UpsertAddress from '~/components/UpsertAddress';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
@@ -79,14 +86,19 @@ function CreateTransferProposal({
 }: Props): JSX.Element {
     const dispatch = useDispatch();
 
+    const allowMemo = useAsyncMemo(nodeSupportsMemo);
+
     const { pathname, state } = useLocation<State>();
-    const accounts = useSelector(accountsSelector).filter(isMultiSig);
+    const accounts = useSelector(confirmedAccountsSelector).filter(isMultiSig);
     const location = pathname.replace(`${transactionKind}`, ':transactionKind');
 
     const handler = findAccountTransactionHandler(transactionKind);
 
     const [account, setAccount] = useState<Account | undefined>(state?.account);
     const [amount, setAmount] = useState<string | undefined>();
+    const [memo, setMemo] = useState<string | undefined>();
+    const [shownMemoWarning, setShownMemoWarning] = useState<boolean>(false);
+
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>();
     const [
         expiryTime,
@@ -110,8 +122,10 @@ function CreateTransferProposal({
                     setFee(
                         scheduledTransferCost(
                             exchangeRate,
-                            account.signatureThreshold
-                        )(scheduleLength)
+                            scheduleLength,
+                            account.signatureThreshold,
+                            memo
+                        )
                     );
                 } else {
                     setFee(undefined);
@@ -121,18 +135,19 @@ function CreateTransferProposal({
                     getTransactionKindCost(
                         transactionKind,
                         exchangeRate,
-                        account.signatureThreshold
+                        account.signatureThreshold,
+                        memo
                     )
                 );
             }
         }
-    }, [account, transactionKind, setFee, scheduleLength, exchangeRate]);
+    }, [account, transactionKind, setFee, scheduleLength, exchangeRate, memo]);
 
     const [amountError, setAmountError] = useState<string>();
     const accountInfo = useSelector(accountInfoSelector(account));
 
     useEffect(() => {
-        const atDisposal = accountInfo ? amountAtDisposal(accountInfo) : 0n;
+        const atDisposal = accountInfo ? getAmountAtDisposal(accountInfo) : 0n;
         if (
             estimatedFee &&
             amount &&
@@ -145,7 +160,7 @@ function CreateTransferProposal({
             setAmountError(undefined);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [estimatedFee, amount, JSON.stringify(accountInfo)]);
+    }, [estimatedFee, amount, stringify(accountInfo)]);
 
     function continueAction(routerAction: typeof push = push) {
         const nextLocation = handler.creationLocationHandler(location);
@@ -182,6 +197,7 @@ function CreateTransferProposal({
                 amount={amount}
                 account={account}
                 schedule={schedule}
+                memo={memo}
                 estimatedFee={estimatedFee}
                 expiryTime={expiryTime}
             />
@@ -232,6 +248,8 @@ function CreateTransferProposal({
                                 account={account}
                                 amount={amount}
                                 recipient={recipient}
+                                allowMemo={allowMemo}
+                                memo={memo}
                                 schedule={schedule}
                                 estimatedFee={estimatedFee}
                                 expiryTime={expiryTime}
@@ -272,8 +290,23 @@ function CreateTransferProposal({
                                             setAmount={setAmount}
                                             estimatedFee={estimatedFee}
                                         />
+                                        {allowMemo && (
+                                            <PickMemo
+                                                memo={memo}
+                                                setMemo={setMemo}
+                                                shownMemoWarning={
+                                                    shownMemoWarning
+                                                }
+                                                setShownMemoWarning={
+                                                    setShownMemoWarning
+                                                }
+                                            />
+                                        )}
                                         <Button
-                                            disabled={amount === undefined}
+                                            disabled={
+                                                amount === undefined ||
+                                                !!validateMemo(memo || '')
+                                            }
                                             className={styles.submitButton}
                                             onClick={() => continueAction()}
                                         >
@@ -295,12 +328,12 @@ function CreateTransferProposal({
                                             onClickedRecipient={continueAction}
                                         />
                                         <UpsertAddress
-                                            clear
                                             className={styles.addRecipient}
                                             onSubmit={(e) => {
                                                 setRecipient(e);
                                                 continueAction();
                                             }}
+                                            allowAlias={false}
                                         >
                                             <PlusIcon />
                                         </UpsertAddress>
@@ -313,7 +346,8 @@ function CreateTransferProposal({
                                 }
                                 render={() => (
                                     <div className={styles.columnContent}>
-                                        <InputTimestamp
+                                        <DatePicker
+                                            className="body2 mV40"
                                             label="Transaction expiry time"
                                             name="expiry"
                                             isInvalid={
@@ -322,6 +356,7 @@ function CreateTransferProposal({
                                             error={expiryTimeError}
                                             value={expiryTime}
                                             onChange={setExpiryTime}
+                                            minDate={new Date()}
                                         />
                                         <p>
                                             Choose the expiry date for the
@@ -355,6 +390,7 @@ function CreateTransferProposal({
                                         chosenAccount={account}
                                         filter={isMultiSig}
                                         onAccountClicked={continueAction}
+                                        messageWhenEmpty="There are no accounts that require multiple signatures"
                                     />
                                 </div>
                             </Route>

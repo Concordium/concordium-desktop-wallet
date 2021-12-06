@@ -12,7 +12,6 @@ import {
     SignedIdRequest,
     IdObjectRequest,
     Versioned,
-    Identity,
     IdentityStatus,
     AccountStatus,
     Account,
@@ -23,12 +22,49 @@ import { performIdObjectRequest } from '~/utils/httpRequests';
 import { getAddressFromCredentialId } from '~/utils/rustInterface';
 import generalStyles from '../IdentityIssuance.module.scss';
 import styles from './ExternalIssuance.module.scss';
-import { getInitialEncryptedAmount } from '~/utils/accountHelpers';
+import { createInitialAccount } from '~/utils/accountHelpers';
+import { currentIdentityVersion } from '~/utils/identityHelpers';
 import { insertPendingIdentityAndInitialAccount } from '~/database/IdentityDao';
 import { getElementRectangle } from '~/utils/htmlHelpers';
+import { ViewResponseStatus } from '~/preload/preloadTypes';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
+enum IdentityRequestStatus {
+    Success,
+    Aborted,
+    Failed,
+}
+
+interface IdentitySuccess {
+    identityId: number;
+    status: IdentityRequestStatus.Success;
+}
+
+interface IdentityAborted {
+    status: IdentityRequestStatus.Aborted;
+}
+
+interface IdentityFailed {
+    status: IdentityRequestStatus.Failed;
+}
+
+type IdentityGenerationResult =
+    | IdentitySuccess
+    | IdentityAborted
+    | IdentityFailed;
+
+/**
+ * Performs the identity creation flow with an identity provider.
+ * 1. Send the identity object request to the identity provider.
+ * 1. Extract the Location from the HTTP 302 Found returned by the identity provider.
+ * 1. Open browser view at the Location extracted.
+ * 1. The user goes through the steps defined by the identity provider within the browser window.
+ * Eventually the identity provider returns with an HTTP 302 Found with the location used to
+ * poll for the identity.
+ * 1. Update the local database with the identity and initial account.
+ * 1. Start polling for the identity to resolve the status of the identity and the initial account.
+ */
 async function generateIdentity(
     idObjectRequest: Versioned<IdObjectRequest>,
     randomness: string,
@@ -40,21 +76,33 @@ async function generateIdentity(
     walletId: number,
     onError: (message: string) => void,
     rect: Rectangle
-): Promise<number> {
+): Promise<IdentityGenerationResult> {
     let identityObjectLocation;
     let identityId;
     try {
+        // Initiate the identity creation process by sending the identity object request
+        // to the identity provider. The identity provider will return with an HTTP 302 Found
+        // indicating where we should open the browser view to perform the identity creation
+        // process.
         const identityProviderLocation = await performIdObjectRequest(
             provider.metadata.issuanceStart,
             redirectUri,
             idObjectRequest
         );
+
+        // Open a browser view at the received location. The user will be using the
+        // browser view to perform the identity creation process at the identity provider.
+        // The identity provider will, at the end of the process, return an HTTP 302 Found
+        // that points to the location where the identity can be polled for.
         const providerResult = await window.view.createView(
             identityProviderLocation,
             rect
         );
 
-        if (providerResult.error) {
+        if (providerResult.status === ViewResponseStatus.Aborted) {
+            return { status: IdentityRequestStatus.Aborted };
+        }
+        if (providerResult.status === ViewResponseStatus.Error) {
             throw new Error(providerResult.error);
         }
         identityObjectLocation = providerResult.result;
@@ -64,7 +112,7 @@ async function generateIdentity(
         // at the identity provider at this point. This requires a change to the
         // identity providers, and cannot be fixed before that has been implemented.
 
-        const identity: Partial<Identity> = {
+        const identity = {
             identityNumber,
             name: identityName,
             status: IdentityStatus.Pending,
@@ -72,25 +120,21 @@ async function generateIdentity(
             identityProvider: JSON.stringify(provider),
             randomness,
             walletId,
+            version: currentIdentityVersion,
         };
 
         const accountAddress = await getAddressFromCredentialId(
             idObjectRequest.value.pubInfoForIp.regId
         );
 
-        const initialAccount: Omit<Account, 'identityId'> = {
-            name: accountName,
-            status: AccountStatus.Pending,
-            address: accountAddress,
-            signatureThreshold: 1,
-            maxTransactionId: '0',
-            isInitial: true,
-            rewardFilter: '[]',
-            selfAmounts: getInitialEncryptedAmount(),
-            incomingAmounts: '[]',
-            totalDecrypted: '0',
-            deploymentTransactionId: undefined,
-        };
+        const initialAccount: Omit<
+            Account,
+            'identityId'
+        > = createInitialAccount(
+            accountAddress,
+            AccountStatus.Pending,
+            accountName
+        );
 
         identityId = await insertPendingIdentityAndInitialAccount(
             identity,
@@ -101,8 +145,7 @@ async function generateIdentity(
     } catch (e) {
         window.view.removeView();
         onError(`Failed to create identity due to ${e}`);
-        // Rethrow this to avoid redirection;
-        throw e;
+        return { status: IdentityRequestStatus.Failed };
     }
     confirmIdentityAndInitialAccount(
         dispatch,
@@ -111,7 +154,7 @@ async function generateIdentity(
         accountName,
         identityObjectLocation
     ).catch(() => onError(`Failed to confirm identity`));
-    return identityId;
+    return { identityId, status: IdentityRequestStatus.Success };
 }
 
 export interface ExternalIssuanceLocationState extends SignedIdRequest {
@@ -185,13 +228,21 @@ export default function ExternalIssuance({
             onError,
             rect
         )
-            .then((identityId) => {
-                return dispatch(
+            .then((result: IdentityGenerationResult) => {
+                if (
+                    result.status === IdentityRequestStatus.Aborted ||
+                    result.status === IdentityRequestStatus.Failed
+                ) {
+                    return false;
+                }
+
+                dispatch(
                     push({
                         pathname: routes.IDENTITYISSUANCE_FINAL,
-                        state: identityId,
+                        state: result.identityId,
                     })
                 );
+                return true;
             })
             .catch(() => {});
         // eslint-disable-next-line react-hooks/exhaustive-deps

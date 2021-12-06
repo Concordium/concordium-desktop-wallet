@@ -3,7 +3,7 @@ import {
     AccountInfo,
     CredentialDeploymentInformation,
     EqualRecord,
-    Identity,
+    ConfirmedIdentity,
     CommitmentsRandomness,
 } from '~/utils/types';
 
@@ -16,7 +16,7 @@ export interface CredentialBlob {
 }
 
 export interface AccountForm {
-    identity: Identity;
+    identity: ConfirmedIdentity;
     address: string;
     accountInfo: AccountInfo;
     accountName: string;

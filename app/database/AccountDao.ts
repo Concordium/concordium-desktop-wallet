@@ -7,8 +7,9 @@ export const {
     updateAccount,
     findAccounts,
     removeAccount,
-    removeInitialAccount,
-    confirmInitialAccount,
+    updateInitialAccount,
+    insertFromRecoveryNewIdentity,
+    insertFromRecoveryExistingIdentity,
 } = window.database.account;
 
 /**

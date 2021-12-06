@@ -33,18 +33,27 @@ function getSubtitle(location: string) {
     }
 }
 
+interface LocationState {
+    identityName?: string;
+    initialAccountName?: string;
+}
+
 /**
  * The Last route is the default (because it has no path)
  */
 export default function IdentityIssuancePage(): JSX.Element {
     const dispatch = useDispatch();
 
+    const { pathname, state } = useLocation<LocationState>();
     const { path } = useRouteMatch();
 
     const [provider, setProvider] = useState<IdentityProvider | undefined>();
-    const [initialAccountName, setInitialAccountName] = useState<string>('');
-    const [identityName, setIdentityName] = useState<string>('');
-    const { pathname } = useLocation();
+    const [initialAccountName, setInitialAccountName] = useState<string>(
+        state?.initialAccountName || ''
+    );
+    const [identityName, setIdentityName] = useState<string>(
+        state?.identityName || ''
+    );
 
     const [errorModalOpen, setErrorModalOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState<string>('');
@@ -88,7 +97,10 @@ export default function IdentityIssuancePage(): JSX.Element {
     return (
         <PageLayout>
             <PageLayout.Header>
-                <h1>New identity | {getSubtitle(useLocation().pathname)}</h1>
+                <h1>
+                    <span className={styles.titlePrefix}>New identity</span>
+                    {getSubtitle(useLocation().pathname)}
+                </h1>
             </PageLayout.Header>
             <ErrorModal
                 header="Unable to create identity"

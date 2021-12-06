@@ -4,6 +4,8 @@ import {
     encodeWord64,
     putBase58Check,
     serializeVerifyKey,
+    serializeIpInfo,
+    serializeArInfo,
 } from './serializationHelpers';
 import {
     BakerStakeThreshold,
@@ -23,6 +25,9 @@ import {
     UpdateInstructionSignatureWithIndex,
     AuthorizationKeysUpdate,
     AccessStructure,
+    AddAnonymityRevoker,
+    AddIdentityProvider,
+    SerializedTextWithLength,
 } from './types';
 
 /**
@@ -42,11 +47,10 @@ export enum OnChainUpdateType {
     UpdateBakerStakeThreshold = 9,
     UpdateRootKeys = 10,
     UpdateLevel1Keys = 11,
-}
-
-export interface SerializedString {
-    length: Buffer;
-    message: Buffer;
+    // eslint-disable-next-line no-shadow
+    AddAnonymityRevoker = 12,
+    // eslint-disable-next-line no-shadow
+    AddIdentityProvider = 13,
 }
 
 /**
@@ -56,8 +60,8 @@ export interface SerializedString {
 export interface SerializedProtocolUpdate {
     serialization: Buffer;
     payloadLength: Buffer;
-    message: SerializedString;
-    specificationUrl: SerializedString;
+    message: SerializedTextWithLength;
+    specificationUrl: SerializedTextWithLength;
     transactionHash: Buffer;
     auxiliaryData: Buffer;
 }
@@ -254,7 +258,7 @@ export function serializeMintDistribution(mintDistribution: MintDistribution) {
  * what can be handled safely in a number value.
  * @param input the string to serialize
  */
-export function serializeUtf8String(input: string): SerializedString {
+export function serializeUtf8String(input: string): SerializedTextWithLength {
     // A UTF-8 character can take up to 4 bytes per character.
     if (input.length > Number.MAX_SAFE_INTEGER / 4) {
         throw new Error(`The string was too long: ${input.length}`);
@@ -262,7 +266,7 @@ export function serializeUtf8String(input: string): SerializedString {
 
     const encoded = Buffer.from(new TextEncoder().encode(input));
     const serializedLength = encodeWord64(BigInt(encoded.length));
-    return { length: serializedLength, message: encoded };
+    return { length: serializedLength, data: encoded };
 }
 
 /**
@@ -276,10 +280,9 @@ export function serializeProtocolUpdate(
         protocolUpdate.specificationUrl
     );
 
-    const auxiliaryData = Buffer.from(
-        protocolUpdate.specificationAuxiliaryData,
-        'base64'
-    );
+    const auxiliaryData = protocolUpdate.specificationAuxiliaryData
+        ? Buffer.from(protocolUpdate.specificationAuxiliaryData, 'base64')
+        : Buffer.alloc(0);
     const specificationHash = Buffer.from(
         protocolUpdate.specificationHash,
         'hex'
@@ -287,9 +290,9 @@ export function serializeProtocolUpdate(
 
     const payloadLength: bigint =
         BigInt(8) +
-        BigInt(encodedMessage.message.length) +
+        BigInt(encodedMessage.data.length) +
         BigInt(8) +
-        BigInt(encodedSpecificationUrl.message.length) +
+        BigInt(encodedSpecificationUrl.data.length) +
         BigInt(specificationHash.length) +
         BigInt(auxiliaryData.length);
 
@@ -298,9 +301,9 @@ export function serializeProtocolUpdate(
     const serialization = Buffer.concat([
         serializedPayloadLength,
         encodedMessage.length,
-        encodedMessage.message,
+        encodedMessage.data,
         encodedSpecificationUrl.length,
-        encodedSpecificationUrl.message,
+        encodedSpecificationUrl.data,
         specificationHash,
         auxiliaryData,
     ]);
@@ -325,6 +328,28 @@ export function serializeGasRewards(gasRewards: GasRewards) {
     serializedGasRewards.writeUInt32BE(gasRewards.accountCreation, 8);
     serializedGasRewards.writeUInt32BE(gasRewards.chainUpdate, 12);
     return serializedGasRewards;
+}
+
+/**
+ * Serializes an AddIdentityProvider update's payload to bytes.
+ */
+export function serializeAddIdentityProvider(
+    addIdentityProvider: AddIdentityProvider
+) {
+    const data = serializeIpInfo(addIdentityProvider);
+    const length = encodeWord32(data.length);
+    return Buffer.concat([length, data]);
+}
+
+/**
+ * Serializes an AddAnonymityRevoker update's payload to bytes.
+ */
+export function serializeAddAnonymityRevoker(
+    addAnonymityRevoker: AddAnonymityRevoker
+) {
+    const data = serializeArInfo(addAnonymityRevoker);
+    const length = encodeWord32(data.length);
+    return Buffer.concat([length, data]);
 }
 
 /**
@@ -418,6 +443,10 @@ function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
             return OnChainUpdateType.UpdateRootKeys;
         case UpdateType.UpdateLevel2KeysUsingLevel1Keys:
             return OnChainUpdateType.UpdateLevel1Keys;
+        case UpdateType.AddIdentityProvider:
+            return OnChainUpdateType.AddIdentityProvider;
+        case UpdateType.AddAnonymityRevoker:
+            return OnChainUpdateType.AddAnonymityRevoker;
         default:
             throw new Error(`An invalid update type was given: ${type}`);
     }

@@ -1,0 +1,28 @@
+@import 'config/bundle';
+
+.outer {
+    margin: 20px 25px;
+    border: 1px solid $color-grey;
+    padding: 5px;
+    border-radius: 7px;
+}
+
+.text {
+    display: flex;
+    flex-direction: column;
+}
+
+.status,
+.name {
+    composes: body4 from global;
+}
+
+.part {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    &:not(:last-of-type) {
+        margin-bottom: 10px;
+    }
+}
