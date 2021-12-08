@@ -1,8 +1,11 @@
+import clsx from 'clsx';
 import React, { forwardRef, InputHTMLAttributes } from 'react';
 import Label from '~/components/Label';
 import { isDefined, noOp } from '~/utils/basicHelpers';
-import { MakeRequired, NotOptional } from '~/utils/types';
+import { ClassName, MakeRequired, NotOptional } from '~/utils/types';
 import { CommonInputProps } from '../common';
+
+import styles from './Radios.module.scss';
 
 interface RadioProps
     extends MakeRequired<CommonInputProps, 'label'>,
@@ -15,18 +18,23 @@ interface RadioProps
 
 const Radio = forwardRef<HTMLInputElement, RadioProps>(
     ({ isInvalid, label, ...inputProps }, ref) => {
+        const id = `radio-${inputProps.value}`;
+
         return (
-            <label>
-                <input ref={ref} type="radio" {...inputProps} />
-                {label}
-            </label>
+            <div className={styles.radio}>
+                <input id={id} ref={ref} type="radio" {...inputProps} />
+                <label htmlFor={id}>{label}</label>
+            </div>
         );
     }
 );
 
 Radio.displayName = 'Radio';
 
-interface Props extends Pick<RadioProps, 'onBlur'>, CommonInputProps {
+interface Props
+    extends Pick<RadioProps, 'onBlur'>,
+        CommonInputProps,
+        ClassName {
     options: NotOptional<Pick<RadioProps, 'value' | 'label'>>[];
     value?: string;
     defaultValue?: string;
@@ -41,15 +49,16 @@ const Radios = forwardRef<HTMLInputElement, Props>(
             defaultValue,
             error,
             label,
+            className,
             onChange = noOp,
             ...inputProps
         },
         ref
     ) => {
         return (
-            <div>
-                <Label>{label}</Label>
-                <div>
+            <div className={clsx(styles.root, className)}>
+                <Label className="mB5">{label}</Label>
+                <div className={styles.radios}>
                     {options.map((o) => (
                         <Radio
                             key={o.value}

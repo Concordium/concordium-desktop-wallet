@@ -1,3 +1,46 @@
+@import 'config/bundle';
+
 .root {
     display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+.radios {
+    display: flex;
+    flex-direction: row;
+    border-radius: 10px;
+    box-shadow: 0 0 0 1px $color-grey inset;
+    padding: 2px;
+}
+
+.radio {
+    flex: 1;
+    box-shadow: none !important;
+
+    input {
+        @include hideInput;
+
+        &:checked + label {
+            background-color: $color-pale-blue;
+            color: $color-white;
+        }
+    }
+
+    label {
+        text-align: center;
+        padding: 12px 5px;
+        display: inline-block;
+        width: 100%;
+    }
+
+    &:first-child label {
+        border-top-left-radius: 8px;
+        border-bottom-left-radius: 8px;
+    }
+
+    &:last-child label {
+        border-top-right-radius: 8px;
+        border-bottom-right-radius: 8px;
+    }
 }
