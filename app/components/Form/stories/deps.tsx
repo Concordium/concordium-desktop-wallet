@@ -11,6 +11,7 @@ export const {
     Input,
     Submit,
     Switch,
+    Radios,
     TextArea,
     File,
     InlineNumber,
@@ -34,6 +35,7 @@ export const subcomponents: Meta['subcomponents'] = {
     'Form.TextArea': TextArea,
     'Form.Checkbox': Checkbox,
     'Form.Switch': Switch,
+    'Form.Radios': Radios,
     'Form.InlineNumber': InlineNumber,
     'Form.File': File,
     'Form.DatePicker': DatePicker,
@@ -128,6 +130,14 @@ export const AllFieldsTemplate: Story<FormProps> = (args) => (
         >
             Agree to terms
         </Form.Checkbox>
+        <Form.Radios
+            name="radio"
+            label="Select one of the following"
+            options={[
+                { value: 'first', label: 'First' },
+                { value: 'second', label: 'Second' },
+            ]}
+        />
         <Form.Switch name="setting">Enable setting</Form.Switch>
         <div>
             Please send {getGTUSymbol()}
