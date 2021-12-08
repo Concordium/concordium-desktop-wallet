@@ -4,6 +4,7 @@ import Label from '~/components/Label';
 import { isDefined, noOp } from '~/utils/basicHelpers';
 import { ClassName, MakeRequired, NotOptional } from '~/utils/types';
 import { CommonInputProps } from '../common';
+import ErrorMessage from '../ErrorMessage';
 
 import styles from './Radios.module.scss';
 
@@ -55,10 +56,16 @@ const Radios = forwardRef<HTMLInputElement, Props>(
         },
         ref
     ) => {
+        const { isInvalid } = inputProps;
         return (
             <div className={clsx(styles.root, className)}>
                 <Label className="mB5">{label}</Label>
-                <div className={styles.radios}>
+                <div
+                    className={clsx(
+                        styles.radios,
+                        isInvalid && styles.radiosInvalid
+                    )}
+                >
                     {options.map((o) => (
                         <Radio
                             key={o.value}
@@ -73,6 +80,7 @@ const Radios = forwardRef<HTMLInputElement, Props>(
                         />
                     ))}
                 </div>
+                <ErrorMessage>{error}</ErrorMessage>
             </div>
         );
     }

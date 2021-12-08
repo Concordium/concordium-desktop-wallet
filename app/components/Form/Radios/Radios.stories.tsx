@@ -24,6 +24,8 @@ const Template: Story<Props> = (args) => {
 const options: Props['options'] = [
     { value: 'first', label: 'First' },
     { value: 'second', label: 'Second' },
+    { value: 'third', label: 'Third' },
+    { value: 'fourth', label: 'Fourth' },
 ];
 
 export const Primary = Template.bind({});
@@ -34,13 +36,13 @@ Primary.args = {
 
 export const WithLabel = Template.bind({});
 WithLabel.args = {
-    options,
+    options: options.slice(0, 3),
     label: 'Select an option',
 };
 
 export const Invalid = Template.bind({});
 Invalid.args = {
-    options,
+    options: options.slice(0, 2),
     label: 'Select an option',
     isInvalid: true,
     error: 'An option must be selected',

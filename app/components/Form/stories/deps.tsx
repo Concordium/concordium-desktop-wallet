@@ -108,6 +108,15 @@ export const ValidationTemplate: Story<FormProps> = (args) => (
         >
             Agree to terms
         </Form.Checkbox>
+        <Form.Radios
+            name="radio"
+            options={[
+                { value: 'first', label: 'First' },
+                { value: 'second', label: 'Second' },
+                { value: 'third', label: 'Third' },
+            ]}
+            rules={{ required: 'You must select an option' }}
+        />
         <Form.Submit>Submit</Form.Submit>
     </Form>
 );
@@ -132,10 +141,10 @@ export const AllFieldsTemplate: Story<FormProps> = (args) => (
         </Form.Checkbox>
         <Form.Radios
             name="radio"
-            label="Select one of the following"
             options={[
                 { value: 'first', label: 'First' },
                 { value: 'second', label: 'Second' },
+                { value: 'third', label: 'Third' },
             ]}
         />
         <Form.Switch name="setting">Enable setting</Form.Switch>
