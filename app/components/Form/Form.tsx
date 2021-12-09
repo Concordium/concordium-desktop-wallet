@@ -24,6 +24,7 @@ import GtuInput, { GtuInputProps } from './GtuInput';
 import InlineInput, { InlineInputProps } from './InlineInput';
 import DatePicker from './DatePicker';
 import Radios from './Radios';
+import { RadiosProps } from './Radios/Radios';
 
 export type FormProps<TFormValues extends FieldValues = FieldValues> = Omit<
     FormHTMLAttributes<HTMLFormElement>,
@@ -94,7 +95,7 @@ Form.Checkbox = connectWithFormUncontrolled(Checkbox);
 Form.Switch = connectWithFormUncontrolled(Switch);
 (Form.Switch as FC).displayName = 'Form.Switch';
 
-Form.Radios = connectWithFormUncontrolled(Radios);
+Form.Radios = connectWithFormControlled<unknown, RadiosProps>(Radios);
 (Form.Radios as FC).displayName = 'Form.Radios';
 
 Form.File = connectWithFormControlled<FileInputValue, FileInputProps>(

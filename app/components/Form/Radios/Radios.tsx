@@ -1,8 +1,8 @@
 import clsx from 'clsx';
-import React, { forwardRef, InputHTMLAttributes } from 'react';
+import React, { InputHTMLAttributes } from 'react';
 import Label from '~/components/Label';
-import { isDefined, noOp } from '~/utils/basicHelpers';
-import { ClassName, MakeRequired, NotOptional } from '~/utils/types';
+import { noOp } from '~/utils/basicHelpers';
+import { ClassName, MakeRequired } from '~/utils/types';
 import { CommonInputProps } from '../common';
 import ErrorMessage from '../ErrorMessage';
 
@@ -14,78 +14,63 @@ interface RadioProps
             InputHTMLAttributes<HTMLInputElement>,
             'onBlur' | 'onChange' | 'defaultChecked' | 'checked'
         > {
-    value: string;
+    id: string;
 }
 
-const Radio = forwardRef<HTMLInputElement, RadioProps>(
-    ({ isInvalid, label, ...inputProps }, ref) => {
-        const id = `radio-${inputProps.value}`;
-
-        return (
-            <div className={styles.radio}>
-                <input id={id} ref={ref} type="radio" {...inputProps} />
-                <label htmlFor={id}>{label}</label>
-            </div>
-        );
-    }
-);
-
-Radio.displayName = 'Radio';
-
-interface Props
-    extends Pick<RadioProps, 'onBlur'>,
-        CommonInputProps,
-        ClassName {
-    options: NotOptional<Pick<RadioProps, 'value' | 'label'>>[];
-    value?: string;
-    defaultValue?: string;
-    onChange?(value: string): void;
+function Radio({ isInvalid, label, id, ...inputProps }: RadioProps) {
+    return (
+        <label className={styles.radio}>
+            <input type="radio" value={id} {...inputProps} />
+            <div>{label}</div>
+        </label>
+    );
 }
 
-const Radios = forwardRef<HTMLInputElement, Props>(
-    (
-        {
-            options,
-            value,
-            defaultValue,
-            error,
-            label,
-            className,
-            onChange = noOp,
-            ...inputProps
-        },
-        ref
-    ) => {
-        const { isInvalid } = inputProps;
-        return (
-            <div className={clsx(styles.root, className)}>
-                <Label className="mB5">{label}</Label>
-                <div
-                    className={clsx(
-                        styles.radios,
-                        isInvalid && styles.radiosInvalid
-                    )}
-                >
-                    {options.map((o) => (
-                        <Radio
-                            key={o.value}
-                            ref={ref}
-                            defaultChecked={defaultValue === o.value}
-                            checked={
-                                isDefined(value) ? o.value === value : undefined
-                            }
-                            onChange={(e) => onChange(e.target.value)}
-                            {...o}
-                            {...inputProps}
-                        />
-                    ))}
-                </div>
-                <ErrorMessage>{error}</ErrorMessage>
-            </div>
-        );
-    }
-);
+interface Option<T> {
+    label: string;
+    value: T;
+}
 
-Radios.displayName = 'Radios';
+export interface RadiosProps<T = unknown> extends CommonInputProps, ClassName {
+    options: Option<T>[];
+    value: T | undefined;
+    onChange(value: T): void;
+    onBlur?(): void;
+}
+
+function Radios<T>({
+    options,
+    value,
+    error,
+    label,
+    className,
+    onChange = noOp,
+    ...inputProps
+}: RadiosProps<T>) {
+    const { isInvalid } = inputProps;
+    return (
+        <div className={clsx(styles.root, className)}>
+            <Label className="mB5">{label}</Label>
+            <div
+                className={clsx(
+                    styles.radios,
+                    isInvalid && styles.radiosInvalid
+                )}
+            >
+                {options.map((o, i) => (
+                    <Radio
+                        key={o.label}
+                        checked={o.value === value}
+                        id={`${i}`}
+                        onChange={() => onChange(o.value)}
+                        label={o.label}
+                        {...inputProps}
+                    />
+                ))}
+            </div>
+            <ErrorMessage>{error}</ErrorMessage>
+        </div>
+    );
+}
 
 export default Radios;

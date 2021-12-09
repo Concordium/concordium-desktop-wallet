@@ -1,18 +1,15 @@
 import React, { useState } from 'react';
 // also exported from '@storybook/react' if you can deal with breaking changes in 6.1
 import { Story, Meta } from '@storybook/react/types-6-0';
-import Radios from './Radios';
-import { PropsOf } from '~/utils/types';
+import Radios, { RadiosProps } from './Radios';
 
 export default {
     title: 'Components/Form/Fields/Radios',
     component: Radios,
 } as Meta;
 
-type Props = PropsOf<typeof Radios>;
-
-const Template: Story<Props> = (args) => {
-    const [value, setValue] = useState<string | undefined>(args.value);
+const Template: Story<RadiosProps<number>> = (args) => {
+    const [value, setValue] = useState<number | undefined>(args.value);
 
     return (
         <div style={{ width: 300 }}>
@@ -21,17 +18,17 @@ const Template: Story<Props> = (args) => {
     );
 };
 
-const options: Props['options'] = [
-    { value: 'first', label: 'First' },
-    { value: 'second', label: 'Second' },
-    { value: 'third', label: 'Third' },
-    { value: 'fourth', label: 'Fourth' },
+const options: RadiosProps<number>['options'] = [
+    { value: 1, label: 'First' },
+    { value: 2, label: 'Second' },
+    { value: 3, label: 'Third' },
+    { value: 4, label: 'Fourth' },
 ];
 
 export const Primary = Template.bind({});
 Primary.args = {
     options,
-    defaultValue: options[0].value,
+    value: 1,
 };
 
 export const WithLabel = Template.bind({});

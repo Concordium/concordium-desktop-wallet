@@ -22,29 +22,29 @@
 .radio {
     flex: 1;
     box-shadow: none !important;
+    text-align: center;
+    display: inline-block;
+    width: 100%;
+
+    div {
+        padding: 12px 5px;
+    }
 
     input {
         @include hideInput;
 
-        &:checked + label {
+        &:checked + div {
             background-color: $color-pale-blue;
             color: $color-white;
         }
     }
 
-    label {
-        text-align: center;
-        padding: 12px 5px;
-        display: inline-block;
-        width: 100%;
-    }
-
-    &:first-child label {
+    &:first-child div {
         border-top-left-radius: 8px;
         border-bottom-left-radius: 8px;
     }
 
-    &:last-child label {
+    &:last-child div {
         border-top-right-radius: 8px;
         border-bottom-right-radius: 8px;
     }
