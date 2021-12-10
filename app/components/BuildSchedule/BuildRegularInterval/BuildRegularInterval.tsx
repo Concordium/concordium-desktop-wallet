@@ -1,9 +1,4 @@
-import React, {
-    useState,
-    useEffect,
-    forwardRef,
-    useImperativeHandle,
-} from 'react';
+import React, { useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useForm } from 'react-hook-form';
 import { EqualRecord, Schedule } from '~/utils/types';
 import {
@@ -17,7 +12,6 @@ import {
 import { isValidBigInt } from '~/utils/numberStringHelpers';
 import Form from '../../Form';
 import { futureDate } from '../../Form/util/validation';
-import ButtonGroup from '../../ButtonGroup';
 import {
     ScheduledTransferBuilderBaseProps,
     ScheduledTransferBuilderRef,
@@ -42,11 +36,13 @@ export const intervals: Interval[] = [
 ];
 
 interface FormValues {
+    interval: number;
     releases: number;
     startTime: Date;
 }
 
 const fieldNames: EqualRecord<FormValues> = {
+    interval: 'interval',
     releases: 'releases',
     startTime: 'startTime',
 };
@@ -75,16 +71,18 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
         },
         ref
     ) => {
-        const [chosenInterval, setChosenInterval] = useState<Interval>(
-            intervals[defaults?.chosenInterval ?? intervals.length - 1]
-        );
-        const form = useForm<FormValues>({ mode: 'onTouched' });
+        const defaultInterval =
+            defaults?.interval ?? intervals[intervals.length - 1].value;
+        const form = useForm<FormValues>({
+            mode: 'onTouched',
+            defaultValues: { interval: defaultInterval },
+        });
         const releases = form.watch(fieldNames.releases);
         const { handleSubmit, errors } = form;
 
-        function createSchedule({ startTime }: FormValues) {
+        function createSchedule({ startTime, interval }: FormValues) {
             let schedule;
-            if (chosenInterval.label === 'Month') {
+            if (interval === TimeConstants.Month) {
                 schedule = createRegularIntervalSchedulePerMonth(
                     amount,
                     releases,
@@ -95,15 +93,13 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
                     amount,
                     releases,
                     startTime.getTime(),
-                    chosenInterval.value
+                    interval
                 );
             }
-            const recoverState = {
+            const recoverState: RegularIntervalDefaults = {
                 releases,
                 startTime: startTime.getTime(),
-                chosenInterval: intervals.findIndex(
-                    (interval) => interval.value === chosenInterval.value
-                ),
+                interval,
                 explicit: false,
             };
             submitSchedule(schedule, recoverState);
@@ -129,18 +125,16 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
 
         return (
             <>
-                <ButtonGroup
-                    buttons={intervals}
-                    isSelected={(interval) => interval === chosenInterval}
-                    onClick={setChosenInterval}
-                    name="interval"
-                    title="Release Every:"
-                />
                 <Form
                     onSubmit={createSchedule}
                     formMethods={form}
                     className={styles.regularInterval}
                 >
+                    <Form.Radios
+                        name={fieldNames.interval}
+                        options={intervals}
+                        label="Release Every:"
+                    />
                     <div>
                         <Label>Split transfer in:</Label>
                         <span className={styles.releasesInputWrapper}>

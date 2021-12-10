@@ -14,7 +14,7 @@ export interface ScheduledTransferBuilderBaseProps {
 
 export interface RegularIntervalDefaults {
     releases: number;
-    chosenInterval: number;
+    interval: number;
     startTime: number;
     explicit: boolean;
 }

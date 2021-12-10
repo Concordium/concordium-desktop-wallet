@@ -32,6 +32,7 @@ import UpdateBakerRestake from './UpdateBakerRestake';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
 import { AddBakerForm } from '~/components/AddBakerDetailsForm';
 import { useIsSubsequentRender } from '~/utils/hooks';
+import { RootState } from '~/store/store';
 
 const { Master, Detail } = MasterDetailPageLayout;
 const ToAccounts = () => <Redirect to={routes.ACCOUNTS} />;
@@ -43,6 +44,9 @@ export default withAccountSync(function DetailsPage() {
     const hasCredentials = useSelector(
         account ? accountHasDeployedCredentialsSelector(account) : () => false
     );
+    const hasLocationState = useSelector((s: RootState) =>
+        Boolean(s.router.location.state)
+    );
     const abortRef = useRef<((reason?: string) => void) | undefined>(undefined);
     useEffect(() => {
         const { current } = abortRef;
@@ -53,7 +57,8 @@ export default withAccountSync(function DetailsPage() {
 
     const isBaker = Boolean(accountInfo?.accountBaker);
     const canTransfer = hasCredentials && Boolean(accountInfo);
-    const accountChanged = !useIsSubsequentRender();
+    const isFirstRender = !useIsSubsequentRender();
+    const accountHasChanged = isFirstRender && !hasLocationState;
 
     if (!account) {
         return null;
@@ -73,7 +78,9 @@ export default withAccountSync(function DetailsPage() {
                 <BasicTransferRoutes account={account}>
                     <Route
                         path={routes.ACCOUNTS_SCHEDULED_TRANSFER}
-                        component={accountChanged ? ToAccounts : BuildSchedule}
+                        component={
+                            accountHasChanged ? ToAccounts : BuildSchedule
+                        }
                     />
                     <Route path={routes.ACCOUNTS_ADDRESS}>
                         <ShowAccountAddress account={account} asCard />
