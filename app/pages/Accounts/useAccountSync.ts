@@ -35,6 +35,9 @@ export default function useAccountSync(onError: (message: string) => void) {
     const abortUpdateRef = useRef(noOp);
     const [loadIsDone, setIsLoadDone] = useState(false);
     const accountInfoLoaded = Boolean(accountInfo);
+    const [updateAccountInfoSwitch, setUpdateAccountInfoSwitch] = useState(
+        true
+    );
 
     const loadNew = useCallback(
         (onlyLoadNewShielded: boolean) => {
@@ -58,20 +61,25 @@ export default function useAccountSync(onError: (message: string) => void) {
             return noOp;
         }
 
-        updateAccountInfo(account, dispatch).catch((e: Error) =>
+        updateAccountInfo(account, accountInfo, dispatch).catch((e: Error) =>
             onError(accountInfoFailedMessage(e.message))
         );
-        const interval = setInterval(() => {
-            updateAccountInfo(account, dispatch).catch((e: Error) =>
-                onError(accountInfoFailedMessage(e.message))
-            );
-        }, accountInfoUpdateInterval);
+
+        const timeout = setTimeout(
+            () => setUpdateAccountInfoSwitch(!updateAccountInfoSwitch),
+            accountInfoUpdateInterval
+        );
 
         return () => {
-            clearInterval(interval);
+            clearTimeout(timeout);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [account?.status, account?.selfAmounts, account?.incomingAmounts]);
+    }, [
+        account?.status,
+        account?.selfAmounts,
+        account?.incomingAmounts,
+        updateAccountInfoSwitch,
+    ]);
 
     useEffect(
         () => () => {
