@@ -488,10 +488,16 @@ export async function updateAccountInfoOfAddress(
  * Updates the given account's accountInfo, in the state, and check if there is updates to the account.
  * If given an address of an account that doesn't exist on chain, this throws an error.
  */
-export async function updateAccountInfo(account: Account, dispatch: Dispatch) {
+export async function updateAccountInfo(
+    account: Account,
+    currentInfo: AccountInfo | undefined,
+    dispatch: Dispatch
+) {
     const accountInfo = await getAccountInfoOfAddress(account.address);
-    await updateAccountFromAccountInfo(dispatch, account, accountInfo);
-    return updateAccountInfoEntry(dispatch, account.address, accountInfo);
+    if (stringify(accountInfo) !== stringify(currentInfo)) {
+        await updateAccountFromAccountInfo(dispatch, account, accountInfo);
+        updateAccountInfoEntry(dispatch, account.address, accountInfo);
+    }
 }
 
 // Add an account with pending status..
