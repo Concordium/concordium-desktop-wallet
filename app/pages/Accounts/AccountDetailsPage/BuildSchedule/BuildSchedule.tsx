@@ -20,9 +20,9 @@ import TransferView from '~/components/Transfers/TransferView';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import { chosenAccountInfoSelector } from '~/features/AccountSlice';
 import ErrorMessage from '~/components/Form/ErrorMessage';
+import Radios from '~/components/Form/Radios';
 
 import styles from './BuildSchedule.module.scss';
-import Radios from '~/components/Form/Radios';
 
 interface State {
     account: Account;

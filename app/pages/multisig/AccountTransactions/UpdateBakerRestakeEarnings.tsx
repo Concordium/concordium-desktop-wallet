@@ -33,9 +33,9 @@ import {
 import DatePicker from '~/components/Form/DatePicker';
 import { isMultiSig } from '~/utils/accountHelpers';
 import Label from '~/components/Label';
+import Radios from '~/components/Form/Radios';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
-import Radios from '~/components/Form/Radios';
 
 interface PageProps {
     exchangeRate: Fraction;

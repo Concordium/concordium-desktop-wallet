@@ -23,8 +23,7 @@ import InlineNumber, { InlineNumberProps } from './InlineNumber';
 import GtuInput, { GtuInputProps } from './GtuInput';
 import InlineInput, { InlineInputProps } from './InlineInput';
 import DatePicker from './DatePicker';
-import Radios from './Radios';
-import { RadiosProps } from './Radios/Radios';
+import Radios, { RadiosProps } from './Radios';
 
 export type FormProps<TFormValues extends FieldValues = FieldValues> = Omit<
     FormHTMLAttributes<HTMLFormElement>,
