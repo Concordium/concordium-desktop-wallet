@@ -21,8 +21,8 @@ export default function DisplayTransactionExpiryTime({
             </p>
             {expiryTime === undefined ? null : (
                 <p className={styles.note}>
-                    A transaction can only be submitted in the 2 hours before
-                    its expiry <br /> (
+                    A transaction can only be submitted within 2 hours of its
+                    expiry <br /> (
                     {getFormattedDateString(subtractHours(2, expiryTime))})
                 </p>
             )}
