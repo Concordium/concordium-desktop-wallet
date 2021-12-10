@@ -12,7 +12,7 @@ interface RadioProps
     extends MakeRequired<CommonInputProps, 'label'>,
         Pick<
             InputHTMLAttributes<HTMLInputElement>,
-            'onBlur' | 'onChange' | 'defaultChecked' | 'checked'
+            'onBlur' | 'onChange' | 'checked'
         > {
     id: string;
 }
@@ -38,6 +38,15 @@ export interface RadiosProps<T = unknown> extends CommonInputProps, ClassName {
     onBlur?(): void;
 }
 
+/**
+ *  Use to select one of many options (as with <input type="radio" />). Is also to use within the context of a <Form /> on <Form.Radios />
+ *
+ *  @example
+ *  const options = [{label: '1' value: 1}, {label: '2' value: 2}];
+ *  const [val, setVal] = useState(1);
+ *
+ *  <Radios options={options} value={val} onChange={setVal} />
+ */
 function Radios<T>({
     options,
     value,
