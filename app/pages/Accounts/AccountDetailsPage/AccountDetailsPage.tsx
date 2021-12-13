@@ -31,21 +31,23 @@ import UpdateBakerStake from './UpdateBakerStake';
 import UpdateBakerRestake from './UpdateBakerRestake';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
 import { AddBakerForm } from '~/components/AddBakerDetailsForm';
-import { useIsSubsequentRender } from '~/utils/hooks';
 import { RootState } from '~/store/store';
 
 const { Master, Detail } = MasterDetailPageLayout;
 const ToAccounts = () => <Redirect to={routes.ACCOUNTS} />;
+const ToCreateScheduled = () => (
+    <Redirect to={routes.ACCOUNTS_CREATESCHEDULEDTRANSFER} />
+);
 
 export default withAccountSync(function DetailsPage() {
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
+    const accountChanged = useSelector(
+        (s: RootState) => s.accounts.accountChanged
+    );
     const viewingShielded = useSelector(viewingShieldedSelector);
     const hasCredentials = useSelector(
         account ? accountHasDeployedCredentialsSelector(account) : () => false
-    );
-    const hasLocationState = useSelector((s: RootState) =>
-        Boolean(s.router.location.state)
     );
     const abortRef = useRef<((reason?: string) => void) | undefined>(undefined);
     useEffect(() => {
@@ -57,8 +59,6 @@ export default withAccountSync(function DetailsPage() {
 
     const isBaker = Boolean(accountInfo?.accountBaker);
     const canTransfer = hasCredentials && Boolean(accountInfo);
-    const isFirstRender = !useIsSubsequentRender();
-    const accountHasChanged = isFirstRender && !hasLocationState;
 
     if (!account) {
         return null;
@@ -79,7 +79,7 @@ export default withAccountSync(function DetailsPage() {
                     <Route
                         path={routes.ACCOUNTS_SCHEDULED_TRANSFER}
                         component={
-                            accountHasChanged ? ToAccounts : BuildSchedule
+                            accountChanged ? ToCreateScheduled : BuildSchedule
                         }
                     />
                     <Route path={routes.ACCOUNTS_ADDRESS}>
