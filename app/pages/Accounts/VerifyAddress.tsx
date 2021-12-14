@@ -46,7 +46,7 @@ export default function VerifyAddress({ account, display, className }: Props) {
                 return "An account's address is derived from the initial credential on that account. The initial credential is not in this wallet, and therefore it is not possible to verify the address of the account.";
             }
             if (identity.version === 0) {
-                return 'The identity used to create this account uses a deprecated version of the key generation. It is recommended to create a new identity and use accounts on that instead.';
+                return 'The address cannot be verified, because the identity used to create this account uses a deprecated version of the key generation, which is not available on the ledger.';
             }
             return undefined;
         },
@@ -56,7 +56,6 @@ export default function VerifyAddress({ account, display, className }: Props) {
 
     const ledgerCall = useCallback(
         async (ledger: ConcordiumLedgerClient) => {
-            setOpened(true);
             if (credential === undefined) {
                 setWarning(
                     'No credentials, that were created by the current Ledger, were found on this account. Please verify that the connected Ledger is for this account.'
@@ -66,12 +65,17 @@ export default function VerifyAddress({ account, display, className }: Props) {
                     "An account's address is derived from the initial credential on that account. The initial credential on this account was not created from the currently connected Ledger, and therefore it is not possible to verify the address of the account."
                 );
             } else {
-                await ledger.verifyAddress(
-                    credential.identityNumber,
-                    credential.credentialNumber
-                );
+                const timeout = setTimeout(setOpened, 1000, true);
+                try {
+                    await ledger.verifyAddress(
+                        credential.identityNumber,
+                        credential.credentialNumber
+                    );
+                } finally {
+                    clearTimeout(timeout);
+                    setOpened(false);
+                }
             }
-            setOpened(false);
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [credential?.identityNumber, credential?.credentialNumber]
@@ -104,13 +108,9 @@ export default function VerifyAddress({ account, display, className }: Props) {
                                     <div
                                         className={clsx(
                                             className,
-                                            'flexColumn'
+                                            'flexColumn textCenter mT40'
                                         )}
                                     >
-                                        <h3 className="mB40 mT0">
-                                            Unlock Ledger to verify and show
-                                            address
-                                        </h3>
                                         {statusView}
                                         <Button
                                             size="big"
@@ -118,7 +118,7 @@ export default function VerifyAddress({ account, display, className }: Props) {
                                             className="m40"
                                             onClick={submitHandler}
                                         >
-                                            Show and Verify Address
+                                            Show and verify address
                                         </Button>
                                     </div>
                                 )}

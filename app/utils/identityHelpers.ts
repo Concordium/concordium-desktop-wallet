@@ -158,7 +158,11 @@ export function isRejectedIdentity(
     );
 }
 
-export function getKeyExportType(version: IdentityVersion) {
+/**
+ * Given an IdentityVersion, returns which Bls Key type should be requested from the ledger.
+ * Version 0 should request seeds (because the ledger does not implement the incorrect key generation algorithm) and version 1 should request actual Bls keys.
+ */
+export function getKeyExportType(version: IdentityVersion): BlsKeyTypes {
     if (version === 0) {
         return BlsKeyTypes.Seed;
     }
