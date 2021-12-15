@@ -47,7 +47,7 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(false), {
 
     mode: 'development',
 
-    target: ['web', 'electron-renderer'],
+    target: ['web'],
 
     entry: [
         'core-js',
@@ -84,10 +84,6 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(false), {
                   manifest: require(manifest),
                   sourceType: 'var',
               }),
-
-        new webpack.ProvidePlugin({
-            Buffer: ['buffer/', 'Buffer'],
-        }),
 
         new webpack.EnvironmentPlugin({
             NODE_ENV: 'development',

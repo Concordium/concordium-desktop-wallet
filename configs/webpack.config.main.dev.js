@@ -34,9 +34,6 @@ module.exports = merge(baseConfig, {
                 ? process.env.LEDGER_EMULATOR_URL
                 : '',
         }),
-        new webpack.ProvidePlugin({
-            Buffer: ['buffer/', 'Buffer'],
-        }),
     ],
 
     /**
