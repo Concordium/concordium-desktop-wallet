@@ -8,6 +8,12 @@ interface AddressPort {
     port: string;
 }
 
+const oldDefault: AddressPort = { address: '127.0.0.1', port: '10000' };
+const newDefault: AddressPort = {
+    address: 'concordiumwalletnode.com',
+    port: '10000',
+};
+
 /**
  * Migrates the node setting to a new default. The setting is only updated if the current
  * setting is set to the previous default value. This is to prevent migrating the setting
@@ -16,7 +22,7 @@ interface AddressPort {
 async function migrateDefaultNode(
     knex: Knex,
     previousDefault: AddressPort,
-    newDefault: AddressPort
+    updatedDefault: AddressPort
 ): Promise<number | void> {
     const currentNodeSetting = (
         await knex
@@ -29,7 +35,7 @@ async function migrateDefaultNode(
         addressAndPort.address === previousDefault.address &&
         addressAndPort.port === previousDefault.port
     ) {
-        const newDefaultSetting = JSON.stringify(newDefault);
+        const newDefaultSetting = JSON.stringify(updatedDefault);
         return knex
             .table(databaseNames.settingsTable)
             .update({ value: newDefaultSetting })
@@ -39,17 +45,9 @@ async function migrateDefaultNode(
 }
 
 export async function up(knex: Knex): Promise<number | void> {
-    return migrateDefaultNode(
-        knex,
-        { address: '127.0.0.1', port: '10000' },
-        { address: 'concordiumwalletnode.com', port: '10000' }
-    );
+    return migrateDefaultNode(knex, oldDefault, newDefault);
 }
 
 export async function down(knex: Knex): Promise<number | void> {
-    return migrateDefaultNode(
-        knex,
-        { address: 'concordiumwalletnode.com', port: '10000' },
-        { address: '127.0.0.1', port: '10000' }
-    );
+    return migrateDefaultNode(knex, newDefault, oldDefault);
 }
