@@ -1225,6 +1225,9 @@ export type NotOptional<T> = {
     [P in keyof T]-?: T[P];
 };
 
+export type MakeRequired<T, K extends keyof T> = NotOptional<Pick<T, K>> &
+    Omit<T, K>;
+
 /**
  * @description
  * Object where keys and values are the same. Useful for storing names of form fields, and other things.

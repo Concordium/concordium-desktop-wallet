@@ -1,0 +1,51 @@
+@import 'config/bundle';
+
+.root {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+.radios {
+    display: flex;
+    flex-direction: row;
+    border-radius: 10px;
+    box-shadow: 0 0 0 1px $color-grey inset;
+    padding: 2px;
+
+    &Invalid {
+        box-shadow: 0 0 0 2px $color-error inset;
+        color: $color-error;
+    }
+}
+
+.radio {
+    flex: 1;
+    box-shadow: none !important;
+    text-align: center;
+    display: inline-block;
+    width: 100%;
+
+    div {
+        padding: 12px 5px;
+    }
+
+    input {
+        @include hideInput;
+
+        &:checked + div {
+            background-color: $color-pale-blue;
+            color: $color-white;
+        }
+    }
+
+    &:first-child div {
+        border-top-left-radius: 8px;
+        border-bottom-left-radius: 8px;
+    }
+
+    &:last-child div {
+        border-top-right-radius: 8px;
+        border-bottom-right-radius: 8px;
+    }
+}
