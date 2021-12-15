@@ -24,7 +24,7 @@ const formatAccount = (account: Account | AddressBookEntry) => (
     </>
 );
 const formatAmount = (amount: string) =>
-    formatValue(`${getGTUSymbol()} ${amount}`);
+    formatValue(`${getGTUSymbol()}${amount}`);
 const formatEnabled = (enable: boolean) => formatValue(enable ? 'Yes' : 'No');
 
 export type DetailsProps = {
