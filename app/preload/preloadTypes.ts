@@ -38,6 +38,8 @@ import {
     CredentialNumberPrfKey,
     IpInfo,
     ArInfo,
+    IdentityVersion,
+    DecryptedTransferTransaction,
 } from '~/utils/types';
 import { ExternalCredential } from '../database/types';
 import type LedgerCommands from './preloadLedgerTypes';
@@ -402,14 +404,30 @@ export interface AccountReportMethods {
         account: Account,
         filters: TransactionFilter,
         global: Global,
-        keys: Record<string, CredentialNumberPrfKey>
+        keys: Record<string, CredentialNumberPrfKey>,
+        decryptFunction: (
+            encryptedTransfers: TransferTransaction[],
+            accountAddress: string,
+            prfKey: string,
+            identityVersion: IdentityVersion,
+            credentialNumber: number,
+            global: Global
+        ) => Promise<DecryptedTransferTransaction[]>
     ) => Promise<void>;
     multiple: (
         fileName: string,
         accounts: Account[],
         filters: TransactionFilter,
         global: Global,
-        keys: Record<string, CredentialNumberPrfKey>
+        keys: Record<string, CredentialNumberPrfKey>,
+        decryptFunction: (
+            encryptedTransfers: TransferTransaction[],
+            accountAddress: string,
+            prfKey: string,
+            identityVersion: IdentityVersion,
+            credentialNumber: number,
+            global: Global
+        ) => Promise<DecryptedTransferTransaction[]>
     ) => Promise<void>;
     abort: () => void;
 }

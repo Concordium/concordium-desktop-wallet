@@ -16,9 +16,8 @@ import Button from '~/cross-app-components/Button';
 import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
 import errorMessages from '~/constants/errorMessages.json';
 import { findEntries, insert } from '~/database/DecryptedAmountsDao';
-import decryptTransactions, {
-    isSuccessfulEncryptedTransaction,
-} from '~/utils/decryptHelpers';
+import isSuccessfulEncryptedTransaction from '~/utils/decryptHelpers';
+import decryptTransactions from '~/utils/decryptTransactions';
 
 interface Props {
     account: Account;

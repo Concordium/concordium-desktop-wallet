@@ -1,8 +1,7 @@
 import PromiseWorker from 'promise-worker';
 import { AccountEncryptedAmount } from '@concordium/node-sdk/';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-expect-error : has no default export.
-import RustWorker, { BakerKeyVariants } from './rust.worker';
+import { BakerKeyVariants } from './rust.worker';
 import {
     PublicInformationForIp,
     ConfirmedIdentity,
@@ -26,7 +25,7 @@ import { getAccountPath } from '~/features/ledger/Path';
 import { stringify, parse } from './JSONHelper';
 import CredentialInfoLedgerDetails from '~/components/ledger/CredentialInfoLedgerDetails';
 
-const rawWorker = new RustWorker();
+const rawWorker = new Worker(new URL('./rust.worker.ts', import.meta.url));
 const worker = new PromiseWorker(rawWorker);
 
 const identityCreatedUsingDeprecatedKeyGen = (version: IdentityVersion) =>

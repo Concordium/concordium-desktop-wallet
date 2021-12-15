@@ -20,18 +20,6 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.worker\.ts?$/,
-                exclude: /node_modules/,
-                use: [
-                    {
-                        loader: 'worker-loader',
-                        options: {
-                            publicPath: './',
-                        },
-                    },
-                ],
-            },
-            {
                 test: /\.tsx?$/,
                 exclude: /node_modules/,
                 include: /app/,
