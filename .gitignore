@@ -49,7 +49,6 @@ storybook-static
 app/1.preload.dev.worker.js
 app/crypto.wasm
 app/preload.dev.worker.js
-app/pkg_index_js.preload.dev.worker.js
 
 .idea
 npm-debug.log.*
