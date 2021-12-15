@@ -24,6 +24,7 @@ interface Props extends ClassName {
  * Allows the user to verify the address of the current account, on the ledger.
  */
 export default function VerifyAddress({ account, display, className }: Props) {
+    const [noVerify, setNoVerify] = useState(false);
     const [opened, setOpened] = useState(false);
     const [warning, setWarning] = useState<string>();
     const identity = useSelector(specificIdentitySelector(account.identityId));
@@ -46,12 +47,21 @@ export default function VerifyAddress({ account, display, className }: Props) {
                 return "An account's address is derived from the initial credential on that account. The initial credential is not in this wallet, and therefore it is not possible to verify the address of the account.";
             }
             if (identity.version === 0) {
-                return 'The address cannot be verified, because the identity used to create this account uses a deprecated version of the key generation, which is not available on the ledger.';
+                return 'The address cannot be verified, because the identity used to create this account uses a deprecated version of the key generation, which is not available on the Ledger.';
             }
             return undefined;
         },
         () => {},
         [identity, account.address]
+    );
+
+    const showWithoutLedger = useCallback(
+        (show: boolean) => {
+            setNoVerify(show);
+            setOpened(show);
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        []
     );
 
     const ledgerCall = useCallback(
@@ -65,7 +75,7 @@ export default function VerifyAddress({ account, display, className }: Props) {
                     "An account's address is derived from the initial credential on that account. The initial credential on this account was not created from the currently connected Ledger, and therefore it is not possible to verify the address of the account."
                 );
             } else {
-                const timeout = setTimeout(setOpened, 1000, true);
+                const timeout = setTimeout(setOpened, 100, true);
                 try {
                     await ledger.verifyAddress(
                         credential.identityNumber,
@@ -120,9 +130,28 @@ export default function VerifyAddress({ account, display, className }: Props) {
                                         >
                                             Show and verify address
                                         </Button>
+                                        <Button
+                                            size="small"
+                                            inverted
+                                            className="mH50"
+                                            onClick={() =>
+                                                showWithoutLedger(true)
+                                            }
+                                        >
+                                            Show without verifying
+                                        </Button>
                                     </div>
                                 )}
                                 {opened && display}
+                                {noVerify && opened && (
+                                    <Button
+                                        size="small"
+                                        className="mT20"
+                                        onClick={() => showWithoutLedger(false)}
+                                    >
+                                        Hide address
+                                    </Button>
+                                )}
                             </>
                         )}
                     </>
