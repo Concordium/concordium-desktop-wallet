@@ -62,7 +62,7 @@ async function loadTransactionFile(
     if (instanceOfUpdateInstruction(transactionObject)) {
         return {
             show: true,
-            header: 'Update Instruction not supported',
+            header: 'Update instruction not supported',
             content: `The transaction within "${fileName}" is an update instruction, which is not supported for import.`,
         };
     }
@@ -79,7 +79,7 @@ async function loadTransactionFile(
     if (!account?.signatureThreshold) {
         return {
             show: true,
-            header: 'Sender Account not known',
+            header: 'Sender account not known',
             content: `In "${fileName}", the sender of the transaction is not an account in this wallet.`,
         };
     }
@@ -107,14 +107,14 @@ async function loadTransactionFile(
     if (transactionObject.nonce) {
         return {
             show: true,
-            header: 'Unexpected Field present',
+            header: 'Unexpected field present',
             content: `In "${fileName}", the nonce was present.`,
         };
     }
     if (transactionObject.energyAmount) {
         return {
             show: true,
-            header: 'Unexpected Field present',
+            header: 'Unexpected field present',
             content: `In "${fileName}", the energyAmount was present.`,
         };
     }
@@ -122,7 +122,7 @@ async function loadTransactionFile(
     if (transactionObject.estimatedFee) {
         return {
             show: true,
-            header: 'Unexpected Field present',
+            header: 'Unexpected field present',
             content: `In "${fileName}", the estimatedFee was present.`,
         };
     }
@@ -205,7 +205,7 @@ export default function ImportProposal() {
             setProcessing(false);
             setShowError({
                 show: true,
-                header: 'Unable to load blockHash',
+                header: 'Unable to load block hash',
                 content: errorMessages.unableToReachNode,
             });
             return;

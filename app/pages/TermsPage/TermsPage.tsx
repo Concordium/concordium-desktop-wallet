@@ -130,7 +130,7 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
                         inverted={false}
                         onClick={handleAccept}
                     >
-                        Yes, I Accept
+                        Yes, I accept
                     </ButtonNavLink>
                 )}
             </PageLayout.Container>

@@ -186,8 +186,8 @@ export default function BuildSchedule({ location }: Props) {
                 </div>
                 <ButtonGroup
                     buttons={[
-                        { label: 'Regular Interval', value: false },
-                        { label: 'Explicit Schedule', value: true },
+                        { label: 'Regular interval', value: false },
+                        { label: 'Explicit schedule', value: true },
                     ]}
                     isSelected={({ value }) => value === explicit}
                     onClick={({ value }) => setExplicit(value)}

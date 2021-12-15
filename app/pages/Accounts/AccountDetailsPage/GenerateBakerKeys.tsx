@@ -69,7 +69,7 @@ export default function GenerateBakerKeys({
                     </p>
                     <p>
                         If the baker credentials are lost or compromised, new
-                        ones should be generated with the Update Baker Keys
+                        ones should be generated with the Update baker keys
                         function.
                     </p>
                     <p>

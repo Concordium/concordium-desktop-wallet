@@ -75,7 +75,7 @@ export default function IdentityIssuancePage(): JSX.Element {
                 />
             );
         }
-        throw new Error('Unexpected missing identity Provider!');
+        throw new Error('Unexpected missing identity provider!');
     }
 
     function checkNavigation(location: Location) {

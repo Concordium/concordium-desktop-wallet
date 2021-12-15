@@ -121,7 +121,7 @@ export default function PickAmount({
                         name={fieldNames.amount}
                         defaultValue={defaultAmount}
                         rules={{
-                            required: 'Amount Required',
+                            required: 'Amount required',
                             validate,
                         }}
                     />
@@ -156,7 +156,7 @@ export default function PickAmount({
                             <Form.Checkbox
                                 name={fieldNames.recipient}
                                 rules={{
-                                    required: 'Recipient Required',
+                                    required: 'Recipient required',
                                 }}
                                 checked={Boolean(recipient?.address)}
                                 readOnly

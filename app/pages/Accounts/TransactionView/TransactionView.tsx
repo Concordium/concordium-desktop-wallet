@@ -109,7 +109,7 @@ function TransactionView({ transaction, onClose, setTransaction }: Props) {
             ) : null}
             <CopiableListElement
                 title="Transaction hash"
-                value={transaction.transactionHash || 'No Transaction.'}
+                value={transaction.transactionHash || 'No transaction.'}
             />
             <CopiableListElement
                 title="Block hash"

@@ -29,7 +29,7 @@ export default function DisplayAccountCredentialUpdate({
                 estimatedFee={transaction.estimatedFee}
             />
             <h5>
-                New Threshold: <b>{transaction.payload.threshold}</b>
+                New threshold: <b>{transaction.payload.threshold}</b>
             </h5>
             {removedCredIds.length > 0 ? (
                 <>

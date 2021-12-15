@@ -178,7 +178,7 @@ export default function PickAccount({ onNext }: Props): JSX.Element {
                         onNext(routes.GENERATE_CREDENTIAL_REVEALATTRIBUTES)
                     }
                 >
-                    Reveal Attributes
+                    Reveal attributes
                 </Button>
             )}
         </>
