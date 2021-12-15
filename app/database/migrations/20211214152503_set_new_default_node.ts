@@ -1,5 +1,6 @@
 import { Knex } from 'knex';
 import databaseNames from '~/constants/databaseNames.json';
+import { getTargetNet, Net } from '~/utils/ConfigHelper';
 import { Setting } from '~/utils/types';
 import settingKeys from '../../constants/settingKeys.json';
 
@@ -45,9 +46,15 @@ async function migrateDefaultNode(
 }
 
 export async function up(knex: Knex): Promise<number | void> {
-    return migrateDefaultNode(knex, oldDefault, newDefault);
+    if (getTargetNet() === Net.Mainnet) {
+        return migrateDefaultNode(knex, oldDefault, newDefault);
+    }
+    return Promise.resolve();
 }
 
 export async function down(knex: Knex): Promise<number | void> {
-    return migrateDefaultNode(knex, newDefault, oldDefault);
+    if (getTargetNet() === Net.Mainnet) {
+        return migrateDefaultNode(knex, newDefault, oldDefault);
+    }
+    return Promise.resolve();
 }
