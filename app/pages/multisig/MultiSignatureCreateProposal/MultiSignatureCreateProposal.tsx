@@ -151,8 +151,8 @@ function MultiSignatureCreateProposal({
 function LoadingComponent() {
     return (
         <MultiSignatureLayout
-            pageTitle="Create Multisignature Proposal"
-            stepTitle="Transaction Proposal - loading"
+            pageTitle="Create multisignature proposal"
+            stepTitle="Transaction proposal - loading"
         >
             <Loading text="Fetching information from the node" />
         </MultiSignatureLayout>

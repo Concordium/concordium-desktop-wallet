@@ -18,7 +18,7 @@ import {
 import { serializeAddAnonymityRevoker } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Add Anonymity Revoker';
+const TYPE = 'Add anonymity revoker';
 
 type TransactionType = UpdateInstruction<AddAnonymityRevoker>;
 

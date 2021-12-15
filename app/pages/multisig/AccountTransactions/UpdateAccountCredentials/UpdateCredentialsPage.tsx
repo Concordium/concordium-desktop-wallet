@@ -497,7 +497,11 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
             stepTitle="Transaction proposal - Update account credentials"
             delegateScroll
         >
-            <Columns className={styles.columns} columnScroll divider>
+            <Columns
+                className={styles.subtractContainerPadding}
+                columnScroll
+                divider
+            >
                 <Columns.Column header="Transaction details">
                     <div className={styles.columnContainer}>
                         {displayAccount(account)}

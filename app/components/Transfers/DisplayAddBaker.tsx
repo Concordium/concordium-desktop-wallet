@@ -25,7 +25,7 @@ export default function DisplayAddBaker({ transaction }: Props) {
 
     return (
         <>
-            <h5 className={styles.title}>From Account:</h5>
+            <h5 className={styles.title}>From account:</h5>
             <p className={styles.name}>{senderName}</p>
             <DisplayAddress
                 address={transaction.sender}

@@ -51,20 +51,20 @@ export function createMenu(window: BrowserWindow) {
             role: 'help',
             submenu: [
                 {
-                    label: 'Terms and Conditions',
+                    label: 'Terms and conditions',
                     click: () => {
                         window.webContents?.send(openRoute, TERMS);
                     },
                 },
                 {
-                    label: 'License Notices',
+                    label: 'License notices',
                     click: () => {
                         shell.openExternal(licenseNotices);
                     },
                 },
                 { type: 'separator' },
                 {
-                    label: 'Concordium Support Forum',
+                    label: 'Concordium support forum',
                     click: () => {
                         shell.openExternal(supportForum);
                     },

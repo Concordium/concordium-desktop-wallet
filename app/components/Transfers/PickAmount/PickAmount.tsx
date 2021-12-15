@@ -172,7 +172,7 @@ export default function PickAmount({
                                 );
                             }}
                             title={
-                                recipient ? recipient.name : 'Select Recipient'
+                                recipient ? recipient.name : 'Select recipient'
                             }
                             comment={recipient?.note}
                         />

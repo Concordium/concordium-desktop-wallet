@@ -290,7 +290,7 @@ export default function SubmitTransaction({ location }: Props) {
     return (
         <PageLayout>
             <PageLayout.Header>
-                <h1>Accounts | Submit Transaction</h1>
+                <h1>Accounts | Submit transaction</h1>
             </PageLayout.Header>
             <PageLayout.Container
                 closeRoute={cancelled}

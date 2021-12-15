@@ -55,7 +55,7 @@ export default function TransferProposalDetails({
             <AccountDetail title="Recipient" value={recipient} />
             {isScheduledTransfer ? (
                 <PlainDetail
-                    title="Release Schedule"
+                    title="Release schedule"
                     value={schedule}
                     format={(s) => (
                         <ScheduleList schedule={s.map(toReleaseSchedule)} />

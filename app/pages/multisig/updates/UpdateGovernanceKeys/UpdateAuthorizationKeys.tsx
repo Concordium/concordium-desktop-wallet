@@ -314,7 +314,7 @@ export default function UpdateAuthorizationKeys({
                 header="Error"
             />
             <Columns divider columnScroll columnClassName={styles.column}>
-                <Columns.Column header="Transaction Details">
+                <Columns.Column header="Transaction details">
                     <div className={styles.columnContent}>
                         <h2>Level 2 keys and their indices</h2>
                         <p>

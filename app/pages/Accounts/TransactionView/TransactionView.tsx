@@ -95,24 +95,24 @@ function TransactionView({ transaction, onClose, setTransaction }: Props) {
             {displayRejectReason(transaction)}
             {!!transaction.fromAddress && (
                 <CopiableListElement
-                    title="From Address:"
+                    title="From address:"
                     value={`${transaction.fromAddress}`}
                     note={transaction.fromName}
                 />
             )}
             {transaction.toAddress ? (
                 <CopiableListElement
-                    title="To Address:"
+                    title="To address:"
                     value={`${transaction.toAddress}`}
                     note={transaction.toName}
                 />
             ) : null}
             <CopiableListElement
-                title="Transaction Hash"
+                title="Transaction hash"
                 value={transaction.transactionHash || 'No Transaction.'}
             />
             <CopiableListElement
-                title="Block Hash"
+                title="Block hash"
                 value={transaction.blockHash || 'Awaiting finalization'}
             />
         </div>

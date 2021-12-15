@@ -18,7 +18,7 @@ import {
 import { serializeProtocolUpdate } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Update Chain Protocol';
+const TYPE = 'Update chain protocol';
 
 type TransactionType = UpdateInstruction<ProtocolUpdate>;
 

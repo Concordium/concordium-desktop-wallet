@@ -58,7 +58,7 @@ export default function SetNodeConnection() {
                     <Columns.Column>
                         <div className={styles.connectionSetting}>
                             <ConnectionSettingElement
-                                displayText="Node Connection"
+                                displayText="Node connection"
                                 setting={nodeConnectionSetting}
                             />
                         </div>

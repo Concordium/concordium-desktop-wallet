@@ -254,7 +254,7 @@ export default function ExternalIssuance({
 
     return (
         <>
-            <h2 className={generalStyles.header}>Generating the Identity</h2>
+            <h2 className={generalStyles.header}>Generating the identity</h2>
             <div ref={divRef} className={styles.fullscreen} />
         </>
     );

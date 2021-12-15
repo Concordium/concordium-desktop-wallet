@@ -19,7 +19,7 @@ import {
 import { serializeExchangeRate } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Update Micro CCD Per Euro';
+const TYPE = 'Update micro CCD per euro';
 
 type TransactionType = UpdateInstruction<ExchangeRate>;
 

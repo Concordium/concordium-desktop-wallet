@@ -35,13 +35,13 @@ export default function DisplayEncryptedTransfer({
     const singleSigTransfer = useRouteMatch(routes.SUBMITTRANSFER);
     return (
         <>
-            <p className={styles.title}>From Account:</p>
+            <p className={styles.title}>From account:</p>
             <p className={styles.name}>{fromName}</p>
             <DisplayAddress
                 address={transaction.sender}
                 lineClassName={styles.address}
             />
-            <p className={styles.title}>To Account:</p>
+            <p className={styles.title}>To account:</p>
             <p className={styles.name}>{to?.name}</p>
             <DisplayAddress
                 address={transaction.payload.toAddress}

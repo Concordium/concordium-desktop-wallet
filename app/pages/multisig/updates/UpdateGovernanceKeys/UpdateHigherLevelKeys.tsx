@@ -153,7 +153,7 @@ export default function UpdateHigherLevelKeys({
 
     return (
         <Columns divider columnScroll columnClassName={styles.column}>
-            <Columns.Column header="Transaction Details">
+            <Columns.Column header="Transaction details">
                 <div className={styles.columnContent}>
                     <h5>Signature threshold</h5>
                     <p>

@@ -38,13 +38,13 @@ export default function DisplayScheduledTransfer({
 
     return (
         <div>
-            <h5 className={styles.title}>From Account:</h5>
+            <h5 className={styles.title}>From account:</h5>
             <p className={styles.name}>{fromName}</p>
             <DisplayAddress
                 address={transaction.sender}
                 lineClassName={styles.address}
             />
-            <h5 className={styles.title}>To Account:</h5>
+            <h5 className={styles.title}>To account:</h5>
             <p className={styles.name}>{to?.name}</p>
             <DisplayAddress
                 address={transaction.payload.toAddress}
@@ -60,7 +60,7 @@ export default function DisplayScheduledTransfer({
                     expiryTime={dateFromTimeStamp(transaction.expiry)}
                 />
             )}
-            <h5 className={styles.title}>Individual Releases:</h5>
+            <h5 className={styles.title}>Individual releases:</h5>
             <ScheduleList
                 schedule={transaction.payload.schedule.map(toReleaseSchedule)}
             />

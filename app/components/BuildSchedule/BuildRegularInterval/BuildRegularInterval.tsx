@@ -134,7 +134,7 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
                     isSelected={(interval) => interval === chosenInterval}
                     onClick={setChosenInterval}
                     name="interval"
-                    title="Release Every:"
+                    title="Release every:"
                 />
                 <Form
                     onSubmit={createSchedule}

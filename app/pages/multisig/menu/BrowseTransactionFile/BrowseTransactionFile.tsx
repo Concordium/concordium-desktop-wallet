@@ -97,7 +97,7 @@ export default function BrowseTransactionFile() {
                 content={showError.content}
                 onClick={() => setShowError({ show: false })}
             />
-            <h2 className="textCenter mB40">Sign Proposal</h2>
+            <h2 className="textCenter mB40">Sign proposal</h2>
             <FileInput
                 className={styles.input}
                 placeholder="Drag and drop file here"

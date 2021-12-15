@@ -19,7 +19,7 @@ export default function TransactionHashView({ transaction }: Props) {
 
     return (
         <>
-            <h5>Transaction Hash</h5>
+            <h5>Transaction hash</h5>
             {transactionHash}
         </>
     );

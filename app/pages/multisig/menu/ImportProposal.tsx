@@ -268,7 +268,7 @@ export default function ImportProposal() {
                 content={showError.content}
                 onClick={() => setShowError({ show: false })}
             />
-            <h2 className="textCenter mB40">Import Proposals</h2>
+            <h2 className="textCenter mB40">Import proposals</h2>
             {processing || (
                 <FileInput
                     className={styles.input}

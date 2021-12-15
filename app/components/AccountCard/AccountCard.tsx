@@ -57,7 +57,7 @@ function ShieldedBalance({
         </>
     );
 
-    const rowLeftSide = <h3>Shielded Balance:</h3>;
+    const rowLeftSide = <h3>Shielded balance:</h3>;
 
     const closeInfo = (e: SyntheticEvent) => {
         e.stopPropagation(); // So that we avoid triggering the parent's onClick
@@ -219,7 +219,7 @@ export function AccountCardView({
             />
             <SidedRow
                 className={styles.row}
-                left={<h3>Account Total:</h3>}
+                left={<h3>Account total:</h3>}
                 right={
                     <h3>
                         {displayAsGTU(shielded + unShielded)}
@@ -235,7 +235,7 @@ export function AccountCardView({
             />
             <SidedRow
                 className={styles.row}
-                left="- At Disposal:"
+                left="- At disposal:"
                 right={displayAsGTU(amountAtDisposal)}
             />
             <SidedRow

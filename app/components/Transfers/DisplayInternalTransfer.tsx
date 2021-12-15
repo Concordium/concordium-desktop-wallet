@@ -43,7 +43,7 @@ export default function DisplayInternalTransfer({
     return (
         <>
             <h2>{transactionDetails.title}</h2>
-            <h5 className={styles.title}>From Account:</h5>
+            <h5 className={styles.title}>From account:</h5>
             <p className={styles.name}>{fromName}</p>
             <DisplayAddress
                 address={transaction.sender}

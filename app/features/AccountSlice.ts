@@ -455,7 +455,7 @@ export async function loadAccountInfos(
         );
         if (!accountInfo) {
             throw new Error(
-                `Genesis Account '${account.name}' not found on chain. Associated credId: ${account.address}`
+                `Genesis account '${account.name}' not found on chain. Associated credId: ${account.address}`
             );
         }
         const address = await initializeGenesisAccount(
