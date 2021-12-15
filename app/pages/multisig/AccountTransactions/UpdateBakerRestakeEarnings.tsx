@@ -79,7 +79,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
 
         if (restakeEarnings === undefined) {
             setError(
-                'The Restake Earnings setting is needed to make transaction'
+                'The restake earnings setting is needed to make transaction'
             );
             return;
         }
@@ -99,8 +99,8 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
 
     return (
         <MultiSignatureLayout
-            pageTitle="Multi Signature Transactions | Update Baker Restake Earnings"
-            stepTitle="Transaction Proposal - Update Baker Restake Earnings"
+            pageTitle="Multi signature transactions | Update baker restake earnings"
+            stepTitle="Transaction proposal - Update baker restake earnings"
             delegateScroll
         >
             <SimpleErrorModal
@@ -111,7 +111,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
             />
             <Columns divider columnScroll>
                 <Columns.Column
-                    header="Transaction Details"
+                    header="Transaction details"
                     className={styles.stretchColumn}
                 >
                     <div className={styles.columnContent}>
@@ -243,7 +243,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                     </Route>
                     <Route path={`${path}/${BakerSubRoutes.sign}`}>
                         <Columns.Column
-                            header="Signature and Hardware Wallet"
+                            header="Signature and hardware wallet"
                             className={styles.stretchColumn}
                         >
                             {transaction !== undefined &&

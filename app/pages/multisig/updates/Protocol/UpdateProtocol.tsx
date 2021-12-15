@@ -58,7 +58,7 @@ export default function UpdateProtocol({
                 className="body1"
                 name={fieldNames.specificationHash}
                 defaultValue={defaults.specificationHash || undefined}
-                label="Specification Hash:"
+                label="Specification hash:"
                 placeholder="Paste specification hash here"
                 spellCheck="false"
                 rules={{
@@ -70,7 +70,7 @@ export default function UpdateProtocol({
             />
             <Form.File
                 name={fieldNames.specificationAuxiliaryData}
-                label="Specification Auxiliary Data:"
+                label="Specification auxiliary data:"
                 placeholder="Drag and drop file here"
                 buttonTitle="or browse to file"
                 defaultValue={defaults.specificationAuxiliaryData || undefined}

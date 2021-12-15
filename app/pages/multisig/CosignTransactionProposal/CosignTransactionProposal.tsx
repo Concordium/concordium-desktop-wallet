@@ -33,15 +33,15 @@ import { isExpired } from '~/utils/transactionHelpers';
 import TransactionExpirationDetails from '~/components/TransactionExpirationDetails';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import getTransactionSignDigest from '~/utils/transactionHash';
-
 import ExpiredTransactionView from '../ExpiredTransactionView';
 import MultiSignatureLayout from '../MultiSignatureLayout';
-import styles from './CosignTransactionProposal.module.scss';
 import { signUpdateInstruction, signAccountTransaction } from './util';
 import saveFile from '~/utils/FileHelper';
 import Button from '~/cross-app-components/Button';
 import { LedgerCallback } from '~/components/ledger/util';
 import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
+
+import styles from './CosignTransactionProposal.module.scss';
 
 interface CosignTransactionProposalForm {
     transactionDetailsMatch: boolean;
@@ -183,7 +183,7 @@ function CosignTransactionProposal({
                                 columnClassName={styles.column}
                                 columnScroll
                             >
-                                <Columns.Column header="Security & Submission Details">
+                                <Columns.Column header="Security & submission details">
                                     <div className={styles.columnContent}>
                                         <TransactionSignDigestView
                                             transactionSignDigest={
@@ -204,7 +204,7 @@ function CosignTransactionProposal({
                                         )}
                                     </div>
                                 </Columns.Column>
-                                <Columns.Column header="Transaction Details">
+                                <Columns.Column header="Transaction details">
                                     <div className={styles.columnContent}>
                                         <TransactionDetails
                                             transaction={transactionObject}
@@ -219,7 +219,7 @@ function CosignTransactionProposal({
                                     </div>
                                 </Columns.Column>
                                 <Columns.Column
-                                    header="Signature and Hardware Wallet"
+                                    header="Signature and hardware wallet"
                                     className={styles.stretchColumn}
                                 >
                                     <div className={styles.columnContent}>
@@ -274,7 +274,7 @@ function CosignTransactionProposal({
                                                         exportSignedTransaction
                                                     }
                                                 >
-                                                    Export Signature
+                                                    Export signature
                                                 </Button>
                                             ) : (
                                                 <Form.Submit
@@ -284,7 +284,7 @@ function CosignTransactionProposal({
                                                         isTransactionExpired
                                                     }
                                                 >
-                                                    Sign Proposal
+                                                    Sign proposal
                                                 </Form.Submit>
                                             )}
                                         </div>

@@ -185,7 +185,7 @@ const SubmittedProposalView = withChainData<Props>(
         return (
             <MultiSignatureLayout
                 pageTitle={handler.title}
-                stepTitle={`Transaction Proposal - ${handler.type}`}
+                stepTitle={`Transaction proposal - ${handler.type}`}
                 disableBack
             >
                 <SimpleErrorModal

@@ -130,7 +130,7 @@ function MultiSignatureCreateProposal({
                     render={() => (
                         <MultiSignatureLayout
                             pageTitle={handler.title}
-                            stepTitle={`Transaction Proposal - ${handler.type}`}
+                            stepTitle={`Transaction proposal - ${handler.type}`}
                             delegateScroll
                         >
                             <BuildComponent

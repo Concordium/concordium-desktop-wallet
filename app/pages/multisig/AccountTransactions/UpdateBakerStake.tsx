@@ -41,9 +41,9 @@ import {
 } from '~/utils/accountRouterHelpers';
 import { ensureChainData, ChainData } from '../common/withChainData';
 import DatePicker from '~/components/Form/DatePicker';
+import { isMultiSig } from '~/utils/accountHelpers';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
-import { isMultiSig } from '~/utils/accountHelpers';
 
 function toMicroUnitsSafe(str: string | undefined) {
     if (str === undefined) {
@@ -112,8 +112,8 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
 
     return (
         <MultiSignatureLayout
-            pageTitle="Multi Signature Transactions | Update Baker Stake"
-            stepTitle="Transaction Proposal - Update Baker Stake"
+            pageTitle="Multi signature transactions | Update baker stake"
+            stepTitle="Transaction proposal - Update baker stake"
             delegateScroll
         >
             <SimpleErrorModal
@@ -127,7 +127,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                 columnScroll
                 className={styles.subtractContainerPadding}
             >
-                <Columns.Column header="Transaction Details">
+                <Columns.Column header="Transaction details">
                     <div className={styles.columnContent}>
                         <UpdateBakerStakeProposalDetails
                             account={account}
@@ -273,7 +273,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                     </Route>
                     <Route path={`${path}/${BakerSubRoutes.sign}`}>
                         <Columns.Column
-                            header="Signature and Hardware Wallet"
+                            header="Signature and hardware wallet"
                             className={styles.stretchColumn}
                         >
                             {transaction !== undefined &&

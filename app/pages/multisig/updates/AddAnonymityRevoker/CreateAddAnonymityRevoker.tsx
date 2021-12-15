@@ -31,7 +31,7 @@ export const fieldDisplays = {
     name: 'Name',
     url: 'URL',
     description: 'Description',
-    arIdentity: 'Anonymity Revoker',
+    arIdentity: 'Anonymity revoker',
     arPublicKey: 'Public key',
 };
 

@@ -62,7 +62,7 @@ export default function UpdateMintDistribution({
     return (
         <>
             <div>
-                <h5>Current Mint Distribution</h5>
+                <h5>Current mint distribution</h5>
                 <MintRateInput
                     value={mintPerSlot.toString()}
                     slotsPerYear={slotsPerYear}
@@ -76,7 +76,7 @@ export default function UpdateMintDistribution({
                 />
             </div>
             <div>
-                <h5>New Mint Distribution</h5>
+                <h5>New mint distribution</h5>
                 <FormMintRateInput
                     name={fieldNames.mintPerSlot}
                     defaultValue={

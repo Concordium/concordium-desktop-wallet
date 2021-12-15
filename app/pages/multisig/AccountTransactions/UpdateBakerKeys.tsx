@@ -45,7 +45,7 @@ import { isMultiSig } from '~/utils/accountHelpers';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
 
-const pageTitle = 'Multi Signature Transactions | Update Baker Keys';
+const pageTitle = 'Multi signature transactions | Update baker keys';
 
 interface PageProps {
     exchangeRate: Fraction;
@@ -151,7 +151,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
     return (
         <MultiSignatureLayout
             pageTitle={pageTitle}
-            stepTitle="Transaction Proposal - Update Baker Keys"
+            stepTitle="Transaction proposal - Update baker keys"
             delegateScroll
         >
             <SimpleErrorModal
@@ -166,7 +166,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                 className={styles.subtractContainerPadding}
                 columnClassName={styles.column}
             >
-                <Columns.Column header="Transaction Details">
+                <Columns.Column header="Transaction details">
                     <div className={styles.columnContent}>
                         <UpdateBakerKeysProposalDetails
                             account={account}
@@ -294,7 +294,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                         </Columns.Column>
                     </Route>
                     <Route path={`${path}/${BakerSubRoutes.sign}`}>
-                        <Columns.Column header="Signature and Hardware Wallet">
+                        <Columns.Column header="Signature and hardware wallet">
                             <SignTransactionColumn
                                 signingFunction={signingFunction}
                                 onSkip={() => signingFunction()}

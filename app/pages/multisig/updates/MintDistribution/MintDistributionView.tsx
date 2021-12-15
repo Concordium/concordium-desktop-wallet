@@ -53,7 +53,7 @@ export default withChainData(function MintDistributionView({
     return (
         <>
             <div>
-                <h5>Current Mint Distribution</h5>
+                <h5>Current mint distribution</h5>
                 <MintRateInput
                     value={currentMintPerSlot.toString()}
                     slotsPerYear={slotsPerYear}
@@ -67,7 +67,7 @@ export default withChainData(function MintDistributionView({
                 />
             </div>
             <div>
-                <h5>New Mint Distribution</h5>
+                <h5>New mint distribution</h5>
                 <MintRateInput
                     value={newMintPerSlot.toString()}
                     slotsPerYear={slotsPerYear}

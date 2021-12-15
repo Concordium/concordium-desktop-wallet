@@ -36,9 +36,9 @@ export const fieldDisplays = {
     name: 'Name',
     url: 'URL',
     description: 'Description',
-    ipIdentity: 'Identity Provider',
-    ipVerifyKey: 'Verify Key',
-    ipCdiVerifyKey: 'CDI Verify Key:',
+    ipIdentity: 'Identity provider',
+    ipVerifyKey: 'Verify key',
+    ipCdiVerifyKey: 'CDI verify key:',
 };
 
 const cdiKeyLength = 64;

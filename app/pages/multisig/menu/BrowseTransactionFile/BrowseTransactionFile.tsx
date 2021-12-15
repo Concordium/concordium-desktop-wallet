@@ -12,6 +12,8 @@ import SimpleErrorModal, {
 } from '~/components/SimpleErrorModal';
 import FileInput from '~/components/Form/FileInput';
 import { FileInputValue } from '~/components/Form/FileInput/FileInput';
+import Card from '~/cross-app-components/Card';
+
 import styles from './BrowseTransactionFile.module.scss';
 
 /**
@@ -88,13 +90,14 @@ export default function BrowseTransactionFile() {
     }, [files]);
 
     return (
-        <>
+        <Card className="pH40 pV30 relative textCenter">
             <SimpleErrorModal
                 show={showError.show}
                 header={showError.header}
                 content={showError.content}
                 onClick={() => setShowError({ show: false })}
             />
+            <h2 className="textCenter mB40">Sign Proposal</h2>
             <FileInput
                 className={styles.input}
                 placeholder="Drag and drop file here"
@@ -103,6 +106,6 @@ export default function BrowseTransactionFile() {
                 onChange={setFiles}
                 disableFileNames
             />
-        </>
+        </Card>
     );
 }

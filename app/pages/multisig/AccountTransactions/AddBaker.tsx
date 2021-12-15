@@ -55,7 +55,7 @@ import styles from './MultisignatureAccountTransactions.module.scss';
 import DatePicker from '~/components/Form/DatePicker';
 import { isMultiSig } from '~/utils/accountHelpers';
 
-const pageTitle = 'Multi Signature Transactions | Add Baker';
+const pageTitle = 'Multi signature transactions | Add baker';
 
 interface PageProps extends ChainData {
     exchangeRate: Fraction;
@@ -184,7 +184,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
     return (
         <MultiSignatureLayout
             pageTitle={pageTitle}
-            stepTitle="Transaction Proposal - Add Baker"
+            stepTitle="Transaction proposal - Add baker"
             delegateScroll
         >
             <SimpleErrorModal
@@ -199,7 +199,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                 className={styles.subtractContainerPadding}
                 columnClassName={styles.column}
             >
-                <Columns.Column header="Transaction Details">
+                <Columns.Column header="Transaction details">
                     <div className={styles.columnContent}>
                         <AddBakerProposalDetails
                             account={account}
@@ -360,7 +360,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                     </Route>
 
                     <Route path={`${path}/${BakerSubRoutes.sign}`}>
-                        <Columns.Column header="Signature and Hardware Wallet">
+                        <Columns.Column header="Signature and hardware wallet">
                             <SignTransactionColumn
                                 signingFunction={signingFunction}
                                 onSkip={() => signingFunction()}

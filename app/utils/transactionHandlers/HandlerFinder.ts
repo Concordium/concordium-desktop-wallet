@@ -71,27 +71,27 @@ export function findAccountTransactionHandler(
             );
         case TransactionKindId.Add_baker:
             return new AccountHandlerTypeMiddleware(
-                new BakerHandler('Add Baker', instanceOfAddBaker)
+                new BakerHandler('Add baker', instanceOfAddBaker)
             );
         case TransactionKindId.Update_baker_keys:
             return new AccountHandlerTypeMiddleware(
-                new BakerHandler('Update Baker Keys', instanceOfUpdateBakerKeys)
+                new BakerHandler('Update baker keys', instanceOfUpdateBakerKeys)
             );
         case TransactionKindId.Remove_baker:
             return new AccountHandlerTypeMiddleware(
-                new BakerHandler('Remove Baker', instanceOfRemoveBaker)
+                new BakerHandler('Remove baker', instanceOfRemoveBaker)
             );
         case TransactionKindId.Update_baker_stake:
             return new AccountHandlerTypeMiddleware(
                 new BakerHandler(
-                    'Update Baker Stake',
+                    'Update baker stake',
                     instanceOfUpdateBakerStake
                 )
             );
         case TransactionKindId.Update_baker_restake_earnings:
             return new AccountHandlerTypeMiddleware(
                 new BakerHandler(
-                    'Update Baker Restake Earnings',
+                    'Update baker restake earnings',
                     instanceOfUpdateBakerRestakeEarnings
                 )
             );

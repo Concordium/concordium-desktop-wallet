@@ -23,9 +23,9 @@ const fieldNames: EqualRecord<UpdateGasRewardsFields> = {
 
 const labels: { [P in keyof UpdateGasRewardsFields]: string } = {
     baker: 'Baker:',
-    finalizationProof: 'Finalization Proof:',
-    accountCreation: 'Account Creation:',
-    chainUpdate: 'Chain Update:',
+    finalizationProof: 'Finalization proof:',
+    accountCreation: 'Account creation:',
+    chainUpdate: 'Chain update:',
 };
 
 const convertsToInteger: Validate = (v: number) =>

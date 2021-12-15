@@ -15,7 +15,6 @@ import SimpleErrorModal, {
 } from '~/components/SimpleErrorModal';
 import FileInput from '~/components/Form/FileInput';
 import { FileInputValue } from '~/components/Form/FileInput/FileInput';
-import styles from './BrowseTransactionFile/BrowseTransactionFile.module.scss';
 import { fileListToFileArray } from '~/components/Form/FileInput/util';
 import createMultiSignatureTransaction from '~/utils/MultiSignatureTransactionHelper';
 import { loadProposals } from '~/features/MultiSignatureSlice';
@@ -37,6 +36,8 @@ import getTransactionCost, {
     getTransactionEnergyCost,
 } from '~/utils/transactionCosts';
 import errorMessages from '~/constants/errorMessages.json';
+
+import styles from './BrowseTransactionFile/BrowseTransactionFile.module.scss';
 
 async function loadTransactionFile(
     file: File,
@@ -236,13 +237,13 @@ export default function ImportProposal() {
 
         await saveMultipleFiles(
             proposals.map(([name, prop]) => [name, prop.transaction || '']),
-            'Choose Directory to save updated versions of proposals'
+            'Choose directory to save updated versions of proposals'
         );
 
         setProcessing(false);
         setShowError({
             show: true,
-            header: 'Importing Completed',
+            header: 'Importing completed',
             content: `All files have been processed and ${files.length} proposals have been added.`,
         });
     }

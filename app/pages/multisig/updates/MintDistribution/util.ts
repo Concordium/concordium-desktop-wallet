@@ -7,8 +7,8 @@ import { rewardFractionResolution } from '~/constants/updateConstants.json';
 import { RewardDistributionValue } from '../../common/RewardDistribution';
 
 export const rewardDistributionLabels: [string, string, string] = [
-    'Baking Reward Account',
-    'Finalization Account Reward',
+    'Baking reward account',
+    'Finalization account reward',
     'Foundation',
 ];
 

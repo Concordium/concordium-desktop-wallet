@@ -70,7 +70,7 @@ export default function AddCredential({
             } catch (e) {
                 setShowError({
                     show: true,
-                    header: 'Invalid Credential',
+                    header: 'Invalid credential',
                     content: 'Unable to parse the file contents',
                 });
                 return;
@@ -84,7 +84,7 @@ export default function AddCredential({
             ) {
                 setShowError({
                     show: true,
-                    header: 'Invalid Credential',
+                    header: 'Invalid credential',
                     content:
                         'The file contents does not have the correct format',
                 });
@@ -93,7 +93,7 @@ export default function AddCredential({
             if (accountAddress !== credentialExport.address) {
                 setShowError({
                     show: true,
-                    header: 'Invalid Credential',
+                    header: 'Invalid credential',
                     content:
                         'The imported credential has not been generated for the current account',
                 });
@@ -103,7 +103,7 @@ export default function AddCredential({
             if (credentialIds.find(([credId]) => credId === credentialId)) {
                 setShowError({
                     show: true,
-                    header: 'Invalid Credential',
+                    header: 'Invalid credential',
                     content: 'No duplicate credentials allowed',
                 });
                 return;
@@ -120,7 +120,7 @@ export default function AddCredential({
             ) {
                 setShowError({
                     show: true,
-                    header: 'Invalid Credential',
+                    header: 'Invalid credential',
                     content: 'Only one credential for each device is allowed',
                 });
             } else {
@@ -142,7 +142,7 @@ export default function AddCredential({
         body = (
             <Card className={styles.addingCard}>
                 <div className={styles.addingCardHeader}>
-                    <h2 className="mB0">New Credential:</h2>
+                    <h2 className="mB0">New credential:</h2>
                     <CloseButton
                         onClick={() => setCurrentCredential(undefined)}
                     />
@@ -182,7 +182,7 @@ export default function AddCredential({
                         custodian exactly
                     </Form.Checkbox>
                     <Form.Submit className="mT20">
-                        Add Credential to Proposal
+                        Add credential to proposal
                     </Form.Submit>
                 </Form>
             </Card>

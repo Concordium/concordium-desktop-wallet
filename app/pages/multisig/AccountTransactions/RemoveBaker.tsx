@@ -87,8 +87,8 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
 
     return (
         <MultiSignatureLayout
-            pageTitle="Multi Signature Transactions | Remove Baker"
-            stepTitle="Transaction Proposal - Remove Baker"
+            pageTitle="Multi signature transactions | Remove baker"
+            stepTitle="Transaction proposal - Remove baker"
             delegateScroll
         >
             <SimpleErrorModal
@@ -103,7 +103,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                 className={styles.subtractContainerPadding}
             >
                 <Columns.Column
-                    header="Transaction Details"
+                    header="Transaction details"
                     className={styles.stretchColumn}
                 >
                     <div className={styles.columnContent}>
@@ -231,7 +231,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                     </Route>
                     <Route path={`${path}/${BakerSubRoutes.sign}`}>
                         <Columns.Column
-                            header="Signature and Hardware Wallet"
+                            header="Signature and hardware wallet"
                             className={styles.stretchColumn}
                         >
                             {transaction !== undefined &&

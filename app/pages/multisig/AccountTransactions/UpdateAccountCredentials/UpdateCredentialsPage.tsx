@@ -43,9 +43,9 @@ import { getNoteForOwnCredential } from '~/utils/credentialHelper';
 import { identitiesSelector } from '~/features/IdentitySlice';
 import { CredentialDetails, CredentialStatus } from './util';
 import DisplayAddress from '~/components/DisplayAddress';
+import DatePicker from '~/components/Form/DatePicker';
 
 import styles from './UpdateAccountCredentials.module.scss';
-import DatePicker from '~/components/Form/DatePicker';
 
 const placeHolderText = (
     <h2 className={styles.LargePropertyValue}>To be determined</h2>
@@ -82,13 +82,13 @@ function subTitle(currentLocation: string) {
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
             return 'Accounts';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL:
-            return 'New Credentials';
+            return 'New credentials';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD:
             return ' ';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY:
             return 'Transaction expiry time';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
-            return 'Signature and Hardware Wallet';
+            return 'Signature and hardware wallet';
         default:
             throw new Error('unknown location');
     }
@@ -130,7 +130,7 @@ function displaySignatureThreshold(
     }
     return (
         <>
-            <h5 className={styles.PropertyName}>Signature Threshold:</h5>
+            <h5 className={styles.PropertyName}>Signature threshold:</h5>
             {body}
         </>
     );
@@ -493,12 +493,12 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
 
     return (
         <MultiSignatureLayout
-            pageTitle="Multi Signature Transactions | Update Account Credentials"
-            stepTitle="Transaction Proposal - Update Account Credentials"
+            pageTitle="Multi signature transactions | Update account credentials"
+            stepTitle="Transaction proposal - Update account credentials"
             delegateScroll
         >
             <Columns className={styles.columns} columnScroll divider>
-                <Columns.Column header="Transaction Details">
+                <Columns.Column header="Transaction details">
                     <div className={styles.columnContainer}>
                         {displayAccount(account)}
                         <DisplayEstimatedFee
