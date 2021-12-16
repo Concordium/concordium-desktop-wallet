@@ -3,9 +3,8 @@ import { createHash, verify } from 'crypto';
 import { createReadStream, readFileSync } from 'fs';
 import type { UpdateInfo } from 'electron-updater';
 
-import verification from '~/constants/verification.json';
-
-import packageJson from '../../../package.json';
+import * as verification from '~/constants/verification.json';
+import * as packageJson from '../../../package.json';
 
 const { publicKeyUrl } = verification;
 const { build } = packageJson;
