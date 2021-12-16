@@ -27,6 +27,7 @@ const Template: Story<{ account: Account; accountInfo: AccountInfo }> = ({
             '234': stringify(accountInfo),
         },
         chosenAccountAddress: account.address,
+        accountChanged: true,
         defaultAccount: account.address,
     };
 
