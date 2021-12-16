@@ -42,7 +42,7 @@ function CopiableListElement({
                 <div className={styles.copiableListElementLeftSide}>
                     <p className={styles.copiableListElementTitle}>{title}</p>
                     {'\n'}
-                    <p className="body4 m0 mT5">
+                    <p className="body5 m0 mT5">
                         {value} {note ? `(${note})` : undefined}
                     </p>
                 </div>

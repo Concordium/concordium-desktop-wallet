@@ -1,9 +1,10 @@
 import React from 'react';
 import clsx from 'clsx';
-import styles from './DisplayEstimatedFee.module.scss';
 import { displayAsGTU } from '~/utils/gtu';
 import { Fraction } from '~/utils/types';
 import { collapseFraction } from '~/utils/basicHelpers';
+
+import styles from './DisplayEstimatedFee.module.scss';
 
 interface Props {
     estimatedFee: Fraction | undefined;

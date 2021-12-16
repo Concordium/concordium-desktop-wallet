@@ -17,7 +17,7 @@ const formatAccount = (account: Account | AddressBookEntry) => (
         {formatValue(account.name)}
         <DisplayAddress
             outerClassName={styles.note}
-            lineClassName="body4 textFaded"
+            lineClassName="body5 textFaded"
             address={account.address}
         />
         {'note' in account && formatNote(account.note)}

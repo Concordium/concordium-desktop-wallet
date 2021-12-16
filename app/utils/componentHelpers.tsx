@@ -15,3 +15,11 @@ export function ensureProps<TProps>(
         return <Component {...props} />;
     };
 }
+
+export function partialApply<P, A extends Partial<P>>(
+    Component: ComponentType<P>,
+    apply: A
+): ComponentType<Omit<P, keyof A>> {
+    // eslint-disable-next-line react/display-name
+    return (props) => <Component {...(apply as A)} {...(props as P)} />;
+}

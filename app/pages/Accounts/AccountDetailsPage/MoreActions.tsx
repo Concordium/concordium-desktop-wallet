@@ -34,7 +34,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
             >
                 Account address
                 <br />
-                <span className="body4 pT5">{account.address}</span>
+                <span className="body5 pT5">{account.address}</span>
             </ButtonNavLink>
             {accountHasDeployedCredentials && (
                 <ButtonNavLink

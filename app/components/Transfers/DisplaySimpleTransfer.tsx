@@ -7,7 +7,7 @@ import DisplayFee from '~/components/DisplayFee';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import DisplayMemo from './DisplayMemo';
-import DisplayAddress from '../DisplayAddress';
+import { DisplayFromAccount, DisplayToAccount } from './DisplayAccount';
 
 import styles from './transferDetails.module.scss';
 
@@ -31,19 +31,12 @@ export default function DisplaySimpleTransfer({
     const singleSigTransfer = useRouteMatch(routes.SUBMITTRANSFER);
     return (
         <>
-            <h5 className={styles.title}>From account:</h5>
-            <p className={styles.name}>{fromName}</p>
-            <DisplayAddress
-                address={transaction.sender}
-                lineClassName={styles.address}
-            />
-            <h5 className={styles.title}>To account:</h5>
-            <p className={styles.name}>{to?.name}</p>
-            <DisplayAddress
+            <DisplayFromAccount name={fromName} address={transaction.sender} />
+            <DisplayToAccount
+                name={to?.name}
+                note={to?.note}
                 address={transaction.payload.toAddress}
-                lineClassName={styles.address}
             />
-            {to?.note && <p className={styles.note}>Note: {to?.note}</p>}
             <h5 className={styles.title}>Amount:</h5>
             <p className={styles.amount}>
                 {displayAsGTU(transaction.payload.amount)}
