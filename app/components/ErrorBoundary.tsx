@@ -29,8 +29,8 @@ export default class ErrorBoundary extends Component<
 
     componentDidCatch(error: Error, errorInfo: ErrorInfo) {
         // You can also log the error to an error reporting service
-        // eslint-disable-next-line no-console
         window.log.error(error);
+        // eslint-disable-next-line no-console
         console.error(error, errorInfo);
     }
 
