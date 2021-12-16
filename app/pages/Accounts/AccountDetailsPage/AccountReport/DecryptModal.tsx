@@ -4,12 +4,14 @@ import Modal from '~/cross-app-components/Modal';
 import { Account } from '~/utils/types';
 import { noOp, asyncNoOp } from '~/utils/basicHelpers';
 import { globalSelector } from '~/features/GlobalSlice';
+import { specificIdentitySelector } from '~/features/IdentitySlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import errorMessages from '~/constants/errorMessages.json';
 import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
 import Ledger from '~/components/ledger/Ledger';
 import Card from '~/cross-app-components/Card';
 import Button from '~/cross-app-components/Button';
+import { getKeyExportType } from '~/utils/identityHelpers';
 
 export interface DecryptModalInput {
     show: boolean;
@@ -35,6 +37,9 @@ export default function DecryptModal({
     onFinish = noOp,
 }: DecryptModalInput) {
     const global = useSelector(globalSelector);
+    const identity = useSelector(
+        account ? specificIdentitySelector(account.identityId) : () => undefined
+    );
 
     async function ledgerCall(
         ledger: ConcordiumLedgerClient,
@@ -42,6 +47,10 @@ export default function DecryptModal({
     ) {
         if (!account) {
             throw new Error('Missing account');
+        }
+
+        if (!identity) {
+            throw new Error('Missing identity');
         }
 
         if (!global) {
@@ -67,7 +76,8 @@ export default function DecryptModal({
 
         setMessage('Please accept decrypt on device');
         const prfKeySeed = await ledger.getPrfKeyDecrypt(
-            credential.identityNumber
+            credential.identityNumber,
+            getKeyExportType(identity.version)
         );
         setMessage('Please wait');
         const prfKey = prfKeySeed.toString('hex');

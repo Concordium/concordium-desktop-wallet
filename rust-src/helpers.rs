@@ -5,12 +5,13 @@ use std::convert::TryInto;
 use keygen_bls::{keygen_bls, keygen_bls_deprecated};
 use serde_json::{from_value, Value as SerdeValue};
 use anyhow::{Result, anyhow, bail};
-use pairing::bls12_381::Fr;
+use pairing::bls12_381::{Fr, FrRepr};
 use dodis_yampolskiy_prf::SecretKey;
 use curve_arithmetic::Curve;
 use pedersen_scheme::{
     Randomness as PedersenRandomness, Value,
 };
+use ff::{PrimeField};
 use hex;
 
 pub fn build_key_map(keys: &Vec<VerifyKey>) -> BTreeMap<KeyIndex, VerifyKey> {
@@ -46,13 +47,18 @@ pub fn generate_bls_key_deprecated(seed: &str) -> Result<Fr> {
 #[derive(Copy, Clone)]
 pub enum RawBlsType {
     Seed,
-    SeedDeprecated
+    SeedDeprecated,
+    Bls
 }
 
 pub fn get_bls(s: &str, raw_type: RawBlsType) -> Result<Fr> {
     match raw_type {
         RawBlsType::SeedDeprecated => Ok(generate_bls_key_deprecated(&s)?),
-        RawBlsType::Seed => Ok(generate_bls_key(&s)?)
+        RawBlsType::Seed => Ok(generate_bls_key(&s)?),
+        RawBlsType::Bls => {
+            let fr_numbers = [u64::from_str_radix(&s[48..64], 16)?, u64::from_str_radix(&s[32..48], 16)?, u64::from_str_radix(&s[16..32], 16)?, u64::from_str_radix(&s[0..16], 16)?];
+            Ok(Fr::from_repr(FrRepr(fr_numbers)).unwrap())
+        },
     }
 }
 
