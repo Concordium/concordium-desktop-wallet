@@ -9,6 +9,7 @@ import {
     PublicInformationForIp,
     CreationKeys,
     Global,
+    BlsKeyTypes,
 } from '~/utils/types';
 import Card from '~/cross-app-components/Card';
 import { globalSelector } from '~/features/GlobalSlice';
@@ -227,6 +228,7 @@ export default function IdentityIssuanceChooseProvider({
                     ledgerCallback={withLedger}
                     preCallback={getIdentityNumber}
                     disabled={!provider}
+                    exportType={BlsKeyTypes.Seed}
                 />
             </div>
         </>

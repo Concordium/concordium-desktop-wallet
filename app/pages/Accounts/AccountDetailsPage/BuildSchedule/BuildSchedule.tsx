@@ -18,9 +18,9 @@ import { BuildScheduleDefaults } from '~/components/BuildSchedule/util';
 import { scheduledTransferCost } from '~/utils/transactionCosts';
 import TransferView from '~/components/Transfers/TransferView';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
-import ButtonGroup from '~/components/ButtonGroup';
 import { chosenAccountInfoSelector } from '~/features/AccountSlice';
 import ErrorMessage from '~/components/Form/ErrorMessage';
+import Radios from '~/components/Form/Radios';
 
 import styles from './BuildSchedule.module.scss';
 
@@ -185,15 +185,14 @@ export default function BuildSchedule({ location }: Props) {
                     <DisplayEstimatedFee estimatedFee={estimatedFee} />
                     <ErrorMessage>{amountError}</ErrorMessage>
                 </div>
-                <ButtonGroup
-                    buttons={[
+                <Radios
+                    options={[
                         { label: 'Regular Interval', value: false },
                         { label: 'Explicit Schedule', value: true },
                     ]}
-                    isSelected={({ value }) => value === explicit}
-                    onClick={({ value }) => setExplicit(value)}
-                    name="scheduleType"
-                    title="Schedule type:"
+                    value={explicit}
+                    onChange={setExplicit}
+                    label="Schedule type:"
                 />
             </div>
             <BuildComponent

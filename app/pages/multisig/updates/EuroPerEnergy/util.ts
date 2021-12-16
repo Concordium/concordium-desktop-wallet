@@ -10,6 +10,6 @@ export const commonFieldProps: Pick<
     RelativeRateFieldProps,
     'numeratorUnit' | 'denominatorUnit'
 > = {
-    numeratorUnit: { position: 'prefix', value: '€ ' },
+    numeratorUnit: { position: 'prefix', value: '€' },
     denominatorUnit: { position: 'postfix', value: ' NRG' },
 };

@@ -35,6 +35,7 @@ import { AccountCardView } from '~/components/AccountCard/AccountCard';
 import SimpleLedgerWithCreationKeys from '~/components/ledger/SimpleLedgerWithCreationKeys';
 import pairWallet from '~/utils/WalletPairing';
 import { throwLoggedError } from '~/utils/basicHelpers';
+import { getKeyExportType } from '~/utils/identityHelpers';
 
 import generalStyles from '../AccountCreation.module.scss';
 import styles from './GeneratePage.module.scss';
@@ -241,6 +242,7 @@ export default function AccountCreationGenerate({
                         ledgerCallback={createAccount}
                         credentialNumber={credentialNumber}
                         preCallback={checkWallet}
+                        exportType={getKeyExportType(identity.version)}
                         compareButtonClassName="mT50"
                     />
                 </Columns.Column>

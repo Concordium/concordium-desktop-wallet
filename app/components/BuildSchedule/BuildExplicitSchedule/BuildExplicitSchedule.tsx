@@ -141,7 +141,7 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
             <Form onSubmit={addToSchedule} formMethods={methods}>
                 <div className={styles.amountInputWrapper}>
                     <Label>Amount:</Label>
-                    {getGTUSymbol()}{' '}
+                    {getGTUSymbol()}
                     <Form.InlineNumber
                         name={addSchedulePointFormNames.amount}
                         defaultValue="0.00"
