@@ -4,8 +4,10 @@
  */
 
 const webpack = require('webpack');
+const path = require('path');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 const { merge } = require('webpack-merge');
 const TerserPlugin = require('terser-webpack-plugin');
 const { baseConfig, assetsConfig, stylesConfig } = require('./partials');
@@ -74,6 +76,10 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
             analyzerMode:
                 process.env.OPEN_ANALYZER === 'true' ? 'server' : 'disabled',
             openAnalyzer: process.env.OPEN_ANALYZER === 'true',
+        }),
+
+        new WasmPackPlugin({
+            crateDirectory: path.resolve(__dirname, '.'),
         }),
     ],
 });

@@ -12,6 +12,7 @@ const webpack = require('webpack');
 const chalk = require('chalk');
 const { merge } = require('webpack-merge');
 const { spawn, execSync } = require('child_process');
+const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 const { baseConfig, assetsConfig, stylesConfig } = require('./partials');
 const CheckNodeEnv = require('../internals/scripts/CheckNodeEnv');
 const { fromRoot } = require('./helpers/pathHelpers');
@@ -91,6 +92,10 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(false), {
 
         new webpack.LoaderOptionsPlugin({
             debug: true,
+        }),
+
+        new WasmPackPlugin({
+            crateDirectory: path.resolve(__dirname, '.'),
         }),
     ],
 

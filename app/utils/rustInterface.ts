@@ -1,6 +1,5 @@
 import PromiseWorker from 'promise-worker';
 import { AccountEncryptedAmount } from '@concordium/node-sdk/';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 import { BakerKeyVariants } from './rust.worker';
 import {
     PublicInformationForIp,

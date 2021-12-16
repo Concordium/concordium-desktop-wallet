@@ -5,6 +5,7 @@ import ipcRendererCommands from '~/constants/ipcRendererCommands.json';
 import ipcCommands from '~/constants/ipcCommands.json';
 
 import packageJson from '../../../package.json';
+import appPackageJson from '../../package.json';
 import { getVerificationFunctions, RealUpdateInfo } from './verify';
 
 const {
@@ -15,9 +16,10 @@ const {
 } = ipcRendererCommands;
 const { triggerAppUpdate, quitAndInstallUpdate } = ipcCommands;
 const { build } = packageJson;
+const { version } = appPackageJson;
 
 const updateServer = 'https://update.electronjs.org';
-const updateFeed = `${updateServer}/${build.publish.owner}/${build.publish.repo}/${process.platform}-${process.arch}/51/`;
+const updateFeed = `${updateServer}/${build.publish.owner}/${build.publish.repo}/${process.platform}-${process.arch}/${version}/`;
 autoUpdater.setFeedURL({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...(build.publish as any),

@@ -5,7 +5,6 @@
 
 const path = require('path');
 const webpack = require('webpack');
-const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const { dependencies: externals } = require('../../app/package.json');
 const CheckTargetNet = require('../../internals/scripts/CheckTargetNet');
@@ -23,20 +22,7 @@ module.exports = {
                 test: /\.tsx?$/,
                 exclude: /node_modules/,
                 include: /app/,
-                use: [
-                    {
-                        loader: 'babel-loader',
-                        options: {
-                            plugins: [
-                                '@babel/plugin-proposal-optional-chaining',
-                                '@babel/plugin-proposal-nullish-coalescing-operator',
-                            ],
-                        },
-                    },
-                    {
-                        loader: 'ts-loader',
-                    },
-                ],
+                use: 'ts-loader',
             },
         ],
     },
@@ -79,9 +65,6 @@ module.exports = {
             DEBUG_PROD: false,
             START_MINIMIZED: false,
             E2E_BUILD: false,
-        }),
-        new WasmPackPlugin({
-            crateDirectory: path.resolve(__dirname, '.'),
         }),
         new webpack.ProvidePlugin({
             Buffer: ['buffer/', 'Buffer'],
