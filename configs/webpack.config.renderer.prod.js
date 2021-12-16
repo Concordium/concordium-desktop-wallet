@@ -5,7 +5,7 @@
 
 const webpack = require('webpack');
 const path = require('path');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 const { merge } = require('webpack-merge');
@@ -39,26 +39,21 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
         path: fromRoot('./app/dist'),
         publicPath: './dist/',
         filename: 'renderer.prod.js',
+        library: {
+            type: 'umd',
+        },
     },
 
     optimization: {
-        minimizer: process.env.E2E_BUILD
-            ? []
-            : [
-                  new TerserPlugin({
-                      parallel: true,
-                      sourceMap: true,
-                      cache: true,
-                  }),
-                  new OptimizeCSSAssetsPlugin({
-                      cssProcessorOptions: {
-                          map: {
-                              inline: false,
-                              annotation: true,
-                          },
-                      },
-                  }),
-              ],
+        minimize: true,
+        minimizer: [
+            new TerserPlugin({
+                parallel: true,
+                sourceMap: true,
+                cache: true,
+            }),
+            new CssMinimizerPlugin(),
+        ],
     },
 
     experiments: {
