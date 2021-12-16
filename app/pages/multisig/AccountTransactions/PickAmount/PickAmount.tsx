@@ -61,7 +61,7 @@ export default function PickAmount({
             <AccountCard account={account} accountInfo={accountInfo} />
             <h5 className="mB0">Amount:</h5>
             <div className={clsx(styles.inputWrapper)}>
-                {getGTUSymbol()}{' '}
+                {getGTUSymbol()}
                 <GtuInput
                     value={state}
                     onChange={onChange}
