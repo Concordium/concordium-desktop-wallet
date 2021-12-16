@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { LOCATION_CHANGE } from 'connected-react-router';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
 // eslint-disable-next-line import/no-cycle
@@ -56,6 +57,7 @@ export interface AccountState {
     accounts: Account[];
     accountsInfo: Record<string, string>;
     chosenAccountAddress: string;
+    accountChanged: boolean;
     defaultAccount: string | undefined;
 }
 
@@ -69,6 +71,14 @@ function getValidAccountsIndices(accounts: Account[]): AccountByIndexTuple[] {
         )
         .filter(([, acc]) => acc.status === AccountStatus.Confirmed);
 }
+
+const setChosenAccountAddress = (state: AccountState, address: string) => {
+    if (state.chosenAccountAddress !== address) {
+        state.accountChanged = true;
+    }
+
+    state.chosenAccountAddress = address;
+};
 
 const setConfirmedAccount = (next: boolean) => (state: AccountState) => {
     const chosenIndex = state.accounts.findIndex(
@@ -84,10 +94,13 @@ const setConfirmedAccount = (next: boolean) => (state: AccountState) => {
         ? ([i]: AccountByIndexTuple) => i > chosenIndex
         : ([i]: AccountByIndexTuple) => i < chosenIndex;
 
-    state.chosenAccountAddress =
+    const nextChosenAccountAddress =
         confirmedAccountsIndices.find(firstValid)?.[1].address ??
-        confirmedAccountsIndices[0]?.[1].address ??
-        state.chosenAccountAddress;
+        confirmedAccountsIndices[0]?.[1].address;
+
+    if (nextChosenAccountAddress) {
+        setChosenAccountAddress(state, nextChosenAccountAddress);
+    }
 };
 
 const initialState: AccountState = {
@@ -95,6 +108,7 @@ const initialState: AccountState = {
     accounts: [],
     accountsInfo: {},
     chosenAccountAddress: '',
+    accountChanged: true,
     defaultAccount: undefined,
 };
 
@@ -108,14 +122,16 @@ const accountsSlice = createSlice({
         nextConfirmedAccount: setConfirmedAccount(true),
         previousConfirmedAccount: setConfirmedAccount(false),
         chooseAccount: (state, input: PayloadAction<string>) => {
-            state.chosenAccountAddress = input.payload;
+            setChosenAccountAddress(state, input.payload);
         },
         updateAccounts: (state, input) => {
             state.accounts = input.payload;
 
             if (!state.chosenAccountAddress) {
-                state.chosenAccountAddress =
-                    state.defaultAccount || state.accounts[0]?.address || '';
+                setChosenAccountAddress(
+                    state,
+                    state.defaultAccount || state.accounts[0]?.address || ''
+                );
             }
         },
         setAccountInfos: (
@@ -128,7 +144,7 @@ const accountsSlice = createSlice({
             state.defaultAccount = input.payload;
 
             if (input.payload) {
-                state.chosenAccountAddress = input.payload;
+                setChosenAccountAddress(state, input.payload);
             }
         },
         addToAccountInfos: (
@@ -156,6 +172,11 @@ const accountsSlice = createSlice({
                 };
             }
         },
+    },
+    extraReducers(builder) {
+        builder.addCase(LOCATION_CHANGE, (state) => {
+            state.accountChanged = false;
+        });
     },
 });
 
