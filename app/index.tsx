@@ -12,6 +12,10 @@ import './styles/app.global.scss';
 
 const store = configuredStore();
 
+window.autoUpdate.onError((_, errorMessage: string, error: Error) =>
+    window.log.error(errorMessage, { error })
+);
+
 initMisc(store.dispatch);
 window.addListener.openRoute((_, route: string) => {
     window.log.info(`Routed to${route}`);

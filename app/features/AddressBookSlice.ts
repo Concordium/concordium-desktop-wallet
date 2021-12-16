@@ -8,7 +8,6 @@ import {
     removeEntry,
 } from '../database/AddressBookDao';
 import { AddressBookEntry, Dispatch } from '../utils/types';
-import { throwLoggedError } from '~/utils/basicHelpers';
 
 interface AddressBookState {
     addressBook: AddressBookEntry[];

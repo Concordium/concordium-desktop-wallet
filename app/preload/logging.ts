@@ -51,6 +51,9 @@ ipcRenderer
     )
     .catch(() => {});
 
+/**
+ * A function to allow using the loggers overload without type errors;
+ */
 function log(f: LeveledLogMethod, ...args: Parameters<PutLog>) {
     const first = args[0];
     return typeof first === 'string' ? f(first, args[1]) : f(first);

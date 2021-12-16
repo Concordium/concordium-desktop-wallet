@@ -1,6 +1,5 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import { autoUpdater, UpdateInfo } from 'electron-updater';
-import log from 'electron-log';
 
 import {
     updateAvailable,
@@ -25,9 +24,6 @@ autoUpdater.setFeedURL({
     url: updateFeed,
 });
 
-log.transports.file.level = 'info';
-
-autoUpdater.logger = log;
 autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = false;
 
@@ -44,8 +40,7 @@ const handleUpdateDownloaded = (mainWindow: BrowserWindow) => async (
         await Promise.all([verifyChecksum(), verifySignature()]);
         mainWindow.webContents.send(updateVerified);
     } catch (e) {
-        log.error('Could not update application due to:', e);
-        mainWindow.webContents.send(updateError, 'Could not apply update.');
+        mainWindow.webContents.send(updateError, 'Could not apply update.', e);
     }
 };
 
@@ -53,8 +48,12 @@ export default function initAutoUpdate(mainWindow: BrowserWindow) {
     autoUpdater.on('update-available', (info) =>
         mainWindow.webContents.send(updateAvailable, info)
     );
-    autoUpdater.on('error', () =>
-        mainWindow.webContents.send(updateError, 'Could not download update.')
+    autoUpdater.on('error', (e) =>
+        mainWindow.webContents.send(
+            updateError,
+            'Could not download update.',
+            e
+        )
     );
     autoUpdater.on('update-downloaded', handleUpdateDownloaded(mainWindow));
 
