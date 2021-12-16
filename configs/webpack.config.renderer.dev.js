@@ -47,7 +47,7 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(false), {
 
     mode: 'development',
 
-    target: ['web'],
+    target: 'web',
 
     entry: [
         'core-js',
@@ -65,7 +65,7 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(false), {
     },
 
     experiments: {
-        syncWebAssembly: true,
+        asyncWebAssembly: true,
     },
 
     resolve: {

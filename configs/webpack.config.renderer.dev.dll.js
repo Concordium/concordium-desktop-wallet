@@ -25,7 +25,7 @@ module.exports = merge(baseConfig, {
 
     target: 'electron-renderer',
 
-    externals: ['fsevents', 'crypto-browserify', 'stream-browserify'],
+    externals: ['fsevents', 'crypto-browserify'],
 
     /**
      * Use `module` from `webpack.config.renderer.dev.js`

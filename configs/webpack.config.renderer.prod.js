@@ -60,7 +60,7 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
     },
 
     experiments: {
-        syncWebAssembly: true,
+        asyncWebAssembly: true,
     },
 
     plugins: [

@@ -22,7 +22,7 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
         filename: 'preload.dev.js',
     },
     experiments: {
-        syncWebAssembly: true,
+        asyncWebAssembly: true,
     },
     plugins: [
         new webpack.EnvironmentPlugin({

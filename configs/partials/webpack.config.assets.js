@@ -48,7 +48,7 @@ module.exports.config = {
             // SVG Font
             {
                 test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-                exclude: [pathToSvgAssets],
+                exclude: pathToSvgAssets,
                 use: {
                     loader: 'url-loader',
                     options: {

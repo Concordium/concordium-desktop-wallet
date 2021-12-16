@@ -17,7 +17,7 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
         fromRoot('./app/preload/preload.ts'),
     ],
     experiments: {
-        syncWebAssembly: true,
+        asyncWebAssembly: true,
     },
     output: {
         path: fromRoot('./app/dist'),
