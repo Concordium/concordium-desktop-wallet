@@ -43,7 +43,6 @@ export default function DisplayInternalTransfer({
     const singleSigTransfer = useRouteMatch(routes.SUBMITTRANSFER);
     return (
         <>
-            <h2>{transactionDetails.title}</h2>
             <DisplayFromAccount name={fromName} address={transaction.sender} />
             <h5 className={styles.title}>Amount:</h5>
             <p className={styles.amount}>
