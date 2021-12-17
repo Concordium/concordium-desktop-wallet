@@ -33,8 +33,6 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 to={routes.ACCOUNTS_ADDRESS}
             >
                 Account address
-                <br />
-                <span className="body5 pT5">{account.address}</span>
             </ButtonNavLink>
             {accountHasDeployedCredentials && (
                 <ButtonNavLink

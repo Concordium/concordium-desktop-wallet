@@ -12,6 +12,7 @@ import AccountPageHeader from './AccountPageHeader';
 import DisplayAddress, {
     AddressDisplayFormat,
 } from '~/components/DisplayAddress';
+import VerifyAddress from './VerifyAddress';
 
 import styles from './Accounts.module.scss';
 
@@ -25,6 +26,20 @@ export default function ShowAccountAddress() {
     if (!account) {
         return null;
     }
+
+    const display = (
+        <>
+            <QRCode className="mB50" size={512} value={account.address} />
+            <div className="flex alignCenter mBauto">
+                <DisplayAddress
+                    className="body2 mL20"
+                    address={account.address}
+                    format={AddressDisplayFormat.DoubleLine}
+                />
+                <CopyButton className="mL20" value={account.address} />
+            </div>
+        </>
+    );
 
     return (
         <PageLayout>
@@ -44,15 +59,11 @@ export default function ShowAccountAddress() {
                 </IconButton>
 
                 <h2 className="m0 mBauto">{account.name}</h2>
-                <QRCode className="mB50" size={512} value={account.address} />
-                <div className="flex alignCenter mBauto">
-                    <DisplayAddress
-                        className="body2 mL20"
-                        format={AddressDisplayFormat.DoubleLine}
-                        address={account.address}
-                    />
-                    <CopyButton className="mL20" value={account.address} />
-                </div>
+                <VerifyAddress
+                    account={account}
+                    className="mBauto mTauto"
+                    display={display}
+                />
             </PageLayout.Container>
         </PageLayout>
     );

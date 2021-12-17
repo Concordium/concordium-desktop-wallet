@@ -3,7 +3,6 @@ import { useDispatch } from 'react-redux';
 import QRCode from 'qrcode.react';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
-
 import ExpandIcon from '@resources/svg/expand.svg';
 import Card from '~/cross-app-components/Card';
 import routes from '~/constants/routes.json';
@@ -14,6 +13,7 @@ import DisplayAddress, {
 
 import { Account, ClassName } from '../../utils/types';
 import CopyButton from '../../components/CopyButton';
+import VerifyAddress from './VerifyAddress';
 
 import styles from './Accounts.module.scss';
 
@@ -33,6 +33,24 @@ export default function ShowAccountAddress({
     const dispatch = useDispatch();
     const Component = asCard ? Card : 'div';
 
+    const display = (
+        <>
+            <QRCode className="m20" value={account.address} size={200} />
+            <div className={styles.displayAddress}>
+                <DisplayAddress
+                    className="mH40"
+                    lineClassName="body3"
+                    address={account.address}
+                    format={AddressDisplayFormat.DoubleLine}
+                />
+                <CopyButton
+                    className={styles.displayAddressCopy}
+                    value={account.address}
+                />
+            </div>
+        </>
+    );
+
     return (
         <Component
             className={clsx(
@@ -47,16 +65,8 @@ export default function ShowAccountAddress({
             >
                 <ExpandIcon height="22" />
             </IconButton>
-            <QRCode className="m20" value={account.address} size={200} />
-            <div className="flex">
-                <DisplayAddress
-                    className="mL20"
-                    lineClassName="body3"
-                    format={AddressDisplayFormat.DoubleLine}
-                    address={account.address}
-                />
-                <CopyButton className="mL20" value={account.address} />
-            </div>
+
+            <VerifyAddress account={account} display={display} />
         </Component>
     );
 }
