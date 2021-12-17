@@ -4,10 +4,8 @@ import { RemoveBaker } from '~/utils/types';
 import { useAccountName } from '~/utils/dataHooks';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
-import DisplayAddress from '../DisplayAddress';
 import routes from '~/constants/routes.json';
-
-import styles from './transferDetails.module.scss';
+import { DisplayFromAccount } from './DisplayAccount';
 
 interface Props {
     transaction: RemoveBaker;
@@ -22,11 +20,9 @@ export default function DisplayAddBaker({ transaction }: Props) {
 
     return (
         <>
-            <p className={styles.title}>From account:</p>
-            <p className={styles.name}>{senderName}</p>
-            <DisplayAddress
+            <DisplayFromAccount
+                name={senderName}
                 address={transaction.sender}
-                lineClassName={styles.address}
             />
             {Boolean(isSingleSig) || (
                 <DisplayTransactionExpiryTime

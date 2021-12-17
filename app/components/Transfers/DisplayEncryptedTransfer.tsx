@@ -11,7 +11,7 @@ import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import DisplayMemo from './DisplayMemo';
-import DisplayAddress from '../DisplayAddress';
+import { DisplayFromAccount, DisplayToAccount } from './DisplayAccount';
 
 import styles from './transferDetails.module.scss';
 
@@ -35,19 +35,12 @@ export default function DisplayEncryptedTransfer({
     const singleSigTransfer = useRouteMatch(routes.SUBMITTRANSFER);
     return (
         <>
-            <p className={styles.title}>From account:</p>
-            <p className={styles.name}>{fromName}</p>
-            <DisplayAddress
-                address={transaction.sender}
-                lineClassName={styles.address}
-            />
-            <p className={styles.title}>To account:</p>
-            <p className={styles.name}>{to?.name}</p>
-            <DisplayAddress
+            <DisplayFromAccount name={fromName} address={transaction.sender} />
+            <DisplayToAccount
+                name={to?.name}
+                note={to?.note}
                 address={transaction.payload.toAddress}
-                lineClassName={styles.address}
             />
-            {to?.note && <p className={styles.note}>Note: {to?.note}</p>}
             <p className={styles.title}>Amount:</p>
             <p className={styles.amount}>
                 {displayAsGTU(transaction.payload.plainTransferAmount)}

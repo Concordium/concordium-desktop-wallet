@@ -5,8 +5,8 @@ import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import { useAccountName } from '~/utils/dataHooks';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
-import DisplayAddress from '../DisplayAddress';
 import routes from '~/constants/routes.json';
+import { DisplayFromAccount } from './DisplayAccount';
 
 import styles from './transferDetails.module.scss';
 
@@ -25,11 +25,9 @@ export default function DisplayUpdateBakerRestakeEarnings({
 
     return (
         <>
-            <p className={styles.title}>From account:</p>
-            <p className={styles.name}>{senderName}</p>
-            <DisplayAddress
+            <DisplayFromAccount
+                name={senderName}
                 address={transaction.sender}
-                lineClassName={styles.address}
             />
             <p className={styles.title}>Restake earnings:</p>
             <p className={styles.amount}>

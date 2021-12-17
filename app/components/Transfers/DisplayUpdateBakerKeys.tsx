@@ -6,8 +6,8 @@ import { useAccountName } from '~/utils/dataHooks';
 import PublicKey from '~/pages/multisig/common/PublicKey/PublicKey';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
-import DisplayAddress from '../DisplayAddress';
 import routes from '~/constants/routes.json';
+import { DisplayFromAccount } from './DisplayAccount';
 
 import styles from './transferDetails.module.scss';
 
@@ -24,11 +24,9 @@ export default function DisplayUpdateBakerKeys({ transaction }: Props) {
 
     return (
         <>
-            <p className={styles.title}>From account:</p>
-            <p className={styles.name}>{senderName}</p>
-            <DisplayAddress
+            <DisplayFromAccount
+                name={senderName}
                 address={transaction.sender}
-                lineClassName={styles.address}
             />
             <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
             <p className={styles.title}>Public keys:</p>

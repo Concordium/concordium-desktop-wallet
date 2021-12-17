@@ -103,8 +103,8 @@ function displayAccount(account: Account | undefined) {
             </h2>
             {account ? (
                 <DisplayAddress
-                    outerClassName="mB5 mT5"
-                    lineClassName="textFaded body5"
+                    className="mB5 mT5"
+                    lineClassName="body4"
                     address={account?.address}
                 />
             ) : null}

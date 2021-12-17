@@ -2,8 +2,9 @@ import clsx from 'clsx';
 import React, { ReactNode } from 'react';
 import { getGTUSymbol } from '~/utils/gtu';
 import { AddressBookEntry, Account } from '~/utils/types';
-import styles from './ProposalDetails.module.scss';
 import DisplayAddress from '~/components/DisplayAddress';
+
+import styles from './ProposalDetails.module.scss';
 
 const placeholder = <p className={styles.placeholder}>To be determined</p>;
 
@@ -16,7 +17,7 @@ const formatAccount = (account: Account | AddressBookEntry) => (
     <>
         {formatValue(account.name)}
         <DisplayAddress
-            outerClassName={styles.note}
+            className={styles.note}
             lineClassName="body5 textFaded"
             address={account.address}
         />

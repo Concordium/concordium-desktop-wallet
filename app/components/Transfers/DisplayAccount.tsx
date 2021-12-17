@@ -21,7 +21,11 @@ export default function DisplayAccount({ label, name, address, note }: Props) {
                     {note && <p className={styles.note}>{note}</p>}
                 </div>
             )}
-            <DisplayAddress address={address} lineClassName={styles.address} />
+            <DisplayAddress
+                address={address}
+                className={styles.addressContainer}
+                lineClassName="mH5"
+            />
         </>
     );
 }

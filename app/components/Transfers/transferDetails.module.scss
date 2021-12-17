@@ -19,11 +19,15 @@
     margin: 0;
 }
 
-.address,
+.addressContainer,
 .note {
     composes: value;
     font-size: $font-size-body4;
-    margin: 0;
+}
+
+.addressContainer {
+    max-width: 300px;
+    margin: auto;
 }
 
 .amount {
@@ -40,6 +44,7 @@
 
 .note {
     color: $color-text-faded;
+    margin: 0;
 }
 
 .memo {

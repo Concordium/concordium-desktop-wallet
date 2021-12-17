@@ -19,7 +19,9 @@ import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
 import { chooseFileDestination } from '~/utils/FileHelper';
-import DisplayAddress from '~/components/DisplayAddress';
+import DisplayAddress, {
+    AddressDisplayFormat,
+} from '~/components/DisplayAddress';
 import TransactionFilters, {
     TransactionFiltersRef,
 } from '~/components/TransactionFilters';
@@ -306,10 +308,12 @@ export default function AccountReport({ location }: Props) {
                                                     <div>
                                                         <p>{account.name}</p>
                                                         <DisplayAddress
-                                                            outerClassName={
+                                                            className={
                                                                 styles.address
                                                             }
-                                                            lineLength={25}
+                                                            format={
+                                                                AddressDisplayFormat.DoubleLine
+                                                            }
                                                             address={
                                                                 account.address
                                                             }

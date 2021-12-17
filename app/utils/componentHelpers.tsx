@@ -16,6 +16,19 @@ export function ensureProps<TProps>(
     };
 }
 
+/**
+ * Partially apply component, creating a new component more tailored to a specific purpose
+ *
+ * @example
+ *  Props {
+ *      name: string;
+ *      gender: 'male' | 'female';
+ *  }
+ *
+ *  function Person(p: Props) {...}
+ *
+ *  const Man = partialApply(Person, {gender: 'male'}); // <Man name="John" />
+ */
 export function partialApply<P, A extends Partial<P>>(
     Component: ComponentType<P>,
     apply: A
