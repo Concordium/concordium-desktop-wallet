@@ -4,6 +4,7 @@ import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect } from 'react-router';
 import type { Buffer } from 'buffer/';
+import clsx from 'clsx';
 import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
 import { parse } from '~/utils/JSONHelper';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
@@ -326,7 +327,7 @@ export default function SubmitTransaction({ location }: Props) {
                         }
                         className={styles.summary}
                     >
-                        <div className="mT40">
+                        <div className={clsx(styles.summaryContent, 'pT40')}>
                             <TransactionDetails transaction={transaction} />
                         </div>
                     </Card>

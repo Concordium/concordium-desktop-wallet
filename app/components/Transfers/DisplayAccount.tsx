@@ -23,7 +23,7 @@ export default function DisplayAccount({ label, name, address, note }: Props) {
             )}
             <DisplayAddress
                 address={address}
-                className={styles.addressContainer}
+                className={styles.address}
                 lineClassName="mH5"
             />
         </>
