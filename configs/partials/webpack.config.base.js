@@ -6,6 +6,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 const { dependencies: externals } = require('../../app/package.json');
 const CheckTargetNet = require('../../internals/scripts/CheckTargetNet');
 
@@ -88,5 +89,8 @@ module.exports = {
             /\.\.\/pkg\/node_sdk_helpers/,
             path.resolve(__dirname, '../..', 'internals/mocks/empty.js')
         ),
+        new WasmPackPlugin({
+            crateDirectory: path.resolve(__dirname, '.'),
+        }),
     ],
 };
