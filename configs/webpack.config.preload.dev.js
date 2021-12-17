@@ -10,6 +10,7 @@ CheckNodeEnv('development');
 DeleteSourceMaps();
 
 module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
+    devtool: 'inline-source-map',
     mode: 'development',
     target: 'electron-main',
     entry: [
