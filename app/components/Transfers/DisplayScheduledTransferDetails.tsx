@@ -55,6 +55,7 @@ export default function DisplayScheduledTransfer({
             )}
             <h5 className={styles.title}>Individual releases:</h5>
             <ScheduleList
+                className={styles.value}
                 schedule={transaction.payload.schedule.map(toReleaseSchedule)}
             />
         </div>
