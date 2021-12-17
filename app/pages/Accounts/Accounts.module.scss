@@ -55,3 +55,29 @@
     align-items: center;
     position: relative;
 }
+
+.verifyAddress {
+    position: relative;
+    align-self: stretch;
+    margin-left: -20px;
+    margin-right: -20px;
+}
+
+.verifyAddressCloseButton {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+}
+
+.displayAddress {
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.displayAddressCopy {
+    position: absolute;
+    right: 0;
+    top: calc(50% - 17px);
+    height: 34px;
+}

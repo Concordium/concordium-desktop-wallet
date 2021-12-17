@@ -43,7 +43,7 @@ pub fn generate_unsigned_credential_ext(
     prf_key_raw: &str,
     use_deprecated: bool,
 ) -> String {
-    let raw_type = if use_deprecated { RawBlsType::SeedDeprecated } else { RawBlsType::Seed };
+    let raw_type = if use_deprecated { RawBlsType::SeedDeprecated } else { RawBlsType::Bls };
     let prf_key = get_prf_key(prf_key_raw, raw_type).expect("Unable to compute prf key");
     let id_cred_sec = get_id_cred_sec(id_cred_sec_raw, raw_type).expect("Unable to compute id cred sec");
     match generate_unsigned_credential_aux(input, id_cred_sec, prf_key) {
@@ -81,7 +81,7 @@ pub fn decrypt_amounts_ext(
     prf_key_raw: &str,
     use_deprecated: bool,
 ) -> String {
-    let raw_type = if use_deprecated { RawBlsType::SeedDeprecated } else { RawBlsType::Seed };
+    let raw_type = if use_deprecated { RawBlsType::SeedDeprecated } else { RawBlsType::Bls };
     let prf_key = get_prf_key(prf_key_raw, raw_type).expect("Unable to compute prf key");
     match decrypt_amounts_aux(input, prf_key) {
         Ok(s) => s,
@@ -95,7 +95,7 @@ pub fn create_sec_to_pub_ext(
     prf_key_raw: &str,
     use_deprecated: bool,
 ) -> String {
-    let raw_type = if use_deprecated { RawBlsType::SeedDeprecated } else { RawBlsType::Seed };
+    let raw_type = if use_deprecated { RawBlsType::SeedDeprecated } else { RawBlsType::Bls };
     let prf_key = get_prf_key(prf_key_raw, raw_type).expect("Unable to compute prf key");
     match create_sec_to_pub_aux(input, prf_key) {
         Ok(s) => s,
@@ -109,7 +109,7 @@ pub fn create_pub_to_sec_ext(
     prf_key_raw: &str,
     use_deprecated: bool,
 ) -> String {
-    let raw_type = if use_deprecated { RawBlsType::SeedDeprecated } else { RawBlsType::Seed };
+    let raw_type = if use_deprecated { RawBlsType::SeedDeprecated } else { RawBlsType::Bls };
     let prf_key = get_prf_key(prf_key_raw, raw_type).expect("Unable to compute prf key");
     match create_pub_to_sec_aux(input, prf_key) {
         Ok(s) => s,
@@ -123,7 +123,7 @@ pub fn create_encrypted_transfer_ext(
     prf_key_raw: &str,
     use_deprecated: bool,
 ) -> String {
-    let raw_type = if use_deprecated { RawBlsType::SeedDeprecated } else { RawBlsType::Seed };
+    let raw_type = if use_deprecated { RawBlsType::SeedDeprecated } else { RawBlsType::Bls };
     let prf_key = get_prf_key(prf_key_raw, raw_type).expect("Unable to compute prf key");
     match create_encrypted_transfer_aux(input, prf_key) {
         Ok(s) => s,
@@ -137,7 +137,7 @@ pub fn create_genesis_account_ext(
     id_cred_sec_raw: &str,
     prf_key_raw: &str,
 ) -> String {
-    let raw_type = RawBlsType::Seed;
+    let raw_type = RawBlsType::Bls;
     let prf_key = get_prf_key(prf_key_raw, raw_type).expect("Unable to compute prf key");
     let id_cred_sec = get_id_cred_sec(id_cred_sec_raw, raw_type).expect("Unable to compute prf key");
     match create_genesis_account(input, id_cred_sec, prf_key) {

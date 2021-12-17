@@ -109,6 +109,11 @@ export enum IdentityStatus {
 // decoding the seed as Hex.
 export type IdentityVersion = 1 | 0;
 
+export enum BlsKeyTypes {
+    Seed = 0,
+    Key = 1,
+}
+
 interface BaseIdentity {
     status: IdentityStatus;
     id: number;
@@ -1403,7 +1408,7 @@ export enum PrintErrorTypes {
     NoPrinters = 'no valid printers available',
 }
 
-export type PrivateKeySeeds = {
+export type PrivateKeys = {
     idCredSec: Buffer;
     prfKey: Buffer;
 };

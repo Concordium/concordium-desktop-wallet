@@ -18,6 +18,7 @@ import {
     CreationKeys,
     CommitmentsRandomness,
     IdentityVersion,
+    BlsKeyTypes,
 } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
@@ -33,18 +34,20 @@ const identityCreatedUsingDeprecatedKeyGen = (version: IdentityVersion) =>
     version === 0;
 
 /**
- * Returns the PrfKey and IdCredSec seeds for the given identity.
+ * Returns the PrfKey and IdCredSec for the given identity.
+ * identityVersion 0 gives the seeds, and 1 gives the BLS keys.
  */
 async function getSecretsFromLedger(
     ledger: ConcordiumLedgerClient,
     displayMessage: (message: string) => void,
-    identityNumber: number
+    identityNumber: number,
+    keyType: BlsKeyTypes
 ) {
     displayMessage('Please accept to create credential on device');
     const {
         prfKey: prfKeyRaw,
         idCredSec: idCredSecRaw,
-    } = await ledger.getPrivateKeySeeds(identityNumber);
+    } = await ledger.getPrivateKeys(identityNumber, keyType);
 
     const prfKey = prfKeyRaw.toString('hex');
     const idCredSec = idCredSecRaw.toString('hex');
@@ -55,6 +58,7 @@ export async function exportKeysFromLedger(
     identityNumber: number,
     credentialNumber: number,
     displayMessage: (message: string) => void,
+    keyType: BlsKeyTypes,
     ledger: ConcordiumLedgerClient
 ): Promise<CreationKeys> {
     const path = getAccountPath({
@@ -65,7 +69,8 @@ export async function exportKeysFromLedger(
     const { prfKey, idCredSec } = await getSecretsFromLedger(
         ledger,
         displayMessage,
-        identityNumber
+        identityNumber,
+        keyType
     );
     displayMessage(
         `Please confirm exporting
@@ -446,7 +451,8 @@ export async function createGenesisAccount(
     const { prfKey, idCredSec } = await getSecretsFromLedger(
         ledger,
         displayMessage,
-        identityNumber
+        identityNumber,
+        BlsKeyTypes.Key
     );
     displayMessage('Please confirm exporting public-key on device');
     const publicKey = await ledger.getPublicKey(path);
