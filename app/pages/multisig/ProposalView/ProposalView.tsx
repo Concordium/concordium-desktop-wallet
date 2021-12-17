@@ -149,7 +149,6 @@ function ProposalView({ proposal }: ProposalViewProps) {
         <MultiSignatureLayout
             pageTitle={handler.title}
             print={handler.print(transaction, proposal.status, image)}
-            stepTitle={`Transaction proposal - ${handler.type}`}
             disableBack={isAccountTransaction}
             closeRoute={CLOSE_ROUTE}
             delegateScroll

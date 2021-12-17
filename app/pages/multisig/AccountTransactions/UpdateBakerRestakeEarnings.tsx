@@ -34,6 +34,7 @@ import DatePicker from '~/components/Form/DatePicker';
 import { isMultiSig } from '~/utils/accountHelpers';
 import Label from '~/components/Label';
 import Radios from '~/components/Form/Radios';
+import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
 
@@ -58,6 +59,9 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
         transaction,
         setTransaction,
     ] = useState<UpdateBakerRestakeEarnings>();
+    const handler = findAccountTransactionHandler(
+        TransactionKindId.Update_baker_restake_earnings
+    );
 
     const estimatedFee = useTransactionCostEstimate(
         TransactionKindId.Update_baker_restake_earnings,
@@ -98,11 +102,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
     };
 
     return (
-        <MultiSignatureLayout
-            pageTitle="Multi signature transactions | Update baker restake earnings"
-            stepTitle="Transaction proposal - Update baker restake earnings"
-            delegateScroll
-        >
+        <MultiSignatureLayout pageTitle={handler.title} delegateScroll>
             <SimpleErrorModal
                 show={Boolean(error)}
                 header="Unable to perform transfer"

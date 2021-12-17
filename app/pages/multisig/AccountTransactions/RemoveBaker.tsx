@@ -34,6 +34,7 @@ import {
 } from '~/utils/accountRouterHelpers';
 import DatePicker from '~/components/Form/DatePicker';
 import { isMultiSig } from '~/utils/accountHelpers';
+import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
 
@@ -54,6 +55,10 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
     const [account, setAccount] = useState<Account | undefined>(state?.account);
     const [error, setError] = useState<string>();
     const [transaction, setTransaction] = useState<RemoveBaker>();
+
+    const handler = findAccountTransactionHandler(
+        TransactionKindId.Remove_baker
+    );
 
     const cooldownUntil = useCalcBakerStakeCooldownUntil();
 
@@ -86,11 +91,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
     };
 
     return (
-        <MultiSignatureLayout
-            pageTitle="Multi signature transactions | Remove baker"
-            stepTitle="Transaction proposal - Remove baker"
-            delegateScroll
-        >
+        <MultiSignatureLayout pageTitle={handler.title} delegateScroll>
             <SimpleErrorModal
                 show={Boolean(error)}
                 header="Unable to perform transfer"

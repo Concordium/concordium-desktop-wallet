@@ -42,10 +42,9 @@ import {
 import DatePicker from '~/components/Form/DatePicker';
 import ExportBakerKeys from './ExportBakerKeys';
 import { isMultiSig } from '~/utils/accountHelpers';
+import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
-
-const pageTitle = 'Multi signature transactions | Update baker keys';
 
 interface PageProps {
     exchangeRate: Fraction;
@@ -65,6 +64,9 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
     const [error, setError] = useState<string>();
     const [bakerKeys, setBakerKeys] = useState<BakerKeys>();
     const [transaction, setTransaction] = useState<UpdateBakerKeys>();
+    const handler = findAccountTransactionHandler(
+        TransactionKindId.Remove_baker
+    );
 
     const estimatedFee = useTransactionCostEstimate(
         TransactionKindId.Update_baker_keys,
@@ -149,11 +151,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
     };
 
     return (
-        <MultiSignatureLayout
-            pageTitle={pageTitle}
-            stepTitle="Transaction proposal - Update baker keys"
-            delegateScroll
-        >
+        <MultiSignatureLayout pageTitle={handler.title} delegateScroll>
             <SimpleErrorModal
                 show={Boolean(error)}
                 header="Unable to perform transfer"

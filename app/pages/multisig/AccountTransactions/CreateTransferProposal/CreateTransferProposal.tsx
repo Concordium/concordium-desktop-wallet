@@ -228,11 +228,7 @@ function CreateTransferProposal({
     }
 
     return (
-        <MultiSignatureLayout
-            pageTitle={handler.title}
-            stepTitle={`Transaction proposal - ${handler.type}`}
-            delegateScroll
-        >
+        <MultiSignatureLayout pageTitle={handler.title} delegateScroll>
             <div className={styles.subtractContainerPadding}>
                 <Columns divider columnScroll columnClassName={styles.column}>
                     <Columns.Column

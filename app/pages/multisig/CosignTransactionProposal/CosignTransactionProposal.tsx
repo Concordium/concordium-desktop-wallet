@@ -169,7 +169,7 @@ function CosignTransactionProposal({
                         : MultiSignatureTransactionStatus.Open,
                     image
                 )}
-                stepTitle={`Transaction signing confirmation - ${transactionHandler.type}`}
+                stepTitle="Transaction signing confirmation"
                 delegateScroll
             >
                 <Ledger ledgerCallback={signingFunction}>

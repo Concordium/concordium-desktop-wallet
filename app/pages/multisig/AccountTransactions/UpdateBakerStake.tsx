@@ -42,6 +42,7 @@ import {
 import { ensureChainData, ChainData } from '../common/withChainData';
 import DatePicker from '~/components/Form/DatePicker';
 import { isMultiSig } from '~/utils/accountHelpers';
+import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
 
@@ -74,6 +75,9 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
     const [stake, setStake] = useState<string>();
     const [error, setError] = useState<string>();
     const [transaction, setTransaction] = useState<UpdateBakerStake>();
+    const handler = findAccountTransactionHandler(
+        TransactionKindId.Update_baker_stake
+    );
 
     const estimatedFee = useTransactionCostEstimate(
         TransactionKindId.Update_baker_stake,
@@ -111,11 +115,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
     };
 
     return (
-        <MultiSignatureLayout
-            pageTitle="Multi signature transactions | Update baker stake"
-            stepTitle="Transaction proposal - Update baker stake"
-            delegateScroll
-        >
+        <MultiSignatureLayout pageTitle={handler.title} delegateScroll>
             <SimpleErrorModal
                 show={Boolean(error)}
                 header="Unable to perform transfer"

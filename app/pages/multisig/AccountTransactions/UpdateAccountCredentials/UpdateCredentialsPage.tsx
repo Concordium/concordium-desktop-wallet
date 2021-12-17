@@ -492,11 +492,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
     ].includes(location);
 
     return (
-        <MultiSignatureLayout
-            pageTitle="Multi signature transactions | Update account credentials"
-            stepTitle="Transaction proposal - Update account credentials"
-            delegateScroll
-        >
+        <MultiSignatureLayout pageTitle={handler.title} delegateScroll>
             <Columns
                 className={styles.subtractContainerPadding}
                 columnScroll

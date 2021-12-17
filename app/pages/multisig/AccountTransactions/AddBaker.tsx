@@ -50,12 +50,11 @@ import {
 } from '~/utils/accountRouterHelpers';
 import AddBakerDetailsForm from '~/components/AddBakerDetailsForm';
 import ExportBakerKeys from './ExportBakerKeys';
-
-import styles from './MultisignatureAccountTransactions.module.scss';
 import DatePicker from '~/components/Form/DatePicker';
 import { isMultiSig } from '~/utils/accountHelpers';
+import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 
-const pageTitle = 'Multi signature transactions | Add baker';
+import styles from './MultisignatureAccountTransactions.module.scss';
 
 interface PageProps extends ChainData {
     exchangeRate: Fraction;
@@ -94,6 +93,8 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
         exchangeRate,
         account?.signatureThreshold
     );
+
+    const handler = findAccountTransactionHandler(TransactionKindId.Add_baker);
 
     const onGenerateKeys = () => {
         if (account === undefined) {
@@ -182,11 +183,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
     };
 
     return (
-        <MultiSignatureLayout
-            pageTitle={pageTitle}
-            stepTitle="Transaction proposal - Add baker"
-            delegateScroll
-        >
+        <MultiSignatureLayout pageTitle={handler.title} delegateScroll>
             <SimpleErrorModal
                 show={Boolean(error)}
                 header="Unable to perform transfer"
