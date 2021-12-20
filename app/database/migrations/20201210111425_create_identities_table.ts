@@ -1,12 +1,9 @@
 import { Knex } from 'knex';
-import {
-    walletTable,
-    identitiesTable,
-} from '../../constants/databaseNames.json';
+import databaseNames from '../../constants/databaseNames.json';
 
 export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable(
-        identitiesTable,
+        databaseNames.identitiesTable,
         (table: Knex.TableBuilder) => {
             table.increments('id');
             table.integer('identityNumber');
@@ -20,12 +17,12 @@ export async function up(knex: Knex): Promise<void> {
             table
                 .integer('walletId')
                 .references('id')
-                .inTable(walletTable)
+                .inTable(databaseNames.walletTable)
                 .notNullable();
         }
     );
 }
 
 export async function down(knex: Knex): Promise<void> {
-    return knex.schema.dropTable(identitiesTable);
+    return knex.schema.dropTable(databaseNames.identitiesTable);
 }

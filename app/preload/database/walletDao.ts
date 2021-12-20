@@ -1,6 +1,6 @@
 import { Hex, WalletEntry, WalletType } from '~/utils/types';
 import { knex } from '~/database/knex';
-import { walletTable } from '~/constants/databaseNames.json';
+import databaseNames from '~/constants/databaseNames.json';
 import { WalletMethods } from '~/preload/preloadTypes';
 
 /**
@@ -9,7 +9,7 @@ import { WalletMethods } from '~/preload/preloadTypes';
  * @returns primary key for the wallet entry
  */
 async function getWalletId(identifier: Hex) {
-    const table = (await knex())(walletTable);
+    const table = (await knex())(databaseNames.walletTable);
     const result: WalletEntry = await table
         .where('identifier', identifier)
         .first();
@@ -26,7 +26,7 @@ async function getWalletId(identifier: Hex) {
  * @returns the id of the inserted row
  */
 async function insertWallet(identifier: Hex, type: WalletType) {
-    const table = (await knex())(walletTable);
+    const table = (await knex())(databaseNames.walletTable);
     return (await table.insert({ identifier, type }))[0];
 }
 

@@ -30,6 +30,7 @@ import Columns from '~/components/Columns';
 import styles from './AccountReport.module.scss';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
 import { globalSelector } from '~/features/GlobalSlice';
+import decryptTransactions from '~/utils/decryptTransactions';
 
 const decryptMessage = (name: string) =>
     `'${name}' has encrypted funds. To create a complete account report, we need to decrypt them. Otherwise this account will be skipped.`;
@@ -172,7 +173,8 @@ export default function AccountReport({ location }: Props) {
                         accountsToReport,
                         filters,
                         global,
-                        prfKeyMap
+                        prfKeyMap,
+                        decryptTransactions
                     );
                 } else {
                     await window.accountReport.single(
@@ -180,7 +182,8 @@ export default function AccountReport({ location }: Props) {
                         accountsToReport[0],
                         filters,
                         global,
-                        prfKeyMap
+                        prfKeyMap,
+                        decryptTransactions
                     );
                 }
                 setMakingReport(false);
