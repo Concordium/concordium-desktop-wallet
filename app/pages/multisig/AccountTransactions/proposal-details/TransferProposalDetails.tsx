@@ -47,7 +47,10 @@ export default function TransferProposalDetails({
         <Details>
             <AccountDetail title="Account" value={account} first />
             <AmountDetail title="Amount" value={amount} />
-            <DisplayEstimatedFee className="mT5" estimatedFee={estimatedFee} />
+            <DisplayEstimatedFee
+                className="mT10 mono"
+                estimatedFee={estimatedFee}
+            />
             {Boolean(amountError) && (
                 <p className="textError textCenter">{amountError}</p>
             )}

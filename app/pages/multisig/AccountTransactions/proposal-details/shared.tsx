@@ -15,13 +15,11 @@ export const formatNote = (text: ReactNode) => (
 
 const formatAccount = (account: Account | AddressBookEntry) => (
     <>
-        {formatValue(account.name)}
-        <DisplayAddress
-            className={styles.note}
-            lineClassName="body5 textFaded"
-            address={account.address}
-        />
-        {'note' in account && formatNote(account.note)}
+        <div className="mB10">
+            {formatValue(account.name)}
+            {'note' in account && formatNote(account.note)}
+        </div>
+        <DisplayAddress className={styles.address} address={account.address} />
     </>
 );
 const formatAmount = (amount: string) =>
