@@ -4,6 +4,7 @@
   "description": "concordium-desktop-wallet",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\" \"yarn build-preload\"",
+    "build-ci": "yarn build-main && concurrently \"yarn build-renderer\" \"yarn build-preload\"",
     "build-dll": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.renderer.dev.dll.js --color",
     "build-e2e": "cross-env E2E_BUILD=true yarn build",
     "build-main": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.main.prod.js --color",
@@ -25,7 +26,7 @@
     "name": "echo $npm_package_productName-$TARGET_NET",
     "package": "yarn build && node ./scripts/build.js",
     "package-mac-no-notarize": "export NOTARIZE=skip && yarn build && node ./scripts/build.js",
-    "postinstall": "node internals/scripts/CheckNativeDep.js && electron-builder install-app-deps && yarn build-dll && opencollective-postinstall  && sh ./internals/scripts/build_protos.sh",
+    "postinstall": "node internals/scripts/CheckNativeDep.js && electron-builder install-app-deps && yarn build-dll && opencollective-postinstall && sh ./internals/scripts/build_protos.sh",
     "postlint-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{ts,tsx,js,jsx,json,html,yml}'",
     "postlint-styles-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{css,scss}'",
     "preinstall": "node ./internals/scripts/CheckYarn.js",
