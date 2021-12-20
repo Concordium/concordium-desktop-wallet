@@ -7,9 +7,9 @@ import {
     app,
     MenuItem,
 } from 'electron';
-import { licenseNotices, supportForum } from '~/constants/urls.json';
-import { openRoute } from '~/constants/ipcRendererCommands.json';
-import { TERMS } from '~/constants/routes.json';
+import urls from '~/constants/urls.json';
+import ipcRendererCommands from '~/constants/ipcRendererCommands.json';
+import routes from '~/constants/routes.json';
 
 const isMac = process.platform === 'darwin';
 const isLinux = process.platform === 'linux';
@@ -53,20 +53,23 @@ export function createMenu(window: BrowserWindow) {
                 {
                     label: 'Terms and conditions',
                     click: () => {
-                        window.webContents?.send(openRoute, TERMS);
+                        window.webContents?.send(
+                            ipcRendererCommands.openRoute,
+                            routes.TERMS
+                        );
                     },
                 },
                 {
                     label: 'License notices',
                     click: () => {
-                        shell.openExternal(licenseNotices);
+                        shell.openExternal(urls.licenseNotices);
                     },
                 },
                 { type: 'separator' },
                 {
                     label: 'Concordium support forum',
                     click: () => {
-                        shell.openExternal(supportForum);
+                        shell.openExternal(urls.supportForum);
                     },
                 },
                 ...(isMac

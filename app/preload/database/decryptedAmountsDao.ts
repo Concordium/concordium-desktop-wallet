@@ -1,10 +1,10 @@
 import { DecryptedAmount } from '~/utils/types';
 import { knex } from '~/database/knex';
-import { decryptedAmountsTable } from '~/constants/databaseNames.json';
+import databaseNames from '~/constants/databaseNames.json';
 import { DecryptedAmountsMethods } from '../preloadTypes';
 
 async function insert(entry: DecryptedAmount) {
-    return (await knex())(decryptedAmountsTable).insert(entry);
+    return (await knex())(databaseNames.decryptedAmountsTable).insert(entry);
 }
 
 async function findEntries(
@@ -12,7 +12,7 @@ async function findEntries(
 ): Promise<DecryptedAmount[]> {
     return (await knex())
         .select<DecryptedAmount[]>()
-        .table(decryptedAmountsTable)
+        .table(databaseNames.decryptedAmountsTable)
         .whereIn('transactionHash', transactionHashes);
 }
 

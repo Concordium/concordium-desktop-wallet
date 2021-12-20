@@ -7,7 +7,7 @@ import IconButton from '~/cross-app-components/IconButton';
 import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
-import { alreadyPrinting } from '~/constants/errorMessages.json';
+import errorMessages from '~/constants/errorMessages.json';
 import { RootState } from '~/store/store';
 import { setPrinting } from '~/features/MiscSlice';
 
@@ -72,7 +72,7 @@ export default function PrintButton({
                     return setShowError({
                         show: true,
                         header: 'Already printing',
-                        content: alreadyPrinting,
+                        content: errorMessages.alreadyPrinting,
                     });
                 }}
             />

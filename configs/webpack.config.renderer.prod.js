@@ -4,7 +4,8 @@
  */
 
 const webpack = require('webpack');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const path = require('path');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { merge } = require('webpack-merge');
 const TerserPlugin = require('terser-webpack-plugin');
@@ -16,8 +17,15 @@ const { fromRoot } = require('./helpers/pathHelpers');
 CheckNodeEnv('production');
 DeleteSourceMaps();
 
+const devtoolsConfig =
+    process.env.DEBUG_PROD === 'true'
+        ? {
+              devtool: 'source-map',
+          }
+        : {};
+
 module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
-    devtool: process.env.DEBUG_PROD === 'true' ? 'source-map' : 'none',
+    ...devtoolsConfig,
     mode: 'production',
     target: 'web',
     entry: [
@@ -27,42 +35,31 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
     ],
 
     output: {
-        libraryTarget: 'var',
         path: fromRoot('./app/dist'),
         publicPath: './dist/',
         filename: 'renderer.prod.js',
+        library: {
+            type: 'umd',
+        },
     },
 
     optimization: {
-        minimizer: process.env.E2E_BUILD
-            ? []
-            : [
-                  new TerserPlugin({
-                      parallel: true,
-                      sourceMap: true,
-                      cache: true,
-                  }),
-                  new OptimizeCSSAssetsPlugin({
-                      cssProcessorOptions: {
-                          map: {
-                              inline: false,
-                              annotation: true,
-                          },
-                      },
-                  }),
-              ],
+        minimize: true,
+        minimizer: [
+            new TerserPlugin({
+                parallel: true,
+                sourceMap: true,
+                cache: true,
+            }),
+            new CssMinimizerPlugin(),
+        ],
+    },
+
+    experiments: {
+        asyncWebAssembly: true,
     },
 
     plugins: [
-        /**
-         * Create global constants which can be configured at compile time.
-         *
-         * Useful for allowing different behaviour between development builds and
-         * release builds
-         *
-         * NODE_ENV should be production so that modules do not perform certain
-         * development checks
-         */
         new webpack.EnvironmentPlugin({
             NODE_ENV: 'production',
             DEBUG_PROD: false,

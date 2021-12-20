@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { render } from 'react-dom';
 import { AppContainer as ReactHotAppContainer } from 'react-hot-loader';
 import { push } from 'connected-react-router';
@@ -22,7 +22,7 @@ window.addListener.logFromMain((_, ...args: any[]) => console.log(...args));
 window.autoUpdate.onUpdateAvailable((_, info: UpdateInfo) => {
     store.dispatch(triggerUpdateNotification(info.version));
 });
-const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
+const AppContainer = ReactHotAppContainer;
 
 document.addEventListener('DOMContentLoaded', () =>
     render(

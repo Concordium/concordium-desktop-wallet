@@ -1,12 +1,9 @@
 import { Knex } from 'knex';
-import {
-    accountsTable,
-    preferencesTable,
-} from '~/constants/databaseNames.json';
+import databaseNames from '~/constants/databaseNames.json';
 import { Preference, PreferenceKey } from '../types';
 
 export async function up(knex: Knex): Promise<void> {
-    await knex.schema.createTable(preferencesTable, (table) => {
+    await knex.schema.createTable(databaseNames.preferencesTable, (table) => {
         table.string('key').primary();
         table.string('value').nullable();
     });
@@ -19,24 +16,24 @@ export async function up(knex: Knex): Promise<void> {
         },
     ];
 
-    await knex.batchInsert(preferencesTable, initialPreferences);
+    await knex.batchInsert(databaseNames.preferencesTable, initialPreferences);
 
-    await knex.schema.alterTable(accountsTable, (table) => {
+    await knex.schema.alterTable(databaseNames.accountsTable, (table) => {
         table.dropColumn('rewardFilter');
     });
 
-    return knex.schema.alterTable(accountsTable, (table) => {
+    return knex.schema.alterTable(databaseNames.accountsTable, (table) => {
         table.string('transactionFilter').defaultTo('{}');
     });
 }
 
 export async function down(knex: Knex): Promise<void> {
-    await knex.schema.dropTable(preferencesTable);
+    await knex.schema.dropTable(databaseNames.preferencesTable);
 
-    await knex.schema.alterTable(accountsTable, (table) => {
+    await knex.schema.alterTable(databaseNames.accountsTable, (table) => {
         table.dropColumn('transactionFilter');
     });
-    return knex.schema.alterTable(accountsTable, (table) => {
+    return knex.schema.alterTable(databaseNames.accountsTable, (table) => {
         table.string('rewardFilter').defaultTo('[]');
     });
 }

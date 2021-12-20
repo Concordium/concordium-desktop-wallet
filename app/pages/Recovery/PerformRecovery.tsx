@@ -21,7 +21,7 @@ import Button from '~/cross-app-components/Button';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import ChoiceModal from '~/components/ChoiceModal';
 import { noOp } from '~/utils/basicHelpers';
-import { identitySpacesBetweenWarning } from '~/constants/recoveryConstants.json';
+import recoveryConstants from '~/constants/recoveryConstants.json';
 import { useAsyncMemo } from '~/utils/hooks';
 import AbortController from '~/utils/AbortController';
 
@@ -193,7 +193,9 @@ export default function PerformRecovery({
             let moved = false;
             if (
                 emptyIndices > 0 &&
-                (emptyIndices + 1) % identitySpacesBetweenWarning === 0
+                (emptyIndices + 1) %
+                    recoveryConstants.identitySpacesBetweenWarning ===
+                    0
             ) {
                 moved = await promptStop(emptyIndices);
             }

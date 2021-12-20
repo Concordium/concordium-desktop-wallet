@@ -1,7 +1,7 @@
 import React from 'react';
 import { RegisterOptions, useFormContext, Validate } from 'react-hook-form';
 import { EqualRecord, GasRewards } from '~/utils/types';
-import { rewardFractionResolution } from '~/constants/updateConstants.json';
+import updateConstants from '~/constants/updateConstants.json';
 import {
     FormGasRewardFractionField,
     GasRewardFractionField,
@@ -36,7 +36,7 @@ const validationRules: RegisterOptions = {
     required: 'Value is required',
     min: { value: 0, message: 'Value can not be negative' },
     max: {
-        value: rewardFractionResolution,
+        value: updateConstants.rewardFractionResolution,
         message: 'Value can not be above 100',
     },
     validate: {

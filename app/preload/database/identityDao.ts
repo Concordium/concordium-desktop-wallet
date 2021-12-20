@@ -1,12 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Knex } from 'knex';
 import { knex } from '~/database/knex';
-import {
-    identitiesTable,
-    accountsTable,
-    credentialsTable,
-    addressBookTable,
-} from '~/constants/databaseNames.json';
+import databaseNames from '~/constants/databaseNames.json';
 import { removeInitialAccount, serializeAccountFields } from './accountDao';
 import {
     Account,
@@ -27,7 +22,7 @@ import { IdentityMethods } from '~/preload/preloadTypes';
  */
 export async function getNextIdentityNumber(walletId: number): Promise<number> {
     const maxIdentityNumber = await (await knex())
-        .table<Identity>(identitiesTable)
+        .table<Identity>(databaseNames.identitiesTable)
         .where('walletId', walletId)
         .max<{ maxIdentityNumber: number }>(
             'identityNumber as maxIdentityNumber'
@@ -45,14 +40,16 @@ export async function getNextIdentityNumber(walletId: number): Promise<number> {
 }
 
 async function insertIdentity(identity: Partial<Identity> | Identity[]) {
-    return (await knex())(identitiesTable).insert(identity);
+    return (await knex())(databaseNames.identitiesTable).insert(identity);
 }
 
 async function updateIdentity(
     id: number,
     updatedValues: Record<string, unknown>
 ) {
-    return (await knex())(identitiesTable).where({ id }).update(updatedValues);
+    return (await knex())(databaseNames.identitiesTable)
+        .where({ id })
+        .update(updatedValues);
 }
 
 /**
@@ -60,11 +57,16 @@ async function updateIdentity(
  * @returns a list of identities that have been created from the supplied wallet
  */
 async function getIdentitiesForWallet(walletId: number): Promise<Identity[]> {
-    return (await knex()).select().table(identitiesTable).where({ walletId });
+    return (await knex())
+        .select()
+        .table(databaseNames.identitiesTable)
+        .where({ walletId });
 }
 
 async function removeIdentity(id: number, trx: Knex.Transaction) {
-    const table = (await knex())(identitiesTable).transacting(trx);
+    const table = (await knex())(databaseNames.identitiesTable).transacting(
+        trx
+    );
     return table.where({ id }).del();
 }
 
@@ -78,10 +80,10 @@ async function rejectIdentityAndInitialAccount(
     detail: string
 ) {
     (await knex()).transaction(async (trx) => {
-        await trx(identitiesTable)
+        await trx(databaseNames.identitiesTable)
             .where({ id: identityId })
             .update({ status: IdentityStatus.Rejected, detail });
-        await trx(accountsTable)
+        await trx(databaseNames.accountsTable)
             .where({ identityId, isInitial: 1 })
             .update({ status: AccountStatus.Rejected });
     });
@@ -97,14 +99,14 @@ async function insertPendingIdentityAndInitialAccount(
 ) {
     return (await knex()).transaction(async (trx) => {
         const identityId = (
-            await trx.table(identitiesTable).insert(identity)
+            await trx.table(databaseNames.identitiesTable).insert(identity)
         )[0];
         const initialAccountWithIdentityId = {
             ...initialAccount,
             identityId,
         };
         await trx
-            .table(accountsTable)
+            .table(databaseNames.accountsTable)
             .insert(serializeAccountFields(initialAccountWithIdentityId));
         return identityId;
     });
@@ -127,19 +129,21 @@ async function confirmIdentity(
     addressBookEntry: AddressBookEntry
 ) {
     (await knex()).transaction(async (trx) => {
-        await trx(identitiesTable).where({ id: identityId }).update({
-            status: IdentityStatus.Confirmed,
-            identityObject: identityObjectJson,
-        });
-        await trx(accountsTable)
+        await trx(databaseNames.identitiesTable)
+            .where({ id: identityId })
+            .update({
+                status: IdentityStatus.Confirmed,
+                identityObject: identityObjectJson,
+            });
+        await trx(databaseNames.accountsTable)
             .where({ identityId, isInitial: 1 })
             .first()
             .update({
                 status: AccountStatus.Confirmed,
                 address: accountAddress,
             });
-        await trx(credentialsTable).insert(credential);
-        await trx(addressBookTable).insert(addressBookEntry);
+        await trx(databaseNames.credentialsTable).insert(credential);
+        await trx(databaseNames.addressBookTable).insert(addressBookEntry);
     });
 }
 
@@ -158,7 +162,9 @@ async function removeIdentityAndInitialAccount(identityId: number) {
 export async function getIdentityVersion(
     identityId: number
 ): Promise<IdentityVersion | undefined> {
-    const identity = await (await knex())<Identity>(identitiesTable)
+    const identity = await (await knex())<Identity>(
+        databaseNames.identitiesTable
+    )
         .where({ id: identityId })
         .first();
     return identity?.version;
