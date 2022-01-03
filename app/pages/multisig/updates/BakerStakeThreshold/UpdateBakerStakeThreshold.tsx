@@ -1,6 +1,5 @@
 import React from 'react';
 import Form from '~/components/Form';
-import Label from '~/components/Label';
 import { onlyDigitsNoLeadingZeroes } from '~/utils/basicHelpers';
 import { UpdateProps } from '~/utils/transactionTypes';
 import { EqualRecord } from '~/utils/types';
@@ -23,13 +22,12 @@ export default function UpdateBakerStakeThreshold({
         blockSummary.updates.chainParameters.minimumThresholdForBaking;
 
     return (
-        <>
-            <div className="body1">
-                <Label>Current baker stake threshold (µCCD)</Label>
-                {currentBakerStakeThreshold.toString()}
+        <div>
+            <div className="body3 mono mB10">
+                Current threshold: {currentBakerStakeThreshold.toString()}
             </div>
             <Form.Input
-                className="body1"
+                className="body2"
                 name={fieldNames.threshold}
                 label="New baker stake threshold (µCCD)"
                 defaultValue={currentBakerStakeThreshold.toString()}
@@ -45,6 +43,6 @@ export default function UpdateBakerStakeThreshold({
                         'Must be a valid number',
                 }}
             />
-        </>
+        </div>
     );
 }

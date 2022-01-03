@@ -20,6 +20,7 @@ import {
     toRewardDistributionValue,
 } from './util';
 import { parseMintPerSlot } from '~/utils/mintDistributionHelpers';
+import Label from '~/components/Label';
 
 export interface UpdateMintDistributionFields {
     mintPerSlot: string;
@@ -62,7 +63,7 @@ export default function UpdateMintDistribution({
     return (
         <>
             <div>
-                <h5>Current mint distribution</h5>
+                <Label className="mB5">Current mint distribution</Label>
                 <MintRateInput
                     value={mintPerSlot.toString()}
                     slotsPerYear={slotsPerYear}
@@ -76,7 +77,7 @@ export default function UpdateMintDistribution({
                 />
             </div>
             <div>
-                <h5>New mint distribution</h5>
+                <Label className="mB5">New mint distribution</Label>
                 <FormMintRateInput
                     name={fieldNames.mintPerSlot}
                     defaultValue={
