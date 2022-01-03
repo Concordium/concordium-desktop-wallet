@@ -1,10 +1,7 @@
 import React from 'react';
 import { UpdateProps } from '~/utils/transactionTypes';
 import { EqualRecord } from '~/utils/types';
-import {
-    RelativeRateField,
-    FormRelativeRateField,
-} from '../../common/RelativeRateField';
+import { FormRelativeRateField } from '../../common/RelativeRateField';
 import {
     isPositiveNumber,
     validBigIntValues,
@@ -27,15 +24,15 @@ export default function UpdateEuroPerEnergy({
 }: UpdateProps) {
     const exchangeRate = getCurrentValue(blockSummary);
     const currentValue: RelativeRateValue = fromExchangeRate(exchangeRate);
+    const { numeratorUnit, denominatorUnit } = commonFieldProps;
 
     return (
-        <>
-            <RelativeRateField
-                {...commonFieldProps}
-                label="Current euro per energy"
-                value={currentValue}
-                disabled
-            />
+        <div>
+            <div className="body3 mono mB10">
+                Current rate: {currentValue.denominator} {denominatorUnit.value}{' '}
+                = {numeratorUnit.value}
+                {currentValue.numerator}
+            </div>
             <FormRelativeRateField
                 {...commonFieldProps}
                 name={fieldNames.euroPerEnergyRate}
@@ -48,6 +45,6 @@ export default function UpdateEuroPerEnergy({
                     },
                 }}
             />
-        </>
+        </div>
     );
 }
