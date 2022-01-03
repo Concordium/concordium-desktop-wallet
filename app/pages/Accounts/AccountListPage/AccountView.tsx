@@ -10,7 +10,7 @@ import routes from '~/constants/routes.json';
 
 import AccountBalanceView from '../AccountBalanceView';
 import AccountViewActions from '../AccountViewActions';
-import FailedInitialAccount from './FailedInitialAccount';
+import FailedAccountModal from './FailedAccountModal';
 import BasicTransferRoutes from '../BasicTransferRoutes';
 import TransactionsAndAddress from './TransactionsAndAddress';
 import DecryptComponent from '../DecryptComponent';
@@ -32,8 +32,8 @@ export default withAccountSync(function AccountView() {
 
     return (
         <>
-            {account.isInitial && accountInfo === undefined && (
-                <FailedInitialAccount account={account} />
+            {accountInfo === undefined && (
+                <FailedAccountModal account={account} />
             )}
             {account.status === AccountStatus.Confirmed && (
                 <>
