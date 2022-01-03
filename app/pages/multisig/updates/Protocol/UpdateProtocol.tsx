@@ -38,7 +38,7 @@ export default function UpdateProtocol({
     return (
         <>
             <Form.TextArea
-                className="body1"
+                className="body2"
                 name={fieldNames.message}
                 label="Message:"
                 defaultValue={defaults.message || undefined}
@@ -46,7 +46,7 @@ export default function UpdateProtocol({
                 rules={{ required: 'Message is required' }}
             />
             <Form.Input
-                className="body1"
+                className="body2"
                 name={fieldNames.specificationUrl}
                 defaultValue={defaults.specificationUrl || undefined}
                 label="Specification URL:"
@@ -55,7 +55,7 @@ export default function UpdateProtocol({
                 rules={{ required: 'Specification URL is required' }}
             />
             <Form.TextArea
-                className="body1"
+                className="body2"
                 name={fieldNames.specificationHash}
                 defaultValue={defaults.specificationHash || undefined}
                 label="Specification hash:"
