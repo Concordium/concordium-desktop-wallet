@@ -61,7 +61,10 @@ export default function TransferProposalDetails({
                     title="Release schedule"
                     value={schedule}
                     format={(s) => (
-                        <ScheduleList schedule={s.map(toReleaseSchedule)} />
+                        <ScheduleList
+                            schedule={s.map(toReleaseSchedule)}
+                            className="mono"
+                        />
                     )}
                 />
             ) : null}

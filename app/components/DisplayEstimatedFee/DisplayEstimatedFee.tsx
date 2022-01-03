@@ -23,5 +23,9 @@ export default function DisplayEstimatedFee({
     } else {
         fee = 'To be determined';
     }
-    return <p className={clsx(styles.root, className)}>Estimated fee: {fee}</p>;
+    return (
+        <p className={clsx(styles.root, 'mono', className)}>
+            Estimated fee: {fee}
+        </p>
+    );
 }
