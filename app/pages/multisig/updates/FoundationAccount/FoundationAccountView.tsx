@@ -1,4 +1,3 @@
-import clsx from 'clsx';
 import React from 'react';
 import Loading from '~/cross-app-components/Loading';
 import { FoundationAccount } from '~/utils/types';
@@ -31,7 +30,7 @@ export default withChainData(function FoundationAccountView({
                 <h5 className="mB0">Current foundation account address:</h5>
                 <DisplayAddress
                     className="mT5"
-                    lineClassName={clsx(styles.accountAddress, 'textFaded')}
+                    lineClassName={styles.accountAddress}
                     address={currentFoundationAccount}
                 />
             </div>
