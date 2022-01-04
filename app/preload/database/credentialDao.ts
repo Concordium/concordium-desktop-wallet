@@ -1,10 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { knex } from '~/database/knex';
-import {
-    credentialsTable,
-    identitiesTable,
-    walletTable,
-} from '~/constants/databaseNames.json';
+import databaseNames from '~/constants/databaseNames.json';
 import { Credential, CredentialWithIdentityNumber } from '~/utils/types';
 import { CredentialMethods } from '~/preload/preloadTypes';
 
@@ -18,38 +14,42 @@ import { CredentialMethods } from '~/preload/preloadTypes';
 async function getCredentialsOfAccount(accountAddress: string) {
     const credentials = await (await knex())
         .select()
-        .table(credentialsTable)
+        .table(databaseNames.credentialsTable)
         .join(
-            identitiesTable,
-            `${credentialsTable}.identityId`,
+            databaseNames.identitiesTable,
+            `${databaseNames.credentialsTable}.identityId`,
             '=',
-            `${identitiesTable}.id`
+            `${databaseNames.identitiesTable}.id`
         )
         .join(
-            walletTable,
-            `${identitiesTable}.walletId`,
+            databaseNames.walletTable,
+            `${databaseNames.identitiesTable}.walletId`,
             '=',
-            `${walletTable}.id`
+            `${databaseNames.walletTable}.id`
         )
         .where({ accountAddress })
         .select(
-            `${credentialsTable}.*`,
-            `${identitiesTable}.identityNumber as identityNumber`,
-            `${walletTable}.id as walletId`
+            `${databaseNames.credentialsTable}.*`,
+            `${databaseNames.identitiesTable}.identityNumber as identityNumber`,
+            `${databaseNames.walletTable}.id as walletId`
         );
     return credentials;
 }
 
 export async function insertCredential(credential: Credential) {
-    return (await knex())(credentialsTable).insert(credential);
+    return (await knex())(databaseNames.credentialsTable).insert(credential);
 }
 
 export async function removeCredential(credential: Partial<Credential>) {
-    return (await knex())(credentialsTable).where(credential).del();
+    return (await knex())(databaseNames.credentialsTable)
+        .where(credential)
+        .del();
 }
 
 export async function removeCredentialsOfAccount(accountAddress: string) {
-    return (await knex())(credentialsTable).where({ accountAddress }).del();
+    return (await knex())(databaseNames.credentialsTable)
+        .where({ accountAddress })
+        .del();
 }
 
 export async function getCredentials(): Promise<
@@ -57,16 +57,16 @@ export async function getCredentials(): Promise<
 > {
     const credentials = await (await knex())
         .select()
-        .table(credentialsTable)
+        .table(databaseNames.credentialsTable)
         .join(
-            identitiesTable,
-            `${credentialsTable}.identityId`,
+            databaseNames.identitiesTable,
+            `${databaseNames.credentialsTable}.identityId`,
             '=',
-            `${identitiesTable}.id`
+            `${databaseNames.identitiesTable}.id`
         )
         .select(
-            `${credentialsTable}.*`,
-            `${identitiesTable}.identityNumber as identityNumber`
+            `${databaseNames.credentialsTable}.*`,
+            `${databaseNames.identitiesTable}.identityNumber as identityNumber`
         );
     return credentials;
 }
@@ -80,14 +80,14 @@ export async function getCredentialsForIdentity(
 ): Promise<Credential[]> {
     return (await knex())
         .select()
-        .table(credentialsTable)
+        .table(databaseNames.credentialsTable)
         .where({ identityId });
 }
 
 export async function getNextCredentialNumber(identityId: number) {
     const credentials = await (await knex())
         .select()
-        .table(credentialsTable)
+        .table(databaseNames.credentialsTable)
         .where({ identityId });
     if (credentials.length === 0) {
         return 0;
@@ -104,11 +104,11 @@ export async function updateCredentialIndex(
     credentialIndex: number | undefined
 ) {
     if (credentialIndex === undefined) {
-        return (await knex())(credentialsTable)
+        return (await knex())(databaseNames.credentialsTable)
             .where({ credId })
             .update({ credentialIndex: null });
     }
-    return (await knex())(credentialsTable)
+    return (await knex())(databaseNames.credentialsTable)
         .where({ credId })
         .update({ credentialIndex });
 }
@@ -117,7 +117,7 @@ export async function updateCredential(
     credId: string,
     updatedValues: Partial<Credential>
 ) {
-    return (await knex())(credentialsTable)
+    return (await knex())(databaseNames.credentialsTable)
         .where({ credId })
         .update(updatedValues);
 }

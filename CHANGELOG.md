@@ -12,7 +12,7 @@
 
 -   Added a GTU drop option for testnet and stagenet.
 -   In the case of a failed identity, the error details received from the identity provider are now displayed to the user.
--   UI flows for baker transactions for singler signer accounts.
+-   UI flows for baker transactions for single signer accounts.
 
 ### Changed
 

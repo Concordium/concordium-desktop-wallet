@@ -13,6 +13,7 @@ import { AccountForm, CredentialBlob, fieldNames } from '../types';
 import { CreationKeys } from '~/utils/types';
 import errorMessages from '~/constants/errorMessages.json';
 import SimpleLedgerWithCreationKeys from '~/components/ledger/SimpleLedgerWithCreationKeys';
+import { getKeyExportType } from '~/utils/identityHelpers';
 
 import generalStyles from '../GenerateCredential.module.scss';
 import splitViewStyles from '../SplitViewRouter/SplitViewRouter.module.scss';
@@ -140,6 +141,7 @@ export default function SignCredential({ onSigned }: Props): JSX.Element {
             ledgerCallback={sign}
             credentialNumber={credentialNumber}
             preCallback={checkWallet}
+            exportType={getKeyExportType(identity.version)}
         />
     );
 }

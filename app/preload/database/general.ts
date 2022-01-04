@@ -2,7 +2,7 @@
 import { knex as externalKnex } from 'knex';
 import { invalidateKnexSingleton, knex, setPassword } from '~/database/knex';
 import migrate from '~/database/migration';
-import { settingsTable } from '~/constants/databaseNames.json';
+import databaseNames from '~/constants/databaseNames.json';
 import config from '~/database/knexfile';
 import { GeneralMethods } from '~/preload/preloadTypes';
 
@@ -13,7 +13,7 @@ import { GeneralMethods } from '~/preload/preloadTypes';
  */
 async function checkDatabaseAccess(): Promise<boolean> {
     try {
-        const table = (await knex())(settingsTable);
+        const table = (await knex())(databaseNames.settingsTable);
         await table.select();
         return true;
     } catch {

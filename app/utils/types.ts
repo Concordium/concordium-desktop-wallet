@@ -109,6 +109,11 @@ export enum IdentityStatus {
 // decoding the seed as Hex.
 export type IdentityVersion = 1 | 0;
 
+export enum BlsKeyTypes {
+    Seed = 0,
+    Key = 1,
+}
+
 interface BaseIdentity {
     status: IdentityStatus;
     id: number;
@@ -553,6 +558,10 @@ export interface TransferTransaction {
 export interface TransferTransactionWithNames extends TransferTransaction {
     fromName?: string;
     toName?: string;
+}
+
+export interface DecryptedTransferTransaction extends TransferTransaction {
+    decryptedAmount: string;
 }
 
 export type EncryptedAmount = Hex;
@@ -1225,6 +1234,9 @@ export type NotOptional<T> = {
     [P in keyof T]-?: T[P];
 };
 
+export type MakeRequired<T, K extends keyof T> = NotOptional<Pick<T, K>> &
+    Omit<T, K>;
+
 /**
  * @description
  * Object where keys and values are the same. Useful for storing names of form fields, and other things.
@@ -1396,7 +1408,7 @@ export enum PrintErrorTypes {
     NoPrinters = 'no valid printers available',
 }
 
-export type PrivateKeySeeds = {
+export type PrivateKeys = {
     idCredSec: Buffer;
     prfKey: Buffer;
 };

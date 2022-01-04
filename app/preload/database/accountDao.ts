@@ -1,12 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Knex } from 'knex';
 import { knex } from '~/database/knex';
-import {
-    accountsTable,
-    identitiesTable,
-    addressBookTable,
-    credentialsTable,
-} from '~/constants/databaseNames.json';
+import databaseNames from '~/constants/databaseNames.json';
 import {
     Account,
     Identity,
@@ -49,17 +44,17 @@ function prepareAccounts(accounts: Account | Account[]) {
 
 function selectAccounts(builder: Knex) {
     return builder
-        .table(accountsTable)
+        .table(databaseNames.accountsTable)
         .join(
-            identitiesTable,
-            `${accountsTable}.identityId`,
+            databaseNames.identitiesTable,
+            `${databaseNames.accountsTable}.identityId`,
             '=',
-            `${identitiesTable}.id`
+            `${databaseNames.identitiesTable}.id`
         )
         .select(
-            `${accountsTable}.*`,
-            `${identitiesTable}.name as identityName`,
-            `${identitiesTable}.identityNumber as identityNumber`
+            `${databaseNames.accountsTable}.*`,
+            `${databaseNames.identitiesTable}.name as identityName`,
+            `${databaseNames.identitiesTable}.identityNumber as identityNumber`
         );
 }
 
@@ -84,14 +79,16 @@ export async function getAccount(
 }
 
 export async function insertAccount(account: Account | Account[]) {
-    return (await knex())(accountsTable).insert(prepareAccounts(account));
+    return (await knex())(databaseNames.accountsTable).insert(
+        prepareAccounts(account)
+    );
 }
 
 export async function updateAccount(
     address: string,
     updatedValues: Partial<Account>
 ) {
-    return (await knex())(accountsTable)
+    return (await knex())(databaseNames.accountsTable)
         .where({ address })
         .update(serializeAccountFields(updatedValues));
 }
@@ -99,13 +96,13 @@ export async function updateAccount(
 export async function findAccounts(condition: Partial<Account>) {
     const accounts = await (await knex())
         .select()
-        .table(accountsTable)
+        .table(databaseNames.accountsTable)
         .where(condition);
     return parseAccounts(accounts);
 }
 
 export async function removeAccount(accountAddress: string) {
-    return (await knex())(accountsTable)
+    return (await knex())(databaseNames.accountsTable)
         .where({ address: accountAddress })
         .del();
 }
@@ -114,7 +111,7 @@ export async function removeInitialAccount(
     identityId: number,
     trx: Knex.Transaction
 ) {
-    const table = (await knex())(accountsTable).transacting(trx);
+    const table = (await knex())(databaseNames.accountsTable).transacting(trx);
     return table.where({ identityId, isInitial: 1 }).del();
 }
 
@@ -124,7 +121,7 @@ export async function updateInitialAccount(
 ) {
     return (await knex())
         .select()
-        .table(accountsTable)
+        .table(databaseNames.accountsTable)
         .where({ identityId, isInitial: 1 })
         .first()
         .update(serializeAccountFields(updatedValues));
@@ -139,23 +136,23 @@ async function insertAccountTransactionally(
     transaction: Knex.Transaction
 ) {
     const abe = await transaction
-        .table(addressBookTable)
+        .table(databaseNames.addressBookTable)
         .where({ address: account.address })
         .first()
         .select();
     if (abe) {
         await transaction
-            .table(accountsTable)
+            .table(databaseNames.accountsTable)
             .insert(serializeAccountFields({ ...account, name: abe.name }));
         await transaction
-            .table(addressBookTable)
+            .table(databaseNames.addressBookTable)
             .where({ address: account.address })
             .update({ readOnly: true });
     } else {
         await transaction
-            .table(accountsTable)
+            .table(databaseNames.accountsTable)
             .insert(serializeAccountFields(account));
-        await transaction.table(addressBookTable).insert({
+        await transaction.table(databaseNames.addressBookTable).insert({
             address: account.address,
             name: account.name,
             readOnly: true,
@@ -173,7 +170,7 @@ async function insertFromRecovery(
     transaction: Knex.Transaction
 ): Promise<void> {
     const accountInDatabase = await transaction
-        .table(accountsTable)
+        .table(databaseNames.accountsTable)
         .where({ address: account.address })
         .first()
         .select();
@@ -184,7 +181,7 @@ async function insertFromRecovery(
             transaction
         );
     }
-    await transaction.table(credentialsTable).insert(credential);
+    await transaction.table(databaseNames.credentialsTable).insert(credential);
 }
 
 /** Inserts accounts and credentials for a specific identity, from recovery.
@@ -196,7 +193,9 @@ async function insertFromRecoveryNewIdentity(
 ) {
     return (await knex()).transaction(async (transaction) => {
         const identityId = (
-            await transaction.table(identitiesTable).insert(identity)
+            await transaction
+                .table(databaseNames.identitiesTable)
+                .insert(identity)
         )[0];
         for (const pair of recovered) {
             const account = { ...pair.account, identityId };

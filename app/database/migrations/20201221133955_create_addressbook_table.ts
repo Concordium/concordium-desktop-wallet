@@ -1,9 +1,9 @@
 import { Knex } from 'knex';
-import { addressBookTable } from '../../constants/databaseNames.json';
+import databaseNames from '../../constants/databaseNames.json';
 
 export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable(
-        addressBookTable,
+        databaseNames.addressBookTable,
         (table: Knex.TableBuilder) => {
             table.string('name');
             table.string('address', 50).unique();
@@ -14,5 +14,5 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(knex: Knex): Promise<void> {
-    return knex.schema.dropTable(addressBookTable);
+    return knex.schema.dropTable(databaseNames.addressBookTable);
 }

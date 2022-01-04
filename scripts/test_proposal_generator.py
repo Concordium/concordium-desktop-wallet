@@ -1,3 +1,6 @@
+# Tests for proposal_generator.py
+# Version 0.2.0
+
 from decimal import Decimal
 import unittest
 import random
@@ -30,7 +33,7 @@ class TestTransferAmount(unittest.TestCase):
             x = random.randrange(1,(TransferAmount.max_amount+1)//1000000)
             y = random.randrange(1,1000000)
             z = x*1000000+y*10**(6-len(str(y)))
-            with self.subTest(i=z):
+            with self.subTest(z):
                 self.assertEqual(TransferAmount.from_string(f"{x}.{y}",'.',','),TransferAmount(z))
                 self.assertEqual(TransferAmount.from_string(f"{x:,}.{y}",'.',','),TransferAmount(z))
 
@@ -185,8 +188,8 @@ class TestReleaseScheduleBuilder(unittest.TestCase):
         ir_time = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00"))
         frem_time = ir_time + relativedelta(days =+ 1)
         #No release should be skipped if the earliest release is before the initial release
-        with self.subTest(i=1):
-            er_time = ir_time + relativedelta(seconds =- 1)
+        with self.subTest(1):
+            er_time = ir_time + relativedelta(seconds = -1)
             expected_rt = [ir_time] + [frem_time + relativedelta(months =+ i) for i in range(num_releases-1)]
             (release_times,skipped_releases) = build_release_schedule(ir_time,frem_time,er_time,num_releases)
             self.assertEqual(skipped_releases,0)
@@ -194,15 +197,15 @@ class TestReleaseScheduleBuilder(unittest.TestCase):
             self.assertEqual(len(release_times),num_releases-skipped_releases)
         #Test release schedule for earliest release right before the (i+1)th remaining release
         for i in range(0,num_releases-1):
-            with self.subTest(i=i+2):
-                er_time = frem_time + relativedelta(months =+ i,seconds =- 1)
-                expected_rt = [er_time] + [frem_time + relativedelta(months =+ j) for j in range(i,num_releases-1)]
+            with self.subTest(i+2):
+                er_time = frem_time + relativedelta(months = +i, seconds = -1)
+                expected_rt = [er_time] + [frem_time + relativedelta(months = +j) for j in range(i,num_releases-1)]
                 (release_times,skipped_releases) = build_release_schedule(ir_time,frem_time,er_time,num_releases)
                 self.assertEqual(skipped_releases,i)
                 self.assertEqual(len(release_times),num_releases-skipped_releases)
         #Test release schedule for earliest release after all releases
-        with self.subTest(i=num_releases+1):
-                er_time = frem_time + relativedelta(months =+ num_releases-2,seconds =+ 1)
+        with self.subTest(num_releases+1):
+                er_time = frem_time + relativedelta(months = +num_releases-2, seconds = +1)
                 expected_rt = [er_time]
                 (release_times,skipped_releases) = build_release_schedule(ir_time,frem_time,er_time,num_releases)
                 self.assertEqual(skipped_releases,num_releases-1)
@@ -212,7 +215,7 @@ class TestReleaseScheduleBuilder(unittest.TestCase):
         num_releases = 10
         #Initial release after first remaining release
         time1 = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00"))
-        time2 = time1 + relativedelta(hours =+ 1)
+        time2 = time1 + relativedelta(hours = +1)
         not_relevant = time1
         self.assertRaises(ValueError,build_release_schedule,time2,time1,not_relevant,num_releases)
 
@@ -221,7 +224,7 @@ class TestAmountToScheduledList(unittest.TestCase):
     def test_valid_amounts(self):
         initial_amount = TransferAmount(1000)
         remaining_amount = TransferAmount(10)
-        num_releases = 10 #
+        num_releases = 10
         skipped = 3
         expected_result = [TransferAmount(1003)] + [TransferAmount(1)]*5 + [TransferAmount(2)]
         result = amounts_to_scheduled_list(initial_amount,remaining_amount,num_releases,skipped)    
@@ -229,14 +232,14 @@ class TestAmountToScheduledList(unittest.TestCase):
 
     def test_random_valid_amounts(self):
         for i in range(0,1000):
-            with self.subTest(i=i):
+            with self.subTest(i):
                 n = random.randrange(1,25) #num_releases := n+1
                 skipped = random.randrange(0,n+1) #skipped releases
                 #Amount for the initial release
                 init = random.randrange(1,10000)
                 #Amount for each remaining release
                 q = random.randrange(1,10000)
-                #Remainder payed out with the last release
+                #Remainder paid out with the last release
                 r = random.randrange(0,n) 
                 initial_amount = TransferAmount(init)
                 remaining_amount = TransferAmount(q*n+r)
@@ -254,7 +257,7 @@ class TestAmountToScheduledList(unittest.TestCase):
 class TestMain(unittest.TestCase):
 
     def test_valid_welcome_transfer(self):
-        time1 = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00")) + relativedelta(days =+ 10)
+        time1 = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00")) + relativedelta(days = +10)
         transfers = [
             {
                 "sender_address": '38Dh9TwGWCieKppVu3ft91bjPvpyt7hWWNdFTRz9P3CCdvYHjE',
@@ -272,7 +275,7 @@ class TestMain(unittest.TestCase):
 		"thousands_sep" : ',',
 		"decimal_sep" : '.'
 	    }
-        transaction_expiry = datetime.now() + relativedelta(hours =+ 2) #Must be the same as in main
+        transaction_expiry = datetime.now() + relativedelta(hours = +2) #Must be the same as in main
         expected_content = {
 			"sender": '38Dh9TwGWCieKppVu3ft91bjPvpyt7hWWNdFTRz9P3CCdvYHjE',
 			"nonce": "", 
@@ -302,7 +305,7 @@ class TestMain(unittest.TestCase):
                            
     def test_valid_transfer(self):
         time1 = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00")) + relativedelta(months =- 3)
-        time2 = time1 + relativedelta(months =+ 1)
+        time2 = time1 + relativedelta(months = +1)
         transfers = [
             {
                 "sender_address": '38Dh9TwGWCieKppVu3ft91bjPvpyt7hWWNdFTRz9P3CCdvYHjE',
@@ -322,8 +325,8 @@ class TestMain(unittest.TestCase):
 		"decimal_sep" : '.'
 	    }
         #These two dates must be the same as in main
-        transaction_expiry = datetime.now() + relativedelta(hours =+ 2)
-        earliest_release_time = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00")) + relativedelta(days =+ 1)
+        transaction_expiry = datetime.now() + relativedelta(hours = +2)
+        earliest_release_time = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00")) + relativedelta(days = +1)
         expected_content = {
 			"sender": '38Dh9TwGWCieKppVu3ft91bjPvpyt7hWWNdFTRz9P3CCdvYHjE',
 			"nonce": "", 
@@ -337,8 +340,8 @@ class TestMain(unittest.TestCase):
 			"payload": {
 				"toAddress": '4QbKSwdnF1PTtN6LqdTfmUt7FQDTToxFVV746ysy7TazZy4zx7',
 				"schedule": [{'amount': 1003, 'timestamp': int(earliest_release_time.timestamp())*1000}] + 
-                [{'amount': 1, 'timestamp': int((time1 + relativedelta(months =+ i)).timestamp())*1000} for i in range(4,9)] +
-                [{'amount': 2, 'timestamp': int((time1 + relativedelta(months =+ 9)).timestamp())*1000}]
+                [{'amount': 1, 'timestamp': int((time1 + relativedelta(months = +i)).timestamp())*1000} for i in range(4,9)] +
+                [{'amount': 2, 'timestamp': int((time1 + relativedelta(months = +9)).timestamp())*1000}]
 			},
 			"signatures": {}
 		}
