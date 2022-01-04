@@ -4,7 +4,6 @@ import { FieldValues } from 'react-hook-form';
 import Columns from '~/components/Columns';
 import { BlockSummary, KeysWithThreshold } from '~/node/NodeApiTypes';
 import routes from '~/constants/routes.json';
-import styles from '../../common/MultiSignatureFlowPage.module.scss';
 import ProposeNewKey from './ProposeNewKey';
 import KeySetSize from './KeySetSize';
 import {
@@ -18,6 +17,8 @@ import KeySetThreshold from './KeySetThreshold';
 import { KeyUpdateEntry } from './KeyUpdateEntry';
 import { typeToDisplay } from '~/utils/updates/HigherLevelKeysHelpers';
 import SetExpiryAndEffectiveTime from './SetExpiryAndEffectiveTime';
+
+import styles from '../../common/MultiSignatureFlowPage.module.scss';
 
 interface Props {
     defaults: FieldValues;
@@ -152,7 +153,12 @@ export default function UpdateHigherLevelKeys({
     }
 
     return (
-        <Columns divider columnScroll columnClassName={styles.column}>
+        <Columns
+            divider
+            columnScroll
+            className={styles.subtractContainerPadding}
+            columnClassName={styles.column}
+        >
             <Columns.Column header="Transaction details">
                 <div className={styles.columnContent}>
                     <h5 className="mB5">Signature threshold</h5>

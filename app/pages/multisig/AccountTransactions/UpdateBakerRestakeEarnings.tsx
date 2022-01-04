@@ -109,7 +109,11 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                 content={error}
                 onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
             />
-            <Columns divider columnScroll>
+            <Columns
+                divider
+                columnScroll
+                className={styles.subtractContainerPadding}
+            >
                 <Columns.Column
                     header="Transaction details"
                     className={styles.stretchColumn}
