@@ -2,6 +2,12 @@
 
 ## 1.3.0
 
+### Fixed
+
+-   Fixed identity issuance with dts.
+
+## 1.3.0
+
 ### Added
 
 -   Added a GTU drop option for testnet and stagenet.
