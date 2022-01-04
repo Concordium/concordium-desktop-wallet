@@ -57,7 +57,7 @@ export default function CreateAddAnonymityRevoker({
     return (
         <>
             <Form.TextArea
-                className="body1"
+                className="body2"
                 name={fieldNames.name}
                 label={fieldDisplays.name}
                 defaultValue={defaults.name || undefined}
@@ -65,7 +65,7 @@ export default function CreateAddAnonymityRevoker({
                 rules={{ required: requiredMessage(fieldDisplays.name) }}
             />
             <Form.Input
-                className="body1"
+                className="body2"
                 name={fieldNames.url}
                 defaultValue={defaults.url || undefined}
                 label={fieldDisplays.url}
@@ -73,14 +73,14 @@ export default function CreateAddAnonymityRevoker({
                 rules={{ required: requiredMessage(fieldDisplays.url) }}
             />
             <Form.TextArea
-                className="body1"
+                className="body2"
                 name={fieldNames.description}
                 defaultValue={defaults.description || undefined}
                 label={fieldDisplays.description}
                 placeholder={enterHere(fieldDisplays.description)}
             />
             <Form.Input
-                className="body1"
+                className="body2"
                 name={fieldNames.arIdentity}
                 defaultValue={defaults.arIdentity || undefined}
                 label={fieldDisplays.arIdentity}
@@ -94,7 +94,7 @@ export default function CreateAddAnonymityRevoker({
                 }}
             />
             <Form.TextArea
-                className="body1"
+                className="body2"
                 name={fieldNames.arPublicKey}
                 defaultValue={defaults.arPublicKey || undefined}
                 label={fieldDisplays.arPublicKey}
