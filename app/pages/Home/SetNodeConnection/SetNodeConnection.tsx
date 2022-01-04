@@ -36,11 +36,12 @@ export default function SetNodeConnection() {
                     <Columns.Column className="textLeft">
                         <p className="mT0">
                             Most of the features in the Concordium Desktop
-                            Wallet requires an active connection to a node
-                            participating in the Concordium blockchain. If you
-                            already have your own node running, you can connect
-                            to it on the right. Make sure to input the correct
-                            IP address and port number.
+                            Wallet require an active connection to a node
+                            participating in the Concordium blockchain. You can
+                            either connect to a publically available node, or if
+                            you have your own node running you can connect to
+                            that instead. Make sure to input the correct IP
+                            address and port number.
                         </p>
                         <p>
                             If you do not have a node running yet, you can read
