@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.1
+
+### Fixed
+
+-   Fixed identity issuance with dts.
+
 ## 1.3.0
 
 ### Added
@@ -15,6 +21,7 @@
 -   Updated UI to reflect the rename of GTU to CCD, meaning anywhere tokens were referred to as GTU, it now says CCD. The GTU icon has also been replaced with the icon representing CCD.
 -   Datetimes are now selected with a date picker from a calendar.
 -   Finalized transactions are no longer stored in the local database, but are instead always fetched from the wallet proxy when needed.
+-   Updated the default node configuration to point to concordiumwalletnode.com.
 
 ### Fixed
 
