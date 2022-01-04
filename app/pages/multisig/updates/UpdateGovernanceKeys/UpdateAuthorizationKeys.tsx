@@ -261,12 +261,16 @@ export default function UpdateAuthorizationKeys({
     ) {
         return (
             <div key={accessStructure.type}>
-                <h2>{getAccessStructureTitle(accessStructure.type)}</h2>
-                <h3>
+                <h5 className="mB5">
+                    {getAccessStructureTitle(accessStructure.type)}
+                </h5>
+                <div className="mono">
                     Current threshold:{' '}
-                    {currentThresholds.get(accessStructure.type)}
-                </h3>
-                <h3>New threshold: {accessStructure.threshold}</h3>
+                    <b>{currentThresholds.get(accessStructure.type)}</b>
+                </div>
+                <div className="mono">
+                    New threshold: <b>{accessStructure.threshold}</b>
+                </div>
                 <ul>
                     {accessStructure.publicKeyIndicies.map((publicKeyIndex) => {
                         const matchingKey = keys.find(
@@ -316,15 +320,15 @@ export default function UpdateAuthorizationKeys({
             <Columns divider columnScroll columnClassName={styles.column}>
                 <Columns.Column header="Transaction details">
                     <div className={styles.columnContent}>
-                        <h2>Level 2 keys and their indices</h2>
-                        <p>
+                        <h5 className="mB5">Level 2 keys and their indices</h5>
+                        <div className="mono">
                             Current size of level 2 key set:{' '}
                             <b>{currentKeySetSize}</b>
-                        </p>
-                        <p>
+                        </div>
+                        <div className="mono">
                             New size of level 2 key set:{' '}
                             <b>{newLevel2Keys.keys.length}</b>
-                        </p>
+                        </div>
                         <ul>
                             {removeRemovedKeys(newLevel2Keys).keys.map(
                                 (key, index) => {

@@ -155,25 +155,27 @@ export default function UpdateHigherLevelKeys({
         <Columns divider columnScroll columnClassName={styles.column}>
             <Columns.Column header="Transaction details">
                 <div className={styles.columnContent}>
-                    <h5>Signature threshold</h5>
-                    <p>
+                    <h5 className="mB5">Signature threshold</h5>
+                    <div className="mono">
                         Current {typeToDisplay(type)} key signature threshold:{' '}
                         <b>{currentThreshold}</b>
-                    </p>
-                    <p>
+                    </div>
+                    <div className="mono">
                         New {typeToDisplay(type)} key signature threshold:{' '}
                         <b>{threshold}</b>
-                    </p>
-                    <h5>{typeToDisplay(type)} governance key updates</h5>
-                    <p>
+                    </div>
+                    <h5 className="mB5">
+                        {typeToDisplay(type)} governance key updates
+                    </h5>
+                    <div className="mono">
                         Current size of {typeToDisplay(type)} key set:{' '}
                         <b>{currentKeySetSize}</b>
-                    </p>
-                    <p>
+                    </div>
+                    <div className="mono">
                         New size of {typeToDisplay(type)} key set:{' '}
                         <b>{newKeySetSize}</b>
-                    </p>
-                    <ul>
+                    </div>
+                    <ul className="mT10">
                         {newKeys.map((keyWithStatus) => {
                             return (
                                 <KeyUpdateEntry
