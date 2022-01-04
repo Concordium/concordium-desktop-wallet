@@ -30,7 +30,9 @@ export default function ExpiredTransactionView({
         expiry < now
     ) {
         return (
-            <span className="textError mono">The transaction has expired</span>
+            <span className="textError mono body4">
+                The transaction has expired
+            </span>
         );
     }
     return null;

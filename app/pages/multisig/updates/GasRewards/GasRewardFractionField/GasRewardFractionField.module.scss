@@ -1,7 +1,7 @@
 @import 'config/bundle';
 
 .root {
-    font-size: $font-size-body1;
+    font-size: $font-size-body2;
     display: flex;
     width: 100%;
     justify-content: space-between;
@@ -10,6 +10,11 @@
 
 .disabled {
     color: $color-text-faded;
+}
+
+.display {
+    font-family: $font-family-mono;
+    font-size: $font-size-body3;
 }
 
 .value {

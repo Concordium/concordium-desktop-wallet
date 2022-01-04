@@ -48,13 +48,15 @@ interface GasRewardsFormProps {
     gasRewards: GasRewards;
     disabled?: boolean;
     readOnly?: boolean;
+    display?: boolean;
     title: string;
 }
 
 export default function GasRewardsForm({
     gasRewards,
     disabled = false,
-    readOnly = false,
+    display = false,
+    readOnly = display,
     title,
 }: GasRewardsFormProps): JSX.Element {
     const fields = Object.keys(fieldNames) as Array<keyof GasRewards>;
@@ -85,6 +87,7 @@ export default function GasRewardsForm({
                         value={value}
                         disabled={disabled}
                         readOnly={readOnly}
+                        display={display}
                     />
                 ) : (
                     <FormGasRewardFractionField

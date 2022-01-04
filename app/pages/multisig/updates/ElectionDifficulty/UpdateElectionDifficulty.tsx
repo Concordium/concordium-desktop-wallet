@@ -14,18 +14,15 @@ export default function UpdateElectionDifficulty({
         blockSummary.updates.chainParameters.electionDifficulty;
     const slotDuration = Number(consensusStatus.slotDuration);
     return (
-        <>
-            <ElectionDifficultyInput
-                label="Current election difficulty"
-                disabled
-                value={currentElectionDifficulty}
-                timePerSlot={slotDuration}
-            />
+        <div>
+            <div className="mono mB10">
+                Current election difficulty: {currentElectionDifficulty}
+            </div>
             <ElectionDifficultyInput
                 label="New election difficulty"
                 value={defaults.electionDifficulty || currentElectionDifficulty}
                 timePerSlot={slotDuration}
             />
-        </>
+        </div>
     );
 }
