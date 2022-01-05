@@ -92,6 +92,9 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(false), {
         new webpack.LoaderOptionsPlugin({
             debug: true,
         }),
+        new webpack.ProvidePlugin({
+            process: 'process/browser',
+        }),
     ],
 
     node: {
