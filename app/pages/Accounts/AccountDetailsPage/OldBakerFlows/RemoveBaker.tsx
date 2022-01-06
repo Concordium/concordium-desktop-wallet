@@ -7,9 +7,7 @@ import Card from '~/cross-app-components/Card';
 import routes from '~/constants/routes.json';
 import { stringify } from '~/utils/JSONHelper';
 import { createRemoveBakerTransaction } from '~/utils/transactionHelpers';
-import { SubmitTransactionLocationState } from '../SubmitTransaction/SubmitTransaction';
-
-import styles from './AccountDetailsPage.module.scss';
+import { SubmitTransactionLocationState } from '../../SubmitTransaction/SubmitTransaction';
 import { multiplyFraction } from '~/utils/basicHelpers';
 import BakerPendingChange from '~/components/BakerPendingChange';
 import { AccountInfo, NotOptional, TransactionKindId } from '~/utils/types';
@@ -20,6 +18,8 @@ import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
 import ensureExchangeRateAndNonce, {
     ExchangeRateAndNonceProps,
 } from '~/components/Transfers/ensureExchangeRateAndNonce';
+
+import styles from '../AccountDetailsPage.module.scss';
 
 interface Props extends NotOptional<ExchangeRateAndNonceProps> {
     accountInfo?: AccountInfo;

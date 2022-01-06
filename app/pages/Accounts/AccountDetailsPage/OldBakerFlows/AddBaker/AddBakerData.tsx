@@ -18,7 +18,7 @@ import {
     TransactionKindId,
 } from '~/utils/types';
 
-import styles from '../AccountDetailsPage.module.scss';
+import styles from '../../AccountDetailsPage.module.scss';
 
 type FormWrapperProps = Omit<
     PropsOf<typeof AddBakerDetailsForm>,

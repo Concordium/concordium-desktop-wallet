@@ -16,8 +16,8 @@ import { stringify } from '~/utils/JSONHelper';
 import { BakerKeys } from '~/utils/rustInterface';
 import { createAddBakerTransaction } from '~/utils/transactionHelpers';
 import { AddBakerPayload, NotOptional, TransactionKindId } from '~/utils/types';
-import { SubmitTransactionLocationState } from '../../SubmitTransaction/SubmitTransaction';
-import GenerateBakerKeys from '../GenerateBakerKeys';
+import { SubmitTransactionLocationState } from '../../../SubmitTransaction/SubmitTransaction';
+import GenerateBakerKeys from '../../GenerateBakerKeys';
 import AddBakerData from './AddBakerData';
 
 const header = 'Add baker';

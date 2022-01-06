@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, Route } from 'react-router';
 
-import { LocationDescriptorObject } from 'history';
+// import { LocationDescriptorObject } from 'histo'ry';
 import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
 import {
     chosenAccountSelector,
@@ -24,14 +24,15 @@ import BuildSchedule from './BuildSchedule';
 import TransactionLog from './TransactionLog';
 import DecryptComponent from '../DecryptComponent';
 import withAccountSync from '../withAccountSync';
-import AddBaker from './AddBaker';
-import RemoveBaker from './RemoveBaker';
-import UpdateBakerKeys from './UpdateBakerKeys';
-import UpdateBakerStake from './UpdateBakerStake';
-import UpdateBakerRestake from './UpdateBakerRestake';
+// import AddBaker from './OldBakerFlows/AddBaker';
+import RemoveBaker from './OldBakerFlows/RemoveBaker';
+import UpdateBakerKeys from './OldBakerFlows/UpdateBakerKeys';
+import UpdateBakerStake from './OldBakerFlows/UpdateBakerStake';
+import UpdateBakerRestake from './OldBakerFlows/UpdateBakerRestake';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
-import { AddBakerForm } from '~/components/AddBakerDetailsForm';
+// import { AddBakerForm } from '~/components/AddBakerDetailsForm';
 import { RootState } from '~/store/store';
+import AccountTransactionFlow from '../AccountTransactionFlow';
 
 const { Master, Detail } = MasterDetailPageLayout;
 const ToAccounts = () => <Redirect to={routes.ACCOUNTS} />;
@@ -103,14 +104,26 @@ export default withAccountSync(function DetailsPage() {
                     </Route>
                     <Route
                         path={routes.ACCOUNTS_ADD_BAKER}
-                        render={({ location }) =>
+                        // render={({ location }) =>
+                        render={() =>
                             canTransfer && !isBaker ? (
-                                <AddBaker
-                                    location={
-                                        location as LocationDescriptorObject<AddBakerForm>
-                                    }
-                                    account={account}
-                                />
+                                // <AddBaker
+                                //     location={
+                                //         location as LocationDescriptorObject<AddBakerForm>
+                                //     }
+                                //     account={account}
+                                // />
+                                <AccountTransactionFlow title="Add baker">
+                                    <AccountTransactionFlow.Page>
+                                        First
+                                    </AccountTransactionFlow.Page>
+                                    <AccountTransactionFlow.Page title="Special title">
+                                        Second
+                                    </AccountTransactionFlow.Page>
+                                    <AccountTransactionFlow.Page>
+                                        Third
+                                    </AccountTransactionFlow.Page>
+                                </AccountTransactionFlow>
                             ) : (
                                 <ToAccounts />
                             )

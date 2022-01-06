@@ -29,10 +29,8 @@ import {
     NotOptional,
     TransactionKindId,
 } from '~/utils/types';
-import { SubmitTransactionLocationState } from '../SubmitTransaction/SubmitTransaction';
+import { SubmitTransactionLocationState } from '../../SubmitTransaction/SubmitTransaction';
 import { multiplyFraction } from '~/utils/basicHelpers';
-
-import styles from './AccountDetailsPage.module.scss';
 import BakerPendingChange from '~/components/BakerPendingChange';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import { isMultiSig } from '~/utils/accountHelpers';
@@ -40,6 +38,8 @@ import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
 import ensureExchangeRateAndNonce, {
     ExchangeRateAndNonceProps,
 } from '~/components/Transfers/ensureExchangeRateAndNonce';
+
+import styles from '../AccountDetailsPage.module.scss';
 
 const LoadingComponent = () => <Loading text="Loading chain data" inline />;
 

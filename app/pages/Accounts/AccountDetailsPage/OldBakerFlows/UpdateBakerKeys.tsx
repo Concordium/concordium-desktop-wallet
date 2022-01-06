@@ -5,7 +5,7 @@ import { push, replace } from 'connected-react-router';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
 import routes from '~/constants/routes.json';
-import GenerateBakerKeys from './GenerateBakerKeys';
+import GenerateBakerKeys from '../GenerateBakerKeys';
 import { BakerKeys } from '~/utils/rustInterface';
 import {
     NotOptional,
@@ -13,16 +13,16 @@ import {
     UpdateBakerKeysPayload,
 } from '~/utils/types';
 import { createUpdateBakerKeysTransaction } from '~/utils/transactionHelpers';
-import { SubmitTransactionLocationState } from '../SubmitTransaction/SubmitTransaction';
+import { SubmitTransactionLocationState } from '../../SubmitTransaction/SubmitTransaction';
 import { stringify } from '~/utils/JSONHelper';
 import { multiplyFraction } from '~/utils/basicHelpers';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
-
-import styles from './AccountDetailsPage.module.scss';
 import ensureExchangeRateAndNonce, {
     ExchangeRateAndNonceProps,
 } from '~/components/Transfers/ensureExchangeRateAndNonce';
+
+import styles from '../AccountDetailsPage.module.scss';
 
 const header = 'Update baker keys';
 
