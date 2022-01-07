@@ -32,7 +32,7 @@ import UpdateBakerRestake from './OldBakerFlows/UpdateBakerRestake';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
 // import { AddBakerForm } from '~/components/AddBakerDetailsForm';
 import { RootState } from '~/store/store';
-import AccountTransactionFlow from '../AccountTransactionFlow';
+import AddBaker from './AddBaker/AddBaker';
 
 const { Master, Detail } = MasterDetailPageLayout;
 const ToAccounts = () => <Redirect to={routes.ACCOUNTS} />;
@@ -113,17 +113,7 @@ export default withAccountSync(function DetailsPage() {
                                 //     }
                                 //     account={account}
                                 // />
-                                <AccountTransactionFlow title="Add baker">
-                                    <AccountTransactionFlow.Page>
-                                        First
-                                    </AccountTransactionFlow.Page>
-                                    <AccountTransactionFlow.Page title="Special title">
-                                        Second
-                                    </AccountTransactionFlow.Page>
-                                    <AccountTransactionFlow.Page>
-                                        Third
-                                    </AccountTransactionFlow.Page>
-                                </AccountTransactionFlow>
+                                <AddBaker />
                             ) : (
                                 <ToAccounts />
                             )
