@@ -65,11 +65,13 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
             DEBUG_PROD: false,
             E2E_BUILD: false,
         }),
-
         new BundleAnalyzerPlugin({
             analyzerMode:
                 process.env.OPEN_ANALYZER === 'true' ? 'server' : 'disabled',
             openAnalyzer: process.env.OPEN_ANALYZER === 'true',
+        }),
+        new webpack.ProvidePlugin({
+            process: 'process/browser',
         }),
     ],
 });

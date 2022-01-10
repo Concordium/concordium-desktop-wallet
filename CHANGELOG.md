@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+-   Allow users to verify address on Ledger device.
+
 ## 1.3.1
 
 ### Fixed
