@@ -9,7 +9,6 @@ CheckNodeEnv('production');
 DeleteSourceMaps();
 
 module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
-    devtool: 'none',
     mode: 'production',
     target: 'electron-main',
     entry: [
@@ -17,6 +16,9 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
         'regenerator-runtime/runtime',
         fromRoot('./app/preload/preload.ts'),
     ],
+    experiments: {
+        asyncWebAssembly: true,
+    },
     output: {
         path: fromRoot('./app/dist'),
         publicPath: './dist/',

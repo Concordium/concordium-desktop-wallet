@@ -19,10 +19,12 @@ export default function ButtonNavLink({
     size = 'huge',
     ...props
 }: ButtonNavLinkProps): JSX.Element {
+    if (!disabled) {
+        props.activeClassName = 'active';
+    }
     return (
         <Button
             as={disabled ? undefined : NavLink}
-            activeClassName="active"
             className={clsx(styles.root, className)}
             disabled={disabled}
             inverted={inverted}

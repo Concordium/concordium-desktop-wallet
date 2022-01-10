@@ -1,19 +1,19 @@
 import { knex } from '~/database/knex';
 import { Preference, PreferenceKey } from '~/database/types';
-import { preferencesTable } from '~/constants/databaseNames.json';
+import databaseNames from '~/constants/databaseNames.json';
 import { Hex } from '~/utils/types';
 import { PreferenceAccessor, PreferencesMethods } from '../preloadTypes';
 
 async function getPreference(key: PreferenceKey): Promise<Preference> {
     return (await knex())
-        .table(preferencesTable)
-        .select(`${preferencesTable}.value`)
+        .table(databaseNames.preferencesTable)
+        .select(`${databaseNames.preferencesTable}.value`)
         .where({ key })
         .first();
 }
 async function setPreference(key: PreferenceKey, value: string) {
     return (await knex())
-        .table(preferencesTable)
+        .table(databaseNames.preferencesTable)
         .where({ key })
         .update({ value });
 }

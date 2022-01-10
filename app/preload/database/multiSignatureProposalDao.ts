@@ -3,7 +3,7 @@ import {
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
 } from '~/utils/types';
-import { multiSignatureProposalTable } from '~/constants/databaseNames.json';
+import databaseNames from '~/constants/databaseNames.json';
 import { knex } from '~/database/knex';
 import { parse } from '~/utils/JSONHelper';
 import { max } from '~/utils/basicHelpers';
@@ -15,7 +15,7 @@ import { MultiSignatureTransactionMethods } from '~/preload/preloadTypes';
  */
 async function insert(transaction: Partial<MultiSignatureTransaction>) {
     return (await knex())
-        .table(multiSignatureProposalTable)
+        .table(databaseNames.multiSignatureProposalTable)
         .insert(transaction);
 }
 
@@ -23,7 +23,7 @@ async function insert(transaction: Partial<MultiSignatureTransaction>) {
  * Updates the given proposal entry.
  */
 async function updateEntry(multiSigTransaction: MultiSignatureTransaction) {
-    return (await knex())(multiSignatureProposalTable)
+    return (await knex())(databaseNames.multiSignatureProposalTable)
         .where({ id: multiSigTransaction.id })
         .update(multiSigTransaction);
 }
@@ -31,7 +31,7 @@ async function updateEntry(multiSigTransaction: MultiSignatureTransaction) {
 async function getMaxOpenNonceOnAccount(address: string): Promise<bigint> {
     const openProposals: MultiSignatureTransaction[] = await (await knex())
         .select()
-        .table(multiSignatureProposalTable)
+        .table(databaseNames.multiSignatureProposalTable)
         .where({ status: MultiSignatureTransactionStatus.Open });
     const transactionsOnAccount: AccountTransaction[] = openProposals
         .map((prop) => parse(prop.transaction))

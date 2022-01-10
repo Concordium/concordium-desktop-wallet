@@ -560,6 +560,10 @@ export interface TransferTransactionWithNames extends TransferTransaction {
     toName?: string;
 }
 
+export interface DecryptedTransferTransaction extends TransferTransaction {
+    decryptedAmount: string;
+}
+
 export type EncryptedAmount = Hex;
 
 export interface TypedCredentialDeploymentInformation {
