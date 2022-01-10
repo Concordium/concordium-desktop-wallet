@@ -2,7 +2,7 @@ import React from 'react';
 import Loading from '~/cross-app-components/Loading';
 import { BlockSummary } from '~/node/NodeApiTypes';
 import { BakerStakeThreshold } from '~/utils/types';
-import withChainData, { ChainData } from '../../common/withChainData';
+import withChainData, { ChainData } from '~/utils/withChainData';
 import { displayAsGTU } from '~/utils/gtu';
 import Label from '~/components/Label';
 

@@ -2,32 +2,32 @@ import React from 'react';
 import clsx from 'clsx';
 import { useAccountInfo } from '~/utils/dataHooks';
 import { Account, ClassName, EqualRecord, Fraction } from '~/utils/types';
-import AccountCard from './AccountCard';
-import PickBakerStakeAmount from './PickBakerStakeAmount';
-import PickBakerRestake from './PickBakerRestake';
-import Form from './Form';
+import AccountCard from '../AccountCard';
+import PickBakerStakeAmount from '../PickBakerStakeAmount';
+import PickBakerRestake from '../PickBakerRestake';
+import Form from '../Form';
 
-export interface AddBakerForm {
+export interface StakeSettings {
     stake: string;
     restake: boolean;
 }
 
-const fieldNames: EqualRecord<AddBakerForm> = {
+const fieldNames: EqualRecord<StakeSettings> = {
     stake: 'stake',
     restake: 'restake',
 };
 
 interface Props extends ClassName {
-    initialData?: Partial<AddBakerForm>;
+    initialData?: Partial<StakeSettings>;
     showAccountCard?: boolean;
     account: Account;
     estimatedFee: Fraction;
     minimumStake: bigint;
     buttonClassName?: string;
-    onSubmit(values: AddBakerForm): void;
+    onSubmit(values: StakeSettings): void;
 }
 
-export default function AddBakerDetailsForm({
+export default function AddBakerStakeSettings({
     initialData,
     showAccountCard,
     account,
@@ -40,7 +40,7 @@ export default function AddBakerDetailsForm({
     const accountInfo = useAccountInfo(account.address);
 
     return (
-        <Form<AddBakerForm>
+        <Form<StakeSettings>
             onSubmit={onSubmit}
             className={clsx('flexColumn', className)}
         >

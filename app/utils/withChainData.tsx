@@ -5,7 +5,7 @@ import { useDispatch } from 'react-redux';
 import { BlockSummary, ConsensusStatus } from '~/node/NodeApiTypes';
 import { getConsensusStatus, getBlockSummary } from '~/node/nodeRequests';
 import routes from '~/constants/routes.json';
-import Execute from '../Execute';
+import Execute from '~/components/Execute';
 
 export interface ChainData {
     consensusStatus?: ConsensusStatus;

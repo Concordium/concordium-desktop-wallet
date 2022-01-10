@@ -17,7 +17,7 @@ import { proposalsSelector } from '~/features/MultiSignatureSlice';
 import { getUpdateQueueTypes } from '~/utils/UpdateInstructionHelper';
 import { parse } from '~/utils/JSONHelper';
 
-import { ensureChainData, ChainData } from '../common/withChainData';
+import { ensureChainData, ChainData } from '~/utils/withChainData';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 import SignTransactionProposal from '../SignTransactionProposal';
 import BuildProposal from './BuildProposal';

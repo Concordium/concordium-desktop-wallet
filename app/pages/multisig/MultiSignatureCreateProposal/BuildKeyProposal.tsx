@@ -1,6 +1,6 @@
 import React from 'react';
 import { FieldValues } from 'react-hook-form';
-import { ChainData } from '../common/withChainData';
+import { ChainData } from '~/utils/withChainData';
 import {
     UpdateType,
     AuthorizationKeysUpdate,

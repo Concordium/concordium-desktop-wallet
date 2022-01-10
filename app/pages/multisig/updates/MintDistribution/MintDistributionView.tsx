@@ -1,7 +1,7 @@
 import React from 'react';
 import { MintDistribution } from '~/utils/types';
 import Loading from '~/cross-app-components/Loading';
-import withChainData, { ChainData } from '../../common/withChainData';
+import withChainData, { ChainData } from '~/utils/withChainData';
 import {
     getCurrentValue,
     getSlotsPerYear,

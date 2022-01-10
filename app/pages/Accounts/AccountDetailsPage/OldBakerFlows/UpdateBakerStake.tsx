@@ -12,10 +12,7 @@ import {
     chosenAccountInfoSelector,
     chosenAccountSelector,
 } from '~/features/AccountSlice';
-import {
-    ChainData,
-    ensureChainData,
-} from '~/pages/multisig/common/withChainData';
+import { ChainData, ensureChainData } from '~/utils/withChainData';
 import {
     useCalcBakerStakeCooldownUntil,
     useTransactionCostEstimate,

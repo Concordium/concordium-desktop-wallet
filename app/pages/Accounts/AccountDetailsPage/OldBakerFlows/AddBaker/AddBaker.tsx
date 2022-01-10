@@ -3,7 +3,6 @@ import { LocationDescriptorObject } from 'history';
 import React, { useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router';
-import { AddBakerForm } from '~/components/AddBakerDetailsForm';
 import ensureExchangeRateAndNonce, {
     ExchangeRateAndNonceProps,
 } from '~/components/Transfers/ensureExchangeRateAndNonce';
@@ -19,20 +18,21 @@ import { AddBakerPayload, NotOptional, TransactionKindId } from '~/utils/types';
 import { SubmitTransactionLocationState } from '../../../SubmitTransaction/SubmitTransaction';
 import GenerateBakerKeys from '../../GenerateBakerKeys';
 import AddBakerData from './AddBakerData';
+import { StakeSettings } from '~/components/BakerTransactions/AddBakerStakeSettings';
 
 const header = 'Add baker';
 
 interface Props extends NotOptional<ExchangeRateAndNonceProps> {
-    location: LocationDescriptorObject<AddBakerForm>;
+    location: LocationDescriptorObject<StakeSettings>;
 }
 
 const AddBaker = ensureExchangeRateAndNonce(
     ({ location, nonce, exchangeRate, account }: Props) => {
         const dispatch = useDispatch();
-        const [bakerData, setBakerData] = useState<AddBakerForm>();
+        const [bakerData, setBakerData] = useState<StakeSettings>();
 
         const handleSubmit = useCallback(
-            (values: AddBakerForm) => {
+            (values: StakeSettings) => {
                 setBakerData(values);
                 dispatch(
                     push(
@@ -88,7 +88,7 @@ const AddBaker = ensureExchangeRateAndNonce(
 
                 const transaction = makeTransaction(bakerKeys);
                 const serialized = stringify(transaction);
-                const state: SubmitTransactionLocationState<AddBakerForm> = {
+                const state: SubmitTransactionLocationState<StakeSettings> = {
                     account,
                     cancelled: {
                         pathname: routes.ACCOUNTS_ADD_BAKER,

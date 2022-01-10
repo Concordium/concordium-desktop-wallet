@@ -25,7 +25,7 @@ import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
 import SignTransactionColumn from '../SignTransactionProposal/SignTransaction';
 import errorMessages from '~/constants/errorMessages.json';
-import { ensureChainData, ChainData } from '../common/withChainData';
+import { ensureChainData, ChainData } from '~/utils/withChainData';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 
@@ -48,11 +48,11 @@ import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
-import AddBakerDetailsForm from '~/components/AddBakerDetailsForm';
 import ExportBakerKeys from './ExportBakerKeys';
 import DatePicker from '~/components/Form/DatePicker';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
+import AddBakerStakeSettings from '~/components/BakerTransactions/AddBakerStakeSettings';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
 
@@ -259,7 +259,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                                 header="Stake"
                                 className={styles.stretchColumn}
                             >
-                                <AddBakerDetailsForm
+                                <AddBakerStakeSettings
                                     className={styles.columnContent}
                                     minimumStake={minimumThresholdForBaking}
                                     showAccountCard

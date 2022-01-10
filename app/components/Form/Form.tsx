@@ -1,5 +1,6 @@
 import React, { FC, FormHTMLAttributes, PropsWithChildren } from 'react';
 import {
+    DefaultValues,
     FieldValues,
     FormProvider,
     SubmitHandler,
@@ -31,6 +32,7 @@ export type FormProps<TFormValues extends FieldValues = FieldValues> = Omit<
 > & {
     formMethods?: UseFormMethods<TFormValues>;
     onSubmit: SubmitHandler<TFormValues>;
+    defaultValues?: DefaultValues<TFormValues>;
 };
 
 /**
@@ -65,10 +67,12 @@ function Form<TFormValues extends FieldValues = FieldValues>({
     children,
     formMethods,
     onSubmit,
+    defaultValues,
     ...formProps
 }: PropsWithChildren<FormProps<TFormValues>>): JSX.Element {
     const methods = useForm<TFormValues>({
         mode: 'onTouched',
+        defaultValues,
     });
 
     const { handleSubmit } = formMethods ?? methods;

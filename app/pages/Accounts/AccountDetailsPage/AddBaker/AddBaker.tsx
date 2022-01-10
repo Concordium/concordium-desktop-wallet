@@ -1,37 +1,45 @@
 import React from 'react';
+import Form from '~/components/Form';
 import AccountTransactionFlow, {
     FlowPageProps,
 } from '../../AccountTransactionFlow';
 
-type DetailsState = {
+interface StakeSettings {
     stake: string;
     restake: boolean;
-};
-
-interface KeysState {
-    aggKey: string;
 }
+
+type PoolOpen = boolean;
 
 interface BakerState {
-    keys: KeysState;
-    details: DetailsState;
+    stake: StakeSettings;
+    poolOpen: PoolOpen;
 }
 
-type DetailsProps = FlowPageProps<DetailsState>;
+type StakePageProps = FlowPageProps<StakeSettings>;
+type PoolOpenPageProps = FlowPageProps<PoolOpen>;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function BakerDetailsPage({ onNext }: DetailsProps) {
+const Continue = () => <Form.Submit>Continue</Form.Submit>;
+
+function BakerDetailsPage({ onNext, initial }: StakePageProps) {
     return (
-        <>
-            Add baker details
-            <button
-                type="button"
-                onClick={() => onNext({ stake: '0', restake: true })}
-            >
-                Continue
-            </button>
-        </>
+        <Form<StakeSettings> onSubmit={onNext} defaultValues={initial}>
+            <p>
+                To add a baker you must choose an amount to stake on the
+                account. The staked amount will be part of the balance, but
+                while staked the amount is unavailable for transactions.
+            </p>
+            <p>
+                By default all rewards are added to the staked amount. This can
+                be disabled below.
+            </p>
+            <Continue />
+        </Form>
     );
+}
+
+function PoolOpenPage({ initial }: PoolOpenPageProps) {
+    return <>Pool open settings: {initial ? 'Yes' : 'No'}</>;
 }
 
 export default function AddBaker() {
@@ -41,12 +49,8 @@ export default function AddBaker() {
             serializeTransaction={(values) => JSON.stringify(values)}
         >
             {{
-                details: { component: BakerDetailsPage },
-                keys: {
-                    // eslint-disable-next-line react/display-name
-                    component: () => <>Keys</>,
-                    title: 'Export keys',
-                },
+                stake: { component: BakerDetailsPage },
+                poolOpen: { component: PoolOpenPage },
             }}
         </AccountTransactionFlow>
     );

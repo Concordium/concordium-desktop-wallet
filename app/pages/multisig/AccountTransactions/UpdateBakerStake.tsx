@@ -39,7 +39,7 @@ import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
-import { ensureChainData, ChainData } from '../common/withChainData';
+import { ensureChainData, ChainData } from '~/utils/withChainData';
 import DatePicker from '~/components/Form/DatePicker';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';

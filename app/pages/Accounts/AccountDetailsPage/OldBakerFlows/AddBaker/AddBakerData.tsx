@@ -1,15 +1,12 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import AddBakerDetailsForm, {
-    AddBakerForm,
-} from '~/components/AddBakerDetailsForm';
+    StakeSettings,
+} from '~/components/BakerTransactions/AddBakerStakeSettings';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import Card from '~/cross-app-components/Card';
 import { chosenAccountSelector } from '~/features/AccountSlice';
-import {
-    ChainData,
-    ensureChainData,
-} from '~/pages/multisig/common/withChainData';
+import { ChainData, ensureChainData } from '~/utils/withChainData';
 import { useTransactionCostEstimate } from '~/utils/dataHooks';
 import {
     Fraction,
@@ -53,9 +50,9 @@ const FormWrapper = ensureChainData(
 
 interface Props {
     header: string;
-    initialData?: AddBakerForm;
+    initialData?: StakeSettings;
     exchangeRate: Fraction;
-    onSubmit(values: AddBakerForm): void;
+    onSubmit(values: StakeSettings): void;
 }
 
 export default function AddBakerData({
