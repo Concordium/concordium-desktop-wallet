@@ -24,7 +24,8 @@ export default function UpdateBakerStakeThreshold({
     return (
         <div>
             <div className="body3 mono mB10">
-                Current threshold: {currentBakerStakeThreshold.toString()}
+                Current threshold (µCCD):{' '}
+                {currentBakerStakeThreshold.toString()}
             </div>
             <Form.Input
                 className="body2"
