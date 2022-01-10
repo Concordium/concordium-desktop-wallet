@@ -74,12 +74,20 @@ function TransactionView({ transaction, onClose, setTransaction }: Props) {
 
     useEffect(() => {
         if (transaction) {
-            const upToDateChosenTransaction = transactions.find(
-                (t) => t.transactionHash === transaction.transactionHash
-            );
+            let upToDateChosenTransaction;
+            if (transaction.transactionHash) {
+                upToDateChosenTransaction = transactions.find(
+                    (t) => t.transactionHash === transaction.transactionHash
+                );
+            } else {
+                upToDateChosenTransaction = transactions.find(
+                    (t) => t.id === transaction.id
+                );
+            }
             setTransaction(upToDateChosenTransaction);
         }
-    }, [transactions, transaction, setTransaction]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [transactions]);
 
     return (
         <div className={styles.root}>
