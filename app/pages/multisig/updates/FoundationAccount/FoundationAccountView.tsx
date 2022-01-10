@@ -1,12 +1,11 @@
-import clsx from 'clsx';
 import React from 'react';
 import Loading from '~/cross-app-components/Loading';
 import { FoundationAccount } from '~/utils/types';
 import withChainData, { ChainData } from '../../common/withChainData';
 import DisplayAddress from '~/components/DisplayAddress';
+import { getCurrentValue } from './util';
 
 import styles from './FoundationAccount.module.scss';
-import { getCurrentValue } from './util';
 
 interface Props extends ChainData {
     foundationAccount: FoundationAccount;
@@ -30,15 +29,15 @@ export default withChainData(function FoundationAccountView({
             <div>
                 <h5 className="mB0">Current foundation account address:</h5>
                 <DisplayAddress
-                    outerClassName="mT5"
-                    lineClassName={clsx(styles.accountAddress, 'textFaded')}
+                    className="mT5"
+                    lineClassName={styles.accountAddress}
                     address={currentFoundationAccount}
                 />
             </div>
             <div>
                 <h5 className="mB0">New foundation account address:</h5>
                 <DisplayAddress
-                    outerClassName="mT5"
+                    className="mT5"
                     lineClassName={styles.accountAddress}
                     address={foundationAccount.address}
                 />

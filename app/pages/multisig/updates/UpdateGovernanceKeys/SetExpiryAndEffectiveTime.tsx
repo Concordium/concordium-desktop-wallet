@@ -50,7 +50,7 @@ export default function SetExpiryAndEffectiveTime({
                 <h3>Choose effective time and expiry of the update</h3>
                 <Form.DatePicker
                     name="effectiveTime"
-                    label="Effective Time"
+                    label="Effective time"
                     className="body2 mV40"
                     rules={{
                         required: 'Effective time is required',
@@ -63,7 +63,7 @@ export default function SetExpiryAndEffectiveTime({
                 <Form.DatePicker
                     className="body2 mV40"
                     name="expiryTime"
-                    label="Transaction Expiry Time"
+                    label="Transaction expiry time"
                     rules={{
                         required: 'Transaction expiry time is required',
                         validate: {

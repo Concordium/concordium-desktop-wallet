@@ -17,9 +17,9 @@ export default function DisplayHexString({
     return (
         <div className={clsx('textCenter mono', className)}>
             {chunkString(value, lineLength).map((text) => (
-                <p className="m0" key={text}>
+                <div className="m0" key={text}>
                     {text}
-                </p>
+                </div>
             ))}
         </div>
     );

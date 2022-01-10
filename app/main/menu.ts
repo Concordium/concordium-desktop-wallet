@@ -51,7 +51,7 @@ export function createMenu(window: BrowserWindow) {
             role: 'help',
             submenu: [
                 {
-                    label: 'Terms and Conditions',
+                    label: 'Terms and conditions',
                     click: () => {
                         window.webContents?.send(
                             ipcRendererCommands.openRoute,
@@ -60,14 +60,14 @@ export function createMenu(window: BrowserWindow) {
                     },
                 },
                 {
-                    label: 'License Notices',
+                    label: 'License notices',
                     click: () => {
                         shell.openExternal(urls.licenseNotices);
                     },
                 },
                 { type: 'separator' },
                 {
-                    label: 'Concordium Support Forum',
+                    label: 'Concordium support forum',
                     click: () => {
                         shell.openExternal(urls.supportForum);
                     },

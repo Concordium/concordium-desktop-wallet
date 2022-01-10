@@ -18,7 +18,7 @@ import {
 import { serializeFoundationAccount } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Update Foundation Account';
+const TYPE = 'Update foundation account';
 
 type TransactionType = UpdateInstruction<FoundationAccount>;
 

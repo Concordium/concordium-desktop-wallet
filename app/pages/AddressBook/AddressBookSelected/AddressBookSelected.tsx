@@ -10,7 +10,9 @@ import {
 import DeleteAddress from '../DeleteAddress';
 import UpsertAddress from '~/components/UpsertAddress';
 import Card from '~/cross-app-components/Card';
-import DisplayAddress from '~/components/DisplayAddress';
+import DisplayAddress, {
+    AddressDisplayFormat,
+} from '~/components/DisplayAddress';
 import CopyButton from '~/components/CopyButton';
 
 import styles from './AddressBookSelected.module.scss';
@@ -52,7 +54,7 @@ export default function AddressBookElementView() {
                 <div className={styles.address}>
                     <DisplayAddress
                         lineClassName="body3"
-                        lineLength={25}
+                        format={AddressDisplayFormat.DoubleLine}
                         address={chosenEntry.address}
                     />
                     <CopyButton

@@ -55,7 +55,7 @@ function getSpecificsHandler(transaction: AccountTransaction) {
         instanceOfScheduledTransfer(transaction) ||
         instanceOfScheduledTransferWithMemo(transaction)
     ) {
-        title = 'Scheduled Transfer submitted!';
+        title = 'Scheduled transfer submitted!';
         amount = getScheduledTransferAmount(transaction);
         note = (
             <h3 className="textCenter">

@@ -24,9 +24,9 @@ export default withChainData(function EuroPerEnergyView({
         return (
             <RelativeRateField
                 {...commonFieldProps}
-                label="Current euro per energy"
+                label="Current euro per energy:"
                 value={fromExchangeRate(currentValue)}
-                disabled
+                display
             />
         );
     }
@@ -40,9 +40,9 @@ export default withChainData(function EuroPerEnergyView({
             )}
             <RelativeRateField
                 {...commonFieldProps}
-                label="New euro per energy rate"
+                label="New euro per energy rate:"
                 value={fromExchangeRate(exchangeRate)}
-                disabled
+                display
             />
         </>
     );

@@ -63,7 +63,7 @@ export default function PrintButton({
                             .catch((error) =>
                                 setShowError({
                                     show: true,
-                                    header: 'Print Failed',
+                                    header: 'Print failed',
                                     content: error.toString(),
                                 })
                             )
@@ -71,7 +71,7 @@ export default function PrintButton({
                     }
                     return setShowError({
                         show: true,
-                        header: 'Already Printing',
+                        header: 'Already printing',
                         content: errorMessages.alreadyPrinting,
                     });
                 }}

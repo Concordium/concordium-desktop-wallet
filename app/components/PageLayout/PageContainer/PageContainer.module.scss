@@ -15,17 +15,17 @@
 .back,
 .close {
     position: absolute;
-    top: $page-container-padding-vertical;
+    top: $page-container-padding-vertical - 5px;
 }
 
 .back {
-    left: $page-container-padding-vertical;
+    left: $page-container-padding-vertical - 5px;
     padding-left: 11px;
     padding-right: 13px;
 }
 
 .close {
-    right: $page-container-padding-vertical;
+    right: $page-container-padding-vertical - 5px;
 }
 
 .paddingVertical {

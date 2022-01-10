@@ -88,7 +88,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
 
         return (
             <label className={clsx(styles.root, className)}>
-                <Label>{label}</Label>
+                <Label className="mB5">{label}</Label>
                 <textarea
                     className={clsx(
                         styles.field,

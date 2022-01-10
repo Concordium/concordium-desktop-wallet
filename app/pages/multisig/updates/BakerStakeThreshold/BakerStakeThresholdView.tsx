@@ -3,8 +3,8 @@ import Loading from '~/cross-app-components/Loading';
 import { BlockSummary } from '~/node/NodeApiTypes';
 import { BakerStakeThreshold } from '~/utils/types';
 import withChainData, { ChainData } from '../../common/withChainData';
-
 import { displayAsGTU } from '~/utils/gtu';
+import Label from '~/components/Label';
 
 interface Props extends ChainData {
     bakerStakeThreshold: BakerStakeThreshold;
@@ -19,27 +19,29 @@ export default withChainData(function BakerStakeThresholdView({
 }: Props) {
     function renderCurrentValue(bs: BlockSummary): JSX.Element {
         return (
-            <>
-                <h5 className="mB0">Current baker stake threshold</h5>
-                <div className="body1 mT10">
+            <div>
+                <Label className="mB5">Current baker stake threshold:</Label>
+                <div className="body3 mono">
                     {displayAsGTU(
                         bs.updates.chainParameters.minimumThresholdForBaking
                     )}
                 </div>
-            </>
+            </div>
         );
     }
     return (
-        <div>
+        <>
             {blockSummary ? (
                 renderCurrentValue(blockSummary)
             ) : (
                 <Loading inline />
             )}
-            <h5 className="mB0">New baker stake threshold</h5>
-            <div className="body1 mT10">
-                {displayAsGTU(bakerStakeThreshold.threshold)}
+            <div>
+                <Label className="mB5">New baker stake threshold:</Label>
+                <div className="body3 mono">
+                    {displayAsGTU(bakerStakeThreshold.threshold)}
+                </div>
             </div>
-        </div>
+        </>
     );
 });

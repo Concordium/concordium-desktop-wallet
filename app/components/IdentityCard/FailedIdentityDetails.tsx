@@ -53,7 +53,7 @@ export default function FailedIdentityDetails({
     );
     const identityProviderName = identityProvider.ipInfo.ipDescription.name;
     const cc = 'idiss@concordium.software';
-    const subject = `Issuance Reference: ${sessionId}`;
+    const subject = `Issuance reference: ${sessionId}`;
     const body = `Hi! My identity issuance failed.
 
 Here is my info:

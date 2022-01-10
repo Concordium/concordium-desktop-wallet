@@ -42,7 +42,7 @@ export default function ChainUpdateProposalStatus<
         <ProposalStatusView
             {...proposalStatusProps}
             headerLeft="Foundation"
-            headerRight="Chain Update"
+            headerRight="Chain update"
             title={handler.type}
             status={status}
         >

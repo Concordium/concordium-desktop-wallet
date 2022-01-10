@@ -20,7 +20,7 @@ function getSubtitle(location: string) {
         case routes.ACCOUNTCREATION_GENERATE:
             return 'Creating a new account';
         case routes.ACCOUNTCREATION_PICKATTRIBUTES:
-            return 'Revealing Attributes';
+            return 'Revealing attributes';
         case routes.ACCOUNTCREATION_FINAL:
             return 'Your account';
         default:
@@ -70,7 +70,7 @@ export default function AccountCreationPage(): JSX.Element {
         <PageLayout>
             <PageLayout.Header>
                 <h1>
-                    <span className={styles.titlePrefix}>New account</span>
+                    <span className="pageTitlePrefix">New account</span>
                     {getSubtitle(useLocation().pathname)}
                 </h1>
             </PageLayout.Header>

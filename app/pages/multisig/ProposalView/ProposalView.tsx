@@ -149,7 +149,6 @@ function ProposalView({ proposal }: ProposalViewProps) {
         <MultiSignatureLayout
             pageTitle={handler.title}
             print={handler.print(transaction, proposal.status, image)}
-            stepTitle={`Transaction Proposal - ${handler.type}`}
             disableBack={isAccountTransaction}
             closeRoute={CLOSE_ROUTE}
             delegateScroll
@@ -175,7 +174,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
                 className={styles.subtractContainerPadding}
             >
                 <Columns divider columnScroll columnClassName={styles.column}>
-                    <Columns.Column header="Transaction Details">
+                    <Columns.Column header="Transaction details">
                         <div className={styles.columnContent}>
                             <TransactionDetails transaction={transaction} />
                             <ExpiredTransactionView
@@ -220,7 +219,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
                         </div>
                     </Columns.Column>
                     <Columns.Column
-                        header="Security & Submission Details"
+                        header="Security & submission details"
                         className={styles.stretchColumn}
                     >
                         <div className={styles.columnContent}>

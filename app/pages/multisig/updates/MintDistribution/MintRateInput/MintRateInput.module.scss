@@ -7,7 +7,7 @@
 
 .exponent {
     vertical-align: super;
-    font-size: $font-size-body4;
+    font-size: $font-size-body5;
 }
 
 .field:disabled {
@@ -15,6 +15,6 @@
 }
 
 .description {
-    composes: textFaded from global, body4 from global;
+    composes: textFaded from global, body5 from global;
     margin-top: 5px;
 }

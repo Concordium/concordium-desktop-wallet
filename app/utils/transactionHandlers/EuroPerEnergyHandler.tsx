@@ -19,7 +19,7 @@ import {
 import { serializeExchangeRate } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Update Euro Per Energy';
+const TYPE = 'Update euro per energy';
 
 type TransactionType = UpdateInstruction<ExchangeRate>;
 

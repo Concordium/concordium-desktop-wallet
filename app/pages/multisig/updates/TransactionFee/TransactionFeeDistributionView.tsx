@@ -27,7 +27,7 @@ function SignTransactionFeeDistribution({
     return (
         <>
             <div className="mB50">
-                <h5>Current Transaction Fee Distribution</h5>
+                <h5>Current transaction fee distribution:</h5>
                 {blockSummary ? (
                     <RewardDistribution
                         value={getCurrentValue(blockSummary)}
@@ -39,7 +39,7 @@ function SignTransactionFeeDistribution({
                 )}
             </div>
             <div className="mB50">
-                <h5>New Transaction Fee Distribution</h5>
+                <h5>New transaction fee distribution:</h5>
                 <RewardDistribution
                     value={value}
                     labels={rewardDistributionLabels}

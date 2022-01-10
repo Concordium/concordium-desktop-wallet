@@ -20,6 +20,7 @@ export interface GasRewardFractionFieldProps
         ClassName {
     label: string;
     value: RewardFraction | undefined;
+    display?: boolean;
     onChange?(v: RewardFraction | undefined): void;
     onBlur?(): void;
 }
@@ -45,6 +46,7 @@ export function GasRewardFractionField({
     onChange = noOp,
     value,
     className,
+    display = false,
     ...props
 }: GasRewardFractionFieldProps): JSX.Element {
     const { disabled, isInvalid, readOnly } = props;
@@ -64,6 +66,7 @@ export function GasRewardFractionField({
             className={clsx(
                 styles.root,
                 disabled && styles.disabled,
+                display && styles.display,
                 readOnly && styles.readOnly,
                 isInvalid && styles.invalid,
                 className

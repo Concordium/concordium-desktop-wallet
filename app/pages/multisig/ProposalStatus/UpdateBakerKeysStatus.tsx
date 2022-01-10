@@ -26,9 +26,9 @@ export default function UpdateBakerKeysProposalStatus({
         <ProposalStatusView
             {...proposalStatusViewProps}
             headerLeft={senderName ?? transaction.sender}
-            headerRight="Update Baker Keys"
+            headerRight="Update baker keys"
             status={status}
-            title="Update Baker Keys"
+            title="Update baker keys"
         >
             <span className="textFaded">
                 Account: {senderName ? `${senderName} ` : ''} (

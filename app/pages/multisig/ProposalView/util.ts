@@ -51,7 +51,7 @@ async function HandleAccountTransactionSignatureFile(
     if (proposal.signatures[credentialIndex] !== undefined) {
         return {
             show: true,
-            header: 'Duplicate Credential',
+            header: 'Duplicate credential',
             content:
                 'The loaded signature file contains a signature, from a credential, which already has a signature on the proposal.',
         };
@@ -86,7 +86,7 @@ async function HandleAccountTransactionSignatureFile(
     if (!validSignature) {
         return {
             show: true,
-            header: 'Incorrect Signature',
+            header: 'Incorrect signature',
             content:
                 'The loaded signature is not valid for the current transaction.',
         };

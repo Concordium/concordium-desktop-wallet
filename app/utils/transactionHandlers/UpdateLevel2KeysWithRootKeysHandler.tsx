@@ -17,7 +17,7 @@ import UpdateLevel2KeysWithRootKeys from '~/pages/multisig/updates/UpdateGoverna
 import { removeRemovedKeys } from '~/pages/multisig/updates/UpdateGovernanceKeys/util';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Update Level 2 Governance Keys using root keys';
+const TYPE = 'Update level 2 governance keys using root keys';
 
 type TransactionType = UpdateInstruction<AuthorizationKeysUpdate>;
 

@@ -24,9 +24,9 @@ export default withChainData(function MicroGtuPerEuroView({
         return (
             <RelativeRateField
                 {...commonFieldProps}
-                label="Current micro CCD per euro rate"
+                label="Current micro CCD per euro rate:"
                 value={fromExchangeRate(currentValue)}
-                disabled
+                display
             />
         );
     }
@@ -40,9 +40,9 @@ export default withChainData(function MicroGtuPerEuroView({
             )}
             <RelativeRateField
                 {...commonFieldProps}
-                label="New micro CCD per euro rate"
+                label="New micro CCD per euro rate:"
                 value={fromExchangeRate(exchangeRate)}
-                disabled
+                display
             />
         </>
     );

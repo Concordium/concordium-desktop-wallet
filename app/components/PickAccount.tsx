@@ -74,7 +74,7 @@ export default function PickAccount({
         <>
             <SimpleErrorModal
                 show={Boolean(error)}
-                header="Unable to load Accounts"
+                header="Unable to load accounts"
                 content={error}
                 onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
             />
