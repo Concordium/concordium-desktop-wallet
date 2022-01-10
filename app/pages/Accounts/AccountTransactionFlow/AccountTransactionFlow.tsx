@@ -1,88 +1,52 @@
-import { push } from 'connected-react-router';
-import React, {
-    Children,
-    ComponentType,
-    // createContext,
-    ReactElement,
-    useState,
-} from 'react';
+import { goBack, push } from 'connected-react-router';
+import React, { ComponentType, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Route, Switch, useLocation, useRouteMatch } from 'react-router';
+import BackButton from '~/cross-app-components/BackButton';
 import Card from '~/cross-app-components/Card';
-import {
-    MakeRequired,
-    PolymorphicComponentProps,
-    PropsOf,
-} from '~/utils/types';
 
 import styles from './AccountTransactionFlow.module.scss';
 
-interface BasePageProps {
-    title?: string;
-}
-
-type OnNextFunction<S> = (values: S) => void;
-
-interface RequiredChildProps<S> {
-    onNext: OnNextFunction<S>;
+export interface FlowPageProps<S> {
+    onNext(values: S): void;
     initial: S | undefined;
 }
 
-// type OtherPageAsProps<
-//     S,
-//     C extends ComponentType<RequiredChildProps<S>>
-// > = MakeRequired<PolymorphicComponentProps<C, BasePageProps>, 'as'>;
-
-type PageAsProps<S, C extends ComponentType<RequiredChildProps<S>>> = Omit<
-    MakeRequired<PolymorphicComponentProps<C, BasePageProps>, 'as'>,
-    keyof RequiredChildProps<S>
->;
-
-// interface PageRenderChildProps<S> extends BasePageProps {
-//     children: OnNextFunction<S>;
-// }
-
-export function FlowPage<S, C extends ComponentType<RequiredChildProps<S>>>(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _: PageAsProps<S, C>
-) {
-    return null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+interface FlowChild<S, P extends keyof S = any> {
+    title?: string;
+    component: ComponentType<FlowPageProps<S[P]>>;
 }
 
-interface Props<S> {
+interface Props<S extends Record<string, unknown>> {
     title: string;
     serializeTransaction(values: S): string;
-    children:
-        | ReactElement<PropsOf<typeof FlowPage>>
-        | ReactElement<PropsOf<typeof FlowPage>>[];
-    // children:
-    //     | ReactElement<PageAsProps<S, ComponentType<RequiredChildProps<S>>>>
-    //     | ReactElement<PageAsProps<S, ComponentType<RequiredChildProps<S>>>>[];
+    children: { [P in keyof S]: FlowChild<S, P> };
 }
 
-export default function AccountTransactionFlow<S>({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function AccountTransactionFlow<S extends Record<string, any>>({
     title: baseTitle,
     serializeTransaction,
     children,
 }: Props<S>) {
     const { pathname, state } = useLocation<S>();
-    const [values, setValues] = useState<S>(state);
+    const [values, setValues] = useState<S>(state ?? {});
     const { path: matchedPath } = useRouteMatch();
     const dispatch = useDispatch();
 
-    const pages = Children.map(children, (c, i) => {
-        const { title, as, ...asProps } = c.props;
-        return {
-            title,
-            Page: as,
-            props: asProps,
+    const pages = Object.entries(children)
+        .map(([k, c]: [keyof S, FlowChild<S>], i) => ({
+            substate: k,
+            Page: c.component,
+            title: c.title ?? baseTitle,
             route: i === 0 ? matchedPath : `${matchedPath}/${i}`,
             nextRoute:
-                i === Children.count(children) - 1
+                i === Object.values(children).length - 1
                     ? undefined
                     : `${matchedPath}/${i + 1}`,
-        };
-    }).reverse();
+        }))
+        .reverse();
 
     const currentPage = pages.find((p) => pathname.startsWith(p.route));
 
@@ -90,7 +54,8 @@ export default function AccountTransactionFlow<S>({
         return null;
     }
 
-    const { title = baseTitle, nextRoute } = currentPage;
+    const { nextRoute, title, route: currentRoute } = currentPage;
+    const isFirstPage = currentRoute === matchedPath;
 
     function next() {
         if (nextRoute) {
@@ -110,17 +75,21 @@ export default function AccountTransactionFlow<S>({
 
     return (
         <Card className={styles.root}>
-            <h3>{title}</h3>
+            {isFirstPage || (
+                <BackButton
+                    className={styles.backButton}
+                    onClick={() => dispatch(goBack())}
+                />
+            )}
+            <h3 className="mT0">{title}</h3>
             <div>{JSON.stringify(currentPage)}</div>
             <Switch>
-                {pages.map(({ Page, route, props }) => (
+                {pages.map(({ Page, route, substate }) => (
                     <Route path={route} key={route}>
-                        <Page {...props} onNext={handleNext} initial={values} />
+                        <Page onNext={handleNext} initial={values[substate]} />
                     </Route>
                 ))}
             </Switch>
         </Card>
     );
 }
-
-AccountTransactionFlow.Page = FlowPage;

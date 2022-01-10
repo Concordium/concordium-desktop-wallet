@@ -1,33 +1,53 @@
 import React from 'react';
-import AccountTransactionFlow from '../../AccountTransactionFlow';
+import AccountTransactionFlow, {
+    FlowPageProps,
+} from '../../AccountTransactionFlow';
+
+type DetailsState = {
+    stake: string;
+    restake: boolean;
+};
+
+interface KeysState {
+    aggKey: string;
+}
 
 interface BakerState {
-    keys: string;
-    stake: string;
+    keys: KeysState;
+    details: DetailsState;
 }
 
-// type DetailsState = Pick<BakerState, 'stake'>;
-type DetailsState = { test: string };
-
-interface DetailsProps {
-    initial: DetailsState | undefined;
-    onNext(values: DetailsState): void;
-}
+type DetailsProps = FlowPageProps<DetailsState>;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function BakerDetailsPage(_: DetailsProps) {
-    return <>Add baker details</>;
+function BakerDetailsPage({ onNext }: DetailsProps) {
+    return (
+        <>
+            Add baker details
+            <button
+                type="button"
+                onClick={() => onNext({ stake: '0', restake: true })}
+            >
+                Continue
+            </button>
+        </>
+    );
 }
 
 export default function AddBaker() {
     return (
         <AccountTransactionFlow<BakerState>
             title="Add baker"
-            serializeTransaction={JSON.stringify}
+            serializeTransaction={(values) => JSON.stringify(values)}
         >
-            <AccountTransactionFlow.Page<DetailsState, typeof BakerDetailsPage>
-                as={BakerDetailsPage}
-            />
+            {{
+                details: { component: BakerDetailsPage },
+                keys: {
+                    // eslint-disable-next-line react/display-name
+                    component: () => <>Keys</>,
+                    title: 'Export keys',
+                },
+            }}
         </AccountTransactionFlow>
     );
 }

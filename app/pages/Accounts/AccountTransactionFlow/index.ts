@@ -1,1 +1,1 @@
-export { default } from './AccountTransactionFlow';
+export { default, FlowPageProps } from './AccountTransactionFlow';
