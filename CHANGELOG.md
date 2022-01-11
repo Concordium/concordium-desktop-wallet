@@ -4,6 +4,7 @@
 
 ### Fixed
 
+-   Fixed issue that caused the wallet to crash when inspecting identities with missing date attributes.
 -   Fixed identity issuance with dts.
 
 ## 1.3.0
