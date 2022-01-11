@@ -1,6 +1,7 @@
 import { push } from 'connected-react-router';
 import React from 'react';
 import { useDispatch } from 'react-redux';
+import Label from '~/components/Label';
 import Button from '~/cross-app-components/Button';
 import { createProposalRoute } from '~/utils/routerHelper';
 import { UpdateType, TransactionTypes } from '~/utils/types';
@@ -26,15 +27,18 @@ export default function KeySetSize({
     return (
         <>
             <div>
-                <h2>Size of the {typeToDisplay(type)} key set</h2>
                 <p>
                     Please confirm that the changes to the total amount of{' '}
                     {typeToDisplay(type)} keys is as expected.
                 </p>
-                <h2>Current size of {typeToDisplay(type)} key set</h2>
-                <h1>{currentKeySetSize}</h1>
-                <h2>New size of {typeToDisplay(type)} key set</h2>
-                <h1>{newKeySetSize}</h1>
+                <Label className="mB5">
+                    Current size of {typeToDisplay(type)} key set
+                </Label>
+                <div className="body2">{currentKeySetSize}</div>
+                <Label className="mB5 mT40">
+                    New size of {typeToDisplay(type)} key set
+                </Label>
+                <div className="body2">{newKeySetSize}</div>
             </div>
             <Button
                 onClick={() =>

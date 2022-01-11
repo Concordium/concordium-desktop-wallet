@@ -60,5 +60,5 @@ export default class BakerHandler<
 
     print = () => undefined;
 
-    title = `Account Transaction | ${this.type}`;
+    title = `Account transaction | ${this.type}`;
 }

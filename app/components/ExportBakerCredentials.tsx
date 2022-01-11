@@ -43,7 +43,7 @@ export default function ExportBakerCredentials({
         );
 
         const success = await saveFile(fileString, {
-            title: 'Save Baker Credentials',
+            title: 'Save baker credentials',
             defaultPath: 'baker-credentials.json',
         });
         if (success) {
@@ -58,7 +58,7 @@ export default function ExportBakerCredentials({
                 className={clsx('mT50', buttonClassName)}
                 onClick={onExport}
             >
-                Export Baker Credentials
+                Export baker credentials
             </Button>
         </div>
     );

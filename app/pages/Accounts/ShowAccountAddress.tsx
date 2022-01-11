@@ -7,7 +7,9 @@ import ExpandIcon from '@resources/svg/expand.svg';
 import Card from '~/cross-app-components/Card';
 import routes from '~/constants/routes.json';
 import IconButton from '~/cross-app-components/IconButton';
-import DisplayAddress from '~/components/DisplayAddress';
+import DisplayAddress, {
+    AddressDisplayFormat,
+} from '~/components/DisplayAddress';
 
 import { Account, ClassName } from '../../utils/types';
 import CopyButton from '../../components/CopyButton';
@@ -36,10 +38,10 @@ export default function ShowAccountAddress({
             <QRCode className="m20" value={account.address} size={200} />
             <div className={styles.displayAddress}>
                 <DisplayAddress
-                    outerClassName="mH40"
+                    className="mH40"
                     lineClassName="body3"
-                    lineLength={10}
                     address={account.address}
+                    format={AddressDisplayFormat.DoubleLine}
                 />
                 <CopyButton
                     className={styles.displayAddressCopy}

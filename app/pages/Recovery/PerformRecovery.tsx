@@ -118,7 +118,7 @@ export default function PerformRecovery({
             return;
         }
         if (!blockHash) {
-            setError('Current Blockhash has not been loaded yet');
+            setError('Current block hash has not been loaded yet');
             return;
         }
         controller.start();

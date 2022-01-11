@@ -53,6 +53,7 @@ export interface RelativeRateFieldProps
      */
     numeratorUnit: RelativeRateFieldUnit;
     value: RelativeRateValue;
+    display?: boolean;
     onChange?(v: RelativeRateValue): void;
     onBlur?(): void;
 }
@@ -70,9 +71,10 @@ export function RelativeRateField({
     label,
     isInvalid,
     error,
-    disabled,
     className,
     value,
+    display = false,
+    disabled = display,
     onChange = noOp,
     onBlur = noOp,
 }: RelativeRateFieldProps) {
@@ -102,6 +104,7 @@ export function RelativeRateField({
             className={clsx(
                 styles.root,
                 disabled && styles.rootDisabled,
+                display && styles.rootDisplay,
                 isInvalid && styles.rootInvalid,
                 className
             )}

@@ -2,10 +2,7 @@ import React from 'react';
 
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
-import {
-    RelativeRateField,
-    FormRelativeRateField,
-} from '../../common/RelativeRateField';
+import { FormRelativeRateField } from '../../common/RelativeRateField';
 import { commonFieldProps, getCurrentValue } from './util';
 import {
     isPositiveNumber,
@@ -28,15 +25,15 @@ export default function UpdateMicroGtuPerEuroRate({
 }: UpdateProps): JSX.Element | null {
     const exchangeRate = getCurrentValue(blockSummary);
     const currentValue: RelativeRateValue = fromExchangeRate(exchangeRate);
+    const { numeratorUnit, denominatorUnit } = commonFieldProps;
 
     return (
-        <>
-            <RelativeRateField
-                {...commonFieldProps}
-                label="Current micro CCD per euro rate"
-                value={currentValue}
-                disabled
-            />
+        <div>
+            <div className="body3 mono mB10">
+                Current rate: {denominatorUnit.value}
+                {currentValue.denominator} = {numeratorUnit.value}
+                {currentValue.numerator}
+            </div>
             <FormRelativeRateField
                 {...commonFieldProps}
                 name={fieldNames.microGtuPerEuroRate}
@@ -49,6 +46,6 @@ export default function UpdateMicroGtuPerEuroRate({
                     },
                 }}
             />
-        </>
+        </div>
     );
 }

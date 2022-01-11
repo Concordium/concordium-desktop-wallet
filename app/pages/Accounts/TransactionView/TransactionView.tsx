@@ -42,7 +42,7 @@ function CopiableListElement({
                 <div className={styles.copiableListElementLeftSide}>
                     <p className={styles.copiableListElementTitle}>{title}</p>
                     {'\n'}
-                    <p className="body4 m0 mT5">
+                    <p className="body5 m0 mT5">
                         {value} {note ? `(${note})` : undefined}
                     </p>
                 </div>
@@ -103,24 +103,24 @@ function TransactionView({ transaction, onClose, setTransaction }: Props) {
             {displayRejectReason(transaction)}
             {!!transaction.fromAddress && (
                 <CopiableListElement
-                    title="From Address:"
+                    title="From address:"
                     value={`${transaction.fromAddress}`}
                     note={transaction.fromName}
                 />
             )}
             {transaction.toAddress ? (
                 <CopiableListElement
-                    title="To Address:"
+                    title="To address:"
                     value={`${transaction.toAddress}`}
                     note={transaction.toName}
                 />
             ) : null}
             <CopiableListElement
-                title="Transaction Hash"
-                value={transaction.transactionHash || 'No Transaction.'}
+                title="Transaction hash"
+                value={transaction.transactionHash || 'No transaction.'}
             />
             <CopiableListElement
-                title="Block Hash"
+                title="Block hash"
                 value={transaction.blockHash || 'Awaiting finalization'}
             />
         </div>

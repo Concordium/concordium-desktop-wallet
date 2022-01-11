@@ -155,7 +155,7 @@ export default function UpsertAddress<
                                         'Name cannot exceed 40 characters.',
                                 },
                             }}
-                            placeholder="Recipient Name"
+                            placeholder="Recipient name"
                             defaultValue={initialValues?.name}
                             readOnly={readOnly}
                         />

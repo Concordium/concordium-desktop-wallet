@@ -13,6 +13,7 @@ import {
 import styles from './KeySetThreshold.module.scss';
 import { getAccessStructureTitle } from './util';
 import { createProposalRoute } from '~/utils/routerHelper';
+import Label from '~/components/Label';
 
 interface Props {
     currentAccessStructures: AccessStructure[];
@@ -106,19 +107,19 @@ export default function AccessStructureThreshold({
                             key={newAccessStructure.type}
                             className={styles.accessStructure}
                         >
-                            <h2>
-                                {getAccessStructureTitle(
-                                    newAccessStructure.type
-                                )}
-                            </h2>
-                            <h3>Current signature threshold</h3>
-                            <h1>
+                            <div className="mono body3 mB10">
+                                Current signature threshold:{' '}
                                 {getThreshold(
                                     newAccessStructure.type,
                                     currentAccessStructures
                                 )}
-                            </h1>
-                            <h3>New signature threshold</h3>
+                            </div>
+                            <Label className="mB5">
+                                {getAccessStructureTitle(
+                                    newAccessStructure.type
+                                )}{' '}
+                                signature threshold
+                            </Label>
                             <InlineNumber
                                 className={styles.inputField}
                                 value={newAccessStructure.threshold?.toString()}

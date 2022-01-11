@@ -26,11 +26,11 @@ function generateButtonText(status: KeyUpdateEntryStatus) {
 export function generateStatusLabel(status: KeyUpdateEntryStatus) {
     switch (status) {
         case KeyUpdateEntryStatus.Added:
-            return <h2 className={styles.added}>Added</h2>;
+            return <div className={styles.added}>Added</div>;
         case KeyUpdateEntryStatus.Removed:
-            return <h2 className={styles.removed}>Removed</h2>;
+            return <div className={styles.removed}>Removed</div>;
         case KeyUpdateEntryStatus.Unchanged:
-            return <h2 className={styles.unchanged}>Unchanged</h2>;
+            return <div className={styles.unchanged}>Unchanged</div>;
         default:
             throw new Error(`Unsupported status type: ${status}`);
     }

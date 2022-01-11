@@ -82,7 +82,7 @@ export default function BuildProposal({
                         <Form.DatePicker
                             className="body2 mV40"
                             name="effectiveTime"
-                            label="Effective Time"
+                            label="Effective time"
                             defaultValue={
                                 defaults.effectiveTime ||
                                 new Date(
@@ -101,7 +101,7 @@ export default function BuildProposal({
                         <Form.DatePicker
                             className="body2 mV40"
                             name="expiryTime"
-                            label="Transaction Expiry Time"
+                            label="Transaction expiry time"
                             defaultValue={
                                 defaults.expiryTime || getDefaultExpiry()
                             }

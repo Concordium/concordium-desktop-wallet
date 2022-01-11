@@ -130,7 +130,6 @@ function MultiSignatureCreateProposal({
                     render={() => (
                         <MultiSignatureLayout
                             pageTitle={handler.title}
-                            stepTitle={`Transaction Proposal - ${handler.type}`}
                             delegateScroll
                         >
                             <BuildComponent
@@ -150,10 +149,7 @@ function MultiSignatureCreateProposal({
 
 function LoadingComponent() {
     return (
-        <MultiSignatureLayout
-            pageTitle="Create Multisignature Proposal"
-            stepTitle="Transaction Proposal - loading"
-        >
+        <MultiSignatureLayout pageTitle="Create multisignature proposal">
             <Loading text="Fetching information from the node" />
         </MultiSignatureLayout>
     );

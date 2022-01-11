@@ -54,5 +54,5 @@ export default class UpdateHandlerBase<
         return undefined;
     }
 
-    title = `Foundation Transaction | ${this.type}`;
+    title = `Foundation transaction | ${this.type}`;
 }

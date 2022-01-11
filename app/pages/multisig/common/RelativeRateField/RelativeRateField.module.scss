@@ -9,12 +9,19 @@
     display: flex;
     justify-content: center;
     width: 100%;
-    font-size: $font-size-body1;
+    font-size: $font-size-body2;
     border-bottom: 1px solid $color-off-black;
     white-space: pre;
 
-    .rootDisabled & {
+    .rootDisabled &,
+    .rootDisplay & {
         border-color: transparent;
+    }
+
+    .rootDisplay & {
+        font-size: $font-size-body3;
+        font-family: $font-family-mono;
+        color: $color-text;
     }
 
     .rootInvalid & {
@@ -23,8 +30,9 @@
 }
 
 .label {
-    display: inline;
+    display: inline-block;
     color: $color-off-black;
+    margin-bottom: 5px;
 }
 
 .fieldWrapper {
@@ -34,12 +42,20 @@
     .rootDisabled & {
         color: $color-grey;
     }
+
+    .rootDisplay & {
+        color: inherit;
+    }
 }
 
 .field {
     display: inline;
     text-align: left;
     border: none;
+
+    .rootDisplay & {
+        color: inherit;
+    }
 }
 
 .reduced {

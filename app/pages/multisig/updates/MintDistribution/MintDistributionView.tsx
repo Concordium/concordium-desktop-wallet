@@ -13,6 +13,7 @@ import {
     RewardDistributionValue,
 } from '../../common/RewardDistribution';
 import MintRateInput from './MintRateInput';
+import Label from '~/components/Label';
 
 interface Props extends ChainData {
     mintDistribution: MintDistribution;
@@ -53,7 +54,7 @@ export default withChainData(function MintDistributionView({
     return (
         <>
             <div>
-                <h5>Current Mint Distribution</h5>
+                <Label className="mB5">Current mint distribution:</Label>
                 <MintRateInput
                     value={currentMintPerSlot.toString()}
                     slotsPerYear={slotsPerYear}
@@ -67,7 +68,7 @@ export default withChainData(function MintDistributionView({
                 />
             </div>
             <div>
-                <h5>New Mint Distribution</h5>
+                <Label className="mB5">New mint distribution:</Label>
                 <MintRateInput
                     value={newMintPerSlot.toString()}
                     slotsPerYear={slotsPerYear}

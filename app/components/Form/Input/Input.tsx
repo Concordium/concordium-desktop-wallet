@@ -21,7 +21,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     ) => {
         return (
             <label className={clsx(styles.root, className)}>
-                <Label>{label}</Label>
+                <Label className="mB5">{label}</Label>
                 <input
                     className={clsx(
                         styles.field,

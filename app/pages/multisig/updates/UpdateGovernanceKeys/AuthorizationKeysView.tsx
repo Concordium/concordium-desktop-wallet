@@ -12,6 +12,7 @@ import { getAccessStructureTitle, removeRemovedKeys } from './util';
 import PublicKeyDetails from '~/components/ledger/PublicKeyDetails';
 import styles from './HigherLevelKeysView.module.scss';
 import localStyles from './UpdateAuthorizationKeys.module.scss';
+import Label from '~/components/Label';
 
 interface Props extends ChainData {
     authorizationKeysUpdate: AuthorizationKeysUpdate;
@@ -53,8 +54,10 @@ function accessStructureView(
     const keysInStructure = findKeysForAccessStructure(accessStructure, keys);
     return (
         <div key={accessStructure.type}>
-            <h2>{getAccessStructureTitle(accessStructure.type)}</h2>
-            <p>Threshold: {accessStructure.threshold}</p>
+            <Label className="mB5">
+                {getAccessStructureTitle(accessStructure.type)}
+            </Label>
+            <div className="mono">Threshold: {accessStructure.threshold}</div>
             <ul>
                 {keysInStructure.map((key) => {
                     return (
@@ -89,31 +92,37 @@ function AuthorizationKeysView({
 
     return (
         <>
-            <h2>Level 2 keys and their indices</h2>
-            <p>
-                New size of level 2 key set:{' '}
-                <b>{authorizationKeysUpdateWithoutRemovedKeys.keys.length}</b>
-            </p>
-            <ul>
-                {authorizationKeysUpdateWithoutRemovedKeys.keys.map(
-                    (key, index) => {
-                        return (
-                            <li
-                                className={localStyles.listItem}
-                                key={key.verifyKey}
-                            >
-                                <div className={localStyles.keyDiv}>
-                                    <p className={localStyles.index}>{index}</p>
-                                    <PublicKeyDetails
-                                        className={localStyles.keyText}
-                                        publicKey={key.verifyKey}
-                                    />
-                                </div>
-                            </li>
-                        );
-                    }
-                )}
-            </ul>
+            <div>
+                <Label className="mB5">Level 2 keys and their indices</Label>
+                <div className="mono">
+                    New size of level 2 key set:{' '}
+                    <b>
+                        {authorizationKeysUpdateWithoutRemovedKeys.keys.length}
+                    </b>
+                </div>
+                <ul>
+                    {authorizationKeysUpdateWithoutRemovedKeys.keys.map(
+                        (key, index) => {
+                            return (
+                                <li
+                                    className={localStyles.listItem}
+                                    key={key.verifyKey}
+                                >
+                                    <div className={localStyles.keyDiv}>
+                                        <p className={localStyles.index}>
+                                            {index}
+                                        </p>
+                                        <PublicKeyDetails
+                                            className={localStyles.keyText}
+                                            publicKey={key.verifyKey}
+                                        />
+                                    </div>
+                                </li>
+                            );
+                        }
+                    )}
+                </ul>
+            </div>
             {authorizationKeysUpdate.accessStructures.map((accessStructure) => {
                 return accessStructureView(
                     accessStructure,
