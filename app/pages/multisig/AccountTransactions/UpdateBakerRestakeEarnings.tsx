@@ -17,7 +17,6 @@ import { createUpdateBakerRestakeEarningsTransaction } from '~/utils/transaction
 import routes from '~/constants/routes.json';
 import { useAccountInfo, useTransactionCostEstimate } from '~/utils/dataHooks';
 import SignTransaction from './SignTransaction';
-import ButtonGroup from '~/components/ButtonGroup';
 import UpdateBakerRestakeEarningsProposalDetails from './proposal-details/UpdateBakerRestakeEarnings';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
@@ -30,6 +29,8 @@ import {
 import ChooseExpiry from './ChooseExpiry';
 import { isMultiSig } from '~/utils/accountHelpers';
 import Label from '~/components/Label';
+import Radios from '~/components/Form/Radios';
+import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
 
@@ -54,6 +55,9 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
         transaction,
         setTransaction,
     ] = useState<UpdateBakerRestakeEarnings>();
+    const handler = findAccountTransactionHandler(
+        TransactionKindId.Update_baker_restake_earnings
+    );
 
     const estimatedFee = useTransactionCostEstimate(
         TransactionKindId.Update_baker_restake_earnings,
@@ -71,7 +75,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
 
         if (restakeEarnings === undefined) {
             setError(
-                'The Restake Earnings setting is needed to make transaction'
+                'The restake earnings setting is needed to make transaction'
             );
             return;
         }
@@ -90,20 +94,20 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
     };
 
     return (
-        <MultiSignatureLayout
-            pageTitle="Multi Signature Transactions | Update Baker Restake Earnings"
-            stepTitle="Transaction Proposal - Update Baker Restake Earnings"
-            delegateScroll
-        >
+        <MultiSignatureLayout pageTitle={handler.title} delegateScroll>
             <SimpleErrorModal
                 show={Boolean(error)}
                 header="Unable to perform transfer"
                 content={error}
                 onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
             />
-            <Columns divider columnScroll>
+            <Columns
+                divider
+                columnScroll
+                className={styles.subtractContainerPadding}
+            >
                 <Columns.Column
-                    header="Transaction Details"
+                    header="Transaction details"
                     className={styles.stretchColumn}
                 >
                     <div className={styles.columnContent}>
@@ -210,7 +214,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                     </Route>
                     <Route path={`${path}/${AccountTransactionSubRoutes.sign}`}>
                         <Columns.Column
-                            header="Signature and Hardware Wallet"
+                            header="Signature and hardware wallet"
                             className={styles.stretchColumn}
                         >
                             {transaction !== undefined &&
@@ -255,10 +259,9 @@ function RestakeEarnings({
                 <Label>Current restake:</Label>
                 <span className="body1">{restake ? 'Yes' : 'No'}</span>
             </div>
-            <ButtonGroup
-                title="Enable restake earnings"
-                name="restake"
-                buttons={[
+            <Radios
+                label="Enable restake earnings"
+                options={[
                     {
                         label: 'Yes, restake',
                         value: true,
@@ -268,8 +271,8 @@ function RestakeEarnings({
                         value: false,
                     },
                 ]}
-                isSelected={({ value }) => value === enable}
-                onClick={({ value }) => onChanged(value)}
+                value={enable}
+                onChange={onChanged}
             />
         </>
     );

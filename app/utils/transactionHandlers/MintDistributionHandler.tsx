@@ -19,7 +19,7 @@ import {
 import { serializeMintDistribution } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Update Mint Distribution';
+const TYPE = 'Update mint distribution';
 
 type TransactionType = UpdateInstruction<MintDistribution>;
 

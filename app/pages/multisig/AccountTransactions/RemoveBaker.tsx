@@ -32,6 +32,7 @@ import {
 } from '~/utils/accountRouterHelpers';
 import ChooseExpiry from './ChooseExpiry';
 import { isMultiSig } from '~/utils/accountHelpers';
+import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
 
@@ -52,6 +53,10 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
     const [account, setAccount] = useState<Account | undefined>(state?.account);
     const [error, setError] = useState<string>();
     const [transaction, setTransaction] = useState<RemoveBaker>();
+
+    const handler = findAccountTransactionHandler(
+        TransactionKindId.Remove_baker
+    );
 
     const cooldownUntil = useCalcBakerStakeCooldownUntil();
 
@@ -80,11 +85,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
     };
 
     return (
-        <MultiSignatureLayout
-            pageTitle="Multi Signature Transactions | Remove Baker"
-            stepTitle="Transaction Proposal - Remove Baker"
-            delegateScroll
-        >
+        <MultiSignatureLayout pageTitle={handler.title} delegateScroll>
             <SimpleErrorModal
                 show={Boolean(error)}
                 header="Unable to perform transfer"
@@ -97,7 +98,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                 className={styles.subtractContainerPadding}
             >
                 <Columns.Column
-                    header="Transaction Details"
+                    header="Transaction details"
                     className={styles.stretchColumn}
                 >
                     <div className={styles.columnContent}>
@@ -197,7 +198,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                     </Route>
                     <Route path={`${path}/${AccountTransactionSubRoutes.sign}`}>
                         <Columns.Column
-                            header="Signature and Hardware Wallet"
+                            header="Signature and hardware wallet"
                             className={styles.stretchColumn}
                         >
                             {transaction !== undefined &&

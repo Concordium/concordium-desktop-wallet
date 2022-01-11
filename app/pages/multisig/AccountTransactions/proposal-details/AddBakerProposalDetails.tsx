@@ -8,8 +8,8 @@ import {
     EnabledDetail,
     PlainDetail,
 } from './shared';
-import PublicKey from '../../common/PublicKey/PublicKey';
 import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
+import DisplayPublicKey from '~/components/Transfers/DisplayPublicKey';
 
 interface Props {
     account?: Account;
@@ -34,27 +34,25 @@ export default function AddBakerProposalDetails({
             <AmountDetail title="Amount to stake" value={stake} />
             <DisplayEstimatedFee estimatedFee={estimatedFee} />
             <EnabledDetail title="Restake earnings" value={restakeEarnings} />
+            {bakerVerifyKeys ? (
+                <>
+                    <DisplayPublicKey
+                        name="Election verify key"
+                        publicKey={bakerVerifyKeys.electionVerifyKey}
+                    />
+                    <DisplayPublicKey
+                        name="Signature verify key"
+                        publicKey={bakerVerifyKeys.signatureVerifyKey}
+                    />
+                    <DisplayPublicKey
+                        name="Aggregation verify key"
+                        publicKey={bakerVerifyKeys.aggregationVerifyKey}
+                    />
+                </>
+            ) : (
+                <PlainDetail title="Public keys" />
+            )}
             <DisplayTransactionExpiryTime expiryTime={expiryTime} />
-            <PlainDetail
-                title="Public keys"
-                value={bakerVerifyKeys}
-                format={(bakerKeys) => (
-                    <>
-                        <PublicKey
-                            name="Election verify key"
-                            publicKey={bakerKeys.electionVerifyKey}
-                        />
-                        <PublicKey
-                            name="Signature verify key"
-                            publicKey={bakerKeys.signatureVerifyKey}
-                        />
-                        <PublicKey
-                            name="Aggregation verify key"
-                            publicKey={bakerKeys.aggregationVerifyKey}
-                        />
-                    </>
-                )}
-            />
         </Details>
     );
 }

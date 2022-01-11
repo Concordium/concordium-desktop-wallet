@@ -38,7 +38,7 @@ export default function Recovery() {
         <Columns className="flexChildFill" columnScroll>
             <Columns.Column>
                 <div className={styles.leftColumn}>
-                    <h2 className="mB40 textLeft">Account Recovery</h2>
+                    <h2 className="mB40 textLeft">Account recovery</h2>
                     <Switch>
                         <Route
                             path={routes.RECOVERY_COMPLETED}

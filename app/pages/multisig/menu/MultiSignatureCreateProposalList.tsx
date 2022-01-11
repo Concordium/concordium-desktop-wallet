@@ -18,12 +18,12 @@ const updateInstructionTypes: [TransactionTypes, UpdateType, string][] = [
     [
         TransactionTypes.UpdateInstruction,
         UpdateType.UpdateMicroGTUPerEuro,
-        'Update µCCD per Euro',
+        'Update µCCD per euro',
     ],
     [
         TransactionTypes.UpdateInstruction,
         UpdateType.UpdateEuroPerEnergy,
-        'Update Euro per energy',
+        'Update euro per energy',
     ],
     [
         TransactionTypes.UpdateInstruction,
@@ -105,7 +105,7 @@ const accountTransactionTypes: [
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Update_credentials,
-        'Update Account Credentials',
+        'Update account credentials',
     ],
     [
         TransactionTypes.AccountTransaction,
@@ -125,27 +125,27 @@ const accountTransactionTypes: [
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Add_baker,
-        'Add Baker',
+        'Add baker',
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Update_baker_keys,
-        'Update Baker Keys',
+        'Update baker keys',
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Remove_baker,
-        'Remove Baker',
+        'Remove baker',
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Update_baker_stake,
-        'Update Baker Stake',
+        'Update baker stake',
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Update_baker_restake_earnings,
-        'Update Baker Restake Earnings',
+        'Update baker restake earnings',
     ],
 ];
 

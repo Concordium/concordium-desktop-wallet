@@ -9,6 +9,7 @@ import {
     PublicInformationForIp,
     CreationKeys,
     Global,
+    BlsKeyTypes,
 } from '~/utils/types';
 import Card from '~/cross-app-components/Card';
 import { globalSelector } from '~/features/GlobalSlice';
@@ -41,7 +42,7 @@ const IPDetails = (info: PublicInformationForIp) => (
             />
         </div>
         <p>
-            <b>Signature Threshold:</b> {info.publicKeys.threshold}
+            <b>Signature threshold:</b> {info.publicKeys.threshold}
         </p>
     </div>
 );
@@ -220,6 +221,7 @@ export default function IdentityIssuanceChooseProvider({
                     ledgerCallback={withLedger}
                     preCallback={getIdentityNumber}
                     disabled={!provider}
+                    exportType={BlsKeyTypes.Seed}
                 />
             </div>
         </>

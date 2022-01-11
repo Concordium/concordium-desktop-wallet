@@ -22,7 +22,7 @@ export default function UpdateAccountCredentialsProposalStatus({
 }: GtuTransferProposalStatusProps): JSX.Element {
     const [senderName, setSenderName] = useState<string | undefined>();
 
-    const title = 'Update Account Credentials';
+    const title = 'Update account credentials';
     useEffect(() => {
         lookupName(transaction.sender).then(setSenderName);
     }, [transaction.sender]);
@@ -31,7 +31,7 @@ export default function UpdateAccountCredentialsProposalStatus({
         <ProposalStatusView
             {...proposalStatusViewProps}
             headerLeft={senderName || transaction.sender}
-            headerRight="Credential Update"
+            headerRight="Credential update"
             status={status}
             title={title}
         >

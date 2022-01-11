@@ -198,7 +198,7 @@ export default function ExportKeyView(): JSX.Element {
     return (
         <PageLayout>
             <PageLayout.Header>
-                <h1>Multi Signature Transactions</h1>
+                <h1>Multi signature transactions</h1>
             </PageLayout.Header>
             <PageLayout.Container className={styles.container} padding="both">
                 <h2>Export your {getKeyDisplay(keyType)}</h2>

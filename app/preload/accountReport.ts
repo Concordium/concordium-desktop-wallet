@@ -12,6 +12,7 @@ import {
     Global,
     CredentialNumberPrfKey,
     IdentityVersion,
+    DecryptedTransferTransaction,
 } from '~/utils/types';
 import exportTransactionFields from '~/constants/exportTransactionFields.json';
 import { getISOFormat, secondsSinceUnixEpoch } from '~/utils/timeHelpers';
@@ -24,10 +25,8 @@ import { getIdentityVersion } from './database/identityDao';
 import { convertIncomingTransaction } from '~/utils/TransactionConverters';
 import httpMethods from './http';
 import decryptAmountsDao from './database/decryptedAmountsDao';
-import decryptTransactions, {
-    isSuccessfulEncryptedTransaction,
-} from '~/utils/decryptHelpers';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
+import isSuccessfulEncryptedTransaction from '~/utils/decryptHelpers';
 
 async function enrichWithDecryptedAmounts(
     credentialNumber: number,
@@ -35,7 +34,15 @@ async function enrichWithDecryptedAmounts(
     identityVersion: IdentityVersion,
     address: string,
     global: Global,
-    transactions: TransferTransaction[]
+    transactions: TransferTransaction[],
+    decryptTransactions: (
+        encryptedTransfers: TransferTransaction[],
+        accountAddress: string,
+        prfKey: string,
+        identityVersion: IdentityVersion,
+        credentialNumber: number,
+        global: Global
+    ) => Promise<DecryptedTransferTransaction[]>
 ): Promise<TransferTransaction[]> {
     const encryptedTransactions = transactions.filter(
         isSuccessfulEncryptedTransaction
@@ -213,6 +220,14 @@ async function streamTransactions(
     filter: TransactionFilter,
     global: Global,
     keys: Record<string, CredentialNumberPrfKey>,
+    decryptTransactions: (
+        encryptedTransfers: TransferTransaction[],
+        accountAddress: string,
+        prfKey: string,
+        identityVersion: IdentityVersion,
+        credentialNumber: number,
+        global: Global
+    ) => Promise<DecryptedTransferTransaction[]>,
     abortController: AbortController
 ) {
     const getAddressName = async (address: string) => {
@@ -291,7 +306,8 @@ async function streamTransactions(
                 identityVersion,
                 account.address,
                 global,
-                convertedTransactions
+                convertedTransactions,
+                decryptTransactions
             );
         } else {
             transactions = convertedTransactions;
@@ -336,6 +352,14 @@ async function buildAccountReportForSingleAccount(
     filter: TransactionFilter,
     global: Global,
     keys: Record<string, CredentialNumberPrfKey>,
+    decryptTransactions: (
+        encryptedTransfers: TransferTransaction[],
+        accountAddress: string,
+        prfKey: string,
+        identityVersion: IdentityVersion,
+        credentialNumber: number,
+        global: Global
+    ) => Promise<DecryptedTransferTransaction[]>,
     abortController: AbortController
 ) {
     abortController.start();
@@ -350,6 +374,7 @@ async function buildAccountReportForSingleAccount(
         filter,
         global,
         keys,
+        decryptTransactions,
         abortController
     );
     stream.end();
@@ -366,6 +391,14 @@ async function buildAccountReportForMultipleAccounts(
     filter: TransactionFilter,
     global: Global,
     keys: Record<string, CredentialNumberPrfKey>,
+    decryptTransactions: (
+        encryptedTransfers: TransferTransaction[],
+        accountAddress: string,
+        prfKey: string,
+        identityVersion: IdentityVersion,
+        credentialNumber: number,
+        global: Global
+    ) => Promise<DecryptedTransferTransaction[]>,
     abortController: AbortController
 ) {
     abortController.start();
@@ -388,6 +421,7 @@ async function buildAccountReportForMultipleAccounts(
             filter,
             global,
             keys,
+            decryptTransactions,
             abortController
         );
         middleMan.end();

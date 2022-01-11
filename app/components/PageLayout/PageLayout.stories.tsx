@@ -61,7 +61,7 @@ WithHeaderButtons.args = {
             <PageLayout.HeaderButton align="left">
                 <PlusIcon height="20" />
             </PageLayout.HeaderButton>
-            <h1>Page Title</h1>
+            <h1>Page title</h1>
             <PageLayout.HeaderButton align="right">
                 <PlusIcon height="20" />
             </PageLayout.HeaderButton>

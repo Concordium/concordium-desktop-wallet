@@ -18,7 +18,7 @@ import {
 import { serializeTransactionFeeDistribution } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Update Transaction Fee Distribution';
+const TYPE = 'Update transaction fee distribution';
 
 type TransactionType = UpdateInstruction<TransactionFeeDistribution>;
 

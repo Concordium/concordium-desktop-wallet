@@ -33,8 +33,6 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 to={routes.ACCOUNTS_ADDRESS}
             >
                 Account address
-                <br />
-                <span className="body4 pT5">{account.address}</span>
             </ButtonNavLink>
             {accountHasDeployedCredentials && (
                 <ButtonNavLink
@@ -65,7 +63,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 className="mB20:notLast flex width100"
                 to={routes.ACCOUNTS_CREDENTIAL_INFORMATION}
             >
-                Credential & attribute Information
+                Credential & attribute information
             </ButtonNavLink>
             {accountHasDeployedCredentials && !hasUsedEncrypted && (
                 <ButtonNavLink

@@ -82,5 +82,5 @@ export default abstract class TransferHandler<
             .replace(/\s/g, '-')}_${exportType}.json`;
     }
 
-    title = `Account Transaction | ${this.type}`;
+    title = `Account transaction | ${this.type}`;
 }

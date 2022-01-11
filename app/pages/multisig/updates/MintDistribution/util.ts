@@ -3,12 +3,12 @@ import {
     ConsensusStatus,
     MintDistributionNode,
 } from '~/node/NodeApiTypes';
-import { rewardFractionResolution } from '~/constants/updateConstants.json';
+import updateConstants from '~/constants/updateConstants.json';
 import { RewardDistributionValue } from '../../common/RewardDistribution';
 
 export const rewardDistributionLabels: [string, string, string] = [
-    'Baking Reward Account',
-    'Finalization Account Reward',
+    'Baking reward account',
+    'Finalization account reward',
     'Foundation',
 ];
 
@@ -22,8 +22,8 @@ export const toRewardDistributionValue = ({
     MintDistributionNode,
     'bakingReward' | 'finalizationReward'
 >): RewardDistributionValue => ({
-    first: bakingReward * rewardFractionResolution,
-    second: finalizationReward * rewardFractionResolution,
+    first: bakingReward * updateConstants.rewardFractionResolution,
+    second: finalizationReward * updateConstants.rewardFractionResolution,
 });
 
 export const getSlotsPerYear = (consensusStatus: ConsensusStatus): number => {

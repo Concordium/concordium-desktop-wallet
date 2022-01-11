@@ -20,7 +20,7 @@ export default function UpdateBakerRestakeEarningsProposalDetails({
     return (
         <Details>
             <AccountDetail title="Account" value={account} first />
-            <EnabledDetail title="Restake Earnings" value={restakeEarnings} />
+            <EnabledDetail title="Restake earnings" value={restakeEarnings} />
             <DisplayEstimatedFee estimatedFee={estimatedFee} />
             <DisplayTransactionExpiryTime expiryTime={expiryTime} />
         </Details>

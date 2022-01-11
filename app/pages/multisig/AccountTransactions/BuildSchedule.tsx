@@ -4,11 +4,12 @@ import { toMicroUnits } from '~/utils/gtu';
 import { Schedule } from '~/utils/types';
 import RegularInterval from '~/components/BuildSchedule/BuildRegularInterval';
 import ExplicitSchedule from '~/components/BuildSchedule/BuildExplicitSchedule';
-import ButtonGroup from '~/components/ButtonGroup';
 import {
     ScheduledTransferBuilderRef,
     BuildScheduleDefaults,
 } from '~/components/BuildSchedule/util';
+import Radios from '~/components/Form/Radios';
+
 import accountStyles from '~/pages/Accounts/AccountDetailsPage/BuildSchedule/BuildSchedule.module.scss';
 
 interface Props {
@@ -39,15 +40,14 @@ const BuildSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
                     'flexColumn flexChildFill'
                 )}
             >
-                <ButtonGroup
-                    buttons={[
-                        { label: 'Regular Interval', value: false },
-                        { label: 'Explicit Schedule', value: true },
+                <Radios
+                    options={[
+                        { label: 'Regular interval', value: false },
+                        { label: 'Explicit schedule', value: true },
                     ]}
-                    isSelected={({ value }) => value === explicit}
-                    onClick={({ value }) => setExplicit(value)}
-                    name="scheduleType"
-                    title="Schedule type:"
+                    value={explicit}
+                    onChange={setExplicit}
+                    label="Schedule type:"
                 />
                 <BuildComponent
                     defaults={defaults}

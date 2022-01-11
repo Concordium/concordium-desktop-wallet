@@ -76,7 +76,7 @@ export default function AccountBalanceView(): JSX.Element | null {
                     )}
                     onClick={() => setViewingShieldedAndReset(dispatch, true)}
                 >
-                    Shielded Balance
+                    Shielded balance
                 </Button>
             )}
         </div>
@@ -130,7 +130,9 @@ export default function AccountBalanceView(): JSX.Element | null {
                 {accountBaker && (
                     <div className={styles.bakerRow}>
                         <BakerImage className={styles.bakerImage} height="18" />
-                        <h3 className="m0">{accountBaker.bakerId}</h3>
+                        <h3 className="m0">
+                            {accountBaker.bakerId.toString()}
+                        </h3>
                     </div>
                 )}
             </>

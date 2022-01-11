@@ -1,9 +1,5 @@
 import { Knex } from 'knex';
-import {
-    accountsTable,
-    identitiesTable,
-    transactionTable,
-} from '~/constants/databaseNames.json';
+import databaseNames from '~/constants/databaseNames.json';
 import { ADDRESS_LENGTH } from '~/utils/accountHelpers';
 import { Account } from '~/utils/types';
 
@@ -29,7 +25,7 @@ function createCommonFields(table: Knex.CreateTableBuilder) {
     table
         .integer('identityId')
         .references('id')
-        .inTable(identitiesTable)
+        .inTable(databaseNames.identitiesTable)
         .notNullable();
 }
 
@@ -52,7 +48,9 @@ export async function up(knex: Knex): Promise<void> {
             table.string('maxTransactionId').defaultTo('0').notNullable();
         });
 
-        const accounts: Account[] = await t(accountsTable).select();
+        const accounts: Account[] = await t(
+            databaseNames.accountsTable
+        ).select();
 
         if (accounts.length) {
             await t.batchInsert(
@@ -62,10 +60,10 @@ export async function up(knex: Knex): Promise<void> {
             );
         }
 
-        await t.schema.dropTableIfExists(accountsTable);
-        await t.schema.renameTable(TEMP_NAME, accountsTable);
+        await t.schema.dropTableIfExists(databaseNames.accountsTable);
+        await t.schema.renameTable(TEMP_NAME, databaseNames.accountsTable);
 
-        await t.table(transactionTable).del();
+        await t.table(databaseNames.transactionTable).del();
     });
 }
 
@@ -105,7 +103,9 @@ export async function down(knex: Knex): Promise<void> {
             table.integer('maxTransactionId').defaultTo(0);
         });
 
-        const accounts: Account[] = await t(accountsTable).select();
+        const accounts: Account[] = await t(
+            databaseNames.accountsTable
+        ).select();
 
         if (accounts.length) {
             await t.batchInsert(
@@ -114,9 +114,9 @@ export async function down(knex: Knex): Promise<void> {
                 insertChunkSize
             );
         }
-        await t.schema.dropTableIfExists(accountsTable);
-        await t.schema.renameTable(TEMP_NAME, accountsTable);
+        await t.schema.dropTableIfExists(databaseNames.accountsTable);
+        await t.schema.renameTable(TEMP_NAME, databaseNames.accountsTable);
 
-        await t.table(transactionTable).del();
+        await t.table(databaseNames.transactionTable).del();
     });
 }

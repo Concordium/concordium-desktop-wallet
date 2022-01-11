@@ -4,6 +4,7 @@ import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect } from 'react-router';
 import type { Buffer } from 'buffer/';
+import clsx from 'clsx';
 import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
 import { parse } from '~/utils/JSONHelper';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
@@ -48,6 +49,7 @@ import PrintButton from '~/components/PrintButton';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 import { insert } from '~/database/DecryptedAmountsDao';
+import { getKeyExportType } from '~/utils/identityHelpers';
 
 import styles from './SubmitTransaction.module.scss';
 
@@ -77,7 +79,8 @@ async function attachCompletedPayload(
     const getPrfKey = async () => {
         setMessage('Please accept decrypt on device');
         const prfKeySeed = await ledger.getPrfKeyDecrypt(
-            credential.identityNumber
+            credential.identityNumber,
+            getKeyExportType(identityVersion)
         );
         setMessage('Please wait');
         return prfKeySeed.toString('hex');
@@ -290,7 +293,10 @@ export default function SubmitTransaction({ location }: Props) {
     return (
         <PageLayout>
             <PageLayout.Header>
-                <h1>Accounts | Submit Transaction</h1>
+                <h1>
+                    <span className="pageTitlePrefix">Submit transaction</span>
+                    {handler.type}
+                </h1>
             </PageLayout.Header>
             <PageLayout.Container
                 closeRoute={cancelled}
@@ -326,7 +332,7 @@ export default function SubmitTransaction({ location }: Props) {
                         }
                         className={styles.summary}
                     >
-                        <div className="mT40">
+                        <div className={clsx(styles.summaryContent, 'pT40')}>
                             <TransactionDetails transaction={transaction} />
                         </div>
                     </Card>

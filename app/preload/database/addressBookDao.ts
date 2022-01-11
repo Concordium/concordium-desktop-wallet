@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { knex } from '~/database/knex';
-import { addressBookTable } from '~/constants/databaseNames.json';
+import databaseNames from '~/constants/databaseNames.json';
 import { AddressBookEntry } from '~/utils/types';
 import { AddressBookMethods } from '~/preload/preloadTypes';
 
@@ -15,26 +15,26 @@ function sanitizeAddressBookEntry(e: AddressBookEntry): AddressBookEntry {
 async function getAddressBook(): Promise<AddressBookEntry[]> {
     return (await knex())
         .select()
-        .table(addressBookTable)
+        .table(databaseNames.addressBookTable)
         .orderByRaw('name COLLATE NOCASE ASC')
         .then((e) => e.map(sanitizeAddressBookEntry));
 }
 
 async function insertEntry(entry: AddressBookEntry | AddressBookEntry[]) {
-    return (await knex())(addressBookTable).insert(entry);
+    return (await knex())(databaseNames.addressBookTable).insert(entry);
 }
 
 async function updateEntry(
     address: string,
     updatedValues: Partial<AddressBookEntry>
 ) {
-    return (await knex())(addressBookTable)
+    return (await knex())(databaseNames.addressBookTable)
         .where({ address })
         .update(updatedValues);
 }
 
 async function removeEntry(entry: Partial<AddressBookEntry>) {
-    return (await knex())(addressBookTable).where(entry).del();
+    return (await knex())(databaseNames.addressBookTable).where(entry).del();
 }
 
 async function findEntries(
@@ -42,7 +42,7 @@ async function findEntries(
 ): Promise<AddressBookEntry[]> {
     return (await knex())
         .select()
-        .table(addressBookTable)
+        .table(databaseNames.addressBookTable)
         .where(condition)
         .then((e) => e.map(sanitizeAddressBookEntry));
 }
@@ -50,7 +50,7 @@ async function findEntries(
 export async function getEntryName(address: string) {
     const entry = await (await knex())
         .select<AddressBookEntry>('name')
-        .table(addressBookTable)
+        .table(databaseNames.addressBookTable)
         .where({ address })
         .first();
     if (entry) {

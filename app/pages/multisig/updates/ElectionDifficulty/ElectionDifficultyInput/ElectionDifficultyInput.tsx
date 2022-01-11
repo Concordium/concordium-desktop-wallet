@@ -14,6 +14,9 @@ export const toElectionDifficultyResolution = toResolution(
 );
 
 const validateResolutionConversion: Validate = (value: string) => {
+    if (Number.isNaN(parseFloat(value))) {
+        return 'Value must be a number';
+    }
     try {
         toElectionDifficultyResolution(value);
         return true;
@@ -35,14 +38,16 @@ export interface ElectionDifficultyInputProps {
     value: number | undefined;
     disabled?: boolean;
     readOnly?: boolean;
+    display?: boolean;
 }
 
 export default function ElectionDifficultyInput({
     label,
     value,
     timePerSlot,
+    display = false,
     disabled = false,
-    readOnly = false,
+    readOnly = display,
 }: ElectionDifficultyInputProps): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const initial = useMemo(() => value?.toString() ?? '', []);
@@ -112,20 +117,18 @@ export default function ElectionDifficultyInput({
 
     return (
         <label className={styles.root}>
-            <div className={styles.label}>{label}</div>
+            <div className={clsx(styles.label, 'mB5')}>{label}</div>
             <input
                 className={clsx(
                     styles.field,
+                    display && styles.display,
                     shouldRegister && error && styles.fieldInvalid
                 )}
                 name={shouldRegister ? fieldName : undefined}
                 defaultValue={initial}
-                type="number"
+                type="text"
                 disabled={disabled}
                 readOnly={readOnly}
-                step={1 / electionDifficultyResolution}
-                min={0}
-                max={0.99999}
                 ref={shouldRegister ? registration : undefined}
             />
             {blockTime && (

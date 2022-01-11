@@ -16,9 +16,9 @@ import Button from '~/cross-app-components/Button';
 import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
 import errorMessages from '~/constants/errorMessages.json';
 import { findEntries, insert } from '~/database/DecryptedAmountsDao';
-import decryptTransactions, {
-    isSuccessfulEncryptedTransaction,
-} from '~/utils/decryptHelpers';
+import isSuccessfulEncryptedTransaction from '~/utils/decryptHelpers';
+import decryptTransactions from '~/utils/decryptTransactions';
+import { getKeyExportType } from '~/utils/identityHelpers';
 
 interface Props {
     account: Account;
@@ -71,7 +71,8 @@ export default function DecryptComponent({ account, onDecrypt }: Props) {
 
         setMessage('Please accept decrypt on device');
         const prfKeySeed = await ledger.getPrfKeyDecrypt(
-            credential.identityNumber
+            credential.identityNumber,
+            getKeyExportType(identity.version)
         );
         setMessage('Please wait');
         const prfKey = prfKeySeed.toString('hex');

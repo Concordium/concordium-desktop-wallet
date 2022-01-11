@@ -53,7 +53,7 @@ export default function GenerateCredential(): JSX.Element {
     return (
         <PageLayout>
             <PageLayout.Header>
-                <h1>Generate Account Credentials</h1>
+                <h1>Generate account credentials</h1>
             </PageLayout.Header>
             <PageLayout.Container
                 closeRoute={routes.MULTISIGTRANSACTIONS_EXPORT_KEY}

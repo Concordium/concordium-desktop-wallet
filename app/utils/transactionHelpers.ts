@@ -50,7 +50,7 @@ import {
 } from './transactionCosts';
 import { toMicroUnits, isValidGTUString, displayAsGTU } from './gtu';
 import { getEncodedSize } from './cborHelper';
-import { maxMemoSize } from '~/constants/externalConstants.json';
+import externalConstants from '~/constants/externalConstants.json';
 import { isASCII } from './basicHelpers';
 import { getAmountAtDisposal } from './accountHelpers';
 
@@ -636,8 +636,8 @@ export function validateData(data: string, name = 'Data'): string | undefined {
     ) {
         return `Numbers greater than ${Number.MAX_SAFE_INTEGER} or smaller than ${Number.MIN_SAFE_INTEGER} are not supported`;
     }
-    if (getEncodedSize(data) > maxMemoSize) {
-        return `${name} is too large, encoded size must be at most ${maxMemoSize} bytes`;
+    if (getEncodedSize(data) > externalConstants.maxMemoSize) {
+        return `${name} is too large, encoded size must be at most ${externalConstants.maxMemoSize} bytes`;
     }
     // Check that the memo only contains ascii characters
     if (isASCII(data)) {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { RegisterOptions, useFormContext, Validate } from 'react-hook-form';
 import { EqualRecord, GasRewards } from '~/utils/types';
-import { rewardFractionResolution } from '~/constants/updateConstants.json';
+import updateConstants from '~/constants/updateConstants.json';
 import {
     FormGasRewardFractionField,
     GasRewardFractionField,
@@ -23,9 +23,9 @@ const fieldNames: EqualRecord<UpdateGasRewardsFields> = {
 
 const labels: { [P in keyof UpdateGasRewardsFields]: string } = {
     baker: 'Baker:',
-    finalizationProof: 'Finalization Proof:',
-    accountCreation: 'Account Creation:',
-    chainUpdate: 'Chain Update:',
+    finalizationProof: 'Finalization proof:',
+    accountCreation: 'Account creation:',
+    chainUpdate: 'Chain update:',
 };
 
 const convertsToInteger: Validate = (v: number) =>
@@ -36,7 +36,7 @@ const validationRules: RegisterOptions = {
     required: 'Value is required',
     min: { value: 0, message: 'Value can not be negative' },
     max: {
-        value: rewardFractionResolution,
+        value: updateConstants.rewardFractionResolution,
         message: 'Value can not be above 100',
     },
     validate: {
@@ -48,13 +48,15 @@ interface GasRewardsFormProps {
     gasRewards: GasRewards;
     disabled?: boolean;
     readOnly?: boolean;
+    display?: boolean;
     title: string;
 }
 
 export default function GasRewardsForm({
     gasRewards,
     disabled = false,
-    readOnly = false,
+    display = false,
+    readOnly = display,
     title,
 }: GasRewardsFormProps): JSX.Element {
     const fields = Object.keys(fieldNames) as Array<keyof GasRewards>;
@@ -85,6 +87,7 @@ export default function GasRewardsForm({
                         value={value}
                         disabled={disabled}
                         readOnly={readOnly}
+                        display={display}
                     />
                 ) : (
                     <FormGasRewardFractionField

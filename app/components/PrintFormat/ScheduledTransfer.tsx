@@ -73,7 +73,7 @@ function PrintFormatScheduledTransfer({
             {table(
                 <thead>
                     <tr>
-                        <th>Release Time</th>
+                        <th>Release time</th>
                         <th>Amount</th>
                     </tr>
                 </thead>,

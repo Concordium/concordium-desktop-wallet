@@ -1,4 +1,4 @@
-import { externalCredentialsTable } from '~/constants/databaseNames.json';
+import databaseNames from '~/constants/databaseNames.json';
 import { ExternalCredential } from '~/database/types';
 import { knex } from '~/database/knex';
 import { MakeOptional } from '~/utils/types';
@@ -8,7 +8,7 @@ async function upsertExternalCredential(
     credential: MakeOptional<ExternalCredential, 'note'>
 ) {
     return (await knex())
-        .table(externalCredentialsTable)
+        .table(databaseNames.externalCredentialsTable)
         .insert(credential)
         .onConflict('credId')
         .merge();
@@ -23,7 +23,7 @@ async function upsertMultipleExternalCredentials(
 
     // eslint-disable-next-line consistent-return
     return (await knex())
-        .table(externalCredentialsTable)
+        .table(databaseNames.externalCredentialsTable)
         .insert(credentials)
         .onConflict('credId')
         .ignore();
@@ -36,13 +36,15 @@ async function deleteExternalCredentials(credIds: string[]) {
 
     // eslint-disable-next-line consistent-return
     return (await knex())
-        .table(externalCredentialsTable)
+        .table(databaseNames.externalCredentialsTable)
         .whereIn('credId', credIds)
         .del();
 }
 
 async function getAllExternalCredentials(): Promise<ExternalCredential[]> {
-    return (await knex()).table(externalCredentialsTable).select();
+    return (await knex())
+        .table(databaseNames.externalCredentialsTable)
+        .select();
 }
 
 const exposedMethods: ExternalCredentialMethods = {

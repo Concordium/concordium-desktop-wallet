@@ -5,8 +5,8 @@
 
 const path = require('path');
 const webpack = require('webpack');
-const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 const { dependencies: externals } = require('../../app/package.json');
 const CheckTargetNet = require('../../internals/scripts/CheckTargetNet');
 
@@ -34,20 +34,7 @@ module.exports = {
                 test: /\.tsx?$/,
                 exclude: /node_modules/,
                 include: /app/,
-                use: [
-                    {
-                        loader: 'babel-loader',
-                        options: {
-                            plugins: [
-                                '@babel/plugin-proposal-optional-chaining',
-                                '@babel/plugin-proposal-nullish-coalescing-operator',
-                            ],
-                        },
-                    },
-                    {
-                        loader: 'ts-loader',
-                    },
-                ],
+                use: 'ts-loader',
             },
         ],
     },
@@ -55,7 +42,9 @@ module.exports = {
     output: {
         path: path.join(__dirname, '..', 'app'),
         // https://github.com/webpack/webpack/issues/1114
-        libraryTarget: 'commonjs2',
+        library: {
+            type: 'commonjs2',
+        },
         webassemblyModuleFilename: 'crypto.wasm',
     },
 
@@ -70,21 +59,27 @@ module.exports = {
                 extensions,
             }),
         ],
+        fallback: {
+            crypto: require.resolve('crypto-browserify'),
+            stream: require.resolve('stream-browserify'),
+        },
     },
 
     optimization: {
-        namedModules: true,
-        noEmitOnErrors: false,
+        moduleIds: 'named',
+        emitOnErrors: true,
     },
 
     plugins: [
         new webpack.EnvironmentPlugin({
-            NODE_ENV: 'production',
             TARGET_NET: 'mainnet',
             LEDGER_EMULATOR_URL: '',
+            DEBUG_PROD: false,
+            START_MINIMIZED: false,
+            E2E_BUILD: false,
         }),
-        new WasmPackPlugin({
-            crateDirectory: path.resolve(__dirname, '.'),
+        new webpack.ProvidePlugin({
+            Buffer: ['buffer/', 'Buffer'],
         }),
         new webpack.NormalModuleReplacementPlugin(
             /\.\.\/migrations/,
@@ -94,5 +89,8 @@ module.exports = {
             /\.\.\/pkg\/node_sdk_helpers/,
             path.resolve(__dirname, '../..', 'internals/mocks/empty.js')
         ),
+        new WasmPackPlugin({
+            crateDirectory: path.resolve(__dirname, '.'),
+        }),
     ],
 };

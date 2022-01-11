@@ -22,8 +22,8 @@ Open.args = {
     headerLeft: 'Header left',
     headerRight: 'Header right',
     status: MultiSignatureTransactionStatus.Open,
-    title: 'Transaction Title',
-    children: ['Effective Time: DD - MM - YYYY'],
+    title: 'Transaction title',
+    children: ['Effective time: DD - MM - YYYY'],
 };
 
 export const Submitted = Template.bind({});
@@ -32,8 +32,8 @@ Submitted.args = {
     headerRight: 'Header right',
     submittedOn: new Date(),
     status: MultiSignatureTransactionStatus.Submitted,
-    title: 'Transaction Title',
-    children: ['Effective Time: DD - MM - YYYY'],
+    title: 'Transaction title',
+    children: ['Effective time: DD - MM - YYYY'],
 };
 
 export const Failed = Template.bind({});
@@ -42,8 +42,8 @@ Failed.args = {
     headerRight: 'Header right',
     submittedOn: new Date(),
     status: MultiSignatureTransactionStatus.Rejected,
-    title: 'Transaction Title',
-    children: ['Effective Time: DD - MM - YYYY'],
+    title: 'Transaction title',
+    children: ['Effective time: DD - MM - YYYY'],
 };
 
 export const Success = Template.bind({});
@@ -52,6 +52,6 @@ Success.args = {
     headerRight: 'Header right',
     submittedOn: new Date(),
     status: MultiSignatureTransactionStatus.Finalized,
-    title: 'Transaction Title',
-    children: ['Effective Time: DD - MM - YYYY'],
+    title: 'Transaction title',
+    children: ['Effective time: DD - MM - YYYY'],
 };

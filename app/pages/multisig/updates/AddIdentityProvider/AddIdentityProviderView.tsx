@@ -28,35 +28,49 @@ export default function AddIdentityProviderView({
 
     return (
         <>
-            <div className="body1">
-                <h5 className="mB0">{fieldDisplays.name}</h5>
-                {addIdentityProvider.ipDescription.name}
+            <div>
+                <h5 className="mB5">{fieldDisplays.name}:</h5>
+                <span className="mono body3">
+                    {addIdentityProvider.ipDescription.name}
+                </span>
             </div>
-            <div className="body1">
-                <h5 className="mB0">{fieldDisplays.url}</h5>
-                {addIdentityProvider.ipDescription.url}
+            <div>
+                <h5 className="mB5">{fieldDisplays.url}:</h5>
+                <span className="mono body3">
+                    {addIdentityProvider.ipDescription.url}
+                </span>
             </div>
-            <div className="body1">
-                <h5 className="mB0">{fieldDisplays.description}</h5>
-                {addIdentityProvider.ipDescription.description}
+            <div>
+                <h5 className="mB5">{fieldDisplays.description}:</h5>
+                <span className="mono body3">
+                    {addIdentityProvider.ipDescription.description}
+                </span>
             </div>
-            <div className="body1">
-                <h5 className="mB0">{fieldDisplays.ipIdentity}</h5>
-                {addIdentityProvider.ipIdentity}
+            <div>
+                <h5 className="mB5">{fieldDisplays.ipIdentity}:</h5>
+                <span className="mono body3">
+                    {addIdentityProvider.ipIdentity}
+                </span>
             </div>
-            <div className="body1">
-                <h5 className="mB0">{fieldDisplays.ipVerifyKey}</h5>
-                {addIdentityProvider.ipVerifyKey}
+            <div>
+                <h5 className="mB5">{fieldDisplays.ipVerifyKey}:</h5>
+                <span className="mono body3">
+                    {addIdentityProvider.ipVerifyKey}
+                </span>
             </div>
-            <div className="body1">
-                <h5 className="mB0">{fieldDisplays.ipVerifyKey} Hash</h5>
-                <DisplayHexString value={ipVerifyKeyHash} />
+            <div>
+                <h5 className="mB5">{fieldDisplays.ipVerifyKey} hash:</h5>
+                <span className="mono body3">
+                    <DisplayHexString value={ipVerifyKeyHash} />
+                </span>
             </div>
-            <div className="body1">
-                <h5 className="mB0">{fieldDisplays.ipCdiVerifyKey}</h5>
-                <PublicKeyDetails
-                    publicKey={addIdentityProvider.ipCdiVerifyKey}
-                />
+            <div>
+                <h5 className="mB5">{fieldDisplays.ipCdiVerifyKey}:</h5>
+                <span className="mono body3">
+                    <PublicKeyDetails
+                        publicKey={addIdentityProvider.ipCdiVerifyKey}
+                    />
+                </span>
             </div>
         </>
     );

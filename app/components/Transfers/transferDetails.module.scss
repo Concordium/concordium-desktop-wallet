@@ -1,7 +1,7 @@
 @import 'config/bundle';
 
 .title {
-    margin-bottom: 0;
+    margin-bottom: 5px;
     margin-top: 40px;
 
     &:first-child {
@@ -9,32 +9,41 @@
     }
 }
 
+.value {
+    composes: mono from global;
+}
+
 .name {
-    font-size: $font-size-body1;
-    font-weight: $font-weight-emphasized;
+    composes: value;
+    composes: body3 from global;
     margin: 0;
 }
 
 .address,
 .note {
+    composes: value;
     font-size: $font-size-body4;
-    margin-top: 5px;
-    margin-bottom: 0;
 }
 
 .amount {
-    font-size: $font-size-h1;
+    composes: value;
+    composes: body3 from global;
     margin: 0;
 }
 
 .fee {
-    margin-top: 0;
+    composes: value;
+    font-size: $font-size-body4;
+    margin-top: 10px;
 }
 
 .note {
     color: $color-text-faded;
+    margin: 0;
 }
 
 .memo {
+    composes: value;
+    composes: body3 from global;
     white-space: pre-wrap;
 }

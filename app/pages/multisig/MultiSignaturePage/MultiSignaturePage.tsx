@@ -24,7 +24,7 @@ export default function MultiSignaturePage() {
     return (
         <MasterDetailPageLayout>
             <Header>
-                <h1>Multi Signature Transactions</h1>
+                <h1>Multi signature transactions</h1>
             </Header>
             <Master>
                 <ButtonNavLink
