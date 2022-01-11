@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import { Route, Switch, useLocation, useRouteMatch } from 'react-router';
 import BackButton from '~/cross-app-components/BackButton';
 import Card from '~/cross-app-components/Card';
+import Loading from '~/cross-app-components/Loading';
 
 import styles from './AccountTransactionFlow.module.scss';
 
@@ -18,10 +19,14 @@ interface FlowChild<S, P extends keyof S = any> {
     component: ComponentType<FlowPageProps<S[P]>>;
 }
 
+type FlowChildren<S extends Record<string, unknown>> = {
+    [P in keyof S]: FlowChild<S, P>;
+};
+
 interface Props<S extends Record<string, unknown>> {
     title: string;
     serializeTransaction(values: S): string;
-    children: { [P in keyof S]: FlowChild<S, P> };
+    children: FlowChildren<S>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -82,7 +87,6 @@ export default function AccountTransactionFlow<S extends Record<string, any>>({
                 />
             )}
             <h3 className="mT0">{title}</h3>
-            <div>{JSON.stringify(currentPage)}</div>
             <Switch>
                 {pages.map(({ Page, route, substate }) => (
                     <Route path={route} key={route}>
@@ -93,3 +97,13 @@ export default function AccountTransactionFlow<S extends Record<string, any>>({
         </Card>
     );
 }
+
+export const AccountTransactionFlowLoading = ({
+    title,
+}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+Pick<Props<any>, 'title'>) => (
+    <Card className={styles.root}>
+        <h3 className="mT0">{title}</h3>
+        <Loading text="Loading transaction dependencies" inline />
+    </Card>
+);

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import AddBakerDetailsForm, {
+import AddBakerStakeSettings, {
     StakeSettings,
 } from '~/components/BakerTransactions/AddBakerStakeSettings';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
@@ -18,7 +18,7 @@ import {
 import styles from '../../AccountDetailsPage.module.scss';
 
 type FormWrapperProps = Omit<
-    PropsOf<typeof AddBakerDetailsForm>,
+    PropsOf<typeof AddBakerStakeSettings>,
     'minimumStake' | 'estimatedFee'
 > &
     NotOptional<ChainData> &
@@ -37,7 +37,7 @@ const FormWrapper = ensureChainData(
         );
 
         return (
-            <AddBakerDetailsForm
+            <AddBakerStakeSettings
                 {...props}
                 minimumStake={minimumStake}
                 estimatedFee={estimatedFee}

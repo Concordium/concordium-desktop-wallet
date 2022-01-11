@@ -1,6 +1,5 @@
 import React, { ComponentType } from 'react';
 
-/* eslint-disable import/prefer-default-export */
 export function ensureProps<TProps>(
     Component: ComponentType<TProps>,
     ensureFun: (props: TProps) => boolean,
