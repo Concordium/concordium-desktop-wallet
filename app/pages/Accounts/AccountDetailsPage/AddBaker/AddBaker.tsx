@@ -8,6 +8,7 @@ import { connect } from 'react-redux';
 import AddBakerStakeSettings, {
     StakeSettings,
 } from '~/components/BakerTransactions/AddBakerStakeSettings';
+import Form from '~/components/Form';
 import Radios from '~/components/Form/Radios';
 import withExchangeRate, {
     ExchangeRate,
@@ -17,7 +18,13 @@ import Button from '~/cross-app-components/Button';
 import { chosenAccountSelector } from '~/features/AccountSlice';
 import { RootState } from '~/store/store';
 import { useTransactionCostEstimate } from '~/utils/dataHooks';
-import { Account, NotOptional, TransactionKindId } from '~/utils/types';
+import {
+    Account,
+    EqualRecord,
+    NotOptional,
+    PropsOf,
+    TransactionKindId,
+} from '~/utils/types';
 import withChainData, { ChainData } from '~/utils/withChainData';
 import AccountTransactionFlow, {
     FlowPageProps,
@@ -95,12 +102,18 @@ function PoolOpenPage({ initial = true, onNext }: PoolOpenPageProps) {
 
 type CommissionsPageProps = FlowPageProps<CommissionSettings>;
 
-function CommisionsPage({ initial }: CommissionsPageProps) {
-    const currentValues: CommissionSettings = initial ?? {
-        transactionFee: 10,
-        bakingReward: 10,
-        finalizationReward: 10,
-    };
+const commissionsFieldNames: EqualRecord<CommissionSettings> = {
+    transactionFee: 'transactionFee',
+    bakingReward: 'bakingReward',
+    finalizationReward: 'finalizationReward',
+};
+
+const commonSliderProps: Pick<PropsOf<typeof Form.Slider>, 'step' | 'unit'> = {
+    step: 0.01,
+    unit: '%',
+};
+
+function CommissionsPage({ initial, onNext }: CommissionsPageProps) {
     const boundaries: {
         [P in keyof CommissionSettings]: [number, number];
     } = {
@@ -108,16 +121,44 @@ function CommisionsPage({ initial }: CommissionsPageProps) {
         bakingReward: [5, 15],
         finalizationReward: [5, 15],
     };
+    const defaultValues: CommissionSettings = {
+        transactionFee: boundaries.transactionFee[1],
+        bakingReward: boundaries.bakingReward[1],
+        finalizationReward: boundaries.finalizationReward[1],
+    };
 
     return (
-        <>
+        <Form<CommissionSettings>
+            onSubmit={onNext}
+            defaultValues={initial ?? defaultValues}
+        >
             <p>
                 When you open your baker as a pool, you have to set commission
                 rates. You can do so below:
             </p>
-            {JSON.stringify(currentValues)}
-            {JSON.stringify(boundaries)}
-        </>
+            <Form.Slider
+                label="Transaction fee commissions"
+                name={commissionsFieldNames.transactionFee}
+                min={boundaries.transactionFee[0]}
+                max={boundaries.transactionFee[1]}
+                {...commonSliderProps}
+            />
+            <Form.Slider
+                label="Baking reward commissions"
+                name={commissionsFieldNames.bakingReward}
+                min={boundaries.bakingReward[0]}
+                max={boundaries.bakingReward[1]}
+                {...commonSliderProps}
+            />
+            <Form.Slider
+                label="Finalization reward commissions"
+                name={commissionsFieldNames.finalizationReward}
+                min={boundaries.finalizationReward[0]}
+                max={boundaries.finalizationReward[1]}
+                {...commonSliderProps}
+            />
+            <Form.Submit className={styles.mainButton}>Continue</Form.Submit>
+        </Form>
     );
 }
 
@@ -151,7 +192,7 @@ export default withData(function AddBaker(props: Props) {
                 {{
                     stake: { component: StakePage },
                     poolOpen: { component: PoolOpenPage },
-                    commissions: { component: CommisionsPage },
+                    commissions: { component: CommissionsPage },
                 }}
             </AccountTransactionFlow>
         </dependencies.Provider>

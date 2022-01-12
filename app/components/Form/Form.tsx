@@ -25,6 +25,7 @@ import GtuInput, { GtuInputProps } from './GtuInput';
 import InlineInput, { InlineInputProps } from './InlineInput';
 import DatePicker from './DatePicker';
 import Radios, { RadiosProps } from './Radios';
+import Slider from './Slider';
 
 export type FormProps<TFormValues extends FieldValues = FieldValues> = Omit<
     FormHTMLAttributes<HTMLFormElement>,
@@ -123,6 +124,9 @@ Form.DatePicker = connectWithFormControlled<Date, PropsOf<typeof DatePicker>>(
     DatePicker
 );
 (Form.DatePicker as FC).displayName = 'Form.DatePicker';
+
+Form.Slider = connectWithFormControlled<number, PropsOf<typeof Slider>>(Slider);
+(Form.Slider as FC).displayName = 'Form.Slider';
 
 Form.Submit = Submit;
 (Form.Submit as FC).displayName = 'Form.Submit';
