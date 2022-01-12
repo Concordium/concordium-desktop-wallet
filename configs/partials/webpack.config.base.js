@@ -14,7 +14,7 @@ CheckTargetNet();
 
 const targetNet = process.env.TARGET_NET;
 
-let userData = process.env.npm_package_userData;
+let userData = 'Concordium Wallet';
 if (targetNet) {
     userData += ` ${targetNet}`;
 }
