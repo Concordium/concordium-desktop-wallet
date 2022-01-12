@@ -25,14 +25,14 @@ type FlowChildren<S extends Record<string, unknown>> = {
 
 interface Props<S extends Record<string, unknown>> {
     title: string;
-    serializeTransaction(values: S): string;
+    onDone(values: S): void;
     children: FlowChildren<S>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function AccountTransactionFlow<S extends Record<string, any>>({
     title: baseTitle,
-    serializeTransaction,
+    onDone,
     children,
 }: Props<S>) {
     const { pathname, state } = useLocation<S>();
@@ -62,21 +62,16 @@ export default function AccountTransactionFlow<S extends Record<string, any>>({
     const { nextRoute, title, route: currentRoute } = currentPage;
     const isFirstPage = currentRoute === matchedPath;
 
-    function next() {
+    const handleNext = (substate: keyof S) => (v: Partial<S>) => {
+        const newValues = { ...values, [substate]: v };
+        setValues(newValues);
+
         if (nextRoute) {
             dispatch(push(nextRoute));
-        } else if (values !== undefined) {
-            const serialized = serializeTransaction(values);
-            // eslint-disable-next-line no-console
-            console.log(serialized);
-            // go to submit page...
+        } else {
+            onDone(newValues);
         }
-    }
-
-    function handleNext(v: Partial<S>): void {
-        setValues((e) => ({ ...e, ...v }));
-        next();
-    }
+    };
 
     return (
         <Card className={styles.root}>
@@ -90,7 +85,10 @@ export default function AccountTransactionFlow<S extends Record<string, any>>({
             <Switch>
                 {pages.map(({ Page, route, substate }) => (
                     <Route path={route} key={route}>
-                        <Page onNext={handleNext} initial={values[substate]} />
+                        <Page
+                            onNext={handleNext(substate)}
+                            initial={values[substate]}
+                        />
                     </Route>
                 ))}
             </Switch>

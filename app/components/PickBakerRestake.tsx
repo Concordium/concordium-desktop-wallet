@@ -17,7 +17,6 @@ export default function PickBakerRestake({ fieldName, initial = true }: Props) {
     return (
         <Form.Radios
             name={fieldName}
-            label="Enable restake earnings"
             defaultValue={initial}
             options={[
                 {

@@ -61,7 +61,7 @@ export default function AddBakerStakeSettings({
                     fieldName={fieldNames.stake}
                     minimumStake={minimumStake}
                 />
-                <p>
+                <p className="mB30">
                     By default all baker rewards are added to the staked amount.
                     This can be disabled below.
                 </p>

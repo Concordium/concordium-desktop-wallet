@@ -1,12 +1,19 @@
-import React, { ComponentType, createContext, useContext } from 'react';
+import React, {
+    ComponentType,
+    createContext,
+    useContext,
+    useState,
+} from 'react';
 import { connect } from 'react-redux';
 import AddBakerStakeSettings, {
     StakeSettings,
 } from '~/components/BakerTransactions/AddBakerStakeSettings';
+import Radios from '~/components/Form/Radios';
 import withExchangeRate, {
     ExchangeRate,
 } from '~/components/Transfers/withExchangeRate';
 import withNonce, { AccountAndNonce } from '~/components/Transfers/withNonce';
+import Button from '~/cross-app-components/Button';
 import { chosenAccountSelector } from '~/features/AccountSlice';
 import { RootState } from '~/store/store';
 import { useTransactionCostEstimate } from '~/utils/dataHooks';
@@ -17,7 +24,9 @@ import AccountTransactionFlow, {
     AccountTransactionFlowLoading,
 } from '../../AccountTransactionFlow';
 
-type PoolOpen = boolean;
+import styles from './AddBaker.module.scss';
+
+type PoolOpenSettings = boolean;
 
 type Dependencies = ChainData & ExchangeRate & AccountAndNonce;
 
@@ -27,21 +36,15 @@ const dependencies = createContext<NotOptional<Dependencies>>(
 
 const title = 'Add baker';
 
-interface BakerState {
-    stake: StakeSettings;
-    poolOpen: PoolOpen;
-}
-
 type StakePageProps = FlowPageProps<StakeSettings>;
-type PoolOpenPageProps = FlowPageProps<PoolOpen>;
 
-function BakerDetailsPage({ onNext, initial }: StakePageProps) {
+function StakePage({ onNext, initial }: StakePageProps) {
     const { blockSummary, exchangeRate, account } = useContext(dependencies);
     const minimumStake = BigInt(
         blockSummary.updates.chainParameters.minimumThresholdForBaking
     );
     const estimatedFee = useTransactionCostEstimate(
-        TransactionKindId.Add_baker,
+        TransactionKindId.Add_baker, // TODO: change this to the correct transaction.
         exchangeRate,
         account?.signatureThreshold
     );
@@ -53,12 +56,40 @@ function BakerDetailsPage({ onNext, initial }: StakePageProps) {
             account={account}
             estimatedFee={estimatedFee}
             minimumStake={minimumStake}
+            buttonClassName={styles.mainButton}
         />
     );
 }
 
-function PoolOpenPage({ initial }: PoolOpenPageProps) {
-    return <>Pool open settings: {initial ? 'Yes' : 'No'}</>;
+type PoolOpenPageProps = FlowPageProps<PoolOpenSettings>;
+
+function PoolOpenPage({ initial = true, onNext }: PoolOpenPageProps) {
+    const [value, setValue] = useState(initial);
+    return (
+        <>
+            <p>
+                You have the option to open your baker as a pool for others to
+                delegate their CCD to.
+            </p>
+            <Radios
+                className="mT50"
+                options={[
+                    { label: 'Open pool', value: true },
+                    { label: 'Keep closed', value: false },
+                ]}
+                value={value}
+                onChange={setValue}
+            />
+            <Button className={styles.mainButton} onClick={() => onNext(value)}>
+                Continue
+            </Button>
+        </>
+    );
+}
+
+interface AddBakerState {
+    stake: StakeSettings;
+    poolOpen: PoolOpenSettings;
 }
 
 type Props = Dependencies;
@@ -77,12 +108,13 @@ export default withData(function AddBaker(props: Props) {
 
     return (
         <dependencies.Provider value={props as NotOptional<Dependencies>}>
-            <AccountTransactionFlow<BakerState>
+            <AccountTransactionFlow<AddBakerState>
                 title={title}
-                serializeTransaction={(values) => JSON.stringify(values)}
+                // eslint-disable-next-line no-console
+                onDone={(values) => console.log(values)}
             >
                 {{
-                    stake: { component: BakerDetailsPage },
+                    stake: { component: StakePage },
                     poolOpen: { component: PoolOpenPage },
                 }}
             </AccountTransactionFlow>
