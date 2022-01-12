@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import RcSlider from 'rc-slider';
+import clsx from 'clsx';
 import { CommonInputProps } from '../common';
 import InlineNumber from '../InlineNumber';
 import { isDefined, noOp } from '~/utils/basicHelpers';
+import Label from '~/components/Label';
+import { ClassName } from '~/utils/types';
 
-interface Props extends CommonInputProps {
+import styles from './Slider.module.scss';
+
+interface Props extends CommonInputProps, ClassName {
     min: number;
     max: number;
     step: number;
@@ -23,6 +28,7 @@ export default function Slider({
     onChange = noOp,
     onBlur = noOp,
     value,
+    className,
 }: Props) {
     const [innerValue, setInnerValue] = useState<number | undefined>(value);
 
@@ -31,9 +37,9 @@ export default function Slider({
     }, [innerValue, onChange]);
 
     return (
-        <label>
-            {label}
-            <div>
+        <label className={clsx(styles.root, className)}>
+            <Label className="mB5">{label}</Label>
+            <div className={styles.grid}>
                 <span>
                     Min:
                     <br />
@@ -54,18 +60,18 @@ export default function Slider({
                     {max}
                     {unit}
                 </span>
-            </div>
-            <div>
-                <InlineNumber
-                    value={innerValue?.toString()}
-                    onChange={(v) =>
-                        setInnerValue(isDefined(v) ? parseFloat(v) : v)
-                    }
-                    onBlur={onBlur}
-                    fallbackValue={min}
-                    allowFractions
-                />
-                {unit}
+                <div className={styles.input}>
+                    <InlineNumber
+                        value={innerValue?.toString()}
+                        onChange={(v) =>
+                            setInnerValue(isDefined(v) ? parseFloat(v) : v)
+                        }
+                        onBlur={onBlur}
+                        fallbackValue={min}
+                        allowFractions
+                    />
+                    {unit}
+                </div>
             </div>
         </label>
     );

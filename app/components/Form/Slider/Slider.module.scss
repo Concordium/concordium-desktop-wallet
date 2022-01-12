@@ -1,0 +1,21 @@
+@import 'config/bundle';
+
+.root {
+    display: block;
+    text-align: center;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 50px auto 50px;
+    grid-gap: 10px;
+    align-items: center;
+    justify-items: center;
+}
+
+.input {
+    grid-column-start: 2;
+    border-bottom: 1px solid $color-text;
+    width: 100%;
+    max-width: 200px;
+}

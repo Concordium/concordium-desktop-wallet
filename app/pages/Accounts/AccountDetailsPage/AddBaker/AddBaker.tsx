@@ -108,9 +108,13 @@ const commissionsFieldNames: EqualRecord<CommissionSettings> = {
     finalizationReward: 'finalizationReward',
 };
 
-const commonSliderProps: Pick<PropsOf<typeof Form.Slider>, 'step' | 'unit'> = {
+const commonSliderProps: Pick<
+    PropsOf<typeof Form.Slider>,
+    'step' | 'unit' | 'className'
+> = {
     step: 0.01,
     unit: '%',
+    className: 'mB20',
 };
 
 function CommissionsPage({ initial, onNext }: CommissionsPageProps) {
