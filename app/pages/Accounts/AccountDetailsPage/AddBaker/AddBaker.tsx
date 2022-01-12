@@ -28,6 +28,12 @@ import styles from './AddBaker.module.scss';
 
 type PoolOpenSettings = boolean;
 
+interface CommissionSettings {
+    transactionFee: number;
+    bakingReward: number;
+    finalizationReward: number;
+}
+
 type Dependencies = ChainData & ExchangeRate & AccountAndNonce;
 
 const dependencies = createContext<NotOptional<Dependencies>>(
@@ -87,9 +93,38 @@ function PoolOpenPage({ initial = true, onNext }: PoolOpenPageProps) {
     );
 }
 
+type CommissionsPageProps = FlowPageProps<CommissionSettings>;
+
+function CommisionsPage({ initial }: CommissionsPageProps) {
+    const currentValues: CommissionSettings = initial ?? {
+        transactionFee: 10,
+        bakingReward: 10,
+        finalizationReward: 10,
+    };
+    const boundaries: {
+        [P in keyof CommissionSettings]: [number, number];
+    } = {
+        transactionFee: [5, 15],
+        bakingReward: [5, 15],
+        finalizationReward: [5, 15],
+    };
+
+    return (
+        <>
+            <p>
+                When you open your baker as a pool, you have to set commission
+                rates. You can do so below:
+            </p>
+            {JSON.stringify(currentValues)}
+            {JSON.stringify(boundaries)}
+        </>
+    );
+}
+
 interface AddBakerState {
     stake: StakeSettings;
     poolOpen: PoolOpenSettings;
+    commissions: CommissionSettings;
 }
 
 type Props = Dependencies;
@@ -116,6 +151,7 @@ export default withData(function AddBaker(props: Props) {
                 {{
                     stake: { component: StakePage },
                     poolOpen: { component: PoolOpenPage },
+                    commissions: { component: CommisionsPage },
                 }}
             </AccountTransactionFlow>
         </dependencies.Provider>
