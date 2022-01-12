@@ -25,7 +25,7 @@ import { findAccountTransactionHandler } from '~/utils/transactionHandlers/Handl
 import CreateTransaction from './CreateTransaction';
 import routes from '~/constants/routes.json';
 
-import styles from './MultisignatureAccountTransactions.module.scss';
+import styles from '../common/MultiSignatureFlowPage.module.scss';
 
 function useRouteSubTitle() {
     const match = useRouteMatch<{

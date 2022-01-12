@@ -103,7 +103,7 @@ function createAccountTransaction<T extends TransactionPayload>({
 }
 
 /**
- *  Constructs a, simple transfer, transaction object,
+ *  Constructs a simple transfer transaction object,
  * Given the fromAddress, toAddress and the amount.
  */
 export function createSimpleTransferTransaction(
@@ -130,7 +130,7 @@ export function createSimpleTransferTransaction(
 }
 
 /**
- *  Constructs a, simple transfer, transaction object,
+ *  Constructs a simple transfer with memo transaction object,
  * Given the fromAddress, toAddress and the amount.
  */
 export function createSimpleTransferWithMemoTransaction(
@@ -159,7 +159,7 @@ export function createSimpleTransferWithMemoTransaction(
 }
 
 /**
- *  Constructs a, register data, transaction object,
+ *  Constructs a register data transaction object.
  */
 export function createRegisterDataTransaction(
     fromAddress: string,

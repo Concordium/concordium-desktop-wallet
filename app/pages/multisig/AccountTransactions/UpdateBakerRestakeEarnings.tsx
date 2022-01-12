@@ -32,7 +32,7 @@ import Label from '~/components/Label';
 import Radios from '~/components/Form/Radios';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 
-import styles from './MultisignatureAccountTransactions.module.scss';
+import styles from '../common/MultiSignatureFlowPage.module.scss';
 
 interface PageProps {
     exchangeRate: Fraction;

@@ -2,7 +2,8 @@ import React, { ReactNode } from 'react';
 import Button from '~/cross-app-components/Button';
 import DatePicker from '~/components/Form/DatePicker';
 import { useTransactionExpiryState } from '~/utils/dataHooks';
-import styles from './MultisignatureAccountTransactions.module.scss';
+
+import styles from '../common/MultiSignatureFlowPage.module.scss';
 
 interface Props {
     buttonText: string;

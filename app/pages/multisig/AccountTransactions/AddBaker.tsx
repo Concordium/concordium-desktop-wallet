@@ -50,7 +50,7 @@ import ExportBakerKeys from './ExportBakerKeys';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 
-import styles from './MultisignatureAccountTransactions.module.scss';
+import styles from '../common/MultiSignatureFlowPage.module.scss';
 
 interface PageProps extends ChainData {
     exchangeRate: Fraction;

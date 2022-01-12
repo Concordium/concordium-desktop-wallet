@@ -43,7 +43,7 @@ import ChooseExpiry from './ChooseExpiry';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 
-import styles from './MultisignatureAccountTransactions.module.scss';
+import styles from '../common/MultiSignatureFlowPage.module.scss';
 
 function toMicroUnitsSafe(str: string | undefined) {
     if (str === undefined) {

@@ -252,7 +252,7 @@ async function signTransferToPublic(
         );
     }
     if (!response) {
-        throw new Error('Unexpected missing response from ledger;');
+        throw new Error('Unexpected missing response from Ledger');
     }
     return response.slice(0, 64);
 }
@@ -481,7 +481,7 @@ async function signRegisterData(
     }
 
     if (!response) {
-        throw new Error('Unexpected missing response from ledger;');
+        throw new Error('Unexpected missing response from Ledger');
     }
     return response.slice(0, 64);
 }
