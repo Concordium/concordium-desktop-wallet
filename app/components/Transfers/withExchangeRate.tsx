@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { routerActions } from 'connected-react-router';
 import { Fraction } from '~/utils/types';
 import { getEnergyToMicroGtuRate } from '~/node/nodeHelpers';
-import { unableToReachNode } from '~/constants/errorMessages.json';
+import errorMessages from '~/constants/errorMessages.json';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 export interface ExchangeRate {
@@ -11,7 +11,7 @@ export interface ExchangeRate {
 }
 
 /**
- * Component that injects the current exchange rate between energy and gtu into the props.
+ * Component that injects the current exchange rate between energy and ccd into the props.
  */
 export default function withExchangeRate<TProps extends ExchangeRate>(
     Component: ComponentType<TProps>
@@ -38,7 +38,7 @@ export default function withExchangeRate<TProps extends ExchangeRate>(
             <>
                 <SimpleErrorModal
                     show={showError}
-                    header={unableToReachNode}
+                    header={errorMessages.unableToReachNode}
                     onClick={() => dispatch(routerActions.goBack())}
                 />
                 <Component {...propsWithExchangeRate} />

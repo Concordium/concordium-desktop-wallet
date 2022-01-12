@@ -1,10 +1,11 @@
 import React from 'react';
+import { useRouteMatch } from 'react-router';
 import { RemoveBaker } from '~/utils/types';
-import styles from './transferDetails.module.scss';
 import { useAccountName } from '~/utils/dataHooks';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
-import DisplayAddress from '../DisplayAddress';
+import routes from '~/constants/routes.json';
+import { DisplayFromAccount } from './DisplayAccount';
 
 interface Props {
     transaction: RemoveBaker;
@@ -15,17 +16,19 @@ interface Props {
  */
 export default function DisplayAddBaker({ transaction }: Props) {
     const senderName = useAccountName(transaction.sender);
+    const isSingleSig = useRouteMatch(routes.SUBMITTRANSFER);
+
     return (
         <>
-            <p className={styles.title}>From Account:</p>
-            <p className={styles.name}>{senderName}</p>
-            <DisplayAddress
+            <DisplayFromAccount
+                name={senderName}
                 address={transaction.sender}
-                lineClassName={styles.address}
             />
-            <DisplayTransactionExpiryTime
-                expiryTime={dateFromTimeStamp(transaction.expiry)}
-            />
+            {Boolean(isSingleSig) || (
+                <DisplayTransactionExpiryTime
+                    expiryTime={dateFromTimeStamp(transaction.expiry)}
+                />
+            )}
         </>
     );
 }

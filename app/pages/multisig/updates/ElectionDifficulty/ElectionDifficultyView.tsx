@@ -22,19 +22,19 @@ export default withChainData(function ElectionDifficultyView({
 
     const currentElectionDifficulty =
         blockSummary.updates.chainParameters.electionDifficulty;
-    const { slotDuration } = consensusStatus;
+    const slotDuration = Number(consensusStatus.slotDuration);
 
     return (
         <>
             <ElectionDifficultyInput
-                label="Current election difficulty"
-                disabled
+                label="Current election difficulty:"
+                display
                 value={currentElectionDifficulty}
                 timePerSlot={slotDuration}
             />
             <ElectionDifficultyInput
-                label="New election difficulty"
-                readOnly
+                label="New election difficulty:"
+                display
                 value={electionDifficulty / electionDifficultyResolution}
                 timePerSlot={slotDuration}
             />

@@ -48,7 +48,7 @@ function PrintFormatScheduledTransfer({
     const amount = getScheduledTransferAmount(transaction);
     const body = (
         <>
-            <h1>Transaction - Send GTU with a schedule</h1>
+            <h1>Transaction - Send CCD with a schedule</h1>
             {table(
                 standardTableHeader,
                 <tbody>
@@ -73,7 +73,7 @@ function PrintFormatScheduledTransfer({
             {table(
                 <thead>
                     <tr>
-                        <th>Release Time</th>
+                        <th>Release time</th>
                         <th>Amount</th>
                     </tr>
                 </thead>,

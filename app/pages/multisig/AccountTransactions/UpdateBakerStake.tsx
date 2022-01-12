@@ -13,7 +13,6 @@ import {
     Fraction,
 } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
-import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import {
     createUpdateBakerStakeTransaction,
@@ -30,9 +29,8 @@ import SignTransaction from './SignTransaction';
 import PickAmount from './PickAmount';
 import UpdateBakerStakeProposalDetails from './proposal-details/UpdateBakerStakeProposalDetails';
 import { microGtuToGtu, toMicroUnits } from '~/utils/gtu';
-import InputTimestamp from '~/components/Form/InputTimestamp';
 import { getFormattedDateString } from '~/utils/timeHelpers';
-import PendingChange from '~/components/BakerPendingChange/BakerPendingChange';
+import PendingChange from '~/components/BakerPendingChange';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
@@ -42,6 +40,11 @@ import {
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
 import { ensureChainData, ChainData } from '../common/withChainData';
+import DatePicker from '~/components/Form/DatePicker';
+import { isMultiSig } from '~/utils/accountHelpers';
+import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
+
+import styles from './MultisignatureAccountTransactions.module.scss';
 
 function toMicroUnitsSafe(str: string | undefined) {
     if (str === undefined) {
@@ -72,6 +75,9 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
     const [stake, setStake] = useState<string>();
     const [error, setError] = useState<string>();
     const [transaction, setTransaction] = useState<UpdateBakerStake>();
+    const handler = findAccountTransactionHandler(
+        TransactionKindId.Update_baker_stake
+    );
 
     const estimatedFee = useTransactionCostEstimate(
         TransactionKindId.Update_baker_stake,
@@ -109,11 +115,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
     };
 
     return (
-        <MultiSignatureLayout
-            pageTitle="Multi Signature Transactions | Update Baker Stake"
-            stepTitle="Transaction Proposal - Update Baker Stake"
-            delegateScroll
-        >
+        <MultiSignatureLayout pageTitle={handler.title} delegateScroll>
             <SimpleErrorModal
                 show={Boolean(error)}
                 header="Unable to perform transfer"
@@ -125,7 +127,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                 columnScroll
                 className={styles.subtractContainerPadding}
             >
-                <Columns.Column header="Transaction Details">
+                <Columns.Column header="Transaction details">
                     <div className={styles.columnContent}>
                         <UpdateBakerStakeProposalDetails
                             account={account}
@@ -146,10 +148,11 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
-                                        filter={(_, info) =>
-                                            info?.accountBaker !== undefined
+                                        filter={(a, info) =>
+                                            info?.accountBaker !== undefined &&
+                                            isMultiSig(a)
                                         }
-                                        messageWhenEmpty="There are no baker accounts "
+                                        messageWhenEmpty="There are no baker accounts that require multiple signatures"
                                         onAccountClicked={() => {
                                             dispatch(
                                                 push(
@@ -224,7 +227,8 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                                         Choose the expiry date for the
                                         transaction.
                                     </p>
-                                    <InputTimestamp
+                                    <DatePicker
+                                        className="body2 mV40"
                                         label="Transaction expiry time"
                                         name="expiry"
                                         isInvalid={
@@ -233,6 +237,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                                         error={expiryTimeError}
                                         value={expiryTime}
                                         onChange={setExpiryTime}
+                                        minDate={new Date()}
                                     />
                                     <p className="mB0">
                                         Committing the transaction after this
@@ -268,7 +273,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                     </Route>
                     <Route path={`${path}/${BakerSubRoutes.sign}`}>
                         <Columns.Column
-                            header="Signature and Hardware Wallet"
+                            header="Signature and hardware wallet"
                             className={styles.stretchColumn}
                         >
                             {transaction !== undefined &&

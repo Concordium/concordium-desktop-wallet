@@ -3,7 +3,7 @@ import { push } from 'connected-react-router';
 import { useDispatch } from 'react-redux';
 import { Switch, Route, useLocation, Redirect } from 'react-router-dom';
 import routes from '~/constants/routes.json';
-import { ChosenAttributes, Identity } from '~/utils/types';
+import { ChosenAttributes, ConfirmedIdentity } from '~/utils/types';
 import PageLayout from '~/components/PageLayout';
 import PickName from './PickName';
 import PickIdentity from './PickIdentity';
@@ -20,7 +20,7 @@ function getSubtitle(location: string) {
         case routes.ACCOUNTCREATION_GENERATE:
             return 'Creating a new account';
         case routes.ACCOUNTCREATION_PICKATTRIBUTES:
-            return 'Revealing Attributes';
+            return 'Revealing attributes';
         case routes.ACCOUNTCREATION_FINAL:
             return 'Your account';
         default:
@@ -32,7 +32,7 @@ function getSubtitle(location: string) {
 export default function AccountCreationPage(): JSX.Element {
     const dispatch = useDispatch();
     const [accountName, setAccountName] = useState('');
-    const [identity, setIdentity] = useState<Identity | undefined>();
+    const [identity, setIdentity] = useState<ConfirmedIdentity | undefined>();
     const [chosenAttributes, setChosenAttributes] = useState<
         Array<keyof ChosenAttributes>
     >([]);
@@ -69,7 +69,10 @@ export default function AccountCreationPage(): JSX.Element {
     return (
         <PageLayout>
             <PageLayout.Header>
-                <h1> New Account | {getSubtitle(useLocation().pathname)}</h1>
+                <h1>
+                    <span className="pageTitlePrefix">New account</span>
+                    {getSubtitle(useLocation().pathname)}
+                </h1>
             </PageLayout.Header>
             <PageLayout.Container
                 className={styles.container}

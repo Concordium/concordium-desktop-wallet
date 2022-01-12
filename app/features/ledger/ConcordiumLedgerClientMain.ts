@@ -12,7 +12,7 @@ import signTransfer from './Transfer';
 import signPublicInformationForIp from './PublicInformationForIp';
 import {
     getPrfKeyDecrypt,
-    getPrivateKeySeeds,
+    getPrivateKeys,
     getPrfKeyRecovery,
 } from './ExportPrivateKeySeed';
 import {
@@ -38,7 +38,8 @@ import {
     AuthorizationKeysUpdate,
     AddIdentityProvider,
     AddAnonymityRevoker,
-    PrivateKeySeeds,
+    PrivateKeys,
+    BlsKeyTypes,
 } from '~/utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
@@ -50,6 +51,7 @@ import signAuthorizationKeysUpdate from './SignAuthorizationKeysUpdate';
 import signAddIdentityProviderTransaction from './SignAddIdentityProvider';
 import signAddAnonymityRevokerTransaction from './SignAddAnonymityRevoker';
 import EmulatorTransport from './EmulatorTransport';
+import verifyAddress from './verifyAddress';
 
 /**
  * Concordium Ledger API.
@@ -92,16 +94,23 @@ export default class ConcordiumLedgerClientMain {
         return getSignedPublicKey(this.transport, path);
     }
 
-    getPrivateKeySeeds(identity: number): Promise<PrivateKeySeeds> {
-        return getPrivateKeySeeds(this.transport, identity);
+    getPrivateKeys(
+        identity: number,
+        keyType: BlsKeyTypes
+    ): Promise<PrivateKeys> {
+        return getPrivateKeys(this.transport, identity, keyType);
     }
 
-    getPrfKeyDecrypt(identity: number): Promise<Buffer> {
-        return getPrfKeyDecrypt(this.transport, identity);
+    getPrfKeyDecrypt(identity: number, keyType: BlsKeyTypes): Promise<Buffer> {
+        return getPrfKeyDecrypt(this.transport, identity, keyType);
     }
 
     getPrfKeyRecovery(identity: number): Promise<Buffer> {
         return getPrfKeyRecovery(this.transport, identity);
+    }
+
+    verifyAddress(identity: number, credentialNumber: number): Promise<void> {
+        return verifyAddress(this.transport, identity, credentialNumber);
     }
 
     signTransfer(

@@ -2,14 +2,17 @@ import React from 'react';
 import { useRouteMatch } from 'react-router';
 import routes from '~/constants/routes.json';
 import { AddressBookEntry, ScheduledTransfer } from '~/utils/types';
-import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
+import {
+    getScheduledTransferAmount,
+    toReleaseSchedule,
+} from '~/utils/transactionHelpers';
 import { displayAsGTU } from '~/utils/gtu';
 import DisplayFee from '~/components/DisplayFee';
 import ScheduleList from '~/components/ScheduleList';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import DisplayMemo from './DisplayMemo';
-import DisplayAddress from '../DisplayAddress';
+import { DisplayFromAccount, DisplayToAccount } from './DisplayAccount';
 
 import styles from './transferDetails.module.scss';
 
@@ -35,19 +38,12 @@ export default function DisplayScheduledTransfer({
 
     return (
         <div>
-            <h5 className={styles.title}>From Account:</h5>
-            <p className={styles.name}>{fromName}</p>
-            <DisplayAddress
-                address={transaction.sender}
-                lineClassName={styles.address}
-            />
-            <h5 className={styles.title}>To Account:</h5>
-            <p className={styles.name}>{to?.name}</p>
-            <DisplayAddress
+            <DisplayFromAccount name={fromName} address={transaction.sender} />
+            <DisplayToAccount
+                name={to?.name}
+                note={to?.note}
                 address={transaction.payload.toAddress}
-                lineClassName={styles.address}
             />
-            {to?.note && <p className={styles.note}>Note: {to?.note}</p>}
             <h5 className={styles.title}>Amount:</h5>
             <p className={styles.amount}>{displayAsGTU(amount)}</p>
             <DisplayFee className={styles.fee} transaction={transaction} />
@@ -57,8 +53,11 @@ export default function DisplayScheduledTransfer({
                     expiryTime={dateFromTimeStamp(transaction.expiry)}
                 />
             )}
-            <h5 className={styles.title}>Individual Releases:</h5>
-            <ScheduleList schedule={transaction.payload.schedule} />
+            <h5 className={styles.title}>Individual releases:</h5>
+            <ScheduleList
+                className={styles.value}
+                schedule={transaction.payload.schedule.map(toReleaseSchedule)}
+            />
         </div>
     );
 }

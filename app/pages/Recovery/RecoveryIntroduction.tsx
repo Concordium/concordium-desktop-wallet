@@ -14,7 +14,7 @@ export default function RecoveryIntroduction() {
 
     return (
         <div className={styles.introduction}>
-            <h2>Account Recovery</h2>
+            <h2>Account recovery</h2>
             <p>
                 You can recover your lost accounts using a Ledger device that
                 has been set up using the same seed phrase, as the Ledger used

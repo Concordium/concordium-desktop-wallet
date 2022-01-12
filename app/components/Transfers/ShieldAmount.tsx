@@ -14,7 +14,7 @@ interface Props {
  */
 export default function ShieldAmount({ account, disableClose = false }: Props) {
     const specific = {
-        amountHeader: 'Shield GTU',
+        amountHeader: 'Shield CCD',
         createTransaction: createShieldAmountTransaction,
         location: routes.ACCOUNTS_SHIELDAMOUNT,
         transactionKind: TransactionKindId.Transfer_to_encrypted,

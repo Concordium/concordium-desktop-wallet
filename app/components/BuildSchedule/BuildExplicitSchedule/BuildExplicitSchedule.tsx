@@ -16,6 +16,7 @@ import {
     toMicroUnits,
 } from '~/utils/gtu';
 import { getDefaultScheduledStartTime } from '~/utils/timeHelpers';
+import { toReleaseSchedule } from '~/utils/transactionHelpers';
 import Form from '../../Form';
 import { futureDate } from '../../Form/util/validation';
 import ScheduleList from '../../ScheduleList';
@@ -140,7 +141,7 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
             <Form onSubmit={addToSchedule} formMethods={methods}>
                 <div className={styles.amountInputWrapper}>
                     <Label>Amount:</Label>
-                    {getGTUSymbol()}{' '}
+                    {getGTUSymbol()}
                     <Form.InlineNumber
                         name={addSchedulePointFormNames.amount}
                         defaultValue="0.00"
@@ -157,14 +158,16 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
                         }}
                     />
                 </div>
-                <Form.Timestamp
+                <Form.DatePicker
+                    className="body2"
                     name={addSchedulePointFormNames.timestamp}
                     label="Release time:"
                     rules={{
-                        required: 'Timestamp required',
-                        validate: futureDate('Must be future date'),
+                        required: 'Date and time required',
+                        validate: futureDate('Must be in the future'),
                     }}
                     defaultValue={getDefaultScheduledStartTime()}
+                    minDate={new Date()}
                 />
                 <Form.Submit size="small">Add</Form.Submit>
             </Form>
@@ -193,7 +196,7 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
                     </Card>
                     {!adding ? (
                         <ScheduleList
-                            schedule={schedule}
+                            schedule={schedule.map(toReleaseSchedule)}
                             removeFromSchedule={removeFromSchedule}
                         />
                     ) : null}

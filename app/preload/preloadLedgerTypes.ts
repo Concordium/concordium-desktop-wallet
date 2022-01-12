@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer/';
 import {
-    PrivateKeySeeds,
+    PrivateKeys,
     PublicInformationForIp,
     SignedPublicKey,
     UnsignedCredentialDeploymentInformation,
@@ -20,6 +20,7 @@ import {
     UpdateAccountCredentials,
     AccountTransaction,
     AddAnonymityRevoker,
+    BlsKeyTypes,
 } from '~/utils/types';
 import { AppAndVersion } from '../features/ledger/GetAppAndVersion';
 import { AccountPathInput } from '../features/ledger/Path';
@@ -48,8 +49,15 @@ type LedgerCommands = {
     getPublicKey: (keypath: number[]) => Promise<Buffer>;
     getPublicKeySilent: (keypath: number[]) => ReturnBuffer;
     getSignedPublicKey: (keypath: number[]) => Promise<SignedPublicKey>;
-    getPrivateKeySeeds: (identity: number) => Promise<PrivateKeySeeds>;
-    getPrfKeyDecrypt: (identity: number) => ReturnBuffer;
+    verifyAddress: (
+        identity: number,
+        credentialNumber: number
+    ) => Promise<void>;
+    getPrivateKeys: (
+        identity: number,
+        keyType: BlsKeyTypes
+    ) => Promise<PrivateKeys>;
+    getPrfKeyDecrypt: (identity: number, keyType: BlsKeyTypes) => ReturnBuffer;
     getPrfKeyRecovery: (identity: number) => ReturnBuffer;
     signTransfer: SignAccountTransaction<AccountTransaction>;
     signPublicInformationForIp: (

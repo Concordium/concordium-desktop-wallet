@@ -110,7 +110,6 @@ export default function PickAccount({ onNext }: Props): JSX.Element {
         address,
         name: accountName || 'Name pending',
         identityId: -1,
-        maxTransactionId: '',
         isInitial: false,
         transactionFilter: {},
     };
@@ -179,7 +178,7 @@ export default function PickAccount({ onNext }: Props): JSX.Element {
                         onNext(routes.GENERATE_CREDENTIAL_REVEALATTRIBUTES)
                     }
                 >
-                    Reveal Attributes
+                    Reveal attributes
                 </Button>
             )}
         </>

@@ -3,11 +3,11 @@ import { useDispatch } from 'react-redux';
 import { routerActions } from 'connected-react-router';
 import { Account } from '~/utils/types';
 import { getNextAccountNonce } from '~/node/nodeRequests';
-import { unableToReachNode } from '~/constants/errorMessages.json';
+import errorMessages from '~/constants/errorMessages.json';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 export interface Nonce {
-    nonce?: string;
+    nonce?: bigint;
 }
 
 export interface WithAccount extends Nonce {
@@ -23,7 +23,7 @@ export default function withNonce<TProps extends WithAccount>(
 ): ComponentType<Omit<TProps, keyof Nonce>> {
     return ({ account, ...props }) => {
         const dispatch = useDispatch();
-        const [nonce, setNonce] = useState<string | undefined>();
+        const [nonce, setNonce] = useState<bigint | undefined>();
         const [showError, setShowError] = useState<boolean>(false);
 
         useEffect(() => {
@@ -43,7 +43,7 @@ export default function withNonce<TProps extends WithAccount>(
             <>
                 <SimpleErrorModal
                     show={showError}
-                    header={unableToReachNode}
+                    header={errorMessages.unableToReachNode}
                     onClick={() => dispatch(routerActions.goBack())}
                 />
                 <Component {...propsWithNonce} />

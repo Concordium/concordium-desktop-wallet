@@ -162,7 +162,10 @@ const createWindow = async () => {
 
     initializeIpcHandlers(mainWindow, printWindow, browserView);
 
-    if (process.env.NODE_ENV === 'production' && !process.env.TARGET_NET) {
+    if (
+        process.env.NODE_ENV === 'production' &&
+        process.env.TARGET_NET === 'mainnet'
+    ) {
         initAutoUpdate(mainWindow);
     }
 };

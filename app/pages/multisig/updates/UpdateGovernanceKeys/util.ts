@@ -184,7 +184,7 @@ export function getAccessStructureTitle(
         case AccessStructureEnum.euroPerEnergy:
             return 'Euro per energy';
         case AccessStructureEnum.microGtuPerEuro:
-            return 'Micro GTU per Euro';
+            return 'Micro CCD per euro';
         case AccessStructureEnum.foundationAccount:
             return 'Foundation account';
         case AccessStructureEnum.mintDistribution:

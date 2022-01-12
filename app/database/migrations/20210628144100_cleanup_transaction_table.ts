@@ -1,17 +1,16 @@
 import { Knex } from 'knex';
-import {
-    transactionTable,
-    accountsTable,
-} from '~/constants/databaseNames.json';
+import databaseNames from '~/constants/databaseNames.json';
 import { up as createTransactionTable } from './20201230111229_create_transaction_table';
 
 export async function up(knex: Knex): Promise<void> {
     await knex.transaction(async (t) => {
-        await t.table(accountsTable).update({ maxTransactionId: 0 });
+        await t
+            .table(databaseNames.accountsTable)
+            .update({ maxTransactionId: 0 });
 
-        await t.schema.dropTableIfExists(transactionTable);
+        await t.schema.dropTableIfExists(databaseNames.transactionTable);
         await t.schema.createTable(
-            transactionTable,
+            databaseNames.transactionTable,
             (table: Knex.TableBuilder) => {
                 // Type Fields
                 table.string('transactionKind').notNullable();
@@ -39,7 +38,9 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(knex: Knex): Promise<void> {
-    await knex.schema.dropTableIfExists(transactionTable);
+    await knex.schema.dropTableIfExists(databaseNames.transactionTable);
     await createTransactionTable(knex);
-    await knex.table(accountsTable).update({ maxTransactionId: 0 });
+    await knex
+        .table(databaseNames.accountsTable)
+        .update({ maxTransactionId: 0 });
 }

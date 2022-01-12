@@ -15,13 +15,14 @@
     }
 }
 
-.value,
-.placeholder {
-    font-size: $font-size-body1;
+.value {
+    font-family: $font-family-mono;
+    font-size: $font-size-body3;
     margin: 0;
 }
 
-.note,
-.placeholder {
-    composes: textFaded from global;
+.note {
+    composes: textFaded from global, mT5 from global;
+    font-family: $font-family-mono;
+    font-size: $font-size-body4;
 }

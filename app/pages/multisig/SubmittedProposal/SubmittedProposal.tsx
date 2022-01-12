@@ -159,7 +159,7 @@ const SubmittedProposalView = withChainData<Props>(
             } else {
                 throw new Error(`Unexpected Transaction type: ${transaction}`);
             }
-            const submitted = (await sendTransaction(payload)).getValue();
+            const submitted = await sendTransaction(payload);
             const modifiedProposal: MultiSignatureTransaction = {
                 ...proposal,
             };
@@ -183,11 +183,7 @@ const SubmittedProposalView = withChainData<Props>(
         }, [init, blockSummary]);
 
         return (
-            <MultiSignatureLayout
-                pageTitle={handler.title}
-                stepTitle={`Transaction Proposal - ${handler.type}`}
-                disableBack
-            >
+            <MultiSignatureLayout pageTitle={handler.title} disableBack>
                 <SimpleErrorModal
                     show={showError.show}
                     header={showError.header}

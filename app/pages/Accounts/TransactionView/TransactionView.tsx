@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import clsx from 'clsx';
 import { useSelector } from 'react-redux';
 import TransactionListElement from '../TransactionList/TransactionListElement';
 import {
     TransferTransactionWithNames,
     TransactionStatus,
-    TransferTransaction,
+    StateUpdate,
 } from '~/utils/types';
 import { isFailed } from '~/utils/transactionHelpers';
 import SidedRow from '~/components/SidedRow';
@@ -17,6 +17,7 @@ import CloseButton from '~/cross-app-components/CloseButton';
 
 interface Props {
     transaction: TransferTransactionWithNames;
+    setTransaction: StateUpdate<TransferTransactionWithNames | undefined>;
     onClose?(): void;
 }
 
@@ -41,12 +42,12 @@ function CopiableListElement({
                 <div className={styles.copiableListElementLeftSide}>
                     <p className={styles.copiableListElementTitle}>{title}</p>
                     {'\n'}
-                    <p className="body4 m0 mT5">
+                    <p className="body5 m0 mT5">
                         {value} {note ? `(${note})` : undefined}
                     </p>
                 </div>
             }
-            right={<CopyButton value={value} />}
+            right={<CopyButton className={styles.copyButton} value={value} />}
         />
     );
 }
@@ -68,23 +69,25 @@ function displayRejectReason(transaction: TransferTransactionWithNames) {
 /**
  * Detailed view of the given transaction.
  */
-function TransactionView({ transaction, onClose }: Props) {
+function TransactionView({ transaction, onClose, setTransaction }: Props) {
     const transactions = useSelector(transactionsSelector);
-    const [
-        chosenTransaction,
-        setChosenTransaction,
-    ] = useState<TransferTransaction>(transaction);
 
     useEffect(() => {
-        if (chosenTransaction) {
-            const upToDateChosenTransaction = transactions.find(
-                (t) => t.transactionHash === chosenTransaction.transactionHash
-            );
-            if (upToDateChosenTransaction) {
-                setChosenTransaction(upToDateChosenTransaction);
+        if (transaction) {
+            let upToDateChosenTransaction;
+            if (transaction.transactionHash) {
+                upToDateChosenTransaction = transactions.find(
+                    (t) => t.transactionHash === transaction.transactionHash
+                );
+            } else {
+                upToDateChosenTransaction = transactions.find(
+                    (t) => t.id === transaction.id
+                );
             }
+            setTransaction(upToDateChosenTransaction);
         }
-    }, [transactions, chosenTransaction, setChosenTransaction]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [transactions]);
 
     return (
         <div className={styles.root}>
@@ -100,24 +103,24 @@ function TransactionView({ transaction, onClose }: Props) {
             {displayRejectReason(transaction)}
             {!!transaction.fromAddress && (
                 <CopiableListElement
-                    title="From Address:"
+                    title="From address:"
                     value={`${transaction.fromAddress}`}
                     note={transaction.fromName}
                 />
             )}
             {transaction.toAddress ? (
                 <CopiableListElement
-                    title="To Address:"
+                    title="To address:"
                     value={`${transaction.toAddress}`}
                     note={transaction.toName}
                 />
             ) : null}
             <CopiableListElement
-                title="Transaction Hash"
-                value={transaction.transactionHash || 'No Transaction.'}
+                title="Transaction hash"
+                value={transaction.transactionHash || 'No transaction.'}
             />
             <CopiableListElement
-                title="Block Hash"
+                title="Block hash"
                 value={transaction.blockHash || 'Awaiting finalization'}
             />
         </div>

@@ -1,9 +1,9 @@
 /* eslint-disable */
 import { Knex } from 'knex';
-import { transactionTable } from '~/constants/databaseNames.json';
+import databaseNames from '~/constants/databaseNames.json';
 
 export async function up(knex: Knex): Promise<void> {
-    return knex.schema.alterTable(transactionTable, (table) => {
+    return knex.schema.alterTable(databaseNames.transactionTable, (table) => {
         table.index(['toAddress', 'transactionKind', 'blockTime']);
         table.index(['fromAddress', 'transactionKind', 'blockTime']);
         table.index('status');
@@ -14,7 +14,7 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(knex: Knex): Promise<void> {
-    return knex.schema.alterTable(transactionTable, (table) => {
+    return knex.schema.alterTable(databaseNames.transactionTable, (table) => {
         table.dropIndex(['toAddress', 'transactionKind', 'blockTime']);
         table.dropIndex(['fromAddress', 'transactionKind', 'blockTime']);
         table.dropIndex('status');

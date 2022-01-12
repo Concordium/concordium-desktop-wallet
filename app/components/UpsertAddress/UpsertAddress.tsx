@@ -8,6 +8,8 @@ import React, {
 import { SubmitHandler, Validate } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { isAlias } from '@concordium/node-sdk/lib/src/alias';
+import { AccountAddress } from '@concordium/node-sdk/lib/src/types/accountAddress';
 import {
     AddressBookEntry,
     EqualRecord,
@@ -22,14 +24,17 @@ import {
 } from '~/features/AddressBookSlice';
 import Modal from '~/cross-app-components/Modal';
 import Button from '~/cross-app-components/Button';
+import IconButton from '~/cross-app-components/IconButton';
 import Card from '~/cross-app-components/Card';
 import Form from '../Form';
 
 import styles from './UpsertAddress.module.scss';
+import { chosenAccountSelector } from '~/features/AccountSlice';
 
 type Props = PropsWithChildren<{
     initialValues?: AddressBookEntryForm;
     readOnly?: boolean;
+    allowAlias?: boolean;
     onSubmit?(entry: AddressBookEntry): void;
 }>;
 
@@ -47,16 +52,20 @@ const fieldNames: NotOptional<EqualRecord<AddressBookEntryForm>> = {
 
 const noteMaxLength = 100;
 
-export default function UpsertAddress<TAs extends ElementType = typeof Button>({
+export default function UpsertAddress<
+    TAs extends ElementType = typeof IconButton
+>({
     onSubmit,
     initialValues,
     readOnly = false,
+    allowAlias = true,
     as,
     ...asProps
 }: UpsertAddressProps<TAs>) {
     const [open, setOpen] = useState(false);
     const dispatch = useDispatch();
     const entries = useSelector(addressBookSelector);
+    const account = useSelector(chosenAccountSelector);
 
     const isEditMode = initialValues !== undefined;
     const header = useMemo(
@@ -64,7 +73,7 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
         [isEditMode]
     );
 
-    const As = as || Button;
+    const As = as || IconButton;
 
     const upsertAddress = useCallback(
         async (values: AddressBookEntryForm) => {
@@ -80,6 +89,20 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
             return addToAddressBook(dispatch, entry);
         },
         [isEditMode, initialValues, dispatch, readOnly]
+    );
+
+    const addressNotAlias: Validate = useCallback(
+        (address: string) => {
+            if (!allowAlias && account) {
+                const accountAddress = new AccountAddress(account.address);
+                return (
+                    !isAlias(accountAddress, new AccountAddress(address)) ||
+                    'The recipient should not be an alias of the sending account.'
+                );
+            }
+            return true;
+        },
+        [account, allowAlias]
     );
 
     const addressUnique: Validate = useCallback(
@@ -132,7 +155,7 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
                                         'Name cannot exceed 40 characters.',
                                 },
                             }}
-                            placeholder="Recipient Name"
+                            placeholder="Recipient name"
                             defaultValue={initialValues?.name}
                             readOnly={readOnly}
                         />
@@ -146,6 +169,7 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
                                 validate: {
                                     ...commonAddressValidators.validate,
                                     addressUnique,
+                                    addressNotAlias,
                                 },
                             }}
                             placeholder="Paste the account address here"

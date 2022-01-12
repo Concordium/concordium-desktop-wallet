@@ -246,7 +246,7 @@ export default function PerformImport({ location }: Props) {
             />
             <PageLayout>
                 <PageLayout.Header>
-                    <h1>Export and Import</h1>
+                    <h1>Export/Import</h1>
                 </PageLayout.Header>
                 <PageLayout.Container disableBack>
                     <Columns divider columnScroll>

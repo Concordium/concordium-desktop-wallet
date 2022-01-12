@@ -75,7 +75,7 @@ export default function IdentityIssuancePage(): JSX.Element {
                 />
             );
         }
-        throw new Error('Unexpected missing identity Provider!');
+        throw new Error('Unexpected missing identity provider!');
     }
 
     function checkNavigation(location: Location) {
@@ -97,7 +97,10 @@ export default function IdentityIssuancePage(): JSX.Element {
     return (
         <PageLayout>
             <PageLayout.Header>
-                <h1>New identity | {getSubtitle(useLocation().pathname)}</h1>
+                <h1>
+                    <span className="pageTitlePrefix">New identity</span>
+                    {getSubtitle(useLocation().pathname)}
+                </h1>
             </PageLayout.Header>
             <ErrorModal
                 header="Unable to create identity"

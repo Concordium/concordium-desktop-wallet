@@ -280,10 +280,9 @@ export function serializeProtocolUpdate(
         protocolUpdate.specificationUrl
     );
 
-    const auxiliaryData = Buffer.from(
-        protocolUpdate.specificationAuxiliaryData,
-        'base64'
-    );
+    const auxiliaryData = protocolUpdate.specificationAuxiliaryData
+        ? Buffer.from(protocolUpdate.specificationAuxiliaryData, 'base64')
+        : Buffer.alloc(0);
     const specificationHash = Buffer.from(
         protocolUpdate.specificationHash,
         'hex'

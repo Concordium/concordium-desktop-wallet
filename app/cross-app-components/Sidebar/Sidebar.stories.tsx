@@ -31,13 +31,8 @@ export default {
     ],
 } as Meta;
 
-const Template: Story<SidebarProps<true>> = (args) => (
-    <Sidebar
-        {...args}
-        hasThemeSwitch
-        version="1.0.0"
-        style={{ position: 'absolute' }}
-    />
+const Template: Story<SidebarProps> = (args) => (
+    <Sidebar {...args} version="1.0.0" style={{ position: 'absolute' }} />
 );
 
 const links: SidebarLink[] = [
@@ -53,7 +48,7 @@ const links: SidebarLink[] = [
     },
     {
         route: '/3',
-        title: 'Address Book',
+        title: 'Address book',
         icon: <i />,
     },
     {
@@ -63,7 +58,7 @@ const links: SidebarLink[] = [
     },
     {
         route: '/5',
-        title: 'Multi Signature Transactions',
+        title: 'Multi signature transactions',
         icon: <i />,
     },
     {
@@ -81,7 +76,6 @@ Light.args = {
 export const Dark = Template.bind({});
 Dark.args = {
     links,
-    isDark: true,
 };
 Dark.parameters = {
     backgrounds: {

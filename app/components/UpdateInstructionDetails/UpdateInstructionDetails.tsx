@@ -11,9 +11,10 @@ import {
     UpdateInstructionPayload,
 } from '~/utils/types';
 import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
+import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 
 import styles from './UpdateInstructionDetails.module.scss';
-import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
+import { PlainDetail } from '~/pages/multisig/AccountTransactions/proposal-details/shared';
 
 interface Props {
     transaction: UpdateInstruction<UpdateInstructionPayload>;
@@ -35,12 +36,20 @@ export default function UpdateInstructionDetails({
         <div className={styles.root}>
             {handler.view(transaction)}
             <div>
-                <h5>Effective time:</h5>
-                <span
-                    className={clsx(styles.timestamp, isExpired && 'textError')}
-                >
-                    {getFormattedDateString(effective)}
-                </span>
+                <PlainDetail
+                    title="Effective time"
+                    value={getFormattedDateString(effective)}
+                    format={(d) => (
+                        <span
+                            className={clsx(
+                                'boyd3 mono',
+                                isExpired && 'textError'
+                            )}
+                        >
+                            {d}
+                        </span>
+                    )}
+                />
             </div>
             <div>
                 <DisplayTransactionExpiryTime expiryTime={expiry} />

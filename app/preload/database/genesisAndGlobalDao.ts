@@ -1,16 +1,16 @@
 import { Knex } from 'knex';
 import { knex } from '~/database/knex';
-import { globalTable, genesisTable } from '~/constants/databaseNames.json';
+import databaseNames from '~/constants/databaseNames.json';
 import { Global } from '~/utils/types';
 import { GenesisAndGlobalMethods } from '~/preload/preloadTypes';
 
 async function setGenesis(genesisBlock: string, trx: Knex.Transaction) {
-    const table = (await knex())(genesisTable).transacting(trx);
+    const table = (await knex())(databaseNames.genesisTable).transacting(trx);
     return table.insert({ genesisBlock });
 }
 
 async function setGlobal(global: Global, trx: Knex.Transaction) {
-    const table = (await knex())(globalTable).transacting(trx);
+    const table = (await knex())(databaseNames.globalTable).transacting(trx);
     return table.insert(global);
 }
 

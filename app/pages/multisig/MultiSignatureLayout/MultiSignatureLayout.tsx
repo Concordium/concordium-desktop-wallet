@@ -10,24 +10,36 @@ import styles from './MultiSignatureLayout.module.scss';
 interface MultiSignatureLayoutProps
     extends Pick<PageContainerProps, 'closeRoute' | 'disableBack'> {
     pageTitle: string;
-    stepTitle: string;
+    stepTitle?: string;
     delegateScroll?: boolean;
     print?: JSX.Element;
 }
 
 export default function MultiSignatureLayout({
     pageTitle,
-    stepTitle,
+    stepTitle = 'Transaction proposal',
     closeRoute = routes.MULTISIGTRANSACTIONS,
     children,
     disableBack,
     delegateScroll = false,
     print,
 }: PropsWithChildren<MultiSignatureLayoutProps>): JSX.Element {
+    const titleParts = pageTitle.split('|').map((s) => s.trim());
+
+    const title =
+        titleParts.length > 1 ? (
+            <>
+                <span className="pageTitlePrefix">{titleParts[0]}</span>
+                {titleParts[1]}
+            </>
+        ) : (
+            titleParts[0]
+        );
+
     return (
         <PageLayout>
             <PageLayout.Header>
-                <h1>{pageTitle}</h1>
+                <h1>{title}</h1>
             </PageLayout.Header>
             <PageLayout.Container
                 className={clsx(

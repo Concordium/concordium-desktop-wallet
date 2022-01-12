@@ -1,12 +1,18 @@
 import type { Buffer } from 'buffer/';
-import { getTransactionStatus } from '../node/nodeRequests';
-import { getDefaultExpiry, getNow, secondsSinceUnixEpoch } from './timeHelpers';
+import {
+    ReleaseSchedule,
+    TransactionSummary,
+} from '@concordium/node-sdk/lib/src/types';
+import {
+    dateFromTimeStamp,
+    getDefaultExpiry,
+    getNow,
+    secondsSinceUnixEpoch,
+} from './timeHelpers';
 import {
     TransactionKindId,
     TransferTransaction,
     SimpleTransfer,
-    TransactionEvent,
-    TransactionStatus,
     ScheduledTransfer,
     EncryptedTransfer,
     Schedule,
@@ -32,6 +38,8 @@ import {
     UpdateBakerRestakeEarnings,
     TransactionKindString,
     SimpleTransferWithMemo,
+    TransactionStatus,
+    SchedulePoint,
 } from './types';
 import {
     getTransactionEnergyCost,
@@ -41,7 +49,7 @@ import {
 } from './transactionCosts';
 import { toMicroUnits, isValidGTUString, displayAsGTU } from './gtu';
 import { getEncodedSize } from './cborHelper';
-import { maxMemoSize } from '~/constants/externalConstants.json';
+import externalConstants from '~/constants/externalConstants.json';
 import { isASCII } from './basicHelpers';
 import { getAmountAtDisposal } from './accountHelpers';
 
@@ -52,7 +60,7 @@ interface CreateAccountTransactionInput<T> {
     payload: T;
     estimatedEnergyAmount?: bigint;
     signatureAmount?: number;
-    nonce: string;
+    nonce: bigint;
 }
 
 /**
@@ -76,7 +84,7 @@ function createAccountTransaction<T extends TransactionPayload>({
 }: CreateAccountTransactionInput<T>): AccountTransaction<T> {
     const transaction: AccountTransaction<T> = {
         sender: fromAddress,
-        nonce,
+        nonce: nonce.toString(),
         expiry: BigInt(secondsSinceUnixEpoch(expiry)),
         energyAmount: '',
         transactionKind,
@@ -101,7 +109,7 @@ export function createSimpleTransferTransaction(
     fromAddress: string,
     amount: BigInt,
     toAddress: string,
-    nonce: string,
+    nonce: bigint,
     signatureAmount = 1,
     expiry = getDefaultExpiry()
 ): SimpleTransfer {
@@ -128,7 +136,7 @@ export function createSimpleTransferWithMemoTransaction(
     fromAddress: string,
     amount: BigInt,
     toAddress: string,
-    nonce: string,
+    nonce: bigint,
     memo: string,
     signatureAmount = 1,
     expiry = getDefaultExpiry()
@@ -158,7 +166,7 @@ export function createEncryptedTransferTransaction(
     fromAddress: string,
     amount: bigint,
     toAddress: string,
-    nonce: string,
+    nonce: bigint,
     memo?: string,
     expiry = getDefaultExpiry()
 ): EncryptedTransfer {
@@ -190,7 +198,7 @@ export function createEncryptedTransferTransaction(
 export function createShieldAmountTransaction(
     fromAddress: string,
     amount: bigint,
-    nonce: string,
+    nonce: bigint,
     expiry = getDefaultExpiry()
 ): TransferToEncrypted {
     const payload = {
@@ -208,7 +216,7 @@ export function createShieldAmountTransaction(
 export function createUnshieldAmountTransaction(
     fromAddress: string,
     amount: BigInt,
-    nonce: string,
+    nonce: bigint,
     expiry = getDefaultExpiry()
 ) {
     const payload = {
@@ -292,7 +300,7 @@ export function createScheduledTransferTransaction(
     fromAddress: string,
     toAddress: string,
     schedule: Schedule,
-    nonce: string,
+    nonce: bigint,
     signatureAmount = 1,
     expiry = getDefaultExpiry()
 ) {
@@ -319,7 +327,7 @@ export function createScheduledTransferWithMemoTransaction(
     fromAddress: string,
     toAddress: string,
     schedule: Schedule,
-    nonce: string,
+    nonce: bigint,
     memo: string,
     signatureAmount = 1,
     expiry = getDefaultExpiry()
@@ -349,7 +357,7 @@ export function createUpdateCredentialsTransaction(
     removedCredIds: string[],
     threshold: number,
     currentCredentialAmount: number,
-    nonce: string,
+    nonce: bigint,
     signatureAmount = 1,
     expiry = getDefaultExpiry()
 ) {
@@ -376,7 +384,7 @@ export function createUpdateCredentialsTransaction(
 export function createAddBakerTransaction(
     fromAddress: string,
     payload: AddBakerPayload,
-    nonce: string,
+    nonce: bigint,
     signatureAmount = 1,
     expiry = getDefaultExpiry()
 ): AddBaker {
@@ -393,7 +401,7 @@ export function createAddBakerTransaction(
 export function createUpdateBakerKeysTransaction(
     fromAddress: string,
     payload: UpdateBakerKeysPayload,
-    nonce: string,
+    nonce: bigint,
     signatureAmount = 1,
     expiry = getDefaultExpiry()
 ): UpdateBakerKeys {
@@ -409,7 +417,7 @@ export function createUpdateBakerKeysTransaction(
 
 export function createRemoveBakerTransaction(
     fromAddress: string,
-    nonce: string,
+    nonce: bigint,
     signatureAmount = 1,
     expiry = getDefaultExpiry()
 ): RemoveBaker {
@@ -426,7 +434,7 @@ export function createRemoveBakerTransaction(
 export function createUpdateBakerStakeTransaction(
     fromAddress: string,
     payload: UpdateBakerStakePayload,
-    nonce: string,
+    nonce: bigint,
     signatureAmount = 1,
     expiry = getDefaultExpiry()
 ): UpdateBakerStake {
@@ -443,7 +451,7 @@ export function createUpdateBakerStakeTransaction(
 export function createUpdateBakerRestakeEarningsTransaction(
     fromAddress: string,
     payload: UpdateBakerRestakeEarningsPayload,
-    nonce: string,
+    nonce: bigint,
     signatureAmount = 1,
     expiry = getDefaultExpiry()
 ): UpdateBakerRestakeEarnings {
@@ -454,48 +462,6 @@ export function createUpdateBakerRestakeEarningsTransaction(
         nonce,
         payload,
         signatureAmount,
-    });
-}
-
-export interface StatusResponse {
-    status: TransactionStatus;
-    outcomes: Record<string, TransactionEvent>;
-}
-
-/**
- * Queries the node for the status of the transaction with the provided transaction hash.
- * The polling will continue until the transaction becomes absent or finalized.
- * @param transactionHash the hash of the transaction to get the status for
- * @param pollingIntervalM, optional, interval between polling in milliSeconds, defaults to every 20 seconds.
- */
-export async function getStatus(
-    transactionHash: string,
-    pollingIntervalMs = 20000
-): Promise<StatusResponse> {
-    return new Promise((resolve) => {
-        const interval = setInterval(async () => {
-            let response;
-            try {
-                response = (
-                    await getTransactionStatus(transactionHash)
-                ).getValue();
-            } catch (err) {
-                // This happens if the node cannot be reached. Just wait for the next
-                // interval and try again.
-                return;
-            }
-            if (response === 'null') {
-                clearInterval(interval);
-                resolve({ status: TransactionStatus.Rejected, outcomes: {} });
-                return;
-            }
-
-            const parsedResponse = JSON.parse(response);
-            if (parsedResponse.status === 'finalized') {
-                clearInterval(interval);
-                resolve(parsedResponse);
-            }
-        }, pollingIntervalMs);
     });
 }
 
@@ -541,7 +507,7 @@ export function buildTransactionAccountSignature(
     return transactionAccountSignature;
 }
 
-export function isSuccessfulTransaction(event: TransactionEvent) {
+export function isSuccessfulTransaction(event: TransactionSummary) {
     return event.result.outcome === 'success';
 }
 
@@ -555,7 +521,7 @@ export function validateShieldedAmount(
     estimatedFee: bigint | undefined
 ): string | undefined {
     if (!isValidGTUString(amountToValidate)) {
-        return 'Value is not a valid GTU amount';
+        return 'Value is not a valid CCD amount';
     }
     const amountToValidateMicroGTU = toMicroUnits(amountToValidate);
     if (
@@ -582,7 +548,7 @@ export function validateTransferAmount(
     estimatedFee: bigint | undefined
 ): string | undefined {
     if (!isValidGTUString(amountToValidate)) {
-        return 'Value is not a valid GTU amount';
+        return 'Value is not a valid CCD amount';
     }
     const amountToValidateMicroGTU = toMicroUnits(amountToValidate);
     if (
@@ -618,7 +584,7 @@ export function validateBakerStake(
     estimatedFee: bigint | undefined
 ): string | undefined {
     if (!isValidGTUString(amountToValidate)) {
-        return 'Value is not a valid GTU amount';
+        return 'Value is not a valid CCD amount';
     }
     const amount = toMicroUnits(amountToValidate);
     if (bakerStakeThreshold && bakerStakeThreshold > amount) {
@@ -645,8 +611,8 @@ export function validateMemo(memo: string): string | undefined {
     ) {
         return `Numbers greater than ${Number.MAX_SAFE_INTEGER} or smaller than ${Number.MIN_SAFE_INTEGER} are not supported`;
     }
-    if (getEncodedSize(memo) > maxMemoSize) {
-        return `Memo is too large, encoded size must be at most ${maxMemoSize} bytes`;
+    if (getEncodedSize(memo) > externalConstants.maxMemoSize) {
+        return `Memo is too large, encoded size must be at most ${externalConstants.maxMemoSize} bytes`;
     }
     // Check that the memo only contains ascii characters
     if (isASCII(memo)) {
@@ -718,4 +684,14 @@ export function isShieldedBalanceTransaction(transaction: TransferTransaction) {
         default:
             return false;
     }
+}
+
+export function toReleaseSchedule(release: SchedulePoint): ReleaseSchedule {
+    return {
+        amount: BigInt(release.amount),
+        timestamp: dateFromTimeStamp(
+            release.timestamp,
+            TimeStampUnit.milliSeconds
+        ),
+    };
 }

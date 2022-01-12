@@ -12,7 +12,6 @@ import {
     Fraction,
 } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
-import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { createUpdateBakerRestakeEarningsTransaction } from '~/utils/transactionHelpers';
 import routes from '~/constants/routes.json';
@@ -22,9 +21,7 @@ import {
     useTransactionExpiryState,
 } from '~/utils/dataHooks';
 import SignTransaction from './SignTransaction';
-import ButtonGroup from '~/components/ButtonGroup';
 import UpdateBakerRestakeEarningsProposalDetails from './proposal-details/UpdateBakerRestakeEarnings';
-import InputTimestamp from '~/components/Form/InputTimestamp';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
@@ -33,6 +30,13 @@ import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
+import DatePicker from '~/components/Form/DatePicker';
+import { isMultiSig } from '~/utils/accountHelpers';
+import Label from '~/components/Label';
+import Radios from '~/components/Form/Radios';
+import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
+
+import styles from './MultisignatureAccountTransactions.module.scss';
 
 interface PageProps {
     exchangeRate: Fraction;
@@ -55,6 +59,9 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
         transaction,
         setTransaction,
     ] = useState<UpdateBakerRestakeEarnings>();
+    const handler = findAccountTransactionHandler(
+        TransactionKindId.Update_baker_restake_earnings
+    );
 
     const estimatedFee = useTransactionCostEstimate(
         TransactionKindId.Update_baker_restake_earnings,
@@ -76,7 +83,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
 
         if (restakeEarnings === undefined) {
             setError(
-                'The Restake Earnings setting is needed to make transaction'
+                'The restake earnings setting is needed to make transaction'
             );
             return;
         }
@@ -95,20 +102,20 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
     };
 
     return (
-        <MultiSignatureLayout
-            pageTitle="Multi Signature Transactions | Update Baker Restake Earnings"
-            stepTitle="Transaction Proposal - Update Baker Restake Earnings"
-            delegateScroll
-        >
+        <MultiSignatureLayout pageTitle={handler.title} delegateScroll>
             <SimpleErrorModal
                 show={Boolean(error)}
                 header="Unable to perform transfer"
                 content={error}
                 onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
             />
-            <Columns divider columnScroll>
+            <Columns
+                divider
+                columnScroll
+                className={styles.subtractContainerPadding}
+            >
                 <Columns.Column
-                    header="Transaction Details"
+                    header="Transaction details"
                     className={styles.stretchColumn}
                 >
                     <div className={styles.columnContent}>
@@ -131,10 +138,11 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
-                                        filter={(_, info) =>
-                                            info?.accountBaker !== undefined
+                                        filter={(a, info) =>
+                                            info?.accountBaker !== undefined &&
+                                            isMultiSig(a)
                                         }
-                                        messageWhenEmpty="There are no baker accounts "
+                                        messageWhenEmpty="There are no baker accounts that require multiple signatures"
                                         onAccountClicked={() => {
                                             dispatch(
                                                 push(
@@ -193,7 +201,8 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                                         Choose the expiry date for the
                                         transaction.
                                     </p>
-                                    <InputTimestamp
+                                    <DatePicker
+                                        className="body2 mV40"
                                         label="Transaction expiry time"
                                         name="expiry"
                                         isInvalid={
@@ -202,6 +211,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                                         error={expiryTimeError}
                                         value={expiryTime}
                                         onChange={setExpiryTime}
+                                        minDate={new Date()}
                                     />
                                     <p className="mB0">
                                         Committing the transaction after this
@@ -237,7 +247,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                     </Route>
                     <Route path={`${path}/${BakerSubRoutes.sign}`}>
                         <Columns.Column
-                            header="Signature and Hardware Wallet"
+                            header="Signature and hardware wallet"
                             className={styles.stretchColumn}
                         >
                             {transaction !== undefined &&
@@ -277,15 +287,14 @@ function RestakeEarnings({
 
     return (
         <>
-            <p className="mT0">
-                Currently restake is{' '}
-                {restake ? <b>enabled</b> : <b>disabled</b>}.
-            </p>
-            <p>Select whether to restake earnings.</p>
-            <ButtonGroup
-                title="Enable restake earnings"
-                name="restake"
-                buttons={[
+            <p className="mV30">Choose to restake earnings or not, below.</p>
+            <div className="mV30">
+                <Label>Current restake:</Label>
+                <span className="body1">{restake ? 'Yes' : 'No'}</span>
+            </div>
+            <Radios
+                label="Enable restake earnings"
+                options={[
                     {
                         label: 'Yes, restake',
                         value: true,
@@ -295,8 +304,8 @@ function RestakeEarnings({
                         value: false,
                     },
                 ]}
-                isSelected={({ value }) => value === enable}
-                onClick={({ value }) => onChanged(value)}
+                value={enable}
+                onChange={onChanged}
             />
         </>
     );

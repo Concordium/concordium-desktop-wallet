@@ -28,7 +28,6 @@ import {
 } from '~/utils/transactionCosts';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import LoadingComponent from '../LoadingComponent';
-import InputTimestamp from '~/components/Form/InputTimestamp';
 import PickRecipient from '~/components/Transfers/PickRecipient';
 import { useTransactionExpiryState } from '~/utils/dataHooks';
 import {
@@ -40,11 +39,13 @@ import { collapseFraction } from '~/utils/basicHelpers';
 import { toMicroUnits, displayAsGTU } from '~/utils/gtu';
 import { useAsyncMemo } from '~/utils/hooks';
 import { nodeSupportsMemo } from '~/node/nodeHelpers';
+import { stringify } from '~/utils/JSONHelper';
 import { isMultiSig, getAmountAtDisposal } from '~/utils/accountHelpers';
-
-import styles from './CreateTransferProposal.module.scss';
 import UpsertAddress from '~/components/UpsertAddress';
 import PickMemo from './PickMemo';
+import DatePicker from '~/components/Form/DatePicker';
+
+import styles from './CreateTransferProposal.module.scss';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
@@ -57,7 +58,7 @@ function subTitle(currentLocation: string) {
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY:
             return 'Select transaction expiry time';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
-            return 'Signature and Hardware Wallet';
+            return 'Signature and hardware wallet';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE:
             return 'Setup the release schedule';
         default:
@@ -159,7 +160,7 @@ function CreateTransferProposal({
             setAmountError(undefined);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [estimatedFee, amount, JSON.stringify(accountInfo)]);
+    }, [estimatedFee, amount, stringify(accountInfo)]);
 
     function continueAction(routerAction: typeof push = push) {
         const nextLocation = handler.creationLocationHandler(location);
@@ -227,11 +228,7 @@ function CreateTransferProposal({
     }
 
     return (
-        <MultiSignatureLayout
-            pageTitle={handler.title}
-            stepTitle={`Transaction Proposal - ${handler.type}`}
-            delegateScroll
-        >
+        <MultiSignatureLayout pageTitle={handler.title} delegateScroll>
             <div className={styles.subtractContainerPadding}>
                 <Columns divider columnScroll columnClassName={styles.column}>
                     <Columns.Column
@@ -239,7 +236,7 @@ function CreateTransferProposal({
                             styles.transactionDetailsColumn,
                             styles.stretchColumn
                         )}
-                        header="Transaction Details"
+                        header="Transaction details"
                     >
                         <div className={styles.columnContent}>
                             <TransactionProposalDetails
@@ -327,12 +324,12 @@ function CreateTransferProposal({
                                             onClickedRecipient={continueAction}
                                         />
                                         <UpsertAddress
-                                            clear
                                             className={styles.addRecipient}
                                             onSubmit={(e) => {
                                                 setRecipient(e);
                                                 continueAction();
                                             }}
+                                            allowAlias={false}
                                         >
                                             <PlusIcon />
                                         </UpsertAddress>
@@ -345,7 +342,8 @@ function CreateTransferProposal({
                                 }
                                 render={() => (
                                     <div className={styles.columnContent}>
-                                        <InputTimestamp
+                                        <DatePicker
+                                            className="body2 mV40"
                                             label="Transaction expiry time"
                                             name="expiry"
                                             isInvalid={
@@ -354,6 +352,7 @@ function CreateTransferProposal({
                                             error={expiryTimeError}
                                             value={expiryTime}
                                             onChange={setExpiryTime}
+                                            minDate={new Date()}
                                         />
                                         <p>
                                             Choose the expiry date for the

@@ -15,7 +15,6 @@ import SimpleErrorModal, {
 } from '~/components/SimpleErrorModal';
 import FileInput from '~/components/Form/FileInput';
 import { FileInputValue } from '~/components/Form/FileInput/FileInput';
-import styles from './BrowseTransactionFile/BrowseTransactionFile.module.scss';
 import { fileListToFileArray } from '~/components/Form/FileInput/util';
 import createMultiSignatureTransaction from '~/utils/MultiSignatureTransactionHelper';
 import { loadProposals } from '~/features/MultiSignatureSlice';
@@ -37,6 +36,8 @@ import getTransactionCost, {
     getTransactionEnergyCost,
 } from '~/utils/transactionCosts';
 import errorMessages from '~/constants/errorMessages.json';
+
+import styles from './BrowseTransactionFile/BrowseTransactionFile.module.scss';
 
 async function loadTransactionFile(
     file: File,
@@ -61,7 +62,7 @@ async function loadTransactionFile(
     if (instanceOfUpdateInstruction(transactionObject)) {
         return {
             show: true,
-            header: 'Update Instruction not supported',
+            header: 'Update instruction not supported',
             content: `The transaction within "${fileName}" is an update instruction, which is not supported for import.`,
         };
     }
@@ -78,7 +79,7 @@ async function loadTransactionFile(
     if (!account?.signatureThreshold) {
         return {
             show: true,
-            header: 'Sender Account not known',
+            header: 'Sender account not known',
             content: `In "${fileName}", the sender of the transaction is not an account in this wallet.`,
         };
     }
@@ -106,14 +107,14 @@ async function loadTransactionFile(
     if (transactionObject.nonce) {
         return {
             show: true,
-            header: 'Unexpected Field present',
+            header: 'Unexpected field present',
             content: `In "${fileName}", the nonce was present.`,
         };
     }
     if (transactionObject.energyAmount) {
         return {
             show: true,
-            header: 'Unexpected Field present',
+            header: 'Unexpected field present',
             content: `In "${fileName}", the energyAmount was present.`,
         };
     }
@@ -121,7 +122,7 @@ async function loadTransactionFile(
     if (transactionObject.estimatedFee) {
         return {
             show: true,
-            header: 'Unexpected Field present',
+            header: 'Unexpected field present',
             content: `In "${fileName}", the estimatedFee was present.`,
         };
     }
@@ -204,7 +205,7 @@ export default function ImportProposal() {
             setProcessing(false);
             setShowError({
                 show: true,
-                header: 'Unable to load blockHash',
+                header: 'Unable to load block hash',
                 content: errorMessages.unableToReachNode,
             });
             return;
@@ -236,13 +237,13 @@ export default function ImportProposal() {
 
         await saveMultipleFiles(
             proposals.map(([name, prop]) => [name, prop.transaction || '']),
-            'Choose Directory to save updated versions of proposals'
+            'Choose directory to save updated versions of proposals'
         );
 
         setProcessing(false);
         setShowError({
             show: true,
-            header: 'Importing Completed',
+            header: 'Importing completed',
             content: `All files have been processed and ${files.length} proposals have been added.`,
         });
     }
@@ -267,7 +268,7 @@ export default function ImportProposal() {
                 content={showError.content}
                 onClick={() => setShowError({ show: false })}
             />
-            <h2 className="textCenter mB40">Import Proposals</h2>
+            <h2 className="textCenter mB40">Import proposals</h2>
             {processing || (
                 <FileInput
                     className={styles.input}

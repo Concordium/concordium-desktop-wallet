@@ -10,6 +10,8 @@ import { displayAsGTU } from '~/utils/gtu';
 import { sumToBigInt } from '~/utils/basicHelpers';
 import { getPublicAccountAmounts } from '~/utils/accountHelpers';
 
+import styles from './Accounts.module.scss';
+
 function getShieldedAmount(accounts: Account[]) {
     return sumToBigInt(accounts, (account) =>
         account.totalDecrypted ? BigInt(account.totalDecrypted) : 0n
@@ -51,28 +53,25 @@ export default function AccountPageHeader() {
     );
 
     return (
-        <>
-            <h1>Accounts</h1>
-            <h1 className="mH40">|</h1>
-            <h3 className="mR20">
-                Wallet Total:{' '}
+        <span className={styles.pageHeader}>
+            <h1 className="pR40 mR40">Accounts</h1>
+            <h3 className="pR20 mR20">
+                Wallet total:{' '}
                 <b>
                     {displayAsGTU(totalAmount)}
                     {hidden}{' '}
                 </b>
-                |
             </h3>
-            <h3 className="mR20">
+            <h3 className="pR20 mR20">
                 At disposal:{' '}
                 <b>
                     {displayAsGTU(totalAtDisposal)}
                     {hidden}{' '}
                 </b>
-                |
             </h3>
-            <h3 className="mR20">
+            <h3>
                 Stake: <b>{displayAsGTU(totalStaked)}</b>
             </h3>
-        </>
+        </span>
     );
 }

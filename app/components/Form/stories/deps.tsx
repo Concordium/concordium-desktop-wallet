@@ -11,10 +11,11 @@ export const {
     Input,
     Submit,
     Switch,
+    Radios,
     TextArea,
-    Timestamp,
     File,
     InlineNumber,
+    DatePicker,
 } = Form;
 
 export const argTypes: Meta['argTypes'] = {
@@ -34,9 +35,10 @@ export const subcomponents: Meta['subcomponents'] = {
     'Form.TextArea': TextArea,
     'Form.Checkbox': Checkbox,
     'Form.Switch': Switch,
+    'Form.Radios': Radios,
     'Form.InlineNumber': InlineNumber,
-    'Form.Timestamp': Timestamp,
     'Form.File': File,
+    'Form.DatePicker': DatePicker,
     'Form.Submit': Submit,
 };
 
@@ -84,10 +86,11 @@ export const ValidationTemplate: Story<FormProps> = (args) => (
                 validate: maxFileSizeKb(1, 'File size too big (1kb allowed)'),
             }}
         />
-        <Form.Timestamp
+        <Form.DatePicker
             name="time"
+            placeholder="Date & time"
             rules={{
-                required: 'Field is required',
+                required: 'Time is required',
                 validate: futureDate(),
             }}
         />
@@ -105,6 +108,15 @@ export const ValidationTemplate: Story<FormProps> = (args) => (
         >
             Agree to terms
         </Form.Checkbox>
+        <Form.Radios
+            name="radio"
+            options={[
+                { value: 'first', label: 'First' },
+                { value: 'second', label: 'Second' },
+                { value: 'third', label: 'Third' },
+            ]}
+            rules={{ required: 'You must select an option' }}
+        />
         <Form.Submit>Submit</Form.Submit>
     </Form>
 );
@@ -113,10 +125,11 @@ export const AllFieldsTemplate: Story<FormProps> = (args) => (
     <Form {...args}>
         <Form.Input name="name" placeholder="Name" />
         <Form.TextArea name="comment" placeholder="Comment" />
-        <Form.Timestamp
+        <Form.DatePicker
             name="time"
+            placeholder="Date & time"
             rules={{
-                required: 'Field is required',
+                required: 'Time is required',
                 validate: futureDate(),
             }}
         />
@@ -126,6 +139,14 @@ export const AllFieldsTemplate: Story<FormProps> = (args) => (
         >
             Agree to terms
         </Form.Checkbox>
+        <Form.Radios
+            name="radio"
+            options={[
+                { value: 'first', label: 'First' },
+                { value: 'second', label: 'Second' },
+                { value: 'third', label: 'Third' },
+            ]}
+        />
         <Form.Switch name="setting">Enable setting</Form.Switch>
         <div>
             Please send {getGTUSymbol()}

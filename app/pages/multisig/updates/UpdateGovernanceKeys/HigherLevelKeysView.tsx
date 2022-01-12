@@ -34,7 +34,6 @@ function HigherLevelKeysView({
         return <Loading inline />;
     }
 
-    const typeDisplayText = typeToDisplay(type);
     const currentThreshold = getThreshold(blockSummary.updates.keys, type);
     const currentKeySetSize = getKeySetSize(blockSummary.updates.keys, type);
     const newKeySetSize = higherLevelKeyUpdate.updateKeys.filter(
@@ -44,24 +43,26 @@ function HigherLevelKeysView({
     return (
         <>
             <div className={styles.content}>
-                <h5>Signature threshold</h5>
-                <p>
-                    Current {typeDisplayText} key signature threshold:{' '}
+                <h5 className="mB5">Signature threshold:</h5>
+                <div className="mono">
+                    Current {typeToDisplay(type)} key signature threshold:{' '}
                     <b>{currentThreshold}</b>
-                </p>
-                <p>
-                    New {typeDisplayText} key signature threshold:{' '}
+                </div>
+                <div className="mono">
+                    New {typeToDisplay(type)} key signature threshold:{' '}
                     <b>{higherLevelKeyUpdate.threshold}</b>
-                </p>
-                <h5>{typeToDisplay(type)} governance key updates</h5>
-                <p>
-                    Current size of {typeDisplayText} key set:{' '}
+                </div>
+                <h5 className="mB5">
+                    {typeToDisplay(type)} governance key updates:
+                </h5>
+                <div className="mono">
+                    Current size of {typeToDisplay(type)} key set:{' '}
                     <b>{currentKeySetSize}</b>
-                </p>
-                <p>
-                    New size of {typeDisplayText} key set:{' '}
+                </div>
+                <div className="mono">
+                    New size of {typeToDisplay(type)} key set:{' '}
                     <b>{newKeySetSize}</b>
-                </p>
+                </div>
             </div>
             <ul>
                 {higherLevelKeyUpdate.updateKeys.map((key) => {

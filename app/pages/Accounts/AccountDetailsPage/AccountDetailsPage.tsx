@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import { Route } from 'react-router';
+import { Redirect, Route } from 'react-router';
 
+import { LocationDescriptorObject } from 'history';
 import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
 import {
     chosenAccountSelector,
@@ -15,21 +16,49 @@ import AccountPageLayout from '../AccountPageLayout';
 import AccountViewActions from '../AccountViewActions';
 import BasicTransferRoutes from '../BasicTransferRoutes';
 import ShowAccountAddress from '../ShowAccountAddress';
-import ShowReleaseSchedule from '../ShowReleaseSchedule';
-import ScheduleTransfer from '../ScheduleTransfer';
-import CredentialInformation from '../CredentialInformation';
+import ShowReleaseSchedule from './ShowReleaseSchedule';
+import ScheduleTransfer from './ScheduleTransfer';
+import CredentialInformation from './CredentialInformation';
 import MoreActions from './MoreActions';
 import BuildSchedule from './BuildSchedule';
 import TransactionLog from './TransactionLog';
 import DecryptComponent from '../DecryptComponent';
 import withAccountSync from '../withAccountSync';
+import AddBaker from './AddBaker';
+import RemoveBaker from './RemoveBaker';
+import UpdateBakerKeys from './UpdateBakerKeys';
+import UpdateBakerStake from './UpdateBakerStake';
+import UpdateBakerRestake from './UpdateBakerRestake';
+import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
+import { AddBakerForm } from '~/components/AddBakerDetailsForm';
+import { RootState } from '~/store/store';
 
 const { Master, Detail } = MasterDetailPageLayout;
+const ToAccounts = () => <Redirect to={routes.ACCOUNTS} />;
+const ToCreateScheduled = () => (
+    <Redirect to={routes.ACCOUNTS_CREATESCHEDULEDTRANSFER} />
+);
 
 export default withAccountSync(function DetailsPage() {
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
+    const accountChanged = useSelector(
+        (s: RootState) => s.accounts.accountChanged
+    );
     const viewingShielded = useSelector(viewingShieldedSelector);
+    const hasCredentials = useSelector(
+        account ? accountHasDeployedCredentialsSelector(account) : () => false
+    );
+    const abortRef = useRef<((reason?: string) => void) | undefined>(undefined);
+    useEffect(() => {
+        const { current } = abortRef;
+        return () => {
+            current?.();
+        };
+    }, [account?.address]);
+
+    const isBaker = Boolean(accountInfo?.accountBaker);
+    const canTransfer = hasCredentials && Boolean(accountInfo);
 
     if (!account) {
         return null;
@@ -49,7 +78,9 @@ export default withAccountSync(function DetailsPage() {
                 <BasicTransferRoutes account={account}>
                     <Route
                         path={routes.ACCOUNTS_SCHEDULED_TRANSFER}
-                        component={BuildSchedule}
+                        component={
+                            accountChanged ? ToCreateScheduled : BuildSchedule
+                        }
                     />
                     <Route path={routes.ACCOUNTS_ADDRESS}>
                         <ShowAccountAddress account={account} asCard />
@@ -58,7 +89,11 @@ export default withAccountSync(function DetailsPage() {
                         <ShowReleaseSchedule accountInfo={accountInfo} />
                     </Route>
                     <Route path={routes.ACCOUNTS_CREATESCHEDULEDTRANSFER}>
-                        <ScheduleTransfer account={account} />
+                        {hasCredentials && accountInfo ? (
+                            <ScheduleTransfer account={account} />
+                        ) : (
+                            <ToAccounts />
+                        )}
                     </Route>
                     <Route path={routes.ACCOUNTS_CREDENTIAL_INFORMATION}>
                         <CredentialInformation
@@ -66,11 +101,64 @@ export default withAccountSync(function DetailsPage() {
                             accountInfo={accountInfo}
                         />
                     </Route>
+                    <Route
+                        path={routes.ACCOUNTS_ADD_BAKER}
+                        render={({ location }) =>
+                            canTransfer && !isBaker ? (
+                                <AddBaker
+                                    location={
+                                        location as LocationDescriptorObject<AddBakerForm>
+                                    }
+                                    account={account}
+                                />
+                            ) : (
+                                <ToAccounts />
+                            )
+                        }
+                    />
+                    <Route path={routes.ACCOUNTS_REMOVE_BAKER}>
+                        {canTransfer && isBaker ? (
+                            <RemoveBaker
+                                account={account}
+                                accountInfo={accountInfo}
+                            />
+                        ) : (
+                            <ToAccounts />
+                        )}
+                    </Route>
+                    <Route path={routes.ACCOUNTS_UPDATE_BAKER_KEYS}>
+                        {canTransfer && isBaker ? (
+                            <UpdateBakerKeys account={account} />
+                        ) : (
+                            <ToAccounts />
+                        )}
+                    </Route>
+                    <Route path={routes.ACCOUNTS_UPDATE_BAKER_STAKE}>
+                        {canTransfer && isBaker ? (
+                            <UpdateBakerStake
+                                account={account}
+                                accountInfo={accountInfo}
+                            />
+                        ) : (
+                            <ToAccounts />
+                        )}
+                    </Route>
+                    <Route path={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}>
+                        {canTransfer && isBaker ? (
+                            <UpdateBakerRestake
+                                account={account}
+                                accountInfo={accountInfo}
+                            />
+                        ) : (
+                            <ToAccounts />
+                        )}
+                    </Route>
+
                     <Route path={routes.ACCOUNTS}>
                         {viewingShielded && !account.allDecrypted ? (
                             <DecryptComponent account={account} />
                         ) : (
-                            <TransactionLog />
+                            <TransactionLog abortRef={abortRef} />
                         )}
                     </Route>
                 </BasicTransferRoutes>

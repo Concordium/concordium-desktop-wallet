@@ -21,7 +21,7 @@ import Button from '~/cross-app-components/Button';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import ChoiceModal from '~/components/ChoiceModal';
 import { noOp } from '~/utils/basicHelpers';
-import { identitySpacesBetweenWarning } from '~/constants/recoveryConstants.json';
+import recoveryConstants from '~/constants/recoveryConstants.json';
 import { useAsyncMemo } from '~/utils/hooks';
 import AbortController from '~/utils/AbortController';
 
@@ -118,7 +118,7 @@ export default function PerformRecovery({
             return;
         }
         if (!blockHash) {
-            setError('Current Blockhash has not been loaded yet');
+            setError('Current block hash has not been loaded yet');
             return;
         }
         controller.start();
@@ -141,12 +141,12 @@ export default function PerformRecovery({
                 blockHash,
                 global,
                 identity.id,
+                identity.version,
                 controller
             );
             accounts.forEach((acc) => {
                 acc.identityName = identity.name;
             });
-            setEmptyIndices(0);
         } else {
             accounts = await recoverNewIdentity(
                 prfKeySeed,
@@ -154,8 +154,21 @@ export default function PerformRecovery({
                 global,
                 identityNumber,
                 walletId,
+                1,
                 controller
             );
+            // If there is no accounts recovered, try to recover using version 0 format.
+            if (!accounts.length) {
+                accounts = await recoverNewIdentity(
+                    prfKeySeed,
+                    blockHash,
+                    global,
+                    identityNumber,
+                    walletId,
+                    0,
+                    controller
+                );
+            }
             const identityName = getRecoveredIdentityName(identityNumber);
             accounts.forEach((acc) => {
                 acc.identityName = identityName;
@@ -180,7 +193,9 @@ export default function PerformRecovery({
             let moved = false;
             if (
                 emptyIndices > 0 &&
-                (emptyIndices + 1) % identitySpacesBetweenWarning === 0
+                (emptyIndices + 1) %
+                    recoveryConstants.identitySpacesBetweenWarning ===
+                    0
             ) {
                 moved = await promptStop(emptyIndices);
             }

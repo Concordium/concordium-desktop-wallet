@@ -8,7 +8,7 @@ import {
 import SignTransaction from '../SignTransaction';
 import { createUpdateCredentialsTransaction } from '~/utils/transactionHelpers';
 import { ensureNonce } from '~/components/Transfers/withNonce';
-import LoadingComponent from '../LoadingComponent';
+import Loading from '~/cross-app-components/Loading';
 
 interface Props {
     account: Account;
@@ -16,7 +16,7 @@ interface Props {
     removedCredIds: string[];
     currentCredentialAmount: number;
     newThreshold: number;
-    nonce: string;
+    nonce: bigint;
     estimatedFee?: Fraction;
     expiry: Date;
 }
@@ -70,4 +70,7 @@ function CreateUpdate({
     return <SignTransaction transaction={transaction} account={account} />;
 }
 
+const LoadingComponent = () => (
+    <Loading text="Fetching information from the node" />
+);
 export default ensureNonce(CreateUpdate, LoadingComponent);

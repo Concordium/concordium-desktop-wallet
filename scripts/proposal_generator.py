@@ -5,6 +5,8 @@
 # Note: The script uses dateutil and base58, which can be installed using 
 # "pip install python-dateutil"
 # "pip install base58"
+#
+# Version 0.2.0
 import sys
 import json
 import csv
@@ -219,7 +221,7 @@ def build_release_schedule(
 
 	for i in range(num_releases - 1):
 		# remaining realeses are i month after first remaining release
-		planned_release_time = first_rem_release_time + relativedelta(months =+ i)
+		planned_release_time = first_rem_release_time + relativedelta(months = +i)
 
 		# Only add release if after earliest_release_time.
 		if planned_release_time > earliest_release_time:
@@ -261,11 +263,11 @@ def main():
 	decimal_sep = config["decimal_sep"]
 
 	# proposals expire 2 hours from now
-	transaction_expiry = datetime.now() + relativedelta(hours =+ 2) 
+	transaction_expiry = datetime.now() + relativedelta(hours = +2) 
 	# If regular releases are before earliest_release_time, they get combined into one at that time.
 	# earliest_release_time = 14:00 CET tomorrow.
 	# This can be later than all release times, in which case all releases happen at that time.
-	earliest_release_time = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00")) + relativedelta(days =+ 1)
+	earliest_release_time = datetime.combine(date.today(), time.fromisoformat("14:00:00+01:00")) + relativedelta(days = +1)
 
 	parser = argparse.ArgumentParser(description="Generate pre-proposals from the csv file \"input_csv\".\n"\
 		"For each row in the csv file, a json file with the corresponding pre-proposal is generated in the same folder.\n"

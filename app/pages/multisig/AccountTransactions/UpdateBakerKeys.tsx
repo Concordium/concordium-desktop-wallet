@@ -13,7 +13,6 @@ import {
     Fraction,
 } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
-import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
 import {
@@ -31,9 +30,7 @@ import {
 } from '~/utils/dataHooks';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { addProposal } from '~/features/MultiSignatureSlice';
-import { DownloadBakerCredentialsStep } from './AddBaker';
 import UpdateBakerKeysProposalDetails from './proposal-details/UpdateBakerKeysProposalDetails';
-import InputTimestamp from '~/components/Form/InputTimestamp';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
@@ -42,8 +39,12 @@ import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
+import DatePicker from '~/components/Form/DatePicker';
+import ExportBakerKeys from './ExportBakerKeys';
+import { isMultiSig } from '~/utils/accountHelpers';
+import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 
-const pageTitle = 'Multi Signature Transactions | Update Baker Keys';
+import styles from './MultisignatureAccountTransactions.module.scss';
 
 interface PageProps {
     exchangeRate: Fraction;
@@ -63,6 +64,9 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
     const [error, setError] = useState<string>();
     const [bakerKeys, setBakerKeys] = useState<BakerKeys>();
     const [transaction, setTransaction] = useState<UpdateBakerKeys>();
+    const handler = findAccountTransactionHandler(
+        TransactionKindId.Remove_baker
+    );
 
     const estimatedFee = useTransactionCostEstimate(
         TransactionKindId.Update_baker_keys,
@@ -147,11 +151,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
     };
 
     return (
-        <MultiSignatureLayout
-            pageTitle={pageTitle}
-            stepTitle="Transaction Proposal - Update Baker Keys"
-            delegateScroll
-        >
+        <MultiSignatureLayout pageTitle={handler.title} delegateScroll>
             <SimpleErrorModal
                 show={Boolean(error)}
                 header="Unable to perform transfer"
@@ -164,7 +164,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                 className={styles.subtractContainerPadding}
                 columnClassName={styles.column}
             >
-                <Columns.Column header="Transaction Details">
+                <Columns.Column header="Transaction details">
                     <div className={styles.columnContent}>
                         <UpdateBakerKeysProposalDetails
                             account={account}
@@ -196,10 +196,11 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
-                                        filter={(_, info) =>
-                                            info?.accountBaker !== undefined
+                                        filter={(a, info) =>
+                                            info?.accountBaker !== undefined &&
+                                            isMultiSig(a)
                                         }
-                                        messageWhenEmpty="There are no baker accounts "
+                                        messageWhenEmpty="There are no baker accounts that require multiple signatures"
                                         onAccountClicked={() => {
                                             dispatch(
                                                 push(
@@ -226,7 +227,8 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                                         Choose the expiry date for the
                                         transaction.
                                     </p>
-                                    <InputTimestamp
+                                    <DatePicker
+                                        className="body2 mV40"
                                         label="Transaction expiry time"
                                         name="expiry"
                                         isInvalid={
@@ -235,6 +237,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                                         error={expiryTimeError}
                                         value={expiryTime}
                                         onChange={setExpiryTime}
+                                        minDate={new Date()}
                                     />
                                     <p className="mB0">
                                         Committing the transaction after this
@@ -266,34 +269,30 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                             header="Baker keys"
                             className={styles.stretchColumn}
                         >
-                            {bakerKeys !== undefined &&
-                            account !== undefined ? (
-                                <DownloadBakerCredentialsStep
-                                    accountAddress={account.address}
-                                    bakerKeys={bakerKeys}
-                                    onContinue={() =>
-                                        onCreateTransaction()
-                                            .then(() =>
-                                                dispatch(
-                                                    push(
-                                                        `${url}/${BakerSubRoutes.sign}`
-                                                    )
+                            <ExportBakerKeys
+                                className={styles.columnContent}
+                                accountAddress={account?.address}
+                                bakerKeys={bakerKeys}
+                                onContinue={() =>
+                                    onCreateTransaction()
+                                        .then(() =>
+                                            dispatch(
+                                                push(
+                                                    `${url}/${BakerSubRoutes.sign}`
                                                 )
                                             )
-                                            .catch(() =>
-                                                setError(
-                                                    errorMessages.unableToReachNode
-                                                )
+                                        )
+                                        .catch(() =>
+                                            setError(
+                                                errorMessages.unableToReachNode
                                             )
-                                    }
-                                />
-                            ) : (
-                                <p>Generating keys...</p>
-                            )}
+                                        )
+                                }
+                            />
                         </Columns.Column>
                     </Route>
                     <Route path={`${path}/${BakerSubRoutes.sign}`}>
-                        <Columns.Column header="Signature and Hardware Wallet">
+                        <Columns.Column header="Signature and hardware wallet">
                             <SignTransactionColumn
                                 signingFunction={signingFunction}
                                 onSkip={() => signingFunction()}

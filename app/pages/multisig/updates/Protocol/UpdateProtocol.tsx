@@ -38,7 +38,7 @@ export default function UpdateProtocol({
     return (
         <>
             <Form.TextArea
-                className="body1"
+                className="body2"
                 name={fieldNames.message}
                 label="Message:"
                 defaultValue={defaults.message || undefined}
@@ -46,19 +46,21 @@ export default function UpdateProtocol({
                 rules={{ required: 'Message is required' }}
             />
             <Form.Input
-                className="body1"
+                className="body2"
                 name={fieldNames.specificationUrl}
                 defaultValue={defaults.specificationUrl || undefined}
                 label="Specification URL:"
                 placeholder="Enter specification URL"
+                spellCheck="false"
                 rules={{ required: 'Specification URL is required' }}
             />
             <Form.TextArea
-                className="body1"
+                className="body2"
                 name={fieldNames.specificationHash}
                 defaultValue={defaults.specificationHash || undefined}
-                label="Specification Hash:"
+                label="Specification hash:"
                 placeholder="Paste specification hash here"
+                spellCheck="false"
                 rules={{
                     required: 'Specification hash is required',
                     minLength: lengthRule,
@@ -68,12 +70,11 @@ export default function UpdateProtocol({
             />
             <Form.File
                 name={fieldNames.specificationAuxiliaryData}
-                label="Specification Auxiliary Data:"
+                label="Specification auxiliary data:"
                 placeholder="Drag and drop file here"
                 buttonTitle="or browse to file"
                 defaultValue={defaults.specificationAuxiliaryData || undefined}
                 rules={{
-                    required: 'Specification Auxiliary Data is required',
                     validate: maxFileSizeKb(
                         auxiliaryDataMaxSizeKb,
                         `File size too big (max: ${auxiliaryDataMaxSizeKb}kb)`

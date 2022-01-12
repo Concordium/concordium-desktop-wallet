@@ -1,3 +1,8 @@
+import {
+    InitialAccountCredential,
+    NormalAccountCredential,
+    Versioned,
+} from '@concordium/node-sdk';
 import { getCredentialsOfAccount } from '~/database/CredentialDao';
 import { getWalletId } from '~/database/WalletDao';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
@@ -12,6 +17,15 @@ import {
     instanceOfDeployedCredential,
     CommitmentsRandomness,
 } from './types';
+
+export async function hasFirstCredential(
+    accountAddress: string
+): Promise<boolean> {
+    const credentialsOfAccount = await getCredentialsOfAccount(accountAddress);
+    return credentialsOfAccount.some(
+        (credential) => credential.credentialIndex === 0
+    );
+}
 
 /**
  * Finds the unique, deployed, credential with the given account address and walletId.
@@ -95,4 +109,18 @@ export function getNoteForOwnCredential(
     }
 
     return `Credential from "${identityName}"`;
+}
+
+/**
+ * Given a versioned credential, returns the credId.
+ */
+export function getCredId(
+    cred: Versioned<InitialAccountCredential | NormalAccountCredential>
+) {
+    if (cred.v !== 0) {
+        throw new Error('Unsupported credential version');
+    }
+    return cred.value.type === 'initial'
+        ? cred.value.contents.regId
+        : cred.value.contents.credId;
 }

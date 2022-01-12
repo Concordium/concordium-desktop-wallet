@@ -1,71 +1,9 @@
-import {
-    ExchangeRate,
-    GasRewards,
-    RewardFraction,
-    TransactionFeeDistribution,
-    VerifyKey,
-} from '../utils/types';
+import { RewardFraction, VerifyKey } from '../utils/types';
+
+export { BlockSummary, ConsensusStatus } from '@concordium/node-sdk/';
 
 // This file contains interfaces that matches what is returned
 // from the Concordium Node using GRPC.
-
-/**
- * Model that matches what is returned by the node when getting the
- * current consensus status.
- */
-export interface ConsensusStatus {
-    bestBlock: string;
-    bestBlockHeight: number;
-    blockArriveLatencyEMA: number;
-    blockArriveLatencyEMSD: number;
-    blockArrivePeriodEMA: number;
-    blockArrivePeriodEMSD: number;
-    blockLastArrivedTime: string;
-    blockLastReceivedTime: string | null;
-    blockReceiveLatencyEMA: number;
-    blockReceiveLatencyEMSD: number;
-    blockReceivePeriodEMA: number;
-    blockReceivePeriodEMSD: number;
-    blocksReceivedCount: number;
-    blocksVerifiedCount: number;
-    epochDuration: number;
-    finalizationCount: number;
-    finalizationPeriodEMA: number;
-    finalizationPeriodEMSD: number;
-    genesisBlock: string;
-    genesisTime: string;
-    currentEraGenesisBlock: string;
-    currentEraGenesisTime: string;
-    lastFinalizedBlock: string;
-    lastFinalizedBlockHeight: number;
-    lastFinalizedTime: string | null;
-    slotDuration: number;
-    transactionsPerBlockEMA: number;
-    transactionsPerBlockEMSD: number;
-    protocolVersion: number;
-}
-
-interface UpdateQueue {
-    nextSequenceNumber: bigint;
-    queue: unknown; // FIXME: add the actual type
-}
-
-interface UpdateQueues {
-    microGTUPerEuro: UpdateQueue;
-    euroPerEnergy: UpdateQueue;
-    transactionFeeDistribution: UpdateQueue;
-    foundationAccount: UpdateQueue;
-    electionDifficulty: UpdateQueue;
-    mintDistribution: UpdateQueue;
-    protocol: UpdateQueue;
-    gasRewards: UpdateQueue;
-    bakerStakeThreshold: UpdateQueue;
-    rootKeys: UpdateQueue;
-    level1Keys: UpdateQueue;
-    level2Keys: UpdateQueue;
-    addIdentityProvider: UpdateQueue;
-    addAnonymityRevoker: UpdateQueue;
-}
 
 export interface Authorization {
     threshold: number;
@@ -102,21 +40,6 @@ export interface MintDistributionNode {
     finalizationReward: RewardFraction;
 }
 
-interface RewardParameters {
-    transactionFeeDistribution: TransactionFeeDistribution;
-    mintDistribution: MintDistributionNode;
-    gASRewards: GasRewards;
-}
-
-interface ChainParameters {
-    microGTUPerEuro: ExchangeRate;
-    euroPerEnergy: ExchangeRate;
-    rewardParameters: RewardParameters;
-    minimumThresholdForBaking: bigint;
-    bakerCooldownEpochs: number;
-    electionDifficulty: number;
-}
-
 export interface KeysWithThreshold {
     keys: VerifyKey[];
     threshold: number;
@@ -126,25 +49,6 @@ export interface Keys {
     rootKeys: KeysWithThreshold;
     level1Keys: KeysWithThreshold;
     level2Keys: Authorizations;
-}
-
-interface Updates {
-    chainParameters: ChainParameters;
-    keys: Keys;
-    updateQueues: UpdateQueues;
-}
-
-interface MintEvent {
-    tag: string;
-    foundationAccount: string;
-    mintPlatformDevleopmentCharge: number;
-    mintFinalizationReward: number;
-    mintBakingReward: number;
-}
-
-export interface BlockSummary {
-    updates: Updates;
-    specialEvents: [MintEvent];
 }
 
 export interface AccountNonce {

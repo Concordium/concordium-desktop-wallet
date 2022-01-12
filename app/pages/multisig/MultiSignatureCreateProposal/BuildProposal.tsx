@@ -37,7 +37,6 @@ export default function BuildProposal({
     const form = useForm<FieldValues & MultiSignatureCreateProposalForm>({
         mode: 'onTouched',
     });
-    const displayType = UpdateType[type];
     const { effectiveTime: effective } = form.watch(['effectiveTime']);
     const UpdateComponent = handler.update;
 
@@ -72,8 +71,7 @@ export default function BuildProposal({
             >
                 <div className={styles.proposal}>
                     <p className="mT0">
-                        Add all the details for the {displayType} transaction
-                        below.
+                        Add all the details for the transaction below.
                     </p>
                     <>
                         <UpdateComponent
@@ -81,9 +79,10 @@ export default function BuildProposal({
                             blockSummary={blockSummary}
                             consensusStatus={consensusStatus}
                         />
-                        <Form.Timestamp
+                        <Form.DatePicker
+                            className="body2 mV40"
                             name="effectiveTime"
-                            label="Effective Time"
+                            label="Effective time"
                             defaultValue={
                                 defaults.effectiveTime ||
                                 new Date(
@@ -97,10 +96,12 @@ export default function BuildProposal({
                                     'Effective time must be in the future'
                                 ),
                             }}
+                            minDate={new Date()}
                         />
-                        <Form.Timestamp
+                        <Form.DatePicker
+                            className="body2 mV40"
                             name="expiryTime"
-                            label="Transaction Expiry Time"
+                            label="Transaction expiry time"
                             defaultValue={
                                 defaults.expiryTime || getDefaultExpiry()
                             }
@@ -120,6 +121,7 @@ export default function BuildProposal({
                                     ),
                                 },
                             }}
+                            maxDate={effective ?? new Date()}
                         />
                     </>
                 </div>

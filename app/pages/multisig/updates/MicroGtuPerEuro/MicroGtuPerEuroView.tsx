@@ -12,7 +12,7 @@ interface Props extends ChainData {
 }
 
 /**
- * Displays an overview of a micro GTU per euro transaction payload.
+ * Displays an overview of a micro CCD per euro transaction payload.
  */
 export default withChainData(function MicroGtuPerEuroView({
     exchangeRate,
@@ -24,9 +24,9 @@ export default withChainData(function MicroGtuPerEuroView({
         return (
             <RelativeRateField
                 {...commonFieldProps}
-                label="Current micro GTU per euro rate"
+                label="Current micro CCD per euro rate:"
                 value={fromExchangeRate(currentValue)}
-                disabled
+                display
             />
         );
     }
@@ -40,9 +40,9 @@ export default withChainData(function MicroGtuPerEuroView({
             )}
             <RelativeRateField
                 {...commonFieldProps}
-                label="New micro GTU per euro rate"
+                label="New micro CCD per euro rate:"
                 value={fromExchangeRate(exchangeRate)}
-                disabled
+                display
             />
         </>
     );

@@ -6,7 +6,7 @@ import routes from '~/constants/routes.json';
 import { createCredentialDetails } from '~/utils/rustInterface';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import {
-    Identity,
+    ConfirmedIdentity,
     CredentialDeploymentDetails,
     CommitmentsRandomness,
     CreationKeys,
@@ -33,13 +33,14 @@ import errorMessages from '~/constants/errorMessages.json';
 import { AccountCardView } from '~/components/AccountCard/AccountCard';
 import SimpleLedgerWithCreationKeys from '~/components/ledger/SimpleLedgerWithCreationKeys';
 import pairWallet from '~/utils/WalletPairing';
+import { getKeyExportType } from '~/utils/identityHelpers';
 
 import generalStyles from '../AccountCreation.module.scss';
 import styles from './GeneratePage.module.scss';
 
 interface Props {
     accountName: string;
-    identity: Identity;
+    identity: ConfirmedIdentity;
     attributes: AttributeKeyName[];
 }
 
@@ -67,7 +68,7 @@ export default function AccountCreationGenerate({
 
         try {
             const response = await sendTransaction(payload);
-            if (response.getValue()) {
+            if (response) {
                 return;
             }
         } catch (e) {
@@ -231,6 +232,7 @@ export default function AccountCreationGenerate({
                         ledgerCallback={createAccount}
                         credentialNumber={credentialNumber}
                         preCallback={checkWallet}
+                        exportType={getKeyExportType(identity.version)}
                         compareButtonClassName="mT50"
                     />
                 </Columns.Column>

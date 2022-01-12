@@ -13,7 +13,7 @@ export default function DisplayTransactionExpiryTime({
 }: Props) {
     return (
         <>
-            <p className={styles.title}>Transaction expiry time</p>
+            <p className={styles.title}>Transaction expiry time:</p>
             <p className={styles.value}>
                 {expiryTime === undefined
                     ? placeholder
@@ -21,8 +21,8 @@ export default function DisplayTransactionExpiryTime({
             </p>
             {expiryTime === undefined ? null : (
                 <p className={styles.note}>
-                    Note: A transaction can only be submitted in the 2 hours
-                    before the expiry <br /> (
+                    A transaction can only be submitted within 2 hours of its
+                    expiry <br /> (
                     {getFormattedDateString(subtractHours(2, expiryTime))})
                 </p>
             )}

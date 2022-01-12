@@ -1,5 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+    AccountInfo,
+    BlockSummary,
+    ConsensusStatus,
+    CryptographicParameters,
+    NextAccountNonce,
+    TransactionStatus,
+    Versioned,
+} from '@concordium/node-sdk';
+import {
     OpenDialogOptions,
     OpenDialogReturnValue,
     Rectangle,
@@ -24,6 +33,13 @@ import {
     IncomingTransaction,
     AccountAndCredentialPairs,
     TransactionFilter,
+    TransactionOrder,
+    DecryptedAmount,
+    CredentialNumberPrfKey,
+    IpInfo,
+    ArInfo,
+    IdentityVersion,
+    DecryptedTransferTransaction,
 } from '~/utils/types';
 import { ExternalCredential } from '../database/types';
 import type LedgerCommands from './preloadLedgerTypes';
@@ -47,10 +63,55 @@ export interface Once {
     onVerificationKeysConfirmed: PutListener;
 }
 
+type ConsensusAndGlobalResultSuccess = {
+    successful: true;
+    response: {
+        consensusStatus: ConsensusStatus;
+        global: Versioned<CryptographicParameters>;
+    };
+};
+
+type ConsensusAndGlobalResultFailure = {
+    successful: false;
+    error: Error;
+};
+
+export type ConsensusAndGlobalResult =
+    | ConsensusAndGlobalResultSuccess
+    | ConsensusAndGlobalResultFailure;
+
+type GetAccountInfo = (
+    address: string,
+    blockHash: string
+) => Promise<AccountInfo | undefined>;
+
 export type GRPC = {
-    call: (command: string, input: Record<string, string>) => Promise<any>;
     setLocation: (address: string, port: string) => void;
-    nodeConsensusAndGlobal: (address: string, port: string) => Promise<any>;
+    nodeConsensusAndGlobal: (
+        address: string,
+        port: string
+    ) => Promise<ConsensusAndGlobalResult>;
+    sendTransaction: (
+        transactionPayload: Uint8Array,
+        networkId: number
+    ) => Promise<boolean>;
+    getCryptographicParameters: (
+        blockHash: string
+    ) => Promise<Versioned<CryptographicParameters> | undefined>;
+    getConsensusStatus: () => Promise<ConsensusStatus>;
+    getTransactionStatus: (
+        transactionId: string
+    ) => Promise<TransactionStatus | undefined>;
+    getNextAccountNonce: (
+        address: string
+    ) => Promise<NextAccountNonce | undefined>;
+    getBlockSummary: (blockHash: string) => Promise<BlockSummary | undefined>;
+    getAccountInfoOfCredential: GetAccountInfo;
+    getAccountInfo: GetAccountInfo;
+    getIdentityProviders: (blockHash: string) => Promise<IpInfo[] | undefined>;
+    getAnonymityRevokers: (blockHash: string) => Promise<ArInfo[] | undefined>;
+    // We return a Uint8Array here, because PeerListResponse must be manually serialized/deserialized.
+    getPeerList: (includeBootstrappers: boolean) => Promise<Uint8Array>;
 };
 
 export type FileMethods = {
@@ -79,6 +140,8 @@ export type CryptoMethods = {
 export type GetTransactionsResult = {
     transactions: IncomingTransaction[];
     full: boolean;
+    minId?: string;
+    maxId?: string;
 };
 
 export interface HttpGetResponse<T> {
@@ -94,13 +157,13 @@ export type HttpMethods = {
     ) => Promise<HttpGetResponse<T>>;
     getTransactions: (
         address: string,
-        id: string
+        transactionFilter: TransactionFilter,
+        limit: number,
+        order: TransactionOrder,
+        id?: string
     ) => Promise<GetTransactionsResult>;
-    getNewestTransactions: (
-        address: string,
-        transactionFilter: TransactionFilter
-    ) => Promise<IncomingTransaction[]>;
     getIdProviders: () => Promise<IdentityProvider[]>;
+    gtuDrop: (address: string) => Promise<string>;
 };
 
 export type GeneralMethods = {
@@ -197,7 +260,10 @@ export type IdentityMethods = {
     insert: (identity: Partial<Identity> | Identity[]) => Promise<number[]>;
     update: (id: number, updatedValues: Partial<Identity>) => Promise<number>;
     getIdentitiesForWallet: (walletId: number) => Promise<Identity[]>;
-    rejectIdentityAndInitialAccount: (identityId: number) => Promise<void>;
+    rejectIdentityAndInitialAccount: (
+        identityId: number,
+        detail: string
+    ) => Promise<void>;
     removeIdentityAndInitialAccount: (identityId: number) => Promise<void>;
     confirmIdentity: (
         identityId: number,
@@ -207,7 +273,7 @@ export type IdentityMethods = {
         addressBookEntry: AddressBookEntry
     ) => Promise<void>;
     insertPendingIdentityAndInitialAccount: (
-        identity: Partial<Identity>,
+        identity: Omit<Identity, 'id'>,
         initialAccount: Omit<Account, 'identityId'>
     ) => Promise<number>;
 };
@@ -248,19 +314,12 @@ export interface GetTransactionsOutput {
 export type TransactionMethods = {
     getPending: () => Promise<TransferTransaction[]>;
     hasPending: (address: string) => Promise<boolean>;
-    getTransactionsForAccount: (
-        address: Account,
+    getFilteredPendingTransactions: (
+        address: string,
         filteredTypes: TransactionKindString[],
         fromDate?: Date,
-        toDate?: Date,
-        limit?: number,
-        startId?: string
-    ) => Promise<GetTransactionsOutput>;
-    hasEncryptedTransactions: (
-        address: string,
-        fromTime: string,
-        toTime: string
-    ) => Promise<boolean>;
+        toDate?: Date
+    ) => Promise<TransferTransaction[]>;
     hasPendingShieldedBalanceTransfer: (address: string) => Promise<boolean>;
     update: (
         identifier: Record<string, unknown>,
@@ -270,16 +329,17 @@ export type TransactionMethods = {
         transactions: TransferTransaction[]
     ) => Promise<TransferTransaction[]>;
     getTransaction: (id: string) => Promise<TransferTransaction | undefined>;
-    upsertTransactionsAndUpdateMaxId: (
-        transactions: TransferTransaction[],
-        address: string,
-        newMaxId: bigint
-    ) => Promise<TransferTransaction[]>;
+    deleteTransaction: (transactionHash: string) => Promise<number>;
 };
 
 export type WalletMethods = {
     getWalletId: (identifier: Hex) => Promise<number | undefined>;
     insertWallet: (identifier: Hex, type: WalletType) => Promise<number>;
+};
+
+export type DecryptedAmountsMethods = {
+    insert: (entry: DecryptedAmount) => Promise<number[]>;
+    findEntries: (transactionHashes: string[]) => Promise<DecryptedAmount[]>;
 };
 
 export enum ViewResponseStatus {
@@ -326,6 +386,7 @@ export type Database = {
     settings: SettingsMethods;
     transaction: TransactionMethods;
     wallet: WalletMethods;
+    decyptedAmounts: DecryptedAmountsMethods;
 };
 
 export interface AutoUpdateMethods {
@@ -341,12 +402,32 @@ export interface AccountReportMethods {
     single: (
         fileName: string,
         account: Account,
-        filters: TransactionFilter
+        filters: TransactionFilter,
+        global: Global,
+        keys: Record<string, CredentialNumberPrfKey>,
+        decryptFunction: (
+            encryptedTransfers: TransferTransaction[],
+            accountAddress: string,
+            prfKey: string,
+            identityVersion: IdentityVersion,
+            credentialNumber: number,
+            global: Global
+        ) => Promise<DecryptedTransferTransaction[]>
     ) => Promise<void>;
     multiple: (
         fileName: string,
         accounts: Account[],
-        filters: TransactionFilter
+        filters: TransactionFilter,
+        global: Global,
+        keys: Record<string, CredentialNumberPrfKey>,
+        decryptFunction: (
+            encryptedTransfers: TransferTransaction[],
+            accountAddress: string,
+            prfKey: string,
+            identityVersion: IdentityVersion,
+            credentialNumber: number,
+            global: Global
+        ) => Promise<DecryptedTransferTransaction[]>
     ) => Promise<void>;
     abort: () => void;
 }

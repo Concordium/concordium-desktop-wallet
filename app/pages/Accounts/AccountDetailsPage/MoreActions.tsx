@@ -18,7 +18,6 @@ export default function MoreActions({ account, accountInfo }: Props) {
     );
     const hasUsedEncrypted = hasEncryptedBalance(account);
     const isBaker = Boolean(accountInfo?.accountBaker);
-    const hasBakerCooldown = Boolean(accountInfo?.accountBaker?.pendingChange);
 
     return (
         <>
@@ -34,8 +33,6 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 to={routes.ACCOUNTS_ADDRESS}
             >
                 Account address
-                <br />
-                <span className="body4 pT5">{account.address}</span>
             </ButtonNavLink>
             {accountHasDeployedCredentials && (
                 <ButtonNavLink
@@ -43,7 +40,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     to={routes.ACCOUNTS_CREATESCHEDULEDTRANSFER}
                     disabled={!accountInfo}
                 >
-                    Send GTU with a schedule
+                    Send CCD with a schedule
                 </ButtonNavLink>
             )}
             <ButtonNavLink
@@ -66,7 +63,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 className="mB20:notLast flex width100"
                 to={routes.ACCOUNTS_CREDENTIAL_INFORMATION}
             >
-                Credential & attribute Information
+                Credential & attribute information
             </ButtonNavLink>
             {accountHasDeployedCredentials && !hasUsedEncrypted && (
                 <ButtonNavLink
@@ -85,12 +82,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
             {accountHasDeployedCredentials && !isBaker && (
                 <ButtonNavLink
                     className="mB20:notLast flex width100"
-                    to={{
-                        pathname: createTransferWithAccountPathName(
-                            TransactionKindId.Add_baker
-                        ),
-                        state: { account },
-                    }}
+                    to={routes.ACCOUNTS_ADD_BAKER}
                     disabled={!accountInfo}
                 >
                     Add baker
@@ -98,54 +90,30 @@ export default function MoreActions({ account, accountInfo }: Props) {
             )}
             {accountHasDeployedCredentials && isBaker && (
                 <>
-                    {hasBakerCooldown || (
-                        <ButtonNavLink
-                            className="mB20:notLast flex width100"
-                            to={{
-                                pathname: createTransferWithAccountPathName(
-                                    TransactionKindId.Remove_baker
-                                ),
-                                state: { account },
-                            }}
-                            disabled={!accountInfo}
-                        >
-                            Remove baker
-                        </ButtonNavLink>
-                    )}
                     <ButtonNavLink
                         className="mB20:notLast flex width100"
-                        to={{
-                            pathname: createTransferWithAccountPathName(
-                                TransactionKindId.Update_baker_keys
-                            ),
-                            state: { account },
-                        }}
+                        to={routes.ACCOUNTS_REMOVE_BAKER}
+                        disabled={!accountInfo}
+                    >
+                        Remove baker
+                    </ButtonNavLink>
+                    <ButtonNavLink
+                        className="mB20:notLast flex width100"
+                        to={routes.ACCOUNTS_UPDATE_BAKER_KEYS}
                         disabled={!accountInfo}
                     >
                         Update baker keys
                     </ButtonNavLink>
-                    {hasBakerCooldown || (
-                        <ButtonNavLink
-                            className="mB20:notLast flex width100"
-                            to={{
-                                pathname: createTransferWithAccountPathName(
-                                    TransactionKindId.Update_baker_stake
-                                ),
-                                state: { account },
-                            }}
-                            disabled={!accountInfo}
-                        >
-                            Update baker stake
-                        </ButtonNavLink>
-                    )}
                     <ButtonNavLink
                         className="mB20:notLast flex width100"
-                        to={{
-                            pathname: createTransferWithAccountPathName(
-                                TransactionKindId.Update_baker_restake_earnings
-                            ),
-                            state: { account },
-                        }}
+                        to={routes.ACCOUNTS_UPDATE_BAKER_STAKE}
+                        disabled={!accountInfo}
+                    >
+                        Update baker stake
+                    </ButtonNavLink>
+                    <ButtonNavLink
+                        className="mB20:notLast flex width100"
+                        to={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}
                         disabled={!accountInfo}
                     >
                         Update baker restake earnings
