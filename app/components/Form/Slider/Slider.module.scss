@@ -69,7 +69,5 @@
 }
 
 .input {
-    .invalid & {
-        color: $color-error;
-    }
+    font-size: $font-size-body2;
 }

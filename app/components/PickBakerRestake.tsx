@@ -24,7 +24,7 @@ export default function PickBakerRestake({ fieldName, initial = true }: Props) {
                     value: true,
                 },
                 {
-                    label: 'No, don’t restake',
+                    label: "No, don't restake",
                     value: false,
                 },
             ]}

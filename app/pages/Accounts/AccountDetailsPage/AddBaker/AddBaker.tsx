@@ -9,6 +9,7 @@ import AddBakerStakeSettings, {
     StakeSettings,
 } from '~/components/BakerTransactions/AddBakerStakeSettings';
 import Form from '~/components/Form';
+import Input from '~/components/Form/Input';
 import Radios from '~/components/Form/Radios';
 import withExchangeRate, {
     ExchangeRate,
@@ -33,13 +34,15 @@ import AccountTransactionFlow, {
 
 import styles from './AddBaker.module.scss';
 
-type PoolOpenSettings = boolean;
+type PoolOpen = boolean;
 
 interface CommissionSettings {
     transactionFee: number;
     bakingReward: number;
     finalizationReward: number;
 }
+
+type MetadataUrl = string;
 
 type Dependencies = ChainData & ExchangeRate & AccountAndNonce;
 
@@ -74,7 +77,7 @@ function StakePage({ onNext, initial }: StakePageProps) {
     );
 }
 
-type PoolOpenPageProps = FlowPageProps<PoolOpenSettings>;
+type PoolOpenPageProps = FlowPageProps<PoolOpen>;
 
 function PoolOpenPage({ initial = true, onNext }: PoolOpenPageProps) {
     const [value, setValue] = useState(initial);
@@ -166,10 +169,34 @@ function CommissionsPage({ initial, onNext }: CommissionsPageProps) {
     );
 }
 
+type MetadataUrlPageProps = FlowPageProps<MetadataUrl>;
+
+const MetadataUrlPage = ({ onNext, initial = '' }: MetadataUrlPageProps) => {
+    const [value, setValue] = useState<MetadataUrl>(initial);
+    return (
+        <>
+            <p className="mB30">
+                You can choose to add a URL with metadata about your baker.
+                Leave it blank if you don&apos;t have any.
+            </p>
+            <Input
+                className="body2"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                placeholder="Enter metadata URL"
+            />
+            <Button className={styles.mainButton} onClick={() => onNext(value)}>
+                Continue
+            </Button>
+        </>
+    );
+};
+
 interface AddBakerState {
     stake: StakeSettings;
-    poolOpen: PoolOpenSettings;
+    poolOpen: PoolOpen;
     commissions: CommissionSettings;
+    metadataUrl: MetadataUrl;
 }
 
 type Props = Dependencies;
@@ -197,6 +224,7 @@ export default withData(function AddBaker(props: Props) {
                     stake: { component: StakePage },
                     poolOpen: { component: PoolOpenPage },
                     commissions: { component: CommissionsPage },
+                    metadataUrl: { component: MetadataUrlPage },
                 }}
             </AccountTransactionFlow>
         </dependencies.Provider>
