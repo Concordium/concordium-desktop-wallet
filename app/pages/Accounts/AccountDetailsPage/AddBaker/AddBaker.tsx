@@ -114,7 +114,7 @@ const commonSliderProps: Pick<
 > = {
     step: 0.001,
     unit: '%',
-    className: 'mB20',
+    className: 'mB30',
 };
 
 function CommissionsPage({ initial, onNext }: CommissionsPageProps) {
@@ -136,7 +136,7 @@ function CommissionsPage({ initial, onNext }: CommissionsPageProps) {
             onSubmit={onNext}
             defaultValues={initial ?? defaultValues}
         >
-            <p>
+            <p className="mB30">
                 When you open your baker as a pool, you have to set commission
                 rates. You can do so below:
             </p>

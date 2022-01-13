@@ -30,9 +30,13 @@ export default function Slider({
     onBlur = noOp,
     value,
     className,
-    isInvalid,
+    isInvalid: outerInvalid,
 }: Props) {
     const [innerValue, setInnerValue] = useState<number | undefined>(value);
+    const exceedsBounds =
+        innerValue !== undefined &&
+        (Number.isNaN(innerValue) || innerValue > max || innerValue < min);
+    const isInvalid = outerInvalid || exceedsBounds;
 
     const allowFractions = step < 1 && step > 0;
     const ensureDigits = allowFractions
@@ -43,6 +47,16 @@ export default function Slider({
     useEffect(() => {
         onChange(innerValue);
     }, [innerValue, onChange]);
+
+    function handleChange(v: string | undefined) {
+        if (!isDefined(v)) {
+            setInnerValue(undefined);
+            return;
+        }
+
+        const parser = Number.isInteger(step) ? parseInt : parseFloat;
+        setInnerValue(parser(v));
+    }
 
     return (
         <label
@@ -79,13 +93,13 @@ export default function Slider({
                     <InlineNumber
                         className={styles.input}
                         value={innerValue?.toString()}
-                        onChange={(v) =>
-                            setInnerValue(isDefined(v) ? parseFloat(v) : v)
-                        }
+                        onChange={handleChange}
                         onBlur={onBlur}
                         fallbackValue={min}
                         allowFractions={ensureDigits ?? false}
                         ensureDigits={ensureDigits}
+                        isInvalid={isInvalid}
+                        fallbackOnInvalid
                     />
                     {unit}
                 </div>
