@@ -3,9 +3,10 @@ import RcSlider from 'rc-slider';
 import clsx from 'clsx';
 import { CommonInputProps } from '../common';
 import InlineNumber from '../InlineNumber';
-import { isDefined, noOp } from '~/utils/basicHelpers';
+import { isDefined, noOp, valueNoOp } from '~/utils/basicHelpers';
 import Label from '~/components/Label';
 import { ClassName } from '~/utils/types';
+import { toFixed } from '~/utils/numberStringHelpers';
 
 import styles from './Slider.module.scss';
 
@@ -29,24 +30,38 @@ export default function Slider({
     onBlur = noOp,
     value,
     className,
+    isInvalid,
 }: Props) {
     const [innerValue, setInnerValue] = useState<number | undefined>(value);
+
+    const allowFractions = step < 1 && step > 0;
+    const ensureDigits = allowFractions
+        ? step.toString().split('.')[1].length
+        : undefined;
+    const formatNumber = ensureDigits ? toFixed(ensureDigits) : valueNoOp;
 
     useEffect(() => {
         onChange(innerValue);
     }, [innerValue, onChange]);
 
     return (
-        <label className={clsx(styles.root, className)}>
+        <label
+            className={clsx(
+                styles.root,
+                isInvalid && styles.invalid,
+                className
+            )}
+        >
             <Label className="mB5">{label}</Label>
             <div className={styles.grid}>
                 <span>
                     Min:
                     <br />
-                    {min}
+                    {formatNumber(min.toString())}
                     {unit}
                 </span>
                 <RcSlider
+                    className={styles.slider}
                     value={innerValue}
                     onChange={setInnerValue}
                     min={min}
@@ -57,18 +72,20 @@ export default function Slider({
                 <span>
                     Max:
                     <br />
-                    {max}
+                    {formatNumber(max.toString())}
                     {unit}
                 </span>
-                <div className={styles.input}>
+                <div className={styles.inputWrapper}>
                     <InlineNumber
+                        className={styles.input}
                         value={innerValue?.toString()}
                         onChange={(v) =>
                             setInnerValue(isDefined(v) ? parseFloat(v) : v)
                         }
                         onBlur={onBlur}
                         fallbackValue={min}
-                        allowFractions
+                        allowFractions={ensureDigits ?? false}
+                        ensureDigits={ensureDigits}
                     />
                     {unit}
                 </div>

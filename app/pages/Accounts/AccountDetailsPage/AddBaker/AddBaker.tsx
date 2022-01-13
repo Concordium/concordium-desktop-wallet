@@ -112,7 +112,7 @@ const commonSliderProps: Pick<
     PropsOf<typeof Form.Slider>,
     'step' | 'unit' | 'className'
 > = {
-    step: 0.01,
+    step: 0.001,
     unit: '%',
     className: 'mB20',
 };
