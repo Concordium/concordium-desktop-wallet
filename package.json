@@ -24,6 +24,7 @@
     "make-disclaimer": "yarn --prod true licenses generate-disclaimer > scripts/disclaimer.txt && node scripts/disclaimer.js && rimraf ./scripts/disclaimer.txt",
     "name": "echo $npm_package_productName-$TARGET_NET",
     "package": "yarn build && node ./scripts/build.js",
+    "package-win-no-sign": "set SIGNING=skip&& yarn build && node ./scripts/build.js",
     "package-mac-no-notarize": "export NOTARIZE=skip && yarn build && node ./scripts/build.js",
     "postinstall": "node internals/scripts/CheckNativeDep.js && electron-builder install-app-deps && yarn build-dll && opencollective-postinstall  && sh ./internals/scripts/build_protos.sh",
     "postlint-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{ts,tsx,js,jsx,json,html,yml}'",
