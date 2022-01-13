@@ -58,6 +58,10 @@ export default function Slider({
         setInnerValue(parser(v));
     }
 
+    if (min > max) {
+        throw new Error('Prop "min" must be lower that prop "max"');
+    }
+
     return (
         <label
             className={clsx(
