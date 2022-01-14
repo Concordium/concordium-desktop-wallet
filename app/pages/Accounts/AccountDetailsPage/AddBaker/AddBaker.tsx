@@ -18,9 +18,15 @@ import withNonce, { AccountAndNonce } from '~/components/Transfers/withNonce';
 import Button from '~/cross-app-components/Button';
 import { chosenAccountSelector } from '~/features/AccountSlice';
 import { RootState } from '~/store/store';
+import { isDefined, multiplyFraction } from '~/utils/basicHelpers';
 import { useTransactionCostEstimate } from '~/utils/dataHooks';
+import { toMicroUnits } from '~/utils/gtu';
+import { BakerKeys } from '~/utils/rustInterface';
+import { createAddBakerTransaction } from '~/utils/transactionHelpers';
 import {
     Account,
+    AddBaker as AddBakerTransaction,
+    AddBakerPayload,
     EqualRecord,
     NotOptional,
     PropsOf,
@@ -31,8 +37,9 @@ import AccountTransactionFlow, {
     FlowPageProps,
     AccountTransactionFlowLoading,
 } from '../../AccountTransactionFlow';
+import GenerateBakerKeys from '../GenerateBakerKeys';
 
-import styles from './AddBaker.module.scss';
+import styles from '../AccountDetailsPage.module.scss';
 
 type PoolOpen = boolean;
 
@@ -72,7 +79,7 @@ function StakePage({ onNext, initial }: StakePageProps) {
             account={account}
             estimatedFee={estimatedFee}
             minimumStake={minimumStake}
-            buttonClassName={styles.mainButton}
+            buttonClassName={styles.bakerFlowContinue}
         />
     );
 }
@@ -96,7 +103,10 @@ function PoolOpenPage({ initial = true, onNext }: PoolOpenPageProps) {
                 value={value}
                 onChange={setValue}
             />
-            <Button className={styles.mainButton} onClick={() => onNext(value)}>
+            <Button
+                className={styles.bakerFlowContinue}
+                onClick={() => onNext(value)}
+            >
                 Continue
             </Button>
         </>
@@ -164,7 +174,9 @@ function CommissionsPage({ initial, onNext }: CommissionsPageProps) {
                 max={boundaries.finalizationReward[1]}
                 {...commonSliderProps}
             />
-            <Form.Submit className={styles.mainButton}>Continue</Form.Submit>
+            <Form.Submit className={styles.bakerFlowContinue}>
+                Continue
+            </Form.Submit>
         </Form>
     );
 }
@@ -185,10 +197,28 @@ const MetadataUrlPage = ({ onNext, initial = '' }: MetadataUrlPageProps) => {
                 onChange={(e) => setValue(e.target.value)}
                 placeholder="Enter metadata URL"
             />
-            <Button className={styles.mainButton} onClick={() => onNext(value)}>
+            <Button
+                className={styles.bakerFlowContinue}
+                onClick={() => onNext(value)}
+            >
                 Continue
             </Button>
         </>
+    );
+};
+
+type GenerateKeysPageProps = FlowPageProps<BakerKeys>;
+
+const GenerateKeysPage = ({ onNext, initial }: GenerateKeysPageProps) => {
+    const { account } = useContext(dependencies);
+
+    return (
+        <GenerateBakerKeys
+            onContinue={onNext}
+            account={account}
+            initialKeys={initial}
+            keyVariant="ADD"
+        />
     );
 };
 
@@ -197,6 +227,7 @@ interface AddBakerState {
     poolOpen: PoolOpen;
     commissions: CommissionSettings;
     metadataUrl: MetadataUrl;
+    keys: BakerKeys;
 }
 
 type Props = Dependencies;
@@ -206,25 +237,59 @@ const withData = (component: ComponentType<Props>) =>
         account: chosenAccountSelector(s) as Account,
     }))(withNonce(withExchangeRate(withChainData(component))));
 
-export default withData(function AddBaker(props: Props) {
-    const loading = Object.values(props).some((v) => !v);
+const hasNecessaryProps = (props: Props): props is NotOptional<Props> => {
+    return [props.exchangeRate, props.nonce, props.blockSummary].every(
+        isDefined
+    );
+};
 
-    if (loading) {
+export default withData(function AddBaker(props: Props) {
+    if (!hasNecessaryProps(props)) {
         return <AccountTransactionFlowLoading title={title} />;
+    }
+
+    const { nonce, account, exchangeRate } = props;
+
+    function convertToTransaction({
+        stake,
+        keys,
+    }: AddBakerState): AddBakerTransaction {
+        const payload: AddBakerPayload = {
+            electionVerifyKey: keys.electionPublic,
+            signatureVerifyKey: keys.signaturePublic,
+            aggregationVerifyKey: keys.aggregationPublic,
+            proofElection: keys.proofElection,
+            proofSignature: keys.proofSignature,
+            proofAggregation: keys.proofAggregation,
+            bakingStake: toMicroUnits(stake.stake),
+            restakeEarnings: stake.restake,
+        };
+
+        const transaction = createAddBakerTransaction(
+            account.address,
+            payload,
+            nonce
+        );
+        transaction.estimatedFee = multiplyFraction(
+            exchangeRate,
+            transaction.energyAmount
+        );
+
+        return transaction;
     }
 
     return (
         <dependencies.Provider value={props as NotOptional<Dependencies>}>
-            <AccountTransactionFlow<AddBakerState>
+            <AccountTransactionFlow<AddBakerState, AddBakerTransaction>
                 title={title}
-                // eslint-disable-next-line no-console
-                onDone={(values) => console.log(values)}
+                convert={convertToTransaction}
             >
                 {{
                     stake: { component: StakePage },
                     poolOpen: { component: PoolOpenPage },
                     commissions: { component: CommissionsPage },
                     metadataUrl: { component: MetadataUrlPage },
+                    keys: { component: GenerateKeysPage },
                 }}
             </AccountTransactionFlow>
         </dependencies.Provider>

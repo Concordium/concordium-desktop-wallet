@@ -124,8 +124,8 @@ const AddBaker = ensureExchangeRateAndNonce(
                     {bakerData ? (
                         <GenerateBakerKeys
                             onContinue={next}
-                            header={header}
                             keyVariant="ADD"
+                            account={account}
                         />
                     ) : (
                         <Redirect to={routes.ACCOUNTS_ADD_BAKER} />
