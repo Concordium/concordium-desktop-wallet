@@ -12,7 +12,7 @@ const message = 'You are about to abort creating an identity. Are you sure?';
 
 /**
  * This Component is used to block navigation away from the identity issuance flow.
- * Uses Prompt to block navigation, and eletron's own messageBox to prompt the user.
+ * Uses Prompt to block navigation, and Electron's own messageBox to prompt the user.
  */
 export default function NavigationBlock({ shouldPrompt }: Props) {
     const [blocking, setBlocking] = useState(true);
@@ -25,7 +25,8 @@ export default function NavigationBlock({ shouldPrompt }: Props) {
                 message,
                 type: 'warning',
                 noLink: true,
-                buttons: ['abort', 'cancel'],
+                title: 'Concordium',
+                buttons: ['Abort', 'Cancel'],
             });
             if (response === 0) {
                 // 0 = abort, because the response is the index of the pressed button.
