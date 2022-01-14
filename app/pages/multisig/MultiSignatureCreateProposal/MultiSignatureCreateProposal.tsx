@@ -55,9 +55,7 @@ function MultiSignatureCreateProposal({
         Partial<FieldValues & MultiSignatureCreateProposalForm>
     >({});
 
-    const [proposal, setProposal] = useState<
-        Partial<MultiSignatureTransaction>
-    >();
+    const [proposal, setProposal] = useState<MultiSignatureTransaction>();
     const dispatch = useDispatch();
 
     // TODO Add support for account transactions.
@@ -82,7 +80,7 @@ function MultiSignatureCreateProposal({
     }
 
     function handleProposal(
-        newProposal: Partial<MultiSignatureTransaction>,
+        newProposal: MultiSignatureTransaction | undefined,
         newDefaults: FieldValues
     ) {
         setDefaults(newDefaults);
@@ -121,7 +119,7 @@ function MultiSignatureCreateProposal({
                     path={routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION}
                     render={() => (
                         <SignTransactionProposal
-                            proposal={proposal as MultiSignatureTransaction}
+                            proposal={proposal}
                             blockSummary={blockSummary}
                         />
                     )}

@@ -28,6 +28,7 @@ import {
     AddBaker as AddBakerTransaction,
     AddBakerPayload,
     EqualRecord,
+    MakeRequired,
     NotOptional,
     PropsOf,
     TransactionKindId,
@@ -40,6 +41,7 @@ import AccountTransactionFlow, {
 import GenerateBakerKeys from '../GenerateBakerKeys';
 
 import styles from '../AccountDetailsPage.module.scss';
+import { ensureProps } from '~/utils/componentHelpers';
 
 type PoolOpen = boolean;
 
@@ -51,11 +53,9 @@ interface CommissionSettings {
 
 type MetadataUrl = string;
 
-type Dependencies = ChainData & ExchangeRate & AccountAndNonce;
+type Dependencies = NotOptional<ChainData & ExchangeRate & AccountAndNonce>;
 
-const dependencies = createContext<NotOptional<Dependencies>>(
-    {} as NotOptional<Dependencies>
-);
+const dependencies = createContext<Dependencies>({} as Dependencies);
 
 const title = 'Add baker';
 
@@ -231,23 +231,32 @@ interface AddBakerState {
 }
 
 type Props = Dependencies;
+type UnsafeProps = MakeRequired<Partial<Props>, 'account'>;
 
-const withData = (component: ComponentType<Props>) =>
-    connect((s: RootState) => ({
-        account: chosenAccountSelector(s) as Account,
-    }))(withNonce(withExchangeRate(withChainData(component))));
-
-const hasNecessaryProps = (props: Props): props is NotOptional<Props> => {
+const hasNecessaryProps = (props: UnsafeProps): props is Props => {
     return [props.exchangeRate, props.nonce, props.blockSummary].every(
         isDefined
     );
 };
 
-export default withData(function AddBaker(props: Props) {
-    if (!hasNecessaryProps(props)) {
-        return <AccountTransactionFlowLoading title={title} />;
-    }
+const withData = (component: ComponentType<Props>) =>
+    connect((s: RootState) => ({
+        account: chosenAccountSelector(s) as Account,
+    }))(
+        withNonce(
+            withExchangeRate(
+                withChainData(
+                    ensureProps(
+                        component,
+                        hasNecessaryProps,
+                        <AccountTransactionFlowLoading title={title} />
+                    )
+                )
+            )
+        )
+    );
 
+export default withData(function AddBaker(props: Props) {
     const { nonce, account, exchangeRate } = props;
 
     function convertToTransaction({
@@ -279,7 +288,7 @@ export default withData(function AddBaker(props: Props) {
     }
 
     return (
-        <dependencies.Provider value={props as NotOptional<Dependencies>}>
+        <dependencies.Provider value={props}>
             <AccountTransactionFlow<AddBakerState, AddBakerTransaction>
                 title={title}
                 convert={convertToTransaction}

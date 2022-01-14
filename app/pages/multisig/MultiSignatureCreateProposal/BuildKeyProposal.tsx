@@ -20,7 +20,7 @@ interface Props extends Required<ChainData> {
     defaults: FieldValues;
     type: UpdateType;
     onFinish: (
-        proposal: Partial<MultiSignatureTransaction>,
+        proposal: MultiSignatureTransaction | undefined,
         defaults: FieldValues
     ) => void;
 }
@@ -64,7 +64,7 @@ export default function BuildProposal({
 
         const newDefaults = { effectiveTime, expiryTime, keyUpdate };
         if (newProposal) {
-            onFinish(newProposal, newDefaults);
+            onFinish(newProposal as MultiSignatureTransaction, newDefaults);
         }
     }
 

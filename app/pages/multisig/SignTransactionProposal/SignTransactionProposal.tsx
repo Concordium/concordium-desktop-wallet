@@ -6,6 +6,7 @@ import routes from '~/constants/routes.json';
 import { BlockSummary } from '~/node/NodeApiTypes';
 import {
     AccountTransaction,
+    MakeOptional,
     MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
@@ -157,7 +158,7 @@ function SignTransactionProposalView({ proposal, blockSummary }: Props) {
 
 const SignTransactionProposal = ensureProps(
     SignTransactionProposalView,
-    ({ proposal }) => !!proposal,
+    (p: MakeOptional<Props, 'proposal'>): p is Props => !!p.proposal,
     <Redirect to={routes.MULTISIGTRANSACTIONS} />
 );
 
