@@ -14,7 +14,7 @@ const message = 'You are about to abort creating an identity. Are you sure?';
  * This Component is used to block navigation away from the identity issuance flow.
  * Uses Prompt to block navigation, and eletron's own messageBox to prompt the user.
  */
-export default function BlockingPage({ shouldPrompt }: Props) {
+export default function NavigationBlock({ shouldPrompt }: Props) {
     const [blocking, setBlocking] = useState(true);
     const dispatch = useDispatch();
 
@@ -34,16 +34,20 @@ export default function BlockingPage({ shouldPrompt }: Props) {
                 setBlocking(true);
             }
         },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         [message]
     );
 
-    const handleNavigation = (nLocation: Location) => {
-        if (!shouldPrompt(nLocation)) {
-            return true;
-        }
-        showPrompt(nLocation);
-        return false;
-    };
+    const handleNavigation = useCallback(
+        (nLocation: Location) => {
+            if (!shouldPrompt(nLocation)) {
+                return true;
+            }
+            showPrompt(nLocation);
+            return false;
+        },
+        [showPrompt, shouldPrompt]
+    );
 
     return <Prompt when={blocking} message={handleNavigation} />;
 }

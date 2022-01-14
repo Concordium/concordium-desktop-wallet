@@ -73,7 +73,7 @@ export default function IdentityIssuancePage(): JSX.Element {
         throw new Error('Unexpected missing identity provider!');
     }
 
-    function checkNavigation(location: Location) {
+    function shouldPromptOnNavigation(location: Location) {
         // Allow direct navigation from any route but the external issuance page.
         if (
             (pathname !== routes.IDENTITYISSUANCE_EXTERNAL || errorModalOpen) &&
@@ -82,9 +82,8 @@ export default function IdentityIssuancePage(): JSX.Element {
             return false;
         }
 
-        const isSubRoute = location.pathname.startsWith(path);
-
-        return !isSubRoute;
+        // Allow direct navigation between sub routes.
+        return !location.pathname.startsWith(path);
     }
 
     return (
@@ -101,7 +100,7 @@ export default function IdentityIssuancePage(): JSX.Element {
                 show={errorModalOpen}
                 onClick={() => dispatch(push(routes.IDENTITIES))}
             />
-            <NavigationBlock shouldPrompt={checkNavigation} />
+            <NavigationBlock shouldPrompt={shouldPromptOnNavigation} />
             <PageLayout.Container
                 closeRoute={routes.IDENTITIES}
                 padding="both"
