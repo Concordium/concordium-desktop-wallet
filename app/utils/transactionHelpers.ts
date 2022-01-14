@@ -40,6 +40,10 @@ import {
     SimpleTransferWithMemo,
     TransactionStatus,
     SchedulePoint,
+    ConfigureBakerPayload,
+    ConfigureBaker,
+    ConfigureDelegationPayload,
+    ConfigureDelegation,
 } from './types';
 import {
     getTransactionEnergyCost,
@@ -459,6 +463,40 @@ export function createUpdateBakerRestakeEarningsTransaction(
         fromAddress,
         expiry,
         transactionKind: TransactionKindId.Update_baker_restake_earnings,
+        nonce,
+        payload,
+        signatureAmount,
+    });
+}
+
+export function createConfigureBakerTransaction(
+    fromAddress: string,
+    payload: ConfigureBakerPayload,
+    nonce: bigint,
+    signatureAmount = 1,
+    expiry = getDefaultExpiry()
+): ConfigureBaker {
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Configure_baker,
+        nonce,
+        payload,
+        signatureAmount,
+    });
+}
+
+export function createConfigureDelegationTransaction(
+    fromAddress: string,
+    payload: ConfigureDelegationPayload,
+    nonce: bigint,
+    signatureAmount = 1,
+    expiry = getDefaultExpiry()
+): ConfigureDelegation {
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Configure_delegation,
         nonce,
         payload,
         signatureAmount,

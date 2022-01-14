@@ -15,9 +15,15 @@ type Proofs = Hex;
 type Word64 = bigint;
 type Word32 = number;
 type Word16 = number;
+type BakerId = Word64;
 export type Word8 = number;
 type JSONString = string; // indicates that it is some object that has been stringified.
 export type Amount = bigint;
+export enum OpenStatus {
+    OpenForAll = 0,
+    ClosedForNew = 1,
+    ClosedForAll = 2,
+}
 
 export interface Fraction {
     numerator: Word64;
@@ -208,6 +214,8 @@ export enum TransactionKindId {
     Simple_transfer_with_memo = 22,
     Encrypted_transfer_with_memo = 23,
     Transfer_with_schedule_and_memo = 24,
+    Configure_baker = 25,
+    Configure_delegation = 26,
 }
 
 export type BooleanFilters = { [P in TransactionKindString]?: boolean };
@@ -291,35 +299,68 @@ export interface UpdateAccountCredentialsPayload {
     threshold: number;
 }
 
+// TODO: remove
 export type BakerVerifyKeys = {
     electionVerifyKey: Hex;
     signatureVerifyKey: Hex;
     aggregationVerifyKey: Hex;
 };
 
+// TODO: remove
 export type BakerKeyProofs = {
     proofElection: Hex;
     proofSignature: Hex;
     proofAggregation: Hex;
 };
 
+// TODO: remove
 export type AddBakerPayload = BakerVerifyKeys &
     BakerKeyProofs & {
         bakingStake: Amount;
         restakeEarnings: boolean;
     };
 
+// TODO: remove
 export type UpdateBakerKeysPayload = BakerVerifyKeys & BakerKeyProofs;
 
+// TODO: remove
 export type RemoveBakerPayload = {};
 
+// TODO: remove
 export type UpdateBakerStakePayload = {
     stake: Amount;
 };
 
+// TODO: remove
 export type UpdateBakerRestakeEarningsPayload = {
     restakeEarnings: boolean;
 };
+
+export type BakerVerifyKey = Hex;
+export type BakerKeyProof = Hex;
+
+export type BakerKeyWithProof = [BakerVerifyKey, BakerKeyProof];
+
+export interface ConfigureBakerPayload {
+    stake?: Amount;
+    restakeEarnings?: boolean;
+    openForDelegation?: OpenStatus;
+    signatureVerifyKey?: BakerKeyWithProof;
+    electionVerifyKey?: BakerKeyWithProof;
+    aggregationVerifyKey?: BakerKeyWithProof;
+    metadataUrl?: string;
+    transactionFeeCommission?: RewardFraction;
+    bakingRewardCommission?: RewardFraction;
+    finalizationRewardCommission?: RewardFraction;
+}
+
+type DelegationTarget = null | BakerId;
+
+export interface ConfigureDelegationPayload {
+    stake?: Amount;
+    restakeEarnings?: boolean;
+    delegationTarget?: DelegationTarget;
+}
 
 export type TransactionPayload =
     | UpdateAccountCredentialsPayload
@@ -332,7 +373,9 @@ export type TransactionPayload =
     | UpdateBakerKeysPayload
     | RemoveBakerPayload
     | UpdateBakerStakePayload
-    | UpdateBakerRestakeEarningsPayload;
+    | UpdateBakerRestakeEarningsPayload
+    | ConfigureBakerPayload
+    | ConfigureDelegationPayload;
 
 // Structure of an accountTransaction, which is expected
 // the blockchain's nodes
@@ -370,6 +413,8 @@ export type UpdateBakerKeys = AccountTransaction<UpdateBakerKeysPayload>;
 export type RemoveBaker = AccountTransaction<RemoveBakerPayload>;
 export type UpdateBakerStake = AccountTransaction<UpdateBakerStakePayload>;
 export type UpdateBakerRestakeEarnings = AccountTransaction<UpdateBakerRestakeEarningsPayload>;
+export type ConfigureBaker = AccountTransaction<ConfigureBakerPayload>;
+export type ConfigureDelegation = AccountTransaction<ConfigureDelegationPayload>;
 
 // Types of block items, and their identifier numbers
 export enum BlockItemKind {

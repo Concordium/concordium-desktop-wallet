@@ -22,14 +22,16 @@ import { isDefined, multiplyFraction } from '~/utils/basicHelpers';
 import { useTransactionCostEstimate } from '~/utils/dataHooks';
 import { toMicroUnits } from '~/utils/gtu';
 import { BakerKeys } from '~/utils/rustInterface';
-import { createAddBakerTransaction } from '~/utils/transactionHelpers';
+import { createConfigureBakerTransaction } from '~/utils/transactionHelpers';
 import {
     Account,
-    AddBaker as AddBakerTransaction,
-    AddBakerPayload,
+    ConfigureBaker as ConfigureBakerTransaction,
+    ConfigureBakerPayload,
     EqualRecord,
+    MakeOptional,
     MakeRequired,
     NotOptional,
+    OpenStatus,
     PropsOf,
     TransactionKindId,
 } from '~/utils/types';
@@ -39,17 +41,18 @@ import AccountTransactionFlow, {
     AccountTransactionFlowLoading,
 } from '../../AccountTransactionFlow';
 import GenerateBakerKeys from '../GenerateBakerKeys';
-
-import styles from '../AccountDetailsPage.module.scss';
 import { ensureProps } from '~/utils/componentHelpers';
 
-type OpenForDelegation = boolean;
+import styles from '../AccountDetailsPage.module.scss';
 
-interface CommissionSettings {
-    transactionFee: number;
-    bakingReward: number;
-    finalizationReward: number;
-}
+type Commissions = NotOptional<
+    Pick<
+        ConfigureBakerPayload,
+        | 'transactionFeeCommission'
+        | 'bakingRewardCommission'
+        | 'finalizationRewardCommission'
+    >
+>;
 
 type MetadataUrl = string;
 
@@ -86,9 +89,9 @@ function StakePage({
 }
 
 function OpenForDelegationPage({
-    initial = true,
+    initial = OpenStatus.OpenForAll,
     onNext,
-}: AccountTransactionFlowPageProps<OpenForDelegation>) {
+}: AccountTransactionFlowPageProps<OpenStatus>) {
     const [value, setValue] = useState(initial);
     return (
         <>
@@ -99,8 +102,8 @@ function OpenForDelegationPage({
             <Radios
                 className="mT50"
                 options={[
-                    { label: 'Open pool', value: true },
-                    { label: 'Keep closed', value: false },
+                    { label: 'Open pool', value: OpenStatus.OpenForAll },
+                    { label: 'Keep closed', value: OpenStatus.ClosedForAll },
                 ]}
                 value={value}
                 onChange={setValue}
@@ -115,10 +118,10 @@ function OpenForDelegationPage({
     );
 }
 
-const commissionsFieldNames: EqualRecord<CommissionSettings> = {
-    transactionFee: 'transactionFee',
-    bakingReward: 'bakingReward',
-    finalizationReward: 'finalizationReward',
+const commissionsFieldNames: EqualRecord<Commissions> = {
+    transactionFeeCommission: 'transactionFeeCommission',
+    bakingRewardCommission: 'bakingRewardCommission',
+    finalizationRewardCommission: 'finalizationRewardCommission',
 };
 
 const commonSliderProps: Pick<
@@ -133,22 +136,24 @@ const commonSliderProps: Pick<
 function CommissionsPage({
     initial,
     onNext,
-}: AccountTransactionFlowPageProps<CommissionSettings>) {
+}: AccountTransactionFlowPageProps<Commissions>) {
+    // TODO: get values from chain
     const boundaries: {
-        [P in keyof CommissionSettings]: [number, number];
+        [P in keyof Commissions]: [number, number];
     } = {
-        transactionFee: [5, 15],
-        bakingReward: [5, 15],
-        finalizationReward: [5, 15],
+        transactionFeeCommission: [5, 15],
+        bakingRewardCommission: [5, 15],
+        finalizationRewardCommission: [5, 15],
     };
-    const defaultValues: CommissionSettings = {
-        transactionFee: boundaries.transactionFee[1],
-        bakingReward: boundaries.bakingReward[1],
-        finalizationReward: boundaries.finalizationReward[1],
+    const defaultValues: Commissions = {
+        transactionFeeCommission: boundaries.transactionFeeCommission[1],
+        bakingRewardCommission: boundaries.bakingRewardCommission[1],
+        finalizationRewardCommission:
+            boundaries.finalizationRewardCommission[1],
     };
 
     return (
-        <Form<CommissionSettings>
+        <Form<Commissions>
             onSubmit={onNext}
             defaultValues={initial ?? defaultValues}
         >
@@ -158,23 +163,23 @@ function CommissionsPage({
             </p>
             <Form.Slider
                 label="Transaction fee commissions"
-                name={commissionsFieldNames.transactionFee}
-                min={boundaries.transactionFee[0]}
-                max={boundaries.transactionFee[1]}
+                name={commissionsFieldNames.transactionFeeCommission}
+                min={boundaries.transactionFeeCommission[0]}
+                max={boundaries.transactionFeeCommission[1]}
                 {...commonSliderProps}
             />
             <Form.Slider
                 label="Baking reward commissions"
-                name={commissionsFieldNames.bakingReward}
-                min={boundaries.bakingReward[0]}
-                max={boundaries.bakingReward[1]}
+                name={commissionsFieldNames.bakingRewardCommission}
+                min={boundaries.bakingRewardCommission[0]}
+                max={boundaries.bakingRewardCommission[1]}
                 {...commonSliderProps}
             />
             <Form.Slider
                 label="Finalization reward commissions"
-                name={commissionsFieldNames.finalizationReward}
-                min={boundaries.finalizationReward[0]}
-                max={boundaries.finalizationReward[1]}
+                name={commissionsFieldNames.finalizationRewardCommission}
+                min={boundaries.finalizationRewardCommission[0]}
+                max={boundaries.finalizationRewardCommission[1]}
                 {...commonSliderProps}
             />
             <Form.Submit className={styles.bakerFlowContinue}>
@@ -229,14 +234,18 @@ const GenerateKeysPage = ({
 
 interface AddBakerState {
     stake: StakeSettings;
-    poolOpen: OpenForDelegation;
-    commissions: CommissionSettings;
+    openForDelegation: OpenStatus;
+    commissions: Commissions;
     metadataUrl: MetadataUrl;
     keys: BakerKeys;
 }
 
 type Props = Dependencies;
 type UnsafeProps = MakeRequired<Partial<Props>, 'account'>;
+type AddBakerPayload = MakeOptional<
+    NotOptional<ConfigureBakerPayload>,
+    'metadataUrl'
+>;
 
 const hasNecessaryProps = (props: UnsafeProps): props is Props => {
     return [props.exchangeRate, props.nonce, props.blockSummary].every(
@@ -267,19 +276,25 @@ export default withData(function AddBaker(props: Props) {
     function convertToTransaction({
         stake,
         keys,
-    }: AddBakerState): AddBakerTransaction {
+        openForDelegation,
+        metadataUrl,
+        commissions,
+    }: AddBakerState): ConfigureBakerTransaction {
         const payload: AddBakerPayload = {
-            electionVerifyKey: keys.electionPublic,
-            signatureVerifyKey: keys.signaturePublic,
-            aggregationVerifyKey: keys.aggregationPublic,
-            proofElection: keys.proofElection,
-            proofSignature: keys.proofSignature,
-            proofAggregation: keys.proofAggregation,
-            bakingStake: toMicroUnits(stake.stake),
+            electionVerifyKey: [keys.electionPublic, keys.proofElection],
+            signatureVerifyKey: [keys.signaturePublic, keys.proofSignature],
+            aggregationVerifyKey: [
+                keys.aggregationPublic,
+                keys.proofAggregation,
+            ],
+            stake: toMicroUnits(stake.stake),
             restakeEarnings: stake.restake,
+            openForDelegation,
+            metadataUrl,
+            ...commissions,
         };
 
-        const transaction = createAddBakerTransaction(
+        const transaction = createConfigureBakerTransaction(
             account.address,
             payload,
             nonce
@@ -294,13 +309,13 @@ export default withData(function AddBaker(props: Props) {
 
     return (
         <dependencies.Provider value={props}>
-            <AccountTransactionFlow<AddBakerState, AddBakerTransaction>
+            <AccountTransactionFlow<AddBakerState, ConfigureBakerTransaction>
                 title={title}
                 convert={convertToTransaction}
             >
                 {{
                     stake: { component: StakePage },
-                    poolOpen: { component: OpenForDelegationPage },
+                    openForDelegation: { component: OpenForDelegationPage },
                     commissions: { component: CommissionsPage },
                     metadataUrl: { component: MetadataUrlPage },
                     keys: { component: GenerateKeysPage },
