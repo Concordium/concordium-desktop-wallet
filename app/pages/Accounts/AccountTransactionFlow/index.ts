@@ -1,5 +1,5 @@
 export {
     default,
-    FlowPageProps,
+    AccountTransactionFlowPageProps,
     AccountTransactionFlowLoading,
 } from './AccountTransactionFlow';

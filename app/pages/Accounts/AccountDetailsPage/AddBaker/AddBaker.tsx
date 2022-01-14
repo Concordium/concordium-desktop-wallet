@@ -35,7 +35,7 @@ import {
 } from '~/utils/types';
 import withChainData, { ChainData } from '~/utils/withChainData';
 import AccountTransactionFlow, {
-    FlowPageProps,
+    AccountTransactionFlowPageProps,
     AccountTransactionFlowLoading,
 } from '../../AccountTransactionFlow';
 import GenerateBakerKeys from '../GenerateBakerKeys';
@@ -43,7 +43,7 @@ import GenerateBakerKeys from '../GenerateBakerKeys';
 import styles from '../AccountDetailsPage.module.scss';
 import { ensureProps } from '~/utils/componentHelpers';
 
-type PoolOpen = boolean;
+type OpenForDelegation = boolean;
 
 interface CommissionSettings {
     transactionFee: number;
@@ -59,9 +59,10 @@ const dependencies = createContext<Dependencies>({} as Dependencies);
 
 const title = 'Add baker';
 
-type StakePageProps = FlowPageProps<StakeSettings>;
-
-function StakePage({ onNext, initial }: StakePageProps) {
+function StakePage({
+    onNext,
+    initial,
+}: AccountTransactionFlowPageProps<StakeSettings>) {
     const { blockSummary, exchangeRate, account } = useContext(dependencies);
     const minimumStake = BigInt(
         blockSummary.updates.chainParameters.minimumThresholdForBaking
@@ -84,9 +85,10 @@ function StakePage({ onNext, initial }: StakePageProps) {
     );
 }
 
-type PoolOpenPageProps = FlowPageProps<PoolOpen>;
-
-function PoolOpenPage({ initial = true, onNext }: PoolOpenPageProps) {
+function OpenForDelegationPage({
+    initial = true,
+    onNext,
+}: AccountTransactionFlowPageProps<OpenForDelegation>) {
     const [value, setValue] = useState(initial);
     return (
         <>
@@ -113,8 +115,6 @@ function PoolOpenPage({ initial = true, onNext }: PoolOpenPageProps) {
     );
 }
 
-type CommissionsPageProps = FlowPageProps<CommissionSettings>;
-
 const commissionsFieldNames: EqualRecord<CommissionSettings> = {
     transactionFee: 'transactionFee',
     bakingReward: 'bakingReward',
@@ -130,7 +130,10 @@ const commonSliderProps: Pick<
     className: 'mB30',
 };
 
-function CommissionsPage({ initial, onNext }: CommissionsPageProps) {
+function CommissionsPage({
+    initial,
+    onNext,
+}: AccountTransactionFlowPageProps<CommissionSettings>) {
     const boundaries: {
         [P in keyof CommissionSettings]: [number, number];
     } = {
@@ -181,9 +184,10 @@ function CommissionsPage({ initial, onNext }: CommissionsPageProps) {
     );
 }
 
-type MetadataUrlPageProps = FlowPageProps<MetadataUrl>;
-
-const MetadataUrlPage = ({ onNext, initial = '' }: MetadataUrlPageProps) => {
+const MetadataUrlPage = ({
+    onNext,
+    initial = '',
+}: AccountTransactionFlowPageProps<MetadataUrl>) => {
     const [value, setValue] = useState<MetadataUrl>(initial);
     return (
         <>
@@ -207,9 +211,10 @@ const MetadataUrlPage = ({ onNext, initial = '' }: MetadataUrlPageProps) => {
     );
 };
 
-type GenerateKeysPageProps = FlowPageProps<BakerKeys>;
-
-const GenerateKeysPage = ({ onNext, initial }: GenerateKeysPageProps) => {
+const GenerateKeysPage = ({
+    onNext,
+    initial,
+}: AccountTransactionFlowPageProps<BakerKeys>) => {
     const { account } = useContext(dependencies);
 
     return (
@@ -224,7 +229,7 @@ const GenerateKeysPage = ({ onNext, initial }: GenerateKeysPageProps) => {
 
 interface AddBakerState {
     stake: StakeSettings;
-    poolOpen: PoolOpen;
+    poolOpen: OpenForDelegation;
     commissions: CommissionSettings;
     metadataUrl: MetadataUrl;
     keys: BakerKeys;
@@ -295,7 +300,7 @@ export default withData(function AddBaker(props: Props) {
             >
                 {{
                     stake: { component: StakePage },
-                    poolOpen: { component: PoolOpenPage },
+                    poolOpen: { component: OpenForDelegationPage },
                     commissions: { component: CommissionsPage },
                     metadataUrl: { component: MetadataUrlPage },
                     keys: { component: GenerateKeysPage },

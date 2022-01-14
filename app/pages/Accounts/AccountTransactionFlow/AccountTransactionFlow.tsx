@@ -9,7 +9,7 @@ import { AccountTransaction } from '~/utils/types';
 
 import styles from './AccountTransactionFlow.module.scss';
 
-export interface FlowPageProps<S> {
+export interface AccountTransactionFlowPageProps<S> {
     onNext(values: S): void;
     initial: S | undefined;
 }
@@ -17,7 +17,7 @@ export interface FlowPageProps<S> {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface FlowChild<S, P extends keyof S = any> {
     title?: string;
-    component: ComponentType<FlowPageProps<S[P]>>;
+    component: ComponentType<AccountTransactionFlowPageProps<S[P]>>;
 }
 
 type FlowChildren<S extends Record<string, unknown>> = {
