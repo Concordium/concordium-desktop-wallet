@@ -15,14 +15,8 @@ CheckTargetNet();
 const targetNet = process.env.TARGET_NET;
 
 let userData = 'Concordium Wallet';
-if (targetNet) {
+if (targetNet && targetNet !== 'mainnet') {
     userData += ` ${targetNet}`;
-}
-
-if (targetNet && !['stagenet', 'testnet'].includes(targetNet)) {
-    throw new Error(
-        `Unknown TARGET_NET. Only [stagenet, testnet] are allowed values. Given: ${targetNet}`
-    );
 }
 
 const extensions = ['.js', '.jsx', '.json', '.ts', '.tsx'];
