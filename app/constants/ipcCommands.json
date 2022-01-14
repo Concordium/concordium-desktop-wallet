@@ -2,6 +2,7 @@
     "print": "PRINT",
     "openFileDialog": "OPEN_FILE_DIALOG",
     "saveFileDialog": "SAVE_FILE_DIALOG",
+    "messageBox": "MESSAGE_BOX",
     "openUrl": "OPEN_URL",
     "httpsGet": "HTTPS_GET",
     "createView": "CREATE_VIEW",

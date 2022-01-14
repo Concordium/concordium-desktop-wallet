@@ -1,13 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import {
-    Switch,
-    Route,
-    useLocation,
-    Prompt,
-    useRouteMatch,
-} from 'react-router-dom';
+import { Switch, Route, useLocation, useRouteMatch } from 'react-router-dom';
 import { Location } from 'history';
 import routes from '~/constants/routes.json';
 import { IdentityProvider } from '~/utils/types';
@@ -17,6 +11,7 @@ import PickProvider from './PickProvider';
 import PickName from './PickName/PickName';
 import ExternalIssuance from './ExternalIssuance';
 import FinalPage from './FinalPage';
+import NavigationBlock from './NavigationBlock';
 
 import styles from './IdentityIssuance.module.scss';
 
@@ -84,14 +79,12 @@ export default function IdentityIssuancePage(): JSX.Element {
             (pathname !== routes.IDENTITYISSUANCE_EXTERNAL || errorModalOpen) &&
             !isSigning
         ) {
-            return true;
+            return false;
         }
 
         const isSubRoute = location.pathname.startsWith(path);
 
-        return isSubRoute
-            ? true
-            : 'You are about to abort creating an identity. Are you sure?';
+        return !isSubRoute;
     }
 
     return (
@@ -108,7 +101,7 @@ export default function IdentityIssuancePage(): JSX.Element {
                 show={errorModalOpen}
                 onClick={() => dispatch(push(routes.IDENTITIES))}
             />
-            <Prompt message={checkNavigation} />
+            <NavigationBlock shouldPrompt={checkNavigation} />
             <PageLayout.Container
                 closeRoute={routes.IDENTITIES}
                 padding="both"
