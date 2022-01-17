@@ -3,7 +3,8 @@ import { createSlice, Dispatch, PayloadAction } from '@reduxjs/toolkit';
 export enum NotificationLevel {
     Info = 'info',
     Error = 'error',
-    Update = 'update',
+    ManualUpdate = 'manual-update',
+    AutoUpdate = 'auto-update',
 }
 
 let nextId = 0;
@@ -13,12 +14,15 @@ interface NotificationBase {
 }
 
 interface UpdateNotification extends NotificationBase {
-    level: NotificationLevel.Update;
+    level: NotificationLevel.ManualUpdate | NotificationLevel.AutoUpdate;
     version: string;
 }
 
 export interface Notification extends NotificationBase {
-    level: Exclude<NotificationLevel, NotificationLevel.Update>;
+    level: Exclude<
+        NotificationLevel,
+        NotificationLevel.ManualUpdate | NotificationLevel.AutoUpdate
+    >;
     message: string;
 }
 
@@ -32,17 +36,11 @@ const { actions, reducer } = createSlice({
         notifications: [],
     } as NotificationSliceState,
     reducers: {
-        pushNotification(state, action: PayloadAction<Notification>) {
+        pushNotification(
+            state,
+            action: PayloadAction<Notification | UpdateNotification>
+        ) {
             state.notifications.push({ ...action.payload });
-        },
-        triggerUpdateNotification(state, action: PayloadAction<string>) {
-            state.notifications.push({
-                level: NotificationLevel.Update,
-                id: nextId,
-                version: action.payload,
-            });
-
-            nextId += 1;
         },
         removeNotification(state, action: PayloadAction<number>) {
             state.notifications = state.notifications.filter(
@@ -54,7 +52,25 @@ const { actions, reducer } = createSlice({
 
 export default reducer;
 
-export const { triggerUpdateNotification, removeNotification } = actions;
+export const { removeNotification } = actions;
+
+export function triggerUpdateNotification(
+    dispatch: Dispatch,
+    version: string,
+    auto: boolean
+) {
+    dispatch(
+        actions.pushNotification({
+            level: auto
+                ? NotificationLevel.AutoUpdate
+                : NotificationLevel.ManualUpdate,
+            id: nextId,
+            version,
+        })
+    );
+
+    nextId += 1;
+}
 
 /**
  * Display notifications of different types.

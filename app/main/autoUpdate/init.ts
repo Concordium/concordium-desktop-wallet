@@ -51,14 +51,16 @@ const handleUpdateDownloaded = (mainWindow: BrowserWindow) => async (
 };
 
 export default function initAutoUpdate(mainWindow: BrowserWindow) {
-    if (
+    const canAutoUpdate =
         process.platform === 'win32' ||
         process.platform === 'darwin' ||
-        process.env.APPIMAGE
-    ) {
-        autoUpdater.on('update-available', (info) =>
-            mainWindow.webContents.send(updateAvailable, info)
-        );
+        process.env.APPIMAGE;
+
+    autoUpdater.on('update-available', (info) =>
+        mainWindow.webContents.send(updateAvailable, info, canAutoUpdate)
+    );
+
+    if (canAutoUpdate) {
         autoUpdater.on('error', () =>
             mainWindow.webContents.send(
                 updateError,
@@ -71,7 +73,7 @@ export default function initAutoUpdate(mainWindow: BrowserWindow) {
         ipcMain.handle(quitAndInstallUpdate, () =>
             autoUpdater.quitAndInstall()
         );
-
-        autoUpdater.checkForUpdates();
     }
+
+    autoUpdater.checkForUpdates();
 }

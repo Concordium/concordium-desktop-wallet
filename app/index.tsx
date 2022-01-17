@@ -19,9 +19,10 @@ window.addListener.openRoute((_, route: string) => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-console
 window.addListener.logFromMain((_, ...args: any[]) => console.log(...args));
 
-window.autoUpdate.onUpdateAvailable((_, info: UpdateInfo) => {
-    store.dispatch(triggerUpdateNotification(info.version));
-});
+window.autoUpdate.onUpdateAvailable((_, info: UpdateInfo, automatic: boolean) =>
+    triggerUpdateNotification(store.dispatch, info.version, automatic)
+);
+
 const AppContainer = ReactHotAppContainer;
 
 document.addEventListener('DOMContentLoaded', () =>

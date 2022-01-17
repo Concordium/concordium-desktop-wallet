@@ -115,7 +115,7 @@ const updateStatusMap: {
     [UpdateStatus.Error]: ErrorChild,
 };
 
-export default function AppUpdateNotification(props: Props) {
+export default function AutoUpdateNotification(props: Props) {
     const { onClose } = props;
     const [state, setState] = useState<UpdateState>({
         status: UpdateStatus.Available,
@@ -150,7 +150,7 @@ export default function AppUpdateNotification(props: Props) {
     return (
         <Notification
             className="flexColumn alignCenter"
-            level={NotificationLevel.Update}
+            level={NotificationLevel.AutoUpdate}
             disableClose={disableClose}
             onCloseClick={onClose}
         >
