@@ -1,6 +1,7 @@
 import React, {
     ComponentType,
     createContext,
+    useCallback,
     useContext,
     useState,
 } from 'react';
@@ -44,6 +45,10 @@ import GenerateBakerKeys from '../GenerateBakerKeys';
 import { ensureProps } from '~/utils/componentHelpers';
 
 import styles from '../AccountDetailsPage.module.scss';
+import {
+    fractionResolutionToPercentage,
+    percentageToFractionResolution,
+} from '~/utils/rewardFractionHelpers';
 
 type Commissions = NotOptional<
     Pick<
@@ -133,6 +138,18 @@ const commonSliderProps: Pick<
     className: 'mB30',
 };
 
+const fromRewardFractions = (values: Commissions): Commissions => ({
+    transactionFeeCommission: fractionResolutionToPercentage(
+        values.transactionFeeCommission
+    ),
+    bakingRewardCommission: fractionResolutionToPercentage(
+        values.bakingRewardCommission
+    ),
+    finalizationRewardCommission: fractionResolutionToPercentage(
+        values.finalizationRewardCommission
+    ),
+});
+
 function CommissionsPage({
     initial,
     onNext,
@@ -141,9 +158,9 @@ function CommissionsPage({
     const boundaries: {
         [P in keyof Commissions]: [number, number];
     } = {
-        transactionFeeCommission: [5, 15],
-        bakingRewardCommission: [5, 15],
-        finalizationRewardCommission: [5, 15],
+        transactionFeeCommission: [5000, 15000],
+        bakingRewardCommission: [5000, 15000],
+        finalizationRewardCommission: [5000, 15000],
     };
     const defaultValues: Commissions = {
         transactionFeeCommission: boundaries.transactionFeeCommission[1],
@@ -152,10 +169,26 @@ function CommissionsPage({
             boundaries.finalizationRewardCommission[1],
     };
 
+    const handleSubmit = useCallback(
+        (values: Commissions) =>
+            onNext({
+                transactionFeeCommission: percentageToFractionResolution(
+                    values.transactionFeeCommission
+                ),
+                bakingRewardCommission: percentageToFractionResolution(
+                    values.bakingRewardCommission
+                ),
+                finalizationRewardCommission: percentageToFractionResolution(
+                    values.finalizationRewardCommission
+                ),
+            }),
+        [onNext]
+    );
+
     return (
         <Form<Commissions>
-            onSubmit={onNext}
-            defaultValues={initial ?? defaultValues}
+            onSubmit={handleSubmit}
+            defaultValues={fromRewardFractions(initial ?? defaultValues)}
         >
             <p className="mB30">
                 When you open your baker as a pool, you have to set commission
@@ -189,6 +222,7 @@ function CommissionsPage({
     );
 }
 
+// TODO add correct length validation according to deserialize in concordium-base
 const MetadataUrlPage = ({
     onNext,
     initial = '',
