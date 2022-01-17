@@ -19,6 +19,7 @@ type BakerId = Word64;
 export type Word8 = number;
 type JSONString = string; // indicates that it is some object that has been stringified.
 export type Amount = bigint;
+
 export enum OpenStatus {
     OpenForAll = 0,
     ClosedForNew = 1,
@@ -354,7 +355,7 @@ export interface ConfigureBakerPayload {
     finalizationRewardCommission?: RewardFraction;
 }
 
-type DelegationTarget = null | BakerId;
+export type DelegationTarget = null | BakerId;
 
 export interface ConfigureDelegationPayload {
     stake?: Amount;

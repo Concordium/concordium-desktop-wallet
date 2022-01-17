@@ -23,6 +23,11 @@ import {
     SimpleTransferWithMemoPayload,
     ScheduledTransferWithMemoPayload,
     EncryptedTransferWithMemoPayload,
+    ConfigureBakerPayload,
+    ConfigureDelegationPayload,
+    DelegationTarget,
+    NotOptional,
+    BakerKeyWithProof,
 } from './types';
 import {
     encodeWord32,
@@ -38,8 +43,10 @@ import {
     serializeCredentialDeploymentInformation,
     serializeBoolean,
     encodeWord16,
+    getSerializedTextWithLength,
 } from './serializationHelpers';
 import { encodeAsCBOR } from './cborHelper';
+import { isDefined } from './basicHelpers';
 
 function serializeMemo(memo: string) {
     const encoded = encodeAsCBOR(memo);
@@ -331,6 +338,139 @@ export function serializeUpdateBakerRestakeEarnings(
     ]);
 }
 
+/**
+ * Makes a bitmap for transactions with optional payload fields, where each bit indicates whether a value is included or not.
+ *
+ * @param payload the payload to generate the bitmap for
+ * @param fieldOrder the order the payload fields are serialized in. The order is represented in the bitmap from right to left, i.e index 0 of the order translates to first bit.
+ *
+ * @example
+ * getPayloadBitmap<{test?: string; test2?: string}>({test2: 'yes'}, ['test', 'test2']) // returns 2 (00000010 as bits of UInt8)
+ * getPayloadBitmap<{test?: string; test2?: string; test3?: number}>({test: 'yes', test3: 100}, ['test', 'test2', 'test3']) // returns 5 (00000101 as bits of UInt8)
+ */
+function getPayloadBitmap<T>(payload: T, fieldOrder: Array<keyof T>) {
+    return fieldOrder
+        .map((k) => payload[k])
+        .reduceRight(
+            // eslint-disable-next-line no-bitwise
+            (acc, cur) => (acc << 1) | Number(cur !== undefined),
+            0
+        );
+}
+
+/**
+ * Makes a type with keys from Object and values being functions that take values with types of respective original values, returning a Buffer or undefined.
+ */
+type SerializationSpec<T> = NotOptional<
+    { [P in keyof T]: (v: T[P]) => Buffer | undefined }
+>;
+
+/**
+ * Given a payload and a specification describing how to serialize the fields of the payload this function returns a buffer of the serialized fields, ordered by the order supplied.
+ */
+function serializePayloadFromSpec<T, S extends SerializationSpec<T>>(
+    payload: T,
+    spec: S,
+    order: Array<keyof T>
+) {
+    const buffers = order
+        .map((k) => {
+            const value = payload[k];
+            const serializeField = spec[k] as (
+                v: typeof value
+            ) => Buffer | undefined;
+            return serializeField(value);
+        })
+        .filter(isDefined);
+
+    return Buffer.concat(buffers);
+}
+
+/**
+ * Takes a callback function taking 1 argument, returning a new function taking same argument, applying callback only if supplied argument is defined.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const orUndefined = <F extends (v: any) => any>(fun: F) => (
+    v: Parameters<F>[0] | undefined
+): ReturnType<F> | undefined => (isDefined(v) ? fun(v) : undefined);
+
+const configureBakerOrder: Array<keyof ConfigureBakerPayload> = [
+    'stake',
+    'restakeEarnings',
+    'openForDelegation',
+    'signatureVerifyKey',
+    'electionVerifyKey',
+    'aggregationVerifyKey',
+    'metadataUrl',
+    'transactionFeeCommission',
+    'bakingRewardCommission',
+    'finalizationRewardCommission',
+];
+
+const serializeVerifyKey = ([key, proof]: BakerKeyWithProof) =>
+    Buffer.concat([putHexString(key), putHexString(proof)]);
+
+const serializeUrl = (url: string) => {
+    const { data, length } = getSerializedTextWithLength(url);
+    return Buffer.concat([length, data]);
+};
+
+const configureBakerSerializationSpec: SerializationSpec<ConfigureBakerPayload> = {
+    stake: orUndefined(encodeWord64),
+    restakeEarnings: orUndefined(serializeBoolean),
+    openForDelegation: orUndefined(putInt8),
+    signatureVerifyKey: orUndefined(serializeVerifyKey),
+    electionVerifyKey: orUndefined(serializeVerifyKey),
+    aggregationVerifyKey: orUndefined(serializeVerifyKey),
+    metadataUrl: orUndefined(serializeUrl),
+    transactionFeeCommission: orUndefined(encodeWord32),
+    bakingRewardCommission: orUndefined(encodeWord32),
+    finalizationRewardCommission: orUndefined(encodeWord32),
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function serializeConfigureBaker(payload: ConfigureBakerPayload) {
+    return Buffer.concat([
+        putInt8(TransactionKind.Configure_baker),
+        encodeWord16(getPayloadBitmap(payload, configureBakerOrder)),
+        serializePayloadFromSpec(
+            payload,
+            configureBakerSerializationSpec,
+            configureBakerOrder
+        ),
+    ]);
+}
+
+const configureDelegationOrder: Array<keyof ConfigureDelegationPayload> = [
+    'stake',
+    'restakeEarnings',
+    'delegationTarget',
+];
+
+const serializeDelegationTarget = (t: DelegationTarget) =>
+    t === null ? putInt8(0) : Buffer.concat([putInt8(1), encodeWord64(t)]);
+
+const configureDelegationSerializationSpec: SerializationSpec<ConfigureDelegationPayload> = {
+    stake: orUndefined(encodeWord64),
+    restakeEarnings: orUndefined(serializeBoolean),
+    delegationTarget: orUndefined(serializeDelegationTarget),
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function serializeConfigureDelegation(
+    payload: ConfigureDelegationPayload
+) {
+    return Buffer.concat([
+        putInt8(TransactionKind.Configure_delegation),
+        encodeWord16(getPayloadBitmap(payload, configureDelegationOrder)),
+        serializePayloadFromSpec(
+            payload,
+            configureDelegationSerializationSpec,
+            configureDelegationOrder
+        ),
+    ]);
+}
+
 export function serializeTransferPayload(
     kind: TransactionKind,
     payload: TransactionPayload
@@ -384,6 +524,12 @@ export function serializeTransferPayload(
         case TransactionKind.Update_baker_restake_earnings:
             return serializeUpdateBakerRestakeEarnings(
                 payload as UpdateBakerRestakeEarningsPayload
+            );
+        case TransactionKind.Configure_baker:
+            return serializeConfigureBaker(payload as ConfigureBakerPayload);
+        case TransactionKind.Configure_delegation:
+            return serializeConfigureDelegation(
+                payload as ConfigureDelegationPayload
             );
         default:
             throw new Error('Unsupported transaction kind');
