@@ -51,16 +51,27 @@ const handleUpdateDownloaded = (mainWindow: BrowserWindow) => async (
 };
 
 export default function initAutoUpdate(mainWindow: BrowserWindow) {
-    autoUpdater.on('update-available', (info) =>
-        mainWindow.webContents.send(updateAvailable, info)
-    );
-    autoUpdater.on('error', () =>
-        mainWindow.webContents.send(updateError, 'Could not download update.')
-    );
-    autoUpdater.on('update-downloaded', handleUpdateDownloaded(mainWindow));
+    if (
+        process.platform === 'win32' ||
+        process.platform === 'darwin' ||
+        process.env.APPIMAGE
+    ) {
+        autoUpdater.on('update-available', (info) =>
+            mainWindow.webContents.send(updateAvailable, info)
+        );
+        autoUpdater.on('error', () =>
+            mainWindow.webContents.send(
+                updateError,
+                'Could not download update.'
+            )
+        );
+        autoUpdater.on('update-downloaded', handleUpdateDownloaded(mainWindow));
 
-    ipcMain.handle(triggerAppUpdate, () => autoUpdater.downloadUpdate());
-    ipcMain.handle(quitAndInstallUpdate, () => autoUpdater.quitAndInstall());
+        ipcMain.handle(triggerAppUpdate, () => autoUpdater.downloadUpdate());
+        ipcMain.handle(quitAndInstallUpdate, () =>
+            autoUpdater.quitAndInstall()
+        );
 
-    autoUpdater.checkForUpdates();
+        autoUpdater.checkForUpdates();
+    }
 }
