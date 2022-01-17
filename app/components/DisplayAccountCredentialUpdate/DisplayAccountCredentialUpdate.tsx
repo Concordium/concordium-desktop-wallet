@@ -29,11 +29,11 @@ export default function DisplayAccountCredentialUpdate({
                 estimatedFee={transaction.estimatedFee}
             />
             <h5>
-                New Threshold: <b>{transaction.payload.threshold}</b>
+                New threshold: <b>{transaction.payload.threshold}</b>
             </h5>
             {removedCredIds.length > 0 ? (
                 <>
-                    <h5>Removed Credentials:</h5>
+                    <h5>Removed credentials:</h5>
                     {removedCredIds.map((removedId) => (
                         <p key={removedId} className={styles.credId}>
                             {removedId}
@@ -43,7 +43,7 @@ export default function DisplayAccountCredentialUpdate({
             ) : null}
             {addedCredentials.length > 0 ? (
                 <>
-                    <h5>Added Credentials:</h5>
+                    <h5>Added credentials:</h5>
                     {addedCredentials.map((addedCredential) => (
                         <p
                             key={addedCredential.value.credId}

@@ -11,7 +11,7 @@ import routes from '~/constants/routes.json';
 import { noOp } from '../basicHelpers';
 import TransferHandler from './TransferHandler';
 
-const TYPE = 'Update Account Credentials';
+const TYPE = 'Update account credentials';
 
 type TransactionType = UpdateAccountCredentials;
 

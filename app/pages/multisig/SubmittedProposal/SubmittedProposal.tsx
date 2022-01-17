@@ -190,11 +190,7 @@ const SubmittedProposalView = withChainData<Props>(
         }, [init, blockSummary]);
 
         return (
-            <MultiSignatureLayout
-                pageTitle={handler.title}
-                stepTitle={`Transaction Proposal - ${handler.type}`}
-                disableBack
-            >
+            <MultiSignatureLayout pageTitle={handler.title} disableBack>
                 <SimpleErrorModal
                     show={showError.show}
                     header={showError.header}

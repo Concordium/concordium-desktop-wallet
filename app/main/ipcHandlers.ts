@@ -105,21 +105,26 @@ function createExternalView(
                     });
                 });
 
+                const checkForRedirectToken = (event: Event, url: string) => {
+                    // If the redirect contains the location of the identity, then do not
+                    // follow it, but extract the URL and return it.
+                    if (url.includes(redirectUri)) {
+                        event.preventDefault();
+                        resolve({
+                            status: ViewResponseStatus.Success,
+                            result: url.substring(
+                                url.indexOf(codeUriKey) + codeUriKey.length
+                            ),
+                        });
+                    }
+                };
+                browserView.webContents.on(
+                    'will-navigate',
+                    checkForRedirectToken
+                );
                 return browserView.webContents.on(
                     'will-redirect',
-                    async (event, url) => {
-                        // If the redirect contains the location of the identity, then do not
-                        // follow it, but extract the URL and return it.
-                        if (url.includes(redirectUri)) {
-                            event.preventDefault();
-                            resolve({
-                                status: ViewResponseStatus.Success,
-                                result: url.substring(
-                                    url.indexOf(codeUriKey) + codeUriKey.length
-                                ),
-                            });
-                        }
-                    }
+                    checkForRedirectToken
                 );
             })
             .catch((e) =>
@@ -167,6 +172,7 @@ export default function initializeIpcHandlers(
     );
     ipcMain.handle(ipcCommands.removeView, () => {
         browserView.webContents.emit('abort');
+        browserView.webContents.removeAllListeners('will-navigate');
         browserView.webContents.removeAllListeners('will-redirect');
 
         // Load a blank page to prevent flashing of a previous identity

@@ -23,9 +23,9 @@ export default function AddBakerProposalStatus({
         <ProposalStatusView
             {...proposalStatusViewProps}
             headerLeft={senderName ?? transaction.sender}
-            headerRight="Add Baker"
+            headerRight="Add baker"
             status={status}
-            title="Add Baker"
+            title="Add baker"
         >
             <span className="textFaded">
                 Account: {senderName ? `${senderName} ` : ''} (

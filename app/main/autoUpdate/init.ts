@@ -1,20 +1,21 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import { autoUpdater, UpdateInfo } from 'electron-updater';
+import ipcRendererCommands from '~/constants/ipcRendererCommands.json';
+import ipcCommands from '~/constants/ipcCommands.json';
 
-import {
+import packageJson from '../../../package.json';
+import appPackageJson from '../../package.json';
+import { getVerificationFunctions, RealUpdateInfo } from './verify';
+
+const {
     updateAvailable,
     updateDownloaded,
     updateVerified,
     updateError,
-} from '~/constants/ipcRendererCommands.json';
-import {
-    triggerAppUpdate,
-    quitAndInstallUpdate,
-} from '~/constants/ipcCommands.json';
-
-import { version } from '../../package.json';
-import { build } from '../../../package.json';
-import { getVerificationFunctions, RealUpdateInfo } from './verify';
+} = ipcRendererCommands;
+const { triggerAppUpdate, quitAndInstallUpdate } = ipcCommands;
+const { build } = packageJson;
+const { version } = appPackageJson;
 
 const updateServer = 'https://update.electronjs.org';
 const updateFeed = `${updateServer}/${build.publish.owner}/${build.publish.repo}/${process.platform}-${process.arch}/${version}/`;

@@ -126,7 +126,7 @@ function SignTransactionProposalView({ proposal, blockSummary }: Props) {
     return (
         <MultiSignatureLayout
             pageTitle={transactionHandler.title}
-            stepTitle={`Transaction signing confirmation - ${transactionHandler.type}`}
+            stepTitle="Transaction signing confirmation"
             delegateScroll
         >
             <Columns
@@ -135,7 +135,7 @@ function SignTransactionProposalView({ proposal, blockSummary }: Props) {
                 columnClassName={styles.column}
                 columnScroll
             >
-                <Columns.Column header="Transaction Details">
+                <Columns.Column header="Transaction details">
                     <section className={styles.detailsColumnContent}>
                         <TransactionDetails transaction={transactionObject} />
                         <ExpiredTransactionView
@@ -144,7 +144,7 @@ function SignTransactionProposalView({ proposal, blockSummary }: Props) {
                     </section>
                 </Columns.Column>
                 <Columns.Column
-                    header="Signature and Hardware Wallet"
+                    header="Signature and hardware wallet"
                     className={styles.stretchColumn}
                 >
                     <SignTransaction

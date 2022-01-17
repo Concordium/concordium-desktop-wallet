@@ -42,7 +42,7 @@ const IPDetails = (info: PublicInformationForIp) => (
             />
         </div>
         <p>
-            <b>Signature Threshold:</b> {info.publicKeys.threshold}
+            <b>Signature threshold:</b> {info.publicKeys.threshold}
         </p>
     </div>
 );

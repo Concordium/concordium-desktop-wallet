@@ -56,7 +56,7 @@ export default function FailedIdentityModal({ identity }: Props) {
             open={modalOpen}
             actions={[
                 {
-                    label: 'Try Again',
+                    label: 'Try again',
                     location: {
                         pathname: routes.IDENTITYISSUANCE,
                         state: {

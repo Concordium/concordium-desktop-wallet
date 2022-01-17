@@ -239,7 +239,7 @@ function showMemo(
     ) {
         // If we are fully showing the memo, and the type is one that has a memo version, but there is no memo:
         return (
-            <i className="body4 m0 textFaded">
+            <i className="body5 m0 textFaded">
                 The transaction contains no memo
             </i>
         );
@@ -250,7 +250,7 @@ function showMemo(
     return (
         <pre
             className={clsx(
-                'body4 m0 textFaded',
+                'body5 m0 textFaded',
                 showFullMemo && styles.fullMemo,
                 showFullMemo || styles.lineClamp
             )}
@@ -347,7 +347,7 @@ function TransactionListElement({
                 }
             />
             <SidedRow
-                className="body4 textFaded"
+                className="body5 textFaded"
                 left={
                     <>
                         {time} {statusSymbol(transaction.status)}

@@ -2,7 +2,9 @@ import winston, { LeveledLogMethod } from 'winston';
 import { ipcRenderer } from 'electron';
 import ipcCommands from '~/constants/ipcCommands.json';
 import { LoggingMethods, PutLog } from './preloadTypes';
-import { fileName, maxsize, maxFiles } from '~/constants/logConstants.json';
+import constants from '~/constants/logConstants.json';
+
+const { fileName, maxsize, maxFiles } = constants;
 
 const LogLevels = {
     error: 0,

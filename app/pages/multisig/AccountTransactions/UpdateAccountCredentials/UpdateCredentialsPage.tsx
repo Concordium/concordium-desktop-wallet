@@ -42,14 +42,10 @@ import {
 import { getNoteForOwnCredential } from '~/utils/credentialHelper';
 import { identitiesSelector } from '~/features/IdentitySlice';
 import { CredentialDetails, CredentialStatus } from './util';
-import DisplayAddress from '~/components/DisplayAddress';
+import DatePicker from '~/components/Form/DatePicker';
+import { AccountDetail, PlainDetail } from '../proposal-details/shared';
 
 import styles from './UpdateAccountCredentials.module.scss';
-import DatePicker from '~/components/Form/DatePicker';
-
-const placeHolderText = (
-    <h2 className={styles.LargePropertyValue}>To be determined</h2>
-);
 
 function assignIndices(
     items: Omit<AddedCredential, 'index'>[],
@@ -82,81 +78,55 @@ function subTitle(currentLocation: string) {
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
             return 'Accounts';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL:
-            return 'New Credentials';
+            return 'New credentials';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD:
             return ' ';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY:
             return 'Transaction expiry time';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
-            return 'Signature and Hardware Wallet';
+            return 'Signature and hardware wallet';
         default:
             return throwLoggedError('unknown location');
     }
-}
-
-function displayAccount(account: Account | undefined) {
-    return (
-        <>
-            <h5 className={styles.PropertyName}>Account:</h5>
-            <h2 className="mV0">
-                {account ? account.name : 'Choose an account on the right'}
-            </h2>
-            {account ? (
-                <DisplayAddress
-                    outerClassName="mB5 mT5"
-                    lineClassName="textFaded body4"
-                    address={account?.address}
-                />
-            ) : null}
-        </>
-    );
 }
 
 function displaySignatureThreshold(
     currentThreshold: number | undefined,
     newThreshold: number | undefined
 ) {
-    let body;
-    if (!currentThreshold) {
-        body = placeHolderText;
-    } else {
-        body = (
-            <p className="mT5">
-                Current amount of required signatures: <b>{currentThreshold}</b>
-                <br />
-                New amount of required signatures: <b>{newThreshold || '?'}</b>
-            </p>
-        );
-    }
     return (
-        <>
-            <h5 className={styles.PropertyName}>Signature Threshold:</h5>
-            {body}
-        </>
+        <PlainDetail
+            title="Signature threshold"
+            value={currentThreshold}
+            format={() => (
+                <p className="mT5 mono body3">
+                    Current amount of required signatures:{' '}
+                    <b>{currentThreshold}</b>
+                    <br />
+                    New amount of required signatures:{' '}
+                    <b>{newThreshold || '?'}</b>
+                </p>
+            )}
+        />
     );
 }
 
 function displayCredentialCount(
     currentAmount: number | undefined,
-    newAmount: number
+    newAmount: number | undefined = 0
 ) {
-    let body;
-    if (!currentAmount) {
-        body = placeHolderText;
-    } else {
-        body = (
-            <p className="mT5">
-                Current amount of credentials: <b>{currentAmount}</b>
-                <br />
-                New amount of credentials: <b>{newAmount}</b>
-            </p>
-        );
-    }
     return (
-        <>
-            <h5 className={styles.PropertyName}>Credentials:</h5>
-            {body}
-        </>
+        <PlainDetail
+            title="Credentials"
+            value={currentAmount}
+            format={() => (
+                <p className="mT5 mono body3">
+                    Current amount of credentials: <b>{currentAmount}</b>
+                    <br />
+                    New amount of credentials: <b>{newAmount}</b>
+                </p>
+            )}
+        />
     );
 }
 
@@ -168,30 +138,31 @@ const toWrapperWithNote = (credDetails: CredentialDetails[]) => (
 });
 
 function listCredentials(
-    credentialIds: CredentialDetails[],
     updateCredential: (credId: CredentialDetails) => void,
-    isEditing: boolean
+    isEditing: boolean,
+    credentialIds?: CredentialDetails[]
 ) {
-    if (credentialIds.length === 0) {
-        return null;
-    }
-    return credentialIds.map((credDetails) => {
+    return credentialIds?.map((credDetails) => {
         const [credId, status, note] = credDetails;
 
         let buttonText = 'Remove';
         let statusText = null;
 
         if (status === CredentialStatus.Added) {
-            statusText = <h2 className={clsx(styles.green, 'mB0')}>Added</h2>;
+            statusText = (
+                <div className={clsx(styles.green, 'mB0 mono')}>Added</div>
+            );
         } else if (status === CredentialStatus.Unchanged) {
             statusText = (
-                <h2 className={clsx(styles.gray, 'mB0')}>Unchanged</h2>
+                <div className={clsx(styles.gray, 'mB0 mono')}>Unchanged</div>
             );
         } else if (status === CredentialStatus.Removed) {
             buttonText = 'Revert';
-            statusText = <h2 className={clsx(styles.red, 'mB0')}>Removed</h2>;
+            statusText = (
+                <div className={clsx(styles.red, 'mB0 mono')}>Removed</div>
+            );
         } else if (status === CredentialStatus.Original) {
-            statusText = <h2 className="mB0">Original</h2>;
+            statusText = <div className="mB0 mono">Original</div>;
         }
 
         return (
@@ -207,10 +178,10 @@ function listCredentials(
                         </Button>
                     )}
                 </div>
-                <h5>
+                <div>
                     {note && <div className="mB5">{note}</div>}
-                    <div className="textFaded">{credId}</div>
-                </h5>
+                    <div className="textFaded body4">{credId}</div>
+                </div>
                 <div className="mL20">{statusText}</div>
             </div>
         );
@@ -250,13 +221,15 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
     // const [isReady, setReady] = useState(false);
     const [account, setAccount] = useState<Account | undefined>(state?.account);
     const [currentCredentials, setCurrentCredentials] = useState<
-        AccountInfoCredential[]
-    >([]);
+        AccountInfoCredential[] | undefined
+    >();
 
     const handler = new UpdateAccountCredentialsHandler();
 
     const [newThreshold, setNewThreshold] = useState<number | undefined>();
-    const [credentialIds, setCredentialIds] = useState<CredentialDetails[]>([]);
+    const [credentialIds, setCredentialIds] = useState<
+        CredentialDetails[] | undefined
+    >();
     const [newCredentials, setNewCredentials] = useState<
         CredentialDeploymentInformation[]
     >([]);
@@ -266,9 +239,10 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
         expiryTimeError,
     ] = useTransactionExpiryState();
 
-    const newCredentialAmount = credentialIds.filter(
-        ([, status]) => status !== CredentialStatus.Removed
-    ).length;
+    const newCredentialAmount =
+        credentialIds?.filter(
+            ([, status]) => status !== CredentialStatus.Removed
+        ).length ?? 0;
 
     const isReady = useMemo(() => {
         switch (location) {
@@ -362,12 +336,15 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
             // Create a payload with the current settings, to estimate the fee.
             const payload = {
                 addedCredentials: assignIndices(
-                    newCredentials.map(toWrapperWithNote(credentialIds)),
+                    newCredentials.map(toWrapperWithNote(credentialIds ?? [])),
                     []
                 ),
-                removedCredIds: credentialIds
-                    .filter(([, status]) => status === CredentialStatus.Removed)
-                    .map(([id]) => id),
+                removedCredIds:
+                    credentialIds
+                        ?.filter(
+                            ([, status]) => status === CredentialStatus.Removed
+                        )
+                        .map(([id]) => id) ?? [],
                 threshold: newThreshold || 1,
             };
 
@@ -375,7 +352,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                 getUpdateCredentialsCost(
                     exchangeRate,
                     payload,
-                    currentCredentials.length,
+                    currentCredentials?.length ?? 0,
                     account.signatureThreshold
                 )
             );
@@ -389,7 +366,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
         newThreshold,
         newCredentials,
         credentialIds,
-        currentCredentials.length,
+        currentCredentials,
     ]);
 
     useEffect(() => {
@@ -402,7 +379,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
     function updateCredentialStatus([removedId, status]: CredentialDetails) {
         if (status === CredentialStatus.Added) {
             setCredentialIds((currentCredentialIds) =>
-                currentCredentialIds.filter(([credId]) => credId !== removedId)
+                currentCredentialIds?.filter(([credId]) => credId !== removedId)
             );
             setNewCredentials((creds) =>
                 creds.filter(({ credId }) => credId !== removedId)
@@ -416,7 +393,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                     ? CredentialStatus.Removed
                     : CredentialStatus.Unchanged;
             setCredentialIds((currentCredentialIds) =>
-                currentCredentialIds.map((item) =>
+                currentCredentialIds?.map((item) =>
                     item[0] !== removedId ? item : [item[0], newStatus, item[2]]
                 )
             );
@@ -436,18 +413,19 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
             throwLoggedError('Unexpected missing expiry');
         }
 
-        const usedIndices: number[] = currentCredentials
-            .filter(({ credential }) => {
-                const { credId } = credential;
-                const currentStatus = credentialIds.find(
-                    ([id]) => credId === id
-                );
-                return (
-                    currentStatus &&
-                    currentStatus[1] === CredentialStatus.Unchanged
-                );
-            })
-            .map(({ credentialIndex }) => credentialIndex || 0);
+        const usedIndices: number[] =
+            currentCredentials
+                ?.filter(({ credential }) => {
+                    const { credId } = credential;
+                    const currentStatus = credentialIds?.find(
+                        ([id]) => credId === id
+                    );
+                    return (
+                        currentStatus &&
+                        currentStatus[1] === CredentialStatus.Unchanged
+                    );
+                })
+                .map(({ credentialIndex }) => credentialIndex || 0) ?? [];
 
         return (
             <div
@@ -459,16 +437,21 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                 <CreateUpdate
                     account={account}
                     addedCredentials={assignIndices(
-                        newCredentials.map(toWrapperWithNote(credentialIds)),
+                        newCredentials.map(
+                            toWrapperWithNote(credentialIds ?? [])
+                        ),
                         usedIndices
                     )}
-                    removedCredIds={credentialIds
-                        .filter(
-                            ([, status]) => status === CredentialStatus.Removed
-                        )
-                        .map(([id]) => id)}
+                    removedCredIds={
+                        credentialIds
+                            ?.filter(
+                                ([, status]) =>
+                                    status === CredentialStatus.Removed
+                            )
+                            .map(([id]) => id) ?? []
+                    }
                     newThreshold={newThreshold}
-                    currentCredentialAmount={currentCredentials.length}
+                    currentCredentialAmount={currentCredentials?.length || 0}
                     estimatedFee={estimatedFee}
                     expiry={expiryTime}
                 />
@@ -492,17 +475,17 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
     ].includes(location);
 
     return (
-        <MultiSignatureLayout
-            pageTitle="Multi Signature Transactions | Update Account Credentials"
-            stepTitle="Transaction Proposal - Update Account Credentials"
-            delegateScroll
-        >
-            <Columns className={styles.columns} columnScroll divider>
-                <Columns.Column header="Transaction Details">
+        <MultiSignatureLayout pageTitle={handler.title} delegateScroll>
+            <Columns
+                className={styles.subtractContainerPadding}
+                columnScroll
+                divider
+            >
+                <Columns.Column header="Transaction details">
                     <div className={styles.columnContainer}>
-                        {displayAccount(account)}
+                        <AccountDetail first title="Account" value={account} />
                         <DisplayEstimatedFee
-                            className={styles.LargePropertyValue}
+                            className="mT10 mB40"
                             estimatedFee={estimatedFee}
                         />
                         {displaySignatureThreshold(
@@ -510,19 +493,19 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                             newThreshold
                         )}
                         {displayCredentialCount(
-                            currentCredentials.length,
-                            credentialIds.length
+                            currentCredentials?.length,
+                            credentialIds?.length
+                        )}
+                        {listCredentials(
+                            updateCredentialStatus,
+                            location ===
+                                routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL,
+                            credentialIds
                         )}
                         <DisplayTransactionExpiryTime
                             expiryTime={expiryTime}
                             placeholder="To be determined"
                         />
-                        {listCredentials(
-                            credentialIds,
-                            updateCredentialStatus,
-                            location ===
-                                routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL
-                        )}
                     </div>
                 </Columns.Column>
                 <Columns.Column header={subTitle(location)}>
@@ -549,9 +532,9 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                                 render={() => (
                                     <AddCredential
                                         accountAddress={account?.address}
-                                        credentialIds={credentialIds}
+                                        credentialIds={credentialIds ?? []}
                                         onAddCredential={(cred, note) => {
-                                            setCredentialIds((cur) => [
+                                            setCredentialIds((cur = []) => [
                                                 ...cur,
                                                 [
                                                     cred.credId,

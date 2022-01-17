@@ -43,8 +43,8 @@ const BuildSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
             >
                 <Radios
                     options={[
-                        { label: 'Regular Interval', value: false },
-                        { label: 'Explicit Schedule', value: true },
+                        { label: 'Regular interval', value: false },
+                        { label: 'Explicit schedule', value: true },
                     ]}
                     value={explicit}
                     onChange={setExplicit}

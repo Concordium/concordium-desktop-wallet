@@ -28,7 +28,7 @@ const links: SidebarLink[] = [
     },
     {
         route: routes.ADDRESSBOOK,
-        title: 'Address Book',
+        title: 'Address book',
         icon: <IdentityIcon height="25" />,
     },
     {
@@ -38,7 +38,7 @@ const links: SidebarLink[] = [
     },
     {
         route: routes.MULTISIGTRANSACTIONS,
-        title: 'Multi Signature Transactions',
+        title: 'Multi signature transactions',
         icon: <MultiSigIcon height="32" />,
     },
     {

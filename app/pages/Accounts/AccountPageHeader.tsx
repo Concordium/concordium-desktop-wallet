@@ -56,7 +56,7 @@ export default function AccountPageHeader() {
         <span className={styles.pageHeader}>
             <h1 className="pR40 mR40">Accounts</h1>
             <h3 className="pR20 mR20">
-                Wallet Total:{' '}
+                Wallet total:{' '}
                 <b>
                     {displayAsGTU(totalAmount)}
                     {hidden}{' '}

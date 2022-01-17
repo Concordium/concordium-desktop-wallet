@@ -15,7 +15,7 @@ const listenerTimeout = 5000;
 
 enum Status {
     NoWallet = 'No wallet',
-    NewDevice = 'New Device',
+    NewDevice = 'New device',
     OutDated = 'Outdated',
     Connected = 'Connected',
     OpenApp = 'Open app',
@@ -107,6 +107,6 @@ export default function LedgerStatus(): JSX.Element {
     const StatusImage = getStatusImage(statusText);
 
     return (
-        <StatusPart name="HW Wallet:" status={statusText} Icon={StatusImage} />
+        <StatusPart name="HW wallet:" status={statusText} Icon={StatusImage} />
     );
 }

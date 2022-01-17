@@ -56,7 +56,7 @@ export default function PickBakerStakeAmount({
     return (
         <div className="mV30">
             <Label>{header}</Label>
-            <div className="body1">
+            <div className="h1 mV5">
                 {getGTUSymbol()}
                 <Form.GtuInput
                     defaultValue={initial}

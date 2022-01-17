@@ -58,7 +58,7 @@ function subTitle(currentLocation: string) {
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY:
             return 'Select transaction expiry time';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
-            return 'Signature and Hardware Wallet';
+            return 'Signature and hardware wallet';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE:
             return 'Setup the release schedule';
         default:
@@ -228,11 +228,7 @@ function CreateTransferProposal({
     }
 
     return (
-        <MultiSignatureLayout
-            pageTitle={handler.title}
-            stepTitle={`Transaction Proposal - ${handler.type}`}
-            delegateScroll
-        >
+        <MultiSignatureLayout pageTitle={handler.title} delegateScroll>
             <div className={styles.subtractContainerPadding}>
                 <Columns divider columnScroll columnClassName={styles.column}>
                     <Columns.Column
@@ -240,7 +236,7 @@ function CreateTransferProposal({
                             styles.transactionDetailsColumn,
                             styles.stretchColumn
                         )}
-                        header="Transaction Details"
+                        header="Transaction details"
                     >
                         <div className={styles.columnContent}>
                             <TransactionProposalDetails

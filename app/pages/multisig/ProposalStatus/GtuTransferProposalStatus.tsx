@@ -30,12 +30,12 @@ function getSpecifics(
     ) {
         return {
             amount: BigInt(transaction.payload.amount),
-            title: 'CCD Transfer',
+            title: 'CCD transfer',
         };
     }
     return {
         amount: getScheduledTransferAmount(transaction as ScheduledTransfer),
-        title: 'CCD Transfer with a Schedule',
+        title: 'CCD transfer with a schedule',
     };
 }
 
@@ -67,7 +67,7 @@ export default function GtuTransferProposalStatus({
         <ProposalStatusView
             {...proposalStatusViewProps}
             headerLeft={senderName || transaction.sender}
-            headerRight="CCD Transfer"
+            headerRight="CCD transfer"
             status={status}
             title={title}
         >

@@ -18,7 +18,7 @@ import {
 import { serializeAddIdentityProvider } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Add Identity Provider';
+const TYPE = 'Add identity provider';
 
 type TransactionType = UpdateInstruction<AddIdentityProvider>;
 

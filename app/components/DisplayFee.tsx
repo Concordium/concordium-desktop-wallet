@@ -15,7 +15,7 @@ interface Props {
 export default function DisplayFee({ className, transaction }: Props) {
     if (transaction.cost) {
         return (
-            <p className={clsx('body4', className)}>
+            <p className={clsx('body5', className)}>
                 {' '}
                 Fee: {displayAsGTU(transaction.cost)}{' '}
             </p>

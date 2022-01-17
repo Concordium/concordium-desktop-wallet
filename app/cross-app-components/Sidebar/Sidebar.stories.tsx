@@ -48,7 +48,7 @@ const links: SidebarLink[] = [
     },
     {
         route: '/3',
-        title: 'Address Book',
+        title: 'Address book',
         icon: <i />,
     },
     {
@@ -58,7 +58,7 @@ const links: SidebarLink[] = [
     },
     {
         route: '/5',
-        title: 'Multi Signature Transactions',
+        title: 'Multi signature transactions',
         icon: <i />,
     },
     {

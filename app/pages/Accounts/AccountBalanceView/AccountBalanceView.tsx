@@ -76,7 +76,7 @@ export default function AccountBalanceView(): JSX.Element | null {
                     )}
                     onClick={() => setViewingShieldedAndReset(dispatch, true)}
                 >
-                    Shielded Balance
+                    Shielded balance
                 </Button>
             )}
         </div>

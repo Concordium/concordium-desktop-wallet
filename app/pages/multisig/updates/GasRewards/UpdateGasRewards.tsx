@@ -27,12 +27,12 @@ export default function UpdateGasRewards({
     return (
         <>
             <GasRewardsForm
-                title="Current GAS Reward Fractions"
+                title="Current GAS reward fractions"
                 disabled
                 gasRewards={currentRewards}
             />
             <GasRewardsForm
-                title="New GAS Reward Fractions"
+                title="New GAS reward fractions"
                 gasRewards={defaultRewards}
             />
         </>

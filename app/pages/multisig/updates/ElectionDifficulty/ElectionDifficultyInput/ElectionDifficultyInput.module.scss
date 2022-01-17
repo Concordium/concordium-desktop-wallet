@@ -3,7 +3,7 @@
 .field {
     color: $color-pale-blue;
     display: block;
-    font-size: $font-size-body1;
+    font-size: $font-size-body2;
 
     &::-webkit-outer-spin-button,
     &::-webkit-inner-spin-button {
@@ -25,7 +25,16 @@
     }
 }
 
+.display {
+    font-family: $font-family-mono;
+    font-size: $font-size-body3;
+}
+
 .blockTime {
     color: $color-text-faded;
     font-size: $font-size-body4;
+
+    .display + & {
+        font-family: $font-family-mono;
+    }
 }

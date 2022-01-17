@@ -63,7 +63,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 className="mB20:notLast flex width100"
                 to={routes.ACCOUNTS_CREDENTIAL_INFORMATION}
             >
-                Credential & attribute Information
+                Credential & attribute information
             </ButtonNavLink>
             {accountHasDeployedCredentials && !hasUsedEncrypted && (
                 <ButtonNavLink

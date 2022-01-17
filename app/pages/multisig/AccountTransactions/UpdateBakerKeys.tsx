@@ -43,10 +43,9 @@ import { throwLoggedError } from '~/utils/basicHelpers';
 import DatePicker from '~/components/Form/DatePicker';
 import ExportBakerKeys from './ExportBakerKeys';
 import { isMultiSig } from '~/utils/accountHelpers';
+import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
-
-const pageTitle = 'Multi Signature Transactions | Update Baker Keys';
 
 interface PageProps {
     exchangeRate: Fraction;
@@ -66,6 +65,9 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
     const [error, setError] = useState<string>();
     const [bakerKeys, setBakerKeys] = useState<BakerKeys>();
     const [transaction, setTransaction] = useState<UpdateBakerKeys>();
+    const handler = findAccountTransactionHandler(
+        TransactionKindId.Remove_baker
+    );
 
     const estimatedFee = useTransactionCostEstimate(
         TransactionKindId.Update_baker_keys,
@@ -156,11 +158,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
     };
 
     return (
-        <MultiSignatureLayout
-            pageTitle={pageTitle}
-            stepTitle="Transaction Proposal - Update Baker Keys"
-            delegateScroll
-        >
+        <MultiSignatureLayout pageTitle={handler.title} delegateScroll>
             <SimpleErrorModal
                 show={Boolean(error)}
                 header="Unable to perform transfer"
@@ -173,7 +171,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                 className={styles.subtractContainerPadding}
                 columnClassName={styles.column}
             >
-                <Columns.Column header="Transaction Details">
+                <Columns.Column header="Transaction details">
                     <div className={styles.columnContent}>
                         <UpdateBakerKeysProposalDetails
                             account={account}
@@ -301,7 +299,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                         </Columns.Column>
                     </Route>
                     <Route path={`${path}/${BakerSubRoutes.sign}`}>
-                        <Columns.Column header="Signature and Hardware Wallet">
+                        <Columns.Column header="Signature and hardware wallet">
                             <SignTransactionColumn
                                 signingFunction={signingFunction}
                                 onSkip={() => signingFunction()}

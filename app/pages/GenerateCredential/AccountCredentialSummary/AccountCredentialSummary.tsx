@@ -59,7 +59,7 @@ export default function AccountCredentialSummary({
     return (
         <Card
             className={clsx(styles.root, className)}
-            header="Account Credential Summary"
+            header="Account credential summary"
         >
             <Label className="mT30">Identity:</Label>
             {identity ? (

@@ -2,7 +2,7 @@ import lt from 'semver/functions/lt';
 import valid from 'semver/functions/valid';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { AppAndVersion } from '~/features/ledger/GetAppAndVersion';
-import { requiredVersion } from '~/constants/ledgerConstants.json';
+import ledgerConstants from '~/constants/ledgerConstants.json';
 
 export enum LedgerStatusType {
     DISCONNECTED,
@@ -30,5 +30,5 @@ export function isOutdated({ version }: AppAndVersion) {
     if (!currentVersion) {
         throw new Error('Invalid version');
     }
-    return lt(currentVersion, requiredVersion);
+    return lt(currentVersion, ledgerConstants.requiredVersion);
 }
