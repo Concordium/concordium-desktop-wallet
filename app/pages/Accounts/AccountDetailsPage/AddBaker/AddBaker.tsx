@@ -3,9 +3,10 @@ import React, {
     createContext,
     useCallback,
     useContext,
+    useMemo,
     useState,
 } from 'react';
-import { connect } from 'react-redux';
+import { connect, useSelector } from 'react-redux';
 import { Validate } from 'react-hook-form';
 import AddBakerStakeSettings, {
     StakeSettings,
@@ -17,18 +18,28 @@ import withExchangeRate, {
 } from '~/components/Transfers/withExchangeRate';
 import withNonce, { AccountAndNonce } from '~/components/Transfers/withNonce';
 import Button from '~/cross-app-components/Button';
-import { chosenAccountSelector } from '~/features/AccountSlice';
+import {
+    accountInfoSelector,
+    chosenAccountSelector,
+} from '~/features/AccountSlice';
 import { RootState } from '~/store/store';
-import { isDefined, multiplyFraction } from '~/utils/basicHelpers';
-import { useTransactionCostEstimate } from '~/utils/dataHooks';
-import { toMicroUnits } from '~/utils/gtu';
+import {
+    collapseFraction,
+    isDefined,
+    multiplyFraction,
+} from '~/utils/basicHelpers';
+import { microGtuToGtu, toMicroUnits } from '~/utils/gtu';
 import { BakerKeys } from '~/utils/rustInterface';
-import { createConfigureBakerTransaction } from '~/utils/transactionHelpers';
+import {
+    createConfigureBakerTransaction,
+    validateBakerStake,
+} from '~/utils/transactionHelpers';
 import {
     Account,
     ConfigureBaker as ConfigureBakerTransaction,
     ConfigureBakerPayload,
     EqualRecord,
+    Fraction,
     MakeOptional,
     MakeRequired,
     NotOptional,
@@ -49,6 +60,8 @@ import {
 } from '~/utils/rewardFractionHelpers';
 
 import styles from '../AccountDetailsPage.module.scss';
+import { getConfigureBakerFullCost } from '~/utils/transactionCosts';
+import { serializeTransferPayload } from '~/utils/transactionSerialization';
 
 type Commissions = NotOptional<
     Pick<
@@ -61,30 +74,102 @@ type Commissions = NotOptional<
 
 type MetadataUrl = string;
 
+interface AddBakerState {
+    stake: StakeSettings;
+    openForDelegation: OpenStatus;
+    commissions: Commissions;
+    metadataUrl: MetadataUrl;
+    keys: BakerKeys;
+}
+
+type AddBakerPayload = MakeOptional<
+    NotOptional<ConfigureBakerPayload>,
+    'metadataUrl'
+>;
+
 type Dependencies = NotOptional<ChainData & ExchangeRate & AccountAndNonce>;
 
 const dependencies = createContext<Dependencies>({} as Dependencies);
 
-const title = 'Add baker';
+const TITLE = 'Add baker';
+
+const toPayload = ({
+    keys,
+    stake,
+    openForDelegation,
+    metadataUrl,
+    commissions,
+}: AddBakerState): AddBakerPayload => ({
+    electionVerifyKey: [keys.electionPublic, keys.proofElection],
+    signatureVerifyKey: [keys.signaturePublic, keys.proofSignature],
+    aggregationVerifyKey: [keys.aggregationPublic, keys.proofAggregation],
+    stake: toMicroUnits(stake.stake),
+    restakeEarnings: stake.restake,
+    openForDelegation,
+    metadataUrl,
+    ...commissions,
+});
+
+function getEstimatedFee(
+    values: AddBakerState,
+    exchangeRate: Fraction,
+    signatureThreshold = 1
+) {
+    let payloadSize: number | undefined;
+
+    try {
+        payloadSize = serializeTransferPayload(
+            TransactionKindId.Configure_baker,
+            toPayload(values)
+        ).length;
+    } catch {
+        payloadSize = undefined;
+    }
+
+    return getConfigureBakerFullCost(
+        exchangeRate,
+        signatureThreshold,
+        payloadSize
+    );
+}
 
 function StakePage({
     onNext,
     initial,
-}: AccountTransactionFlowPageProps<StakeSettings>) {
+    flowValues,
+}: AccountTransactionFlowPageProps<StakeSettings, AddBakerState>) {
     const { blockSummary, exchangeRate, account } = useContext(dependencies);
     const minimumStake = BigInt(
         blockSummary.updates.chainParameters.minimumThresholdForBaking
     );
-    const estimatedFee = useTransactionCostEstimate(
-        TransactionKindId.Add_baker, // TODO: change this to the correct transaction.
-        exchangeRate,
-        account?.signatureThreshold
+    const { stake, ...otherValues } = flowValues;
+
+    const defaultValues: StakeSettings = useMemo(
+        () => ({
+            stake: microGtuToGtu(minimumStake.toString()) ?? '0.00',
+            restake: true,
+            ...initial,
+        }),
+        [initial, minimumStake]
+    );
+
+    const estimatedFee = useMemo(
+        () =>
+            getEstimatedFee(
+                {
+                    stake: defaultValues,
+                    ...otherValues,
+                } as AddBakerState,
+                exchangeRate,
+                account.signatureThreshold
+            ),
+        [exchangeRate, account.signatureThreshold, defaultValues, otherValues]
     );
 
     return (
         <AddBakerStakeSettings
             onSubmit={onNext}
-            initialData={initial}
+            initialData={defaultValues}
             account={account}
             estimatedFee={estimatedFee}
             minimumStake={minimumStake}
@@ -167,6 +252,7 @@ function CommissionsPage({
         bakingRewardCommission: boundaries.bakingRewardCommission[1],
         finalizationRewardCommission:
             boundaries.finalizationRewardCommission[1],
+        ...initial,
     };
 
     const handleSubmit = useCallback(
@@ -188,7 +274,7 @@ function CommissionsPage({
     return (
         <Form<Commissions>
             onSubmit={handleSubmit}
-            defaultValues={fromRewardFractions(initial ?? defaultValues)}
+            defaultValues={fromRewardFractions(defaultValues)}
         >
             <p className="mB30">
                 When you open your baker as a pool, you have to set commission
@@ -197,22 +283,34 @@ function CommissionsPage({
             <Form.Slider
                 label="Transaction fee commissions"
                 name={commissionsFieldNames.transactionFeeCommission}
-                min={boundaries.transactionFeeCommission[0]}
-                max={boundaries.transactionFeeCommission[1]}
+                min={fractionResolutionToPercentage(
+                    boundaries.transactionFeeCommission[0]
+                )}
+                max={fractionResolutionToPercentage(
+                    boundaries.transactionFeeCommission[1]
+                )}
                 {...commonSliderProps}
             />
             <Form.Slider
                 label="Baking reward commissions"
                 name={commissionsFieldNames.bakingRewardCommission}
-                min={boundaries.bakingRewardCommission[0]}
-                max={boundaries.bakingRewardCommission[1]}
+                min={fractionResolutionToPercentage(
+                    boundaries.bakingRewardCommission[0]
+                )}
+                max={fractionResolutionToPercentage(
+                    boundaries.bakingRewardCommission[1]
+                )}
                 {...commonSliderProps}
             />
             <Form.Slider
                 label="Finalization reward commissions"
                 name={commissionsFieldNames.finalizationRewardCommission}
-                min={boundaries.finalizationRewardCommission[0]}
-                max={boundaries.finalizationRewardCommission[1]}
+                min={fractionResolutionToPercentage(
+                    boundaries.finalizationRewardCommission[0]
+                )}
+                max={fractionResolutionToPercentage(
+                    boundaries.finalizationRewardCommission[1]
+                )}
                 {...commonSliderProps}
             />
             <Form.Submit className={styles.bakerFlowContinue}>
@@ -225,7 +323,7 @@ function CommissionsPage({
 const MAX_SERIALIZED_URL_LENGTH = 2048;
 const validateSerializedLength: Validate = (v: string) =>
     v === undefined ||
-    new TextEncoder().encode(v).length > MAX_SERIALIZED_URL_LENGTH ||
+    new TextEncoder().encode(v).length < MAX_SERIALIZED_URL_LENGTH ||
     `The URL exceeds the maximum length of ${MAX_SERIALIZED_URL_LENGTH} (serialized into UTF-8)`;
 
 interface MetadataUrlPageForm {
@@ -278,20 +376,8 @@ const GenerateKeysPage = ({
     );
 };
 
-interface AddBakerState {
-    stake: StakeSettings;
-    openForDelegation: OpenStatus;
-    commissions: Commissions;
-    metadataUrl: MetadataUrl;
-    keys: BakerKeys;
-}
-
 type Props = Dependencies;
 type UnsafeProps = MakeRequired<Partial<Props>, 'account'>;
-type AddBakerPayload = MakeOptional<
-    NotOptional<ConfigureBakerPayload>,
-    'metadataUrl'
->;
 
 const hasNecessaryProps = (props: UnsafeProps): props is Props => {
     return [props.exchangeRate, props.nonce, props.blockSummary].every(
@@ -309,7 +395,7 @@ const withData = (component: ComponentType<Props>) =>
                     ensureProps(
                         component,
                         hasNecessaryProps,
-                        <AccountTransactionFlowLoading title={title} />
+                        <AccountTransactionFlowLoading title={TITLE} />
                     )
                 )
             )
@@ -318,6 +404,7 @@ const withData = (component: ComponentType<Props>) =>
 
 export default withData(function AddBaker(props: Props) {
     const { nonce, account, exchangeRate } = props;
+    const accountInfo = useSelector(accountInfoSelector(account));
 
     function convertToTransaction({
         stake,
@@ -353,11 +440,37 @@ export default withData(function AddBaker(props: Props) {
         return transaction;
     }
 
+    function validateValues(
+        values: AddBakerState
+    ): keyof AddBakerState | undefined {
+        const minimumStake = BigInt(
+            props.blockSummary.updates.chainParameters.minimumThresholdForBaking
+        );
+        const estimatedFee = getEstimatedFee(
+            values,
+            exchangeRate,
+            account.signatureThreshold
+        );
+        const stakeValidationResult = validateBakerStake(
+            minimumStake,
+            values.stake.stake,
+            accountInfo,
+            estimatedFee && collapseFraction(estimatedFee)
+        );
+
+        if (stakeValidationResult !== undefined) {
+            return 'stake';
+        }
+
+        return undefined;
+    }
+
     return (
         <dependencies.Provider value={props}>
             <AccountTransactionFlow<AddBakerState, ConfigureBakerTransaction>
-                title={title}
+                title={TITLE}
                 convert={convertToTransaction}
+                validate={validateValues}
             >
                 {{
                     stake: { component: StakePage },

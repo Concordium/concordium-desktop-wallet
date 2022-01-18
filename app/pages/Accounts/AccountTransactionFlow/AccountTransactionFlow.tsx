@@ -9,42 +9,53 @@ import { AccountTransaction } from '~/utils/types';
 
 import styles from './AccountTransactionFlow.module.scss';
 
-export interface AccountTransactionFlowPageProps<S> {
-    onNext(values: S): void;
-    initial: S | undefined;
+export interface AccountTransactionFlowPageProps<V, F = unknown> {
+    onNext(values: V): void;
+    initial: V | undefined;
+    flowValues: Partial<F>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-interface FlowChild<S, P extends keyof S = any> {
+interface FlowChild<F, K extends keyof F = any> {
     title?: string;
-    component: ComponentType<AccountTransactionFlowPageProps<S[P]>>;
+    component: ComponentType<AccountTransactionFlowPageProps<F[K], F>>;
 }
 
-type FlowChildren<S extends Record<string, unknown>> = {
-    [P in keyof S]: FlowChild<S, P>;
+type FlowChildren<F extends Record<string, unknown>> = {
+    [K in keyof F]: FlowChild<F, K>;
 };
 
 interface Props<
-    V extends Record<string, unknown>,
+    F extends Record<string, unknown>,
     T extends AccountTransaction
 > {
     title: string;
-    convert(values: V): T;
-    children: FlowChildren<V>;
+    convert(values: F): T;
+    /**
+     * Function to validate the transaction flow values as a whole.
+     * Return key of the substate containing the invalid field, or undefined if valid
+     */
+    validate?(values: F): keyof F | undefined;
+    children: FlowChildren<F>;
 }
 
 export default function AccountTransactionFlow<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    V extends Record<string, any>,
+    F extends Record<string, any>,
     T extends AccountTransaction
->({ title: baseTitle, convert, children }: Props<V, T>) {
-    const { pathname, state } = useLocation<V>();
-    const [values, setValues] = useState<V>(state ?? {});
+>({
+    title: baseTitle,
+    convert,
+    children,
+    validate = () => undefined,
+}: Props<F, T>) {
+    const { pathname, state } = useLocation<F>();
+    const [values, setValues] = useState<F>(state ?? {});
     const { path: matchedPath } = useRouteMatch();
     const dispatch = useDispatch();
 
     const pages = Object.entries(children)
-        .map(([k, c]: [keyof V, FlowChild<V>], i) => ({
+        .map(([k, c]: [keyof F, FlowChild<F>], i) => ({
             substate: k,
             Page: c.component,
             title: c.title ?? baseTitle,
@@ -65,18 +76,28 @@ export default function AccountTransactionFlow<
     const { nextRoute, title, route: currentRoute } = currentPage;
     const isFirstPage = currentRoute === matchedPath;
 
-    const handleNext = (substate: keyof V) => (v: Partial<V>) => {
+    const handleNext = (substate: keyof F) => (v: Partial<F>) => {
         const newValues = { ...values, [substate]: v };
         setValues(newValues);
 
         if (nextRoute) {
             dispatch(push(nextRoute));
-        } else {
-            const transaction = convert(newValues);
-
-            // eslint-disable-next-line no-console
-            console.log(transaction);
+            return;
         }
+
+        const invalidPage = pages.find(
+            (p) => p.substate === validate(newValues)
+        );
+
+        if (invalidPage) {
+            dispatch(push(invalidPage.route));
+            return;
+        }
+
+        const transaction = convert(newValues);
+
+        // eslint-disable-next-line no-console
+        console.log(transaction);
     };
 
     return (
@@ -94,6 +115,7 @@ export default function AccountTransactionFlow<
                         <Page
                             onNext={handleNext(substate)}
                             initial={values[substate]}
+                            flowValues={values}
                         />
                     </Route>
                 ))}
