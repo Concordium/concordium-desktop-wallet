@@ -411,7 +411,7 @@ const serializeVerifyKey = ([key, proof]: BakerKeyWithProof) =>
     Buffer.concat([putHexString(key), putHexString(proof)]);
 
 const serializeUrl = (url: string) => {
-    const { data, length } = getSerializedTextWithLength(url);
+    const { data, length } = getSerializedTextWithLength(url, encodeWord16);
     return Buffer.concat([length, data]);
 };
 

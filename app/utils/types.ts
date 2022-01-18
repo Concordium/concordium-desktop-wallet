@@ -957,6 +957,12 @@ export function instanceOfUpdateBakerRestakeEarnings(
     );
 }
 
+export function instanceOfConfigureBaker(
+    object: AccountTransaction<TransactionPayload>
+): object is ConfigureBaker {
+    return object.transactionKind === TransactionKindId.Configure_baker;
+}
+
 export function isExchangeRate(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<ExchangeRate> {
