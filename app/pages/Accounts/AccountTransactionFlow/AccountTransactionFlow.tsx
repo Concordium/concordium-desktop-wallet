@@ -1,11 +1,15 @@
 import { goBack, push } from 'connected-react-router';
 import React, { ComponentType, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch, useLocation, useRouteMatch } from 'react-router';
 import BackButton from '~/cross-app-components/BackButton';
 import Card from '~/cross-app-components/Card';
 import Loading from '~/cross-app-components/Loading';
-import { AccountTransaction } from '~/utils/types';
+import { chosenAccountSelector } from '~/features/AccountSlice';
+import { stringify } from '~/utils/JSONHelper';
+import { Account, AccountTransaction } from '~/utils/types';
+import { SubmitTransactionLocationState } from '../SubmitTransaction/SubmitTransaction';
+import routes from '~/constants/routes.json';
 
 import styles from './AccountTransactionFlow.module.scss';
 
@@ -53,6 +57,7 @@ export default function AccountTransactionFlow<
     const [values, setValues] = useState<F>(state ?? {});
     const { path: matchedPath } = useRouteMatch();
     const dispatch = useDispatch();
+    const account = useSelector(chosenAccountSelector) as Account;
 
     const pages = Object.entries(children)
         .map(([k, c]: [keyof F, FlowChild<F>], i) => ({
@@ -95,9 +100,24 @@ export default function AccountTransactionFlow<
         }
 
         const transaction = convert(newValues);
-
-        // eslint-disable-next-line no-console
-        console.log(transaction);
+        const serialized = stringify(transaction);
+        const locationState: SubmitTransactionLocationState<F> = {
+            account,
+            cancelled: {
+                pathname: currentRoute,
+                state: newValues,
+            },
+            confirmed: {
+                pathname: routes.ACCOUNTS_FINAL_PAGE,
+                state: {
+                    transaction: serialized,
+                },
+            },
+            transaction: serialized,
+        };
+        dispatch(
+            push({ pathname: routes.SUBMITTRANSFER, state: locationState })
+        );
     };
 
     return (
