@@ -6,11 +6,11 @@ import React, {
     useState,
 } from 'react';
 import { connect } from 'react-redux';
+import { Validate } from 'react-hook-form';
 import AddBakerStakeSettings, {
     StakeSettings,
 } from '~/components/BakerTransactions/AddBakerStakeSettings';
 import Form from '~/components/Form';
-import Input from '~/components/Form/Input';
 import Radios from '~/components/Form/Radios';
 import withExchangeRate, {
     ExchangeRate,
@@ -43,12 +43,12 @@ import AccountTransactionFlow, {
 } from '../../AccountTransactionFlow';
 import GenerateBakerKeys from '../GenerateBakerKeys';
 import { ensureProps } from '~/utils/componentHelpers';
-
-import styles from '../AccountDetailsPage.module.scss';
 import {
     fractionResolutionToPercentage,
     percentageToFractionResolution,
 } from '~/utils/rewardFractionHelpers';
+
+import styles from '../AccountDetailsPage.module.scss';
 
 type Commissions = NotOptional<
     Pick<
@@ -222,31 +222,43 @@ function CommissionsPage({
     );
 }
 
-// TODO add correct length validation according to deserialize in concordium-base
+const MAX_SERIALIZED_URL_LENGTH = 2048;
+const validateSerializedLength: Validate = (v: string) =>
+    v === undefined ||
+    new TextEncoder().encode(v).length > MAX_SERIALIZED_URL_LENGTH ||
+    `The URL exceeds the maximum length of ${MAX_SERIALIZED_URL_LENGTH} (serialized into UTF-8)`;
+
+interface MetadataUrlPageForm {
+    url: MetadataUrl;
+}
+
+const metadataUrlPageFieldNames: EqualRecord<MetadataUrlPageForm> = {
+    url: 'url',
+};
+
 const MetadataUrlPage = ({
     onNext,
     initial = '',
 }: AccountTransactionFlowPageProps<MetadataUrl>) => {
-    const [value, setValue] = useState<MetadataUrl>(initial);
     return (
-        <>
+        <Form<MetadataUrlPageForm> onSubmit={(v) => onNext(v.url)}>
             <p className="mB30">
                 You can choose to add a URL with metadata about your baker.
                 Leave it blank if you don&apos;t have any.
             </p>
-            <Input
+            <Form.Input
+                name={metadataUrlPageFieldNames.url}
+                defaultValue={initial}
                 className="body2"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
                 placeholder="Enter metadata URL"
+                rules={{
+                    validate: validateSerializedLength,
+                }}
             />
-            <Button
-                className={styles.bakerFlowContinue}
-                onClick={() => onNext(value)}
-            >
+            <Form.Submit className={styles.bakerFlowContinue}>
                 Continue
-            </Button>
-        </>
+            </Form.Submit>
+        </Form>
     );
 };
 
