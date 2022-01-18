@@ -14,6 +14,8 @@ import {
     Rectangle,
     SaveDialogOptions,
     SaveDialogReturnValue,
+    MessageBoxOptions,
+    MessageBoxReturnValue,
 } from 'electron';
 import {
     Account,
@@ -450,4 +452,5 @@ export interface WindowFunctions {
     platform: NodeJS.Platform;
     autoUpdate: AutoUpdateMethods;
     accountReport: AccountReportMethods;
+    messageBox: (opts: MessageBoxOptions) => Promise<MessageBoxReturnValue>;
 }
