@@ -25,7 +25,7 @@ export default function NavigationBlock({ shouldPrompt }: Props) {
                 message,
                 type: 'warning',
                 noLink: true,
-                title: 'Concordium',
+                title: 'Concordium Desktop Wallet',
                 buttons: ['Abort', 'Cancel'],
             });
             if (response === 0) {
