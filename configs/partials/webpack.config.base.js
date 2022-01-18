@@ -12,6 +12,13 @@ const CheckTargetNet = require('../../internals/scripts/CheckTargetNet');
 
 CheckTargetNet();
 
+const targetNet = process.env.TARGET_NET;
+
+let userData = 'Concordium Wallet';
+if (targetNet && targetNet !== 'mainnet') {
+    userData += ` ${targetNet}`;
+}
+
 const extensions = ['.js', '.jsx', '.json', '.ts', '.tsx'];
 
 module.exports = {
@@ -72,7 +79,9 @@ module.exports = {
 
     plugins: [
         new webpack.EnvironmentPlugin({
+            NODE_ENV: 'production',
             TARGET_NET: 'mainnet',
+            USER_DATA: userData,
             LEDGER_EMULATOR_URL: '',
             DEBUG_PROD: false,
             START_MINIMIZED: false,
