@@ -14,14 +14,29 @@ import routes from '~/constants/routes.json';
 import styles from './AccountTransactionFlow.module.scss';
 
 export interface AccountTransactionFlowPageProps<V, F = unknown> {
+    /**
+     * Function to be triggered on page submission. Will take user to next page in the flow.
+     */
     onNext(values: V): void;
+    /**
+     * Initial values for substate.
+     */
     initial: V | undefined;
+    /**
+     * Accumulated values of entire flow (thus far)
+     */
     flowValues: Partial<F>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface FlowChild<F, K extends keyof F = any> {
+    /**
+     * Page title. Overrides title defined on AccountTransactionFlow.
+     */
     title?: string;
+    /**
+     * Page component responsible for letting user fill out the respective substate.
+     */
     component: ComponentType<AccountTransactionFlowPageProps<F[K], F>>;
 }
 
@@ -33,13 +48,23 @@ interface Props<
     F extends Record<string, unknown>,
     T extends AccountTransaction
 > {
+    /**
+     * Flow title. Can be overridden for each page.
+     */
     title: string;
+    /**
+     * Function to convert flow values into an account transaction.
+     */
     convert(values: F): T;
     /**
      * Function to validate the transaction flow values as a whole.
      * Return key of the substate containing the invalid field, or undefined if valid
      */
     validate?(values: F): keyof F | undefined;
+    /**
+     * Pages of the transaction flow declared as a mapping of components to corresponding substate.
+     * Declaration order defines the order the pages are shown.
+     */
     children: FlowChildren<F>;
 }
 
