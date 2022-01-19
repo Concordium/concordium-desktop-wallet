@@ -16,6 +16,7 @@ import {
     instanceOfUpdateBakerStake,
     instanceOfUpdateBakerRestakeEarnings,
     AddressBookEntry,
+    instanceOfConfigureBaker,
 } from '../../utils/types';
 import { lookupAddressBookEntry, lookupName } from '~/utils/addressBookHelpers';
 import DisplayScheduleTransfer from './DisplayScheduledTransferDetails';
@@ -28,6 +29,7 @@ import DisplayRemoveBaker from './DisplayRemoveBaker';
 import DisplayAccountCredentialsUpdate from '../DisplayAccountCredentialUpdate';
 import DisplayUpdateBakerStake from './DisplayUpdateBakerStake';
 import DisplayUpdateBakerRestakeEarnings from './DisplayUpdateBakerRestakeEarnings';
+import DisplayConfigureBaker from './DisplayConfigureBaker';
 
 interface Props {
     transaction: AccountTransaction;
@@ -109,6 +111,7 @@ export default function AccountTransactionDetails({ transaction }: Props) {
             />
         );
     }
+    // TODO remove following 5.
     if (instanceOfAddBaker(transaction)) {
         return <DisplayAddBaker transaction={transaction} />;
     }
@@ -123,6 +126,9 @@ export default function AccountTransactionDetails({ transaction }: Props) {
     }
     if (instanceOfRemoveBaker(transaction)) {
         return <DisplayRemoveBaker transaction={transaction} />;
+    }
+    if (instanceOfConfigureBaker(transaction)) {
+        return <DisplayConfigureBaker transaction={transaction} />;
     }
     if (
         instanceOfTransferToEncrypted(transaction) ||
