@@ -1,7 +1,7 @@
 import { goBack, push, replace } from 'connected-react-router';
-import React, { ComponentType, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Route, Switch, useLocation, useRouteMatch } from 'react-router';
+import { useLocation } from 'react-router';
 import BackButton from '~/cross-app-components/BackButton';
 import Card from '~/cross-app-components/Card';
 import Loading from '~/cross-app-components/Loading';
@@ -10,45 +10,27 @@ import { stringify } from '~/utils/JSONHelper';
 import { Account, AccountTransaction } from '~/utils/types';
 import { SubmitTransactionLocationState } from '../SubmitTransaction/SubmitTransaction';
 import routes from '~/constants/routes.json';
+import MultiStepForm, {
+    FormChild,
+    MultiStepFormProps,
+} from '~/components/MultiStepForm';
 
 import styles from './AccountTransactionFlow.module.scss';
-import { isDefined } from '~/utils/basicHelpers';
-
-export interface AccountTransactionFlowPageProps<V, F = unknown> {
-    /**
-     * Function to be triggered on page submission. Will take user to next page in the flow.
-     */
-    onNext(values: V): void;
-    /**
-     * Initial values for substate.
-     */
-    initial: V | undefined;
-    /**
-     * Accumulated values of entire flow (thus far)
-     */
-    flowValues: Partial<F>;
-}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-interface FlowChild<F, K extends keyof F = any> {
+interface FlowChild<F, K extends keyof F = any> extends FormChild<F, K> {
     /**
      * Page title. Overrides title defined on AccountTransactionFlow.
      */
     title?: string;
-    /**
-     * Page component responsible for letting user fill out the respective substate.
-     */
-    component: ComponentType<AccountTransactionFlowPageProps<F[K], F>>;
 }
 
 type FlowChildren<F extends Record<string, unknown>> = {
     [K in keyof F]: FlowChild<F, K>;
 };
 
-interface Props<
-    F extends Record<string, unknown>,
-    T extends AccountTransaction
-> {
+interface Props<F extends Record<string, unknown>, T extends AccountTransaction>
+    extends Omit<MultiStepFormProps<F>, 'onDone'> {
     /**
      * Flow title. Can be overridden for each page.
      */
@@ -58,84 +40,45 @@ interface Props<
      */
     convert(values: F): T;
     /**
-     * Function to validate the transaction flow values as a whole.
-     * Return key of the substate containing the invalid field, or undefined if valid
-     */
-    validate?(values: F): keyof F | undefined;
-    /**
      * Pages of the transaction flow declared as a mapping of components to corresponding substate.
      * Declaration order defines the order the pages are shown.
      */
-    children: FlowChildren<F> | ((values: F) => FlowChildren<F>);
+    children: FlowChildren<F> | ((values: Partial<F>) => FlowChildren<F>);
+}
+
+interface InternalState {
+    isFirstPage: boolean;
+    title?: string;
 }
 
 export default function AccountTransactionFlow<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     F extends Record<string, any>,
     T extends AccountTransaction
->({
-    title: baseTitle,
-    convert,
-    children,
-    validate = () => undefined,
-}: Props<F, T>) {
-    const { pathname, state } = useLocation<F>();
-    const [values, setValues] = useState<F>(state ?? {});
-    const { path: matchedPath } = useRouteMatch();
+>({ title: baseTitle, convert, children, ...formProps }: Props<F, T>) {
+    const { pathname, state } = useLocation<F | null>();
     const dispatch = useDispatch();
     const account = useSelector(chosenAccountSelector) as Account;
-    const flowChildren = useMemo(
-        () => (typeof children === 'function' ? children(values) : children),
-        [children, values]
-    );
-    const keyPagePairs = Object.entries(flowChildren).filter(([, c]) =>
-        isDefined(c)
-    );
+    const [
+        { isFirstPage = true, title = baseTitle },
+        setState,
+    ] = useState<InternalState>({ isFirstPage: true });
 
-    const pages = keyPagePairs
-        .map(([k, c]: [keyof F, FlowChild<F>], i) => ({
-            substate: k,
-            Page: c.component,
-            title: c.title ?? baseTitle,
-            route: i === 0 ? matchedPath : `${matchedPath}/${i}`,
-            nextRoute:
-                i === keyPagePairs.length - 1
-                    ? undefined
-                    : `${matchedPath}/${i + 1}`,
-        }))
-        .reverse();
+    const onPageActive = (step: keyof F, values: Partial<F>) => {
+        const flowChildren =
+            typeof children === 'function' ? children(values) : children;
+        const { title: childTitle } = flowChildren[step];
+        const isFirst = Object.keys(flowChildren).indexOf(step as string) === 0;
 
-    const currentPage = pages.find((p) => pathname.startsWith(p.route));
+        setState({ isFirstPage: isFirst, title: childTitle });
+    };
 
-    if (!currentPage) {
-        return null;
-    }
-
-    const { nextRoute, title, route: currentRoute } = currentPage;
-    const isFirstPage = currentRoute === matchedPath;
-
-    const handleNext = (substate: keyof F) => (v: Partial<F>) => {
-        const newValues = { ...values, [substate]: v };
-        setValues(newValues);
-
-        if (nextRoute) {
-            dispatch(push(nextRoute));
-            return;
-        }
-
-        const invalidPage = pages.find(
-            (p) => p.substate === validate(newValues)
-        );
-
-        if (invalidPage) {
-            dispatch(push(invalidPage.route));
-            return;
-        }
-
-        dispatch(replace(currentRoute, newValues));
-
-        const transaction = convert(newValues);
+    const handleDone = (v: F) => {
+        const transaction = convert(v);
         const serialized = stringify(transaction);
+
+        dispatch(replace(pathname, v));
+
         const locationState: SubmitTransactionLocationState = {
             account,
             confirmed: {
@@ -146,6 +89,7 @@ export default function AccountTransactionFlow<
             },
             transaction: serialized,
         };
+
         dispatch(
             push({ pathname: routes.SUBMITTRANSFER, state: locationState })
         );
@@ -160,17 +104,14 @@ export default function AccountTransactionFlow<
                 />
             )}
             <h3 className="mT0">{title}</h3>
-            <Switch>
-                {pages.map(({ Page, route, substate }) => (
-                    <Route path={route} key={route}>
-                        <Page
-                            onNext={handleNext(substate)}
-                            initial={values[substate]}
-                            flowValues={values}
-                        />
-                    </Route>
-                ))}
-            </Switch>
+            <MultiStepForm<F>
+                initialValues={state ?? undefined}
+                onDone={handleDone}
+                onPageActive={onPageActive}
+                {...formProps}
+            >
+                {children}
+            </MultiStepForm>
         </Card>
     );
 }

@@ -1,5 +1,5 @@
 export {
     default,
-    AccountTransactionFlowPageProps,
     AccountTransactionFlowLoading,
 } from './AccountTransactionFlow';
+export { MultiStepFormPageProps as AccountTransactionFlowPageProps } from '../../../components/MultiStepForm';

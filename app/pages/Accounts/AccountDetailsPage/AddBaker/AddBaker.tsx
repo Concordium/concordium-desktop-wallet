@@ -139,13 +139,13 @@ function getEstimatedFee(
 function StakePage({
     onNext,
     initial,
-    flowValues,
+    formValues,
 }: AccountTransactionFlowPageProps<StakeSettings, AddBakerState>) {
     const { blockSummary, exchangeRate, account } = useContext(dependencies);
     const minimumStake = BigInt(
         blockSummary.updates.chainParameters.minimumThresholdForBaking
     );
-    const { stake, ...otherValues } = flowValues;
+    const { stake, ...otherValues } = formValues;
 
     const defaultValues: StakeSettings = useMemo(
         () => ({
@@ -409,7 +409,7 @@ const withData = (component: ComponentType<Props>) =>
         )
     );
 
-function whenOpenForDelegation<T>(status: OpenStatus, value: T): T | undefined {
+function whenOpen<T>(value: T, status?: OpenStatus): T | undefined {
     if (status === OpenStatus.OpenForAll) {
         return value;
     }
@@ -488,14 +488,20 @@ export default withData(function AddBaker(props: Props) {
                         component: OpenForDelegationPage,
                         title: 'Pool settings',
                     },
-                    commissions: whenOpenForDelegation(openForDelegation, {
-                        component: CommissionsPage,
-                        title: 'Pool settings',
-                    }),
-                    metadataUrl: whenOpenForDelegation(openForDelegation, {
-                        component: MetadataUrlPage,
-                        title: 'Pool settings',
-                    }),
+                    commissions: whenOpen(
+                        {
+                            component: CommissionsPage,
+                            title: 'Pool settings',
+                        },
+                        openForDelegation
+                    ),
+                    metadataUrl: whenOpen(
+                        {
+                            component: MetadataUrlPage,
+                            title: 'Pool settings',
+                        },
+                        openForDelegation
+                    ),
                     keys: { component: GenerateKeysPage, title: 'Baker keys' },
                 })}
             </AccountTransactionFlow>
