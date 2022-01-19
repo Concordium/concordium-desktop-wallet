@@ -25,16 +25,12 @@ import {
     instanceOfScheduledTransferWithMemo,
     instanceOfEncryptedTransferWithMemo,
     instanceOfSimpleTransferWithMemo,
-    instanceOfAddBaker,
-    instanceOfRemoveBaker,
-    instanceOfUpdateBakerKeys,
-    instanceOfUpdateBakerRestakeEarnings,
-    instanceOfUpdateBakerStake,
+    instanceOfConfigureBaker,
 } from '~/utils/types';
 
-interface State {
+export interface FinalPageLocationState {
     transaction: string;
-    recipient: AddressBookEntry;
+    recipient?: AddressBookEntry;
     transactionHash?: string;
 }
 
@@ -86,14 +82,8 @@ function getSpecificsHandler(transaction: AccountTransaction) {
     ) {
         title = 'Shielded transfer submitted!';
         amount = transaction.payload.plainTransferAmount;
-    } else if (
-        instanceOfAddBaker(transaction) ||
-        instanceOfRemoveBaker(transaction) ||
-        instanceOfUpdateBakerKeys(transaction) ||
-        instanceOfUpdateBakerRestakeEarnings(transaction) ||
-        instanceOfUpdateBakerStake(transaction)
-    ) {
-        title = 'Baker transaction submitted!';
+    } else if (instanceOfConfigureBaker(transaction)) {
+        title = 'Configure baker transaction submitted!';
     } else {
         throw new Error(
             `Unsupported transaction type - please implement: ${transaction}`
@@ -118,7 +108,7 @@ function displayRecipient(recipient: AddressBookEntry) {
  */
 export default function FinalPage(): JSX.Element {
     const dispatch = useDispatch();
-    const location = useLocation<State>();
+    const location = useLocation<FinalPageLocationState>();
     if (!location.state) {
         throw new Error('Unexpected missing state.');
     }
@@ -147,7 +137,7 @@ export default function FinalPage(): JSX.Element {
                 estimatedFee={transaction.estimatedFee}
             />
             {handler.note}
-            {displayRecipient(recipient)}
+            {recipient && displayRecipient(recipient)}
 
             <DisplayMemo className="textCenter" memo={handler.memo} />
             <h3 className="textCenter mT10">

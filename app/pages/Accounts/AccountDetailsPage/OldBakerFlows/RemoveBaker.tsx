@@ -54,9 +54,6 @@ export default ensureExchangeRateAndNonce(function RemoveBaker({
         const state: SubmitTransactionLocationState = {
             account,
             transaction: serialized,
-            cancelled: {
-                pathname: routes.ACCOUNTS_REMOVE_BAKER,
-            },
             confirmed: {
                 pathname: routes.ACCOUNTS_FINAL_PAGE,
                 state: {

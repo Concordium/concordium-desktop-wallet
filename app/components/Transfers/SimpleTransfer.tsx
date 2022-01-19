@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { Redirect } from 'react-router';
 import { useDispatch } from 'react-redux';
-import { push } from 'connected-react-router';
+import { push, replace } from 'connected-react-router';
 import { stringify } from '../../utils/JSONHelper';
 import routes from '../../constants/routes.json';
 import {
@@ -70,6 +70,13 @@ function SimpleTransfer({
             );
 
             dispatch(
+                replace(routes.ACCOUNTS_SIMPLETRANSFER, {
+                    amount,
+                    memo,
+                    recipient,
+                })
+            );
+            dispatch(
                 push({
                     pathname: routes.SUBMITTRANSFER,
                     state: {
@@ -77,14 +84,6 @@ function SimpleTransfer({
                             pathname: routes.ACCOUNTS_FINAL_PAGE,
                             state: {
                                 transaction: stringify(transaction),
-                                recipient,
-                            },
-                        },
-                        cancelled: {
-                            pathname: routes.ACCOUNTS_SIMPLETRANSFER,
-                            state: {
-                                amount,
-                                memo,
                                 recipient,
                             },
                         },

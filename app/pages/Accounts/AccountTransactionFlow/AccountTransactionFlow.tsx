@@ -1,4 +1,4 @@
-import { goBack, push } from 'connected-react-router';
+import { goBack, push, replace } from 'connected-react-router';
 import React, { ComponentType, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch, useLocation, useRouteMatch } from 'react-router';
@@ -124,14 +124,12 @@ export default function AccountTransactionFlow<
             return;
         }
 
+        dispatch(replace(currentRoute, newValues));
+
         const transaction = convert(newValues);
         const serialized = stringify(transaction);
-        const locationState: SubmitTransactionLocationState<F> = {
+        const locationState: SubmitTransactionLocationState = {
             account,
-            cancelled: {
-                pathname: currentRoute,
-                state: newValues,
-            },
             confirmed: {
                 pathname: routes.ACCOUNTS_FINAL_PAGE,
                 state: {

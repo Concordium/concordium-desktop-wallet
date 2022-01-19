@@ -66,9 +66,6 @@ export default ensureExchangeRateAndNonce(function UpdateBakerRestake({
             const state: SubmitTransactionLocationState = {
                 account,
                 transaction: serialized,
-                cancelled: {
-                    pathname: routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS,
-                },
                 confirmed: {
                     pathname: routes.ACCOUNTS_FINAL_PAGE,
                     state: {

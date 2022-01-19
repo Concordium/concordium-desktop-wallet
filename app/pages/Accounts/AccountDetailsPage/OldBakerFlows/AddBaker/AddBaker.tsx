@@ -88,12 +88,9 @@ const AddBaker = ensureExchangeRateAndNonce(
 
                 const transaction = makeTransaction(bakerKeys);
                 const serialized = stringify(transaction);
-                const state: SubmitTransactionLocationState<StakeSettings> = {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const state: SubmitTransactionLocationState<any> = {
                     account,
-                    cancelled: {
-                        pathname: routes.ACCOUNTS_ADD_BAKER,
-                        state: bakerData,
-                    },
                     confirmed: {
                         pathname: routes.ACCOUNTS_FINAL_PAGE,
                         state: {
@@ -104,7 +101,7 @@ const AddBaker = ensureExchangeRateAndNonce(
                 };
                 dispatch(replace({ pathname: routes.SUBMITTRANSFER, state }));
             },
-            [dispatch, makeTransaction, bakerData, account]
+            [dispatch, makeTransaction, account]
         );
 
         if (isMultiSig(account)) {

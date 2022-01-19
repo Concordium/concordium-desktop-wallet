@@ -102,9 +102,6 @@ export default ensureExchangeRateAndNonce(function UpdateBakerKeys({
             const state: SubmitTransactionLocationState = {
                 account,
                 transaction: serialized,
-                cancelled: {
-                    pathname: routes.ACCOUNTS_UPDATE_BAKER_KEYS,
-                },
                 confirmed: {
                     pathname: routes.ACCOUNTS_FINAL_PAGE,
                     state: {

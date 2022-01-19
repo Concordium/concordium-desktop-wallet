@@ -473,11 +473,20 @@ export default withData(function AddBaker(props: Props) {
                 validate={validateValues}
             >
                 {{
-                    stake: { component: StakePage },
-                    openForDelegation: { component: OpenForDelegationPage },
-                    commissions: { component: CommissionsPage },
-                    metadataUrl: { component: MetadataUrlPage },
-                    keys: { component: GenerateKeysPage },
+                    stake: { component: StakePage, title: 'Stake settings' },
+                    openForDelegation: {
+                        component: OpenForDelegationPage,
+                        title: 'Pool settings',
+                    },
+                    commissions: {
+                        component: CommissionsPage,
+                        title: 'Pool settings',
+                    },
+                    metadataUrl: {
+                        component: MetadataUrlPage,
+                        title: 'Pool settings',
+                    },
+                    keys: { component: GenerateKeysPage, title: 'Baker keys' },
                 }}
             </AccountTransactionFlow>
         </dependencies.Provider>

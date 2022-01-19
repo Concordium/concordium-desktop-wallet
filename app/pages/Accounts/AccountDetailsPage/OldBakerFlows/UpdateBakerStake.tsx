@@ -86,9 +86,6 @@ const UpdateBakerStakeForm = ensureExchangeRateAndNonce(
                 const state: SubmitTransactionLocationState = {
                     account,
                     transaction: serialized,
-                    cancelled: {
-                        pathname: routes.ACCOUNTS_UPDATE_BAKER_STAKE,
-                    },
                     confirmed: {
                         pathname: routes.ACCOUNTS_FINAL_PAGE,
                         state: {

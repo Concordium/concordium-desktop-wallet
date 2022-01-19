@@ -50,16 +50,15 @@ import SimpleErrorModal from '~/components/SimpleErrorModal';
 import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 import { insert } from '~/database/DecryptedAmountsDao';
 import { getKeyExportType } from '~/utils/identityHelpers';
+import { FinalPageLocationState } from '~/components/Transfers/FinalPage';
 
 import styles from './SubmitTransaction.module.scss';
 
 export interface SubmitTransactionLocationState<
-    CancelledState = Record<string, unknown>,
-    ConfirmedState = Record<string, unknown>
+    ConfirmedState = FinalPageLocationState
 > {
     transaction: string;
     account: Account;
-    cancelled: LocationDescriptorObject<CancelledState>;
     confirmed: LocationDescriptorObject<ConfirmedState>;
 }
 
@@ -167,12 +166,7 @@ export default function SubmitTransaction({ location }: Props) {
         return <Redirect to={routes.ACCOUNTS} />;
     }
 
-    const {
-        account,
-        transaction: transactionJSON,
-        cancelled,
-        confirmed,
-    } = location.state;
+    const { account, transaction: transactionJSON, confirmed } = location.state;
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const identity = useSelector(specificIdentitySelector(account.identityId));
@@ -299,8 +293,7 @@ export default function SubmitTransaction({ location }: Props) {
                 </h1>
             </PageLayout.Header>
             <PageLayout.Container
-                closeRoute={cancelled}
-                backRoute={cancelled}
+                closeRoute={routes.ACCOUNTS}
                 padding="vertical"
             >
                 <SimpleErrorModal
