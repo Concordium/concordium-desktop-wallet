@@ -1,5 +1,5 @@
 import { goBack, push, replace } from 'connected-react-router';
-import React, { ComponentType, useState } from 'react';
+import React, { ComponentType, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch, useLocation, useRouteMatch } from 'react-router';
 import BackButton from '~/cross-app-components/BackButton';
@@ -12,6 +12,7 @@ import { SubmitTransactionLocationState } from '../SubmitTransaction/SubmitTrans
 import routes from '~/constants/routes.json';
 
 import styles from './AccountTransactionFlow.module.scss';
+import { isDefined } from '~/utils/basicHelpers';
 
 export interface AccountTransactionFlowPageProps<V, F = unknown> {
     /**
@@ -65,7 +66,7 @@ interface Props<
      * Pages of the transaction flow declared as a mapping of components to corresponding substate.
      * Declaration order defines the order the pages are shown.
      */
-    children: FlowChildren<F>;
+    children: FlowChildren<F> | ((values: F) => FlowChildren<F>);
 }
 
 export default function AccountTransactionFlow<
@@ -83,8 +84,13 @@ export default function AccountTransactionFlow<
     const { path: matchedPath } = useRouteMatch();
     const dispatch = useDispatch();
     const account = useSelector(chosenAccountSelector) as Account;
+    const flowChildren = useMemo(
+        () => (typeof children === 'function' ? children(values) : children),
+        [children, values]
+    );
 
-    const pages = Object.entries(children)
+    const pages = Object.entries(flowChildren)
+        .filter(([, c]) => isDefined(c))
         .map(([k, c]: [keyof F, FlowChild<F>], i) => ({
             substate: k,
             Page: c.component,

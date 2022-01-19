@@ -77,8 +77,8 @@ type MetadataUrl = string;
 interface AddBakerState {
     stake: StakeSettings;
     openForDelegation: OpenStatus;
-    commissions: Commissions;
-    metadataUrl: MetadataUrl;
+    commissions?: Commissions;
+    metadataUrl?: MetadataUrl;
     keys: BakerKeys;
 }
 
@@ -99,7 +99,10 @@ const toPayload = ({
     openForDelegation,
     metadataUrl,
     commissions,
-}: AddBakerState): AddBakerPayload => ({
+}: MakeOptional<
+    NotOptional<AddBakerState>,
+    'metadataUrl'
+>): AddBakerPayload => ({
     electionVerifyKey: [keys.electionPublic, keys.proofElection],
     signatureVerifyKey: [keys.signaturePublic, keys.proofSignature],
     aggregationVerifyKey: [keys.aggregationPublic, keys.proofAggregation],
@@ -120,7 +123,7 @@ function getEstimatedFee(
     try {
         payloadSize = serializeTransferPayload(
             TransactionKindId.Configure_baker,
-            toPayload(values)
+            toPayload(values as NotOptional<AddBakerState>)
         ).length;
     } catch {
         payloadSize = undefined;
@@ -235,6 +238,12 @@ const fromRewardFractions = (values: Commissions): Commissions => ({
     ),
 });
 
+const getDefaultCommissions = (): Commissions => ({
+    transactionFeeCommission: 15000,
+    bakingRewardCommission: 15000,
+    finalizationRewardCommission: 15000,
+});
+
 function CommissionsPage({
     initial,
     onNext,
@@ -248,10 +257,7 @@ function CommissionsPage({
         finalizationRewardCommission: [5000, 15000],
     };
     const defaultValues: Commissions = {
-        transactionFeeCommission: boundaries.transactionFeeCommission[1],
-        bakingRewardCommission: boundaries.bakingRewardCommission[1],
-        finalizationRewardCommission:
-            boundaries.finalizationRewardCommission[1],
+        ...getDefaultCommissions(),
         ...initial,
     };
 
@@ -402,30 +408,28 @@ const withData = (component: ComponentType<Props>) =>
         )
     );
 
+function ifOpenForDelegation<T>(status: OpenStatus, value: T): T | undefined {
+    if (status === OpenStatus.OpenForAll) {
+        return value;
+    }
+    return undefined;
+}
+
 export default withData(function AddBaker(props: Props) {
     const { nonce, account, exchangeRate } = props;
     const accountInfo = useSelector(accountInfoSelector(account));
 
-    function convertToTransaction({
-        stake,
-        keys,
-        openForDelegation,
-        metadataUrl,
-        commissions,
-    }: AddBakerState): ConfigureBakerTransaction {
-        const payload: AddBakerPayload = {
-            electionVerifyKey: [keys.electionPublic, keys.proofElection],
-            signatureVerifyKey: [keys.signaturePublic, keys.proofSignature],
-            aggregationVerifyKey: [
-                keys.aggregationPublic,
-                keys.proofAggregation,
-            ],
-            stake: toMicroUnits(stake.stake),
-            restakeEarnings: stake.restake,
-            openForDelegation,
-            metadataUrl,
-            ...commissions,
+    function convertToTransaction(
+        values: AddBakerState
+    ): ConfigureBakerTransaction {
+        const withDefaults: MakeOptional<
+            NotOptional<AddBakerState>,
+            'metadataUrl'
+        > = {
+            commissions: getDefaultCommissions(),
+            ...values,
         };
+        const payload: AddBakerPayload = toPayload(withDefaults);
 
         const transaction = createConfigureBakerTransaction(
             account.address,
@@ -472,22 +476,22 @@ export default withData(function AddBaker(props: Props) {
                 convert={convertToTransaction}
                 validate={validateValues}
             >
-                {{
+                {({ openForDelegation }) => ({
                     stake: { component: StakePage, title: 'Stake settings' },
                     openForDelegation: {
                         component: OpenForDelegationPage,
                         title: 'Pool settings',
                     },
-                    commissions: {
+                    commissions: ifOpenForDelegation(openForDelegation, {
                         component: CommissionsPage,
                         title: 'Pool settings',
-                    },
-                    metadataUrl: {
+                    }),
+                    metadataUrl: ifOpenForDelegation(openForDelegation, {
                         component: MetadataUrlPage,
                         title: 'Pool settings',
-                    },
+                    }),
                     keys: { component: GenerateKeysPage, title: 'Baker keys' },
-                }}
+                })}
             </AccountTransactionFlow>
         </dependencies.Provider>
     );
