@@ -58,10 +58,10 @@ import {
     fractionResolutionToPercentage,
     percentageToFractionResolution,
 } from '~/utils/rewardFractionHelpers';
-
-import styles from '../AccountDetailsPage.module.scss';
 import { getConfigureBakerFullCost } from '~/utils/transactionCosts';
 import { serializeTransferPayload } from '~/utils/transactionSerialization';
+
+import styles from '../AccountDetailsPage.module.scss';
 
 type Commissions = NotOptional<
     Pick<
@@ -238,6 +238,7 @@ const fromRewardFractions = (values: Commissions): Commissions => ({
     ),
 });
 
+// TODO: default values should be upper bound from chain.
 const getDefaultCommissions = (): Commissions => ({
     transactionFeeCommission: 15000,
     bakingRewardCommission: 15000,
@@ -408,7 +409,7 @@ const withData = (component: ComponentType<Props>) =>
         )
     );
 
-function ifOpenForDelegation<T>(status: OpenStatus, value: T): T | undefined {
+function whenOpenForDelegation<T>(status: OpenStatus, value: T): T | undefined {
     if (status === OpenStatus.OpenForAll) {
         return value;
     }
@@ -422,14 +423,19 @@ export default withData(function AddBaker(props: Props) {
     function convertToTransaction(
         values: AddBakerState
     ): ConfigureBakerTransaction {
-        const withDefaults: MakeOptional<
-            NotOptional<AddBakerState>,
-            'metadataUrl'
-        > = {
-            commissions: getDefaultCommissions(),
+        const withDefaults = {
             ...values,
         };
-        const payload: AddBakerPayload = toPayload(withDefaults);
+
+        // Ensure defaulf pool settings are used when opting for closed pool.
+        if (values.openForDelegation !== OpenStatus.OpenForAll) {
+            delete withDefaults.metadataUrl;
+            withDefaults.commissions = getDefaultCommissions();
+        }
+
+        const payload: AddBakerPayload = toPayload(
+            withDefaults as NotOptional<AddBakerState>
+        );
 
         const transaction = createConfigureBakerTransaction(
             account.address,
@@ -482,11 +488,11 @@ export default withData(function AddBaker(props: Props) {
                         component: OpenForDelegationPage,
                         title: 'Pool settings',
                     },
-                    commissions: ifOpenForDelegation(openForDelegation, {
+                    commissions: whenOpenForDelegation(openForDelegation, {
                         component: CommissionsPage,
                         title: 'Pool settings',
                     }),
-                    metadataUrl: ifOpenForDelegation(openForDelegation, {
+                    metadataUrl: whenOpenForDelegation(openForDelegation, {
                         component: MetadataUrlPage,
                         title: 'Pool settings',
                     }),

@@ -88,16 +88,18 @@ export default function AccountTransactionFlow<
         () => (typeof children === 'function' ? children(values) : children),
         [children, values]
     );
+    const keyPagePairs = Object.entries(flowChildren).filter(([, c]) =>
+        isDefined(c)
+    );
 
-    const pages = Object.entries(flowChildren)
-        .filter(([, c]) => isDefined(c))
+    const pages = keyPagePairs
         .map(([k, c]: [keyof F, FlowChild<F>], i) => ({
             substate: k,
             Page: c.component,
             title: c.title ?? baseTitle,
             route: i === 0 ? matchedPath : `${matchedPath}/${i}`,
             nextRoute:
-                i === Object.values(children).length - 1
+                i === keyPagePairs.length - 1
                     ? undefined
                     : `${matchedPath}/${i + 1}`,
         }))

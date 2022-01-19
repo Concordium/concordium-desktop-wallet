@@ -12,18 +12,24 @@ import DisplayPublicKey from './DisplayPublicKey';
 
 import styles from './transferDetails.module.scss';
 import { fractionResolutionToPercentage } from '~/utils/rewardFractionHelpers';
+import { toFixed } from '~/utils/numberStringHelpers';
 
 interface DisplayCommissionProps {
     title: string;
     value?: number;
 }
 
+const formatCommission = toFixed(3);
+
 const DisplayCommission = ({ title, value }: DisplayCommissionProps) =>
     value ? (
         <>
             <h5 className={styles.title}>{title}:</h5>
             <p className={styles.amount}>
-                {fractionResolutionToPercentage(value)}%
+                {formatCommission(
+                    fractionResolutionToPercentage(value).toString()
+                )}
+                %
             </p>
         </>
     ) : null;
