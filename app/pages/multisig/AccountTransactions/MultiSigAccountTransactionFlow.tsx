@@ -1,20 +1,25 @@
 /* eslint-disable no-console */
 import { replace } from 'connected-react-router';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router';
 import { stringify } from '~/utils/JSONHelper';
-import { AccountTransaction } from '~/utils/types';
+import { Account, AccountInfo, AccountTransaction } from '~/utils/types';
 import MultiStepForm, {
     FormChild,
+    MultiStepFormPageProps,
     MultiStepFormProps,
     OrRenderValues,
 } from '~/components/MultiStepForm';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import SignTransactionProposal from '../SignTransactionProposal';
+import PickAccount from '~/components/PickAccount';
+import { isMultiSig } from '~/utils/accountHelpers';
+import { partialApply } from '~/utils/componentHelpers';
 
 import multisigFlowStyles from '../common/MultiSignatureFlowPage.module.scss';
+import BakerPendingChange from '~/components/BakerPendingChange';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface FlowChild<F, K extends keyof F = any> extends FormChild<F, K> {
@@ -32,6 +37,53 @@ type FlowChildren<F extends Record<string, unknown>> = {
     [K in keyof F]: FlowChild<F, K>;
 };
 
+interface AccountStep {
+    account: Account;
+}
+
+type SelectAccountPageProps = MultiStepFormPageProps<Account> & {
+    filter?(account: Account, info?: AccountInfo): boolean;
+};
+
+const SelectAccountPage = ({
+    onNext,
+    initial,
+    filter = () => true,
+}: SelectAccountPageProps) => {
+    const [chosen, setChosen] = useState<Account | undefined>(initial);
+
+    const extendedFilter: typeof filter = useCallback(
+        (a, i) => isMultiSig(a) && filter(a, i),
+        [filter]
+    );
+
+    useEffect(() => {
+        if (chosen) {
+            onNext(chosen);
+        }
+    }, [chosen, onNext]);
+
+    return (
+        <PickAccount
+            setAccount={setChosen}
+            chosenAccount={chosen}
+            filter={extendedFilter}
+            messageWhenEmpty="No elligable accounts requiring multiple signatures"
+            isDisabled={(_, info) =>
+                info?.accountBaker?.pendingChange !== undefined ? (
+                    <>
+                        The stake is frozen because:
+                        <br />
+                        <BakerPendingChange
+                            pending={info.accountBaker.pendingChange}
+                        />
+                    </>
+                ) : undefined
+            }
+        />
+    );
+};
+
 interface Props<F extends Record<string, unknown>, T extends AccountTransaction>
     extends Omit<
         MultiStepFormProps<F>,
@@ -42,9 +94,13 @@ interface Props<F extends Record<string, unknown>, T extends AccountTransaction>
      */
     title: string;
     /**
+     * Function to filter elligable accounts for transaction.
+     */
+    accountFilter?(account: Account, info?: AccountInfo): boolean;
+    /**
      * Function to convert flow values into an account transaction.
      */
-    convert(values: F): T;
+    convert(values: AccountStep & F): T;
     /**
      * Pages of the transaction flow declared as a mapping of components to corresponding substate.
      * Declaration order defines the order the pages are shown.
@@ -56,15 +112,18 @@ interface InternalState {
     stepTitle: string;
 }
 
+const ACCOUNT_STEP_TITLE = 'Select account';
 const SIGN_STEP_TITLE = 'Signature and hardware wallet';
 
 export default function MultiSigAccountTransactionFlow<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     F extends Record<string, any>,
     T extends AccountTransaction
->({ title, convert, children, ...formProps }: Props<F, T>) {
-    const { pathname, state } = useLocation<F | null>();
-    const valueStore = useState<F>(state ?? ({} as F));
+>({ title, convert, children, accountFilter, ...formProps }: Props<F, T>) {
+    type WithAccount = AccountStep & F;
+
+    const { pathname, state } = useLocation<WithAccount | null>();
+    const valueStore = useState<Partial<WithAccount>>(state ?? {});
     const [values] = valueStore;
     const dispatch = useDispatch();
 
@@ -85,13 +144,17 @@ export default function MultiSigAccountTransactionFlow<
     );
 
     const getStepTitle = useCallback(
-        (step?: keyof F | 'sign') => {
+        (step?: keyof WithAccount | 'sign') => {
             if (step === 'sign') {
                 return SIGN_STEP_TITLE;
             }
 
+            if (step === 'account') {
+                return ACCOUNT_STEP_TITLE;
+            }
+
             const activeChild = step
-                ? flowChildren.step
+                ? flowChildren[step]
                 : Object.values(flowChildren)[0];
 
             return activeChild.title;
@@ -107,7 +170,7 @@ export default function MultiSigAccountTransactionFlow<
         setState({ stepTitle: getStepTitle(step) });
     };
 
-    const handleDone = (v: F) => {
+    const handleDone = (v: WithAccount) => {
         const transaction = convert(v);
         const serialized = stringify(transaction);
 
@@ -134,7 +197,7 @@ export default function MultiSigAccountTransactionFlow<
                 >
                     <div className={multisigFlowStyles.columnContent}>
                         <div className="flexFill">
-                            <MultiStepForm<F>
+                            <MultiStepForm<WithAccount>
                                 initialValues={state ?? undefined}
                                 valueStore={valueStore}
                                 onDone={handleDone}
@@ -142,6 +205,12 @@ export default function MultiSigAccountTransactionFlow<
                                 {...formProps}
                             >
                                 {{
+                                    account: {
+                                        component: partialApply(
+                                            SelectAccountPage,
+                                            { filter: accountFilter }
+                                        ),
+                                    },
                                     ...flowChildren,
                                     sign: {
                                         component: SignTransactionProposal,

@@ -48,8 +48,6 @@ export type OrRenderValues<
 > = C | ((values: Partial<F>) => C);
 
 interface Props<F extends Record<string, unknown>> {
-    initialValues?: F;
-    valueStore?: [F, Dispatch<SetStateAction<F>>];
     /**
      * Function to validate the transaction flow values as a whole.
      * Return key of the substate containing the invalid field, or undefined if valid
@@ -71,7 +69,7 @@ interface InternalValueStoreProps<F extends Record<string, unknown>>
 
 interface ExternalValueStoreProps<F extends Record<string, unknown>>
     extends Props<F> {
-    valueStore?: [F, Dispatch<SetStateAction<F>>];
+    valueStore: [Partial<F>, Dispatch<SetStateAction<Partial<F>>>];
 }
 
 export type MultiStepFormProps<F extends Record<string, unknown>> =
@@ -81,17 +79,19 @@ export type MultiStepFormProps<F extends Record<string, unknown>> =
 export default function MultiStepForm<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     F extends Record<string, any>
->({
-    initialValues = {} as F,
-    valueStore,
-    children,
-    validate = () => undefined,
-    onDone,
-    onPageActive = noOp,
-}: MultiStepFormProps<F>) {
+>(props: MultiStepFormProps<F>) {
+    const {
+        children,
+        validate = () => undefined,
+        onDone,
+        onPageActive = noOp,
+    } = props;
+    const initialValues =
+        (props as InternalValueStoreProps<F>).initialValues ?? ({} as F);
     const { pathname } = useLocation();
-    const internalValueStore = useState<F>(initialValues);
-    const [values, setValues] = valueStore ?? internalValueStore;
+    const internalValueStore = useState<Partial<F>>(initialValues);
+    const externalValueStore = (props as ExternalValueStoreProps<F>).valueStore;
+    const [values, setValues] = externalValueStore ?? internalValueStore;
     const { path: matchedPath } = useRouteMatch();
     const dispatch = useDispatch();
     const formChildren = useMemo(
@@ -127,7 +127,7 @@ export default function MultiStepForm<
         throw new Error(
             'Changing value store during the lifetime of MultiStepForm will result in errors.'
         );
-    }, [valueStore === undefined]);
+    }, [externalValueStore === undefined]);
 
     if (!currentPage) {
         return null;
@@ -145,7 +145,7 @@ export default function MultiStepForm<
         }
 
         const invalidPage = pages.find(
-            (p) => p.substate === validate(newValues)
+            (p) => p.substate === validate(newValues as F)
         );
 
         if (invalidPage) {
@@ -153,7 +153,7 @@ export default function MultiStepForm<
             return;
         }
 
-        onDone(newValues);
+        onDone(newValues as F);
     };
 
     return (
