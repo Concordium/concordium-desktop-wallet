@@ -1,6 +1,4 @@
-/* eslint-disable react/no-unused-prop-types */
 import React from 'react';
-
 import CogIcon from '@resources/svg/settings.svg';
 import Notification from './Notification';
 import { NotificationLevel } from '~/features/NotificationSlice';
