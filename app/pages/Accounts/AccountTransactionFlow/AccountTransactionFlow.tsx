@@ -13,6 +13,7 @@ import routes from '~/constants/routes.json';
 import MultiStepForm, {
     FormChild,
     MultiStepFormProps,
+    OrRenderValues,
 } from '~/components/MultiStepForm';
 
 import styles from './AccountTransactionFlow.module.scss';
@@ -30,7 +31,10 @@ type FlowChildren<F extends Record<string, unknown>> = {
 };
 
 interface Props<F extends Record<string, unknown>, T extends AccountTransaction>
-    extends Omit<MultiStepFormProps<F>, 'onDone'> {
+    extends Omit<
+        MultiStepFormProps<F>,
+        'onDone' | 'initialValues' | 'valueStore'
+    > {
     /**
      * Flow title. Can be overridden for each page.
      */
@@ -43,7 +47,7 @@ interface Props<F extends Record<string, unknown>, T extends AccountTransaction>
      * Pages of the transaction flow declared as a mapping of components to corresponding substate.
      * Declaration order defines the order the pages are shown.
      */
-    children: FlowChildren<F> | ((values: Partial<F>) => FlowChildren<F>);
+    children: OrRenderValues<F, FlowChildren<F>>;
 }
 
 interface InternalState {
