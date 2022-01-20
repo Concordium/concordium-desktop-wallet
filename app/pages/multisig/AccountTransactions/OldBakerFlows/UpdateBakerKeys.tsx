@@ -2,41 +2,49 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
-import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
+import MultiSignatureLayout from '../../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
 import {
     Account,
     TransactionKindId,
-    RemoveBaker,
+    UpdateBakerKeysPayload,
+    UpdateBakerKeys,
     Fraction,
 } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
-import { createRemoveBakerTransaction } from '~/utils/transactionHelpers';
+import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
+import {
+    createMultisignatureTransaction,
+    signUsingLedger,
+} from '../SignTransaction';
+import SignTransactionColumn from '../../SignTransactionProposal/SignTransaction';
+
+import { createUpdateBakerKeysTransaction } from '~/utils/transactionHelpers';
+import { selectedProposalRoute } from '~/utils/routerHelper';
 import routes from '~/constants/routes.json';
 import {
-    useCalcBakerStakeCooldownUntil,
     useTransactionCostEstimate,
     useTransactionExpiryState,
 } from '~/utils/dataHooks';
-import SignTransaction from './SignTransaction';
-import RemoveBakerProposalDetails from './proposal-details/RemoveBakerProposalDetails';
-import { getFormattedDateString } from '~/utils/timeHelpers';
-import PendingChange from '~/components/BakerPendingChange';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { addProposal } from '~/features/MultiSignatureSlice';
+import UpdateBakerKeysProposalDetails from '../proposal-details/UpdateBakerKeysProposalDetails';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
-import LoadingComponent from './LoadingComponent';
+import LoadingComponent from '../LoadingComponent';
 import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
 import DatePicker from '~/components/Form/DatePicker';
+import ExportBakerKeys from '../ExportBakerKeys';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 
-import styles from './MultisignatureAccountTransactions.module.scss';
+import styles from '../MultisignatureAccountTransactions.module.scss';
 
 interface PageProps {
     exchangeRate: Fraction;
@@ -46,7 +54,7 @@ interface State {
     account?: Account;
 }
 
-function RemoveBakerPage({ exchangeRate }: PageProps) {
+function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
     const dispatch = useDispatch();
 
     const { state } = useLocation<State>();
@@ -54,40 +62,92 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
     const { path, url } = useRouteMatch();
     const [account, setAccount] = useState<Account | undefined>(state?.account);
     const [error, setError] = useState<string>();
-    const [transaction, setTransaction] = useState<RemoveBaker>();
-
+    const [bakerKeys, setBakerKeys] = useState<BakerKeys>();
+    const [transaction, setTransaction] = useState<UpdateBakerKeys>();
     const handler = findAccountTransactionHandler(
         TransactionKindId.Remove_baker
     );
 
-    const cooldownUntil = useCalcBakerStakeCooldownUntil();
-
     const estimatedFee = useTransactionCostEstimate(
-        TransactionKindId.Remove_baker,
+        TransactionKindId.Update_baker_keys,
         exchangeRate,
         account?.signatureThreshold
     );
+
     const [
         expiryTime,
         setExpiryTime,
         expiryTimeError,
     ] = useTransactionExpiryState();
 
+    const onGenerateKeys = () => {
+        if (account === undefined) {
+            setError('An account is needed to generate baker keys');
+            return;
+        }
+        generateBakerKeys(account.address, 'UPDATE')
+            .then((keys) => setBakerKeys(keys))
+            .catch(() => setError('Failed generating baker keys'));
+    };
+
     const onCreateTransaction = async () => {
+        if (bakerKeys === undefined) {
+            setError('Baker keys are needed to make transaction');
+            return;
+        }
         if (account === undefined) {
             setError('Account is needed to make transaction');
             return;
         }
 
+        const payload: UpdateBakerKeysPayload = {
+            electionVerifyKey: bakerKeys.electionPublic,
+            signatureVerifyKey: bakerKeys.signaturePublic,
+            aggregationVerifyKey: bakerKeys.aggregationPublic,
+            proofElection: bakerKeys.proofElection,
+            proofSignature: bakerKeys.proofSignature,
+            proofAggregation: bakerKeys.proofAggregation,
+        };
+
         const accountNonce = await getNextAccountNonce(account.address);
         setTransaction(
-            createRemoveBakerTransaction(
+            createUpdateBakerKeysTransaction(
                 account.address,
+                payload,
                 accountNonce.nonce,
                 account?.signatureThreshold,
                 expiryTime
             )
         );
+    };
+
+    const signingFunction = async (ledger?: ConcordiumLedgerClient) => {
+        if (!account) {
+            throw new Error('unexpected missing account');
+        }
+        if (transaction === undefined) {
+            throw new Error('unexpected missing transaction');
+        }
+        if (bakerKeys === undefined) {
+            throw new Error('unexpected missing bakerKeys');
+        }
+
+        let signatures = {};
+        if (ledger) {
+            signatures = await signUsingLedger(ledger, transaction, account);
+        }
+        const proposal = await createMultisignatureTransaction(
+            transaction,
+            signatures,
+            account.signatureThreshold
+        );
+        if (proposal.id === undefined) {
+            throw new Error('unexpected undefined proposal id');
+        }
+
+        // Set the current proposal in the state to the one that was just generated.
+        dispatch(addProposal(proposal));
+        dispatch(push(selectedProposalRoute(proposal.id)));
     };
 
     return (
@@ -102,15 +162,25 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                 divider
                 columnScroll
                 className={styles.subtractContainerPadding}
+                columnClassName={styles.column}
             >
-                <Columns.Column
-                    header="Transaction details"
-                    className={styles.stretchColumn}
-                >
+                <Columns.Column header="Transaction details">
                     <div className={styles.columnContent}>
-                        <RemoveBakerProposalDetails
+                        <UpdateBakerKeysProposalDetails
                             account={account}
                             estimatedFee={estimatedFee}
+                            bakerVerifyKeys={
+                                bakerKeys === undefined
+                                    ? undefined
+                                    : {
+                                          electionVerifyKey:
+                                              bakerKeys.electionPublic,
+                                          signatureVerifyKey:
+                                              bakerKeys.signaturePublic,
+                                          aggregationVerifyKey:
+                                              bakerKeys.aggregationPublic,
+                                      }
+                            }
                             expiryTime={expiryTime}
                         />
                     </div>
@@ -130,33 +200,17 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                             info?.accountBaker !== undefined &&
                                             isMultiSig(a)
                                         }
+                                        messageWhenEmpty="There are no baker accounts that require multiple signatures"
                                         onAccountClicked={() => {
                                             dispatch(
                                                 push(
                                                     getLocationAfterAccounts(
                                                         url,
-                                                        TransactionKindId.Remove_baker
+                                                        TransactionKindId.Update_baker_keys
                                                     )
                                                 )
                                             );
                                         }}
-                                        isDisabled={(_, info) =>
-                                            info?.accountBaker
-                                                ?.pendingChange !==
-                                            undefined ? (
-                                                <>
-                                                    The stake is frozen because:
-                                                    <br />
-                                                    <PendingChange
-                                                        pending={
-                                                            info.accountBaker
-                                                                .pendingChange
-                                                        }
-                                                    />
-                                                </>
-                                            ) : undefined
-                                        }
-                                        messageWhenEmpty="There are no baker accounts that require multiple signatures"
                                     />
                                 </div>
                             </div>
@@ -189,19 +243,6 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                         Committing the transaction after this
                                         date, will be rejected.
                                     </p>
-                                    {cooldownUntil !== undefined ? (
-                                        <p>
-                                            Remove a baker will result in the
-                                            baker stake being frozen until
-                                            <br />
-                                            {getFormattedDateString(
-                                                cooldownUntil
-                                            )}
-                                            <br />
-                                            where the actual removing of the
-                                            baker will take effect.
-                                        </p>
-                                    ) : null}
                                 </div>
                                 <Button
                                     className="mT40"
@@ -209,39 +250,53 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                         expiryTime === undefined ||
                                         expiryTimeError !== undefined
                                     }
-                                    onClick={() =>
-                                        onCreateTransaction()
-                                            .then(() =>
-                                                dispatch(
-                                                    push(
-                                                        `${url}/${BakerSubRoutes.sign}`
-                                                    )
-                                                )
+                                    onClick={() => {
+                                        onGenerateKeys();
+                                        dispatch(
+                                            push(
+                                                `${url}/${BakerSubRoutes.keys}`
                                             )
-                                            .catch(() =>
-                                                setError(
-                                                    errorMessages.unableToReachNode
-                                                )
-                                            )
-                                    }
+                                        );
+                                    }}
                                 >
-                                    Continue
+                                    Generate keys
                                 </Button>
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${BakerSubRoutes.sign}`}>
+                    <Route path={`${path}/${BakerSubRoutes.keys}`}>
                         <Columns.Column
-                            header="Signature and hardware wallet"
+                            header="Baker keys"
                             className={styles.stretchColumn}
                         >
-                            {transaction !== undefined &&
-                            account !== undefined ? (
-                                <SignTransaction
-                                    transaction={transaction}
-                                    account={account}
-                                />
-                            ) : null}
+                            <ExportBakerKeys
+                                className={styles.columnContent}
+                                accountAddress={account?.address}
+                                bakerKeys={bakerKeys}
+                                onContinue={() =>
+                                    onCreateTransaction()
+                                        .then(() =>
+                                            dispatch(
+                                                push(
+                                                    `${url}/${BakerSubRoutes.sign}`
+                                                )
+                                            )
+                                        )
+                                        .catch(() =>
+                                            setError(
+                                                errorMessages.unableToReachNode
+                                            )
+                                        )
+                                }
+                            />
+                        </Columns.Column>
+                    </Route>
+                    <Route path={`${path}/${BakerSubRoutes.sign}`}>
+                        <Columns.Column header="Signature and hardware wallet">
+                            <SignTransactionColumn
+                                signingFunction={signingFunction}
+                                onSkip={() => signingFunction()}
+                            />
                         </Columns.Column>
                     </Route>
                 </Switch>
@@ -250,4 +305,4 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
     );
 }
 
-export default ensureExchangeRate(RemoveBakerPage, LoadingComponent);
+export default ensureExchangeRate(UpdateBakerKeysPage, LoadingComponent);

@@ -4,13 +4,13 @@ import { TransactionKindId } from '~/utils/types';
 import CreateTransferProposal from './CreateTransferProposal';
 
 import UpdateCredentialPage from './UpdateAccountCredentials/UpdateCredentialsPage';
-import AddBaker from './AddBaker';
-import UpdateBakerKeys from './UpdateBakerKeys';
-import RemoveBaker from './RemoveBaker';
+import AddBaker from './OldBakerFlows/AddBaker';
+import UpdateBakerKeys from './OldBakerFlows/UpdateBakerKeys';
+import RemoveBaker from './OldBakerFlows/RemoveBaker';
 import ErrorBoundary from '~/components/ErrorBoundary';
 import routes from '~/constants/routes.json';
-import UpdateBakerStake from './UpdateBakerStake';
-import UpdateBakerRestakeEarnings from './UpdateBakerRestakeEarnings';
+import UpdateBakerStake from './OldBakerFlows/UpdateBakerStake';
+import UpdateBakerRestakeEarnings from './OldBakerFlows/UpdateBakerRestakeEarnings';
 
 function AccountTransactionRoutes(): JSX.Element {
     const { transactionKind: transactionKindRaw } = useParams<{

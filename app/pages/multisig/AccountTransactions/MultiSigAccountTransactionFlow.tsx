@@ -17,9 +17,9 @@ import SignTransactionProposal from '../SignTransactionProposal';
 import PickAccount from '~/components/PickAccount';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { partialApply } from '~/utils/componentHelpers';
+import { AccountDetail } from './proposal-details/shared';
 
 import multisigFlowStyles from '../common/MultiSignatureFlowPage.module.scss';
-import BakerPendingChange from '~/components/BakerPendingChange';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface FlowChild<F, K extends keyof F = any> extends FormChild<F, K> {
@@ -43,12 +43,14 @@ interface AccountStep {
 
 type SelectAccountPageProps = MultiStepFormPageProps<Account> & {
     filter?(account: Account, info?: AccountInfo): boolean;
+    disabled?(account: Account, info?: AccountInfo): boolean;
 };
 
 const SelectAccountPage = ({
     onNext,
     initial,
     filter = () => true,
+    disabled = () => false,
 }: SelectAccountPageProps) => {
     const [chosen, setChosen] = useState<Account | undefined>(initial);
 
@@ -69,17 +71,7 @@ const SelectAccountPage = ({
             chosenAccount={chosen}
             filter={extendedFilter}
             messageWhenEmpty="No elligable accounts requiring multiple signatures"
-            isDisabled={(_, info) =>
-                info?.accountBaker?.pendingChange !== undefined ? (
-                    <>
-                        The stake is frozen because:
-                        <br />
-                        <BakerPendingChange
-                            pending={info.accountBaker.pendingChange}
-                        />
-                    </>
-                ) : undefined
-            }
+            isDisabled={disabled}
         />
     );
 };
@@ -97,6 +89,10 @@ interface Props<F extends Record<string, unknown>, T extends AccountTransaction>
      * Function to filter elligable accounts for transaction.
      */
     accountFilter?(account: Account, info?: AccountInfo): boolean;
+    /**
+     * Function to disable accounts for selection.
+     */
+    accountDisabled?(account: Account, info?: AccountInfo): boolean;
     /**
      * Function to convert flow values into an account transaction.
      */
@@ -119,7 +115,14 @@ export default function MultiSigAccountTransactionFlow<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     F extends Record<string, any>,
     T extends AccountTransaction
->({ title, convert, children, accountFilter, ...formProps }: Props<F, T>) {
+>({
+    title,
+    convert,
+    children,
+    accountFilter,
+    accountDisabled,
+    ...formProps
+}: Props<F, T>) {
     type WithAccount = AccountStep & F;
 
     const { pathname, state } = useLocation<WithAccount | null>();
@@ -188,6 +191,11 @@ export default function MultiSigAccountTransactionFlow<
             >
                 <Columns.Column header="Transaction details">
                     <div className={multisigFlowStyles.columnContent}>
+                        <AccountDetail
+                            title="Account"
+                            first
+                            value={values.account}
+                        />
                         {keyViewPairs.map(([key, view]) => view(values[key]))}
                     </div>
                 </Columns.Column>
@@ -208,7 +216,10 @@ export default function MultiSigAccountTransactionFlow<
                                     account: {
                                         component: partialApply(
                                             SelectAccountPage,
-                                            { filter: accountFilter }
+                                            {
+                                                filter: accountFilter,
+                                                disabled: accountDisabled,
+                                            }
                                         ),
                                     },
                                     ...flowChildren,

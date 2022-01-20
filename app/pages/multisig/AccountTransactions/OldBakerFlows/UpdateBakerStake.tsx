@@ -1,74 +1,89 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
-import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
+import MultiSignatureLayout from '../../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
+import { BlockSummary } from '~/node/NodeApiTypes';
 import {
     Account,
     TransactionKindId,
-    UpdateBakerRestakeEarnings,
+    UpdateBakerStake,
     Fraction,
 } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
-import { createUpdateBakerRestakeEarningsTransaction } from '~/utils/transactionHelpers';
+import {
+    createUpdateBakerStakeTransaction,
+    validateBakerStake,
+} from '~/utils/transactionHelpers';
 import routes from '~/constants/routes.json';
 import {
-    useAccountInfo,
+    useCalcBakerStakeCooldownUntil,
+    useStakedAmount,
     useTransactionCostEstimate,
     useTransactionExpiryState,
 } from '~/utils/dataHooks';
-import SignTransaction from './SignTransaction';
-import UpdateBakerRestakeEarningsProposalDetails from './proposal-details/UpdateBakerRestakeEarnings';
+import SignTransaction from '../SignTransaction';
+import PickAmount from '../PickAmount';
+import UpdateBakerStakeProposalDetails from '../proposal-details/UpdateBakerStakeProposalDetails';
+import { microGtuToGtu, toMicroUnits } from '~/utils/gtu';
+import { getFormattedDateString } from '~/utils/timeHelpers';
+import PendingChange from '~/components/BakerPendingChange';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
-import LoadingComponent from './LoadingComponent';
+import LoadingComponent from '../LoadingComponent';
 import {
     BakerSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
+import { ensureChainData, ChainData } from '~/utils/withChainData';
 import DatePicker from '~/components/Form/DatePicker';
 import { isMultiSig } from '~/utils/accountHelpers';
-import Label from '~/components/Label';
-import Radios from '~/components/Form/Radios';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 
-import styles from './MultisignatureAccountTransactions.module.scss';
+import styles from '../MultisignatureAccountTransactions.module.scss';
 
-interface PageProps {
+function toMicroUnitsSafe(str: string | undefined) {
+    if (str === undefined) {
+        return undefined;
+    }
+    try {
+        return toMicroUnits(str);
+    } catch (error) {
+        return undefined;
+    }
+}
+interface PageProps extends ChainData {
     exchangeRate: Fraction;
+    blockSummary: BlockSummary;
 }
 
 interface State {
     account?: Account;
 }
 
-function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
+function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
     const dispatch = useDispatch();
 
     const { state } = useLocation<State>();
 
     const { path, url } = useRouteMatch();
     const [account, setAccount] = useState<Account | undefined>(state?.account);
-    const [restakeEarnings, setRestakeEarnings] = useState<boolean>();
+    const [stake, setStake] = useState<string>();
     const [error, setError] = useState<string>();
-    const [
-        transaction,
-        setTransaction,
-    ] = useState<UpdateBakerRestakeEarnings>();
+    const [transaction, setTransaction] = useState<UpdateBakerStake>();
     const handler = findAccountTransactionHandler(
-        TransactionKindId.Update_baker_restake_earnings
+        TransactionKindId.Update_baker_stake
     );
 
     const estimatedFee = useTransactionCostEstimate(
-        TransactionKindId.Update_baker_restake_earnings,
+        TransactionKindId.Update_baker_stake,
         exchangeRate,
         account?.signatureThreshold
     );
-
     const [
         expiryTime,
         setExpiryTime,
@@ -81,17 +96,15 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
             return;
         }
 
-        if (restakeEarnings === undefined) {
-            setError(
-                'The restake earnings setting is needed to make transaction'
-            );
+        if (stake === undefined) {
+            setError('Stake is needed to make transaction');
             return;
         }
 
-        const payload = { restakeEarnings };
+        const payload = { stake: toMicroUnits(stake) };
         const accountNonce = await getNextAccountNonce(account.address);
         setTransaction(
-            createUpdateBakerRestakeEarningsTransaction(
+            createUpdateBakerStakeTransaction(
                 account.address,
                 payload,
                 accountNonce.nonce,
@@ -114,15 +127,12 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                 columnScroll
                 className={styles.subtractContainerPadding}
             >
-                <Columns.Column
-                    header="Transaction details"
-                    className={styles.stretchColumn}
-                >
+                <Columns.Column header="Transaction details">
                     <div className={styles.columnContent}>
-                        <UpdateBakerRestakeEarningsProposalDetails
+                        <UpdateBakerStakeProposalDetails
                             account={account}
                             estimatedFee={estimatedFee}
-                            restakeEarnings={restakeEarnings}
+                            stake={toMicroUnitsSafe(stake)}
                             expiryTime={expiryTime}
                         />
                     </div>
@@ -148,34 +158,51 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                                                 push(
                                                     getLocationAfterAccounts(
                                                         url,
-                                                        TransactionKindId.Update_baker_restake_earnings
+                                                        TransactionKindId.Update_baker_stake
                                                     )
                                                 )
                                             );
                                         }}
+                                        isDisabled={(_, info) =>
+                                            info?.accountBaker
+                                                ?.pendingChange !==
+                                            undefined ? (
+                                                <>
+                                                    The stake is frozen because:
+                                                    <br />
+                                                    <PendingChange
+                                                        pending={
+                                                            info.accountBaker
+                                                                .pendingChange
+                                                        }
+                                                    />
+                                                </>
+                                            ) : undefined
+                                        }
                                     />
                                 </div>
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${BakerSubRoutes.restake}`}>
+                    <Route path={`${path}/${BakerSubRoutes.stake}`}>
                         <Columns.Column
-                            header="Restake earnings"
+                            header="New staked amount"
                             className={styles.stretchColumn}
                         >
                             <div className={styles.columnContent}>
                                 <div className={styles.flex1}>
                                     {account !== undefined ? (
-                                        <RestakeEarnings
-                                            enable={restakeEarnings}
-                                            accountAddress={account?.address}
-                                            onChanged={setRestakeEarnings}
+                                        <PickNewStake
+                                            account={account}
+                                            stake={stake}
+                                            setStake={setStake}
+                                            blockSummary={blockSummary}
                                         />
                                     ) : null}
                                 </div>
                                 <Button
                                     className="mT40"
-                                    disabled={restakeEarnings === undefined}
+                                    disabled={stake === undefined}
                                     onClick={() => {
                                         dispatch(
                                             push(
@@ -189,7 +216,6 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-
                     <Route path={`${path}/${BakerSubRoutes.expiry}`}>
                         <Columns.Column
                             header="Transaction expiry time"
@@ -265,53 +291,57 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
     );
 }
 
-type RestakeEarningsProps = {
-    accountAddress: string;
-    enable?: boolean;
-    onChanged: (enable: boolean) => void;
+type PickNewStakeProps = {
+    account: Account;
+    stake?: string;
+    setStake: (s: string | undefined) => void;
+    blockSummary: BlockSummary;
 };
 
-function RestakeEarnings({
-    accountAddress,
-    enable,
-    onChanged,
-}: RestakeEarningsProps) {
-    const accountInfo = useAccountInfo(accountAddress);
-    const restake = accountInfo?.accountBaker?.restakeEarnings;
+function PickNewStake({
+    account,
+    stake,
+    setStake,
+    blockSummary,
+}: PickNewStakeProps) {
+    const stakedAlready = useStakedAmount(account.address);
+    const minimumThresholdForBaking = BigInt(
+        blockSummary.updates.chainParameters.minimumThresholdForBaking
+    );
+    const cooldownUntil = useCalcBakerStakeCooldownUntil();
+    const stakeGtu = toMicroUnitsSafe(stake);
 
-    useEffect(() => {
-        if (enable === undefined && restake !== undefined) {
-            onChanged(restake);
-        }
-    }, [restake, enable, onChanged]);
+    if (stakedAlready === undefined) {
+        return null;
+    }
 
     return (
         <>
-            <p className="mV30">Choose to restake earnings or not, below.</p>
-            <div className="mV30">
-                <Label>Current restake:</Label>
-                <span className="body1">{restake ? 'Yes' : 'No'}</span>
-            </div>
-            <Radios
-                label="Enable restake earnings"
-                options={[
-                    {
-                        label: 'Yes, restake',
-                        value: true,
-                    },
-                    {
-                        label: 'No, don’t restake',
-                        value: false,
-                    },
-                ]}
-                value={enable}
-                onChange={onChanged}
+            <PickAmount
+                account={account}
+                amount={microGtuToGtu(stakedAlready)}
+                setAmount={setStake}
+                validateAmount={(...args) =>
+                    validateBakerStake(minimumThresholdForBaking, ...args)
+                }
             />
+            <p>Enter your new stake here</p>
+            {cooldownUntil !== undefined &&
+            stakeGtu !== undefined &&
+            stakedAlready !== undefined &&
+            stakeGtu < stakedAlready ? (
+                <p>
+                    You are decreasing the baker stake and the stake will be
+                    frozen until <br />
+                    {getFormattedDateString(cooldownUntil)}
+                    <br /> where the actual decrease will take effect.
+                </p>
+            ) : null}
         </>
     );
 }
 
 export default ensureExchangeRate(
-    UpdateBakerRestakeEarningsPage,
+    ensureChainData(UpdateBakerStakePage, LoadingComponent),
     LoadingComponent
 );
