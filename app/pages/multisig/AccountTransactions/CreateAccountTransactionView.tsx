@@ -2,9 +2,7 @@ import React from 'react';
 import { Redirect, useParams } from 'react-router';
 import { TransactionKindId } from '~/utils/types';
 import CreateTransferProposal from './CreateTransferProposal';
-
 import UpdateCredentialPage from './UpdateAccountCredentials/UpdateCredentialsPage';
-import AddBaker from './OldBakerFlows/AddBaker';
 import UpdateBakerKeys from './OldBakerFlows/UpdateBakerKeys';
 import RemoveBaker from './OldBakerFlows/RemoveBaker';
 import ErrorBoundary from '~/components/ErrorBoundary';
@@ -24,8 +22,6 @@ function AccountTransactionRoutes(): JSX.Element {
         case TransactionKindId.Simple_transfer:
         case TransactionKindId.Transfer_with_schedule:
             return <CreateTransferProposal transactionKind={transactionKind} />;
-        case TransactionKindId.Add_baker:
-            return <AddBaker />;
         case TransactionKindId.Update_baker_keys:
             return <UpdateBakerKeys />;
         case TransactionKindId.Remove_baker:

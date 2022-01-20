@@ -47,12 +47,21 @@ export type OrRenderValues<
     C extends FormChildren<F>
 > = C | ((values: Partial<F>) => C);
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ValidateValues<F extends Record<string, any>> = (
+    values: F
+) => keyof F | undefined;
+
 interface Props<F extends Record<string, unknown>> {
+    /**
+     * Base route where multistep form is included. Defaults to path from useRouteMatch hook.
+     */
+    baseRoute?: string;
     /**
      * Function to validate the transaction flow values as a whole.
      * Return key of the substate containing the invalid field, or undefined if valid
      */
-    validate?(values: F): keyof F | undefined;
+    validate?: ValidateValues<F>;
     onDone(values: F): void;
     onPageActive?(step: keyof F, values: Partial<F>): void;
     /**
@@ -80,11 +89,13 @@ export default function MultiStepForm<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     F extends Record<string, any>
 >(props: MultiStepFormProps<F>) {
+    const { path: matchedPath } = useRouteMatch();
     const {
         children,
         validate = () => undefined,
         onDone,
         onPageActive = noOp,
+        baseRoute = matchedPath,
     } = props;
     const initialValues =
         (props as InternalValueStoreProps<F>).initialValues ?? ({} as F);
@@ -92,7 +103,6 @@ export default function MultiStepForm<
     const internalValueStore = useState<Partial<F>>(initialValues);
     const externalValueStore = (props as ExternalValueStoreProps<F>).valueStore;
     const [values, setValues] = externalValueStore ?? internalValueStore;
-    const { path: matchedPath } = useRouteMatch();
     const dispatch = useDispatch();
     const formChildren = useMemo(
         () => (typeof children === 'function' ? children(values) : children),
@@ -106,11 +116,11 @@ export default function MultiStepForm<
         .map(([k, c]: [keyof F, FormChild<F>], i) => ({
             substate: k,
             Page: c.component,
-            route: i === 0 ? matchedPath : `${matchedPath}/${i}`,
+            route: i === 0 ? baseRoute : `${baseRoute}/${i}`,
             nextRoute:
                 i === keyPagePairs.length - 1
                     ? undefined
-                    : `${matchedPath}/${i + 1}`,
+                    : `${baseRoute}/${i + 1}`,
         }))
         .reverse();
 

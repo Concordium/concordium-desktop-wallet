@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import { foundationTransactionsEnabledSelector } from '~/features/SettingsSlice';
@@ -6,10 +6,12 @@ import {
     TransactionTypes,
     UpdateType,
     TransactionKindId as TransactionKind,
+    TransactionKindId,
 } from '~/utils/types';
 import { createProposalRoute } from '~/utils/routerHelper';
 import { proposalsSelector } from '~/features/MultiSignatureSlice';
 import { expireProposals } from '~/utils/ProposalHelper';
+import routes from '~/constants/routes.json';
 
 import styles from '../MultiSignaturePage/MultiSignaturePage.module.scss';
 
@@ -119,28 +121,8 @@ const accountTransactionTypes: [
     ],
     [
         TransactionTypes.AccountTransaction,
-        TransactionKind.Add_baker,
-        'Add baker',
-    ],
-    [
-        TransactionTypes.AccountTransaction,
-        TransactionKind.Update_baker_keys,
-        'Update baker keys',
-    ],
-    [
-        TransactionTypes.AccountTransaction,
-        TransactionKind.Remove_baker,
-        'Remove baker',
-    ],
-    [
-        TransactionTypes.AccountTransaction,
-        TransactionKind.Update_baker_stake,
-        'Update baker stake',
-    ],
-    [
-        TransactionTypes.AccountTransaction,
-        TransactionKind.Update_baker_restake_earnings,
-        'Update baker restake earnings',
+        TransactionKind.Configure_baker,
+        'Configure baker',
     ],
 ];
 
@@ -172,13 +154,30 @@ export default function MultiSignatureCreateProposalView() {
         <>
             {availableTransactionTypes.map(
                 ([transactionType, specificType, label]) => (
-                    <ButtonNavLink
-                        className={styles.link}
-                        key={`${transactionType}${specificType}`}
-                        to={createProposalRoute(transactionType, specificType)}
-                    >
-                        {label}
-                    </ButtonNavLink>
+                    <Fragment key={`${transactionType}${specificType}`}>
+                        {[
+                            TransactionKindId.Configure_baker,
+                            TransactionKindId.Configure_delegation,
+                        ].every((k) => k !== specificType) && (
+                            <ButtonNavLink
+                                className={styles.link}
+                                to={createProposalRoute(
+                                    transactionType,
+                                    specificType
+                                )}
+                            >
+                                {label}
+                            </ButtonNavLink>
+                        )}
+                        {specificType === TransactionKindId.Configure_baker && (
+                            <ButtonNavLink
+                                className={styles.link}
+                                to={routes.MULTISIGTRANSACTIONS_ADD_BAKER}
+                            >
+                                Add baker
+                            </ButtonNavLink>
+                        )}
+                    </Fragment>
                 )
             )}
         </>

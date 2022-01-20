@@ -23,29 +23,17 @@ import {
     chosenAccountSelector,
 } from '~/features/AccountSlice';
 import { RootState } from '~/store/store';
-import {
-    collapseFraction,
-    isDefined,
-    multiplyFraction,
-} from '~/utils/basicHelpers';
-import { microGtuToGtu, toMicroUnits } from '~/utils/gtu';
+import { isDefined } from '~/utils/basicHelpers';
+import { microGtuToGtu } from '~/utils/gtu';
 import { BakerKeys } from '~/utils/rustInterface';
-import {
-    createConfigureBakerTransaction,
-    validateBakerStake,
-} from '~/utils/transactionHelpers';
 import {
     Account,
     ConfigureBaker as ConfigureBakerTransaction,
-    ConfigureBakerPayload,
     EqualRecord,
-    Fraction,
-    MakeOptional,
     MakeRequired,
     NotOptional,
     OpenStatus,
     PropsOf,
-    TransactionKindId,
 } from '~/utils/types';
 import withChainData, { ChainData } from '~/utils/withChainData';
 import AccountTransactionFlow, {
@@ -58,89 +46,29 @@ import {
     fractionResolutionToPercentage,
     percentageToFractionResolution,
 } from '~/utils/rewardFractionHelpers';
-import { getConfigureBakerFullCost } from '~/utils/transactionCosts';
-import { serializeTransferPayload } from '~/utils/transactionSerialization';
+import {
+    AddBakerFlowState,
+    getEstimatedFee,
+    title,
+    convertToTransaction,
+    validateValues,
+} from '~/utils/transactionFlows/addBaker';
+import {
+    Commissions,
+    MetadataUrl,
+} from '~/utils/transactionFlows/configureBaker';
 
 import styles from '../AccountDetailsPage.module.scss';
-
-type Commissions = NotOptional<
-    Pick<
-        ConfigureBakerPayload,
-        | 'transactionFeeCommission'
-        | 'bakingRewardCommission'
-        | 'finalizationRewardCommission'
-    >
->;
-
-type MetadataUrl = string;
-
-interface AddBakerState {
-    stake: StakeSettings;
-    openForDelegation: OpenStatus;
-    commissions?: Commissions;
-    metadataUrl?: MetadataUrl;
-    keys: BakerKeys;
-}
-
-type AddBakerPayload = MakeOptional<
-    NotOptional<ConfigureBakerPayload>,
-    'metadataUrl'
->;
 
 type Dependencies = NotOptional<ChainData & ExchangeRate & AccountAndNonce>;
 
 const dependencies = createContext<Dependencies>({} as Dependencies);
 
-const TITLE = 'Add baker';
-
-const toPayload = ({
-    keys,
-    stake,
-    openForDelegation,
-    metadataUrl,
-    commissions,
-}: MakeOptional<
-    NotOptional<AddBakerState>,
-    'metadataUrl'
->): AddBakerPayload => ({
-    electionVerifyKey: [keys.electionPublic, keys.proofElection],
-    signatureVerifyKey: [keys.signaturePublic, keys.proofSignature],
-    aggregationVerifyKey: [keys.aggregationPublic, keys.proofAggregation],
-    stake: toMicroUnits(stake.stake),
-    restakeEarnings: stake.restake,
-    openForDelegation,
-    metadataUrl,
-    ...commissions,
-});
-
-function getEstimatedFee(
-    values: AddBakerState,
-    exchangeRate: Fraction,
-    signatureThreshold = 1
-) {
-    let payloadSize: number | undefined;
-
-    try {
-        payloadSize = serializeTransferPayload(
-            TransactionKindId.Configure_baker,
-            toPayload(values as NotOptional<AddBakerState>)
-        ).length;
-    } catch {
-        payloadSize = undefined;
-    }
-
-    return getConfigureBakerFullCost(
-        exchangeRate,
-        signatureThreshold,
-        payloadSize
-    );
-}
-
 function StakePage({
     onNext,
     initial,
     formValues,
-}: AccountTransactionFlowPageProps<StakeSettings, AddBakerState>) {
+}: AccountTransactionFlowPageProps<StakeSettings, AddBakerFlowState>) {
     const { blockSummary, exchangeRate, account } = useContext(dependencies);
     const minimumStake = BigInt(
         blockSummary.updates.chainParameters.minimumThresholdForBaking
@@ -162,7 +90,7 @@ function StakePage({
                 {
                     stake: defaultValues,
                     ...otherValues,
-                } as AddBakerState,
+                } as AddBakerFlowState,
                 exchangeRate,
                 account.signatureThreshold
             ),
@@ -402,7 +330,7 @@ const withData = (component: ComponentType<Props>) =>
                     ensureProps(
                         component,
                         hasNecessaryProps,
-                        <AccountTransactionFlowLoading title={TITLE} />
+                        <AccountTransactionFlowLoading title={title} />
                     )
                 )
             )
@@ -417,70 +345,35 @@ function whenOpen<T>(value: T, status?: OpenStatus): T | undefined {
 }
 
 export default withData(function AddBaker(props: Props) {
-    const { nonce, account, exchangeRate } = props;
+    const { nonce, account, exchangeRate, blockSummary } = props;
     const accountInfo = useSelector(accountInfoSelector(account));
 
-    function convertToTransaction(
-        values: AddBakerState
-    ): ConfigureBakerTransaction {
-        const withDefaults = {
-            ...values,
-        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const convert = useCallback(
+        convertToTransaction(
+            getDefaultCommissions(),
+            account,
+            nonce,
+            exchangeRate
+        ),
+        [account, nonce, exchangeRate]
+    );
 
-        // Ensure defaulf pool settings are used when opting for closed pool.
-        if (values.openForDelegation !== OpenStatus.OpenForAll) {
-            delete withDefaults.metadataUrl;
-            withDefaults.commissions = getDefaultCommissions();
-        }
-
-        const payload: AddBakerPayload = toPayload(
-            withDefaults as NotOptional<AddBakerState>
-        );
-
-        const transaction = createConfigureBakerTransaction(
-            account.address,
-            payload,
-            nonce
-        );
-        transaction.estimatedFee = multiplyFraction(
-            exchangeRate,
-            transaction.energyAmount
-        );
-
-        return transaction;
-    }
-
-    function validateValues(
-        values: AddBakerState
-    ): keyof AddBakerState | undefined {
-        const minimumStake = BigInt(
-            props.blockSummary.updates.chainParameters.minimumThresholdForBaking
-        );
-        const estimatedFee = getEstimatedFee(
-            values,
-            exchangeRate,
-            account.signatureThreshold
-        );
-        const stakeValidationResult = validateBakerStake(
-            minimumStake,
-            values.stake.stake,
-            accountInfo,
-            estimatedFee && collapseFraction(estimatedFee)
-        );
-
-        if (stakeValidationResult !== undefined) {
-            return 'stake';
-        }
-
-        return undefined;
-    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const validate = useCallback(
+        validateValues(blockSummary, account, accountInfo, exchangeRate),
+        [blockSummary, account, accountInfo, exchangeRate]
+    );
 
     return (
         <dependencies.Provider value={props}>
-            <AccountTransactionFlow<AddBakerState, ConfigureBakerTransaction>
-                title={TITLE}
-                convert={convertToTransaction}
-                validate={validateValues}
+            <AccountTransactionFlow<
+                AddBakerFlowState,
+                ConfigureBakerTransaction
+            >
+                title={title}
+                convert={convert}
+                validate={validate}
             >
                 {({ openForDelegation }) => ({
                     stake: { component: StakePage, title: 'Stake settings' },

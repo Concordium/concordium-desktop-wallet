@@ -1,6 +1,13 @@
 /* eslint-disable no-console */
 import { replace } from 'connected-react-router';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+    Fragment,
+    ReactNode,
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
+} from 'react';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router';
 import { stringify } from '~/utils/JSONHelper';
@@ -43,14 +50,14 @@ interface AccountStep {
 
 type SelectAccountPageProps = MultiStepFormPageProps<Account> & {
     filter?(account: Account, info?: AccountInfo): boolean;
-    disabled?(account: Account, info?: AccountInfo): boolean;
+    disabled?(account: Account, info?: AccountInfo): ReactNode | undefined;
 };
 
 const SelectAccountPage = ({
     onNext,
     initial,
     filter = () => true,
-    disabled = () => false,
+    disabled = () => undefined,
 }: SelectAccountPageProps) => {
     const [chosen, setChosen] = useState<Account | undefined>(initial);
 
@@ -58,6 +65,8 @@ const SelectAccountPage = ({
         (a, i) => isMultiSig(a) && filter(a, i),
         [filter]
     );
+
+    console.log(extendedFilter);
 
     useEffect(() => {
         if (chosen) {
@@ -69,7 +78,7 @@ const SelectAccountPage = ({
         <PickAccount
             setAccount={setChosen}
             chosenAccount={chosen}
-            filter={extendedFilter}
+            // filter={extendedFilter}
             messageWhenEmpty="No elligable accounts requiring multiple signatures"
             isDisabled={disabled}
         />
@@ -92,7 +101,10 @@ interface Props<F extends Record<string, unknown>, T extends AccountTransaction>
     /**
      * Function to disable accounts for selection.
      */
-    accountDisabled?(account: Account, info?: AccountInfo): boolean;
+    accountDisabled?(
+        account: Account,
+        info?: AccountInfo
+    ): ReactNode | undefined;
     /**
      * Function to convert flow values into an account transaction.
      */
@@ -196,7 +208,11 @@ export default function MultiSigAccountTransactionFlow<
                             first
                             value={values.account}
                         />
-                        {keyViewPairs.map(([key, view]) => view(values[key]))}
+                        {keyViewPairs.map(([key, view]) => (
+                            <Fragment key={key as string}>
+                                {view(values[key])}
+                            </Fragment>
+                        ))}
                     </div>
                 </Columns.Column>
                 <Columns.Column
