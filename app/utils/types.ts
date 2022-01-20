@@ -1203,6 +1203,7 @@ export interface TransactionDetails {
     type: TransactionKindString;
     outcome: string;
     memo?: Hex;
+    registeredData?: Hex;
 }
 
 export interface TransactionOrigin {

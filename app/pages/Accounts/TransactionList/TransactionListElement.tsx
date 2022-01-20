@@ -223,6 +223,9 @@ function statusSymbol(status: TransactionStatus) {
     }
 }
 
+/**
+ * Displays the memo, either partially or fully or message if absent.
+ */
 function showMemo(
     memo: string | undefined,
     showFullMemo: boolean,
