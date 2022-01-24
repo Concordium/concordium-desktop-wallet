@@ -1,10 +1,8 @@
-/* eslint-disable no-console */
 import { replace } from 'connected-react-router';
 import React, {
     Fragment,
     ReactNode,
     useCallback,
-    useEffect,
     useMemo,
     useState,
 } from 'react';
@@ -59,25 +57,18 @@ const SelectAccountPage = ({
     filter = () => true,
     disabled = () => undefined,
 }: SelectAccountPageProps) => {
-    const [chosen, setChosen] = useState<Account | undefined>(initial);
-
     const extendedFilter: typeof filter = useCallback(
         (a, i) => isMultiSig(a) && filter(a, i),
         [filter]
     );
 
+    // eslint-disable-next-line no-console
     console.log(extendedFilter);
-
-    useEffect(() => {
-        if (chosen) {
-            onNext(chosen);
-        }
-    }, [chosen, onNext]);
 
     return (
         <PickAccount
-            setAccount={setChosen}
-            chosenAccount={chosen}
+            chosenAccount={initial}
+            onAccountClicked={(a) => onNext(a)}
             // filter={extendedFilter}
             messageWhenEmpty="No elligable accounts requiring multiple signatures"
             isDisabled={disabled}
@@ -191,6 +182,7 @@ export default function MultiSigAccountTransactionFlow<
 
         dispatch(replace(pathname, v));
 
+        // eslint-disable-next-line no-console
         console.log(transaction, serialized);
     };
 

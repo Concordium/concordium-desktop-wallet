@@ -121,6 +121,31 @@ const accountTransactionTypes: [
     ],
     [
         TransactionTypes.AccountTransaction,
+        TransactionKind.Add_baker,
+        'Add baker',
+    ],
+    [
+        TransactionTypes.AccountTransaction,
+        TransactionKind.Update_baker_keys,
+        'Update baker keys',
+    ],
+    [
+        TransactionTypes.AccountTransaction,
+        TransactionKind.Remove_baker,
+        'Remove baker',
+    ],
+    [
+        TransactionTypes.AccountTransaction,
+        TransactionKind.Update_baker_stake,
+        'Update baker stake',
+    ],
+    [
+        TransactionTypes.AccountTransaction,
+        TransactionKind.Update_baker_restake_earnings,
+        'Update baker restake earnings',
+    ],
+    [
+        TransactionTypes.AccountTransaction,
         TransactionKind.Configure_baker,
         'Configure baker',
     ],

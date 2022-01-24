@@ -16,9 +16,9 @@ import { noOp } from '~/utils/basicHelpers';
 
 interface Props {
     chosenAccount?: Account;
-    setAccount: (account: Account) => void;
+    setAccount?: (account: Account) => void;
     filter?: (account: Account, info?: AccountInfo) => boolean;
-    onAccountClicked?(): void;
+    onAccountClicked?(account: Account): void;
     isDisabled?: (
         account: Account,
         info?: AccountInfo
@@ -31,7 +31,7 @@ interface Props {
  */
 export default function PickAccount({
     chosenAccount,
-    setAccount,
+    setAccount = noOp,
     filter = () => true,
     isDisabled,
     onAccountClicked = noOp,
@@ -96,7 +96,7 @@ export default function PickAccount({
                                         ? () => {
                                               setChosenIndex(index);
                                               setAccount(account);
-                                              onAccountClicked();
+                                              onAccountClicked(account);
                                           }
                                         : undefined
                                 }
