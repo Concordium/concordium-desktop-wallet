@@ -23,6 +23,8 @@ import PickAccount from '~/components/PickAccount';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { partialApply } from '~/utils/componentHelpers';
 import { AccountDetail } from './proposal-details/shared';
+import Form from '~/components/Form';
+import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime';
 
 import multisigFlowStyles from '../common/MultiSignatureFlowPage.module.scss';
 
@@ -45,6 +47,16 @@ type FlowChildren<F extends Record<string, unknown>> = {
 interface AccountStep {
     account: Account;
 }
+
+interface ExpiryStep {
+    expiry: Date;
+}
+
+interface SignStep {
+    sign: undefined;
+}
+
+type MultiSigAccountTransactionSteps = AccountStep & ExpiryStep & SignStep;
 
 type SelectAccountPageProps = MultiStepFormPageProps<Account> & {
     filter?(account: Account, info?: AccountInfo): boolean;
@@ -76,6 +88,24 @@ const SelectAccountPage = ({
     );
 };
 
+type SelectExpiryPageProps = MultiStepFormPageProps<Date>;
+
+const SelectExpiryPage = ({ onNext, initial }: SelectExpiryPageProps) => {
+    return (
+        <Form<ExpiryStep> onSubmit={(v) => onNext(v.expiry)}>
+            <Form.DatePicker
+                className="body2 mV40"
+                label="Transaction expiry time"
+                name="expiry"
+                defaultValue={initial}
+                minDate={new Date()}
+            />
+            <p>Choose the expiry date for the transaction.</p>
+            <p>Committing the transaction after this date, will be rejected.</p>
+        </Form>
+    );
+};
+
 interface Props<F extends Record<string, unknown>, T extends AccountTransaction>
     extends Omit<
         MultiStepFormProps<F>,
@@ -99,7 +129,9 @@ interface Props<F extends Record<string, unknown>, T extends AccountTransaction>
     /**
      * Function to convert flow values into an account transaction.
      */
-    convert(values: AccountStep & F): T;
+    convert(
+        values: Omit<MultiSigAccountTransactionSteps, keyof SignStep> & F
+    ): T;
     /**
      * Pages of the transaction flow declared as a mapping of components to corresponding substate.
      * Declaration order defines the order the pages are shown.
@@ -112,6 +144,7 @@ interface InternalState {
 }
 
 const ACCOUNT_STEP_TITLE = 'Select account';
+const EXPIRY_STEP_TITLE = 'Select transaction expiry';
 const SIGN_STEP_TITLE = 'Signature and hardware wallet';
 
 export default function MultiSigAccountTransactionFlow<
@@ -126,10 +159,10 @@ export default function MultiSigAccountTransactionFlow<
     accountDisabled,
     ...formProps
 }: Props<F, T>) {
-    type WithAccount = AccountStep & F;
+    type WithMultiSigSteps = MultiSigAccountTransactionSteps & F;
 
-    const { pathname, state } = useLocation<WithAccount | null>();
-    const valueStore = useState<Partial<WithAccount>>(state ?? {});
+    const { pathname, state } = useLocation<WithMultiSigSteps | null>();
+    const valueStore = useState<Partial<WithMultiSigSteps>>(state ?? {});
     const [values] = valueStore;
     const dispatch = useDispatch();
 
@@ -150,13 +183,17 @@ export default function MultiSigAccountTransactionFlow<
     );
 
     const getStepTitle = useCallback(
-        (step?: keyof WithAccount | 'sign') => {
-            if (step === 'sign') {
-                return SIGN_STEP_TITLE;
-            }
-
+        (step?: keyof WithMultiSigSteps) => {
             if (step === 'account') {
                 return ACCOUNT_STEP_TITLE;
+            }
+
+            if (step === 'expiry') {
+                return EXPIRY_STEP_TITLE;
+            }
+
+            if (step === 'sign') {
+                return SIGN_STEP_TITLE;
             }
 
             const activeChild = step
@@ -176,7 +213,7 @@ export default function MultiSigAccountTransactionFlow<
         setState({ stepTitle: getStepTitle(step) });
     };
 
-    const handleDone = (v: WithAccount) => {
+    const handleDone = (v: WithMultiSigSteps) => {
         const transaction = convert(v);
         const serialized = stringify(transaction);
 
@@ -205,6 +242,10 @@ export default function MultiSigAccountTransactionFlow<
                                 {view(values[key])}
                             </Fragment>
                         ))}
+                        <DisplayTransactionExpiryTime
+                            expiryTime={values.expiry}
+                            placeholder="To be determined"
+                        />
                     </div>
                 </Columns.Column>
                 <Columns.Column
@@ -213,7 +254,7 @@ export default function MultiSigAccountTransactionFlow<
                 >
                     <div className={multisigFlowStyles.columnContent}>
                         <div className="flexFill">
-                            <MultiStepForm<WithAccount>
+                            <MultiStepForm<WithMultiSigSteps>
                                 initialValues={state ?? undefined}
                                 valueStore={valueStore}
                                 onDone={handleDone}
@@ -231,6 +272,7 @@ export default function MultiSigAccountTransactionFlow<
                                         ),
                                     },
                                     ...flowChildren,
+                                    expiry: { component: SelectExpiryPage },
                                     sign: {
                                         component: SignTransactionProposal,
                                     },
