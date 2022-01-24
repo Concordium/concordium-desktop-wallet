@@ -36,7 +36,7 @@ export interface FormChild<F, K extends keyof F = any> {
 }
 
 type FormChildren<F extends Record<string, unknown>> = {
-    [K in keyof F]: FormChild<F, K>;
+    [K in keyof F]?: FormChild<F, K>;
 };
 
 /**

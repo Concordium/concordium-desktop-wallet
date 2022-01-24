@@ -27,6 +27,7 @@ import Form from '~/components/Form';
 import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime';
 
 import multisigFlowStyles from '../common/MultiSignatureFlowPage.module.scss';
+import { isDefined } from '~/utils/basicHelpers';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface FlowChild<F, K extends keyof F = any> extends FormChild<F, K> {
@@ -41,7 +42,7 @@ interface FlowChild<F, K extends keyof F = any> extends FormChild<F, K> {
 }
 
 type FlowChildren<F extends Record<string, unknown>> = {
-    [K in keyof F]: FlowChild<F, K>;
+    [K in keyof F]?: FlowChild<F, K>;
 };
 
 interface AccountStep {
@@ -171,14 +172,11 @@ export default function MultiSigAccountTransactionFlow<
         [children, values]
     );
 
-    const keyViewPairs: [
-        keyof F,
-        FlowChild<F, keyof F>['view']
-    ][] = useMemo(
+    const keyViewPairs: [keyof F, FlowChild<F, keyof F>['view']][] = useMemo(
         () =>
-            Object.entries(
-                flowChildren
-            ).map(([k, c]: [keyof F, FlowChild<F, keyof F>]) => [k, c.view]),
+            Object.entries(flowChildren)
+                .filter(([, c]) => isDefined(c))
+                .map(([k, c]: [keyof F, FlowChild<F, keyof F>]) => [k, c.view]),
         [flowChildren]
     );
 

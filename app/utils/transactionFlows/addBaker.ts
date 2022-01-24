@@ -140,3 +140,19 @@ export const validateValues = (
 
     return undefined;
 };
+
+export const displayPoolOpen = (status: OpenStatus) => {
+    switch (status) {
+        case OpenStatus.OpenForAll:
+            return 'Open for delegation';
+        case OpenStatus.ClosedForNew:
+            return 'Closed for new delegators';
+        case OpenStatus.ClosedForAll:
+            return 'Closed for delegation';
+        default:
+            throw new Error(`Status not supported: ${status}`);
+    }
+};
+
+export const displayRestakeEarnings = (value: boolean) =>
+    value ? 'Yes' : 'No';

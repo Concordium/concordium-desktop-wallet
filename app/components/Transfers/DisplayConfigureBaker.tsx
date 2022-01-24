@@ -11,28 +11,11 @@ import { DisplayFromAccount } from './DisplayAccount';
 import DisplayPublicKey from './DisplayPublicKey';
 
 import styles from './transferDetails.module.scss';
-import { fractionResolutionToPercentage } from '~/utils/rewardFractionHelpers';
-import { toFixed } from '~/utils/numberStringHelpers';
-
-interface DisplayCommissionProps {
-    title: string;
-    value?: number;
-}
-
-const formatCommission = toFixed(3);
-
-const DisplayCommission = ({ title, value }: DisplayCommissionProps) =>
-    value ? (
-        <>
-            <h5 className={styles.title}>{title}:</h5>
-            <p className={styles.amount}>
-                {formatCommission(
-                    fractionResolutionToPercentage(value).toString()
-                )}
-                %
-            </p>
-        </>
-    ) : null;
+import {
+    displayPoolOpen,
+    displayRestakeEarnings,
+} from '~/utils/transactionFlows/addBaker';
+import DisplayBakerCommission from './DisplayBakerCommission';
 
 interface Props {
     transaction: ConfigureBaker;
@@ -45,6 +28,8 @@ export default function DisplayConfigureBaker({ transaction }: Props) {
     const senderName = useAccountName(transaction.sender);
     const isSingleSig = useRouteMatch(routes.SUBMITTRANSFER);
 
+    const { payload, expiry } = transaction;
+
     return (
         <>
             <DisplayFromAccount
@@ -52,63 +37,63 @@ export default function DisplayConfigureBaker({ transaction }: Props) {
                 name={senderName}
             />
             <DisplayFee className={styles.fee} transaction={transaction} />
-            {transaction.payload.stake && (
+            {payload.stake && (
                 <>
                     <h5 className={styles.title}>Staked amount:</h5>
                     <p className={styles.amount}>
-                        {displayAsGTU(transaction.payload.stake)}
+                        {displayAsGTU(payload.stake)}
                     </p>
                 </>
             )}
-            {transaction.payload.restakeEarnings !== undefined && (
+            {payload.restakeEarnings !== undefined && (
                 <>
                     <h5 className={styles.title}>Restake earnings:</h5>
                     <p className={styles.amount}>
-                        {transaction.payload.restakeEarnings ? 'Yes' : 'No'}
+                        {displayRestakeEarnings(payload.restakeEarnings)}
                     </p>
                 </>
             )}
-            <DisplayCommission
+            {payload.openForDelegation !== undefined && (
+                <>
+                    <h5 className={styles.title}>Pool delegation status:</h5>
+                    <p className={styles.amount}>
+                        {displayPoolOpen(payload.openForDelegation)}
+                    </p>
+                </>
+            )}
+            <DisplayBakerCommission
                 title="Transaction fee commission"
                 value={transaction.payload.transactionFeeCommission}
             />
-            <DisplayCommission
+            <DisplayBakerCommission
                 title="Baking reward commission"
                 value={transaction.payload.bakingRewardCommission}
             />
-            <DisplayCommission
+            <DisplayBakerCommission
                 title="Finalization reward commission"
                 value={transaction.payload.finalizationRewardCommission}
             />
-            {transaction.payload.metadataUrl !== undefined && (
+            {payload.metadataUrl !== undefined && (
                 <>
                     <h5 className={styles.title}>Metadata URL:</h5>
-                    <p className={styles.amount}>
-                        {transaction.payload.metadataUrl}
-                    </p>
+                    <p className={styles.amount}>{payload.metadataUrl}</p>
                 </>
             )}
-            {transaction.payload.electionVerifyKey !== undefined && (
-                <DisplayPublicKey
-                    name="Election verify key:"
-                    publicKey={transaction.payload.electionVerifyKey[0]}
-                />
-            )}
-            {transaction.payload.signatureVerifyKey !== undefined && (
-                <DisplayPublicKey
-                    name="Election verify key:"
-                    publicKey={transaction.payload.signatureVerifyKey[0]}
-                />
-            )}
-            {transaction.payload.aggregationVerifyKey !== undefined && (
-                <DisplayPublicKey
-                    name="Election verify key:"
-                    publicKey={transaction.payload.aggregationVerifyKey[0]}
-                />
-            )}
+            <DisplayPublicKey
+                name="Election verify key:"
+                publicKey={payload?.electionVerifyKey?.[0]}
+            />
+            <DisplayPublicKey
+                name="Signature verify key:"
+                publicKey={payload?.signatureVerifyKey?.[0]}
+            />
+            <DisplayPublicKey
+                name="Aggregation verify key:"
+                publicKey={payload?.aggregationVerifyKey?.[0]}
+            />
             {Boolean(isSingleSig) || (
                 <DisplayTransactionExpiryTime
-                    expiryTime={dateFromTimeStamp(transaction.expiry)}
+                    expiryTime={dateFromTimeStamp(expiry)}
                 />
             )}
         </>

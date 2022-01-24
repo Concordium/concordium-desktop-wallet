@@ -4,16 +4,30 @@ import styles from './transferDetails.module.scss';
 
 export type Props = {
     name: string;
-    publicKey: string;
+    publicKey: string | undefined;
+    placeholder?: string;
 };
 
-export default function DisplayPublicKey({ name, publicKey }: Props) {
+export default function DisplayPublicKey({
+    name,
+    publicKey,
+    placeholder,
+}: Props) {
+    if (!publicKey && !placeholder) {
+        return null;
+    }
+
     return (
         <>
             <h5 className={styles.title}>{name}</h5>
-            <div className={styles.address}>
-                {chunkString(publicKey, 32).join('\n')}
-            </div>
+            {!publicKey && placeholder && (
+                <span className="textFaded">{placeholder}</span>
+            )}
+            {publicKey && (
+                <div className={styles.address}>
+                    {chunkString(publicKey, 32).join('\n')}
+                </div>
+            )}
         </>
     );
 }
