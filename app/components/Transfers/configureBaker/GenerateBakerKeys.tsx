@@ -10,7 +10,7 @@ import { BakerKeyVariants } from '~/utils/rust.worker';
 import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
 import { Account } from '~/utils/types';
 
-import styles from './AccountDetailsPage.module.scss';
+import styles from './ConfigureBakerPage.module.scss';
 
 interface Props {
     keyVariant: BakerKeyVariants;
@@ -48,7 +48,7 @@ export default function GenerateBakerKeys({
                     accountAddress={account.address}
                     onContinue={() => onContinue(keys)}
                     className="mT30"
-                    buttonClassName={styles.bakerFlowContinue}
+                    buttonClassName={styles.continue}
                     hasExported={isDefined(initialKeys)}
                 />
             ) : (

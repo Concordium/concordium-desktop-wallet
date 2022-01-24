@@ -28,6 +28,8 @@ import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryT
 
 import multisigFlowStyles from '../common/MultiSignatureFlowPage.module.scss';
 import { isDefined } from '~/utils/basicHelpers';
+import Loading from '~/cross-app-components/Loading';
+import { getDefaultExpiry } from '~/utils/timeHelpers';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface FlowChild<F, K extends keyof F = any> extends FormChild<F, K> {
@@ -91,9 +93,17 @@ const SelectAccountPage = ({
 
 type SelectExpiryPageProps = MultiStepFormPageProps<Date>;
 
-const SelectExpiryPage = ({ onNext, initial }: SelectExpiryPageProps) => {
+const SelectExpiryPage = ({
+    onNext,
+    initial = getDefaultExpiry(),
+}: SelectExpiryPageProps) => {
     return (
         <Form<ExpiryStep> onSubmit={(v) => onNext(v.expiry)}>
+            <p>Choose the expiry date for the transaction.</p>
+            <p>
+                Committing the transaction after this date, will result in the
+                transaction being rejected.
+            </p>
             <Form.DatePicker
                 className="body2 mV40"
                 label="Transaction expiry time"
@@ -101,15 +111,16 @@ const SelectExpiryPage = ({ onNext, initial }: SelectExpiryPageProps) => {
                 defaultValue={initial}
                 minDate={new Date()}
             />
-            <p>Choose the expiry date for the transaction.</p>
-            <p>Committing the transaction after this date, will be rejected.</p>
+            <Form.Submit>Continue</Form.Submit>
         </Form>
     );
 };
 
+type RequiredFormValues = Omit<MultiSigAccountTransactionSteps, keyof SignStep>;
+
 interface Props<F extends Record<string, unknown>, T extends AccountTransaction>
     extends Omit<
-        MultiStepFormProps<F>,
+        MultiStepFormProps<RequiredFormValues & F>,
         'onDone' | 'initialValues' | 'valueStore'
     > {
     /**
@@ -130,14 +141,15 @@ interface Props<F extends Record<string, unknown>, T extends AccountTransaction>
     /**
      * Function to convert flow values into an account transaction.
      */
-    convert(
-        values: Omit<MultiSigAccountTransactionSteps, keyof SignStep> & F
-    ): T;
+    convert(values: RequiredFormValues & F): T;
     /**
      * Pages of the transaction flow declared as a mapping of components to corresponding substate.
      * Declaration order defines the order the pages are shown.
      */
-    children: OrRenderValues<F, FlowChildren<F>>;
+    children: OrRenderValues<
+        RequiredFormValues & F,
+        FlowChildren<RequiredFormValues & F>
+    >;
 }
 
 interface InternalState {
@@ -283,3 +295,13 @@ export default function MultiSigAccountTransactionFlow<
         </MultiSignatureLayout>
     );
 }
+
+export const MultiSigAccountTransactionFlowLoading = ({
+    title,
+}: {
+    title: string;
+}) => (
+    <MultiSignatureLayout pageTitle={title}>
+        <Loading text="Loading transaction dependencies" />
+    </MultiSignatureLayout>
+);

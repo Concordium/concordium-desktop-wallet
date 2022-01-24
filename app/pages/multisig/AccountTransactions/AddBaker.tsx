@@ -1,5 +1,11 @@
 /* eslint-disable react/display-name */
-import React from 'react';
+import React, { ComponentType } from 'react';
+import { Redirect } from 'react-router';
+import CommissionsPage from '~/components/Transfers/configureBaker/CommissionsPage';
+import DelegationStatusPage from '~/components/Transfers/configureBaker/DelegationStatusPage';
+import KeysPage from '~/components/Transfers/configureBaker/KeysPage';
+import MetadataUrlPage from '~/components/Transfers/configureBaker/MetadataUrlPage';
+import StakePage from '~/components/Transfers/configureBaker/StakePage';
 import DisplayBakerCommission from '~/components/Transfers/DisplayBakerCommission';
 import DisplayPublicKey from '~/components/Transfers/DisplayPublicKey';
 import {
@@ -8,10 +14,20 @@ import {
     displayRestakeEarnings,
     title,
 } from '~/utils/transactionFlows/addBaker';
-import { Commissions } from '~/utils/transactionFlows/configureBaker';
-import { ConfigureBaker } from '~/utils/types';
-import MultiSigAccountTransactionFlow from './MultiSigAccountTransactionFlow';
+import {
+    Commissions,
+    Dependencies,
+} from '~/utils/transactionFlows/configureBaker';
+import { ConfigureBaker, OpenStatus } from '~/utils/types';
+import MultiSigAccountTransactionFlow, {
+    MultiSigAccountTransactionFlowLoading,
+} from './MultiSigAccountTransactionFlow';
 import { AmountDetail, PlainDetail } from './proposal-details/shared';
+import routes from '~/constants/routes.json';
+import withExchangeRate from '~/components/Transfers/withExchangeRate';
+import withChainData from '~/utils/withChainData';
+import { ensureProps } from '~/utils/componentHelpers';
+import { isDefined } from '~/utils/basicHelpers';
 
 const PLACEHOLDER = 'To be determined';
 
@@ -39,7 +55,29 @@ const DisplayBakerCommissions = ({
     </>
 );
 
-export default function AddBaker() {
+const toRoot = <Redirect to={routes.MULTISIGTRANSACTIONS_ADD_BAKER} />;
+
+type Props = Omit<Dependencies, 'account' | 'nonce'>;
+type UnsafeProps = Partial<Props>;
+
+const hasNecessaryProps = (props: UnsafeProps): props is Props =>
+    [props.exchangeRate, props.blockSummary].every(isDefined);
+
+const withDeps = (component: ComponentType<Props>) =>
+    withExchangeRate(
+        withChainData(
+            ensureProps(
+                component,
+                hasNecessaryProps,
+                <MultiSigAccountTransactionFlowLoading title={title} />
+            )
+        )
+    );
+
+export default withDeps(function AddBaker({
+    exchangeRate,
+    blockSummary,
+}: Props) {
     const convert = (): ConfigureBaker => {
         throw new Error('Unimplemented');
     };
@@ -49,10 +87,20 @@ export default function AddBaker() {
             title={title}
             convert={convert}
         >
-            {({ openForDelegation }) => ({
+            {({ openForDelegation, account }) => ({
                 stake: {
                     title: 'Stake settings',
-                    component: () => null,
+                    component: (p) =>
+                        account ? (
+                            <StakePage
+                                {...p}
+                                account={account}
+                                exchangeRate={exchangeRate}
+                                blockSummary={blockSummary}
+                            />
+                        ) : (
+                            toRoot
+                        ),
                     view: (v) => (
                         <>
                             <AmountDetail
@@ -62,7 +110,7 @@ export default function AddBaker() {
                             <PlainDetail
                                 title="Restake earnings"
                                 value={
-                                    v?.restake
+                                    v?.restake !== undefined
                                         ? displayRestakeEarnings(v.restake)
                                         : undefined
                                 }
@@ -72,7 +120,7 @@ export default function AddBaker() {
                 },
                 openForDelegation: {
                     title: 'Pool settings',
-                    component: () => null,
+                    component: DelegationStatusPage,
                     view: (v) => (
                         <PlainDetail
                             title="Pool delegation status"
@@ -82,25 +130,32 @@ export default function AddBaker() {
                         />
                     ),
                 },
-                commissions: openForDelegation
-                    ? {
-                          title: 'Pool settings',
-                          component: () => null,
-                          view: (v) => <DisplayBakerCommissions {...v} />,
-                      }
-                    : undefined,
-                metadataUrl: openForDelegation
-                    ? {
-                          title: 'Pool settings',
-                          component: () => null,
-                          view: (v) => (
-                              <PlainDetail title="Metadata URL" value={v} />
-                          ),
-                      }
-                    : undefined,
+                commissions:
+                    openForDelegation === OpenStatus.OpenForAll
+                        ? {
+                              title: 'Pool settings',
+                              component: CommissionsPage,
+                              view: (v) => <DisplayBakerCommissions {...v} />,
+                          }
+                        : undefined,
+                metadataUrl:
+                    openForDelegation === OpenStatus.OpenForAll
+                        ? {
+                              title: 'Pool settings',
+                              component: MetadataUrlPage,
+                              view: (v) => (
+                                  <PlainDetail title="Metadata URL" value={v} />
+                              ),
+                          }
+                        : undefined,
                 keys: {
                     title: 'Generate keys',
-                    component: () => null,
+                    component: (p) =>
+                        account ? (
+                            <KeysPage {...p} account={account} />
+                        ) : (
+                            toRoot
+                        ),
                     view: (v) => (
                         <>
                             <DisplayPublicKey
@@ -124,4 +179,4 @@ export default function AddBaker() {
             })}
         </MultiSigAccountTransactionFlow>
     );
-}
+});

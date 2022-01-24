@@ -16,9 +16,9 @@ import { BakerKeys } from '~/utils/rustInterface';
 import { createAddBakerTransaction } from '~/utils/transactionHelpers';
 import { AddBakerPayload, NotOptional, TransactionKindId } from '~/utils/types';
 import { SubmitTransactionLocationState } from '../../../SubmitTransaction/SubmitTransaction';
-import GenerateBakerKeys from '../../GenerateBakerKeys';
 import AddBakerData from './AddBakerData';
 import { StakeSettings } from '~/components/BakerTransactions/AddBakerStakeSettings';
+import GenerateBakerKeys from '~/components/Transfers/configureBaker/GenerateBakerKeys';
 
 const header = 'Add baker';
 

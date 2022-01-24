@@ -5,7 +5,6 @@ import { push, replace } from 'connected-react-router';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
 import routes from '~/constants/routes.json';
-import GenerateBakerKeys from '../GenerateBakerKeys';
 import { BakerKeys } from '~/utils/rustInterface';
 import {
     NotOptional,
@@ -21,6 +20,7 @@ import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
 import ensureExchangeRateAndNonce, {
     ExchangeRateAndNonceProps,
 } from '~/components/Transfers/ensureExchangeRateAndNonce';
+import GenerateBakerKeys from '~/components/Transfers/configureBaker/GenerateBakerKeys';
 
 import styles from '../AccountDetailsPage.module.scss';
 
