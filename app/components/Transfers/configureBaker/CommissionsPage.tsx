@@ -41,7 +41,10 @@ const fromRewardFractions = (values: Commissions): Commissions => ({
     ),
 });
 
-type CommissionsPageProps = MultiStepFormPageProps<Commissions>;
+type CommissionsPageProps = Omit<
+    MultiStepFormPageProps<Commissions>,
+    'formValues'
+>;
 
 export default function CommissionsPage({
     initial,

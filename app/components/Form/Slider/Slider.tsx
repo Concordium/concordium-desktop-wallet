@@ -95,7 +95,6 @@ export default function Slider({
                 </span>
                 <div className={styles.inputWrapper}>
                     <InlineNumber
-                        className={styles.input}
                         value={innerValue?.toString()}
                         onChange={handleChange}
                         onBlur={onBlur}

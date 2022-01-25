@@ -61,13 +61,10 @@
     border-bottom: 1px solid $color-text;
     width: 100%;
     max-width: 200px;
+    font-size: $font-size-body2;
 
     .invalid & {
         color: $color-error;
         border-color: $color-error;
     }
-}
-
-.input {
-    font-size: $font-size-body2;
 }

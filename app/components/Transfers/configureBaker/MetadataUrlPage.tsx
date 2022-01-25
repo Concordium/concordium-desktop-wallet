@@ -21,7 +21,10 @@ const metadataUrlPageFieldNames: EqualRecord<MetadataUrlPageForm> = {
     url: 'url',
 };
 
-type MetadataUrlPageProps = MultiStepFormPageProps<MetadataUrl>;
+type MetadataUrlPageProps = Omit<
+    MultiStepFormPageProps<MetadataUrl>,
+    'formValues'
+>;
 
 const MetadataUrlPage = ({ onNext, initial = '' }: MetadataUrlPageProps) => (
     <Form<MetadataUrlPageForm>

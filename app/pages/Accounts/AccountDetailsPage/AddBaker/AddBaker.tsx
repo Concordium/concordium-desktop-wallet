@@ -91,35 +91,58 @@ export default withDeps(function AddBaker(props: Props) {
         >
             {({ openForDelegation }) => ({
                 stake: {
-                    component: (p) => (
+                    render: (initial, onNext, formValues) => (
                         <StakePage
-                            {...p}
                             account={account}
                             exchangeRate={exchangeRate}
                             blockSummary={blockSummary}
+                            initial={initial}
+                            onNext={onNext}
+                            formValues={formValues}
                         />
                     ),
                 },
                 openForDelegation: {
-                    component: DelegationStatusPage,
+                    render: (initial, onNext) => (
+                        <DelegationStatusPage
+                            initial={initial}
+                            onNext={onNext}
+                        />
+                    ),
                     title: 'Pool settings',
                 },
                 commissions:
                     openForDelegation === OpenStatus.OpenForAll
                         ? {
-                              component: CommissionsPage,
+                              render: (initial, onNext) => (
+                                  <CommissionsPage
+                                      initial={initial}
+                                      onNext={onNext}
+                                  />
+                              ),
                               title: 'Pool settings',
                           }
                         : undefined,
                 metadataUrl:
                     openForDelegation === OpenStatus.OpenForAll
                         ? {
-                              component: MetadataUrlPage,
+                              render: (initial, onNext) => (
+                                  <MetadataUrlPage
+                                      initial={initial}
+                                      onNext={onNext}
+                                  />
+                              ),
                               title: 'Pool settings',
                           }
                         : undefined,
                 keys: {
-                    component: (p) => <KeysPage {...p} account={account} />,
+                    render: (initial, onNext) => (
+                        <KeysPage
+                            account={account}
+                            initial={initial}
+                            onNext={onNext}
+                        />
+                    ),
                     title: 'Generated keys',
                 },
             })}

@@ -6,7 +6,10 @@ import { OpenStatus } from '~/utils/types';
 
 import styles from './ConfigureBakerPage.module.scss';
 
-type DelegationStatusPageProps = MultiStepFormPageProps<OpenStatus>;
+type DelegationStatusPageProps = Omit<
+    MultiStepFormPageProps<OpenStatus>,
+    'formValues'
+>;
 
 export default function DelegationStatusPage({
     initial = OpenStatus.OpenForAll,

@@ -4,7 +4,10 @@ import { BakerKeys } from '~/utils/rustInterface';
 import { Dependencies } from '~/utils/transactionFlows/configureBaker';
 import GenerateBakerKeys from './GenerateBakerKeys';
 
-type GenerateKeysPageProps = MultiStepFormPageProps<BakerKeys> &
+type GenerateKeysPageProps = Omit<
+    MultiStepFormPageProps<BakerKeys>,
+    'formValues'
+> &
     Pick<Dependencies, 'account'>;
 
 const KeysPage = ({ onNext, initial, account }: GenerateKeysPageProps) => (

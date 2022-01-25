@@ -1,6 +1,5 @@
 import { push } from 'connected-react-router';
 import React, {
-    ComponentType,
     Dispatch,
     SetStateAction,
     useEffect,
@@ -30,12 +29,17 @@ export interface MultiStepFormPageProps<V, F = unknown> {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface FormChild<F, K extends keyof F = any> {
     /**
-     * Page component responsible for letting user fill out the respective substate.
+     * Function to render page component responsible for letting user fill out the respective substate.
+     * This is a function to avoid anonymous components messing up render tree updates.
      */
-    component: ComponentType<MultiStepFormPageProps<F[K], F>>;
+    render(
+        initial: F[K] | undefined,
+        onNext: (values: F[K]) => void,
+        formValues: Partial<F>
+    ): JSX.Element;
 }
 
-type FormChildren<F extends Record<string, unknown>> = {
+export type FormChildren<F extends Record<string, unknown>> = {
     [K in keyof F]?: FormChild<F, K>;
 };
 
@@ -115,7 +119,7 @@ export default function MultiStepForm<
     const pages = keyPagePairs
         .map(([k, c]: [keyof F, FormChild<F>], i) => ({
             substate: k,
-            Page: c.component,
+            render: c.render,
             route: i === 0 ? baseRoute : `${baseRoute}/${i}`,
             nextRoute:
                 i === keyPagePairs.length - 1
@@ -168,13 +172,9 @@ export default function MultiStepForm<
 
     return (
         <Switch>
-            {pages.map(({ Page, route, substate }) => (
+            {pages.map(({ render, route, substate }) => (
                 <Route path={route} key={route}>
-                    <Page
-                        onNext={handleNext(substate)}
-                        initial={values[substate]}
-                        formValues={values}
-                    />
+                    {render(values[substate], handleNext(substate), values)}
                 </Route>
             ))}
         </Switch>

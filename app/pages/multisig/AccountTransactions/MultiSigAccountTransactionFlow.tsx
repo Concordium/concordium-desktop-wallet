@@ -1,5 +1,4 @@
 /* eslint-disable react/display-name */
-import { replace } from 'connected-react-router';
 import React, {
     ComponentType,
     ReactNode,
@@ -8,18 +7,24 @@ import React, {
     useState,
 } from 'react';
 import { useDispatch } from 'react-redux';
-import { useLocation } from 'react-router';
-import { stringify } from '~/utils/JSONHelper';
+import {
+    Redirect,
+    Route,
+    Switch,
+    useLocation,
+    useRouteMatch,
+} from 'react-router';
+import { push } from 'connected-react-router';
 import { Account, AccountInfo, AccountTransaction } from '~/utils/types';
 import MultiStepForm, {
     FormChild,
+    FormChildren,
     MultiStepFormPageProps,
     MultiStepFormProps,
     OrRenderValues,
 } from '~/components/MultiStepForm';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 import Columns from '~/components/Columns';
-import SignTransactionProposal from '../SignTransactionProposal';
 import PickAccount from '~/components/PickAccount';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { AccountDetail } from './proposal-details/shared';
@@ -27,6 +32,12 @@ import Form from '~/components/Form';
 import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime';
 import Loading from '~/cross-app-components/Loading';
 import { getDefaultExpiry } from '~/utils/timeHelpers';
+import SignTransaction from './SignTransaction';
+import { useAsyncMemo } from '~/utils/hooks';
+import { getNextAccountNonce } from '~/node/nodeRequests';
+import errorMessages from '~/constants/errorMessages.json';
+import routes from '~/constants/routes.json';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 import multisigFlowStyles from '../common/MultiSignatureFlowPage.module.scss';
 
@@ -50,13 +61,12 @@ interface ExpiryStep {
     expiry: Date;
 }
 
-interface SignStep {
-    sign: undefined;
-}
+export type RequiredValues = AccountStep & ExpiryStep;
 
-type MultiSigAccountTransactionSteps = AccountStep & ExpiryStep & SignStep;
-
-type SelectAccountPageProps = MultiStepFormPageProps<Account> & {
+type SelectAccountPageProps = Omit<
+    MultiStepFormPageProps<Account>,
+    'formValues'
+> & {
     filter?(account: Account, info?: AccountInfo): boolean;
     disabled?(account: Account, info?: AccountInfo): ReactNode | undefined;
 };
@@ -86,39 +96,39 @@ const SelectAccountPage = ({
     );
 };
 
-type SelectExpiryPageProps = MultiStepFormPageProps<Date>;
+type SelectExpiryPageProps = Omit<MultiStepFormPageProps<Date>, 'formValues'>;
 
 const SelectExpiryPage = ({
     onNext,
     initial = getDefaultExpiry(),
 }: SelectExpiryPageProps) => {
     return (
-        <Form<ExpiryStep> onSubmit={(v) => onNext(v.expiry)}>
-            <p>Choose the expiry date for the transaction.</p>
-            <p>
-                Committing the transaction after this date, will result in the
-                transaction being rejected.
-            </p>
-            <Form.DatePicker
-                className="body2 mV40"
-                label="Transaction expiry time"
-                name="expiry"
-                defaultValue={initial}
-                minDate={new Date()}
-            />
+        <Form<ExpiryStep>
+            onSubmit={(v) => onNext(v.expiry)}
+            className="flexColumn flexChildFill"
+        >
+            <div className="flexChildFill">
+                <p>Choose the expiry date for the transaction.</p>
+                <p>
+                    Committing the transaction after this date, will result in
+                    the transaction being rejected.
+                </p>
+                <Form.DatePicker
+                    className="body2 mV40"
+                    label="Transaction expiry time"
+                    name="expiry"
+                    defaultValue={initial}
+                    minDate={new Date()}
+                />
+            </div>
             <Form.Submit>Continue</Form.Submit>
         </Form>
     );
 };
 
-export type RequiredFormValues = Omit<
-    MultiSigAccountTransactionSteps,
-    keyof SignStep
->;
-
 interface Props<F extends Record<string, unknown>, T extends AccountTransaction>
     extends Omit<
-        MultiStepFormProps<RequiredFormValues & F>,
+        MultiStepFormProps<RequiredValues & F>,
         'onDone' | 'initialValues' | 'valueStore'
     > {
     /**
@@ -139,18 +149,18 @@ interface Props<F extends Record<string, unknown>, T extends AccountTransaction>
     /**
      * Function to convert flow values into an account transaction.
      */
-    convert(values: RequiredFormValues & F): T;
+    convert(values: RequiredValues & F, nonce: bigint): T;
     /**
      * Component to render preview of transaction values.
      */
-    preview: ComponentType<Partial<RequiredFormValues & F>>;
+    preview: ComponentType<Partial<RequiredValues & F>>;
     /**
      * Pages of the transaction flow declared as a mapping of components to corresponding substate.
      * Declaration order defines the order the pages are shown.
      */
     children: OrRenderValues<
-        RequiredFormValues & F,
-        FlowChildren<RequiredFormValues & F>
+        RequiredValues & F,
+        FlowChildren<RequiredValues & F>
     >;
 }
 
@@ -175,16 +185,51 @@ export default function MultiSigAccountTransactionFlow<
     accountDisabled,
     ...formProps
 }: Props<F, T>) {
-    type WithMultiSigSteps = MultiSigAccountTransactionSteps & F;
+    type WithMultiSigSteps = RequiredValues & F;
 
-    const { pathname, state } = useLocation<WithMultiSigSteps | null>();
+    const { path: matchedPath } = useRouteMatch();
+    const {
+        state,
+        pathname: currentPath,
+    } = useLocation<WithMultiSigSteps | null>();
+    const signPath = useMemo(() => `${matchedPath}/sign`, [matchedPath]);
     const valueStore = useState<Partial<WithMultiSigSteps>>(state ?? {});
     const [values] = valueStore;
+    const [showError, setShowError] = useState(false);
+    const [transaction, setTransaction] = useState<T>();
     const dispatch = useDispatch();
+
+    const nonce = useAsyncMemo(
+        async () => {
+            if (values.account === undefined) {
+                return undefined;
+            }
+            const { nonce: n } = await getNextAccountNonce(
+                values.account.address
+            );
+            return n;
+        },
+        () => setShowError(true),
+        [values.account]
+    );
 
     const flowChildren = useMemo(
         () => (typeof children === 'function' ? children(values) : children),
         [children, values]
+    );
+
+    const handleDone = useCallback(
+        (v: WithMultiSigSteps) => {
+            if (!nonce) {
+                throw new Error('Tried to create transaction with no nonce');
+            }
+
+            const t = convert(v, nonce);
+            setTransaction(t);
+
+            dispatch(push(signPath));
+        },
+        [convert, nonce, dispatch, signPath]
     );
 
     const getStepTitle = useCallback(
@@ -195,10 +240,6 @@ export default function MultiSigAccountTransactionFlow<
 
             if (step === 'expiry') {
                 return EXPIRY_STEP_TITLE;
-            }
-
-            if (step === 'sign') {
-                return SIGN_STEP_TITLE;
             }
 
             const activeChild = step
@@ -214,25 +255,22 @@ export default function MultiSigAccountTransactionFlow<
         stepTitle: getStepTitle(),
     });
 
-    const onPageActive = (step: keyof F) => {
+    const onPageActive = (step: keyof WithMultiSigSteps) => {
         setState({ stepTitle: getStepTitle(step) });
     };
 
-    const handleDone = (v: WithMultiSigSteps) => {
-        const transaction = convert(v);
-        const serialized = stringify(transaction);
-
-        dispatch(replace(pathname, v));
-
-        // eslint-disable-next-line no-console
-        console.log(transaction, serialized);
-    };
+    const columnTitle = currentPath === signPath ? SIGN_STEP_TITLE : stepTitle;
 
     return (
         <MultiSignatureLayout
             pageTitle={`Account transaction | ${title}`}
             delegateScroll
         >
+            <SimpleErrorModal
+                show={showError}
+                header={errorMessages.unableToReachNode}
+                onClick={() => dispatch(routes.MULTISIGTRANSACTIONS)}
+            />
             <Columns
                 divider
                 columnScroll
@@ -253,35 +291,58 @@ export default function MultiSigAccountTransactionFlow<
                     </div>
                 </Columns.Column>
                 <Columns.Column
-                    header={stepTitle}
+                    header={columnTitle}
                     className={multisigFlowStyles.stretchColumn}
                 >
-                    <div className={multisigFlowStyles.columnContent}>
-                        <MultiStepForm<WithMultiSigSteps>
-                            initialValues={state ?? undefined}
-                            valueStore={valueStore}
-                            onDone={handleDone}
-                            onPageActive={onPageActive}
-                            {...formProps}
-                        >
-                            {{
-                                account: {
-                                    component: (p) => (
-                                        <SelectAccountPage
-                                            filter={accountFilter}
-                                            disabled={accountDisabled}
-                                            {...p}
-                                        />
-                                    ),
-                                },
-                                ...flowChildren,
-                                expiry: { component: SelectExpiryPage },
-                                sign: {
-                                    component: SignTransactionProposal,
-                                },
-                            }}
-                        </MultiStepForm>
-                    </div>
+                    <Switch>
+                        <Route path={`${matchedPath}/sign`}>
+                            {transaction !== undefined ? (
+                                <SignTransaction
+                                    account={values.account}
+                                    transaction={transaction}
+                                />
+                            ) : (
+                                <Redirect to={matchedPath} />
+                            )}
+                        </Route>
+                        <Route path={matchedPath}>
+                            <div className={multisigFlowStyles.columnContent}>
+                                <MultiStepForm<WithMultiSigSteps>
+                                    initialValues={state ?? undefined}
+                                    valueStore={valueStore}
+                                    onPageActive={onPageActive}
+                                    onDone={handleDone}
+                                    {...formProps}
+                                >
+                                    {
+                                        {
+                                            account: {
+                                                render: (initial, onNext) => (
+                                                    <SelectAccountPage
+                                                        filter={accountFilter}
+                                                        disabled={
+                                                            accountDisabled
+                                                        }
+                                                        initial={initial}
+                                                        onNext={onNext}
+                                                    />
+                                                ),
+                                            },
+                                            ...(flowChildren as FormChildren<F>),
+                                            expiry: {
+                                                render: (initial, onNext) => (
+                                                    <SelectExpiryPage
+                                                        initial={initial}
+                                                        onNext={onNext}
+                                                    />
+                                                ),
+                                            },
+                                        } as FormChildren<WithMultiSigSteps>
+                                    }
+                                </MultiStepForm>
+                            </div>
+                        </Route>
+                    </Switch>
                 </Columns.Column>
             </Columns>
         </MultiSignatureLayout>
