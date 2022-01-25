@@ -35,6 +35,7 @@ import DelegationStatusPage from '~/components/Transfers/configureBaker/Delegati
 import CommissionsPage from '~/components/Transfers/configureBaker/CommissionsPage';
 import MetadataUrlPage from '~/components/Transfers/configureBaker/MetadataUrlPage';
 import KeysPage from '~/components/Transfers/configureBaker/KeysPage';
+import routes from '~/constants/routes.json';
 
 type Props = Dependencies;
 type UnsafeProps = MakeRequired<Partial<Props>, 'account'>;
@@ -88,6 +89,7 @@ export default withDeps(function AddBaker(props: Props) {
             title={title}
             convert={convert}
             validate={validate}
+            multisigRoute={routes.MULTISIGTRANSACTIONS_ADD_BAKER}
         >
             {({ openForDelegation }) => ({
                 stake: {

@@ -14,7 +14,7 @@ interface Props {
 const formatCommission = toFixed(3);
 
 const DisplayBakerCommission = ({ title, value, placeholder }: Props) =>
-    value || placeholder ? (
+    isDefined(value) || placeholder ? (
         <>
             <h5 className={styles.title}>{title}:</h5>
             <p className={styles.amount}>

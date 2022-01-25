@@ -25,13 +25,14 @@ import TransactionLog from './TransactionLog';
 import DecryptComponent from '../DecryptComponent';
 import withAccountSync from '../withAccountSync';
 // import AddBaker from './OldBakerFlows/AddBaker';
-import RemoveBaker from './OldBakerFlows/RemoveBaker';
+// import RemoveBaker from './OldBakerFlows/RemoveBaker';
 import UpdateBakerKeys from './OldBakerFlows/UpdateBakerKeys';
 import UpdateBakerStake from './OldBakerFlows/UpdateBakerStake';
 import UpdateBakerRestake from './OldBakerFlows/UpdateBakerRestake';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
 import { RootState } from '~/store/store';
 import AddBaker from './AddBaker';
+import RemoveBaker from './RemoveBaker';
 
 const { Master, Detail } = MasterDetailPageLayout;
 const ToAccounts = () => <Redirect to={routes.ACCOUNTS} />;
@@ -119,14 +120,16 @@ export default withAccountSync(function DetailsPage() {
                         }
                     />
                     <Route path={routes.ACCOUNTS_REMOVE_BAKER}>
-                        {canTransfer && isBaker ? (
-                            <RemoveBaker
-                                account={account}
-                                accountInfo={accountInfo}
-                            />
+                        {/* canTransfer && isBaker ? (
+                            // <RemoveBaker
+                            //     account={account}
+                            //     accountInfo={accountInfo}
+                            // />
+                            <RemoveBaker />
                         ) : (
                             <ToAccounts />
-                        )}
+                        ) */}
+                        <RemoveBaker />
                     </Route>
                     <Route path={routes.ACCOUNTS_UPDATE_BAKER_KEYS}>
                         {canTransfer && isBaker ? (

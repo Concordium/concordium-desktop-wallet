@@ -1,7 +1,7 @@
 import { goBack, push, replace } from 'connected-react-router';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router';
+import { Redirect, useLocation } from 'react-router';
 import BackButton from '~/cross-app-components/BackButton';
 import Card from '~/cross-app-components/Card';
 import Loading from '~/cross-app-components/Loading';
@@ -17,6 +17,7 @@ import MultiStepForm, {
 } from '~/components/MultiStepForm';
 
 import styles from './AccountTransactionFlow.module.scss';
+import { isMultiSig } from '~/utils/accountHelpers';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface FlowChild<F, K extends keyof F = any> extends FormChild<F, K> {
@@ -44,6 +45,10 @@ interface Props<F extends Record<string, unknown>, T extends AccountTransaction>
      */
     convert(values: F): T;
     /**
+     * Corresponding multisig transaction flow (used if account is a multisig account).
+     */
+    multisigRoute: string;
+    /**
      * Pages of the transaction flow declared as a mapping of components to corresponding substate.
      * Declaration order defines the order the pages are shown.
      */
@@ -59,7 +64,13 @@ export default function AccountTransactionFlow<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     F extends Record<string, any>,
     T extends AccountTransaction
->({ title: baseTitle, convert, children, ...formProps }: Props<F, T>) {
+>({
+    title: baseTitle,
+    convert,
+    children,
+    multisigRoute,
+    ...formProps
+}: Props<F, T>) {
     const { pathname, state } = useLocation<F | null>();
     const dispatch = useDispatch();
     const account = useSelector(chosenAccountSelector) as Account;
@@ -98,6 +109,10 @@ export default function AccountTransactionFlow<
             push({ pathname: routes.SUBMITTRANSFER, state: locationState })
         );
     };
+
+    if (isMultiSig(account)) {
+        return <Redirect to={multisigRoute} />;
+    }
 
     return (
         <Card className={styles.root}>

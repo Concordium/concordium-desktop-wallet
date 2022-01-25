@@ -7,7 +7,7 @@ import { useAccountName } from '~/utils/dataHooks';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import routes from '~/constants/routes.json';
-import { DisplayFromAccount } from './DisplayAccount';
+import DisplayAccount from './DisplayAccount';
 import DisplayPublicKey from './DisplayPublicKey';
 
 import styles from './transferDetails.module.scss';
@@ -32,12 +32,13 @@ export default function DisplayConfigureBaker({ transaction }: Props) {
 
     return (
         <>
-            <DisplayFromAccount
+            <DisplayAccount
                 address={transaction.sender}
                 name={senderName}
+                label="Account:"
             />
             <DisplayFee className={styles.fee} transaction={transaction} />
-            {payload.stake && (
+            {payload.stake !== undefined && (
                 <>
                     <h5 className={styles.title}>Staked amount:</h5>
                     <p className={styles.amount}>

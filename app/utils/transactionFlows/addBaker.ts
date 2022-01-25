@@ -37,7 +37,7 @@ export type AddBakerPayload = MakeOptional<
 
 export const title = 'Add baker';
 
-export const toPayload = ({
+const toPayload = ({
     keys,
     stake,
     openForDelegation,
