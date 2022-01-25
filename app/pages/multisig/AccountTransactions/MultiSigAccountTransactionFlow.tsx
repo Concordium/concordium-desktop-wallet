@@ -1,6 +1,7 @@
+/* eslint-disable react/display-name */
 import { replace } from 'connected-react-router';
 import React, {
-    Fragment,
+    ComponentType,
     ReactNode,
     useCallback,
     useMemo,
@@ -21,22 +22,16 @@ import Columns from '~/components/Columns';
 import SignTransactionProposal from '../SignTransactionProposal';
 import PickAccount from '~/components/PickAccount';
 import { isMultiSig } from '~/utils/accountHelpers';
-import { partialApply } from '~/utils/componentHelpers';
 import { AccountDetail } from './proposal-details/shared';
 import Form from '~/components/Form';
 import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime';
-
-import multisigFlowStyles from '../common/MultiSignatureFlowPage.module.scss';
-import { isDefined } from '~/utils/basicHelpers';
 import Loading from '~/cross-app-components/Loading';
 import { getDefaultExpiry } from '~/utils/timeHelpers';
 
+import multisigFlowStyles from '../common/MultiSignatureFlowPage.module.scss';
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface FlowChild<F, K extends keyof F = any> extends FormChild<F, K> {
-    /**
-     * Function rendering current value of the substate represented by the flow child in the left column.
-     */
-    view(v: F[K] | undefined): JSX.Element;
     /**
      * Page title.
      */
@@ -116,7 +111,10 @@ const SelectExpiryPage = ({
     );
 };
 
-type RequiredFormValues = Omit<MultiSigAccountTransactionSteps, keyof SignStep>;
+export type RequiredFormValues = Omit<
+    MultiSigAccountTransactionSteps,
+    keyof SignStep
+>;
 
 interface Props<F extends Record<string, unknown>, T extends AccountTransaction>
     extends Omit<
@@ -142,6 +140,10 @@ interface Props<F extends Record<string, unknown>, T extends AccountTransaction>
      * Function to convert flow values into an account transaction.
      */
     convert(values: RequiredFormValues & F): T;
+    /**
+     * Component to render preview of transaction values.
+     */
+    preview: ComponentType<Partial<RequiredFormValues & F>>;
     /**
      * Pages of the transaction flow declared as a mapping of components to corresponding substate.
      * Declaration order defines the order the pages are shown.
@@ -169,6 +171,7 @@ export default function MultiSigAccountTransactionFlow<
     convert,
     children,
     accountFilter,
+    preview: Preview,
     accountDisabled,
     ...formProps
 }: Props<F, T>) {
@@ -182,14 +185,6 @@ export default function MultiSigAccountTransactionFlow<
     const flowChildren = useMemo(
         () => (typeof children === 'function' ? children(values) : children),
         [children, values]
-    );
-
-    const keyViewPairs: [keyof F, FlowChild<F, keyof F>['view']][] = useMemo(
-        () =>
-            Object.entries(flowChildren)
-                .filter(([, c]) => isDefined(c))
-                .map(([k, c]: [keyof F, FlowChild<F, keyof F>]) => [k, c.view]),
-        [flowChildren]
     );
 
     const getStepTitle = useCallback(
@@ -234,7 +229,10 @@ export default function MultiSigAccountTransactionFlow<
     };
 
     return (
-        <MultiSignatureLayout pageTitle={title} delegateScroll>
+        <MultiSignatureLayout
+            pageTitle={`Account transaction | ${title}`}
+            delegateScroll
+        >
             <Columns
                 divider
                 columnScroll
@@ -247,11 +245,7 @@ export default function MultiSigAccountTransactionFlow<
                             first
                             value={values.account}
                         />
-                        {keyViewPairs.map(([key, view]) => (
-                            <Fragment key={key as string}>
-                                {view(values[key])}
-                            </Fragment>
-                        ))}
+                        <Preview {...values} />
                         <DisplayTransactionExpiryTime
                             expiryTime={values.expiry}
                             placeholder="To be determined"
@@ -263,32 +257,30 @@ export default function MultiSigAccountTransactionFlow<
                     className={multisigFlowStyles.stretchColumn}
                 >
                     <div className={multisigFlowStyles.columnContent}>
-                        <div className="flexFill">
-                            <MultiStepForm<WithMultiSigSteps>
-                                initialValues={state ?? undefined}
-                                valueStore={valueStore}
-                                onDone={handleDone}
-                                onPageActive={onPageActive}
-                                {...formProps}
-                            >
-                                {{
-                                    account: {
-                                        component: partialApply(
-                                            SelectAccountPage,
-                                            {
-                                                filter: accountFilter,
-                                                disabled: accountDisabled,
-                                            }
-                                        ),
-                                    },
-                                    ...flowChildren,
-                                    expiry: { component: SelectExpiryPage },
-                                    sign: {
-                                        component: SignTransactionProposal,
-                                    },
-                                }}
-                            </MultiStepForm>
-                        </div>
+                        <MultiStepForm<WithMultiSigSteps>
+                            initialValues={state ?? undefined}
+                            valueStore={valueStore}
+                            onDone={handleDone}
+                            onPageActive={onPageActive}
+                            {...formProps}
+                        >
+                            {{
+                                account: {
+                                    component: (p) => (
+                                        <SelectAccountPage
+                                            filter={accountFilter}
+                                            disabled={accountDisabled}
+                                            {...p}
+                                        />
+                                    ),
+                                },
+                                ...flowChildren,
+                                expiry: { component: SelectExpiryPage },
+                                sign: {
+                                    component: SignTransactionProposal,
+                                },
+                            }}
+                        </MultiStepForm>
                     </div>
                 </Columns.Column>
             </Columns>

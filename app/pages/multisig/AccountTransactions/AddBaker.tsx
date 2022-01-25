@@ -15,8 +15,8 @@ import {
     title,
 } from '~/utils/transactionFlows/addBaker';
 import {
-    Commissions,
     Dependencies,
+    getDefaultCommissions,
 } from '~/utils/transactionFlows/configureBaker';
 import { ConfigureBaker, OpenStatus } from '~/utils/types';
 import MultiSigAccountTransactionFlow, {
@@ -31,29 +31,75 @@ import { isDefined } from '~/utils/basicHelpers';
 
 const PLACEHOLDER = 'To be determined';
 
-const DisplayBakerCommissions = ({
-    transactionFeeCommission,
-    bakingRewardCommission,
-    finalizationRewardCommission,
-}: Partial<Commissions>) => (
-    <>
-        <DisplayBakerCommission
-            title="Transaction fee commission"
-            value={transactionFeeCommission}
-            placeholder={PLACEHOLDER}
-        />
-        <DisplayBakerCommission
-            title="Baking reward commission"
-            value={bakingRewardCommission}
-            placeholder={PLACEHOLDER}
-        />
-        <DisplayBakerCommission
-            title="Finalization reward commission"
-            value={finalizationRewardCommission}
-            placeholder={PLACEHOLDER}
-        />
-    </>
-);
+const DisplayValues = ({
+    stake,
+    openForDelegation,
+    commissions,
+    metadataUrl,
+    keys,
+}: Partial<AddBakerFlowState>) => {
+    const closed = openForDelegation === OpenStatus.ClosedForAll;
+    const commissionsWithDefaults = closed
+        ? getDefaultCommissions()
+        : commissions;
+
+    const urlWithDefault = closed ? undefined : metadataUrl;
+
+    return (
+        <>
+            <AmountDetail title="Staked amount" value={stake?.stake} />
+            <PlainDetail
+                title="Restake earnings"
+                value={
+                    stake?.restake !== undefined
+                        ? displayRestakeEarnings(stake.restake)
+                        : undefined
+                }
+            />
+            <PlainDetail
+                title="Pool delegation status"
+                value={
+                    openForDelegation !== undefined
+                        ? displayPoolOpen(openForDelegation)
+                        : undefined
+                }
+            />
+            <DisplayBakerCommission
+                title="Transaction fee commission"
+                value={commissionsWithDefaults?.transactionFeeCommission}
+                placeholder={PLACEHOLDER}
+            />
+            <DisplayBakerCommission
+                title="Baking reward commission"
+                value={commissionsWithDefaults?.bakingRewardCommission}
+                placeholder={PLACEHOLDER}
+            />
+            <DisplayBakerCommission
+                title="Finalization reward commission"
+                value={commissionsWithDefaults?.finalizationRewardCommission}
+                placeholder={PLACEHOLDER}
+            />
+            {metadataUrl && (
+                <PlainDetail title="Metadata URL" value={urlWithDefault} />
+            )}
+            <DisplayPublicKey
+                name="Election verify key:"
+                publicKey={keys?.electionPublic}
+                placeholder={PLACEHOLDER}
+            />
+            <DisplayPublicKey
+                name="Signature verify key:"
+                publicKey={keys?.signaturePublic}
+                placeholder={PLACEHOLDER}
+            />
+            <DisplayPublicKey
+                name="Aggregation verify key:"
+                publicKey={keys?.aggregationPublic}
+                placeholder={PLACEHOLDER}
+            />
+        </>
+    );
+};
 
 const toRoot = <Redirect to={routes.MULTISIGTRANSACTIONS_ADD_BAKER} />;
 
@@ -86,6 +132,7 @@ export default withDeps(function AddBaker({
         <MultiSigAccountTransactionFlow<AddBakerFlowState, ConfigureBaker>
             title={title}
             convert={convert}
+            preview={DisplayValues}
         >
             {({ openForDelegation, account }) => ({
                 stake: {
@@ -101,41 +148,16 @@ export default withDeps(function AddBaker({
                         ) : (
                             toRoot
                         ),
-                    view: (v) => (
-                        <>
-                            <AmountDetail
-                                title="Staked amount"
-                                value={v?.stake}
-                            />
-                            <PlainDetail
-                                title="Restake earnings"
-                                value={
-                                    v?.restake !== undefined
-                                        ? displayRestakeEarnings(v.restake)
-                                        : undefined
-                                }
-                            />
-                        </>
-                    ),
                 },
                 openForDelegation: {
                     title: 'Pool settings',
                     component: DelegationStatusPage,
-                    view: (v) => (
-                        <PlainDetail
-                            title="Pool delegation status"
-                            value={
-                                v !== undefined ? displayPoolOpen(v) : undefined
-                            }
-                        />
-                    ),
                 },
                 commissions:
                     openForDelegation === OpenStatus.OpenForAll
                         ? {
                               title: 'Pool settings',
                               component: CommissionsPage,
-                              view: (v) => <DisplayBakerCommissions {...v} />,
                           }
                         : undefined,
                 metadataUrl:
@@ -143,38 +165,16 @@ export default withDeps(function AddBaker({
                         ? {
                               title: 'Pool settings',
                               component: MetadataUrlPage,
-                              view: (v) => (
-                                  <PlainDetail title="Metadata URL" value={v} />
-                              ),
                           }
                         : undefined,
                 keys: {
-                    title: 'Generate keys',
+                    title: 'Generated keys',
                     component: (p) =>
                         account ? (
                             <KeysPage {...p} account={account} />
                         ) : (
                             toRoot
                         ),
-                    view: (v) => (
-                        <>
-                            <DisplayPublicKey
-                                name="Election verify key:"
-                                publicKey={v?.electionPublic}
-                                placeholder={PLACEHOLDER}
-                            />
-                            <DisplayPublicKey
-                                name="Signature verify key:"
-                                publicKey={v?.signaturePublic}
-                                placeholder={PLACEHOLDER}
-                            />
-                            <DisplayPublicKey
-                                name="Aggregation verify key:"
-                                publicKey={v?.aggregationPublic}
-                                placeholder={PLACEHOLDER}
-                            />
-                        </>
-                    ),
                 },
             })}
         </MultiSigAccountTransactionFlow>

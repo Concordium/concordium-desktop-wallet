@@ -42,9 +42,9 @@ export default function AddBakerStakeSettings({
     return (
         <Form<StakeSettings>
             onSubmit={onSubmit}
-            className={clsx('flexColumn', className)}
+            className={clsx('flexColumn flexChildFill', className)}
         >
-            <div>
+            <div className="flexChildFill">
                 <p className="mT0">
                     To add a baker you must choose an amount to stake on the
                     account. The staked amount will be part of the balance, but

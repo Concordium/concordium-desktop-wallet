@@ -7,24 +7,12 @@ type Props = MakeOptional<
     'accountAddress' | 'bakerKeys'
 >;
 
-export default function ExportBakerKeys({
-    accountAddress,
-    bakerKeys,
-    ...props
-}: Props) {
+export default function ExportBakerKeys({ accountAddress, ...props }: Props) {
     if (!accountAddress) {
         return null;
     }
 
-    if (!bakerKeys) {
-        return <p>Generating keys...</p>;
-    }
-
     return (
-        <ExportBakerCredentials
-            accountAddress={accountAddress}
-            bakerKeys={bakerKeys}
-            {...props}
-        />
+        <ExportBakerCredentials accountAddress={accountAddress} {...props} />
     );
 }

@@ -107,7 +107,7 @@ export default function AccountTransactionFlow<
                     onClick={() => dispatch(goBack())}
                 />
             )}
-            <h3 className="mT0">{title}</h3>
+            <h3 className="mT0 bodyEmphasized">{title}</h3>
             <MultiStepForm<F>
                 initialValues={state ?? undefined}
                 onDone={handleDone}
@@ -125,7 +125,7 @@ export const AccountTransactionFlowLoading = ({
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
 Pick<Props<any, any>, 'title'>) => (
     <Card className={styles.root}>
-        <h3 className="mT0">{title}</h3>
+        <h3 className="mT0 bodyEmphasized">{title}</h3>
         <Loading text="Loading transaction dependencies" inline />
     </Card>
 );

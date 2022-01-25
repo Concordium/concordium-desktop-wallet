@@ -80,44 +80,47 @@ export default function CommissionsPage({
         <Form<Commissions>
             onSubmit={handleSubmit}
             defaultValues={fromRewardFractions(defaultValues)}
+            className="flexColumn flexChildFill"
         >
-            <p className="mB30">
-                When you open your baker as a pool, you have to set commission
-                rates. You can do so below:
-            </p>
-            <Form.Slider
-                label="Transaction fee commissions"
-                name={commissionsFieldNames.transactionFeeCommission}
-                min={fractionResolutionToPercentage(
-                    boundaries.transactionFeeCommission[0]
-                )}
-                max={fractionResolutionToPercentage(
-                    boundaries.transactionFeeCommission[1]
-                )}
-                {...commonSliderProps}
-            />
-            <Form.Slider
-                label="Baking reward commissions"
-                name={commissionsFieldNames.bakingRewardCommission}
-                min={fractionResolutionToPercentage(
-                    boundaries.bakingRewardCommission[0]
-                )}
-                max={fractionResolutionToPercentage(
-                    boundaries.bakingRewardCommission[1]
-                )}
-                {...commonSliderProps}
-            />
-            <Form.Slider
-                label="Finalization reward commissions"
-                name={commissionsFieldNames.finalizationRewardCommission}
-                min={fractionResolutionToPercentage(
-                    boundaries.finalizationRewardCommission[0]
-                )}
-                max={fractionResolutionToPercentage(
-                    boundaries.finalizationRewardCommission[1]
-                )}
-                {...commonSliderProps}
-            />
+            <div className="flexChildFill">
+                <p className="mB30">
+                    When you open your baker as a pool, you have to set
+                    commission rates. You can do so below:
+                </p>
+                <Form.Slider
+                    label="Transaction fee commissions"
+                    name={commissionsFieldNames.transactionFeeCommission}
+                    min={fractionResolutionToPercentage(
+                        boundaries.transactionFeeCommission[0]
+                    )}
+                    max={fractionResolutionToPercentage(
+                        boundaries.transactionFeeCommission[1]
+                    )}
+                    {...commonSliderProps}
+                />
+                <Form.Slider
+                    label="Baking reward commissions"
+                    name={commissionsFieldNames.bakingRewardCommission}
+                    min={fractionResolutionToPercentage(
+                        boundaries.bakingRewardCommission[0]
+                    )}
+                    max={fractionResolutionToPercentage(
+                        boundaries.bakingRewardCommission[1]
+                    )}
+                    {...commonSliderProps}
+                />
+                <Form.Slider
+                    label="Finalization reward commissions"
+                    name={commissionsFieldNames.finalizationRewardCommission}
+                    min={fractionResolutionToPercentage(
+                        boundaries.finalizationRewardCommission[0]
+                    )}
+                    max={fractionResolutionToPercentage(
+                        boundaries.finalizationRewardCommission[1]
+                    )}
+                    {...commonSliderProps}
+                />
+            </div>
             <Form.Submit className={styles.continue}>Continue</Form.Submit>
         </Form>
     );

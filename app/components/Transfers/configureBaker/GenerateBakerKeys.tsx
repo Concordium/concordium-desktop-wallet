@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import ExportBakerCredentials from '~/components/ExportBakerCredentials';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
-import Loading from '~/cross-app-components/Loading';
 import { isDefined } from '~/utils/basicHelpers';
 import { useAsyncMemo } from '~/utils/hooks';
 import { BakerKeyVariants } from '~/utils/rust.worker';
@@ -42,18 +41,18 @@ export default function GenerateBakerKeys({
                 header={error}
                 onClick={() => dispatch(goBack())}
             />
-            {keys ? (
-                <ExportBakerCredentials
-                    bakerKeys={keys}
-                    accountAddress={account.address}
-                    onContinue={() => onContinue(keys)}
-                    className="mT30"
-                    buttonClassName={styles.continue}
-                    hasExported={isDefined(initialKeys)}
-                />
-            ) : (
-                <Loading inline text="Generating baker keys" />
-            )}
+            <ExportBakerCredentials
+                bakerKeys={keys}
+                accountAddress={account.address}
+                onContinue={() => {
+                    if (keys !== undefined) {
+                        onContinue(keys);
+                    }
+                }}
+                className="mT30"
+                buttonClassName={styles.continue}
+                hasExported={isDefined(initialKeys)}
+            />
         </>
     );
 }

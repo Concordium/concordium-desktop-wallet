@@ -45,7 +45,7 @@ const hasNecessaryProps = (props: UnsafeProps): props is Props => {
     );
 };
 
-const withData = (component: ComponentType<Props>) =>
+const withDeps = (component: ComponentType<Props>) =>
     connect((s: RootState) => ({
         account: chosenAccountSelector(s) as Account,
     }))(
@@ -62,7 +62,7 @@ const withData = (component: ComponentType<Props>) =>
         )
     );
 
-export default withData(function AddBaker(props: Props) {
+export default withDeps(function AddBaker(props: Props) {
     const { nonce, account, exchangeRate, blockSummary } = props;
     const accountInfo = useSelector(accountInfoSelector(account));
 
@@ -99,7 +99,6 @@ export default withData(function AddBaker(props: Props) {
                             blockSummary={blockSummary}
                         />
                     ),
-                    title: 'Stake settings',
                 },
                 openForDelegation: {
                     component: DelegationStatusPage,
@@ -121,7 +120,7 @@ export default withData(function AddBaker(props: Props) {
                         : undefined,
                 keys: {
                     component: (p) => <KeysPage {...p} account={account} />,
-                    title: 'Baker keys',
+                    title: 'Generated keys',
                 },
             })}
         </AccountTransactionFlow>

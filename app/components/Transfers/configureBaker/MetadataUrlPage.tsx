@@ -24,20 +24,25 @@ const metadataUrlPageFieldNames: EqualRecord<MetadataUrlPageForm> = {
 type MetadataUrlPageProps = MultiStepFormPageProps<MetadataUrl>;
 
 const MetadataUrlPage = ({ onNext, initial = '' }: MetadataUrlPageProps) => (
-    <Form<MetadataUrlPageForm> onSubmit={(v) => onNext(v.url)}>
-        <p>
-            You can choose to add a URL with metadata about your baker. Leave it
-            blank if you don&apos;t have any.
-        </p>
-        <Form.Input
-            name={metadataUrlPageFieldNames.url}
-            defaultValue={initial}
-            className="body2"
-            placeholder="Enter metadata URL"
-            rules={{
-                validate: validateSerializedLength,
-            }}
-        />
+    <Form<MetadataUrlPageForm>
+        onSubmit={(v) => onNext(v.url)}
+        className="flexColumn flexChildFill"
+    >
+        <div className="flexChildFill">
+            <p>
+                You can choose to add a URL with metadata about your baker.
+                Leave it blank if you don&apos;t have any.
+            </p>
+            <Form.Input
+                name={metadataUrlPageFieldNames.url}
+                defaultValue={initial}
+                className="body2"
+                placeholder="Enter metadata URL"
+                rules={{
+                    validate: validateSerializedLength,
+                }}
+            />
+        </div>
         <Form.Submit className={styles.continue}>Continue</Form.Submit>
     </Form>
 );
