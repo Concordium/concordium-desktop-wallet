@@ -195,12 +195,22 @@ export default function MultiSignatureCreateProposalView() {
                             </ButtonNavLink>
                         )}
                         {specificType === TransactionKindId.Configure_baker && (
-                            <ButtonNavLink
-                                className={styles.link}
-                                to={routes.MULTISIGTRANSACTIONS_ADD_BAKER}
-                            >
-                                Add baker
-                            </ButtonNavLink>
+                            <>
+                                <ButtonNavLink
+                                    className={styles.link}
+                                    to={routes.MULTISIGTRANSACTIONS_ADD_BAKER}
+                                >
+                                    Add baker
+                                </ButtonNavLink>
+                                <ButtonNavLink
+                                    className={styles.link}
+                                    to={
+                                        routes.MULTISIGTRANSACTIONS_REMOVE_BAKER
+                                    }
+                                >
+                                    Remove baker
+                                </ButtonNavLink>
+                            </>
                         )}
                     </Fragment>
                 )

@@ -102,6 +102,7 @@ export default withAccountSync(function DetailsPage() {
                             accountInfo={accountInfo}
                         />
                     </Route>
+                    {/* TODO clean up baker routes... */}
                     <Route
                         path={routes.ACCOUNTS_ADD_BAKER}
                         // render={({ location }) =>

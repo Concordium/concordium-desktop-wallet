@@ -26,9 +26,9 @@ const RemoveBakerPage = ({
             {pendingChange ? (
                 <p>
                     Cannot remove baker at this time:
-                    <div className="bodyEmphasized textError mV10">
+                    <span className="block bodyEmphasized textError mV10">
                         <BakerPendingChange pending={pendingChange} />
-                    </div>
+                    </span>
                     It will be possible to proceed after this time has passed.
                 </p>
             ) : (
@@ -42,9 +42,9 @@ const RemoveBakerPage = ({
                                 <br />
                                 <br />
                                 The grace period lasts until
-                                <div className="bodyEmphasized  mV10">
+                                <span className="block bodyEmphasized mV10">
                                     {getFormattedDateString(cooldownUntil)}.
-                                </div>
+                                </span>
                             </>
                         )}
                     </p>

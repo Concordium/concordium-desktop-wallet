@@ -9,6 +9,7 @@ import SubmittedProposal from './SubmittedProposal';
 import ExportKeyView from './ExportKeyView/ExportKeyView';
 import CreateAccountTransactionView from './AccountTransactions/CreateAccountTransactionView';
 import AddBaker from './AccountTransactions/AddBaker';
+import RemoveBaker from './AccountTransactions/RemoveBaker';
 
 export default function MultiSignatureRoutes(): JSX.Element {
     return (
@@ -20,6 +21,10 @@ export default function MultiSignatureRoutes(): JSX.Element {
             <Route
                 path={routes.MULTISIGTRANSACTIONS_ADD_BAKER}
                 component={AddBaker}
+            />
+            <Route
+                path={routes.MULTISIGTRANSACTIONS_REMOVE_BAKER}
+                component={RemoveBaker}
             />
             <Route
                 path={routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION}
