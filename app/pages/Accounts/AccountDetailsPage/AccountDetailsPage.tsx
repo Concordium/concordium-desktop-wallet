@@ -30,9 +30,8 @@ import UpdateBakerKeys from './OldBakerFlows/UpdateBakerKeys';
 import UpdateBakerStake from './OldBakerFlows/UpdateBakerStake';
 import UpdateBakerRestake from './OldBakerFlows/UpdateBakerRestake';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
-// import { AddBakerForm } from '~/components/AddBakerDetailsForm';
 import { RootState } from '~/store/store';
-import AddBaker from './AddBaker/AddBaker';
+import AddBaker from './AddBaker';
 
 const { Master, Detail } = MasterDetailPageLayout;
 const ToAccounts = () => <Redirect to={routes.ACCOUNTS} />;
