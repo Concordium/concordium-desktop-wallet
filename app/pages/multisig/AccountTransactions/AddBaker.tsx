@@ -12,8 +12,6 @@ import DisplayPublicKey from '~/components/Transfers/DisplayPublicKey';
 import {
     AddBakerFlowState,
     convertToTransaction,
-    displayPoolOpen,
-    displayRestakeEarnings,
     getEstimatedFee,
     title,
     validateValues,
@@ -21,6 +19,8 @@ import {
 import {
     Dependencies,
     getDefaultCommissions,
+    displayPoolOpen,
+    displayRestakeEarnings,
 } from '~/utils/transactionFlows/configureBaker';
 import { ConfigureBaker, Fraction, OpenStatus } from '~/utils/types';
 import MultiSigAccountTransactionFlow, {

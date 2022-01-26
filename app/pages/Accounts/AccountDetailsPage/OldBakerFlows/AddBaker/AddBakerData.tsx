@@ -1,8 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import BakerStakeSettings, {
-    StakeSettings,
-} from '~/components/BakerTransactions/BakerStakeSettings';
+import BakerStakeSettings from '~/components/BakerTransactions/BakerStakeSettings';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import Card from '~/cross-app-components/Card';
 import { chosenAccountSelector } from '~/features/AccountSlice';
@@ -16,6 +14,7 @@ import {
 } from '~/utils/types';
 
 import styles from '../../AccountDetailsPage.module.scss';
+import { StakeSettings } from '~/utils/transactionFlows/configureBaker';
 
 type FormWrapperProps = Omit<
     PropsOf<typeof BakerStakeSettings>,

@@ -10,6 +10,7 @@ import {
     fromExchangeRate,
     RelativeRateValue,
 } from '../../common/RelativeRateField/util';
+import { getGTUSymbol } from '~/utils/gtu';
 
 export interface UpdateMicroGtuPerEuroRateFields {
     microGtuPerEuroRate: RelativeRateValue;
@@ -30,7 +31,8 @@ export default function UpdateMicroGtuPerEuroRate({
     return (
         <div>
             <div className="body3 mono mB10">
-                Current rate: {denominatorUnit.value}
+                Current rate: {getGTUSymbol()}
+                {denominatorUnit.value}
                 {currentValue.denominator} = {numeratorUnit.value}
                 {currentValue.numerator}
             </div>

@@ -14,7 +14,7 @@ import styles from './transferDetails.module.scss';
 import {
     displayPoolOpen,
     displayRestakeEarnings,
-} from '~/utils/transactionFlows/addBaker';
+} from '~/utils/transactionFlows/configureBaker';
 import DisplayBakerCommission from './DisplayBakerCommission';
 
 interface Props {

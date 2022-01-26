@@ -17,8 +17,8 @@ import { createAddBakerTransaction } from '~/utils/transactionHelpers';
 import { AddBakerPayload, NotOptional, TransactionKindId } from '~/utils/types';
 import { SubmitTransactionLocationState } from '../../../SubmitTransaction/SubmitTransaction';
 import AddBakerData from './AddBakerData';
-import { StakeSettings } from '~/components/BakerTransactions/BakerStakeSettings';
 import GenerateBakerKeys from '~/components/Transfers/configureBaker/GenerateBakerKeys';
+import { StakeSettings } from '~/utils/transactionFlows/configureBaker';
 
 const header = 'Add baker';
 

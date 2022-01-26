@@ -60,6 +60,7 @@ export default function AddBakerStakePage({
             minimumStake={minimumStake}
             buttonClassName={styles.continue}
             showAccountCard={isMultiSig}
+            existingValues={existingValues}
         />
     );
 }

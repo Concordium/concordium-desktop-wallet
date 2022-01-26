@@ -31,6 +31,7 @@ import {
     title,
     UpdateBakerStakeFlowState,
 } from '~/utils/transactionFlows/updateBakerStake';
+import { microGtuToGtu } from '~/utils/gtu';
 
 type Props = Dependencies;
 type UnsafeProps = MakeRequired<Partial<Props>, 'account'>;
@@ -68,7 +69,7 @@ export default withDeps(function UpdateBakerStake(props: Props) {
         [account, nonce, exchangeRate]
     );
     const existingStakeSettings: StakeSettings = {
-        stake: info.accountBaker?.stakedAmount?.toString() ?? '0.00',
+        stake: microGtuToGtu(info.accountBaker?.stakedAmount) ?? '1000.00', // TODO: change default to 0.
         restake: info.accountBaker?.restakeEarnings ?? true,
     };
 

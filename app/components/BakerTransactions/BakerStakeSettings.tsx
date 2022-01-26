@@ -6,11 +6,7 @@ import AccountCard from '../AccountCard';
 import PickBakerStakeAmount from '../PickBakerStakeAmount';
 import PickBakerRestake from '../PickBakerRestake';
 import Form from '../Form';
-
-export interface StakeSettings {
-    stake: string;
-    restake: boolean;
-}
+import { StakeSettings } from '~/utils/transactionFlows/configureBaker';
 
 const fieldNames: EqualRecord<StakeSettings> = {
     stake: 'stake',
@@ -21,6 +17,7 @@ interface Props extends ClassName {
     initialData?: Partial<StakeSettings>;
     showAccountCard?: boolean;
     account: Account;
+    existingValues?: StakeSettings;
     estimatedFee: Fraction;
     minimumStake: bigint;
     buttonClassName?: string;
@@ -32,6 +29,7 @@ export default function BakerStakeSettings({
     showAccountCard,
     account,
     estimatedFee,
+    existingValues,
     minimumStake,
     className,
     buttonClassName,
@@ -60,6 +58,7 @@ export default function BakerStakeSettings({
                     estimatedFee={estimatedFee}
                     fieldName={fieldNames.stake}
                     minimumStake={minimumStake}
+                    existing={existingValues?.stake}
                 />
                 <p className="mB30">
                     By default all baker rewards are added to the staked amount.
@@ -68,6 +67,7 @@ export default function BakerStakeSettings({
                 <PickBakerRestake
                     initial={initialData?.restake}
                     fieldName={fieldNames.restake}
+                    existing={existingValues?.restake}
                 />
             </div>
             <Form.Submit className={clsx('mT50', buttonClassName)}>

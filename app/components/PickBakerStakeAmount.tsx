@@ -12,6 +12,7 @@ import Label from './Label';
 interface Props {
     header: string;
     initial?: string;
+    existing?: string;
     minimumStake: bigint;
     fieldName: string;
     accountInfo: AccountInfo | undefined;
@@ -25,6 +26,7 @@ export default function PickBakerStakeAmount({
     accountInfo,
     estimatedFee,
     initial,
+    existing,
 }: Props) {
     const form = useFormContext<{ [key: string]: string }>();
     const validStakeAmount: Validate = useCallback(
@@ -55,6 +57,12 @@ export default function PickBakerStakeAmount({
 
     return (
         <div className="mV30">
+            {existing && (
+                <div className="body3 mono mB10">
+                    Current stake: {getGTUSymbol()}
+                    {existing}
+                </div>
+            )}
             <Label>{header}</Label>
             <div className="h1 mV5">
                 {getGTUSymbol()}
