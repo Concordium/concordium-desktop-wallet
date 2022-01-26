@@ -1,11 +1,5 @@
 /* eslint-disable react/display-name */
-import React, {
-    ComponentType,
-    ReactNode,
-    useCallback,
-    useMemo,
-    useState,
-} from 'react';
+import React, { ReactNode, useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import {
     Redirect,
@@ -153,7 +147,7 @@ interface Props<F extends Record<string, unknown>, T extends AccountTransaction>
     /**
      * Component to render preview of transaction values.
      */
-    preview: ComponentType<Partial<RequiredValues & F>>;
+    preview(values: Partial<RequiredValues & F>): JSX.Element;
     /**
      * Pages of the transaction flow declared as a mapping of components to corresponding substate.
      * Declaration order defines the order the pages are shown.
@@ -181,7 +175,7 @@ export default function MultiSigAccountTransactionFlow<
     convert,
     children,
     accountFilter,
-    preview: Preview,
+    preview,
     accountDisabled,
     ...formProps
 }: Props<F, T>) {
@@ -283,7 +277,7 @@ export default function MultiSigAccountTransactionFlow<
                             first
                             value={values.account}
                         />
-                        <Preview {...values} />
+                        {preview(values)}
                         <DisplayTransactionExpiryTime
                             expiryTime={values.expiry}
                             placeholder="To be determined"

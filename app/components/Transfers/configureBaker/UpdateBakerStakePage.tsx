@@ -1,34 +1,38 @@
 import React, { useMemo } from 'react';
-import AddBakerStakeSettings from '~/components/BakerTransactions/AddBakerStakeSettings';
+import BakerStakeSettings from '~/components/BakerTransactions/BakerStakeSettings';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
 import { microGtuToGtu } from '~/utils/gtu';
 import {
-    AddBakerFlowState,
-    getEstimatedFee,
-} from '~/utils/transactionFlows/addBaker';
-import {
     Dependencies,
     StakeSettings,
+    getEstimatedFee,
+    getChanges,
 } from '~/utils/transactionFlows/configureBaker';
+import { UpdateBakerStakeFlowState } from '~/utils/transactionFlows/updateBakerStake';
 
 import styles from './ConfigureBakerPage.module.scss';
 
 interface Props
-    extends MultiStepFormPageProps<StakeSettings, AddBakerFlowState>,
-        Pick<Dependencies, 'blockSummary' | 'exchangeRate' | 'account'> {}
+    extends MultiStepFormPageProps<StakeSettings, UpdateBakerStakeFlowState>,
+        Pick<Dependencies, 'blockSummary' | 'exchangeRate' | 'account'> {
+    isMultiSig?: boolean;
+    existingValues: StakeSettings;
+}
 
-export default function StakePage({
+export default function AddBakerStakePage({
     onNext,
     initial,
     formValues,
     blockSummary,
     exchangeRate,
     account,
+    existingValues,
+    isMultiSig = false,
 }: Props) {
     const minimumStake = BigInt(
         blockSummary.updates.chainParameters.minimumThresholdForBaking
     );
-    const { stake, ...otherValues } = formValues;
+    const { stake } = formValues;
 
     const defaultValues: StakeSettings = useMemo(
         () => ({
@@ -39,27 +43,23 @@ export default function StakePage({
         [initial, minimumStake]
     );
 
+    const changes = getChanges({ stake: existingValues }, { stake });
+
     const estimatedFee = useMemo(
         () =>
-            getEstimatedFee(
-                {
-                    stake: defaultValues,
-                    ...otherValues,
-                } as AddBakerFlowState,
-                exchangeRate,
-                account.signatureThreshold
-            ),
-        [exchangeRate, account.signatureThreshold, defaultValues, otherValues]
+            getEstimatedFee(changes, exchangeRate, account.signatureThreshold),
+        [exchangeRate, account.signatureThreshold, changes]
     );
 
     return (
-        <AddBakerStakeSettings
+        <BakerStakeSettings
             onSubmit={onNext}
             initialData={defaultValues}
             account={account}
             estimatedFee={estimatedFee}
             minimumStake={minimumStake}
             buttonClassName={styles.continue}
+            showAccountCard={isMultiSig}
         />
     );
 }

@@ -2,8 +2,6 @@ import { AccountInfo } from '@concordium/node-sdk';
 import { ValidateValues } from '~/components/MultiStepForm';
 import { BlockSummary } from '~/node/NodeApiTypes';
 import { collapseFraction, multiplyFraction } from '../basicHelpers';
-import { toMicroUnits } from '../gtu';
-import { BakerKeys } from '../rustInterface';
 import { getConfigureBakerFullCost } from '../transactionCosts';
 import {
     createConfigureBakerTransaction,
@@ -16,19 +14,21 @@ import {
     ConfigureBakerPayload,
     Fraction,
     MakeOptional,
+    MakeRequired,
     NotOptional,
     OpenStatus,
     TransactionKindId,
 } from '../types';
-import { Commissions, MetadataUrl, StakeSettings } from './configureBaker';
+import {
+    Commissions,
+    ConfigureBakerFlowState,
+    toPayload,
+} from './configureBaker';
 
-export interface AddBakerFlowState {
-    stake: StakeSettings;
-    openForDelegation: OpenStatus;
-    commissions?: Commissions;
-    metadataUrl?: MetadataUrl;
-    keys: BakerKeys;
-}
+export type AddBakerFlowState = MakeRequired<
+    ConfigureBakerFlowState,
+    'stake' | 'openForDelegation' | 'keys'
+>;
 
 export type AddBakerPayload = MakeOptional<
     NotOptional<ConfigureBakerPayload>,
@@ -36,49 +36,6 @@ export type AddBakerPayload = MakeOptional<
 >;
 
 export const title = 'Add baker';
-
-const toPayload = ({
-    keys,
-    stake,
-    openForDelegation,
-    metadataUrl,
-    commissions,
-}: MakeOptional<
-    NotOptional<AddBakerFlowState>,
-    'metadataUrl'
->): AddBakerPayload => ({
-    electionVerifyKey: [keys.electionPublic, keys.proofElection],
-    signatureVerifyKey: [keys.signaturePublic, keys.proofSignature],
-    aggregationVerifyKey: [keys.aggregationPublic, keys.proofAggregation],
-    stake: toMicroUnits(stake.stake),
-    restakeEarnings: stake.restake,
-    openForDelegation,
-    metadataUrl,
-    ...commissions,
-});
-
-export function getEstimatedFee(
-    values: AddBakerFlowState,
-    exchangeRate: Fraction,
-    signatureThreshold = 1
-) {
-    let payloadSize: number | undefined;
-
-    try {
-        payloadSize = serializeTransferPayload(
-            TransactionKindId.Configure_baker,
-            toPayload(values as NotOptional<AddBakerFlowState>)
-        ).length;
-    } catch {
-        payloadSize = undefined;
-    }
-
-    return getConfigureBakerFullCost(
-        exchangeRate,
-        signatureThreshold,
-        payloadSize
-    );
-}
 
 export const convertToTransaction = (
     defaultCommissions: Commissions,
@@ -96,9 +53,7 @@ export const convertToTransaction = (
         withDefaults.commissions = defaultCommissions;
     }
 
-    const payload: AddBakerPayload = toPayload(
-        withDefaults as NotOptional<AddBakerFlowState>
-    );
+    const payload = toPayload(withDefaults);
 
     const transaction = createConfigureBakerTransaction(
         account.address,
@@ -113,6 +68,27 @@ export const convertToTransaction = (
     return transaction;
 };
 
+export function getEstimatedFee(
+    exchangeRate: Fraction,
+    values?: ConfigureBakerFlowState,
+    signatureThreshold = 1
+) {
+    const payloadSize =
+        values === undefined
+            ? undefined
+            : serializeTransferPayload(
+                  TransactionKindId.Configure_baker,
+                  toPayload(values)
+              ).length;
+
+    return getConfigureBakerFullCost(
+        exchangeRate,
+        signatureThreshold,
+        payloadSize
+    );
+}
+
+// As the payload of the transaction can vary a lot in size, we need to revalidate with all values, to check if account still has enough funds for the transaction.
 export const validateValues = (
     blockSummary: BlockSummary,
     account: Account,
@@ -123,8 +99,8 @@ export const validateValues = (
         blockSummary.updates.chainParameters.minimumThresholdForBaking
     );
     const estimatedFee = getEstimatedFee(
-        values,
         exchangeRate,
+        values,
         account.signatureThreshold
     );
     const stakeValidationResult = validateBakerStake(

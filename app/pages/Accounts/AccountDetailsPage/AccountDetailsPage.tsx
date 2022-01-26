@@ -27,12 +27,13 @@ import withAccountSync from '../withAccountSync';
 // import AddBaker from './OldBakerFlows/AddBaker';
 // import RemoveBaker from './OldBakerFlows/RemoveBaker';
 import UpdateBakerKeys from './OldBakerFlows/UpdateBakerKeys';
-import UpdateBakerStake from './OldBakerFlows/UpdateBakerStake';
-import UpdateBakerRestake from './OldBakerFlows/UpdateBakerRestake';
+// import UpdateBakerStake from './OldBakerFlows/UpdateBakerStake';
+// import UpdateBakerRestake from './OldBakerFlows/UpdateBakerRestake';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
 import { RootState } from '~/store/store';
 import AddBaker from './AddBaker';
 import RemoveBaker from './RemoveBaker';
+import UpdateBakerStake from './UpdateBakerStake';
 
 const { Master, Detail } = MasterDetailPageLayout;
 const ToAccounts = () => <Redirect to={routes.ACCOUNTS} />;
@@ -140,16 +141,17 @@ export default withAccountSync(function DetailsPage() {
                         )}
                     </Route>
                     <Route path={routes.ACCOUNTS_UPDATE_BAKER_STAKE}>
-                        {canTransfer && isBaker ? (
+                        {/* canTransfer && isBaker ? (
                             <UpdateBakerStake
                                 account={account}
                                 accountInfo={accountInfo}
                             />
                         ) : (
                             <ToAccounts />
-                        )}
+                        ) */}
+                        <UpdateBakerStake />
                     </Route>
-                    <Route path={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}>
+                    {/* <Route path={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}>
                         {canTransfer && isBaker ? (
                             <UpdateBakerRestake
                                 account={account}
@@ -158,8 +160,7 @@ export default withAccountSync(function DetailsPage() {
                         ) : (
                             <ToAccounts />
                         )}
-                    </Route>
-
+                    </Route> */}
                     <Route path={routes.ACCOUNTS}>
                         {viewingShielded && !account.allDecrypted ? (
                             <DecryptComponent account={account} />

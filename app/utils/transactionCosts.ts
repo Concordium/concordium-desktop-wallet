@@ -52,10 +52,11 @@ export const payloadSizeEstimate = {
     UpdateBakerRestakeEarnings: 1 + 1, // TransactionKind (Word8) + restake earnings (1 byte)
     /**
      * TransactionKind (Word8) + bitmap (2 bytes) + staked amount (8 bytes) + restake earnings (1 byte)
-     * + open for delegation settings (1 byte) + keys (160 bytes) + proofs (192 bytes)
-     * + metadata url (0 bytes, optional but max 2048 + 16 bytes) + 3 * commission rate (32 bytes)
+     * + open for delegation settings (1 byte) + metadata url (0 bytes, optional but max 2048 + 16 bytes) + 3 * commission rate (32 bytes)
+     * + keys (160 bytes) + proofs (192 bytes)
      */
-    ConfigureBakerFull: 1 + 2 + 8 + 1 + 1 + 160 + 192 + 0 + 3 * 32,
+    ConfigureBakerFull: 1 + 2 + 8 + 1 + 1 + 3 * 32 + 0 + 160 + 192,
+    ConfigureBakerStake: 1 + 2 + 8 + 1, // TransactionKind (Word8) + bitmap (2 bytes) + staked amount (8 bytes) + restake earnings (1 byte)
     ConfigureDelegationFull: 1 + 2 + 8 + 1 + 9, // TransactionKind (1 byte) + bitmap (2 bytes) + delegated amount (8 bytes) + restake earnings (1 byte) + delegation target (9 bytes)
 };
 
@@ -276,6 +277,37 @@ function energyToCost(energy: bigint, exchangeRate: Fraction): Fraction {
         numerator: energy * exchangeRate.numerator,
         denominator: exchangeRate.denominator,
     };
+}
+
+export function getConfigureBakerCost(
+    energyToMicroGtu: Fraction,
+    payloadSize: number,
+    withKeys: boolean,
+    signatureAmount = 1
+) {
+    const energy = calculateCost(
+        BigInt(signatureAmount),
+        BigInt(payloadSize),
+        withKeys
+            ? energyConstants.ConfigureBakerWithKeys
+            : energyConstants.ConfigureBaker
+    );
+
+    return energyToCost(energy, energyToMicroGtu);
+}
+
+export function getConfigureBakerStakeCost(
+    energyToMicroGtu: Fraction,
+    signatureAmount = 1,
+    payloadSize = payloadSizeEstimate.ConfigureBakerStake
+) {
+    const energy = calculateCost(
+        BigInt(signatureAmount),
+        BigInt(payloadSize),
+        energyConstants.ConfigureBaker
+    );
+
+    return energyToCost(energy, energyToMicroGtu);
 }
 
 export function getConfigureBakerFullCost(

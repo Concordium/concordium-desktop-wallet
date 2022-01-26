@@ -6,7 +6,7 @@ import CommissionsPage from '~/components/Transfers/configureBaker/CommissionsPa
 import DelegationStatusPage from '~/components/Transfers/configureBaker/DelegationStatusPage';
 import KeysPage from '~/components/Transfers/configureBaker/KeysPage';
 import MetadataUrlPage from '~/components/Transfers/configureBaker/MetadataUrlPage';
-import StakePage from '~/components/Transfers/configureBaker/StakePage';
+import AddBakerStakePage from '~/components/Transfers/configureBaker/AddBakerStakePage';
 import DisplayBakerCommission from '~/components/Transfers/DisplayBakerCommission';
 import DisplayPublicKey from '~/components/Transfers/DisplayPublicKey';
 import {
@@ -14,6 +14,7 @@ import {
     convertToTransaction,
     displayPoolOpen,
     displayRestakeEarnings,
+    getEstimatedFee,
     title,
     validateValues,
 } from '~/utils/transactionFlows/addBaker';
@@ -21,7 +22,7 @@ import {
     Dependencies,
     getDefaultCommissions,
 } from '~/utils/transactionFlows/configureBaker';
-import { ConfigureBaker, OpenStatus } from '~/utils/types';
+import { ConfigureBaker, Fraction, OpenStatus } from '~/utils/types';
 import MultiSigAccountTransactionFlow, {
     MultiSigAccountTransactionFlowLoading,
     RequiredValues,
@@ -33,25 +34,48 @@ import withChainData from '~/utils/withChainData';
 import { ensureProps } from '~/utils/componentHelpers';
 import { isDefined } from '~/utils/basicHelpers';
 import { accountsInfoSelector } from '~/features/AccountSlice';
+import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
+
+import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
 
 const PLACEHOLDER = 'To be determined';
 
-const DisplayValues = ({
-    stake,
-    openForDelegation,
-    commissions,
-    metadataUrl,
-    keys,
-}: Partial<AddBakerFlowState>) => {
-    const closed = openForDelegation === OpenStatus.ClosedForAll;
-    const commissionsWithDefaults = closed
-        ? getDefaultCommissions()
-        : commissions;
+interface DisplayProps extends Partial<AddBakerFlowState & RequiredValues> {
+    exchangeRate: Fraction;
+}
 
-    const urlWithDefault = closed ? undefined : metadataUrl;
+const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
+    const withDefaults = { ...values };
+    const closed = values.openForDelegation === OpenStatus.ClosedForAll;
+
+    if (closed) {
+        withDefaults.commissions = getDefaultCommissions();
+        delete withDefaults.metadataUrl;
+    }
+
+    const {
+        stake,
+        openForDelegation,
+        commissions,
+        metadataUrl,
+        keys,
+    } = withDefaults;
+
+    const estimatedFee =
+        account !== undefined
+            ? getEstimatedFee(
+                  exchangeRate,
+                  withDefaults,
+                  account.signatureThreshold
+              )
+            : undefined;
 
     return (
         <>
+            <DisplayEstimatedFee
+                className={displayTransferStyles.fee}
+                estimatedFee={estimatedFee}
+            />
             <AmountDetail title="Staked amount" value={stake?.stake} />
             <PlainDetail
                 title="Restake earnings"
@@ -71,21 +95,21 @@ const DisplayValues = ({
             />
             <DisplayBakerCommission
                 title="Transaction fee commission"
-                value={commissionsWithDefaults?.transactionFeeCommission}
+                value={commissions?.transactionFeeCommission}
                 placeholder={PLACEHOLDER}
             />
             <DisplayBakerCommission
                 title="Baking reward commission"
-                value={commissionsWithDefaults?.bakingRewardCommission}
+                value={commissions?.bakingRewardCommission}
                 placeholder={PLACEHOLDER}
             />
             <DisplayBakerCommission
                 title="Finalization reward commission"
-                value={commissionsWithDefaults?.finalizationRewardCommission}
+                value={commissions?.finalizationRewardCommission}
                 placeholder={PLACEHOLDER}
             />
             {metadataUrl && (
-                <PlainDetail title="Metadata URL" value={urlWithDefault} />
+                <PlainDetail title="Metadata URL" value={metadataUrl} />
             )}
             <DisplayPublicKey
                 name="Election verify key:"
@@ -163,20 +187,23 @@ export default withDeps(function AddBaker({
             title={title}
             convert={convert}
             validate={validate}
-            preview={DisplayValues}
+            preview={(v) => (
+                <DisplayValues {...v} exchangeRate={exchangeRate} />
+            )}
         >
             {({ openForDelegation, account }) => ({
                 stake: {
                     title: 'Stake settings',
                     render: (initial, onNext, formValues) =>
                         account ? (
-                            <StakePage
+                            <AddBakerStakePage
                                 account={account}
                                 exchangeRate={exchangeRate}
                                 blockSummary={blockSummary}
                                 initial={initial}
                                 onNext={onNext}
                                 formValues={formValues}
+                                isMultiSig
                             />
                         ) : (
                             <>{toRoot}</>

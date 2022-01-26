@@ -1,8 +1,8 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import AddBakerStakeSettings, {
+import BakerStakeSettings, {
     StakeSettings,
-} from '~/components/BakerTransactions/AddBakerStakeSettings';
+} from '~/components/BakerTransactions/BakerStakeSettings';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import Card from '~/cross-app-components/Card';
 import { chosenAccountSelector } from '~/features/AccountSlice';
@@ -18,7 +18,7 @@ import {
 import styles from '../../AccountDetailsPage.module.scss';
 
 type FormWrapperProps = Omit<
-    PropsOf<typeof AddBakerStakeSettings>,
+    PropsOf<typeof BakerStakeSettings>,
     'minimumStake' | 'estimatedFee'
 > &
     NotOptional<ChainData> &
@@ -37,7 +37,7 @@ const FormWrapper = ensureChainData(
         );
 
         return (
-            <AddBakerStakeSettings
+            <BakerStakeSettings
                 {...props}
                 minimumStake={minimumStake}
                 estimatedFee={estimatedFee}

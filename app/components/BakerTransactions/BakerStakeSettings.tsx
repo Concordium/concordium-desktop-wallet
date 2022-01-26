@@ -27,7 +27,7 @@ interface Props extends ClassName {
     onSubmit(values: StakeSettings): void;
 }
 
-export default function AddBakerStakeSettings({
+export default function BakerStakeSettings({
     initialData,
     showAccountCard,
     account,

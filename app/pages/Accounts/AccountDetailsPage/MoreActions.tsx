@@ -96,6 +96,13 @@ export default function MoreActions({ account, accountInfo }: Props) {
             >
                 Remove baker
             </ButtonNavLink>
+            <ButtonNavLink
+                className="mB20:notLast flex width100"
+                to={routes.ACCOUNTS_UPDATE_BAKER_STAKE}
+                disabled={!accountInfo}
+            >
+                Update baker stake
+            </ButtonNavLink>
             {accountHasDeployedCredentials && isBaker && (
                 <>
                     <ButtonNavLink

@@ -30,7 +30,7 @@ import {
     Dependencies,
     getDefaultCommissions,
 } from '~/utils/transactionFlows/configureBaker';
-import StakePage from '~/components/Transfers/configureBaker/StakePage';
+import AddBakerStakePage from '~/components/Transfers/configureBaker/AddBakerStakePage';
 import DelegationStatusPage from '~/components/Transfers/configureBaker/DelegationStatusPage';
 import CommissionsPage from '~/components/Transfers/configureBaker/CommissionsPage';
 import MetadataUrlPage from '~/components/Transfers/configureBaker/MetadataUrlPage';
@@ -94,7 +94,7 @@ export default withDeps(function AddBaker(props: Props) {
             {({ openForDelegation }) => ({
                 stake: {
                     render: (initial, onNext, formValues) => (
-                        <StakePage
+                        <AddBakerStakePage
                             account={account}
                             exchangeRate={exchangeRate}
                             blockSummary={blockSummary}

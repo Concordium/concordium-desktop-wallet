@@ -52,7 +52,7 @@ import ExportBakerKeys from '../ExportBakerKeys';
 import DatePicker from '~/components/Form/DatePicker';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
-import AddBakerStakeSettings from '~/components/BakerTransactions/AddBakerStakeSettings';
+import BakerStakeSettings from '~/components/BakerTransactions/BakerStakeSettings';
 
 import styles from '../MultisignatureAccountTransactions.module.scss';
 
@@ -259,7 +259,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                                 header="Stake"
                                 className={styles.stretchColumn}
                             >
-                                <AddBakerStakeSettings
+                                <BakerStakeSettings
                                     className={styles.columnContent}
                                     minimumStake={minimumThresholdForBaking}
                                     showAccountCard

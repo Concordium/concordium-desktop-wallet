@@ -2,7 +2,7 @@
 import React, { ComponentType, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, useRouteMatch } from 'react-router';
-import { ConfigureBaker } from '~/utils/types';
+import { ConfigureBaker, Fraction } from '~/utils/types';
 import MultiSigAccountTransactionFlow, {
     MultiSigAccountTransactionFlowLoading,
     RequiredValues,
@@ -19,8 +19,33 @@ import {
     title,
 } from '~/utils/transactionFlows/removeBaker';
 import RemoveBakerPage from '~/components/Transfers/configureBaker/RemoveBakerPage';
+import { getEstimatedFee } from '~/utils/transactionFlows/configureBaker';
+import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
-const DisplayValues = () => <AmountDetail title="Staked amount" value="0" />;
+import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
+
+interface DisplayProps extends Partial<RequiredValues & RemoveBakerFlowState> {
+    exchangeRate: Fraction;
+}
+const DisplayValues = ({ account, exchangeRate }: DisplayProps) => {
+    const estimatedFee =
+        account !== undefined
+            ? getEstimatedFee(
+                  { stake: { stake: '0' } },
+                  exchangeRate,
+                  account.signatureThreshold
+              )
+            : undefined;
+    return (
+        <>
+            <DisplayEstimatedFee
+                className={displayTransferStyles.fee}
+                estimatedFee={estimatedFee}
+            />
+            <AmountDetail title="Staked amount" value="0" />
+        </>
+    );
+};
 
 type Props = Omit<Dependencies, 'account' | 'nonce'>;
 type UnsafeProps = Partial<Props>;
