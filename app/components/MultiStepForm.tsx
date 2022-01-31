@@ -1,7 +1,8 @@
-import { push } from 'connected-react-router';
+import { push, replace } from 'connected-react-router';
 import React, {
     Dispatch,
     SetStateAction,
+    useCallback,
     useEffect,
     useMemo,
     useState,
@@ -25,6 +26,21 @@ export interface MultiStepFormPageProps<V, F = unknown> {
      */
     formValues: Partial<F>;
 }
+
+const makeFormPageObjects = <F extends Record<string, unknown>>(
+    baseRoute: string,
+    children: FormChildren<F>
+) => {
+    const keyPagePairs = Object.entries(children).filter(([, c]) =>
+        isDefined(c)
+    );
+
+    return keyPagePairs.map(([k, c]: [keyof F, FormChild<F>], i) => ({
+        substate: k,
+        render: c.render,
+        route: i === 0 ? baseRoute : `${baseRoute}/${i}`,
+    }));
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface FormChild<F, K extends keyof F = any> {
@@ -108,25 +124,17 @@ export default function MultiStepForm<
     const externalValueStore = (props as ExternalValueStoreProps<F>).valueStore;
     const [values, setValues] = externalValueStore ?? internalValueStore;
     const dispatch = useDispatch();
-    const formChildren = useMemo(
-        () => (typeof children === 'function' ? children(values) : children),
-        [children, values]
-    );
-    const keyPagePairs = Object.entries(formChildren).filter(([, c]) =>
-        isDefined(c)
+
+    const getChildren = useCallback(
+        (v: Partial<F>) =>
+            typeof children === 'function' ? children(v) : children,
+        [children]
     );
 
-    const pages = keyPagePairs
-        .map(([k, c]: [keyof F, FormChild<F>], i) => ({
-            substate: k,
-            render: c.render,
-            route: i === 0 ? baseRoute : `${baseRoute}/${i}`,
-            nextRoute:
-                i === keyPagePairs.length - 1
-                    ? undefined
-                    : `${baseRoute}/${i + 1}`,
-        }))
-        .reverse();
+    const pages = useMemo(
+        () => makeFormPageObjects(baseRoute, getChildren(values)).reverse(),
+        [getChildren, values, baseRoute]
+    );
 
     const currentPage = pages.find((p) => pathname.startsWith(p.route));
 
@@ -143,31 +151,30 @@ export default function MultiStepForm<
         );
     }, [externalValueStore === undefined]);
 
-    if (!currentPage) {
-        return null;
-    }
-
-    const { nextRoute } = currentPage;
-
     const handleNext = (substate: keyof F) => (v: Partial<F>) => {
         const newValues = { ...values, [substate]: v };
         setValues(newValues);
+        const newPages = makeFormPageObjects(baseRoute, getChildren(newValues));
+        const currentIndex = newPages.findIndex((p) => p.substate === substate);
 
-        if (nextRoute) {
-            dispatch(push(nextRoute));
-            return;
+        if (currentIndex === -1) {
+            dispatch(replace(baseRoute));
+        } else if (currentIndex !== newPages.length - 1) {
+            const { route } = newPages[currentIndex + 1] ?? {};
+
+            dispatch(push(route));
+        } else {
+            const invalidPage = pages.find(
+                (p) => p.substate === validate(newValues as F)
+            );
+
+            if (invalidPage) {
+                dispatch(push(invalidPage.route));
+                return;
+            }
+
+            onDone(newValues as F);
         }
-
-        const invalidPage = pages.find(
-            (p) => p.substate === validate(newValues as F)
-        );
-
-        if (invalidPage) {
-            dispatch(push(invalidPage.route));
-            return;
-        }
-
-        onDone(newValues as F);
     };
 
     return (
