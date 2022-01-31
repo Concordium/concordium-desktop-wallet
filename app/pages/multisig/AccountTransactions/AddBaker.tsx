@@ -211,35 +211,47 @@ export default withDeps(function AddBaker({
                 },
                 openForDelegation: {
                     title: 'Pool settings',
-                    render: (initial, onNext) => (
-                        <DelegationStatusPage
-                            initial={initial}
-                            onNext={onNext}
-                        />
-                    ),
+                    render: (initial, onNext) =>
+                        account ? (
+                            <DelegationStatusPage
+                                initial={initial}
+                                onNext={onNext}
+                                account={account}
+                            />
+                        ) : (
+                            <>{toRoot}</>
+                        ),
                 },
                 commissions:
                     openForDelegation === OpenStatus.OpenForAll
                         ? {
                               title: 'Pool settings',
-                              render: (initial, onNext) => (
-                                  <CommissionsPage
-                                      initial={initial}
-                                      onNext={onNext}
-                                  />
-                              ),
+                              render: (initial, onNext) =>
+                                  account ? (
+                                      <CommissionsPage
+                                          initial={initial}
+                                          onNext={onNext}
+                                          account={account}
+                                      />
+                                  ) : (
+                                      <>{toRoot}</>
+                                  ),
                           }
                         : undefined,
                 metadataUrl:
                     openForDelegation === OpenStatus.OpenForAll
                         ? {
                               title: 'Pool settings',
-                              render: (initial, onNext) => (
-                                  <MetadataUrlPage
-                                      initial={initial}
-                                      onNext={onNext}
-                                  />
-                              ),
+                              render: (initial, onNext) =>
+                                  account ? (
+                                      <MetadataUrlPage
+                                          initial={initial}
+                                          onNext={onNext}
+                                          account={account}
+                                      />
+                                  ) : (
+                                      <>{toRoot}</>
+                                  ),
                           }
                         : undefined,
                 keys: {

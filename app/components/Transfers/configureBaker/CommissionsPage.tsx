@@ -1,7 +1,10 @@
 import React, { useCallback } from 'react';
+import { useSelector } from 'react-redux';
 
 import Form from '~/components/Form';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
+import { accountInfoSelector } from '~/features/AccountSlice';
+import { toFixed } from '~/utils/numberStringHelpers';
 import {
     fractionResolutionToPercentage,
     percentageToFractionResolution,
@@ -10,7 +13,7 @@ import {
     Commissions,
     getDefaultCommissions,
 } from '~/utils/transactionFlows/configureBaker';
-import { EqualRecord, PropsOf } from '~/utils/types';
+import { Account, EqualRecord, PropsOf } from '~/utils/types';
 
 import styles from './ConfigureBakerPage.module.scss';
 
@@ -41,15 +44,25 @@ const fromRewardFractions = (values: Commissions): Commissions => ({
     ),
 });
 
-type CommissionsPageProps = Omit<
-    MultiStepFormPageProps<Commissions>,
-    'formValues'
->;
+const formatCommission = toFixed(3);
+
+const renderExistingValue = (value: number) =>
+    formatCommission(fractionResolutionToPercentage(value).toString());
+
+interface CommissionsPageProps
+    extends Omit<MultiStepFormPageProps<Commissions>, 'formValues'> {
+    account: Account;
+}
 
 export default function CommissionsPage({
     initial,
     onNext,
+    account,
 }: CommissionsPageProps) {
+    const accountInfo = useSelector(accountInfoSelector(account));
+    // eslint-disable-next-line no-console
+    console.log(accountInfo);
+
     // TODO: get values from chain
     const boundaries: {
         [P in keyof Commissions]: [number, number];
@@ -58,8 +71,14 @@ export default function CommissionsPage({
         bakingRewardCommission: [5000, 15000],
         finalizationRewardCommission: [5000, 15000],
     };
+
+    // TODO: get values from baker object on account info.
+    const existingValues: Commissions | undefined = {
+        ...getDefaultCommissions(),
+    };
     const defaultValues: Commissions = {
         ...getDefaultCommissions(),
+        ...existingValues,
         ...initial,
     };
 
@@ -90,6 +109,15 @@ export default function CommissionsPage({
                     When you open your baker as a pool, you have to set
                     commission rates. You can do so below:
                 </p>
+                {existingValues?.transactionFeeCommission !== undefined && (
+                    <div className="body3 mono mB10">
+                        Current value:
+                        {renderExistingValue(
+                            existingValues.transactionFeeCommission
+                        )}
+                        %
+                    </div>
+                )}
                 <Form.Slider
                     label="Transaction fee commissions"
                     name={commissionsFieldNames.transactionFeeCommission}
@@ -101,6 +129,15 @@ export default function CommissionsPage({
                     )}
                     {...commonSliderProps}
                 />
+                {existingValues?.bakingRewardCommission !== undefined && (
+                    <div className="body3 mono mB10">
+                        Current value:
+                        {renderExistingValue(
+                            existingValues.bakingRewardCommission
+                        )}
+                        %
+                    </div>
+                )}
                 <Form.Slider
                     label="Baking reward commissions"
                     name={commissionsFieldNames.bakingRewardCommission}
@@ -112,6 +149,15 @@ export default function CommissionsPage({
                     )}
                     {...commonSliderProps}
                 />
+                {existingValues?.finalizationRewardCommission !== undefined && (
+                    <div className="body3 mono mB10">
+                        Current value:
+                        {renderExistingValue(
+                            existingValues.finalizationRewardCommission
+                        )}
+                        %
+                    </div>
+                )}
                 <Form.Slider
                     label="Finalization reward commissions"
                     name={commissionsFieldNames.finalizationRewardCommission}
