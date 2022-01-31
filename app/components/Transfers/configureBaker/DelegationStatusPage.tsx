@@ -41,7 +41,7 @@ export default function DelegationStatusPage({
                     <Radios
                         options={[
                             {
-                                label: 'Open for all',
+                                label: 'Open',
                                 value: OpenStatus.OpenForAll,
                             },
                             existing !== undefined
@@ -51,7 +51,10 @@ export default function DelegationStatusPage({
                                   }
                                 : undefined,
                             {
-                                label: 'Closed for all',
+                                label:
+                                    existing !== undefined
+                                        ? 'Closed for all'
+                                        : 'Closed',
                                 value: OpenStatus.ClosedForAll,
                             },
                         ].filter(isDefined)}

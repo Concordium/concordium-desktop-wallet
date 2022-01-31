@@ -1,12 +1,9 @@
 import { AccountInfo } from '@concordium/node-sdk';
 import { ValidateValues } from '~/components/MultiStepForm';
 import { BlockSummary } from '~/node/NodeApiTypes';
-import { collapseFraction, multiplyFraction } from '../basicHelpers';
+import { collapseFraction } from '../basicHelpers';
 import { getConfigureBakerFullCost } from '../transactionCosts';
-import {
-    createConfigureBakerTransaction,
-    validateBakerStake,
-} from '../transactionHelpers';
+import { validateBakerStake } from '../transactionHelpers';
 import { serializeTransferPayload } from '../transactionSerialization';
 import {
     Account,
@@ -23,6 +20,7 @@ import {
     Commissions,
     ConfigureBakerFlowState,
     toPayload,
+    convertToTransaction as baseConvertToTransaction,
 } from './configureBaker';
 
 export type AddBakerFlowState = MakeRequired<
@@ -53,19 +51,7 @@ export const convertToTransaction = (
         withDefaults.commissions = defaultCommissions;
     }
 
-    const payload = toPayload(withDefaults);
-
-    const transaction = createConfigureBakerTransaction(
-        account.address,
-        payload,
-        nonce
-    );
-    transaction.estimatedFee = multiplyFraction(
-        exchangeRate,
-        transaction.energyAmount
-    );
-
-    return transaction;
+    return baseConvertToTransaction(account, nonce, exchangeRate)(values);
 };
 
 export function getEstimatedFee(

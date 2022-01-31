@@ -88,21 +88,6 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     Add baker
                 </ButtonNavLink>
             )}
-            {/* TODO remove, only here for testing purposes.... */}
-            <ButtonNavLink
-                className="mB20:notLast flex width100"
-                to={routes.ACCOUNTS_REMOVE_BAKER}
-                disabled={!accountInfo}
-            >
-                Remove baker
-            </ButtonNavLink>
-            <ButtonNavLink
-                className="mB20:notLast flex width100"
-                to={routes.ACCOUNTS_UPDATE_BAKER_STAKE}
-                disabled={!accountInfo}
-            >
-                Update baker stake
-            </ButtonNavLink>
             {accountHasDeployedCredentials && isBaker && (
                 <>
                     <ButtonNavLink
@@ -128,11 +113,18 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     </ButtonNavLink>
                     <ButtonNavLink
                         className="mB20:notLast flex width100"
+                        to={routes.ACCOUNTS_UPDATE_BAKER_POOL}
+                        disabled={!accountInfo}
+                    >
+                        Update baker pool
+                    </ButtonNavLink>
+                    {/* <ButtonNavLink
+                        className="mB20:notLast flex width100"
                         to={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}
                         disabled={!accountInfo}
                     >
                         Update baker restake earnings
-                    </ButtonNavLink>
+                    </ButtonNavLink> */}
                 </>
             )}
         </>

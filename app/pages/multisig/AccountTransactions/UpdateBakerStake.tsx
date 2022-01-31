@@ -1,6 +1,7 @@
 /* eslint-disable react/display-name */
 import React, { ComponentType, useCallback } from 'react';
 import { Redirect, useRouteMatch } from 'react-router';
+import { useSelector } from 'react-redux';
 import { ConfigureBaker, Fraction } from '~/utils/types';
 import MultiSigAccountTransactionFlow, {
     MultiSigAccountTransactionFlowLoading,
@@ -25,6 +26,7 @@ import withChainData from '~/utils/withChainData';
 import UpdateBakerStakePage from '~/components/Transfers/configureBaker/UpdateBakerStakePage';
 
 import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
+import { accountsInfoSelector } from '~/features/AccountSlice';
 
 interface DisplayProps
     extends Partial<RequiredValues & UpdateBakerStakeFlowState> {
@@ -85,13 +87,20 @@ export default withDeps(function UpdateBakerStake({
     blockSummary,
 }: Props) {
     const { path: matchedPath } = useRouteMatch();
+    const accountsInfo = useSelector(accountsInfoSelector);
 
     const convert = useCallback(
         (
             { account, ...values }: RequiredValues & UpdateBakerStakeFlowState,
             nonce: bigint
-        ) => convertToTransaction(account, nonce, exchangeRate)(values),
-        [exchangeRate]
+        ) =>
+            convertToTransaction(
+                account,
+                nonce,
+                exchangeRate,
+                accountsInfo[account.address]
+            )(values),
+        [exchangeRate, accountsInfo]
     );
 
     return (

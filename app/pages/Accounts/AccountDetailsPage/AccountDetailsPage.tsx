@@ -34,6 +34,7 @@ import { RootState } from '~/store/store';
 import AddBaker from './AddBaker';
 import RemoveBaker from './RemoveBaker';
 import UpdateBakerStake from './UpdateBakerStake';
+import UpdateBakerPool from './UpdateBakerPool';
 
 const { Master, Detail } = MasterDetailPageLayout;
 const ToAccounts = () => <Redirect to={routes.ACCOUNTS} />;
@@ -122,7 +123,7 @@ export default withAccountSync(function DetailsPage() {
                         }
                     />
                     <Route path={routes.ACCOUNTS_REMOVE_BAKER}>
-                        {/* canTransfer && isBaker ? (
+                        {canTransfer && isBaker ? (
                             // <RemoveBaker
                             //     account={account}
                             //     accountInfo={accountInfo}
@@ -130,8 +131,7 @@ export default withAccountSync(function DetailsPage() {
                             <RemoveBaker />
                         ) : (
                             <ToAccounts />
-                        ) */}
-                        <RemoveBaker />
+                        )}
                     </Route>
                     <Route path={routes.ACCOUNTS_UPDATE_BAKER_KEYS}>
                         {canTransfer && isBaker ? (
@@ -141,15 +141,22 @@ export default withAccountSync(function DetailsPage() {
                         )}
                     </Route>
                     <Route path={routes.ACCOUNTS_UPDATE_BAKER_STAKE}>
-                        {/* canTransfer && isBaker ? (
-                            <UpdateBakerStake
-                                account={account}
-                                accountInfo={accountInfo}
-                            />
+                        {canTransfer && isBaker ? (
+                            // <UpdateBakerStake
+                            //     account={account}
+                            //     accountInfo={accountInfo}
+                            // />
+                            <UpdateBakerStake />
                         ) : (
                             <ToAccounts />
-                        ) */}
-                        <UpdateBakerStake />
+                        )}
+                    </Route>
+                    <Route path={routes.ACCOUNTS_UPDATE_BAKER_POOL}>
+                        {canTransfer && isBaker ? (
+                            <UpdateBakerPool />
+                        ) : (
+                            <ToAccounts />
+                        )}
                     </Route>
                     {/* <Route path={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}>
                         {canTransfer && isBaker ? (

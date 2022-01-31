@@ -25,20 +25,18 @@ interface Props
 export default function UpdateBakerStakePage({
     onNext,
     initial,
-    formValues,
     blockSummary,
     exchangeRate,
     account,
     isMultiSig = false,
 }: Props) {
     const accountInfo = useSelector(accountInfoSelector(account));
-    const existingValues = getExistingValues(accountInfo);
+    const existing = getExistingValues(accountInfo);
     const minimumStake = BigInt(
         blockSummary.updates.chainParameters.minimumThresholdForBaking
     );
-    const { stake } = formValues;
-    const changes = getChanges({ stake: existingValues }, { stake });
-    const defaultValues = { ...existingValues, ...initial };
+    const changes = getChanges({ stake: existing }, { stake: initial });
+    const defaultValues = { ...existing, ...initial };
 
     const estimatedFee = useMemo(
         () =>
@@ -55,7 +53,7 @@ export default function UpdateBakerStakePage({
             minimumStake={minimumStake}
             buttonClassName={styles.continue}
             showAccountCard={isMultiSig}
-            existingValues={existingValues}
+            existingValues={existing}
         />
     );
 }

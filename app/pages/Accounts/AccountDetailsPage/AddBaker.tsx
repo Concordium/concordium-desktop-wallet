@@ -115,7 +115,7 @@ export default withDeps(function AddBaker(props: Props) {
                     title: 'Pool settings',
                 },
                 commissions:
-                    openForDelegation === OpenStatus.OpenForAll
+                    openForDelegation !== OpenStatus.ClosedForAll
                         ? {
                               render: (initial, onNext) => (
                                   <CommissionsPage
@@ -128,7 +128,7 @@ export default withDeps(function AddBaker(props: Props) {
                           }
                         : undefined,
                 metadataUrl:
-                    openForDelegation === OpenStatus.OpenForAll
+                    openForDelegation !== OpenStatus.ClosedForAll
                         ? {
                               render: (initial, onNext) => (
                                   <MetadataUrlPage

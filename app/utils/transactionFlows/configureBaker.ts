@@ -1,7 +1,8 @@
+import { AccountInfo } from '@concordium/node-sdk';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { AccountAndNonce } from '~/components/Transfers/withNonce';
 import { multiplyFraction } from '../basicHelpers';
-import { toMicroUnits } from '../gtu';
+import { microGtuToGtu, toMicroUnits } from '../gtu';
 import { BakerKeys } from '../rustInterface';
 import { getConfigureBakerCost } from '../transactionCosts';
 import { createConfigureBakerTransaction } from '../transactionHelpers';
@@ -15,6 +16,7 @@ import {
     TransactionKindId,
     Account,
     DeepPartial,
+    MakeRequired,
 } from '../types';
 import { ChainData } from '../withChainData';
 
@@ -83,12 +85,102 @@ export const toPayload = ({
     ...commissions,
 });
 
+export const getExisitingValues = ({
+    accountBaker,
+}: AccountInfo): Omit<ConfigureBakerFlowState, 'keys'> | undefined => {
+    if (accountBaker === undefined) {
+        return undefined;
+    }
+
+    return {
+        stake: {
+            stake: microGtuToGtu(accountBaker.stakedAmount) ?? '1000.00',
+            restake: accountBaker.restakeEarnings,
+        },
+        // TODO get proper existing values
+        openForDelegation: OpenStatus.OpenForAll,
+        metadataUrl: 'http://test.com',
+        commissions: {
+            transactionFeeCommission: 15000,
+            bakingRewardCommission: 15000,
+            finalizationRewardCommission: 15000,
+        },
+    };
+};
+
+type ConfigureBakerFlowStateChanges = MakeRequired<
+    DeepPartial<ConfigureBakerFlowState>,
+    'stake' | 'commissions' | 'keys'
+>;
+
+export const getChanges = (
+    existingValues: ConfigureBakerFlowState,
+    newValues: ConfigureBakerFlowState
+): ConfigureBakerFlowStateChanges => {
+    const changes: ConfigureBakerFlowStateChanges = {
+        stake: {},
+        commissions: {},
+        keys: {},
+    };
+
+    if (
+        existingValues.stake?.stake === undefined ||
+        newValues.stake?.stake === undefined ||
+        toMicroUnits(existingValues.stake?.stake) !==
+            toMicroUnits(newValues.stake?.stake)
+    ) {
+        changes.stake.stake = newValues.stake?.stake;
+    }
+    if (existingValues.stake?.restake !== newValues.stake?.restake) {
+        changes.stake.restake = newValues.stake?.restake;
+    }
+
+    if (existingValues.openForDelegation !== newValues.openForDelegation) {
+        changes.openForDelegation = newValues.openForDelegation;
+    }
+
+    if (
+        existingValues.commissions?.transactionFeeCommission !==
+        newValues.commissions?.transactionFeeCommission
+    ) {
+        changes.commissions.transactionFeeCommission =
+            newValues.commissions?.transactionFeeCommission;
+    }
+    if (
+        existingValues.commissions?.bakingRewardCommission !==
+        newValues.commissions?.bakingRewardCommission
+    ) {
+        changes.commissions.bakingRewardCommission =
+            newValues.commissions?.bakingRewardCommission;
+    }
+    if (
+        existingValues.commissions?.finalizationRewardCommission !==
+        newValues.commissions?.finalizationRewardCommission
+    ) {
+        changes.commissions.finalizationRewardCommission =
+            newValues.commissions?.finalizationRewardCommission;
+    }
+
+    if (existingValues.metadataUrl !== newValues.metadataUrl) {
+        changes.metadataUrl = newValues.metadataUrl;
+    }
+
+    changes.keys = { ...newValues.keys };
+
+    return changes;
+};
+
 export const convertToTransaction = (
     account: Account,
     nonce: bigint,
-    exchangeRate: Fraction
+    exchangeRate: Fraction,
+    accountInfo?: AccountInfo
 ) => (values: ConfigureBakerFlowState): ConfigureBaker => {
-    const payload = toPayload(values);
+    const existing =
+        accountInfo !== undefined ? getExisitingValues(accountInfo) : undefined;
+    const payload = toPayload(
+        existing !== undefined ? getChanges(existing, values) : values
+    );
 
     const transaction = createConfigureBakerTransaction(
         account.address,
@@ -102,56 +194,6 @@ export const convertToTransaction = (
 
     return transaction;
 };
-
-export const getChanges = <T extends Partial<ConfigureBakerFlowState>>(
-    existingValues: T,
-    newValues: T
-): DeepPartial<T> => {
-    const changesDraft: DeepPartial<T> = { ...(newValues as DeepPartial<T>) };
-
-    if (changesDraft.stake !== undefined) {
-        if (existingValues.stake?.stake === newValues.stake?.stake) {
-            delete changesDraft.stake.stake;
-        }
-        if (existingValues.stake?.restake === newValues.stake?.restake) {
-            delete changesDraft.stake.restake;
-        }
-    }
-
-    if (existingValues.openForDelegation === newValues.openForDelegation) {
-        delete changesDraft.openForDelegation;
-    }
-
-    if (changesDraft.commissions !== undefined) {
-        if (
-            existingValues.commissions?.transactionFeeCommission ===
-            newValues.commissions?.transactionFeeCommission
-        ) {
-            delete changesDraft.commissions.transactionFeeCommission;
-        }
-        if (
-            existingValues.commissions?.bakingRewardCommission ===
-            newValues.commissions?.bakingRewardCommission
-        ) {
-            delete changesDraft.commissions.bakingRewardCommission;
-        }
-        if (
-            existingValues.commissions?.finalizationRewardCommission ===
-            newValues.commissions?.finalizationRewardCommission
-        ) {
-            delete changesDraft.commissions.finalizationRewardCommission;
-        }
-    }
-
-    if (existingValues.metadataUrl === newValues.metadataUrl) {
-        delete changesDraft.openForDelegation;
-    }
-
-    return changesDraft;
-};
-// Object.entries(newValues)
-//     .filter(([k, v]) => v !== existingValues[k as keyof T])
-//     .reduce((a, [k, v]) => ({ ...a, [k]: v }), {});
 
 export function getEstimatedFee(
     values: DeepPartial<ConfigureBakerFlowState>,
