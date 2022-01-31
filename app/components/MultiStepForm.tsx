@@ -154,6 +154,7 @@ export default function MultiStepForm<
     const handleNext = (substate: keyof F) => (v: Partial<F>) => {
         const newValues = { ...values, [substate]: v };
         setValues(newValues);
+
         const newPages = makeFormPageObjects(baseRoute, getChildren(newValues));
         const currentIndex = newPages.findIndex((p) => p.substate === substate);
 

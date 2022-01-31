@@ -78,14 +78,11 @@ export const toPayload = ({
     stake: stake?.stake !== undefined ? toMicroUnits(stake.stake) : undefined,
     restakeEarnings: stake?.restake,
     openForDelegation,
-    metadataUrl:
-        metadataUrl !== undefined && metadataUrl !== ''
-            ? metadataUrl
-            : undefined,
+    metadataUrl: metadataUrl !== undefined ? metadataUrl : undefined,
     ...commissions,
 });
 
-export const getExisitingValues = ({
+export const getExistingValues = ({
     accountBaker,
 }: AccountInfo): Omit<ConfigureBakerFlowState, 'keys'> | undefined => {
     if (accountBaker === undefined) {
@@ -98,12 +95,15 @@ export const getExisitingValues = ({
             restake: accountBaker.restakeEarnings,
         },
         // TODO get proper existing values
-        openForDelegation: OpenStatus.OpenForAll,
-        metadataUrl: 'http://test.com',
+        openForDelegation: accountBaker.openPool ?? OpenStatus.OpenForAll,
+        metadataUrl: accountBaker.metadataUrl ?? 'http://test.com',
         commissions: {
-            transactionFeeCommission: 15000,
-            bakingRewardCommission: 15000,
-            finalizationRewardCommission: 15000,
+            transactionFeeCommission:
+                accountBaker.transactionFeeCommission ?? 15000,
+            bakingRewardCommission:
+                accountBaker.bakingRewardCommission ?? 15000,
+            finalizationRewardCommission:
+                accountBaker.finalizationRewardCommission ?? 15000,
         },
     };
 };
@@ -177,7 +177,7 @@ export const convertToTransaction = (
     accountInfo?: AccountInfo
 ) => (values: ConfigureBakerFlowState): ConfigureBaker => {
     const existing =
-        accountInfo !== undefined ? getExisitingValues(accountInfo) : undefined;
+        accountInfo !== undefined ? getExistingValues(accountInfo) : undefined;
     const payload = toPayload(
         existing !== undefined ? getChanges(existing, values) : values
     );

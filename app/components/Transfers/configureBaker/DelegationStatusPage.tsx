@@ -5,7 +5,10 @@ import { MultiStepFormPageProps } from '~/components/MultiStepForm';
 import Button from '~/cross-app-components/Button';
 import { accountInfoSelector } from '~/features/AccountSlice';
 import { isDefined } from '~/utils/basicHelpers';
-import { displayPoolOpen } from '~/utils/transactionFlows/configureBaker';
+import {
+    displayPoolOpen,
+    getExistingValues,
+} from '~/utils/transactionFlows/configureBaker';
 import { Account, AccountInfo, OpenStatus } from '~/utils/types';
 
 import styles from './ConfigureBakerPage.module.scss';
@@ -23,7 +26,8 @@ export default function DelegationStatusPage({
     const [value, setValue] = useState(initial);
     const accountInfo: AccountInfo = useSelector(accountInfoSelector(account));
 
-    const existing = OpenStatus.OpenForAll ?? accountInfo.accountBaker; // TODO change to value on accountInfo.
+    const { openForDelegation: existing } =
+        getExistingValues(accountInfo) ?? {};
 
     return (
         <>

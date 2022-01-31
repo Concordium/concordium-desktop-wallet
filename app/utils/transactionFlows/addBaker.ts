@@ -41,14 +41,16 @@ export const convertToTransaction = (
     nonce: bigint,
     exchangeRate: Fraction
 ) => (values: AddBakerFlowState): ConfigureBaker => {
-    const withDefaults = {
+    const sanitized = {
         ...values,
     };
 
-    // Ensure defaulf pool settings are used when opting for closed pool.
-    if (values.openForDelegation !== OpenStatus.OpenForAll) {
-        delete withDefaults.metadataUrl;
-        withDefaults.commissions = defaultCommissions;
+    if (values.openForDelegation === OpenStatus.ClosedForAll) {
+        // Ensure default pool settings are used when opting for closed pool.
+        delete sanitized.metadataUrl;
+        sanitized.commissions = defaultCommissions;
+    } else if (values.metadataUrl === '') {
+        delete sanitized.metadataUrl;
     }
 
     return baseConvertToTransaction(account, nonce, exchangeRate)(values);

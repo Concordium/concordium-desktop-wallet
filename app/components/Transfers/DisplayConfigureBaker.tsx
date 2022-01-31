@@ -1,5 +1,6 @@
 import React from 'react';
 import { useRouteMatch } from 'react-router';
+import clsx from 'clsx';
 import { ConfigureBaker } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
 import DisplayFee from '~/components/DisplayFee';
@@ -77,7 +78,13 @@ export default function DisplayConfigureBaker({ transaction }: Props) {
             {payload.metadataUrl !== undefined && (
                 <>
                     <h5 className={styles.title}>Metadata URL:</h5>
-                    <p className={styles.amount}>{payload.metadataUrl}</p>
+                    {payload.metadataUrl === '' ? (
+                        <p className={clsx(styles.amount, 'textFaded')}>
+                            Deleted
+                        </p>
+                    ) : (
+                        <p className={styles.amount}>{payload.metadataUrl}</p>
+                    )}
                 </>
             )}
             <DisplayPublicKey

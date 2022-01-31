@@ -1,9 +1,12 @@
 /* eslint-disable react/display-name */
 import React, { ComponentType, useCallback } from 'react';
-import { connect } from 'react-redux';
+import { connect, useSelector } from 'react-redux';
 import withExchangeRate from '~/components/Transfers/withExchangeRate';
 import withNonce from '~/components/Transfers/withNonce';
-import { chosenAccountSelector } from '~/features/AccountSlice';
+import {
+    accountInfoSelector,
+    chosenAccountSelector,
+} from '~/features/AccountSlice';
 import { RootState } from '~/store/store';
 import { isDefined } from '~/utils/basicHelpers';
 import {
@@ -51,11 +54,12 @@ const withDeps = (component: ComponentType<Props>) =>
 
 export default withDeps(function UpdateBakerPool(props: Props) {
     const { nonce, account, exchangeRate } = props;
+    const accountInfo = useSelector(accountInfoSelector(account));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const convert = useCallback(
-        convertToTransaction(account, nonce, exchangeRate),
-        [account, nonce, exchangeRate]
+        convertToTransaction(account, nonce, exchangeRate, accountInfo),
+        [account, nonce, exchangeRate, accountInfo]
     );
 
     return (

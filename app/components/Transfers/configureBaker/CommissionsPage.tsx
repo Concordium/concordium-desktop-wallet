@@ -12,6 +12,7 @@ import {
 import {
     Commissions,
     getDefaultCommissions,
+    getExistingValues,
 } from '~/utils/transactionFlows/configureBaker';
 import { Account, EqualRecord, PropsOf } from '~/utils/types';
 
@@ -60,8 +61,6 @@ export default function CommissionsPage({
     account,
 }: CommissionsPageProps) {
     const accountInfo = useSelector(accountInfoSelector(account));
-    // eslint-disable-next-line no-console
-    console.log(accountInfo);
 
     // TODO: get values from chain
     const boundaries: {
@@ -72,13 +71,10 @@ export default function CommissionsPage({
         finalizationRewardCommission: [5000, 15000],
     };
 
-    // TODO: get values from baker object on account info.
-    const existingValues: Commissions | undefined = {
-        ...getDefaultCommissions(),
-    };
+    const { commissions: existing } = getExistingValues(accountInfo) ?? {};
     const defaultValues: Commissions = {
         ...getDefaultCommissions(),
-        ...existingValues,
+        ...existing,
         ...initial,
     };
 
@@ -109,12 +105,10 @@ export default function CommissionsPage({
                     When you open your baker as a pool, you have to set
                     commission rates. You can do so below:
                 </p>
-                {existingValues?.transactionFeeCommission !== undefined && (
+                {existing?.transactionFeeCommission !== undefined && (
                     <div className="body3 mono mB10">
                         Current value:
-                        {renderExistingValue(
-                            existingValues.transactionFeeCommission
-                        )}
+                        {renderExistingValue(existing.transactionFeeCommission)}
                         %
                     </div>
                 )}
@@ -129,13 +123,10 @@ export default function CommissionsPage({
                     )}
                     {...commonSliderProps}
                 />
-                {existingValues?.bakingRewardCommission !== undefined && (
+                {existing?.bakingRewardCommission !== undefined && (
                     <div className="body3 mono mB10">
                         Current value:
-                        {renderExistingValue(
-                            existingValues.bakingRewardCommission
-                        )}
-                        %
+                        {renderExistingValue(existing.bakingRewardCommission)}%
                     </div>
                 )}
                 <Form.Slider
@@ -149,11 +140,11 @@ export default function CommissionsPage({
                     )}
                     {...commonSliderProps}
                 />
-                {existingValues?.finalizationRewardCommission !== undefined && (
+                {existing?.finalizationRewardCommission !== undefined && (
                     <div className="body3 mono mB10">
                         Current value:
                         {renderExistingValue(
-                            existingValues.finalizationRewardCommission
+                            existing.finalizationRewardCommission
                         )}
                         %
                     </div>

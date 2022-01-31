@@ -4,7 +4,10 @@ import { useSelector } from 'react-redux';
 import Form from '~/components/Form';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
 import { accountInfoSelector } from '~/features/AccountSlice';
-import { MetadataUrl } from '~/utils/transactionFlows/configureBaker';
+import {
+    getExistingValues,
+    MetadataUrl,
+} from '~/utils/transactionFlows/configureBaker';
 import { Account, EqualRecord } from '~/utils/types';
 
 import styles from './ConfigureBakerPage.module.scss';
@@ -30,13 +33,12 @@ interface MetadataUrlPageProps
 
 const MetadataUrlPage = ({
     onNext,
-    initial = '',
+    initial,
     account,
 }: MetadataUrlPageProps) => {
     const accountInfo = useSelector(accountInfoSelector(account));
-    // eslint-disable-next-line no-console
-    console.log(accountInfo);
-    const existing = ''; // TODO: get value from accout info.
+    const { metadataUrl: existing } = getExistingValues(accountInfo) ?? {};
+
     return (
         <Form<MetadataUrlPageForm>
             onSubmit={(v) => onNext(v.url)}
@@ -55,7 +57,7 @@ const MetadataUrlPage = ({
                     )}
                     <Form.Input
                         name={metadataUrlPageFieldNames.url}
-                        defaultValue={initial}
+                        defaultValue={initial ?? existing}
                         className="body2"
                         placeholder="Enter metadata URL"
                         rules={{

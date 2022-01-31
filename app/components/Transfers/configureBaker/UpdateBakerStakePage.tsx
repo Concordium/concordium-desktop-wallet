@@ -8,11 +8,9 @@ import {
     StakeSettings,
     getEstimatedFee,
     getChanges,
-} from '~/utils/transactionFlows/configureBaker';
-import {
     getExistingValues,
-    UpdateBakerStakeFlowState,
-} from '~/utils/transactionFlows/updateBakerStake';
+} from '~/utils/transactionFlows/configureBaker';
+import { UpdateBakerStakeFlowState } from '~/utils/transactionFlows/updateBakerStake';
 
 import styles from './ConfigureBakerPage.module.scss';
 
@@ -31,7 +29,7 @@ export default function UpdateBakerStakePage({
     isMultiSig = false,
 }: Props) {
     const accountInfo = useSelector(accountInfoSelector(account));
-    const existing = getExistingValues(accountInfo);
+    const { stake: existing } = getExistingValues(accountInfo) ?? {};
     const minimumStake = BigInt(
         blockSummary.updates.chainParameters.minimumThresholdForBaking
     );
