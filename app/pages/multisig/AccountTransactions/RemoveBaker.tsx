@@ -62,11 +62,10 @@ const withDeps = (component: ComponentType<Props>) =>
         )
     );
 
-export default withDeps(function AddBaker({ exchangeRate }: Props) {
+export default withDeps(function RemoveBaker({ exchangeRate }: Props) {
     const accountsInfo = useSelector(accountsInfoSelector);
     const { path: matchedPath } = useRouteMatch();
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     const convert = useCallback(
         ({ account }: RequiredValues & RemoveBakerFlowState, nonce: bigint) =>
             convertToTransaction(account, nonce, exchangeRate)(),

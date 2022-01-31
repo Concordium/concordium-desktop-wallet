@@ -210,6 +210,14 @@ export default function MultiSignatureCreateProposalView() {
                                 >
                                     Remove baker
                                 </ButtonNavLink>
+                                <ButtonNavLink
+                                    className={styles.link}
+                                    to={
+                                        routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_STAKE
+                                    }
+                                >
+                                    Update baker stake
+                                </ButtonNavLink>
                             </>
                         )}
                     </Fragment>

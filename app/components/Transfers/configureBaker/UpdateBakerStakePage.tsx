@@ -1,14 +1,18 @@
 import React, { useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import BakerStakeSettings from '~/components/BakerTransactions/BakerStakeSettings';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
-import { microGtuToGtu } from '~/utils/gtu';
+import { accountInfoSelector } from '~/features/AccountSlice';
 import {
     Dependencies,
     StakeSettings,
     getEstimatedFee,
     getChanges,
 } from '~/utils/transactionFlows/configureBaker';
-import { UpdateBakerStakeFlowState } from '~/utils/transactionFlows/updateBakerStake';
+import {
+    getExistingValues,
+    UpdateBakerStakeFlowState,
+} from '~/utils/transactionFlows/updateBakerStake';
 
 import styles from './ConfigureBakerPage.module.scss';
 
@@ -16,34 +20,25 @@ interface Props
     extends MultiStepFormPageProps<StakeSettings, UpdateBakerStakeFlowState>,
         Pick<Dependencies, 'blockSummary' | 'exchangeRate' | 'account'> {
     isMultiSig?: boolean;
-    existingValues: StakeSettings;
 }
 
-export default function AddBakerStakePage({
+export default function UpdateBakerStakePage({
     onNext,
     initial,
     formValues,
     blockSummary,
     exchangeRate,
     account,
-    existingValues,
     isMultiSig = false,
 }: Props) {
+    const accountInfo = useSelector(accountInfoSelector(account));
+    const existingValues = getExistingValues(accountInfo);
     const minimumStake = BigInt(
         blockSummary.updates.chainParameters.minimumThresholdForBaking
     );
     const { stake } = formValues;
-
-    const defaultValues: StakeSettings = useMemo(
-        () => ({
-            stake: microGtuToGtu(minimumStake.toString()) ?? '0.00',
-            restake: true,
-            ...initial,
-        }),
-        [initial, minimumStake]
-    );
-
     const changes = getChanges({ stake: existingValues }, { stake });
+    const defaultValues = { ...existingValues, ...initial };
 
     const estimatedFee = useMemo(
         () =>

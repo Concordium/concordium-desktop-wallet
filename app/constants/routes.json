@@ -71,6 +71,7 @@
     "GENERATE_CREDENTIAL_PICKACCOUNT": "/multi-signature-transaction/generate-credential/pick-account",
     "MULTISIGTRANSACTIONS_ADD_BAKER": "/multi-signature-transaction/account-transaction/add-baker",
     "MULTISIGTRANSACTIONS_REMOVE_BAKER": "/multi-signature-transaction/account-transaction/remove-baker",
+    "MULTISIGTRANSACTIONS_UPDATE_BAKER_STAKE": "/multi-signature-transaction/account-transaction/update-baker-stake",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION": "/multi-signature-transaction/account-transaction/:transactionKind",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT": "/multi-signature-transaction/account-transaction/:transactionKind/pick_amount",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT": "/multi-signature-transaction/account-transaction/:transactionKind/pick_recipient",
