@@ -4,11 +4,11 @@ import BakerStakeSettings from '~/components/BakerTransactions/BakerStakeSetting
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
 import { accountInfoSelector } from '~/features/AccountSlice';
 import {
-    Dependencies,
+    ConfigureBakerFlowDependencies,
     StakeSettings,
-    getEstimatedFee,
-    getChanges,
-    getExistingValues,
+    getEstimatedConfigureBakerFee,
+    getBakerFlowChanges,
+    getExistingBakerValues,
 } from '~/utils/transactionFlows/configureBaker';
 import { UpdateBakerStakeFlowState } from '~/utils/transactionFlows/updateBakerStake';
 import { Account } from '~/utils/types';
@@ -17,7 +17,7 @@ import styles from './ConfigureBakerPage.module.scss';
 
 interface Props
     extends MultiStepFormPageProps<StakeSettings, UpdateBakerStakeFlowState>,
-        Pick<Dependencies, 'blockSummary' | 'exchangeRate'> {
+        Pick<ConfigureBakerFlowDependencies, 'blockSummary' | 'exchangeRate'> {
     isMultiSig?: boolean;
     account: Account;
 }
@@ -31,16 +31,23 @@ export default function UpdateBakerStakePage({
     isMultiSig = false,
 }: Props) {
     const accountInfo = useSelector(accountInfoSelector(account));
-    const { stake: existing } = getExistingValues(accountInfo) ?? {};
+    const { stake: existing } = getExistingBakerValues(accountInfo) ?? {};
     const minimumStake = BigInt(
         blockSummary.updates.chainParameters.minimumThresholdForBaking
     );
-    const changes = getChanges({ stake: existing }, { stake: initial });
+    const changes = getBakerFlowChanges(
+        { stake: existing },
+        { stake: initial }
+    );
     const defaultValues = { ...existing, ...initial };
 
     const estimatedFee = useMemo(
         () =>
-            getEstimatedFee(changes, exchangeRate, account.signatureThreshold),
+            getEstimatedConfigureBakerFee(
+                changes,
+                exchangeRate,
+                account.signatureThreshold
+            ),
         [exchangeRate, account.signatureThreshold, changes]
     );
 

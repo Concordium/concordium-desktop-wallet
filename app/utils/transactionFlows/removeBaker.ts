@@ -1,5 +1,4 @@
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
-import { AccountAndNonce } from '~/components/Transfers/withNonce';
 import { multiplyFraction } from '../basicHelpers';
 import { createConfigureBakerTransaction } from '../transactionHelpers';
 import {
@@ -10,7 +9,7 @@ import {
     Account,
 } from '../types';
 
-export type Dependencies = NotOptional<ExchangeRate & AccountAndNonce>;
+export type RemoveBakerDependencies = NotOptional<ExchangeRate>;
 
 export interface RemoveBakerFlowState {
     confirm: undefined;
@@ -20,9 +19,9 @@ export type RemoveBakerPayload = NotOptional<
     Pick<ConfigureBakerPayload, 'stake'>
 >;
 
-export const title = 'Remove baker';
+export const removeBakerTitle = 'Remove baker';
 
-export const convertToTransaction = (
+export const convertToRemoveBakerTransaction = (
     account: Account,
     nonce: bigint,
     exchangeRate: Fraction

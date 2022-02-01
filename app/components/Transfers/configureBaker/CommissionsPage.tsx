@@ -12,7 +12,7 @@ import {
 import {
     Commissions,
     getDefaultCommissions,
-    getExistingValues,
+    getExistingBakerValues,
 } from '~/utils/transactionFlows/configureBaker';
 import { Account, EqualRecord, PropsOf } from '~/utils/types';
 
@@ -71,7 +71,7 @@ export default function CommissionsPage({
         finalizationRewardCommission: [5000, 15000],
     };
 
-    const { commissions: existing } = getExistingValues(accountInfo) ?? {};
+    const { commissions: existing } = getExistingBakerValues(accountInfo) ?? {};
     const defaultValues: Commissions = {
         ...getDefaultCommissions(),
         ...existing,

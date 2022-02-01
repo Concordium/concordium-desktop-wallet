@@ -17,12 +17,12 @@ import AccountTransactionFlow, {
 import { ensureProps } from '~/utils/componentHelpers';
 import {
     AddBakerFlowState,
-    title,
-    convertToTransaction,
-    validateValues,
+    addBakerTitle,
+    convertToAddBakerTransaction,
+    validateAddBakerValues,
 } from '~/utils/transactionFlows/addBaker';
 import {
-    Dependencies,
+    ConfigureBakerFlowDependencies,
     getDefaultCommissions,
 } from '~/utils/transactionFlows/configureBaker';
 import AddBakerStakePage from '~/components/Transfers/configureBaker/AddBakerStakePage';
@@ -32,7 +32,9 @@ import MetadataUrlPage from '~/components/Transfers/configureBaker/MetadataUrlPa
 import KeysPage from '~/components/Transfers/configureBaker/KeysPage';
 import routes from '~/constants/routes.json';
 
-interface Props extends Dependencies, NotOptional<AccountAndNonce> {
+interface Props
+    extends ConfigureBakerFlowDependencies,
+        NotOptional<AccountAndNonce> {
     accountInfo: AccountInfo;
 }
 
@@ -51,7 +53,7 @@ const withDeps = (component: ComponentType<Props>) =>
                 ensureProps(
                     component,
                     hasNecessaryProps,
-                    <AccountTransactionFlowLoading title={title} />
+                    <AccountTransactionFlowLoading title={addBakerTitle} />
                 )
             )
         )
@@ -62,7 +64,7 @@ export default withDeps(function AddBaker(props: Props) {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const convert = useCallback(
-        convertToTransaction(
+        convertToAddBakerTransaction(
             getDefaultCommissions(),
             account,
             nonce,
@@ -73,13 +75,18 @@ export default withDeps(function AddBaker(props: Props) {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const validate = useCallback(
-        validateValues(blockSummary, account, accountInfo, exchangeRate),
+        validateAddBakerValues(
+            blockSummary,
+            account,
+            accountInfo,
+            exchangeRate
+        ),
         [blockSummary, account, accountInfo, exchangeRate]
     );
 
     return (
         <AccountTransactionFlow<AddBakerFlowState, ConfigureBakerTransaction>
-            title={title}
+            title={addBakerTitle}
             convert={convert}
             validate={validate}
             multisigRoute={routes.MULTISIGTRANSACTIONS_ADD_BAKER}

@@ -27,16 +27,16 @@ import {
 } from '~/features/AccountSlice';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import {
-    convertToTransaction,
-    Dependencies,
-    getSanitizedValues,
-    title,
+    convertToUpdateBakerPoolTransaction,
+    UpdateBakerPoolDependencies,
+    getSanitizedBakerPoolValues,
+    updateBakerPoolTitle,
     UpdateBakerPoolFlowState,
 } from '~/utils/transactionFlows/updateBakerPool';
 import {
     displayPoolOpen,
-    getChanges,
-    getEstimatedFee,
+    getBakerFlowChanges,
+    getEstimatedConfigureBakerFee,
 } from '~/utils/transactionFlows/configureBaker';
 
 import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
@@ -51,14 +51,14 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
     const accountInfo: AccountInfo | undefined = useSelector(
         accountInfoSelector(account)
     );
-    const sanitized = getSanitizedValues(values, accountInfo);
-    const changes = getChanges(values, accountInfo);
+    const sanitized = getSanitizedBakerPoolValues(values, accountInfo);
+    const changes = getBakerFlowChanges(values, accountInfo);
 
     const { openForDelegation, commissions, metadataUrl } = changes ?? {};
 
     const estimatedFee =
         account !== undefined
-            ? getEstimatedFee(
+            ? getEstimatedConfigureBakerFee(
                   sanitized,
                   exchangeRate,
                   account.signatureThreshold
@@ -117,7 +117,7 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
 
 const toRoot = <Redirect to={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_POOL} />;
 
-type Props = Dependencies;
+type Props = UpdateBakerPoolDependencies;
 type UnsafeProps = Partial<Props>;
 
 const hasNecessaryProps = (props: UnsafeProps): props is Props =>
@@ -128,7 +128,9 @@ const withDeps = (component: ComponentType<Props>) =>
         ensureProps(
             component,
             hasNecessaryProps,
-            <MultiSigAccountTransactionFlowLoading title={title} />
+            <MultiSigAccountTransactionFlowLoading
+                title={updateBakerPoolTitle}
+            />
         )
     );
 
@@ -141,7 +143,7 @@ export default withDeps(function UpdateBakerPool({ exchangeRate }: Props) {
             { account, ...values }: RequiredValues & UpdateBakerPoolFlowState,
             nonce: bigint
         ) =>
-            convertToTransaction(
+            convertToUpdateBakerPoolTransaction(
                 account,
                 nonce,
                 exchangeRate,
@@ -155,7 +157,7 @@ export default withDeps(function UpdateBakerPool({ exchangeRate }: Props) {
             UpdateBakerPoolFlowState,
             ConfigureBaker
         >
-            title={title}
+            title={updateBakerPoolTitle}
             convert={convert}
             preview={(v) => (
                 <DisplayValues {...v} exchangeRate={exchangeRate} />

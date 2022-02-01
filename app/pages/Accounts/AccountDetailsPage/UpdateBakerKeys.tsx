@@ -12,16 +12,16 @@ import AccountTransactionFlow, {
     AccountTransactionFlowLoading,
 } from '../AccountTransactionFlow';
 import { ensureProps } from '~/utils/componentHelpers';
-import { convertToTransaction } from '~/utils/transactionFlows/configureBaker';
+import { convertToBakerTransaction } from '~/utils/transactionFlows/configureBaker';
 import routes from '~/constants/routes.json';
 import {
-    Dependencies,
-    title,
+    UpdateBakerKeysDependencies,
+    updateBakerKeysTitle,
     UpdateBakerKeysFlowState,
 } from '~/utils/transactionFlows/updateBakerKeys';
 import KeysPage from '~/components/Transfers/configureBaker/KeysPage';
 
-type Props = Dependencies & NotOptional<AccountAndNonce>;
+type Props = UpdateBakerKeysDependencies & NotOptional<AccountAndNonce>;
 type UnsafeProps = MakeRequired<Partial<Props>, 'account'>;
 
 const hasNecessaryProps = (props: UnsafeProps): props is Props => {
@@ -34,7 +34,7 @@ const withDeps = (component: ComponentType<Props>) =>
             ensureProps(
                 component,
                 hasNecessaryProps,
-                <AccountTransactionFlowLoading title={title} />
+                <AccountTransactionFlowLoading title={updateBakerKeysTitle} />
             )
         )
     );
@@ -44,7 +44,7 @@ export default withDeps(function UpdateBakerKeys(props: Props) {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const convert = useCallback(
-        convertToTransaction(account, nonce, exchangeRate),
+        convertToBakerTransaction(account, nonce, exchangeRate),
         [account, nonce, exchangeRate]
     );
 
@@ -53,7 +53,7 @@ export default withDeps(function UpdateBakerKeys(props: Props) {
             UpdateBakerKeysFlowState,
             ConfigureBakerTransaction
         >
-            title={title}
+            title={updateBakerKeysTitle}
             convert={convert}
             multisigRoute={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_KEYS}
         >

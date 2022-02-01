@@ -20,7 +20,9 @@ import {
 } from '../types';
 import { ChainData } from '../withChainData';
 
-export type Dependencies = NotOptional<ChainData & ExchangeRate>;
+export type ConfigureBakerFlowDependencies = NotOptional<
+    ChainData & ExchangeRate
+>;
 
 export interface StakeSettings {
     stake: string;
@@ -52,7 +54,7 @@ export const getDefaultCommissions = (): Commissions => ({
     finalizationRewardCommission: 15000,
 });
 
-export const toPayload = ({
+export const toConfigureBakerPayload = ({
     keys,
     stake,
     openForDelegation,
@@ -80,7 +82,7 @@ export const toPayload = ({
     ...commissions,
 });
 
-export const getExistingValues = (
+export const getExistingBakerValues = (
     { accountBaker }: AccountInfo = {} as AccountInfo
 ): Omit<ConfigureBakerFlowState, 'keys'> | undefined => {
     if (accountBaker === undefined) {
@@ -116,15 +118,15 @@ type ConfigureBakerFlowStateChanges = MakeRequired<
     'stake' | 'commissions' | 'keys'
 >;
 
-export function getChanges(
+export function getBakerFlowChanges(
     newValues: ConfigureBakerFlowState,
     existingValues: ConfigureBakerFlowState
 ): ConfigureBakerFlowStateChanges;
-export function getChanges(
+export function getBakerFlowChanges(
     newValues: ConfigureBakerFlowState,
     accountInfo: AccountInfo | undefined
 ): ConfigureBakerFlowStateChanges | undefined;
-export function getChanges(
+export function getBakerFlowChanges(
     newValues: ConfigureBakerFlowState,
     dyn: (AccountInfo | undefined) | ConfigureBakerFlowState
 ): ConfigureBakerFlowStateChanges | undefined {
@@ -135,7 +137,7 @@ export function getChanges(
     }
 
     if (isAccountInfo(dyn)) {
-        existingValues = getExistingValues(dyn) ?? {};
+        existingValues = getExistingBakerValues(dyn) ?? {};
     } else {
         existingValues = dyn;
     }
@@ -193,16 +195,18 @@ export function getChanges(
     return changes;
 }
 
-export const convertToTransaction = (
+export const convertToBakerTransaction = (
     account: Account,
     nonce: bigint,
     exchangeRate: Fraction,
     accountInfo?: AccountInfo
 ) => (values: ConfigureBakerFlowState): ConfigureBaker => {
     const existing =
-        accountInfo !== undefined ? getExistingValues(accountInfo) : undefined;
-    const payload = toPayload(
-        existing !== undefined ? getChanges(values, existing) : values
+        accountInfo !== undefined
+            ? getExistingBakerValues(accountInfo)
+            : undefined;
+    const payload = toConfigureBakerPayload(
+        existing !== undefined ? getBakerFlowChanges(values, existing) : values
     );
 
     const transaction = createConfigureBakerTransaction(
@@ -218,14 +222,14 @@ export const convertToTransaction = (
     return transaction;
 };
 
-export function getEstimatedFee(
+export function getEstimatedConfigureBakerFee(
     values: DeepPartial<ConfigureBakerFlowState>,
     exchangeRate: Fraction,
     signatureThreshold = 1
 ) {
     const payloadSize = serializeTransferPayload(
         TransactionKindId.Configure_baker,
-        toPayload(values)
+        toConfigureBakerPayload(values)
     ).length;
 
     return getConfigureBakerCost(

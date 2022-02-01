@@ -12,15 +12,15 @@ import withExchangeRate from '~/components/Transfers/withExchangeRate';
 import { ensureProps } from '~/utils/componentHelpers';
 import { isDefined } from '~/utils/basicHelpers';
 import {
-    convertToTransaction,
-    Dependencies,
+    convertToBakerTransaction,
+    ConfigureBakerFlowDependencies,
     displayRestakeEarnings,
-    getChanges,
-    getEstimatedFee,
+    getBakerFlowChanges,
+    getEstimatedConfigureBakerFee,
 } from '~/utils/transactionFlows/configureBaker';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import {
-    title,
+    updateBakerStakeTitle,
     UpdateBakerStakeFlowState,
 } from '~/utils/transactionFlows/updateBakerStake';
 import withChainData from '~/utils/withChainData';
@@ -40,10 +40,14 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
     const accountInfo: AccountInfo | undefined = useSelector(
         accountInfoSelector(account)
     );
-    const { stake } = getChanges(values, accountInfo) ?? {};
+    const { stake } = getBakerFlowChanges(values, accountInfo) ?? {};
     const estimatedFee =
         account !== undefined
-            ? getEstimatedFee(values, exchangeRate, account.signatureThreshold)
+            ? getEstimatedConfigureBakerFee(
+                  values,
+                  exchangeRate,
+                  account.signatureThreshold
+              )
             : undefined;
     return (
         <>
@@ -70,7 +74,7 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
     );
 };
 
-type Props = Omit<Dependencies, 'account' | 'nonce'>;
+type Props = Omit<ConfigureBakerFlowDependencies, 'account' | 'nonce'>;
 type UnsafeProps = Partial<Props>;
 
 const hasNecessaryProps = (props: UnsafeProps): props is Props => {
@@ -83,7 +87,9 @@ const withDeps = (component: ComponentType<Props>) =>
             ensureProps(
                 component,
                 hasNecessaryProps,
-                <MultiSigAccountTransactionFlowLoading title={title} />
+                <MultiSigAccountTransactionFlowLoading
+                    title={updateBakerStakeTitle}
+                />
             )
         )
     );
@@ -100,7 +106,7 @@ export default withDeps(function UpdateBakerStake({
             { account, ...values }: RequiredValues & UpdateBakerStakeFlowState,
             nonce: bigint
         ) =>
-            convertToTransaction(
+            convertToBakerTransaction(
                 account,
                 nonce,
                 exchangeRate,
@@ -114,7 +120,7 @@ export default withDeps(function UpdateBakerStake({
             UpdateBakerStakeFlowState,
             ConfigureBaker
         >
-            title={title}
+            title={updateBakerStakeTitle}
             convert={convert}
             preview={(v) => (
                 <DisplayValues {...v} exchangeRate={exchangeRate} />

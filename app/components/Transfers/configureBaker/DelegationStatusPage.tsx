@@ -7,7 +7,7 @@ import { accountInfoSelector } from '~/features/AccountSlice';
 import { isDefined } from '~/utils/basicHelpers';
 import {
     displayPoolOpen,
-    getExistingValues,
+    getExistingBakerValues,
 } from '~/utils/transactionFlows/configureBaker';
 import { Account, OpenStatus } from '~/utils/types';
 
@@ -27,7 +27,7 @@ export default function DelegationStatusPage({
     const accountInfo = useSelector(accountInfoSelector(account));
 
     const { openForDelegation: existing } =
-        getExistingValues(accountInfo) ?? {};
+        getExistingBakerValues(accountInfo) ?? {};
 
     return (
         <>

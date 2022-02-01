@@ -11,14 +11,14 @@ import DisplayBakerCommission from '~/components/Transfers/DisplayBakerCommissio
 import DisplayPublicKey from '~/components/Transfers/DisplayPublicKey';
 import {
     AddBakerFlowState,
-    convertToTransaction,
-    getEstimatedFee,
-    getSanitizedValues,
-    title,
-    validateValues,
+    convertToAddBakerTransaction,
+    getEstimatedAddBakerFee,
+    getSanitizedAddBakerValues,
+    addBakerTitle,
+    validateAddBakerValues,
 } from '~/utils/transactionFlows/addBaker';
 import {
-    Dependencies,
+    ConfigureBakerFlowDependencies,
     getDefaultCommissions,
     displayPoolOpen,
     displayRestakeEarnings,
@@ -44,7 +44,10 @@ interface DisplayProps extends Partial<AddBakerFlowState & RequiredValues> {
 }
 
 const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
-    const sanitized = getSanitizedValues(values, getDefaultCommissions());
+    const sanitized = getSanitizedAddBakerValues(
+        values,
+        getDefaultCommissions()
+    );
 
     const {
         stake,
@@ -56,7 +59,7 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
 
     const estimatedFee =
         account !== undefined
-            ? getEstimatedFee(
+            ? getEstimatedAddBakerFee(
                   exchangeRate,
                   sanitized,
                   account.signatureThreshold
@@ -125,7 +128,7 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
 
 const toRoot = <Redirect to={routes.MULTISIGTRANSACTIONS_ADD_BAKER} />;
 
-type Props = Dependencies;
+type Props = ConfigureBakerFlowDependencies;
 type UnsafeProps = Partial<Props>;
 
 const hasNecessaryProps = (props: UnsafeProps): props is Props =>
@@ -137,7 +140,7 @@ const withDeps = (component: ComponentType<Props>) =>
             ensureProps(
                 component,
                 hasNecessaryProps,
-                <MultiSigAccountTransactionFlowLoading title={title} />
+                <MultiSigAccountTransactionFlowLoading title={addBakerTitle} />
             )
         )
     );
@@ -154,7 +157,7 @@ export default withDeps(function AddBaker({
             { account, ...values }: RequiredValues & AddBakerFlowState,
             nonce: bigint
         ) =>
-            convertToTransaction(
+            convertToAddBakerTransaction(
                 getDefaultCommissions(),
                 account,
                 nonce,
@@ -166,7 +169,7 @@ export default withDeps(function AddBaker({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const validate = useCallback(
         ({ account, ...values }: RequiredValues & AddBakerFlowState) =>
-            validateValues(
+            validateAddBakerValues(
                 blockSummary,
                 account,
                 accountsInfo[account.address],
@@ -177,7 +180,7 @@ export default withDeps(function AddBaker({
 
     return (
         <MultiSigAccountTransactionFlow<AddBakerFlowState, ConfigureBaker>
-            title={title}
+            title={addBakerTitle}
             convert={convert}
             validate={validate}
             preview={(v) => (

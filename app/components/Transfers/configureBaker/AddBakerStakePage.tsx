@@ -3,11 +3,11 @@ import BakerStakeSettings from '~/components/BakerTransactions/BakerStakeSetting
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
 import { microGtuToGtu } from '~/utils/gtu';
 import {
-    Dependencies,
+    ConfigureBakerFlowDependencies,
     StakeSettings,
 } from '~/utils/transactionFlows/configureBaker';
 import {
-    getEstimatedFee,
+    getEstimatedAddBakerFee,
     AddBakerFlowState,
 } from '~/utils/transactionFlows/addBaker';
 import { Account } from '~/utils/types';
@@ -16,7 +16,7 @@ import styles from './ConfigureBakerPage.module.scss';
 
 interface Props
     extends MultiStepFormPageProps<StakeSettings, AddBakerFlowState>,
-        Pick<Dependencies, 'blockSummary' | 'exchangeRate'> {
+        Pick<ConfigureBakerFlowDependencies, 'blockSummary' | 'exchangeRate'> {
     isMultiSig?: boolean;
     account: Account;
 }
@@ -47,7 +47,7 @@ export default function AddBakerStakePage({
 
     const estimatedFee = useMemo(
         () =>
-            getEstimatedFee(
+            getEstimatedAddBakerFee(
                 exchangeRate,
                 hasKeys
                     ? {

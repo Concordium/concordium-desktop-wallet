@@ -11,13 +11,13 @@ import {
 } from '../types';
 import {
     ConfigureBakerFlowState,
-    convertToTransaction as baseConvertToTransaction,
-    getExistingValues,
+    convertToBakerTransaction,
+    getExistingBakerValues,
 } from './configureBaker';
 
-export const title = 'Update baker pool';
+export const updateBakerPoolTitle = 'Update baker pool';
 
-export type Dependencies = NotOptional<ExchangeRate>;
+export type UpdateBakerPoolDependencies = NotOptional<ExchangeRate>;
 
 export type UpdateBakerPoolFlowState = MakeRequired<
     Pick<
@@ -27,7 +27,7 @@ export type UpdateBakerPoolFlowState = MakeRequired<
     'openForDelegation'
 >;
 
-export const getSanitizedValues = (
+export const getSanitizedBakerPoolValues = (
     values: ConfigureBakerFlowState,
     accountInfo: AccountInfo | undefined
 ) => {
@@ -35,7 +35,7 @@ export const getSanitizedValues = (
         return values;
     }
 
-    const existing = getExistingValues(accountInfo) ?? {};
+    const existing = getExistingBakerValues(accountInfo) ?? {};
     const sanitized = { ...values };
 
     if (values.openForDelegation === OpenStatus.ClosedForAll) {
@@ -51,15 +51,15 @@ export const getSanitizedValues = (
     return sanitized;
 };
 
-export const convertToTransaction = (
+export const convertToUpdateBakerPoolTransaction = (
     account: Account,
     nonce: bigint,
     exchangeRate: Fraction,
     accountInfo: AccountInfo
-) => (values: ConfigureBakerFlowState): ConfigureBaker => {
-    const sanitized = getSanitizedValues(values, accountInfo);
+) => (values: UpdateBakerPoolFlowState): ConfigureBaker => {
+    const sanitized = getSanitizedBakerPoolValues(values, accountInfo);
 
-    return baseConvertToTransaction(
+    return convertToBakerTransaction(
         account,
         nonce,
         exchangeRate,

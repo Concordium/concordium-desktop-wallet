@@ -13,13 +13,13 @@ import { ensureProps } from '~/utils/componentHelpers';
 import { isDefined } from '~/utils/basicHelpers';
 import { accountsInfoSelector } from '~/features/AccountSlice';
 import {
-    Dependencies,
+    RemoveBakerDependencies,
     RemoveBakerFlowState,
-    convertToTransaction,
-    title,
+    convertToRemoveBakerTransaction,
+    removeBakerTitle,
 } from '~/utils/transactionFlows/removeBaker';
 import RemoveBakerPage from '~/components/Transfers/configureBaker/RemoveBakerPage';
-import { getEstimatedFee } from '~/utils/transactionFlows/configureBaker';
+import { getEstimatedConfigureBakerFee } from '~/utils/transactionFlows/configureBaker';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
@@ -30,7 +30,7 @@ interface DisplayProps extends Partial<RequiredValues & RemoveBakerFlowState> {
 const DisplayValues = ({ account, exchangeRate }: DisplayProps) => {
     const estimatedFee =
         account !== undefined
-            ? getEstimatedFee(
+            ? getEstimatedConfigureBakerFee(
                   { stake: { stake: '0' } },
                   exchangeRate,
                   account.signatureThreshold
@@ -47,7 +47,7 @@ const DisplayValues = ({ account, exchangeRate }: DisplayProps) => {
     );
 };
 
-type Props = Dependencies;
+type Props = RemoveBakerDependencies;
 type UnsafeProps = Partial<Props>;
 
 const hasNecessaryProps = (props: UnsafeProps): props is Props =>
@@ -58,7 +58,7 @@ const withDeps = (component: ComponentType<Props>) =>
         ensureProps(
             component,
             hasNecessaryProps,
-            <MultiSigAccountTransactionFlowLoading title={title} />
+            <MultiSigAccountTransactionFlowLoading title={removeBakerTitle} />
         )
     );
 
@@ -68,13 +68,13 @@ export default withDeps(function RemoveBaker({ exchangeRate }: Props) {
 
     const convert = useCallback(
         ({ account }: RequiredValues & RemoveBakerFlowState, nonce: bigint) =>
-            convertToTransaction(account, nonce, exchangeRate)(),
+            convertToRemoveBakerTransaction(account, nonce, exchangeRate)(),
         [exchangeRate]
     );
 
     return (
         <MultiSigAccountTransactionFlow<RemoveBakerFlowState, ConfigureBaker>
-            title={title}
+            title={removeBakerTitle}
             convert={convert}
             preview={DisplayValues}
         >

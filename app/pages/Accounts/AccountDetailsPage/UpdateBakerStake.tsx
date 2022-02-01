@@ -15,17 +15,19 @@ import AccountTransactionFlow, {
 } from '../AccountTransactionFlow';
 import { ensureProps } from '~/utils/componentHelpers';
 import {
-    convertToTransaction,
-    Dependencies,
+    convertToBakerTransaction,
+    ConfigureBakerFlowDependencies,
 } from '~/utils/transactionFlows/configureBaker';
 import UpdateBakerStakePage from '~/components/Transfers/configureBaker/UpdateBakerStakePage';
 import routes from '~/constants/routes.json';
 import {
-    title,
+    updateBakerStakeTitle,
     UpdateBakerStakeFlowState,
 } from '~/utils/transactionFlows/updateBakerStake';
 
-interface Props extends Dependencies, NotOptional<AccountAndNonce> {
+interface Props
+    extends ConfigureBakerFlowDependencies,
+        NotOptional<AccountAndNonce> {
     accountInfo: AccountInfo;
 }
 type UnsafeProps = MakeRequired<Partial<Props>, 'account' | 'accountInfo'>;
@@ -43,7 +45,9 @@ const withDeps = (component: ComponentType<Props>) =>
                 ensureProps(
                     component,
                     hasNecessaryProps,
-                    <AccountTransactionFlowLoading title={title} />
+                    <AccountTransactionFlowLoading
+                        title={updateBakerStakeTitle}
+                    />
                 )
             )
         )
@@ -54,7 +58,7 @@ export default withDeps(function UpdateBakerStake(props: Props) {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const convert = useCallback(
-        convertToTransaction(account, nonce, exchangeRate, accountInfo),
+        convertToBakerTransaction(account, nonce, exchangeRate, accountInfo),
         [account, nonce, exchangeRate, accountInfo]
     );
 
@@ -63,7 +67,7 @@ export default withDeps(function UpdateBakerStake(props: Props) {
             UpdateBakerStakeFlowState,
             ConfigureBakerTransaction
         >
-            title={title}
+            title={updateBakerStakeTitle}
             convert={convert}
             multisigRoute={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_STAKE}
         >

@@ -5,7 +5,7 @@ import Form from '~/components/Form';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
 import { accountInfoSelector } from '~/features/AccountSlice';
 import {
-    getExistingValues,
+    getExistingBakerValues,
     MetadataUrl,
 } from '~/utils/transactionFlows/configureBaker';
 import { Account, EqualRecord } from '~/utils/types';
@@ -37,7 +37,7 @@ const MetadataUrlPage = ({
     account,
 }: MetadataUrlPageProps) => {
     const accountInfo = useSelector(accountInfoSelector(account));
-    const { metadataUrl: existing } = getExistingValues(accountInfo) ?? {};
+    const { metadataUrl: existing } = getExistingBakerValues(accountInfo) ?? {};
 
     return (
         <Form<MetadataUrlPageForm>

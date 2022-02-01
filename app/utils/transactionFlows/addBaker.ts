@@ -19,8 +19,8 @@ import {
 import {
     Commissions,
     ConfigureBakerFlowState,
-    toPayload,
-    convertToTransaction as baseConvertToTransaction,
+    toConfigureBakerPayload,
+    convertToBakerTransaction,
 } from './configureBaker';
 
 export type AddBakerFlowState = MakeRequired<
@@ -33,9 +33,9 @@ export type AddBakerPayload = MakeOptional<
     'metadataUrl'
 >;
 
-export const title = 'Add baker';
+export const addBakerTitle = 'Add baker';
 
-export const getSanitizedValues = (
+export const getSanitizedAddBakerValues = (
     values: Partial<AddBakerFlowState>,
     defaultCommissions: Commissions
 ) => {
@@ -54,18 +54,18 @@ export const getSanitizedValues = (
     return sanitized;
 };
 
-export const convertToTransaction = (
+export const convertToAddBakerTransaction = (
     defaultCommissions: Commissions,
     account: Account,
     nonce: bigint,
     exchangeRate: Fraction
 ) => (values: AddBakerFlowState): ConfigureBaker => {
-    const sanitized = getSanitizedValues(values, defaultCommissions);
+    const sanitized = getSanitizedAddBakerValues(values, defaultCommissions);
 
-    return baseConvertToTransaction(account, nonce, exchangeRate)(sanitized);
+    return convertToBakerTransaction(account, nonce, exchangeRate)(sanitized);
 };
 
-export function getEstimatedFee(
+export function getEstimatedAddBakerFee(
     exchangeRate: Fraction,
     values?: ConfigureBakerFlowState,
     signatureThreshold = 1
@@ -75,7 +75,7 @@ export function getEstimatedFee(
             ? undefined
             : serializeTransferPayload(
                   TransactionKindId.Configure_baker,
-                  toPayload(values)
+                  toConfigureBakerPayload(values)
               ).length;
 
     return getConfigureBakerFullCost(
@@ -86,7 +86,7 @@ export function getEstimatedFee(
 }
 
 // As the payload of the transaction can vary a lot in size, we need to revalidate with all values, to check if account still has enough funds for the transaction.
-export const validateValues = (
+export const validateAddBakerValues = (
     blockSummary: BlockSummary,
     account: Account,
     accountInfo: AccountInfo,
@@ -95,7 +95,7 @@ export const validateValues = (
     const minimumStake = BigInt(
         blockSummary.updates.chainParameters.minimumThresholdForBaking
     );
-    const estimatedFee = getEstimatedFee(
+    const estimatedFee = getEstimatedAddBakerFee(
         exchangeRate,
         values,
         account.signatureThreshold

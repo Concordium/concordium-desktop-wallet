@@ -14,15 +14,15 @@ import AccountTransactionFlow, {
 } from '../AccountTransactionFlow';
 import { ensureProps } from '~/utils/componentHelpers';
 import {
-    title,
-    convertToTransaction,
+    removeBakerTitle,
+    convertToRemoveBakerTransaction,
     RemoveBakerFlowState,
-    Dependencies,
+    RemoveBakerDependencies,
 } from '~/utils/transactionFlows/removeBaker';
 import routes from '~/constants/routes.json';
 import RemoveBakerPage from '~/components/Transfers/configureBaker/RemoveBakerPage';
 
-interface Props extends Dependencies, NotOptional<AccountAndNonce> {
+interface Props extends RemoveBakerDependencies, NotOptional<AccountAndNonce> {
     accountInfo: AccountInfo;
 }
 
@@ -38,7 +38,7 @@ const withDeps = (component: ComponentType<Props>) =>
             ensureProps(
                 component,
                 hasNecessaryProps,
-                <AccountTransactionFlowLoading title={title} />
+                <AccountTransactionFlowLoading title={removeBakerTitle} />
             )
         )
     );
@@ -48,13 +48,13 @@ export default withDeps(function AddBaker(props: Props) {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const convert = useCallback(
-        convertToTransaction(account, nonce, exchangeRate),
+        convertToRemoveBakerTransaction(account, nonce, exchangeRate),
         [account, nonce, exchangeRate]
     );
 
     return (
         <AccountTransactionFlow<RemoveBakerFlowState, ConfigureBakerTransaction>
-            title={title}
+            title={removeBakerTitle}
             convert={convert}
             multisigRoute={routes.MULTISIGTRANSACTIONS_REMOVE_BAKER}
         >
