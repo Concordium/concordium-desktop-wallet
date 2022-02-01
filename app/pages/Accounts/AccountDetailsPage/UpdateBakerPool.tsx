@@ -1,16 +1,10 @@
 /* eslint-disable react/display-name */
 import React, { ComponentType, useCallback } from 'react';
-import { connect, useSelector } from 'react-redux';
 import withExchangeRate from '~/components/Transfers/withExchangeRate';
 import withNonce, { AccountAndNonce } from '~/components/Transfers/withNonce';
-import {
-    accountInfoSelector,
-    chosenAccountSelector,
-} from '~/features/AccountSlice';
-import { RootState } from '~/store/store';
 import { isDefined } from '~/utils/basicHelpers';
 import {
-    Account,
+    AccountInfo,
     ConfigureBaker as ConfigureBakerTransaction,
     MakeRequired,
     NotOptional,
@@ -31,31 +25,28 @@ import DelegationStatusPage from '~/components/Transfers/configureBaker/Delegati
 import CommissionsPage from '~/components/Transfers/configureBaker/CommissionsPage';
 import MetadataUrlPage from '~/components/Transfers/configureBaker/MetadataUrlPage';
 
-type Props = Dependencies & NotOptional<AccountAndNonce>;
-type UnsafeProps = MakeRequired<Partial<Props>, 'account'>;
+interface Props extends Dependencies, NotOptional<AccountAndNonce> {
+    accountInfo: AccountInfo;
+}
+type UnsafeProps = MakeRequired<Partial<Props>, 'account' | 'accountInfo'>;
 
 const hasNecessaryProps = (props: UnsafeProps): props is Props => {
     return [props.exchangeRate, props.nonce].every(isDefined);
 };
 
 const withDeps = (component: ComponentType<Props>) =>
-    connect((s: RootState) => ({
-        account: chosenAccountSelector(s) as Account,
-    }))(
-        withNonce(
-            withExchangeRate(
-                ensureProps(
-                    component,
-                    hasNecessaryProps,
-                    <AccountTransactionFlowLoading title={title} />
-                )
+    withNonce(
+        withExchangeRate(
+            ensureProps(
+                component,
+                hasNecessaryProps,
+                <AccountTransactionFlowLoading title={title} />
             )
         )
     );
 
 export default withDeps(function UpdateBakerPool(props: Props) {
-    const { nonce, account, exchangeRate } = props;
-    const accountInfo = useSelector(accountInfoSelector(account));
+    const { nonce, account, exchangeRate, accountInfo } = props;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const convert = useCallback(

@@ -99,13 +99,6 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     </ButtonNavLink>
                     <ButtonNavLink
                         className="mB20:notLast flex width100"
-                        to={routes.ACCOUNTS_UPDATE_BAKER_KEYS}
-                        disabled={!accountInfo}
-                    >
-                        Update baker keys
-                    </ButtonNavLink>
-                    <ButtonNavLink
-                        className="mB20:notLast flex width100"
                         to={routes.ACCOUNTS_UPDATE_BAKER_STAKE}
                         disabled={!accountInfo}
                     >
@@ -117,6 +110,13 @@ export default function MoreActions({ account, accountInfo }: Props) {
                         disabled={!accountInfo}
                     >
                         Update baker pool
+                    </ButtonNavLink>
+                    <ButtonNavLink
+                        className="mB20:notLast flex width100"
+                        to={routes.ACCOUNTS_UPDATE_BAKER_KEYS}
+                        disabled={!accountInfo}
+                    >
+                        Update baker keys
                     </ButtonNavLink>
                     {/* <ButtonNavLink
                         className="mB20:notLast flex width100"

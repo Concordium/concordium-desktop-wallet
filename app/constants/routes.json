@@ -74,6 +74,7 @@
     "MULTISIGTRANSACTIONS_REMOVE_BAKER": "/multi-signature-transaction/account-transaction/remove-baker",
     "MULTISIGTRANSACTIONS_UPDATE_BAKER_STAKE": "/multi-signature-transaction/account-transaction/update-baker-stake",
     "MULTISIGTRANSACTIONS_UPDATE_BAKER_POOL": "/multi-signature-transaction/account-transaction/update-baker-pool",
+    "MULTISIGTRANSACTIONS_UPDATE_BAKER_KEYS": "/multi-signature-transaction/account-transaction/update-baker-keys",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION": "/multi-signature-transaction/account-transaction/:transactionKind",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT": "/multi-signature-transaction/account-transaction/:transactionKind/pick_amount",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT": "/multi-signature-transaction/account-transaction/:transactionKind/pick_recipient",

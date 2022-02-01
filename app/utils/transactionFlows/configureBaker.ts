@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { AccountInfo } from '@concordium/node-sdk';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
-import { AccountAndNonce } from '~/components/Transfers/withNonce';
 import { isDefined, multiplyFraction } from '../basicHelpers';
 import { microGtuToGtu, toMicroUnits } from '../gtu';
 import { BakerKeys } from '../rustInterface';
@@ -21,9 +20,7 @@ import {
 } from '../types';
 import { ChainData } from '../withChainData';
 
-export type Dependencies = NotOptional<
-    ChainData & ExchangeRate & AccountAndNonce
->;
+export type Dependencies = NotOptional<ChainData & ExchangeRate>;
 
 export interface StakeSettings {
     stake: string;

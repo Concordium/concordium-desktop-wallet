@@ -10,13 +10,15 @@ import {
     getEstimatedFee,
     AddBakerFlowState,
 } from '~/utils/transactionFlows/addBaker';
+import { Account } from '~/utils/types';
 
 import styles from './ConfigureBakerPage.module.scss';
 
 interface Props
     extends MultiStepFormPageProps<StakeSettings, AddBakerFlowState>,
-        Pick<Dependencies, 'blockSummary' | 'exchangeRate' | 'account'> {
+        Pick<Dependencies, 'blockSummary' | 'exchangeRate'> {
     isMultiSig?: boolean;
+    account: Account;
 }
 
 export default function AddBakerStakePage({

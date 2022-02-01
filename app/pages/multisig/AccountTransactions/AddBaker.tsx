@@ -125,7 +125,7 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
 
 const toRoot = <Redirect to={routes.MULTISIGTRANSACTIONS_ADD_BAKER} />;
 
-type Props = Omit<Dependencies, 'account' | 'nonce'>;
+type Props = Dependencies;
 type UnsafeProps = Partial<Props>;
 
 const hasNecessaryProps = (props: UnsafeProps): props is Props =>

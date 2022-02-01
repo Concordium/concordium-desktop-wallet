@@ -1,14 +1,13 @@
 import React from 'react';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
 import { BakerKeys } from '~/utils/rustInterface';
-import { Dependencies } from '~/utils/transactionFlows/configureBaker';
+import { Account } from '~/utils/types';
 import GenerateBakerKeys from './GenerateBakerKeys';
 
-type GenerateKeysPageProps = Omit<
-    MultiStepFormPageProps<BakerKeys>,
-    'formValues'
-> &
-    Pick<Dependencies, 'account'>;
+interface GenerateKeysPageProps
+    extends Omit<MultiStepFormPageProps<BakerKeys>, 'formValues'> {
+    account: Account;
+}
 
 const KeysPage = ({ onNext, initial, account }: GenerateKeysPageProps) => (
     <GenerateBakerKeys

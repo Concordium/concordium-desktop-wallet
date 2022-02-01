@@ -9,7 +9,7 @@ import {
     displayPoolOpen,
     getExistingValues,
 } from '~/utils/transactionFlows/configureBaker';
-import { Account, AccountInfo, OpenStatus } from '~/utils/types';
+import { Account, OpenStatus } from '~/utils/types';
 
 import styles from './ConfigureBakerPage.module.scss';
 
@@ -24,7 +24,7 @@ export default function DelegationStatusPage({
     account,
 }: DelegationStatusPageProps) {
     const [value, setValue] = useState(initial);
-    const accountInfo: AccountInfo = useSelector(accountInfoSelector(account));
+    const accountInfo = useSelector(accountInfoSelector(account));
 
     const { openForDelegation: existing } =
         getExistingValues(accountInfo) ?? {};

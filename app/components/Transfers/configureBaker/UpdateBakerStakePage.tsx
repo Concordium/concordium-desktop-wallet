@@ -11,13 +11,15 @@ import {
     getExistingValues,
 } from '~/utils/transactionFlows/configureBaker';
 import { UpdateBakerStakeFlowState } from '~/utils/transactionFlows/updateBakerStake';
+import { Account } from '~/utils/types';
 
 import styles from './ConfigureBakerPage.module.scss';
 
 interface Props
     extends MultiStepFormPageProps<StakeSettings, UpdateBakerStakeFlowState>,
-        Pick<Dependencies, 'blockSummary' | 'exchangeRate' | 'account'> {
+        Pick<Dependencies, 'blockSummary' | 'exchangeRate'> {
     isMultiSig?: boolean;
+    account: Account;
 }
 
 export default function UpdateBakerStakePage({

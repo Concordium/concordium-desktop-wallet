@@ -4,7 +4,6 @@ import withExchangeRate from '~/components/Transfers/withExchangeRate';
 import withNonce, { AccountAndNonce } from '~/components/Transfers/withNonce';
 import { isDefined } from '~/utils/basicHelpers';
 import {
-    AccountInfo,
     ConfigureBaker as ConfigureBakerTransaction,
     MakeRequired,
     NotOptional,
@@ -13,20 +12,17 @@ import AccountTransactionFlow, {
     AccountTransactionFlowLoading,
 } from '../AccountTransactionFlow';
 import { ensureProps } from '~/utils/componentHelpers';
-import {
-    title,
-    convertToTransaction,
-    RemoveBakerFlowState,
-    Dependencies,
-} from '~/utils/transactionFlows/removeBaker';
+import { convertToTransaction } from '~/utils/transactionFlows/configureBaker';
 import routes from '~/constants/routes.json';
-import RemoveBakerPage from '~/components/Transfers/configureBaker/RemoveBakerPage';
+import {
+    Dependencies,
+    title,
+    UpdateBakerKeysFlowState,
+} from '~/utils/transactionFlows/updateBakerKeys';
+import KeysPage from '~/components/Transfers/configureBaker/KeysPage';
 
-interface Props extends Dependencies, NotOptional<AccountAndNonce> {
-    accountInfo: AccountInfo;
-}
-
-type UnsafeProps = MakeRequired<Partial<Props>, 'account' | 'accountInfo'>;
+type Props = Dependencies & NotOptional<AccountAndNonce>;
+type UnsafeProps = MakeRequired<Partial<Props>, 'account'>;
 
 const hasNecessaryProps = (props: UnsafeProps): props is Props => {
     return [props.exchangeRate, props.nonce].every(isDefined);
@@ -43,8 +39,8 @@ const withDeps = (component: ComponentType<Props>) =>
         )
     );
 
-export default withDeps(function AddBaker(props: Props) {
-    const { nonce, account, exchangeRate, accountInfo } = props;
+export default withDeps(function UpdateBakerKeys(props: Props) {
+    const { nonce, account, exchangeRate } = props;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const convert = useCallback(
@@ -53,19 +49,24 @@ export default withDeps(function AddBaker(props: Props) {
     );
 
     return (
-        <AccountTransactionFlow<RemoveBakerFlowState, ConfigureBakerTransaction>
+        <AccountTransactionFlow<
+            UpdateBakerKeysFlowState,
+            ConfigureBakerTransaction
+        >
             title={title}
             convert={convert}
-            multisigRoute={routes.MULTISIGTRANSACTIONS_REMOVE_BAKER}
+            multisigRoute={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_KEYS}
         >
             {{
-                confirm: {
-                    render: (_, onNext) => (
-                        <RemoveBakerPage
+                keys: {
+                    render: (initial, onNext) => (
+                        <KeysPage
+                            account={account}
+                            initial={initial}
                             onNext={onNext}
-                            accountInfo={accountInfo}
                         />
                     ),
+                    title: 'Generated keys',
                 },
             }}
         </AccountTransactionFlow>

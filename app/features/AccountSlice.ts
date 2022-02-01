@@ -218,7 +218,9 @@ export const chosenAccountInfoSelector = (
         ]
     );
 
-export const accountInfoSelector = (account?: Account) => (state: RootState) =>
+export const accountInfoSelector = (account?: Account) => (
+    state: RootState
+): AccountInfo | undefined =>
     parse(state.accounts.accountsInfo?.[account?.address ?? '']);
 
 export const defaultAccountSelector = (state: RootState) =>

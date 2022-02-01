@@ -26,7 +26,7 @@ import DecryptComponent from '../DecryptComponent';
 import withAccountSync from '../withAccountSync';
 // import AddBaker from './OldBakerFlows/AddBaker';
 // import RemoveBaker from './OldBakerFlows/RemoveBaker';
-import UpdateBakerKeys from './OldBakerFlows/UpdateBakerKeys';
+// import UpdateBakerKeys from './OldBakerFlows/UpdateBakerKeys';
 // import UpdateBakerStake from './OldBakerFlows/UpdateBakerStake';
 // import UpdateBakerRestake from './OldBakerFlows/UpdateBakerRestake';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
@@ -35,6 +35,7 @@ import AddBaker from './AddBaker';
 import RemoveBaker from './RemoveBaker';
 import UpdateBakerStake from './UpdateBakerStake';
 import UpdateBakerPool from './UpdateBakerPool';
+import UpdateBakerKeys from './UpdateBakerKeys';
 
 const { Master, Detail } = MasterDetailPageLayout;
 const ToAccounts = () => <Redirect to={routes.ACCOUNTS} />;
@@ -109,26 +110,30 @@ export default withAccountSync(function DetailsPage() {
                         path={routes.ACCOUNTS_ADD_BAKER}
                         // render={({ location }) =>
                         render={() =>
-                            canTransfer && !isBaker ? (
+                            canTransfer &&
+                            !isBaker &&
+                            accountInfo !== undefined ? (
                                 // <AddBaker
                                 //     location={
                                 //         location as LocationDescriptorObject<AddBakerForm>
                                 //     }
                                 //     account={account}
                                 // />
-                                <AddBaker />
+                                <AddBaker
+                                    account={account}
+                                    accountInfo={accountInfo}
+                                />
                             ) : (
                                 <ToAccounts />
                             )
                         }
                     />
                     <Route path={routes.ACCOUNTS_REMOVE_BAKER}>
-                        {canTransfer && isBaker ? (
-                            // <RemoveBaker
-                            //     account={account}
-                            //     accountInfo={accountInfo}
-                            // />
-                            <RemoveBaker />
+                        {canTransfer && isBaker && accountInfo !== undefined ? (
+                            <RemoveBaker
+                                account={account}
+                                accountInfo={accountInfo}
+                            />
                         ) : (
                             <ToAccounts />
                         )}
@@ -141,19 +146,21 @@ export default withAccountSync(function DetailsPage() {
                         )}
                     </Route>
                     <Route path={routes.ACCOUNTS_UPDATE_BAKER_STAKE}>
-                        {canTransfer && isBaker ? (
-                            // <UpdateBakerStake
-                            //     account={account}
-                            //     accountInfo={accountInfo}
-                            // />
-                            <UpdateBakerStake />
+                        {canTransfer && isBaker && accountInfo !== undefined ? (
+                            <UpdateBakerStake
+                                account={account}
+                                accountInfo={accountInfo}
+                            />
                         ) : (
                             <ToAccounts />
                         )}
                     </Route>
                     <Route path={routes.ACCOUNTS_UPDATE_BAKER_POOL}>
-                        {canTransfer && isBaker ? (
-                            <UpdateBakerPool />
+                        {canTransfer && isBaker && accountInfo !== undefined ? (
+                            <UpdateBakerPool
+                                account={account}
+                                accountInfo={accountInfo}
+                            />
                         ) : (
                             <ToAccounts />
                         )}

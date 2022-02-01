@@ -47,7 +47,7 @@ const DisplayValues = ({ account, exchangeRate }: DisplayProps) => {
     );
 };
 
-type Props = Omit<Dependencies, 'account' | 'nonce'>;
+type Props = Dependencies;
 type UnsafeProps = Partial<Props>;
 
 const hasNecessaryProps = (props: UnsafeProps): props is Props =>
