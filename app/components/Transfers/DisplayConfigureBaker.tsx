@@ -1,6 +1,5 @@
 import React from 'react';
 import { useRouteMatch } from 'react-router';
-import clsx from 'clsx';
 import { ConfigureBaker } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
 import DisplayFee from '~/components/DisplayFee';
@@ -10,13 +9,14 @@ import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import routes from '~/constants/routes.json';
 import DisplayAccount from './DisplayAccount';
 import DisplayPublicKey from './DisplayPublicKey';
-
-import styles from './transferDetails.module.scss';
 import {
     displayPoolOpen,
     displayRestakeEarnings,
 } from '~/utils/transactionFlows/configureBaker';
 import DisplayBakerCommission from './DisplayBakerCommission';
+
+import styles from './transferDetails.module.scss';
+import DisplayMetadataUrl from './DisplayMetadataUrl';
 
 interface Props {
     transaction: ConfigureBaker;
@@ -75,18 +75,7 @@ export default function DisplayConfigureBaker({ transaction }: Props) {
                 title="Finalization reward commission"
                 value={transaction.payload.finalizationRewardCommission}
             />
-            {payload.metadataUrl !== undefined && (
-                <>
-                    <h5 className={styles.title}>Metadata URL:</h5>
-                    {payload.metadataUrl === '' ? (
-                        <p className={clsx(styles.amount, 'textFaded')}>
-                            Deleted
-                        </p>
-                    ) : (
-                        <p className={styles.amount}>{payload.metadataUrl}</p>
-                    )}
-                </>
-            )}
+            <DisplayMetadataUrl metadataUrl={payload.metadataUrl} />
             <DisplayPublicKey
                 name="Election verify key:"
                 publicKey={payload?.electionVerifyKey?.[0]}

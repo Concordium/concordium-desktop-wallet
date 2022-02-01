@@ -5,13 +5,13 @@ import styles from './transferDetails.module.scss';
 export type Props = {
     name: string;
     publicKey: string | undefined;
-    placeholder?: string;
+    placeholder?: boolean;
 };
 
 export default function DisplayPublicKey({
     name,
     publicKey,
-    placeholder,
+    placeholder = false,
 }: Props) {
     if (!publicKey && !placeholder) {
         return null;
@@ -21,7 +21,7 @@ export default function DisplayPublicKey({
         <>
             <h5 className={styles.title}>{name}</h5>
             {!publicKey && placeholder && (
-                <span className="textFaded">{placeholder}</span>
+                <span className="textFaded">To be determined</span>
             )}
             {publicKey && (
                 <div className={styles.address}>

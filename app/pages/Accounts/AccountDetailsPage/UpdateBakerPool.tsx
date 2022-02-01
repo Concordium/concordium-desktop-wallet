@@ -2,7 +2,7 @@
 import React, { ComponentType, useCallback } from 'react';
 import { connect, useSelector } from 'react-redux';
 import withExchangeRate from '~/components/Transfers/withExchangeRate';
-import withNonce from '~/components/Transfers/withNonce';
+import withNonce, { AccountAndNonce } from '~/components/Transfers/withNonce';
 import {
     accountInfoSelector,
     chosenAccountSelector,
@@ -13,15 +13,16 @@ import {
     Account,
     ConfigureBaker as ConfigureBakerTransaction,
     MakeRequired,
+    NotOptional,
     OpenStatus,
 } from '~/utils/types';
 import AccountTransactionFlow, {
     AccountTransactionFlowLoading,
 } from '../AccountTransactionFlow';
 import { ensureProps } from '~/utils/componentHelpers';
-import { convertToTransaction } from '~/utils/transactionFlows/configureBaker';
 import routes from '~/constants/routes.json';
 import {
+    convertToTransaction,
     Dependencies,
     title,
     UpdateBakerPoolFlowState,
@@ -30,7 +31,7 @@ import DelegationStatusPage from '~/components/Transfers/configureBaker/Delegati
 import CommissionsPage from '~/components/Transfers/configureBaker/CommissionsPage';
 import MetadataUrlPage from '~/components/Transfers/configureBaker/MetadataUrlPage';
 
-type Props = Dependencies;
+type Props = Dependencies & NotOptional<AccountAndNonce>;
 type UnsafeProps = MakeRequired<Partial<Props>, 'account'>;
 
 const hasNecessaryProps = (props: UnsafeProps): props is Props => {

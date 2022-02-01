@@ -13,6 +13,7 @@ import {
     AddBakerFlowState,
     convertToTransaction,
     getEstimatedFee,
+    getSanitizedValues,
     title,
     validateValues,
 } from '~/utils/transactionFlows/addBaker';
@@ -38,20 +39,12 @@ import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
 
-const PLACEHOLDER = 'To be determined';
-
 interface DisplayProps extends Partial<AddBakerFlowState & RequiredValues> {
     exchangeRate: Fraction;
 }
 
 const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
-    const withDefaults = { ...values };
-    const closed = values.openForDelegation === OpenStatus.ClosedForAll;
-
-    if (closed) {
-        withDefaults.commissions = getDefaultCommissions();
-        delete withDefaults.metadataUrl;
-    }
+    const sanitized = getSanitizedValues(values, getDefaultCommissions());
 
     const {
         stake,
@@ -59,13 +52,13 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
         commissions,
         metadataUrl,
         keys,
-    } = withDefaults;
+    } = sanitized;
 
     const estimatedFee =
         account !== undefined
             ? getEstimatedFee(
                   exchangeRate,
-                  withDefaults,
+                  sanitized,
                   account.signatureThreshold
               )
             : undefined;
@@ -96,17 +89,17 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
             <DisplayBakerCommission
                 title="Transaction fee commission"
                 value={commissions?.transactionFeeCommission}
-                placeholder={PLACEHOLDER}
+                placeholder
             />
             <DisplayBakerCommission
                 title="Baking reward commission"
                 value={commissions?.bakingRewardCommission}
-                placeholder={PLACEHOLDER}
+                placeholder
             />
             <DisplayBakerCommission
                 title="Finalization reward commission"
                 value={commissions?.finalizationRewardCommission}
-                placeholder={PLACEHOLDER}
+                placeholder
             />
             {metadataUrl && (
                 <PlainDetail title="Metadata URL" value={metadataUrl} />
@@ -114,17 +107,17 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
             <DisplayPublicKey
                 name="Election verify key:"
                 publicKey={keys?.electionPublic}
-                placeholder={PLACEHOLDER}
+                placeholder
             />
             <DisplayPublicKey
                 name="Signature verify key:"
                 publicKey={keys?.signaturePublic}
-                placeholder={PLACEHOLDER}
+                placeholder
             />
             <DisplayPublicKey
                 name="Aggregation verify key:"
                 publicKey={keys?.aggregationPublic}
-                placeholder={PLACEHOLDER}
+                placeholder
             />
         </>
     );
@@ -206,7 +199,7 @@ export default withDeps(function AddBaker({
                                 isMultiSig
                             />
                         ) : (
-                            <>{toRoot}</>
+                            toRoot
                         ),
                 },
                 openForDelegation: {
@@ -219,11 +212,11 @@ export default withDeps(function AddBaker({
                                 account={account}
                             />
                         ) : (
-                            <>{toRoot}</>
+                            toRoot
                         ),
                 },
                 commissions:
-                    openForDelegation === OpenStatus.OpenForAll
+                    openForDelegation !== OpenStatus.ClosedForAll
                         ? {
                               title: 'Pool settings',
                               render: (initial, onNext) =>
@@ -234,12 +227,12 @@ export default withDeps(function AddBaker({
                                           account={account}
                                       />
                                   ) : (
-                                      <>{toRoot}</>
+                                      toRoot
                                   ),
                           }
                         : undefined,
                 metadataUrl:
-                    openForDelegation === OpenStatus.OpenForAll
+                    openForDelegation !== OpenStatus.ClosedForAll
                         ? {
                               title: 'Pool settings',
                               render: (initial, onNext) =>
@@ -250,7 +243,7 @@ export default withDeps(function AddBaker({
                                           account={account}
                                       />
                                   ) : (
-                                      <>{toRoot}</>
+                                      toRoot
                                   ),
                           }
                         : undefined,

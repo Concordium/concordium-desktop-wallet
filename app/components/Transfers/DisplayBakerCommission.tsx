@@ -8,18 +8,18 @@ import styles from './transferDetails.module.scss';
 interface Props {
     title: string;
     value?: number;
-    placeholder?: string;
+    placeholder?: boolean;
 }
 
 const formatCommission = toFixed(3);
 
-const DisplayBakerCommission = ({ title, value, placeholder }: Props) =>
+const DisplayBakerCommission = ({ title, value, placeholder = false }: Props) =>
     isDefined(value) || placeholder ? (
         <>
             <h5 className={styles.title}>{title}:</h5>
             <p className={styles.amount}>
                 {!value && placeholder && (
-                    <span className="textFaded">{placeholder}</span>
+                    <span className="textFaded">To be determined</span>
                 )}
                 {isDefined(value) && (
                     <>

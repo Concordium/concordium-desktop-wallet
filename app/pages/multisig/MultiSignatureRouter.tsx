@@ -11,6 +11,7 @@ import CreateAccountTransactionView from './AccountTransactions/CreateAccountTra
 import AddBaker from './AccountTransactions/AddBaker';
 import RemoveBaker from './AccountTransactions/RemoveBaker';
 import UpdateBakerStake from './AccountTransactions/UpdateBakerStake';
+import UpdateBakerPool from './AccountTransactions/UpdateBakerPool';
 
 export default function MultiSignatureRoutes(): JSX.Element {
     return (
@@ -30,6 +31,10 @@ export default function MultiSignatureRoutes(): JSX.Element {
             <Route
                 path={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_STAKE}
                 component={UpdateBakerStake}
+            />
+            <Route
+                path={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_POOL}
+                component={UpdateBakerPool}
             />
             <Route
                 path={routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION}

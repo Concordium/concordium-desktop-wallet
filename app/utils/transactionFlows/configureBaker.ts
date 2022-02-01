@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AccountInfo } from '@concordium/node-sdk';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { AccountAndNonce } from '~/components/Transfers/withNonce';
-import { multiplyFraction } from '../basicHelpers';
+import { isDefined, multiplyFraction } from '../basicHelpers';
 import { microGtuToGtu, toMicroUnits } from '../gtu';
 import { BakerKeys } from '../rustInterface';
 import { getConfigureBakerCost } from '../transactionCosts';
@@ -82,9 +83,9 @@ export const toPayload = ({
     ...commissions,
 });
 
-export const getExistingValues = ({
-    accountBaker,
-}: AccountInfo): Omit<ConfigureBakerFlowState, 'keys'> | undefined => {
+export const getExistingValues = (
+    { accountBaker }: AccountInfo = {} as AccountInfo
+): Omit<ConfigureBakerFlowState, 'keys'> | undefined => {
     if (accountBaker === undefined) {
         return undefined;
     }
@@ -95,28 +96,53 @@ export const getExistingValues = ({
             restake: accountBaker.restakeEarnings,
         },
         // TODO get proper existing values
-        openForDelegation: accountBaker.openPool ?? OpenStatus.OpenForAll,
-        metadataUrl: accountBaker.metadataUrl ?? 'http://test.com',
+        openForDelegation:
+            (accountBaker as any).openPool ?? OpenStatus.OpenForAll,
+        metadataUrl: (accountBaker as any).metadataUrl ?? 'http://test.com',
         commissions: {
             transactionFeeCommission:
-                accountBaker.transactionFeeCommission ?? 15000,
+                (accountBaker as any).transactionFeeCommission ?? 15000,
             bakingRewardCommission:
-                accountBaker.bakingRewardCommission ?? 15000,
+                (accountBaker as any).bakingRewardCommission ?? 15000,
             finalizationRewardCommission:
-                accountBaker.finalizationRewardCommission ?? 15000,
+                (accountBaker as any).finalizationRewardCommission ?? 15000,
         },
     };
 };
+
+const isAccountInfo = (
+    dyn: ConfigureBakerFlowState | AccountInfo
+): dyn is AccountInfo => (dyn as AccountInfo).accountIndex !== undefined;
 
 type ConfigureBakerFlowStateChanges = MakeRequired<
     DeepPartial<ConfigureBakerFlowState>,
     'stake' | 'commissions' | 'keys'
 >;
 
-export const getChanges = (
-    existingValues: ConfigureBakerFlowState,
-    newValues: ConfigureBakerFlowState
-): ConfigureBakerFlowStateChanges => {
+export function getChanges(
+    newValues: ConfigureBakerFlowState,
+    existingValues: ConfigureBakerFlowState
+): ConfigureBakerFlowStateChanges;
+export function getChanges(
+    newValues: ConfigureBakerFlowState,
+    accountInfo: AccountInfo | undefined
+): ConfigureBakerFlowStateChanges | undefined;
+export function getChanges(
+    newValues: ConfigureBakerFlowState,
+    dyn: (AccountInfo | undefined) | ConfigureBakerFlowState
+): ConfigureBakerFlowStateChanges | undefined {
+    let existingValues: ConfigureBakerFlowState;
+
+    if (!isDefined(dyn)) {
+        return undefined;
+    }
+
+    if (isAccountInfo(dyn)) {
+        existingValues = getExistingValues(dyn) ?? {};
+    } else {
+        existingValues = dyn;
+    }
+
     const changes: ConfigureBakerFlowStateChanges = {
         stake: {},
         commissions: {},
@@ -168,7 +194,7 @@ export const getChanges = (
     changes.keys = { ...newValues.keys };
 
     return changes;
-};
+}
 
 export const convertToTransaction = (
     account: Account,
@@ -179,7 +205,7 @@ export const convertToTransaction = (
     const existing =
         accountInfo !== undefined ? getExistingValues(accountInfo) : undefined;
     const payload = toPayload(
-        existing !== undefined ? getChanges(existing, values) : values
+        existing !== undefined ? getChanges(values, existing) : values
     );
 
     const transaction = createConfigureBakerTransaction(

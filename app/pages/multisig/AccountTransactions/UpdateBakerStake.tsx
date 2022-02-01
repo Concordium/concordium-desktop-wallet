@@ -2,7 +2,7 @@
 import React, { ComponentType, useCallback } from 'react';
 import { Redirect, useRouteMatch } from 'react-router';
 import { useSelector } from 'react-redux';
-import { ConfigureBaker, Fraction } from '~/utils/types';
+import { AccountInfo, ConfigureBaker, Fraction } from '~/utils/types';
 import MultiSigAccountTransactionFlow, {
     MultiSigAccountTransactionFlowLoading,
     RequiredValues,
@@ -15,6 +15,7 @@ import {
     convertToTransaction,
     Dependencies,
     displayRestakeEarnings,
+    getChanges,
     getEstimatedFee,
 } from '~/utils/transactionFlows/configureBaker';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
@@ -26,20 +27,23 @@ import withChainData from '~/utils/withChainData';
 import UpdateBakerStakePage from '~/components/Transfers/configureBaker/UpdateBakerStakePage';
 
 import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
-import { accountsInfoSelector } from '~/features/AccountSlice';
+import {
+    accountInfoSelector,
+    accountsInfoSelector,
+} from '~/features/AccountSlice';
 
 interface DisplayProps
     extends Partial<RequiredValues & UpdateBakerStakeFlowState> {
     exchangeRate: Fraction;
 }
-const DisplayValues = ({ account, exchangeRate, stake }: DisplayProps) => {
+const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
+    const accountInfo: AccountInfo | undefined = useSelector(
+        accountInfoSelector(account)
+    );
+    const { stake } = getChanges(values, accountInfo) ?? {};
     const estimatedFee =
         account !== undefined
-            ? getEstimatedFee(
-                  { stake },
-                  exchangeRate,
-                  account.signatureThreshold
-              )
+            ? getEstimatedFee(values, exchangeRate, account.signatureThreshold)
             : undefined;
     return (
         <>
@@ -47,10 +51,12 @@ const DisplayValues = ({ account, exchangeRate, stake }: DisplayProps) => {
                 className={displayTransferStyles.fee}
                 estimatedFee={estimatedFee}
             />
-            {stake?.stake !== undefined && (
+            {(values.stake?.stake !== undefined &&
+                stake?.stake === undefined) || (
                 <AmountDetail title="Staked amount" value={stake?.stake} />
             )}
-            {stake?.restake !== undefined && (
+            {(values.stake?.restake !== undefined &&
+                stake?.restake === undefined) || (
                 <PlainDetail
                     title="Restake earnings"
                     value={

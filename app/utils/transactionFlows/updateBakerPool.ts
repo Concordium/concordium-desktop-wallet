@@ -1,5 +1,5 @@
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
-import { AccountAndNonce } from '~/components/Transfers/withNonce';
+import { isDefined } from '../basicHelpers';
 import {
     Account,
     AccountInfo,
@@ -17,7 +17,7 @@ import {
 
 export const title = 'Update baker pool';
 
-export type Dependencies = NotOptional<ExchangeRate & AccountAndNonce>;
+export type Dependencies = NotOptional<ExchangeRate>;
 
 export type UpdateBakerPoolFlowState = MakeRequired<
     Pick<
@@ -27,18 +27,18 @@ export type UpdateBakerPoolFlowState = MakeRequired<
     'openForDelegation'
 >;
 
-export const convertToTransaction = (
-    account: Account,
-    nonce: bigint,
-    exchangeRate: Fraction,
-    accountInfo: AccountInfo
-) => (values: ConfigureBakerFlowState): ConfigureBaker => {
+export const getSanitizedValues = (
+    values: ConfigureBakerFlowState,
+    accountInfo: AccountInfo | undefined
+) => {
+    if (!isDefined(accountInfo)) {
+        return values;
+    }
+
     const existing = getExistingValues(accountInfo) ?? {};
     const sanitized = { ...values };
 
     if (values.openForDelegation === OpenStatus.ClosedForAll) {
-        // Ensure existing values are used if OpenStatus is closed.
-        // Ensure metadata Url can be deleted (leave as empty string to do this)
         sanitized.commissions = existing.commissions;
         sanitized.metadataUrl = existing.metadataUrl;
     } else if (
@@ -47,6 +47,17 @@ export const convertToTransaction = (
     ) {
         delete sanitized.metadataUrl;
     }
+
+    return sanitized;
+};
+
+export const convertToTransaction = (
+    account: Account,
+    nonce: bigint,
+    exchangeRate: Fraction,
+    accountInfo: AccountInfo
+) => (values: ConfigureBakerFlowState): ConfigureBaker => {
+    const sanitized = getSanitizedValues(values, accountInfo);
 
     return baseConvertToTransaction(
         account,

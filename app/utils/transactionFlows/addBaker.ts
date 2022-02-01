@@ -35,12 +35,10 @@ export type AddBakerPayload = MakeOptional<
 
 export const title = 'Add baker';
 
-export const convertToTransaction = (
-    defaultCommissions: Commissions,
-    account: Account,
-    nonce: bigint,
-    exchangeRate: Fraction
-) => (values: AddBakerFlowState): ConfigureBaker => {
+export const getSanitizedValues = (
+    values: Partial<AddBakerFlowState>,
+    defaultCommissions: Commissions
+) => {
     const sanitized = {
         ...values,
     };
@@ -53,7 +51,18 @@ export const convertToTransaction = (
         delete sanitized.metadataUrl;
     }
 
-    return baseConvertToTransaction(account, nonce, exchangeRate)(values);
+    return sanitized;
+};
+
+export const convertToTransaction = (
+    defaultCommissions: Commissions,
+    account: Account,
+    nonce: bigint,
+    exchangeRate: Fraction
+) => (values: AddBakerFlowState): ConfigureBaker => {
+    const sanitized = getSanitizedValues(values, defaultCommissions);
+
+    return baseConvertToTransaction(account, nonce, exchangeRate)(sanitized);
 };
 
 export function getEstimatedFee(
