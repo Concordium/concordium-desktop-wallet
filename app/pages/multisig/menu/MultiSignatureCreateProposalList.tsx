@@ -226,6 +226,14 @@ export default function MultiSignatureCreateProposalView() {
                                 >
                                     Update baker pool
                                 </ButtonNavLink>
+                                <ButtonNavLink
+                                    className={styles.link}
+                                    to={
+                                        routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_KEYS
+                                    }
+                                >
+                                    Update baker keys
+                                </ButtonNavLink>
                             </>
                         )}
                     </Fragment>
