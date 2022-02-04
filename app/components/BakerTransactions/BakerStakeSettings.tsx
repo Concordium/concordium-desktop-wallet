@@ -1,12 +1,16 @@
 import React from 'react';
 import clsx from 'clsx';
-import { useAccountInfo } from '~/utils/dataHooks';
+import {
+    useAccountInfo,
+    useCalcBakerStakeCooldownUntil,
+} from '~/utils/dataHooks';
 import { Account, ClassName, EqualRecord, Fraction } from '~/utils/types';
 import AccountCard from '../AccountCard';
 import PickBakerStakeAmount from '../PickBakerStakeAmount';
 import PickBakerRestake from '../PickBakerRestake';
 import Form from '../Form';
 import { StakeSettings } from '~/utils/transactionFlows/configureBaker';
+import { getFormattedDateString } from '~/utils/timeHelpers';
 
 const fieldNames: EqualRecord<StakeSettings> = {
     stake: 'stake',
@@ -21,6 +25,7 @@ interface Props extends ClassName {
     estimatedFee: Fraction;
     minimumStake: bigint;
     buttonClassName?: string;
+    showCooldown?: boolean;
     onSubmit(values: StakeSettings): void;
 }
 
@@ -34,8 +39,10 @@ export default function BakerStakeSettings({
     className,
     buttonClassName,
     onSubmit,
+    showCooldown = false,
 }: Props) {
     const accountInfo = useAccountInfo(account.address);
+    const cooldownUntil = useCalcBakerStakeCooldownUntil();
 
     return (
         <Form<StakeSettings>
@@ -43,11 +50,32 @@ export default function BakerStakeSettings({
             className={clsx('flexColumn flexChildFill', className)}
         >
             <div className="flexChildFill">
-                <p className="mT0">
-                    To add a baker you must choose an amount to stake on the
-                    account. The staked amount will be part of the balance, but
-                    while staked the amount is unavailable for transactions.
-                </p>
+                {showCooldown || (
+                    <p className="mT0">
+                        To add a baker you must choose an amount to stake on the
+                        account. The staked amount will be part of the balance,
+                        but while staked the amount is unavailable for
+                        transactions.
+                    </p>
+                )}
+                {showCooldown && (
+                    <p className="mT0">
+                        Enter your new desired amount to stake. If you raise the
+                        stake it will take effect after two epochs, and if you
+                        lower the stake it will take effect after the grace
+                        period.
+                        {cooldownUntil && (
+                            <>
+                                <br />
+                                <br />
+                                This grace period will last until
+                                <span className="block bodyEmphasized  mV10">
+                                    {getFormattedDateString(cooldownUntil)}
+                                </span>
+                            </>
+                        )}
+                    </p>
+                )}
                 {showAccountCard && (
                     <AccountCard account={account} accountInfo={accountInfo} />
                 )}

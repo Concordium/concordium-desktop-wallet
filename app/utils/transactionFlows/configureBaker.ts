@@ -95,16 +95,15 @@ export const getExistingBakerValues = (
             restake: accountBaker.restakeEarnings,
         },
         // TODO get proper existing values
-        openForDelegation:
-            (accountBaker as any).openPool ?? OpenStatus.OpenForAll,
-        metadataUrl: (accountBaker as any).metadataUrl ?? 'http://test.com',
+        openForDelegation: (accountBaker as any).bakerPoolInfo?.openStatus,
+        metadataUrl: (accountBaker as any).bakerPoolInfo?.metadataUrl,
         commissions: {
-            transactionFeeCommission:
-                (accountBaker as any).transactionFeeCommission ?? 15000,
-            bakingRewardCommission:
-                (accountBaker as any).bakingRewardCommission ?? 15000,
-            finalizationRewardCommission:
-                (accountBaker as any).finalizationRewardCommission ?? 15000,
+            transactionFeeCommission: (accountBaker as any).bakerPoolInfo
+                ?.commissionRates.transactionFeeCommission,
+            bakingRewardCommission: (accountBaker as any).bakerPoolInfo
+                ?.commissionRates.bakingRewardCommission,
+            finalizationRewardCommission: (accountBaker as any).bakerPoolInfo
+                ?.commissionRates.finalizationRewardCommission,
         },
     };
 };

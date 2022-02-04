@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { connect } from 'react-redux';
 import BakerStakeSettings from '~/components/BakerTransactions/BakerStakeSettings';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
 import { accountInfoSelector } from '~/features/AccountSlice';
+import { RootState } from '~/store/store';
 import {
     ConfigureBakerFlowDependencies,
     StakeSettings,
@@ -11,7 +12,8 @@ import {
     getExistingBakerValues,
 } from '~/utils/transactionFlows/configureBaker';
 import { UpdateBakerStakeFlowState } from '~/utils/transactionFlows/updateBakerStake';
-import { Account } from '~/utils/types';
+import { Account, AccountInfo } from '~/utils/types';
+import { withPendingChangeGuard } from './util';
 
 import styles from './ConfigureBakerPage.module.scss';
 
@@ -20,17 +22,18 @@ interface Props
         Pick<ConfigureBakerFlowDependencies, 'blockSummary' | 'exchangeRate'> {
     isMultiSig?: boolean;
     account: Account;
+    accountInfo?: AccountInfo;
 }
 
-export default function UpdateBakerStakePage({
+function UpdateBakerStakePage({
     onNext,
     initial,
     blockSummary,
     exchangeRate,
     account,
+    accountInfo,
     isMultiSig = false,
 }: Props) {
-    const accountInfo = useSelector(accountInfoSelector(account));
     const { stake: existing } = getExistingBakerValues(accountInfo) ?? {};
     const minimumStake = BigInt(
         blockSummary.updates.chainParameters.minimumThresholdForBaking
@@ -61,6 +64,11 @@ export default function UpdateBakerStakePage({
             buttonClassName={styles.continue}
             showAccountCard={isMultiSig}
             existingValues={existing}
+            showCooldown
         />
     );
 }
+
+export default connect((s: RootState, p: Props) => ({
+    accountInfo: accountInfoSelector(p.account)(s),
+}))(withPendingChangeGuard(UpdateBakerStakePage));
