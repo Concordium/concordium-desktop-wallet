@@ -52,7 +52,9 @@ const MetadataUrlPage = ({
                 <div className="mT50">
                     {existing && (
                         <div className="body3 mono mB10">
-                            Current url: {existing}
+                            Current url:
+                            <br />
+                            {existing}
                         </div>
                     )}
                     <Form.Input
