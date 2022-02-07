@@ -18,6 +18,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
     );
     const hasUsedEncrypted = hasEncryptedBalance(account);
     const isBaker = Boolean(accountInfo?.accountBaker);
+    const isDelegating = false;
 
     return (
         <>
@@ -125,6 +126,35 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     >
                         Update baker restake earnings
                     </ButtonNavLink> */}
+                </>
+            )}
+            {/* accountHasDeployedCredentials && !isDelegating && !isBaker && ( */}
+            {accountHasDeployedCredentials && !isDelegating && (
+                <ButtonNavLink
+                    className="mB20:notLast flex width100"
+                    to={routes.ACCOUNTS_ADD_DELEGATION}
+                    disabled={!accountInfo}
+                >
+                    Delegate to pool
+                </ButtonNavLink>
+            )}
+            {/* accountHasDeployedCredentials && isDelegating && !isBaker && ( */}
+            {accountHasDeployedCredentials && isDelegating && (
+                <>
+                    <ButtonNavLink
+                        className="mB20:notLast flex width100"
+                        to={routes.ACCOUNTS_UPDATE_DELEGATION}
+                        disabled={!accountInfo}
+                    >
+                        Update delegation
+                    </ButtonNavLink>
+                    <ButtonNavLink
+                        className="mB20:notLast flex width100"
+                        to={routes.ACCOUNTS_REMOVE_DELEGATION}
+                        disabled={!accountInfo}
+                    >
+                        Withdraw delegation
+                    </ButtonNavLink>
                 </>
             )}
         </>

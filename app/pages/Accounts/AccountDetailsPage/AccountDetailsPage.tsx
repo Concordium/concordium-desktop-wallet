@@ -62,6 +62,7 @@ export default withAccountSync(function DetailsPage() {
     }, [account?.address]);
 
     const isBaker = Boolean(accountInfo?.accountBaker);
+    const isDelegating = false;
     const canTransfer = hasCredentials && Boolean(accountInfo);
 
     if (!account) {
@@ -157,6 +158,42 @@ export default withAccountSync(function DetailsPage() {
                     </Route>
                     <Route path={routes.ACCOUNTS_UPDATE_BAKER_POOL}>
                         {canTransfer && isBaker && accountInfo !== undefined ? (
+                            <UpdateBakerPool
+                                account={account}
+                                accountInfo={accountInfo}
+                            />
+                        ) : (
+                            <ToAccounts />
+                        )}
+                    </Route>
+                    <Route path={routes.ACCOUNTS_ADD_DELEGATION}>
+                        {canTransfer &&
+                        !isDelegating &&
+                        accountInfo !== undefined ? (
+                            <UpdateBakerPool
+                                account={account}
+                                accountInfo={accountInfo}
+                            />
+                        ) : (
+                            <ToAccounts />
+                        )}
+                    </Route>
+                    <Route path={routes.ACCOUNTS_UPDATE_DELEGATION}>
+                        {canTransfer &&
+                        isDelegating &&
+                        accountInfo !== undefined ? (
+                            <UpdateBakerPool
+                                account={account}
+                                accountInfo={accountInfo}
+                            />
+                        ) : (
+                            <ToAccounts />
+                        )}
+                    </Route>
+                    <Route path={routes.ACCOUNTS_REMOVE_DELEGATION}>
+                        {canTransfer &&
+                        isDelegating &&
+                        accountInfo !== undefined ? (
                             <UpdateBakerPool
                                 account={account}
                                 accountInfo={accountInfo}
