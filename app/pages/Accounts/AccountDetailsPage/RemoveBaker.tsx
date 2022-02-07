@@ -48,7 +48,7 @@ export default withDeps(function AddBaker(props: Props) {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const convert = useCallback(
-        convertToRemoveBakerTransaction(account, nonce, exchangeRate),
+        () => convertToRemoveBakerTransaction(account, nonce, exchangeRate)(),
         [account, nonce, exchangeRate]
     );
 

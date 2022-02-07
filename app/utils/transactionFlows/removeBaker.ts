@@ -25,7 +25,7 @@ export const convertToRemoveBakerTransaction = (
     account: Account,
     nonce: bigint,
     exchangeRate: Fraction
-) => (): ConfigureBaker => {
+) => (expiry?: Date): ConfigureBaker => {
     const payload: RemoveBakerPayload = {
         stake: BigInt(0),
     };
@@ -33,7 +33,9 @@ export const convertToRemoveBakerTransaction = (
     const transaction = createConfigureBakerTransaction(
         account.address,
         payload,
-        nonce
+        nonce,
+        account.signatureThreshold,
+        expiry
     );
     transaction.estimatedFee = multiplyFraction(
         exchangeRate,

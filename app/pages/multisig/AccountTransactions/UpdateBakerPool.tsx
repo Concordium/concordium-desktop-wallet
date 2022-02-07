@@ -148,7 +148,7 @@ export default withDeps(function UpdateBakerPool({ exchangeRate }: Props) {
                 nonce,
                 exchangeRate,
                 accountsInfo[account.address]
-            )(values),
+            )(values, values.expiry),
         [exchangeRate, accountsInfo]
     );
 

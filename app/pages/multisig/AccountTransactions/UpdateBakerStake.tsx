@@ -111,7 +111,7 @@ export default withDeps(function UpdateBakerStake({
                 nonce,
                 exchangeRate,
                 accountsInfo[account.address]
-            )(values),
+            )(values, values.expiry),
         [exchangeRate, accountsInfo]
     );
 

@@ -200,7 +200,7 @@ export const convertToBakerTransaction = (
     nonce: bigint,
     exchangeRate: Fraction,
     accountInfo?: AccountInfo
-) => (values: ConfigureBakerFlowState): ConfigureBaker => {
+) => (values: ConfigureBakerFlowState, expiry?: Date): ConfigureBaker => {
     const existing =
         accountInfo !== undefined
             ? getExistingBakerValues(accountInfo)
@@ -212,7 +212,9 @@ export const convertToBakerTransaction = (
     const transaction = createConfigureBakerTransaction(
         account.address,
         payload,
-        nonce
+        nonce,
+        account.signatureThreshold,
+        expiry
     );
     transaction.estimatedFee = multiplyFraction(
         exchangeRate,

@@ -67,8 +67,15 @@ export default withDeps(function RemoveBaker({ exchangeRate }: Props) {
     const { path: matchedPath } = useRouteMatch();
 
     const convert = useCallback(
-        ({ account }: RequiredValues & RemoveBakerFlowState, nonce: bigint) =>
-            convertToRemoveBakerTransaction(account, nonce, exchangeRate)(),
+        (
+            { account, expiry }: RequiredValues & RemoveBakerFlowState,
+            nonce: bigint
+        ) =>
+            convertToRemoveBakerTransaction(
+                account,
+                nonce,
+                exchangeRate
+            )(expiry),
         [exchangeRate]
     );
 

@@ -162,7 +162,7 @@ export default withDeps(function AddBaker({
                 account,
                 nonce,
                 exchangeRate
-            )(values),
+            )(values, values.expiry),
         [exchangeRate]
     );
 

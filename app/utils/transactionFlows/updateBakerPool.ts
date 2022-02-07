@@ -56,7 +56,7 @@ export const convertToUpdateBakerPoolTransaction = (
     nonce: bigint,
     exchangeRate: Fraction,
     accountInfo: AccountInfo
-) => (values: UpdateBakerPoolFlowState): ConfigureBaker => {
+) => (values: UpdateBakerPoolFlowState, expiry?: Date): ConfigureBaker => {
     const sanitized = getSanitizedBakerPoolValues(values, accountInfo);
 
     return convertToBakerTransaction(
@@ -64,5 +64,5 @@ export const convertToUpdateBakerPoolTransaction = (
         nonce,
         exchangeRate,
         accountInfo
-    )(sanitized);
+    )(sanitized, expiry);
 };

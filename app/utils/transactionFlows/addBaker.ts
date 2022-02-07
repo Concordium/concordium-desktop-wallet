@@ -59,10 +59,14 @@ export const convertToAddBakerTransaction = (
     account: Account,
     nonce: bigint,
     exchangeRate: Fraction
-) => (values: AddBakerFlowState): ConfigureBaker => {
+) => (values: AddBakerFlowState, expiry?: Date): ConfigureBaker => {
     const sanitized = getSanitizedAddBakerValues(values, defaultCommissions);
 
-    return convertToBakerTransaction(account, nonce, exchangeRate)(sanitized);
+    return convertToBakerTransaction(
+        account,
+        nonce,
+        exchangeRate
+    )(sanitized, expiry);
 };
 
 export function getEstimatedAddBakerFee(
