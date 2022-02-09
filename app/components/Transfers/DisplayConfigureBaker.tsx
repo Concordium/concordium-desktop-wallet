@@ -14,17 +14,14 @@ import {
     displayRestakeEarnings,
 } from '~/utils/transactionFlows/configureBaker';
 import DisplayBakerCommission from './DisplayBakerCommission';
+import DisplayMetadataUrl from './DisplayMetadataUrl';
 
 import styles from './transferDetails.module.scss';
-import DisplayMetadataUrl from './DisplayMetadataUrl';
 
 interface Props {
     transaction: ConfigureBaker;
 }
 
-/**
- * Displays an overview of an Add-Baker-Transaction.
- */
 export default function DisplayConfigureBaker({ transaction }: Props) {
     const senderName = useAccountName(transaction.sender);
     const isSingleSig = useRouteMatch(routes.SUBMITTRANSFER);

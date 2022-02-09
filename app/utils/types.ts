@@ -963,6 +963,12 @@ export function instanceOfConfigureBaker(
     return object.transactionKind === TransactionKindId.Configure_baker;
 }
 
+export function instanceOfConfigureDelegation(
+    object: AccountTransaction<TransactionPayload>
+): object is ConfigureDelegation {
+    return object.transactionKind === TransactionKindId.Configure_delegation;
+}
+
 export function isExchangeRate(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<ExchangeRate> {

@@ -49,6 +49,7 @@ import ScheduledTransferWithMemoHandler from './ScheduledTransferWithMemoHandler
 import EncryptedTransferWithMemoHandler from './EncryptedTransferWithMemoHandler';
 import SimpleTransferWithMemoHandler from './SimpleTransferWithMemoHandler';
 import ConfigureBakerHandler from './ConfigureBakerHandler';
+import ConfigureDelegationHandler from './ConfigureDelegationHandler';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -123,6 +124,10 @@ export function findAccountTransactionHandler(
         case TransactionKindId.Configure_baker:
             return new AccountHandlerTypeMiddleware(
                 new ConfigureBakerHandler()
+            );
+        case TransactionKindId.Configure_delegation:
+            return new AccountHandlerTypeMiddleware(
+                new ConfigureDelegationHandler()
             );
         default:
             throw new Error(`Unsupported transaction type: ${transactionKind}`);

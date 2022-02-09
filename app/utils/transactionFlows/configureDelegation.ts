@@ -142,5 +142,8 @@ export const convertToConfigureDelegationTransaction = (
     return transaction;
 };
 
+export const displayDelegationTarget = (target: string | bigint | null) =>
+    target === null ? 'L-pool' : target.toString();
+
 export const displayRedelegate = (value: boolean) =>
     value ? 'Redelegate' : "Don't redelegate";
