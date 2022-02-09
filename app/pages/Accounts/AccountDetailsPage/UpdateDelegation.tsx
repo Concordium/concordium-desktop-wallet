@@ -14,9 +14,9 @@ import AccountTransactionFlow, {
     AccountTransactionFlowLoading,
 } from '../AccountTransactionFlow';
 import {
-    addDelegationTitle,
     ConfigureDelegationFlowDependencies,
     ConfigureDelegationFlowState,
+    configureDelegationTitle,
     convertToConfigureDelegationTransaction,
     getExistingDelegationValues,
 } from '~/utils/transactionFlows/configureDelegation';
@@ -44,7 +44,9 @@ const withDeps = (component: ComponentType<Props>) =>
             ensureProps(
                 component,
                 hasNecessaryProps,
-                <AccountTransactionFlowLoading title={addDelegationTitle} />
+                <AccountTransactionFlowLoading
+                    title={configureDelegationTitle}
+                />
             )
         )
     );
@@ -70,9 +72,9 @@ function UpdateDelegation(props: Props) {
             ConfigureDelegationFlowState,
             ConfigureDelegation
         >
-            title={addDelegationTitle}
+            title={configureDelegationTitle}
             convert={convert}
-            multisigRoute={routes.MULTISIGTRANSACTIONS_ADD_DELEGATION}
+            multisigRoute={routes.MULTISIGTRANSACTIONS_CONFIGURE_DELEGATION}
         >
             {{
                 target: {

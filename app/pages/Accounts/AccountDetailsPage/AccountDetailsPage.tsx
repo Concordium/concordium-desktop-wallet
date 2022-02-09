@@ -167,22 +167,8 @@ export default withAccountSync(function DetailsPage() {
                             <ToAccounts />
                         )}
                     </Route>
-                    <Route path={routes.ACCOUNTS_ADD_DELEGATION}>
-                        {canTransfer &&
-                        !isDelegating &&
-                        accountInfo !== undefined ? (
-                            <UpdateDelegation
-                                account={account}
-                                accountInfo={accountInfo}
-                            />
-                        ) : (
-                            <ToAccounts />
-                        )}
-                    </Route>
-                    <Route path={routes.ACCOUNTS_UPDATE_DELEGATION}>
-                        {canTransfer &&
-                        isDelegating &&
-                        accountInfo !== undefined ? (
+                    <Route path={routes.ACCOUNTS_CONFIGURE_DELEGATION}>
+                        {canTransfer && accountInfo !== undefined ? (
                             <UpdateDelegation
                                 account={account}
                                 accountInfo={accountInfo}

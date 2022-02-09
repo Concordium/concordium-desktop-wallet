@@ -27,8 +27,7 @@ export interface ConfigureDelegationFlowState {
     delegate: DelegateSettings;
 }
 
-export const addDelegationTitle = 'Delegate to pool';
-export const updateDelegationTitle = 'Update delegation';
+export const configureDelegationTitle = 'Configure delegation';
 
 export const getExistingDelegationValues = (
     accountInfo: AccountInfo
