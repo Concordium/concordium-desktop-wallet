@@ -1,6 +1,7 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import Form from '~/components/Form';
+import { validBigInt } from '~/components/Form/util/validation';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
 import { ConfigureDelegationFlowState } from '~/utils/transactionFlows/configureDelegation';
 import { EqualRecord, NotOptional } from '~/utils/types';
@@ -54,14 +55,32 @@ export default function DelegationTargetPage({
                     </div>
                 )}
                 <Form.Radios
+                    className="mT50"
                     name={fieldNames.toSpecificPool}
                     options={[
-                        { label: 'Delegate to baker', value: false },
-                        { label: 'Delegate to L-pool', value: true },
+                        { label: 'Delegate to baker', value: true },
+                        { label: 'Delegate to L-pool', value: false },
                     ]}
                 />
                 {toSpecificPoolValue && (
-                    <Form.Input name={fieldNames.poolId} className="mT30" />
+                    <Form.Input
+                        name={fieldNames.poolId}
+                        className="mT30 body2"
+                        placeholder="Enter baker ID"
+                        rules={{
+                            required: 'Baker ID must be specified',
+                            min: {
+                                value: 0,
+                                message: "Baker ID's cannot be negative",
+                            },
+                            validate: {
+                                wholeNumber: validBigInt(
+                                    "Baker ID's are positive whole numbers"
+                                ),
+                                // TODO check if baker ID exists.
+                            },
+                        }}
+                    />
                 )}
             </div>
             <Form.Submit className={styles.continue}>Continue</Form.Submit>
