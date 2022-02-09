@@ -3,6 +3,7 @@ import {
     ReleaseSchedule,
     TransactionSummary,
 } from '@concordium/node-sdk/lib/src/types';
+import { Validate } from 'react-hook-form';
 import {
     dateFromTimeStamp,
     getDefaultExpiry,
@@ -615,6 +616,28 @@ export function validateFee(
     return undefined;
 }
 
+export const validateDelegateAmount = (
+    max: bigint,
+    accountInfo: AccountInfo,
+    estimatedFee: bigint
+): Validate => (value: string) => {
+    if (!isValidGTUString(value)) {
+        return 'Value is not a valid CCD amount';
+    }
+
+    const amount = toMicroUnits(value);
+
+    if (amount > max) {
+        return `Cannot delegate more than (${displayAsGTU(max)})`;
+    }
+
+    if (BigInt(accountInfo.accountAmount) < amount + estimatedFee) {
+        return 'Insufficient funds';
+    }
+
+    return true;
+};
+
 export function validateBakerStake(
     bakerStakeThreshold: bigint | undefined,
     amountToValidate: string,
@@ -628,7 +651,7 @@ export function validateBakerStake(
     if (bakerStakeThreshold && bakerStakeThreshold > amount) {
         return `Stake is below the threshold (${displayAsGTU(
             bakerStakeThreshold
-        )}) for baking `;
+        )}) for baking`;
     }
     if (
         accountInfo &&

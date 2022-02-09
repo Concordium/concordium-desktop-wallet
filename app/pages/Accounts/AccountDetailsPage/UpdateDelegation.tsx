@@ -1,5 +1,6 @@
 /* eslint-disable react/display-name */
 import React, { ComponentType, useCallback } from 'react';
+import { useRouteMatch } from 'react-router';
 import withExchangeRate from '~/components/Transfers/withExchangeRate';
 import withNonce, { AccountAndNonce } from '~/components/Transfers/withNonce';
 import { isDefined } from '~/utils/basicHelpers';
@@ -22,6 +23,8 @@ import {
 import { ensureProps } from '~/utils/componentHelpers';
 import routes from '~/constants/routes.json';
 import DelegationTargetPage from '~/components/Transfers/configureDelegation/DelegationTargetPage';
+import DelegationAmountPage from '~/components/Transfers/configureDelegation/DelegationAmountPage';
+import { microGTUPerGTU } from '~/utils/gtu';
 
 interface Props
     extends ConfigureDelegationFlowDependencies,
@@ -49,6 +52,7 @@ const withDeps = (component: ComponentType<Props>) =>
 function UpdateDelegation(props: Props) {
     const { nonce, account, exchangeRate, accountInfo } = props;
     const { target } = getExistingDelegationValues(accountInfo) ?? {};
+    const { path: matchedRoute } = useRouteMatch();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const convert = useCallback(
@@ -81,7 +85,18 @@ function UpdateDelegation(props: Props) {
                     ),
                 },
                 delegate: {
-                    render: () => <>Delegation settings</>,
+                    render: (initial, onNext, formValues) => (
+                        <DelegationAmountPage
+                            account={account}
+                            accountInfo={accountInfo}
+                            maxDelegationAmount={BigInt(10000) * microGTUPerGTU} // TODO revise.
+                            exchangeRate={exchangeRate}
+                            initial={initial}
+                            onNext={onNext}
+                            formValues={formValues}
+                            baseRoute={matchedRoute}
+                        />
+                    ),
                 },
             }}
         </AccountTransactionFlow>

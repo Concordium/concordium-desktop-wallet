@@ -154,6 +154,37 @@ export function useTransactionExpiryState(
     return [expiryTime, setExpiryTime, expiryTimeError] as const;
 }
 
+/** Hook for calculating the date of the delegation cooldown ending, will result in undefined while loading */
+export function useCalcDelegateAmountCooldownUntil() {
+    const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
+    const now = useCurrentTime(60000);
+
+    if (lastFinalizedBlockSummary === undefined) {
+        return undefined;
+    }
+
+    const { consensusStatus } = lastFinalizedBlockSummary;
+    const {
+        chainParameters,
+    } = lastFinalizedBlockSummary.lastFinalizedBlockSummary.updates;
+    const genesisTime = new Date(consensusStatus.currentEraGenesisTime);
+    const currentEpochIndex = getEpochIndexAt(
+        now,
+        consensusStatus.epochDuration,
+        genesisTime
+    );
+    const nextEpochIndex = currentEpochIndex + 1;
+
+    const cooldownUntilEpochIndex =
+        nextEpochIndex + Number(chainParameters.bakerCooldownEpochs); // TODO change to param related to delegation.
+
+    return epochDate(
+        cooldownUntilEpochIndex,
+        consensusStatus.epochDuration,
+        genesisTime
+    );
+}
+
 /** Hook for calculating the date of the baking stake cooldown ending, will result in undefined while loading */
 export function useCalcBakerStakeCooldownUntil() {
     const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();

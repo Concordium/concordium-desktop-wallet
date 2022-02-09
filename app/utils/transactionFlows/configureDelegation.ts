@@ -2,7 +2,9 @@ import { AccountInfo } from '@concordium/node-sdk';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { multiplyFraction } from '../basicHelpers';
 import { toMicroUnits } from '../gtu';
+import { getTransactionKindCost } from '../transactionCosts';
 import { createConfigureDelegationTransaction } from '../transactionHelpers';
+import { serializeTransferPayload } from '../transactionSerialization';
 import {
     Account,
     ConfigureDelegationPayload,
@@ -10,6 +12,7 @@ import {
     Fraction,
     MakeRequired,
     NotOptional,
+    TransactionKindId,
 } from '../types';
 
 export type ConfigureDelegationFlowDependencies = NotOptional<ExchangeRate>;
@@ -54,7 +57,7 @@ type ConfigureDelegationFlowStateChanges = MakeRequired<
     'delegate'
 >;
 
-const getDelegationFlowChanges = (
+export const getDelegationFlowChanges = (
     existingValues: ConfigureDelegationFlowState,
     newValues: ConfigureDelegationFlowState
 ): ConfigureDelegationFlowStateChanges => {
@@ -94,6 +97,25 @@ const toPayload = (
         values.target != null ? BigInt(values.target) : values.target,
 });
 
+export function getEstimatedConfigureDelegationFee(
+    values: DeepPartial<ConfigureDelegationFlowState>,
+    exchangeRate: Fraction,
+    signatureThreshold = 1
+) {
+    const payloadSize = serializeTransferPayload(
+        TransactionKindId.Configure_delegation,
+        toPayload(values)
+    ).length;
+
+    return getTransactionKindCost(
+        TransactionKindId.Configure_delegation,
+        exchangeRate,
+        signatureThreshold,
+        undefined,
+        payloadSize
+    );
+}
+
 export const convertToConfigureDelegationTransaction = (
     account: Account,
     nonce: bigint,
@@ -120,3 +142,6 @@ export const convertToConfigureDelegationTransaction = (
 
     return transaction;
 };
+
+export const displayRedelegate = (value: boolean) =>
+    value ? 'Redelegate' : "Don't redelegate";
