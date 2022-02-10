@@ -23,7 +23,6 @@ import { ensureProps } from '~/utils/componentHelpers';
 import routes from '~/constants/routes.json';
 import DelegationTargetPage from '~/components/Transfers/configureDelegation/DelegationTargetPage';
 import DelegationAmountPage from '~/components/Transfers/configureDelegation/DelegationAmountPage';
-import { microGTUPerGTU } from '~/utils/gtu';
 
 interface Props
     extends ConfigureDelegationFlowDependencies,
@@ -89,7 +88,6 @@ function ConfigureDelegation(props: Props) {
                         <DelegationAmountPage
                             account={account}
                             accountInfo={accountInfo}
-                            maxDelegationAmount={BigInt(10000) * microGTUPerGTU} // TODO revise.
                             exchangeRate={exchangeRate}
                             initial={initial}
                             onNext={onNext}

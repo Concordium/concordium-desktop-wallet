@@ -4,7 +4,7 @@ import Button from '~/cross-app-components/Button';
 import { useCalcBakerStakeCooldownUntil } from '~/utils/dataHooks';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import { AccountInfo } from '~/utils/types';
-import { withPendingChangeGuard } from './util';
+import { withPendingBakerChangeGuard } from './util';
 
 import styles from './ConfigureBakerPage.module.scss';
 
@@ -13,7 +13,7 @@ interface RemoveBakerPageProps
     accountInfo: AccountInfo | undefined;
 }
 
-const RemoveBakerPage = withPendingChangeGuard(
+const RemoveBakerPage = withPendingBakerChangeGuard(
     ({ onNext }: RemoveBakerPageProps) => {
         const cooldownUntil = useCalcBakerStakeCooldownUntil();
 

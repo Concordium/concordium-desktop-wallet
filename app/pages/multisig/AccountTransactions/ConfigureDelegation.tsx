@@ -30,7 +30,6 @@ import {
     getExistingDelegationValues,
 } from '~/utils/transactionFlows/configureDelegation';
 import DelegationTargetPage from '~/components/Transfers/configureDelegation/DelegationTargetPage';
-import { microGTUPerGTU } from '~/utils/gtu';
 import DelegationAmountPage from '~/components/Transfers/configureDelegation/DelegationAmountPage';
 
 interface DisplayProps
@@ -167,9 +166,6 @@ export default withDeps(function ConfigureDelegation({ exchangeRate }: Props) {
                                 showAccountCard
                                 account={account}
                                 accountInfo={accountsInfo[account.address]}
-                                maxDelegationAmount={
-                                    BigInt(10000) * microGTUPerGTU // TODO revise.
-                                }
                                 exchangeRate={exchangeRate}
                                 initial={initial}
                                 onNext={onNext}

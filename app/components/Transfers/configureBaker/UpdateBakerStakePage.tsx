@@ -13,7 +13,7 @@ import {
 } from '~/utils/transactionFlows/configureBaker';
 import { UpdateBakerStakeFlowState } from '~/utils/transactionFlows/updateBakerStake';
 import { Account, AccountInfo } from '~/utils/types';
-import { withPendingChangeGuard } from './util';
+import { withPendingBakerChangeGuard } from './util';
 
 import styles from './ConfigureBakerPage.module.scss';
 
@@ -71,4 +71,4 @@ function UpdateBakerStakePage({
 
 export default connect((s: RootState, p: Props) => ({
     accountInfo: accountInfoSelector(p.account)(s),
-}))(withPendingChangeGuard(UpdateBakerStakePage));
+}))(withPendingBakerChangeGuard(UpdateBakerStakePage));

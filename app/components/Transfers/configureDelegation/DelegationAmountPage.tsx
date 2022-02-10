@@ -8,7 +8,7 @@ import Label from '~/components/Label';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
 import { collapseFraction } from '~/utils/basicHelpers';
 import { useCalcDelegateAmountCooldownUntil } from '~/utils/dataHooks';
-import { getGTUSymbol } from '~/utils/gtu';
+import { getGTUSymbol, microGTUPerGTU } from '~/utils/gtu';
 import { useUpdateEffect } from '~/utils/hooks';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import {
@@ -23,6 +23,7 @@ import { validateDelegateAmount } from '~/utils/transactionHelpers';
 import { Account, AccountInfo, EqualRecord, Fraction } from '~/utils/types';
 
 import styles from './DelegationPage.module.scss';
+import { withPendingDelegationChangeGuard } from './util';
 
 type SubState = DelegateSettings;
 
@@ -94,10 +95,6 @@ function PickDelegateAmount({
 
 interface Props
     extends MultiStepFormPageProps<SubState, ConfigureDelegationFlowState> {
-    /**
-     * Max delegation amount for delegation target in micro CCD
-     */
-    maxDelegationAmount: bigint;
     account: Account;
     accountInfo: AccountInfo;
     showAccountCard?: boolean;
@@ -105,11 +102,10 @@ interface Props
     baseRoute: string;
 }
 
-export default function DelegationAmountPage({
+function DelegationAmountPage({
     onNext,
     initial,
     formValues: { target },
-    maxDelegationAmount,
     account,
     accountInfo,
     showAccountCard = false,
@@ -117,6 +113,7 @@ export default function DelegationAmountPage({
     baseRoute,
 }: Props) {
     const cooldownUntil = useCalcDelegateAmountCooldownUntil();
+    const maxDelegationAmount = BigInt(10000) * microGTUPerGTU; // TODO revise.
     const existing = getExistingDelegationValues(accountInfo);
     const defaultValues: SubState = {
         amount: '0.00',
@@ -217,3 +214,5 @@ export default function DelegationAmountPage({
         </Form>
     );
 }
+
+export default withPendingDelegationChangeGuard(DelegationAmountPage);
