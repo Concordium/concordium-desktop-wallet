@@ -23,15 +23,15 @@ export interface DelegateSettings {
 }
 
 export interface ConfigureDelegationFlowState {
-    target: string | null;
-    delegate: DelegateSettings;
+    target?: string | null;
+    delegate?: DelegateSettings;
 }
 
 export const configureDelegationTitle = 'Configure delegation';
 
 export const getExistingDelegationValues = (
     accountInfo: AccountInfo
-): ConfigureDelegationFlowState | undefined => {
+): NotOptional<ConfigureDelegationFlowState> | undefined => {
     if ((accountInfo as any).accountDelegation === undefined) {
         return undefined;
     }
@@ -51,7 +51,7 @@ export const getExistingDelegationValues = (
     };
 };
 
-type ConfigureDelegationFlowStateChanges = MakeRequired<
+export type ConfigureDelegationFlowStateChanges = MakeRequired<
     DeepPartial<ConfigureDelegationFlowState>,
     'delegate'
 >;
@@ -70,7 +70,7 @@ export const getDelegationFlowChanges = (
         toMicroUnits(existingValues.delegate?.amount) !==
             toMicroUnits(newValues.delegate?.amount)
     ) {
-        changes.delegate.amount = newValues.delegate.amount;
+        changes.delegate.amount = newValues.delegate?.amount;
     }
     if (
         existingValues.delegate?.redelegate !== newValues.delegate?.redelegate

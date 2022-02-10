@@ -12,26 +12,27 @@ import withExchangeRate from '~/components/Transfers/withExchangeRate';
 import { ensureProps } from '~/utils/componentHelpers';
 import { isDefined } from '~/utils/basicHelpers';
 import { accountsInfoSelector } from '~/features/AccountSlice';
-import {
-    RemoveBakerDependencies,
-    RemoveBakerFlowState,
-    convertToRemoveBakerTransaction,
-    removeBakerTitle,
-} from '~/utils/transactionFlows/removeBaker';
-import RemoveBakerPage from '~/components/Transfers/configureBaker/RemoveBakerPage';
-import { getEstimatedConfigureBakerFee } from '~/utils/transactionFlows/configureBaker';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
+import {
+    convertToRemoveDelegationTransaction,
+    RemoveDelegationDependencies,
+    RemoveDelegationFlowState,
+    removeDelegationTitle,
+} from '~/utils/transactionFlows/removeDelegation';
+import { getEstimatedConfigureDelegationFee } from '~/utils/transactionFlows/configureDelegation';
+import RemoveDelegationPage from '~/components/Transfers/configureDelegation/RemoveDelegationPage';
 
 import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
 
-interface DisplayProps extends Partial<RequiredValues & RemoveBakerFlowState> {
+interface DisplayProps
+    extends Partial<RequiredValues & RemoveDelegationFlowState> {
     exchangeRate: Fraction;
 }
 const DisplayValues = ({ account, exchangeRate }: DisplayProps) => {
     const estimatedFee =
         account !== undefined
-            ? getEstimatedConfigureBakerFee(
-                  { stake: { stake: '0' } },
+            ? getEstimatedConfigureDelegationFee(
+                  { delegate: { amount: '0' } },
                   exchangeRate,
                   account.signatureThreshold
               )
@@ -43,12 +44,12 @@ const DisplayValues = ({ account, exchangeRate }: DisplayProps) => {
                 className={displayTransferStyles.fee}
                 estimatedFee={estimatedFee}
             />
-            <AmountDetail title="Staked amount" value="0" />
+            <AmountDetail title="Delegated amount" value="0" />
         </>
     );
 };
 
-type Props = RemoveBakerDependencies;
+type Props = RemoveDelegationDependencies;
 type UnsafeProps = Partial<Props>;
 
 const hasNecessaryProps = (props: UnsafeProps): props is Props =>
@@ -59,20 +60,22 @@ const withDeps = (component: ComponentType<Props>) =>
         ensureProps(
             component,
             hasNecessaryProps,
-            <MultiSigAccountTransactionFlowLoading title={removeBakerTitle} />
+            <MultiSigAccountTransactionFlowLoading
+                title={removeDelegationTitle}
+            />
         )
     );
 
-export default withDeps(function RemoveBaker({ exchangeRate }: Props) {
+export default withDeps(function RemoveDelegation({ exchangeRate }: Props) {
     const accountsInfo = useSelector(accountsInfoSelector);
     const { path: matchedPath } = useRouteMatch();
 
     const convert = useCallback(
         (
-            { account, expiry }: RequiredValues & RemoveBakerFlowState,
+            { account, expiry }: RequiredValues & RemoveDelegationFlowState,
             nonce: bigint
         ) =>
-            convertToRemoveBakerTransaction(
+            convertToRemoveDelegationTransaction(
                 account,
                 nonce,
                 exchangeRate
@@ -81,8 +84,11 @@ export default withDeps(function RemoveBaker({ exchangeRate }: Props) {
     );
 
     return (
-        <MultiSigAccountTransactionFlow<RemoveBakerFlowState, ConfigureBaker>
-            title={removeBakerTitle}
+        <MultiSigAccountTransactionFlow<
+            RemoveDelegationFlowState,
+            ConfigureBaker
+        >
+            title={removeDelegationTitle}
             convert={convert}
             preview={DisplayValues}
         >
@@ -90,7 +96,7 @@ export default withDeps(function RemoveBaker({ exchangeRate }: Props) {
                 confirm: {
                     render: (_, onNext) =>
                         isDefined(account) ? (
-                            <RemoveBakerPage
+                            <RemoveDelegationPage
                                 onNext={onNext}
                                 accountInfo={accountsInfo[account.address]}
                             />

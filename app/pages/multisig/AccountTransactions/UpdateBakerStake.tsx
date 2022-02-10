@@ -17,6 +17,7 @@ import {
     displayRestakeEarnings,
     getBakerFlowChanges,
     getEstimatedConfigureBakerFee,
+    ConfigureBakerFlowStateChanges,
 } from '~/utils/transactionFlows/configureBaker';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import {
@@ -40,11 +41,13 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
     const accountInfo: AccountInfo | undefined = useSelector(
         accountInfoSelector(account)
     );
-    const { stake } = getBakerFlowChanges(values, accountInfo) ?? {};
+    const changes =
+        getBakerFlowChanges(values, accountInfo) ??
+        ({} as ConfigureBakerFlowStateChanges);
     const estimatedFee =
         account !== undefined
             ? getEstimatedConfigureBakerFee(
-                  values,
+                  changes,
                   exchangeRate,
                   account.signatureThreshold
               )
@@ -56,16 +59,19 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
                 estimatedFee={estimatedFee}
             />
             {(values.stake?.stake !== undefined &&
-                stake?.stake === undefined) || (
-                <AmountDetail title="Staked amount" value={stake?.stake} />
+                changes.stake?.stake === undefined) || (
+                <AmountDetail
+                    title="Staked amount"
+                    value={changes.stake?.stake}
+                />
             )}
             {(values.stake?.restake !== undefined &&
-                stake?.restake === undefined) || (
+                changes.stake?.restake === undefined) || (
                 <PlainDetail
                     title="Restake earnings"
                     value={
-                        stake?.restake !== undefined
-                            ? displayRestakeEarnings(stake.restake)
+                        changes.stake?.restake !== undefined
+                            ? displayRestakeEarnings(changes.stake.restake)
                             : undefined
                     }
                 />
@@ -74,7 +80,7 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
     );
 };
 
-type Props = Omit<ConfigureBakerFlowDependencies, 'account' | 'nonce'>;
+type Props = ConfigureBakerFlowDependencies;
 type UnsafeProps = Partial<Props>;
 
 const hasNecessaryProps = (props: UnsafeProps): props is Props => {

@@ -13,23 +13,18 @@ import { useUpdateEffect } from '~/utils/hooks';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import {
     ConfigureDelegationFlowState,
+    DelegateSettings,
     displayRedelegate,
     getDelegationFlowChanges,
     getEstimatedConfigureDelegationFee,
     getExistingDelegationValues,
 } from '~/utils/transactionFlows/configureDelegation';
 import { validateDelegateAmount } from '~/utils/transactionHelpers';
-import {
-    Account,
-    AccountInfo,
-    EqualRecord,
-    Fraction,
-    NotOptional,
-} from '~/utils/types';
+import { Account, AccountInfo, EqualRecord, Fraction } from '~/utils/types';
 
 import styles from './DelegationPage.module.scss';
 
-type SubState = NotOptional<ConfigureDelegationFlowState['delegate']>;
+type SubState = DelegateSettings;
 
 const fieldNames: EqualRecord<SubState> = {
     amount: 'amount',

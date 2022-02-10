@@ -18,7 +18,6 @@ import {
     ConfigureDelegationFlowState,
     configureDelegationTitle,
     convertToConfigureDelegationTransaction,
-    getExistingDelegationValues,
 } from '~/utils/transactionFlows/configureDelegation';
 import { ensureProps } from '~/utils/componentHelpers';
 import routes from '~/constants/routes.json';
@@ -53,7 +52,6 @@ const withDeps = (component: ComponentType<Props>) =>
 
 function ConfigureDelegation(props: Props) {
     const { nonce, account, exchangeRate, accountInfo } = props;
-    const { target } = getExistingDelegationValues(accountInfo) ?? {};
     const { path: matchedRoute } = useRouteMatch();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -82,7 +80,7 @@ function ConfigureDelegation(props: Props) {
                         <DelegationTargetPage
                             onNext={onNext}
                             initial={initial}
-                            existing={target}
+                            accountInfo={accountInfo}
                         />
                     ),
                 },

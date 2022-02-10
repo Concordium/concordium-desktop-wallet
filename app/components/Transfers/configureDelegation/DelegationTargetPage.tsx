@@ -3,8 +3,11 @@ import { useForm } from 'react-hook-form';
 import Form from '~/components/Form';
 import { validBigInt } from '~/components/Form/util/validation';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
-import { ConfigureDelegationFlowState } from '~/utils/transactionFlows/configureDelegation';
-import { EqualRecord, NotOptional } from '~/utils/types';
+import {
+    ConfigureDelegationFlowState,
+    getExistingDelegationValues,
+} from '~/utils/transactionFlows/configureDelegation';
+import { AccountInfo, EqualRecord, NotOptional } from '~/utils/types';
 
 import styles from './DelegationPage.module.scss';
 
@@ -18,19 +21,26 @@ const fieldNames: EqualRecord<NotOptional<FormState>> = {
     poolId: 'poolId',
 };
 
-type Value = ConfigureDelegationFlowState['target'];
-interface Props extends Omit<MultiStepFormPageProps<Value>, 'formValues'> {
-    existing?: Value;
+interface Props
+    extends Omit<
+        MultiStepFormPageProps<
+            NotOptional<ConfigureDelegationFlowState>['target']
+        >,
+        'formValues'
+    > {
+    accountInfo: AccountInfo;
 }
 
 export default function DelegationTargetPage({
     onNext,
-    existing,
-    initial = existing,
+    accountInfo,
+    initial,
 }: Props) {
+    const { target: existing } = getExistingDelegationValues(accountInfo) ?? {};
+    const defaultValue = initial ?? existing;
     const defaultValues: FormState = {
-        toSpecificPool: typeof initial === 'string',
-        poolId: initial ?? '',
+        toSpecificPool: typeof defaultValue === 'string',
+        poolId: defaultValue ?? '',
     };
 
     const form = useForm<FormState>({ mode: 'onTouched', defaultValues });

@@ -112,7 +112,7 @@ const isAccountInfo = (
     dyn: ConfigureBakerFlowState | AccountInfo
 ): dyn is AccountInfo => (dyn as AccountInfo).accountIndex !== undefined;
 
-type ConfigureBakerFlowStateChanges = MakeRequired<
+export type ConfigureBakerFlowStateChanges = MakeRequired<
     DeepPartial<ConfigureBakerFlowState>,
     'stake' | 'commissions' | 'keys'
 >;
