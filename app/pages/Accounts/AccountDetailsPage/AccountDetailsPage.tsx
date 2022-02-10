@@ -36,7 +36,7 @@ import RemoveBaker from './RemoveBaker';
 import UpdateBakerStake from './UpdateBakerStake';
 import UpdateBakerPool from './UpdateBakerPool';
 import UpdateBakerKeys from './UpdateBakerKeys';
-import UpdateDelegation from './UpdateDelegation';
+import ConfigureDelegation from './ConfigureDelegation';
 
 const { Master, Detail } = MasterDetailPageLayout;
 const ToAccounts = () => <Redirect to={routes.ACCOUNTS} />;
@@ -169,7 +169,7 @@ export default withAccountSync(function DetailsPage() {
                     </Route>
                     <Route path={routes.ACCOUNTS_CONFIGURE_DELEGATION}>
                         {canTransfer && accountInfo !== undefined ? (
-                            <UpdateDelegation
+                            <ConfigureDelegation
                                 account={account}
                                 accountInfo={accountInfo}
                             />

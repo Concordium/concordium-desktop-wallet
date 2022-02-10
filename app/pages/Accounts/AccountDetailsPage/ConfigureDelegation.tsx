@@ -51,7 +51,7 @@ const withDeps = (component: ComponentType<Props>) =>
         )
     );
 
-function UpdateDelegation(props: Props) {
+function ConfigureDelegation(props: Props) {
     const { nonce, account, exchangeRate, accountInfo } = props;
     const { target } = getExistingDelegationValues(accountInfo) ?? {};
     const { path: matchedRoute } = useRouteMatch();
@@ -105,4 +105,4 @@ function UpdateDelegation(props: Props) {
     );
 }
 
-export default withDeps(UpdateDelegation);
+export default withDeps(ConfigureDelegation);
