@@ -17,7 +17,6 @@ import {
     displayRestakeEarnings,
     getBakerFlowChanges,
     getEstimatedConfigureBakerFee,
-    ConfigureBakerFlowStateChanges,
 } from '~/utils/transactionFlows/configureBaker';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import {
@@ -41,9 +40,7 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
     const accountInfo: AccountInfo | undefined = useSelector(
         accountInfoSelector(account)
     );
-    const changes =
-        getBakerFlowChanges(values, accountInfo) ??
-        ({} as ConfigureBakerFlowStateChanges);
+    const changes = getBakerFlowChanges(values, accountInfo) ?? values;
     const estimatedFee =
         account !== undefined
             ? getEstimatedConfigureBakerFee(

@@ -183,7 +183,6 @@ export default function DelegationAmountPage({
                 {showAccountCard && (
                     <AccountCard account={account} accountInfo={accountInfo} />
                 )}
-                <p>target: {target ?? 'L-pool'}</p>
                 <PickDelegateAmount
                     accountInfo={accountInfo}
                     existing={existing?.delegate?.amount}

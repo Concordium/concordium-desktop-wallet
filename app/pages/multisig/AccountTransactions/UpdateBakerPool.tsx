@@ -52,14 +52,12 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
         accountInfoSelector(account)
     );
     const sanitized = getSanitizedBakerPoolValues(values, accountInfo);
-    const changes = getBakerFlowChanges(values, accountInfo);
-
-    const { openForDelegation, commissions, metadataUrl } = changes ?? {};
+    const changes = getBakerFlowChanges(sanitized, accountInfo) ?? sanitized;
 
     const estimatedFee =
         account !== undefined
             ? getEstimatedConfigureBakerFee(
-                  sanitized,
+                  changes,
                   exchangeRate,
                   account.signatureThreshold
               )
@@ -72,44 +70,49 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
                 estimatedFee={estimatedFee}
             />
             {(sanitized.openForDelegation !== undefined &&
-                openForDelegation === undefined) || (
+                changes.openForDelegation === undefined) || (
                 <PlainDetail
                     title="Pool delegation status"
                     value={
-                        openForDelegation !== undefined
-                            ? displayPoolOpen(openForDelegation)
+                        changes.openForDelegation !== undefined
+                            ? displayPoolOpen(changes.openForDelegation)
                             : undefined
                     }
                 />
             )}
             {(sanitized.commissions?.transactionFeeCommission !== undefined &&
-                commissions?.transactionFeeCommission === undefined) || (
+                changes.commissions?.transactionFeeCommission ===
+                    undefined) || (
                 <DisplayBakerCommission
                     title="Transaction fee commission"
-                    value={commissions?.transactionFeeCommission}
+                    value={changes.commissions?.transactionFeeCommission}
                     placeholder
                 />
             )}
             {(sanitized.commissions?.bakingRewardCommission !== undefined &&
-                commissions?.bakingRewardCommission === undefined) || (
+                changes.commissions?.bakingRewardCommission === undefined) || (
                 <DisplayBakerCommission
                     title="Baking reward commission"
-                    value={commissions?.bakingRewardCommission}
+                    value={changes.commissions?.bakingRewardCommission}
                     placeholder
                 />
             )}
             {(sanitized.commissions?.finalizationRewardCommission !==
                 undefined &&
-                commissions?.finalizationRewardCommission === undefined) || (
+                changes.commissions?.finalizationRewardCommission ===
+                    undefined) || (
                 <DisplayBakerCommission
                     title="Finalization reward commission"
-                    value={commissions?.finalizationRewardCommission}
+                    value={changes.commissions?.finalizationRewardCommission}
                     placeholder
                 />
             )}
             {(sanitized.metadataUrl !== undefined &&
-                metadataUrl === undefined) || (
-                <DisplayMetadataUrl metadataUrl={metadataUrl} placeholder />
+                changes.metadataUrl === undefined) || (
+                <DisplayMetadataUrl
+                    metadataUrl={changes.metadataUrl}
+                    placeholder
+                />
             )}
         </>
     );

@@ -149,6 +149,11 @@ const accountTransactionTypes: [
         TransactionKind.Configure_baker,
         'Configure baker',
     ],
+    [
+        TransactionTypes.AccountTransaction,
+        TransactionKind.Configure_delegation,
+        'Configure delegation',
+    ],
 ];
 
 /**
@@ -233,6 +238,27 @@ export default function MultiSignatureCreateProposalView() {
                                     }
                                 >
                                     Update baker keys
+                                </ButtonNavLink>
+                            </>
+                        )}
+                        {specificType ===
+                            TransactionKindId.Configure_delegation && (
+                            <>
+                                <ButtonNavLink
+                                    className={styles.link}
+                                    to={
+                                        routes.MULTISIGTRANSACTIONS_CONFIGURE_DELEGATION
+                                    }
+                                >
+                                    Configure delegation
+                                </ButtonNavLink>
+                                <ButtonNavLink
+                                    className={styles.link}
+                                    to={
+                                        routes.MULTISIGTRANSACTIONS_REMOVE_DELEGATION
+                                    }
+                                >
+                                    Withdraw delegation
                                 </ButtonNavLink>
                             </>
                         )}

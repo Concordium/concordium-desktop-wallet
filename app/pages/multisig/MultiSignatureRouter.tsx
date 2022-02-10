@@ -13,6 +13,7 @@ import RemoveBaker from './AccountTransactions/RemoveBaker';
 import UpdateBakerStake from './AccountTransactions/UpdateBakerStake';
 import UpdateBakerPool from './AccountTransactions/UpdateBakerPool';
 import UpdateBakerKeys from './AccountTransactions/UpdateBakerKeys';
+import ConfigureDelegation from './AccountTransactions/ConfigureDelegation';
 
 export default function MultiSignatureRoutes(): JSX.Element {
     return (
@@ -39,6 +40,14 @@ export default function MultiSignatureRoutes(): JSX.Element {
             />
             <Route
                 path={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_KEYS}
+                component={UpdateBakerKeys}
+            />
+            <Route
+                path={routes.MULTISIGTRANSACTIONS_CONFIGURE_DELEGATION}
+                component={ConfigureDelegation}
+            />
+            <Route
+                path={routes.MULTISIGTRANSACTIONS_REMOVE_DELEGATION}
                 component={UpdateBakerKeys}
             />
             <Route

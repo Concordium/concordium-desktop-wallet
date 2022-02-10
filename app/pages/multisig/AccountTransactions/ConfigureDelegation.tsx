@@ -21,7 +21,6 @@ import displayTransferStyles from '~/components/Transfers/transferDetails.module
 import {
     ConfigureDelegationFlowDependencies,
     ConfigureDelegationFlowState,
-    ConfigureDelegationFlowStateChanges,
     configureDelegationTitle,
     convertToConfigureDelegationTransaction,
     displayDelegationTarget,
@@ -49,7 +48,7 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
     const changes =
         existingValues !== undefined
             ? getDelegationFlowChanges(values, existingValues)
-            : undefined ?? ({} as ConfigureDelegationFlowStateChanges);
+            : undefined ?? values;
     const estimatedFee =
         account !== undefined
             ? getEstimatedConfigureDelegationFee(
@@ -77,16 +76,16 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
             {(values.delegate?.amount !== undefined &&
                 changes.delegate?.amount === undefined) || (
                 <AmountDetail
-                    title="Staked amount"
-                    value={changes.delegate.amount}
+                    title="Delegated amount"
+                    value={changes.delegate?.amount}
                 />
             )}
             {(values.delegate?.redelegate !== undefined &&
-                changes.delegate.redelegate === undefined) || (
+                changes.delegate?.redelegate === undefined) || (
                 <PlainDetail
-                    title="Restake earnings"
+                    title="Redelegate earnings"
                     value={
-                        changes.delegate.redelegate !== undefined
+                        changes.delegate?.redelegate !== undefined
                             ? displayRedelegate(changes.delegate.redelegate)
                             : undefined
                     }
@@ -165,6 +164,7 @@ export default withDeps(function ConfigureDelegation({ exchangeRate }: Props) {
                     render: (initial, onNext, formValues) =>
                         isDefined(account) ? (
                             <DelegationAmountPage
+                                showAccountCard
                                 account={account}
                                 accountInfo={accountsInfo[account.address]}
                                 maxDelegationAmount={
