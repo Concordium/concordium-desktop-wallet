@@ -12,6 +12,8 @@ import {
     instanceOfUpdateBakerKeys,
     instanceOfUpdateBakerStake,
     instanceOfUpdateBakerRestakeEarnings,
+    instanceOfConfigureBaker,
+    instanceOfConfigureDelegation,
 } from '~/utils/types';
 import ChainUpdateProposalStatus from './ChainUpdateProposalStatus';
 import GtuTransferProposalStatus from './GtuTransferProposalStatus';
@@ -23,6 +25,8 @@ import RemoveBakerProposalStatus from './RemoveBakerStatus';
 import UpdateBakerStakeProposalStatus from './UpdateBakerStake';
 import UpdateBakerRestakeEarningsProposalStatus from './UpdateBakerRestakeEarnings';
 import { parse } from '~/utils/JSONHelper';
+import ConfigureBakerProposalStatus from './ConfigureBakerStatus';
+import ConfigureDelegationProposalStatus from './ConfigureDelegationStatus';
 
 interface ProposalStatusProps
     extends Pick<ProposalStatusViewProps, 'className'> {
@@ -114,6 +118,26 @@ export default function ProposalStatus({
     if (instanceOfRemoveBaker(parsed)) {
         return (
             <RemoveBakerProposalStatus
+                {...proposalStatusProps}
+                transaction={parsed}
+                status={status}
+            />
+        );
+    }
+
+    if (instanceOfConfigureBaker(parsed)) {
+        return (
+            <ConfigureBakerProposalStatus
+                {...proposalStatusProps}
+                transaction={parsed}
+                status={status}
+            />
+        );
+    }
+
+    if (instanceOfConfigureDelegation(parsed)) {
+        return (
+            <ConfigureDelegationProposalStatus
                 {...proposalStatusProps}
                 transaction={parsed}
                 status={status}
