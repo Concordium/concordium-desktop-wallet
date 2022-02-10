@@ -90,7 +90,9 @@ export default withDeps(function RemoveDelegation({ exchangeRate }: Props) {
         >
             title={removeDelegationTitle}
             convert={convert}
-            preview={DisplayValues}
+            preview={(p) => (
+                <DisplayValues {...p} exchangeRate={exchangeRate} />
+            )}
         >
             {({ account }) => ({
                 confirm: {

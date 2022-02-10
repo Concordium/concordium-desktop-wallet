@@ -84,7 +84,9 @@ export default withDeps(function RemoveBaker({ exchangeRate }: Props) {
         <MultiSigAccountTransactionFlow<RemoveBakerFlowState, ConfigureBaker>
             title={removeBakerTitle}
             convert={convert}
-            preview={DisplayValues}
+            preview={(p) => (
+                <DisplayValues {...p} exchangeRate={exchangeRate} />
+            )}
         >
             {({ account }) => ({
                 confirm: {
