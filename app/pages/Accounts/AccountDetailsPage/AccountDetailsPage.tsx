@@ -1,8 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, Route } from 'react-router';
-
-// import { LocationDescriptorObject } from 'histo'ry';
+// import { LocationDescriptorObject } from 'history';
 import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
 import {
     chosenAccountSelector,
@@ -10,7 +9,6 @@ import {
 } from '~/features/AccountSlice';
 import routes from '~/constants/routes.json';
 import { viewingShieldedSelector } from '~/features/TransactionSlice';
-
 import AccountBalanceView from '../AccountBalanceView';
 import AccountPageLayout from '../AccountPageLayout';
 import AccountViewActions from '../AccountViewActions';
@@ -37,6 +35,7 @@ import UpdateBakerStake from './UpdateBakerStake';
 import UpdateBakerPool from './UpdateBakerPool';
 import UpdateBakerKeys from './UpdateBakerKeys';
 import ConfigureDelegation from './ConfigureDelegation';
+import RemoveDelegation from './RemoveDelegation';
 
 const { Master, Detail } = MasterDetailPageLayout;
 const ToAccounts = () => <Redirect to={routes.ACCOUNTS} />;
@@ -63,7 +62,7 @@ export default withAccountSync(function DetailsPage() {
     }, [account?.address]);
 
     const isBaker = Boolean(accountInfo?.accountBaker);
-    const isDelegating = false;
+    // const isDelegating = false;
     const canTransfer = hasCredentials && Boolean(accountInfo);
 
     if (!account) {
@@ -179,9 +178,9 @@ export default withAccountSync(function DetailsPage() {
                     </Route>
                     <Route path={routes.ACCOUNTS_REMOVE_DELEGATION}>
                         {canTransfer &&
-                        isDelegating &&
+                        // isDelegating &&
                         accountInfo !== undefined ? (
-                            <UpdateBakerPool
+                            <RemoveDelegation
                                 account={account}
                                 accountInfo={accountInfo}
                             />

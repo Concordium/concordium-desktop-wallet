@@ -18,7 +18,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
     );
     const hasUsedEncrypted = hasEncryptedBalance(account);
     const isBaker = Boolean(accountInfo?.accountBaker);
-    const isDelegating = false;
+    // const isDelegating = false;
 
     return (
         <>
@@ -137,7 +137,8 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     Delegate to pool
                 </ButtonNavLink>
             )}
-            {accountHasDeployedCredentials && isDelegating && !isBaker && (
+            {/* accountHasDeployedCredentials && isDelegating && !isBaker && ( */}
+            {accountHasDeployedCredentials && !isBaker && (
                 <ButtonNavLink
                     className="mB20:notLast flex width100"
                     to={routes.ACCOUNTS_REMOVE_DELEGATION}

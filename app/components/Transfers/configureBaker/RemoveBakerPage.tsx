@@ -4,17 +4,17 @@ import Button from '~/cross-app-components/Button';
 import { useCalcBakerStakeCooldownUntil } from '~/utils/dataHooks';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import { AccountInfo } from '~/utils/types';
-
-import styles from './ConfigureBakerPage.module.scss';
 import { withPendingChangeGuard } from './util';
 
-interface DelegationStatusPageProps
+import styles from './ConfigureBakerPage.module.scss';
+
+interface RemoveBakerPageProps
     extends Pick<MultiStepFormPageProps<undefined>, 'onNext'> {
     accountInfo: AccountInfo | undefined;
 }
 
 const RemoveBakerPage = withPendingChangeGuard(
-    ({ onNext }: DelegationStatusPageProps) => {
+    ({ onNext }: RemoveBakerPageProps) => {
         const cooldownUntil = useCalcBakerStakeCooldownUntil();
 
         return (

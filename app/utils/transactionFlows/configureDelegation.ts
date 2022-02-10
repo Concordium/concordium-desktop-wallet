@@ -119,9 +119,12 @@ export const convertToConfigureDelegationTransaction = (
     account: Account,
     nonce: bigint,
     exchangeRate: Fraction,
-    accountInfo: AccountInfo
+    accountInfo?: AccountInfo
 ) => (values: ConfigureDelegationFlowState, expiry?: Date) => {
-    const existing = getExistingDelegationValues(accountInfo);
+    const existing =
+        accountInfo !== undefined
+            ? getExistingDelegationValues(accountInfo)
+            : undefined;
     const changes =
         existing !== undefined
             ? getDelegationFlowChanges(existing, values)

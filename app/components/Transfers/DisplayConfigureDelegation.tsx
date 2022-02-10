@@ -43,7 +43,7 @@ export default function DisplayConfigureDelegation({ transaction }: Props) {
             )}
             {payload.stake !== undefined && (
                 <>
-                    <h5 className={styles.title}>Staked amount:</h5>
+                    <h5 className={styles.title}>Delegated amount:</h5>
                     <p className={styles.amount}>
                         {displayAsGTU(payload.stake)}
                     </p>
@@ -51,7 +51,7 @@ export default function DisplayConfigureDelegation({ transaction }: Props) {
             )}
             {payload.restakeEarnings !== undefined && (
                 <>
-                    <h5 className={styles.title}>Restake earnings:</h5>
+                    <h5 className={styles.title}>Redelegate earnings:</h5>
                     <p className={styles.amount}>
                         {displayRedelegate(payload.restakeEarnings)}
                     </p>
