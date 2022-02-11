@@ -192,6 +192,8 @@ export enum TransactionKindString {
     TransferWithMemo = 'transferWithMemo',
     EncryptedAmountTransferWithMemo = 'encryptedAmountTransferWithMemo',
     TransferWithScheduleAndMemo = 'transferWithScheduleAndMemo',
+    ConfigureBaker = 'configureBaker',
+    ConfigureDelegation = 'configureDelegation',
 }
 
 // The ids of the different types of an AccountTransaction.

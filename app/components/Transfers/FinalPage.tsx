@@ -26,6 +26,7 @@ import {
     instanceOfEncryptedTransferWithMemo,
     instanceOfSimpleTransferWithMemo,
     instanceOfConfigureBaker,
+    instanceOfConfigureDelegation,
 } from '~/utils/types';
 
 export interface FinalPageLocationState {
@@ -84,6 +85,8 @@ function getSpecificsHandler(transaction: AccountTransaction) {
         amount = transaction.payload.plainTransferAmount;
     } else if (instanceOfConfigureBaker(transaction)) {
         title = 'Configure baker transaction submitted!';
+    } else if (instanceOfConfigureDelegation(transaction)) {
+        title = 'Configure delegation transaction submitted!';
     } else {
         throw new Error(
             `Unsupported transaction type - please implement: ${transaction}`

@@ -25,6 +25,11 @@ import {
     instanceOfSimpleTransferWithMemo,
     instanceOfScheduledTransferWithMemo,
     instanceOfEncryptedTransferWithMemo,
+    ConfigureBaker,
+    ConfigureDelegation,
+    instanceOfConfigureBaker,
+    instanceOfConfigureDelegation,
+    SerializedTextWithLength,
 } from '~/utils/types';
 import {
     serializeTransactionHeader,
@@ -38,6 +43,11 @@ import {
     serializeBakerKeyProofs,
     serializeUpdateBakerStake,
     serializeUpdateBakerRestakeEarnings,
+    serializeConfigureBaker,
+    serializeConfigureDelegation,
+    serializeConfigureBakerPayload,
+    getSerializedMetadataUrlWithLength,
+    getSerializedConfigureBakerBitmap,
 } from '~/utils/transactionSerialization';
 import pathAsBuffer from './Path';
 import {
@@ -65,6 +75,8 @@ const INS_REMOVE_BAKER = 0x14;
 const INS_UPDATE_BAKER_STAKE = 0x15;
 const INS_UPDATE_BAKER_RESTAKE_EARNINGS = 0x16;
 const INS_SIMPLE_TRANSFER_WITH_MEMO = 0x32;
+const INS_CONFIGURE_DELEGATION = 0x17;
+const INS_CONFIGURE_BAKER = 0x18;
 
 async function signSimpleTransfer(
     transport: Transport,
@@ -433,6 +445,111 @@ async function signUpdateBakerRestakeEarnings(
     return response.slice(0, 64);
 }
 
+async function signConfigureBaker(
+    transport: Transport,
+    path: number[],
+    transaction: ConfigureBaker
+): Promise<Buffer> {
+    let p1 = 0x00;
+    const p2 = 0x00;
+
+    const send = (cdata: Buffer) =>
+        transport.send(0xe0, INS_CONFIGURE_BAKER, p1, p2, cdata);
+
+    const payload = serializeConfigureBaker(transaction.payload);
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+    const bitmap = getSerializedConfigureBakerBitmap(transaction.payload);
+
+    const meta = Buffer.concat([
+        pathAsBuffer(path),
+        header,
+        Buffer.from(Uint8Array.of(TransactionKindId.Configure_baker)),
+        bitmap,
+    ]);
+
+    await send(meta);
+
+    // eslint-disable-next-line no-console
+    console.log('SENT META');
+
+    const { metadataUrl, ...noUrlPayload } = transaction.payload;
+
+    p1 = 0x01;
+    // TODO #delegation probably need to send keys and proofs separately.
+    const withoutUrl = serializeConfigureBakerPayload(noUrlPayload);
+    await send(withoutUrl);
+
+    // eslint-disable-next-line no-console
+    console.log('SENT PRE URL');
+
+    const {
+        data: urlBuffer = Buffer.concat([]),
+        length: urlLength = Buffer.concat([]),
+    } = metadataUrl
+        ? getSerializedMetadataUrlWithLength(metadataUrl)
+        : ({} as Partial<SerializedTextWithLength>);
+
+    p1 = 0x02;
+    await send(urlLength);
+
+    // eslint-disable-next-line no-console
+    console.log('SENT URL LENGTH');
+
+    p1 = 0x03;
+    let response;
+    const chunks = chunkBuffer(urlBuffer, 255);
+
+    for (let i = 0; i < chunks.length; i += 1) {
+        response = await send(Buffer.from(chunks[i]));
+    }
+
+    // eslint-disable-next-line no-console
+    console.log('SENT URL');
+
+    if (!response) {
+        throw new Error('Unexpected missing response from ledger;');
+    }
+
+    return response.slice(0, 64);
+}
+
+async function signConfigureDelegation(
+    transport: Transport,
+    path: number[],
+    transaction: ConfigureDelegation
+): Promise<Buffer> {
+    const payload = serializeConfigureDelegation(transaction.payload);
+
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+
+    const cdata = Buffer.concat([pathAsBuffer(path), header, payload]);
+
+    const p1 = 0x00;
+    const p2 = 0x00;
+
+    const response = await transport.send(
+        0xe0,
+        INS_CONFIGURE_DELEGATION,
+        p1,
+        p2,
+        cdata
+    );
+
+    return response.slice(0, 64);
+}
+
 export default async function signTransfer(
     transport: Transport,
     path: number[],
@@ -476,6 +593,12 @@ export default async function signTransfer(
     }
     if (instanceOfUpdateBakerRestakeEarnings(transaction)) {
         return signUpdateBakerRestakeEarnings(transport, path, transaction);
+    }
+    if (instanceOfConfigureBaker(transaction)) {
+        return signConfigureBaker(transport, path, transaction);
+    }
+    if (instanceOfConfigureDelegation(transaction)) {
+        return signConfigureDelegation(transport, path, transaction);
     }
     throw new Error(
         `The received transaction was not a supported transaction type`

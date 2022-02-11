@@ -21,6 +21,7 @@ import {
 } from '~/components/Form/util/validation';
 import { useUpdateEffect } from '~/utils/hooks';
 
+// TODO #delegation extend with new transactions
 interface FilterForm
     extends Pick<
         TransactionFilter,

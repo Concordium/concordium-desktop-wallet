@@ -116,6 +116,8 @@ function shieldedOnlyFilter(filter: TransactionFilter): TransactionFilter {
         updateCredentialKeys: false,
         updateBakerStake: false,
         updateBakerRestakeEarnings: false,
+        configureBaker: false,
+        configureDelegation: false,
     };
 
     return {

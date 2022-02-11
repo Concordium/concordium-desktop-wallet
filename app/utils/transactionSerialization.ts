@@ -410,8 +410,11 @@ const configureBakerOrder: Array<keyof ConfigureBakerPayload> = [
 const serializeVerifyKey = ([key, proof]: BakerKeyWithProof) =>
     Buffer.concat([putHexString(key), putHexString(proof)]);
 
+export const getSerializedMetadataUrlWithLength = (url: string) =>
+    getSerializedTextWithLength(url, encodeWord16);
+
 const serializeUrl = (url: string) => {
-    const { data, length } = getSerializedTextWithLength(url, encodeWord16);
+    const { data, length } = getSerializedMetadataUrlWithLength(url);
     return Buffer.concat([length, data]);
 };
 
@@ -428,16 +431,25 @@ const configureBakerSerializationSpec: SerializationSpec<ConfigureBakerPayload> 
     finalizationRewardCommission: orUndefined(encodeWord32),
 };
 
+export const getSerializedConfigureBakerBitmap = (
+    payload: ConfigureBakerPayload
+) => encodeWord16(getPayloadBitmap(payload, configureBakerOrder));
+
+export const serializeConfigureBakerPayload = (
+    payload: ConfigureBakerPayload
+) =>
+    serializePayloadFromSpec(
+        payload,
+        configureBakerSerializationSpec,
+        configureBakerOrder
+    );
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function serializeConfigureBaker(payload: ConfigureBakerPayload) {
     return Buffer.concat([
         putInt8(TransactionKind.Configure_baker),
-        encodeWord16(getPayloadBitmap(payload, configureBakerOrder)),
-        serializePayloadFromSpec(
-            payload,
-            configureBakerSerializationSpec,
-            configureBakerOrder
-        ),
+        getSerializedConfigureBakerBitmap(payload),
+        serializeConfigureBakerPayload(payload),
     ]);
 }
 
