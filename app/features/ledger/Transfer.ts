@@ -478,15 +478,46 @@ async function signConfigureBaker(
     // eslint-disable-next-line no-console
     console.log('SENT META');
 
-    const { metadataUrl, ...noUrlPayload } = transaction.payload;
+    const {
+        metadataUrl,
+        stake,
+        restakeEarnings,
+        openForDelegation,
+        electionVerifyKey,
+        signatureVerifyKey,
+        aggregationVerifyKey,
+        ...commissions
+    } = transaction.payload;
 
     p1 = 0x01;
-    // TODO #delegation probably need to send keys and proofs separately.
-    const withoutUrl = serializeConfigureBakerPayload(noUrlPayload);
-    await send(withoutUrl);
+    const settings = serializeConfigureBakerPayload({
+        stake,
+        restakeEarnings,
+        openForDelegation,
+    });
+    await send(settings);
 
     // eslint-disable-next-line no-console
-    console.log('SENT PRE URL');
+    console.log('SENT SETTINGS');
+
+    p1 = 0x02;
+    const keys = serializeConfigureBakerPayload({
+        electionVerifyKey,
+        signatureVerifyKey,
+    });
+    await send(keys);
+
+    // eslint-disable-next-line no-console
+    console.log('SENT KEYS');
+
+    p1 = 0x03;
+    const aggKey = serializeConfigureBakerPayload({
+        aggregationVerifyKey,
+    });
+    await send(aggKey);
+
+    // eslint-disable-next-line no-console
+    console.log('SENT AGG KEY');
 
     const {
         data: urlBuffer = Buffer.concat([]),
@@ -495,26 +526,28 @@ async function signConfigureBaker(
         ? getSerializedMetadataUrlWithLength(metadataUrl)
         : ({} as Partial<SerializedTextWithLength>);
 
-    p1 = 0x02;
+    p1 = 0x04;
     await send(urlLength);
 
     // eslint-disable-next-line no-console
     console.log('SENT URL LENGTH');
 
-    p1 = 0x03;
-    let response;
+    p1 = 0x05;
     const chunks = chunkBuffer(urlBuffer, 255);
 
     for (let i = 0; i < chunks.length; i += 1) {
-        response = await send(Buffer.from(chunks[i]));
+        await send(Buffer.from(chunks[i]));
     }
 
     // eslint-disable-next-line no-console
     console.log('SENT URL');
 
-    if (!response) {
-        throw new Error('Unexpected missing response from ledger;');
-    }
+    p1 = 0x06;
+    const comms = serializeConfigureBakerPayload(commissions);
+    const response = await send(comms);
+
+    // eslint-disable-next-line no-console
+    console.log('SENT AGG KEY');
 
     return response.slice(0, 64);
 }
