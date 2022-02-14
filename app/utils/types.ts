@@ -224,10 +224,12 @@ export enum TransactionKindId {
 export type BooleanFilters = { [P in TransactionKindString]?: boolean };
 type DateString = string;
 
-export interface TransactionFilter extends BooleanFilters {
+export interface TransactionDateFilter {
     fromDate?: DateString;
     toDate?: DateString;
 }
+
+export type TransactionFilter = BooleanFilters & TransactionDateFilter;
 
 /**
  * This Interface models the structure of the accounts stored in the database

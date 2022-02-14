@@ -20,25 +20,35 @@ import {
     pastDate,
 } from '~/components/Form/util/validation';
 import { useUpdateEffect } from '~/utils/hooks';
+import { hasDelegationProtocol } from '~/utils/protocolVersion';
 
-// TODO #delegation extend with new transactions
-interface FilterForm
+type CheckableFilters = Pick<
+    TransactionFilter,
+    | TransactionKindString.TransferToEncrypted
+    | TransactionKindString.TransferToPublic
+    | TransactionKindString.FinalizationReward
+    | TransactionKindString.BakingReward
+    | TransactionKindString.BlockReward
+    | TransactionKindString.UpdateCredentials
+    | TransactionKindString.ConfigureDelegation
+>;
+
+interface DateFilters {
+    toDate: Date | null | undefined;
+    fromDate: Date | null | undefined;
+}
+
+interface GroupedFilters
     extends Pick<
         TransactionFilter,
         | TransactionKindString.Transfer
         | TransactionKindString.TransferWithSchedule
-        | TransactionKindString.TransferToEncrypted
-        | TransactionKindString.TransferToPublic
         | TransactionKindString.EncryptedAmountTransfer
-        | TransactionKindString.FinalizationReward
-        | TransactionKindString.BakingReward
-        | TransactionKindString.BlockReward
-        | TransactionKindString.UpdateCredentials
     > {
-    toDate: Date | null | undefined;
-    fromDate: Date | null | undefined;
     bakerTransactions: boolean;
 }
+
+type FilterForm = CheckableFilters & DateFilters & GroupedFilters;
 
 const fieldNames: NotOptional<EqualRecord<FilterForm>> = {
     toDate: 'toDate',
@@ -59,13 +69,23 @@ const fieldNames: NotOptional<EqualRecord<FilterForm>> = {
     [TransactionKindString.UpdateCredentials]:
         TransactionKindString.UpdateCredentials,
     bakerTransactions: 'bakerTransactions',
+    [TransactionKindString.ConfigureDelegation]:
+        TransactionKindString.ConfigureDelegation,
 };
 
-const transactionFilters: {
-    field: keyof FilterForm;
-    group?: TransactionKindString[];
+interface CheckableField<F> {
+    field: F;
     display: string;
-}[] = [
+    pvFilter?: (pv: bigint) => boolean;
+}
+
+type SingleField = CheckableField<keyof CheckableFilters>;
+
+interface GroupedField extends CheckableField<keyof GroupedFilters> {
+    group: TransactionKindString[];
+}
+
+const transactionFilters: (SingleField | GroupedField)[] = [
     {
         field: TransactionKindString.Transfer,
         group: [
@@ -122,8 +142,14 @@ const transactionFilters: {
             TransactionKindString.UpdateBakerKeys,
             TransactionKindString.UpdateBakerRestakeEarnings,
             TransactionKindString.UpdateBakerStake,
+            TransactionKindString.ConfigureBaker,
         ],
         display: 'Baker transactions',
+    },
+    {
+        field: TransactionKindString.ConfigureDelegation,
+        display: 'Configure delegation',
+        pvFilter: hasDelegationProtocol,
     },
 ];
 
@@ -219,9 +245,10 @@ const TransactionFilters = forwardRef<
                     };
                 }
 
-                const filterGroup = transactionFilters.find(
-                    (t) => t.field === k
-                )?.group;
+                const filter = transactionFilters.find((t) => t.field === k) as
+                    | GroupedField
+                    | undefined;
+                const filterGroup = filter?.group;
 
                 if (!filterGroup) {
                     return { ...acc, [k]: v as boolean };
