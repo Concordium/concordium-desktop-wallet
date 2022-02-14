@@ -490,27 +490,19 @@ async function signConfigureBaker(
     } = transaction.payload;
 
     p1 = 0x01;
-    const settings = serializeConfigureBakerPayload({
+    const data = serializeConfigureBakerPayload({
         stake,
         restakeEarnings,
         openForDelegation,
-    });
-    await send(settings);
-
-    // eslint-disable-next-line no-console
-    console.log('SENT SETTINGS');
-
-    p1 = 0x02;
-    const keys = serializeConfigureBakerPayload({
         electionVerifyKey,
         signatureVerifyKey,
     });
-    await send(keys);
+    await send(data);
 
     // eslint-disable-next-line no-console
-    console.log('SENT KEYS');
+    console.log('SENT DATA');
 
-    p1 = 0x03;
+    p1 = 0x02;
     const aggKey = serializeConfigureBakerPayload({
         aggregationVerifyKey,
     });
@@ -526,13 +518,13 @@ async function signConfigureBaker(
         ? getSerializedMetadataUrlWithLength(metadataUrl)
         : ({} as Partial<SerializedTextWithLength>);
 
-    p1 = 0x04;
+    p1 = 0x03;
     await send(urlLength);
 
     // eslint-disable-next-line no-console
     console.log('SENT URL LENGTH');
 
-    p1 = 0x05;
+    p1 = 0x04;
     const chunks = chunkBuffer(urlBuffer, 255);
 
     for (let i = 0; i < chunks.length; i += 1) {
@@ -542,12 +534,12 @@ async function signConfigureBaker(
     // eslint-disable-next-line no-console
     console.log('SENT URL');
 
-    p1 = 0x06;
+    p1 = 0x05;
     const comms = serializeConfigureBakerPayload(commissions);
     const response = await send(comms);
 
     // eslint-disable-next-line no-console
-    console.log('SENT AGG KEY');
+    console.log('SENT COMMISSIONS');
 
     return response.slice(0, 64);
 }
