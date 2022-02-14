@@ -6,6 +6,7 @@ import ButtonNavLink from '~/components/ButtonNavLink';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
 import { createTransferWithAccountPathName } from '~/utils/accountRouterHelpers';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
+import { useProtocolVersion } from '~/utils/dataHooks';
 
 interface Props {
     account: Account;
@@ -18,6 +19,10 @@ export default function MoreActions({ account, accountInfo }: Props) {
     );
     const hasUsedEncrypted = hasEncryptedBalance(account);
     const isBaker = Boolean(accountInfo?.accountBaker);
+    const pv = useProtocolVersion();
+    const isDelegationPV = pv === BigInt(4);
+    const canDelegate =
+        isDelegationPV && !isBaker && accountHasDeployedCredentials;
     // const isDelegating = false;
 
     return (
@@ -105,13 +110,24 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     >
                         Update baker stake
                     </ButtonNavLink>
-                    <ButtonNavLink
-                        className="mB20:notLast flex width100"
-                        to={routes.ACCOUNTS_UPDATE_BAKER_POOL}
-                        disabled={!accountInfo}
-                    >
-                        Update baker pool
-                    </ButtonNavLink>
+                    {isDelegationPV && (
+                        <ButtonNavLink
+                            className="mB20:notLast flex width100"
+                            to={routes.ACCOUNTS_UPDATE_BAKER_POOL}
+                            disabled={!accountInfo}
+                        >
+                            Update baker pool
+                        </ButtonNavLink>
+                    )}
+                    {!isDelegationPV && (
+                        <ButtonNavLink
+                            className="mB20:notLast flex width100"
+                            to={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}
+                            disabled={!accountInfo}
+                        >
+                            Update baker restake earnings
+                        </ButtonNavLink>
+                    )}
                     <ButtonNavLink
                         className="mB20:notLast flex width100"
                         to={routes.ACCOUNTS_UPDATE_BAKER_KEYS}
@@ -119,16 +135,9 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     >
                         Update baker keys
                     </ButtonNavLink>
-                    {/* <ButtonNavLink
-                        className="mB20:notLast flex width100"
-                        to={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}
-                        disabled={!accountInfo}
-                    >
-                        Update baker restake earnings
-                    </ButtonNavLink> */}
                 </>
             )}
-            {accountHasDeployedCredentials && !isBaker && (
+            {canDelegate && (
                 <ButtonNavLink
                     className="mB20:notLast flex width100"
                     to={routes.ACCOUNTS_CONFIGURE_DELEGATION}
@@ -137,8 +146,8 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     Delegate to pool
                 </ButtonNavLink>
             )}
-            {/* accountHasDeployedCredentials && isDelegating && !isBaker && ( */}
-            {accountHasDeployedCredentials && !isBaker && (
+            {/* canDelegate && !isDelegating && ( */}
+            {canDelegate && (
                 <ButtonNavLink
                     className="mB20:notLast flex width100"
                     to={routes.ACCOUNTS_REMOVE_DELEGATION}

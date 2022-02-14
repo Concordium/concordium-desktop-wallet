@@ -215,3 +215,9 @@ export function useCalcBakerStakeCooldownUntil() {
         genesisTime
     );
 }
+
+export function useProtocolVersion(): bigint | undefined {
+    const { protocolVersion } = useConsensusStatus() ?? {};
+
+    return protocolVersion;
+}
