@@ -207,3 +207,11 @@ export function filterRecordEntries<K extends string | number | symbol, V>(
         return acc;
     }, result);
 }
+
+/**
+ * Takes a function producing a boolean result and flips it, returning a function producing the opposite.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const not = <A extends any[]>(
+    f: (...a: A) => boolean
+): ((...a: A) => boolean) => (...args) => !f(...args);

@@ -40,6 +40,7 @@ import ConfigureDelegation from './ConfigureDelegation';
 import RemoveDelegation from './RemoveDelegation';
 import { useProtocolVersion } from '~/utils/dataHooks';
 import { StakeSettings } from '~/utils/transactionFlows/configureBaker';
+import { hasDelegationProtocol } from '~/utils/protocolVersion';
 
 const { Master, Detail } = MasterDetailPageLayout;
 const ToAccounts = () => <Redirect to={routes.ACCOUNTS} />;
@@ -68,7 +69,7 @@ export default withAccountSync(function DetailsPage() {
 
     const isBaker = Boolean(accountInfo?.accountBaker);
     const isDelegating = false;
-    const isDelegationPV = pv !== undefined && pv >= BigInt(4);
+    const isDelegationPV = pv !== undefined && hasDelegationProtocol(pv);
     const canTransfer = hasCredentials && accountInfo !== undefined;
     const canDelegate = isDelegationPV && !isBaker && canTransfer;
 
@@ -199,7 +200,9 @@ export default withAccountSync(function DetailsPage() {
                         )}
                     </Route>
                     <Route path={routes.ACCOUNTS_UPDATE_BAKER_POOL}>
-                        {canDelegate && isBaker && accountInfo !== undefined ? (
+                        {isDelegationPV &&
+                        isBaker &&
+                        accountInfo !== undefined ? (
                             <UpdateBakerPool
                                 account={account}
                                 accountInfo={accountInfo}

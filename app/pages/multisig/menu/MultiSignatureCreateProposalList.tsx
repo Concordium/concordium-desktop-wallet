@@ -12,9 +12,11 @@ import { createProposalRoute } from '~/utils/routerHelper';
 import { proposalsSelector } from '~/features/MultiSignatureSlice';
 import { expireProposals } from '~/utils/ProposalHelper';
 import routes from '~/constants/routes.json';
+import { useProtocolVersion } from '~/utils/dataHooks';
+import { hasDelegationProtocol } from '~/utils/protocolVersion';
+import { not } from '~/utils/basicHelpers';
 
 import styles from '../MultiSignaturePage/MultiSignaturePage.module.scss';
-import { useProtocolVersion } from '~/utils/dataHooks';
 
 // Defines the list of options for creating multi signature transactions.
 const updateInstructionTypes: [TransactionTypes, UpdateType, string][] = [
@@ -131,43 +133,43 @@ const accountTransactionTypes: [
         TransactionTypes.AccountTransaction,
         TransactionKind.Add_baker,
         'Add baker',
-        (pv) => pv < BigInt(4),
+        not(hasDelegationProtocol),
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Update_baker_keys,
         'Update baker keys',
-        (pv) => pv < BigInt(4),
+        not(hasDelegationProtocol),
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Remove_baker,
         'Remove baker',
-        (pv) => pv < BigInt(4),
+        not(hasDelegationProtocol),
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Update_baker_stake,
         'Update baker stake',
-        (pv) => pv < BigInt(4),
+        not(hasDelegationProtocol),
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Update_baker_restake_earnings,
         'Update baker restake earnings',
-        (pv) => pv < BigInt(4),
+        not(hasDelegationProtocol),
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Configure_baker,
         'Configure baker',
-        (pv) => pv >= BigInt(4),
+        hasDelegationProtocol,
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Configure_delegation,
         'Configure delegation',
-        (pv) => pv >= BigInt(4),
+        hasDelegationProtocol,
     ],
 ];
 

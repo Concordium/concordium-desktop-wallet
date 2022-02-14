@@ -7,6 +7,7 @@ import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlic
 import { createTransferWithAccountPathName } from '~/utils/accountRouterHelpers';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
 import { useProtocolVersion } from '~/utils/dataHooks';
+import { hasDelegationProtocol } from '~/utils/protocolVersion';
 
 interface Props {
     account: Account;
@@ -20,7 +21,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
     const hasUsedEncrypted = hasEncryptedBalance(account);
     const isBaker = Boolean(accountInfo?.accountBaker);
     const pv = useProtocolVersion();
-    const isDelegationPV = pv !== undefined && pv >= BigInt(4);
+    const isDelegationPV = pv !== undefined && hasDelegationProtocol(pv);
     const canDelegate =
         isDelegationPV && !isBaker && accountHasDeployedCredentials;
     // const isDelegating = false;

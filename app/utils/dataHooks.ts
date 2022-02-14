@@ -220,4 +220,5 @@ export function useProtocolVersion(): bigint | undefined {
     const { protocolVersion } = useConsensusStatus() ?? {};
 
     return protocolVersion;
+    // return BigInt(4);
 }
