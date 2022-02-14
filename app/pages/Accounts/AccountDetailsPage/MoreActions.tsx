@@ -20,7 +20,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
     const hasUsedEncrypted = hasEncryptedBalance(account);
     const isBaker = Boolean(accountInfo?.accountBaker);
     const pv = useProtocolVersion();
-    const isDelegationPV = pv === BigInt(4);
+    const isDelegationPV = pv !== undefined && pv >= BigInt(4);
     const canDelegate =
         isDelegationPV && !isBaker && accountHasDeployedCredentials;
     // const isDelegating = false;

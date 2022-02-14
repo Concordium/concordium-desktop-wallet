@@ -68,7 +68,7 @@ export default withAccountSync(function DetailsPage() {
 
     const isBaker = Boolean(accountInfo?.accountBaker);
     const isDelegating = false;
-    const isDelegationPV = pv === BigInt(4);
+    const isDelegationPV = pv !== undefined && pv >= BigInt(4);
     const canTransfer = hasCredentials && accountInfo !== undefined;
     const canDelegate = isDelegationPV && !isBaker && canTransfer;
 

@@ -14,6 +14,7 @@ import { expireProposals } from '~/utils/ProposalHelper';
 import routes from '~/constants/routes.json';
 
 import styles from '../MultiSignaturePage/MultiSignaturePage.module.scss';
+import { useProtocolVersion } from '~/utils/dataHooks';
 
 // Defines the list of options for creating multi signature transactions.
 const updateInstructionTypes: [TransactionTypes, UpdateType, string][] = [
@@ -99,62 +100,128 @@ const updateInstructionTypes: [TransactionTypes, UpdateType, string][] = [
     ],
 ];
 
+/**
+ * [Transaction type, Transaction kind, Button label, Protocol version filter]
+ */
 const accountTransactionTypes: [
     TransactionTypes,
-    UpdateType | TransactionKind,
-    string
+    TransactionKind,
+    string,
+    ((pv: bigint) => boolean) | undefined
 ][] = [
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Update_credentials,
         'Update account credentials',
+        undefined,
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Simple_transfer,
         'Send CCD',
+        undefined,
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Transfer_with_schedule,
         'Send CCD with a schedule',
+        undefined,
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Add_baker,
         'Add baker',
+        (pv) => pv < BigInt(4),
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Update_baker_keys,
         'Update baker keys',
+        (pv) => pv < BigInt(4),
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Remove_baker,
         'Remove baker',
+        (pv) => pv < BigInt(4),
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Update_baker_stake,
         'Update baker stake',
+        (pv) => pv < BigInt(4),
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Update_baker_restake_earnings,
         'Update baker restake earnings',
+        (pv) => pv < BigInt(4),
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Configure_baker,
         'Configure baker',
+        (pv) => pv >= BigInt(4),
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Configure_delegation,
         'Configure delegation',
+        (pv) => pv >= BigInt(4),
     ],
 ];
+
+const configureBakerLinks = (
+    <>
+        <ButtonNavLink
+            className={styles.link}
+            to={routes.MULTISIGTRANSACTIONS_ADD_BAKER}
+        >
+            Add baker
+        </ButtonNavLink>
+        <ButtonNavLink
+            className={styles.link}
+            to={routes.MULTISIGTRANSACTIONS_REMOVE_BAKER}
+        >
+            Remove baker
+        </ButtonNavLink>
+        <ButtonNavLink
+            className={styles.link}
+            to={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_STAKE}
+        >
+            Update baker stake
+        </ButtonNavLink>
+        <ButtonNavLink
+            className={styles.link}
+            to={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_POOL}
+        >
+            Update baker pool
+        </ButtonNavLink>
+        <ButtonNavLink
+            className={styles.link}
+            to={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_KEYS}
+        >
+            Update baker keys
+        </ButtonNavLink>
+    </>
+);
+
+const configureDelegationLinks = (
+    <>
+        <ButtonNavLink
+            className={styles.link}
+            to={routes.MULTISIGTRANSACTIONS_CONFIGURE_DELEGATION}
+        >
+            Configure delegation
+        </ButtonNavLink>
+        <ButtonNavLink
+            className={styles.link}
+            to={routes.MULTISIGTRANSACTIONS_REMOVE_DELEGATION}
+        >
+            Withdraw delegation
+        </ButtonNavLink>
+    </>
+);
 
 /**
  * Component that displays a menu containing the available multi signature
@@ -163,18 +230,15 @@ const accountTransactionTypes: [
  */
 export default function MultiSignatureCreateProposalView() {
     const proposals = useSelector(proposalsSelector);
+    const pv = useProtocolVersion();
     const foundationTransactionsEnabled: boolean = useSelector(
         foundationTransactionsEnabledSelector
     );
     const dispatch = useDispatch();
 
-    let availableTransactionTypes = accountTransactionTypes;
-
-    if (foundationTransactionsEnabled) {
-        availableTransactionTypes = availableTransactionTypes.concat(
-            updateInstructionTypes
-        );
-    }
+    const availableTransactionTypes = foundationTransactionsEnabled
+        ? [...accountTransactionTypes, ...updateInstructionTypes]
+        : accountTransactionTypes;
 
     useEffect(() => {
         return expireProposals(proposals, dispatch);
@@ -183,87 +247,32 @@ export default function MultiSignatureCreateProposalView() {
     return (
         <>
             {availableTransactionTypes.map(
-                ([transactionType, specificType, label]) => (
-                    <Fragment key={`${transactionType}${specificType}`}>
-                        {[
-                            TransactionKindId.Configure_baker,
-                            TransactionKindId.Configure_delegation,
-                        ].every((k) => k !== specificType) && (
-                            <ButtonNavLink
-                                className={styles.link}
-                                to={createProposalRoute(
-                                    transactionType,
-                                    specificType
-                                )}
-                            >
-                                {label}
-                            </ButtonNavLink>
-                        )}
-                        {specificType === TransactionKindId.Configure_baker && (
-                            <>
+                ([transactionType, specificType, label, filter]) =>
+                    filter === undefined ||
+                    (pv !== undefined && filter(pv) && (
+                        <Fragment key={`${transactionType}${specificType}`}>
+                            {[
+                                TransactionKindId.Configure_baker,
+                                TransactionKindId.Configure_delegation,
+                            ].every((k) => k !== specificType) && (
                                 <ButtonNavLink
                                     className={styles.link}
-                                    to={routes.MULTISIGTRANSACTIONS_ADD_BAKER}
+                                    to={createProposalRoute(
+                                        transactionType,
+                                        specificType
+                                    )}
                                 >
-                                    Add baker
+                                    {label}
                                 </ButtonNavLink>
-                                <ButtonNavLink
-                                    className={styles.link}
-                                    to={
-                                        routes.MULTISIGTRANSACTIONS_REMOVE_BAKER
-                                    }
-                                >
-                                    Remove baker
-                                </ButtonNavLink>
-                                <ButtonNavLink
-                                    className={styles.link}
-                                    to={
-                                        routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_STAKE
-                                    }
-                                >
-                                    Update baker stake
-                                </ButtonNavLink>
-                                <ButtonNavLink
-                                    className={styles.link}
-                                    to={
-                                        routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_POOL
-                                    }
-                                >
-                                    Update baker pool
-                                </ButtonNavLink>
-                                <ButtonNavLink
-                                    className={styles.link}
-                                    to={
-                                        routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_KEYS
-                                    }
-                                >
-                                    Update baker keys
-                                </ButtonNavLink>
-                            </>
-                        )}
-                        {specificType ===
-                            TransactionKindId.Configure_delegation && (
-                            <>
-                                <ButtonNavLink
-                                    className={styles.link}
-                                    to={
-                                        routes.MULTISIGTRANSACTIONS_CONFIGURE_DELEGATION
-                                    }
-                                >
-                                    Configure delegation
-                                </ButtonNavLink>
-                                <ButtonNavLink
-                                    className={styles.link}
-                                    to={
-                                        routes.MULTISIGTRANSACTIONS_REMOVE_DELEGATION
-                                    }
-                                >
-                                    Withdraw delegation
-                                </ButtonNavLink>
-                            </>
-                        )}
-                    </Fragment>
-                )
+                            )}
+                            {specificType ===
+                                TransactionKindId.Configure_baker &&
+                                configureBakerLinks}
+                            {specificType ===
+                                TransactionKindId.Configure_delegation &&
+                                configureDelegationLinks}
+                        </Fragment>
+                    ))
             )}
         </>
     );

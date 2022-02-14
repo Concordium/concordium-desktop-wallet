@@ -7,10 +7,10 @@ import UpdateCredentialPage from './UpdateAccountCredentials/UpdateCredentialsPa
 import AddBaker from './OldBakerFlows/AddBaker';
 import UpdateBakerKeys from './OldBakerFlows/UpdateBakerKeys';
 import RemoveBaker from './OldBakerFlows/RemoveBaker';
-import ErrorBoundary from '~/components/ErrorBoundary';
-import routes from '~/constants/routes.json';
 import UpdateBakerStake from './OldBakerFlows/UpdateBakerStake';
 import UpdateBakerRestakeEarnings from './OldBakerFlows/UpdateBakerRestakeEarnings';
+import ErrorBoundary from '~/components/ErrorBoundary';
+import routes from '~/constants/routes.json';
 
 function AccountTransactionRoutes(): JSX.Element {
     const { transactionKind: transactionKindRaw } = useParams<{
