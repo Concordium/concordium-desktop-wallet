@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { useForm, useFormContext, Validate } from 'react-hook-form';
 import { Redirect } from 'react-router';
+import clsx from 'clsx';
 import AccountCard from '~/components/AccountCard';
 import Form from '~/components/Form';
 import ErrorMessage from '~/components/Form/ErrorMessage';
@@ -21,9 +22,9 @@ import {
 } from '~/utils/transactionFlows/configureDelegation';
 import { validateDelegateAmount } from '~/utils/transactionHelpers';
 import { Account, AccountInfo, EqualRecord, Fraction } from '~/utils/types';
+import DelegationPendingChange from '~/components/DelegationPendingChange';
 
 import styles from './DelegationPage.module.scss';
-import { withPendingDelegationChangeGuard } from './util';
 
 type SubState = DelegateSettings;
 
@@ -37,6 +38,7 @@ interface PickDelegateAmountProps {
     existing?: string;
     estimatedFee: Fraction;
     max: bigint;
+    hasPendingChange: boolean;
 }
 
 function PickDelegateAmount({
@@ -44,6 +46,7 @@ function PickDelegateAmount({
     estimatedFee,
     existing,
     max,
+    hasPendingChange,
 }: PickDelegateAmountProps) {
     const form = useFormContext<SubState>();
     const { errors } = form;
@@ -77,9 +80,12 @@ function PickDelegateAmount({
             )}
             <Label>Amount</Label>
             <div className="h1 mV5">
-                {getGTUSymbol()}
+                <span className={clsx(hasPendingChange && 'textFaded')}>
+                    {getGTUSymbol()}
+                </span>
                 <Form.GtuInput
                     name={fieldNames.amount}
+                    disabled={hasPendingChange}
                     autoFocus
                     rules={{
                         required: 'Please specify amount to delegate',
@@ -102,7 +108,7 @@ interface Props
     baseRoute: string;
 }
 
-function DelegationAmountPage({
+export default function DelegationAmountPage({
     onNext,
     initial,
     formValues: { target },
@@ -113,8 +119,10 @@ function DelegationAmountPage({
     baseRoute,
 }: Props) {
     const cooldownUntil = useCalcDelegateAmountCooldownUntil();
-    const maxDelegationAmount = BigInt(10000) * microGTUPerGTU; // TODO revise.
+    const maxDelegationAmount = BigInt(10000) * microGTUPerGTU; // TODO #delegation revise.
     const existing = getExistingDelegationValues(accountInfo);
+    // TODO #delegation not actual prop...
+    const { pendingChange } = (accountInfo as any)?.accountDelegation ?? {};
     const defaultValues: SubState = {
         amount: '0.00',
         redelegate: true,
@@ -159,7 +167,7 @@ function DelegationAmountPage({
                         you want to add rewards to the delegated amount.
                     </p>
                 )}
-                {existing && (
+                {existing && pendingChange === undefined && (
                     <p className="mT0">
                         Enter your new desired amount to delegate. If you raise
                         the stake it will take effect after two epochs, and if
@@ -170,12 +178,22 @@ function DelegationAmountPage({
                                 <br />
                                 <br />
                                 This grace period will last until
-                                <span className="block bodyEmphasized  mV10">
+                                <span className="block bodyEmphasized mV10">
                                     {getFormattedDateString(cooldownUntil)}
                                 </span>
                             </>
                         )}
                     </p>
+                )}
+                {pendingChange !== undefined && (
+                    <div className="mV10">
+                        Cannot update delegated amount at this time:
+                        <div className="bodyEmphasized textError mV10">
+                            <DelegationPendingChange pending={pendingChange} />
+                        </div>
+                        It will be possible to proceed after this time has
+                        passed.
+                    </div>
                 )}
                 {showAccountCard && (
                     <AccountCard account={account} accountInfo={accountInfo} />
@@ -185,6 +203,7 @@ function DelegationAmountPage({
                     existing={existing?.delegate?.amount}
                     estimatedFee={estimatedFee}
                     max={maxDelegationAmount}
+                    hasPendingChange={pendingChange !== undefined}
                 />
                 <p className="mB30">
                     By default all delegation rewards are added to the delegated
@@ -214,5 +233,3 @@ function DelegationAmountPage({
         </Form>
     );
 }
-
-export default withPendingDelegationChangeGuard(DelegationAmountPage);

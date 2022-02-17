@@ -11,6 +11,7 @@ import PickBakerRestake from '../PickBakerRestake';
 import Form from '../Form';
 import { StakeSettings } from '~/utils/transactionFlows/configureBaker';
 import { getFormattedDateString } from '~/utils/timeHelpers';
+import BakerPendingChange from '../BakerPendingChange';
 
 const fieldNames: EqualRecord<StakeSettings> = {
     stake: 'stake',
@@ -42,6 +43,7 @@ export default function BakerStakeSettings({
     showCooldown = false,
 }: Props) {
     const accountInfo = useAccountInfo(account.address);
+    const { pendingChange } = accountInfo?.accountBaker ?? {};
     const cooldownUntil = useCalcBakerStakeCooldownUntil();
 
     return (
@@ -58,7 +60,7 @@ export default function BakerStakeSettings({
                         transactions.
                     </p>
                 )}
-                {showCooldown && (
+                {showCooldown && pendingChange === undefined && (
                     <p className="mT0">
                         Enter your new desired amount to stake. If you raise the
                         stake it will take effect after two epochs, and if you
@@ -75,6 +77,16 @@ export default function BakerStakeSettings({
                             </>
                         )}
                     </p>
+                )}
+                {pendingChange !== undefined && (
+                    <div className="mV10">
+                        Cannot update baker stake at this time:
+                        <div className="bodyEmphasized textError mV10">
+                            <BakerPendingChange pending={pendingChange} />
+                        </div>
+                        It will be possible to proceed after this time has
+                        passed.
+                    </div>
                 )}
                 {showAccountCard && (
                     <AccountCard account={account} accountInfo={accountInfo} />
