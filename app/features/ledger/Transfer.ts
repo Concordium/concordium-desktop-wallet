@@ -55,7 +55,7 @@ import {
     encodeWord64,
     base58ToBuffer,
 } from '../../utils/serializationHelpers';
-import { chunkBuffer } from '~/utils/basicHelpers';
+import { chunkBuffer, isDefined } from '~/utils/basicHelpers';
 import { encodeAsCBOR } from '~/utils/cborHelper';
 import {
     signEncryptedTransfer,
@@ -452,8 +452,9 @@ async function signConfigureBaker(
 ): Promise<Buffer> {
     let p1 = 0x00;
     const p2 = 0x00;
+    let response: Buffer;
 
-    const send = (cdata: Buffer) =>
+    const send = (cdata: Buffer | undefined) =>
         transport.send(0xe0, INS_CONFIGURE_BAKER, p1, p2, cdata);
 
     const payload = serializeConfigureBaker(transaction.payload);
@@ -473,10 +474,7 @@ async function signConfigureBaker(
         bitmap,
     ]);
 
-    await send(meta);
-
-    // eslint-disable-next-line no-console
-    console.log('SENT META');
+    response = await send(meta);
 
     const {
         metadataUrl,
@@ -489,57 +487,51 @@ async function signConfigureBaker(
         ...commissions
     } = transaction.payload;
 
-    p1 = 0x01;
-    const data = serializeConfigureBakerPayload({
+    const dataPayload = {
         stake,
         restakeEarnings,
         openForDelegation,
         electionVerifyKey,
         signatureVerifyKey,
-    });
-    await send(data);
+    };
 
-    // eslint-disable-next-line no-console
-    console.log('SENT DATA');
+    if (Object.values(dataPayload).some(isDefined)) {
+        p1 = 0x01;
+        const data = serializeConfigureBakerPayload(dataPayload);
+        response = await send(data);
+    }
 
-    p1 = 0x02;
-    const aggKey = serializeConfigureBakerPayload({
-        aggregationVerifyKey,
-    });
-    await send(aggKey);
+    if (aggregationVerifyKey !== undefined) {
+        p1 = 0x02;
+        const aggKey = serializeConfigureBakerPayload({
+            aggregationVerifyKey,
+        });
+        response = await send(aggKey);
+    }
 
-    // eslint-disable-next-line no-console
-    console.log('SENT AGG KEY');
-
-    const {
-        data: urlBuffer = Buffer.concat([]),
-        length: urlLength = Buffer.concat([]),
-    } = metadataUrl
+    const { data: urlBuffer, length: urlLength } = metadataUrl
         ? getSerializedMetadataUrlWithLength(metadataUrl)
         : ({} as Partial<SerializedTextWithLength>);
 
-    p1 = 0x03;
-    await send(urlLength);
-
-    // eslint-disable-next-line no-console
-    console.log('SENT URL LENGTH');
-
-    p1 = 0x04;
-    const chunks = chunkBuffer(urlBuffer, 255);
-
-    for (let i = 0; i < chunks.length; i += 1) {
-        await send(Buffer.from(chunks[i]));
+    if (urlLength) {
+        p1 = 0x03;
+        response = await send(urlLength);
     }
 
-    // eslint-disable-next-line no-console
-    console.log('SENT URL');
+    if (urlBuffer !== undefined) {
+        p1 = 0x04;
+        const chunks = chunkBuffer(urlBuffer, 255);
 
-    p1 = 0x05;
-    const comms = serializeConfigureBakerPayload(commissions);
-    const response = await send(comms);
+        for (let i = 0; i < chunks.length; i += 1) {
+            response = await send(Buffer.from(chunks[i]));
+        }
+    }
 
-    // eslint-disable-next-line no-console
-    console.log('SENT COMMISSIONS');
+    if (Object.values(commissions).some(isDefined)) {
+        p1 = 0x05;
+        const comms = serializeConfigureBakerPayload(commissions);
+        response = await send(comms);
+    }
 
     return response.slice(0, 64);
 }
