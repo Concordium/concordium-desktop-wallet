@@ -20,11 +20,12 @@ export default function MoreActions({ account, accountInfo }: Props) {
     );
     const hasUsedEncrypted = hasEncryptedBalance(account);
     const isBaker = Boolean(accountInfo?.accountBaker);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const isDelegating = Boolean((accountInfo as any)?.accountDelegation); // TODO #delegation remove any and ensure correct prop name
     const pv = useProtocolVersion();
     const isDelegationPV = pv !== undefined && hasDelegationProtocol(pv);
     const canDelegate =
         isDelegationPV && !isBaker && accountHasDeployedCredentials;
-    // const isDelegating = false;
 
     return (
         <>
@@ -147,14 +148,13 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     Delegate to pool
                 </ButtonNavLink>
             )}
-            {/* canDelegate && !isDelegating && ( */}
-            {canDelegate && (
+            {canDelegate && isDelegating && (
                 <ButtonNavLink
                     className="mB20:notLast flex width100"
                     to={routes.ACCOUNTS_REMOVE_DELEGATION}
                     disabled={!accountInfo}
                 >
-                    Withdraw delegation
+                    Remove delegation
                 </ButtonNavLink>
             )}
         </>

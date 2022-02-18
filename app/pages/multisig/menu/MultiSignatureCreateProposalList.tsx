@@ -220,7 +220,7 @@ const configureDelegationLinks = (
             className={styles.link}
             to={routes.MULTISIGTRANSACTIONS_REMOVE_DELEGATION}
         >
-            Withdraw delegation
+            Remove delegation
         </ButtonNavLink>
     </>
 );

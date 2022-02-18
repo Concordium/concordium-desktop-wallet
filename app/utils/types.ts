@@ -304,39 +304,32 @@ export interface UpdateAccountCredentialsPayload {
     threshold: number;
 }
 
-// TODO: remove
 export type BakerVerifyKeys = {
     electionVerifyKey: Hex;
     signatureVerifyKey: Hex;
     aggregationVerifyKey: Hex;
 };
 
-// TODO: remove
 export type BakerKeyProofs = {
     proofElection: Hex;
     proofSignature: Hex;
     proofAggregation: Hex;
 };
 
-// TODO: remove
 export type AddBakerPayload = BakerVerifyKeys &
     BakerKeyProofs & {
         bakingStake: Amount;
         restakeEarnings: boolean;
     };
 
-// TODO: remove
 export type UpdateBakerKeysPayload = BakerVerifyKeys & BakerKeyProofs;
 
-// TODO: remove
 export type RemoveBakerPayload = {};
 
-// TODO: remove
 export type UpdateBakerStakePayload = {
     stake: Amount;
 };
 
-// TODO: remove
 export type UpdateBakerRestakeEarningsPayload = {
     restakeEarnings: boolean;
 };
