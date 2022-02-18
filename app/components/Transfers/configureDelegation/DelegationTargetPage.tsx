@@ -1,8 +1,9 @@
 import React from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Validate } from 'react-hook-form';
 import Form from '~/components/Form';
 import { validBigInt } from '~/components/Form/util/validation';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
+import { getPoolInfo } from '~/node/nodeRequests';
 import {
     ConfigureDelegationFlowState,
     getExistingDelegationValues,
@@ -46,6 +47,25 @@ export default function DelegationTargetPage({
     const form = useForm<FormState>({ mode: 'onTouched', defaultValues });
     const toSpecificPoolValue = form.watch(fieldNames.toSpecificPool);
 
+    const validateBakerId: Validate = async (value?: string) => {
+        if (value === undefined) {
+            return true;
+        }
+
+        try {
+            const bakerId = BigInt(value);
+            const res = await getPoolInfo('', bakerId);
+
+            if (res === undefined) {
+                throw new Error();
+            }
+
+            return true;
+        } catch {
+            return "Supplied baker ID doesn't match an active baker.";
+        }
+    };
+
     const handleSubmit = ({ toSpecificPool, poolId }: FormState) =>
         onNext(toSpecificPool && poolId !== undefined ? poolId : null);
 
@@ -87,7 +107,7 @@ export default function DelegationTargetPage({
                                 wholeNumber: validBigInt(
                                     "Baker ID's are positive whole numbers"
                                 ),
-                                // TODO check if baker ID exists.
+                                validateBakerId,
                             },
                         }}
                     />

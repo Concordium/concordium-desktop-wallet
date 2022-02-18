@@ -7,10 +7,10 @@ import Form from '~/components/Form';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import Label from '~/components/Label';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
-import { collapseFraction } from '~/utils/basicHelpers';
+import { collapseFraction, noOp } from '~/utils/basicHelpers';
 import { useCalcDelegateAmountCooldownUntil } from '~/utils/dataHooks';
-import { getGTUSymbol, microGTUPerGTU } from '~/utils/gtu';
-import { useUpdateEffect } from '~/utils/hooks';
+import { getGTUSymbol } from '~/utils/gtu';
+import { useAsyncMemo, useUpdateEffect } from '~/utils/hooks';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import {
     ConfigureDelegationFlowState,
@@ -21,8 +21,16 @@ import {
     getExistingDelegationValues,
 } from '~/utils/transactionFlows/configureDelegation';
 import { validateDelegateAmount } from '~/utils/transactionHelpers';
-import { Account, AccountInfo, EqualRecord, Fraction } from '~/utils/types';
+import {
+    Account,
+    AccountInfo,
+    BakerPoolStatus,
+    EqualRecord,
+    Fraction,
+} from '~/utils/types';
 import DelegationPendingChange from '~/components/DelegationPendingChange';
+import { getPoolInfo } from '~/node/nodeRequests';
+import Loading from '~/cross-app-components/Loading';
 
 import styles from './DelegationPage.module.scss';
 
@@ -37,7 +45,7 @@ interface PickDelegateAmountProps {
     accountInfo: AccountInfo;
     existing?: string;
     estimatedFee: Fraction;
-    max: bigint;
+    max?: bigint;
     hasPendingChange: boolean;
 }
 
@@ -54,9 +62,9 @@ function PickDelegateAmount({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const validDelegateAmount: Validate = useCallback(
         validateDelegateAmount(
-            max,
             accountInfo,
-            collapseFraction(estimatedFee)
+            collapseFraction(estimatedFee),
+            max
         ),
         [accountInfo, estimatedFee, max]
     );
@@ -119,9 +127,16 @@ export default function DelegationAmountPage({
     baseRoute,
 }: Props) {
     const cooldownUntil = useCalcDelegateAmountCooldownUntil();
-    const maxDelegationAmount = BigInt(10000) * microGTUPerGTU; // TODO #delegation revise.
+    const bh = ''; // TODO get proper block hash
+    const poolInfo = useAsyncMemo(
+        () => getPoolInfo('', target != null ? BigInt(target) : undefined),
+        noOp,
+        [bh, target]
+    );
     const existing = getExistingDelegationValues(accountInfo);
+
     // TODO #delegation not actual prop...
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { pendingChange } = (accountInfo as any)?.accountDelegation ?? {};
     const defaultValues: SubState = {
         amount: '0.00',
@@ -152,6 +167,10 @@ export default function DelegationAmountPage({
         exchangeRate,
         account.signatureThreshold
     );
+
+    if (poolInfo === undefined) {
+        return <Loading inline text="Loading delegation target data" />;
+    }
 
     return (
         <Form<SubState>
@@ -202,7 +221,7 @@ export default function DelegationAmountPage({
                     accountInfo={accountInfo}
                     existing={existing?.delegate?.amount}
                     estimatedFee={estimatedFee}
-                    max={maxDelegationAmount}
+                    max={(poolInfo as BakerPoolStatus).delegatedCapitalCap}
                     hasPendingChange={pendingChange !== undefined}
                 />
                 <p className="mB30">

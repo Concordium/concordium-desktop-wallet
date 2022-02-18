@@ -15,7 +15,7 @@ type Proofs = Hex;
 type Word64 = bigint;
 type Word32 = number;
 type Word16 = number;
-type BakerId = Word64;
+export type BakerId = Word64;
 export type Word8 = number;
 type JSONString = string; // indicates that it is some object that has been stringified.
 export type Amount = bigint;
@@ -1506,3 +1506,36 @@ export declare type DeepPartial<T> = T extends Array<infer U>
           [K in keyof T]?: DeepPartial<T[K]>;
       }
     : T;
+
+// Taken from here: https://github.com/Concordium/concordium-base/blob/57738f96a609d37695d64db442b3d7b93dcf2d1f/haskell-src/Concordium/Types/Queries.hs#L445
+export interface CurrentPaydayBakerPoolStatus {
+    // TODO missing fields...
+    delegatedCapital: Amount;
+}
+
+// TODO check if these are correct.
+export interface CommissionRates {
+    transactionFee: number;
+    bakingReward: number;
+    finalizationReward: number;
+}
+
+export interface BakerPoolStatus {
+    // TODO missing fields...
+    bakerId: BakerId;
+    bakerAddress: Hex;
+    bakerEquityCapital: Amount;
+    delegatedCapital: Amount;
+    delegatedCapitalCap: Amount;
+    poolInfo: unknown;
+    bakerStakePendingChange: unknown;
+    currentPaydayStatus: CurrentPaydayBakerPoolStatus;
+}
+
+export interface LPoolStatus {
+    // TODO missing fields...
+    delegatedCapital: Amount;
+    commissionRates: CommissionRates;
+}
+
+export type PoolStatus = BakerPoolStatus | LPoolStatus;

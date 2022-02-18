@@ -617,9 +617,9 @@ export function validateFee(
 }
 
 export const validateDelegateAmount = (
-    max: bigint,
     accountInfo: AccountInfo,
-    estimatedFee: bigint
+    estimatedFee: bigint,
+    max?: bigint
 ): Validate => (value: string) => {
     if (!isValidGTUString(value)) {
         return 'Value is not a valid CCD amount';
@@ -627,7 +627,7 @@ export const validateDelegateAmount = (
 
     const amount = toMicroUnits(value);
 
-    if (amount > max) {
+    if (max !== undefined && amount > max) {
         return `Cannot delegate more than (${displayAsGTU(max)})`;
     }
 

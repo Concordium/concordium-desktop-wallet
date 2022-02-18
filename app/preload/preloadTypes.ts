@@ -40,6 +40,8 @@ import {
     ArInfo,
     IdentityVersion,
     DecryptedTransferTransaction,
+    BakerId,
+    PoolStatus,
 } from '~/utils/types';
 import { ExternalCredential } from '../database/types';
 import type LedgerCommands from './preloadLedgerTypes';
@@ -112,6 +114,10 @@ export type GRPC = {
     getAnonymityRevokers: (blockHash: string) => Promise<ArInfo[] | undefined>;
     // We return a Uint8Array here, because PeerListResponse must be manually serialized/deserialized.
     getPeerList: (includeBootstrappers: boolean) => Promise<Uint8Array>;
+    getPoolInfo: (
+        blockHash: string,
+        bakerId?: BakerId
+    ) => Promise<PoolStatus | undefined>;
 };
 
 export type FileMethods = {

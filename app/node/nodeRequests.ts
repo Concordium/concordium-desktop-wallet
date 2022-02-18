@@ -68,4 +68,5 @@ export const {
     getConsensusStatus,
     getAccountInfo,
     getAccountInfoOfCredential,
+    getPoolInfo,
 } = window.grpc;
