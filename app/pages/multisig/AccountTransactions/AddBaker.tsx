@@ -2,6 +2,7 @@
 import React, { ComponentType, useCallback } from 'react';
 import { Redirect } from 'react-router';
 import { useSelector } from 'react-redux';
+import { ChainParameters } from '@concordium/node-sdk';
 import CommissionsPage from '~/components/Transfers/configureBaker/CommissionsPage';
 import DelegationStatusPage from '~/components/Transfers/configureBaker/DelegationStatusPage';
 import KeysPage from '~/components/Transfers/configureBaker/KeysPage';
@@ -41,12 +42,18 @@ import displayTransferStyles from '~/components/Transfers/transferDetails.module
 
 interface DisplayProps extends Partial<AddBakerFlowState & RequiredValues> {
     exchangeRate: Fraction;
+    chainParameters: ChainParameters;
 }
 
-const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
+const DisplayValues = ({
+    account,
+    exchangeRate,
+    chainParameters,
+    ...values
+}: DisplayProps) => {
     const sanitized = getSanitizedAddBakerValues(
         values,
-        getDefaultCommissions()
+        getDefaultCommissions(chainParameters)
     );
 
     const {
@@ -150,6 +157,7 @@ export default withDeps(function AddBaker({
     blockSummary,
 }: Props) {
     const accountsInfo = useSelector(accountsInfoSelector);
+    const cp = blockSummary.updates.chainParameters;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const convert = useCallback(
@@ -158,12 +166,12 @@ export default withDeps(function AddBaker({
             nonce: bigint
         ) =>
             convertToAddBakerTransaction(
-                getDefaultCommissions(),
+                getDefaultCommissions(cp),
                 account,
                 nonce,
                 exchangeRate
             )(values, values.expiry),
-        [exchangeRate]
+        [exchangeRate, cp]
     );
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -184,7 +192,11 @@ export default withDeps(function AddBaker({
             convert={convert}
             validate={validate}
             preview={(v) => (
-                <DisplayValues {...v} exchangeRate={exchangeRate} />
+                <DisplayValues
+                    {...v}
+                    exchangeRate={exchangeRate}
+                    chainParameters={cp}
+                />
             )}
         >
             {({ openForDelegation, account }) => ({
@@ -218,22 +230,20 @@ export default withDeps(function AddBaker({
                             toRoot
                         ),
                 },
-                commissions:
-                    openForDelegation !== OpenStatus.ClosedForAll
-                        ? {
-                              title: 'Pool settings',
-                              render: (initial, onNext) =>
-                                  account ? (
-                                      <CommissionsPage
-                                          initial={initial}
-                                          onNext={onNext}
-                                          account={account}
-                                      />
-                                  ) : (
-                                      toRoot
-                                  ),
-                          }
-                        : undefined,
+                commissions: {
+                    title: 'Pool settings',
+                    render: (initial, onNext) =>
+                        account ? (
+                            <CommissionsPage
+                                initial={initial}
+                                onNext={onNext}
+                                chainParameters={cp}
+                                account={account}
+                            />
+                        ) : (
+                            toRoot
+                        ),
+                },
                 metadataUrl:
                     openForDelegation !== OpenStatus.ClosedForAll
                         ? {

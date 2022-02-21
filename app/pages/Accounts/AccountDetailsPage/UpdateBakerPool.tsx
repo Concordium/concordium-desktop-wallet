@@ -24,6 +24,7 @@ import {
 import DelegationStatusPage from '~/components/Transfers/configureBaker/DelegationStatusPage';
 import CommissionsPage from '~/components/Transfers/configureBaker/CommissionsPage';
 import MetadataUrlPage from '~/components/Transfers/configureBaker/MetadataUrlPage';
+import withChainData from '~/utils/withChainData';
 
 interface Props
     extends UpdateBakerPoolDependencies,
@@ -33,22 +34,36 @@ interface Props
 type UnsafeProps = MakeRequired<Partial<Props>, 'account' | 'accountInfo'>;
 
 const hasNecessaryProps = (props: UnsafeProps): props is Props => {
-    return [props.exchangeRate, props.nonce].every(isDefined);
+    return [props.exchangeRate, props.nonce, props.blockSummary].every(
+        isDefined
+    );
 };
 
 const withDeps = (component: ComponentType<Props>) =>
     withNonce(
-        withExchangeRate(
-            ensureProps(
-                component,
-                hasNecessaryProps,
-                <AccountTransactionFlowLoading title={updateBakerPoolTitle} />
+        withChainData(
+            withExchangeRate(
+                ensureProps(
+                    component,
+                    hasNecessaryProps,
+                    <AccountTransactionFlowLoading
+                        title={updateBakerPoolTitle}
+                    />
+                )
             )
         )
     );
 
 export default withDeps(function UpdateBakerPool(props: Props) {
-    const { nonce, account, exchangeRate, accountInfo } = props;
+    const {
+        nonce,
+        account,
+        exchangeRate,
+        accountInfo,
+        blockSummary: {
+            updates: { chainParameters },
+        },
+    } = props;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const convert = useCallback(
@@ -88,6 +103,7 @@ export default withDeps(function UpdateBakerPool(props: Props) {
                                   <CommissionsPage
                                       initial={initial}
                                       onNext={onNext}
+                                      chainParameters={chainParameters}
                                       account={account}
                                   />
                               ),

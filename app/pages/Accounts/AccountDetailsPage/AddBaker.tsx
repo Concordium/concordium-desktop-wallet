@@ -61,16 +61,17 @@ const withDeps = (component: ComponentType<Props>) =>
 
 export default withDeps(function AddBaker(props: Props) {
     const { nonce, account, exchangeRate, blockSummary, accountInfo } = props;
+    const cp = blockSummary.updates.chainParameters;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const convert = useCallback(
         convertToAddBakerTransaction(
-            getDefaultCommissions(),
+            getDefaultCommissions(cp),
             account,
             nonce,
             exchangeRate
         ),
-        [account, nonce, exchangeRate]
+        [account, nonce, exchangeRate, cp]
     );
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -114,19 +115,17 @@ export default withDeps(function AddBaker(props: Props) {
                     ),
                     title: 'Pool settings',
                 },
-                commissions:
-                    openForDelegation !== OpenStatus.ClosedForAll
-                        ? {
-                              render: (initial, onNext) => (
-                                  <CommissionsPage
-                                      initial={initial}
-                                      onNext={onNext}
-                                      account={account}
-                                  />
-                              ),
-                              title: 'Pool settings',
-                          }
-                        : undefined,
+                commissions: {
+                    render: (initial, onNext) => (
+                        <CommissionsPage
+                            initial={initial}
+                            onNext={onNext}
+                            chainParameters={cp}
+                            account={account}
+                        />
+                    ),
+                    title: 'Pool settings',
+                },
                 metadataUrl:
                     openForDelegation !== OpenStatus.ClosedForAll
                         ? {

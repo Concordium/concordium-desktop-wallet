@@ -38,9 +38,10 @@ import {
     getBakerFlowChanges,
     getEstimatedConfigureBakerFee,
 } from '~/utils/transactionFlows/configureBaker';
+import DisplayMetadataUrl from '~/components/Transfers/DisplayMetadataUrl';
+import withChainData from '~/utils/withChainData';
 
 import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
-import DisplayMetadataUrl from '~/components/Transfers/DisplayMetadataUrl';
 
 interface DisplayProps
     extends Partial<UpdateBakerPoolFlowState & RequiredValues> {
@@ -124,20 +125,26 @@ type Props = UpdateBakerPoolDependencies;
 type UnsafeProps = Partial<Props>;
 
 const hasNecessaryProps = (props: UnsafeProps): props is Props =>
-    [props.exchangeRate].every(isDefined);
+    [props.exchangeRate, props.blockSummary].every(isDefined);
 
 const withDeps = (component: ComponentType<Props>) =>
-    withExchangeRate(
-        ensureProps(
-            component,
-            hasNecessaryProps,
-            <MultiSigAccountTransactionFlowLoading
-                title={updateBakerPoolTitle}
-            />
+    withChainData(
+        withExchangeRate(
+            ensureProps(
+                component,
+                hasNecessaryProps,
+                <MultiSigAccountTransactionFlowLoading
+                    title={updateBakerPoolTitle}
+                />
+            )
         )
     );
-
-export default withDeps(function UpdateBakerPool({ exchangeRate }: Props) {
+export default withDeps(function UpdateBakerPool({
+    exchangeRate,
+    blockSummary: {
+        updates: { chainParameters },
+    },
+}: Props) {
     const accountsInfo = useSelector(accountsInfoSelector);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -189,6 +196,7 @@ export default withDeps(function UpdateBakerPool({ exchangeRate }: Props) {
                                       <CommissionsPage
                                           initial={initial}
                                           onNext={onNext}
+                                          chainParameters={chainParameters}
                                           account={account}
                                       />
                                   ) : (

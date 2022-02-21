@@ -9,6 +9,7 @@ import {
     NotOptional,
     OpenStatus,
 } from '../types';
+import { ChainData } from '../withChainData';
 import {
     ConfigureBakerFlowState,
     convertToBakerTransaction,
@@ -17,7 +18,8 @@ import {
 
 export const updateBakerPoolTitle = 'Update baker pool';
 
-export type UpdateBakerPoolDependencies = NotOptional<ExchangeRate>;
+export type UpdateBakerPoolDependencies = NotOptional<ExchangeRate> &
+    NotOptional<ChainData>;
 
 export type UpdateBakerPoolFlowState = MakeRequired<
     Pick<

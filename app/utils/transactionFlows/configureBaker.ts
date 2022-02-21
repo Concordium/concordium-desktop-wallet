@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { AccountInfo } from '@concordium/node-sdk';
+import { AccountInfo, ChainParameters } from '@concordium/node-sdk';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { isDefined, multiplyFraction } from '../basicHelpers';
 import { microGtuToGtu, toMicroUnits } from '../gtu';
@@ -48,10 +48,15 @@ export interface ConfigureBakerFlowState {
 }
 
 // TODO: default values should be upper bound from chain.
-export const getDefaultCommissions = (): Commissions => ({
-    transactionFeeCommission: 15000,
-    bakingRewardCommission: 15000,
-    finalizationRewardCommission: 15000,
+export const getDefaultCommissions = (
+    chainParameters: ChainParameters
+): Commissions => ({
+    transactionFeeCommission:
+        (chainParameters as any)?.transactionCommissionRange?.max ?? 15000, // TODO remove defaults.
+    bakingRewardCommission:
+        (chainParameters as any)?.bakingCommissionRange?.max ?? 75000,
+    finalizationRewardCommission:
+        (chainParameters as any)?.finalizationCommissionRange?.max ?? 100000,
 });
 
 export const toConfigureBakerPayload = ({

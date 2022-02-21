@@ -1,4 +1,5 @@
-import { RewardFraction } from '@concordium/node-sdk';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { ChainParameters, RewardFraction } from '@concordium/node-sdk';
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -56,26 +57,26 @@ const renderExistingValue = (value: number) =>
 interface CommissionFieldProps {
     label: string;
     name: string;
-    from: RewardFraction;
-    to: RewardFraction;
+    min: RewardFraction;
+    max: RewardFraction;
     existing: RewardFraction | undefined;
 }
 
 const CommissionField = ({
     label,
     name,
-    from,
-    to,
+    min,
+    max,
     existing,
 }: CommissionFieldProps) => {
-    const fromFormatted = fractionResolutionToPercentage(from);
-    const toFormatted = fractionResolutionToPercentage(to);
+    const minFormatted = fractionResolutionToPercentage(min);
+    const maxFormatted = fractionResolutionToPercentage(max);
 
-    if (from === to) {
+    if (min === max) {
         return (
             <div>
                 <Label className="mB5">{label}</Label>
-                <span className="textFaded body2">{fromFormatted}%</span>
+                <span className="textFaded body2">{minFormatted}%</span>
             </div>
         );
     }
@@ -91,8 +92,8 @@ const CommissionField = ({
             <Form.Slider
                 label={label}
                 name={name}
-                min={fromFormatted}
-                max={toFormatted}
+                min={minFormatted}
+                max={maxFormatted}
                 {...commonSliderProps}
             />
         </>
@@ -105,27 +106,20 @@ interface CommissionsPageProps
         'formValues'
     > {
     account: Account;
+    chainParameters: ChainParameters;
 }
 
 export default function CommissionsPage({
     initial,
     onNext,
     account,
+    chainParameters,
 }: CommissionsPageProps) {
     const accountInfo = useSelector(accountInfoSelector(account));
 
-    // TODO: get values from chain
-    const boundaries: {
-        [P in keyof Commissions]: [number, number];
-    } = {
-        transactionFeeCommission: [5000, 15000],
-        bakingRewardCommission: [50000, 100000],
-        finalizationRewardCommission: [100000, 100000],
-    };
-
     const { commissions: existing } = getExistingBakerValues(accountInfo) ?? {};
     const defaultValues: Commissions = {
-        ...getDefaultCommissions(),
+        ...getDefaultCommissions(chainParameters),
         ...existing,
         ...initial,
     };
@@ -157,25 +151,44 @@ export default function CommissionsPage({
                     When you open your baker as a pool, you have to set
                     commission rates. You can do so below:
                 </p>
+                {/* TODO #delegation remove defaults and any casts */}
                 <CommissionField
                     label="Transaction fee commissions"
                     name={commissionsFieldNames.transactionFeeCommission}
-                    from={boundaries.transactionFeeCommission[0]}
-                    to={boundaries.transactionFeeCommission[1]}
+                    min={
+                        (chainParameters as any)?.transactionCommissionRange
+                            ?.min ?? 5000
+                    }
+                    max={
+                        (chainParameters as any)?.transactionCommissionRange
+                            ?.max ?? 15000
+                    }
                     existing={existing?.transactionFeeCommission}
                 />
                 <CommissionField
                     label="Baking reward commissions"
                     name={commissionsFieldNames.bakingRewardCommission}
-                    from={boundaries.bakingRewardCommission[0]}
-                    to={boundaries.bakingRewardCommission[1]}
+                    min={
+                        (chainParameters as any)?.bakingCommissionRange?.min ??
+                        50000
+                    }
+                    max={
+                        (chainParameters as any)?.bakingCommissionRange?.max ??
+                        100000
+                    }
                     existing={existing?.bakingRewardCommission}
                 />
                 <CommissionField
                     label="Finalization reward commissions"
                     name={commissionsFieldNames.finalizationRewardCommission}
-                    from={boundaries.finalizationRewardCommission[0]}
-                    to={boundaries.finalizationRewardCommission[1]}
+                    min={
+                        (chainParameters as any)?.finalizationCommissionRange
+                            ?.min ?? 100000
+                    }
+                    max={
+                        (chainParameters as any)?.finalizationCommissionRange
+                            ?.max ?? 100000
+                    }
                     existing={existing?.finalizationRewardCommission}
                 />
             </div>
