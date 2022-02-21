@@ -159,12 +159,15 @@ export default function MultiStepForm<
         const currentIndex = newPages.findIndex((p) => p.substate === substate);
 
         if (currentIndex === -1) {
+            // Could not find current page. Should not happen.
             dispatch(replace(baseRoute));
         } else if (currentIndex !== newPages.length - 1) {
+            // From any page that isn't the last, to the next in line.
             const { route } = newPages[currentIndex + 1] ?? {};
 
             dispatch(push(route));
         } else {
+            // On final page. Do validation -> trigger done.
             const invalidPage = pages.find(
                 (p) => p.substate === validate(newValues as F)
             );

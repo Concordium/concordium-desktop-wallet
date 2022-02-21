@@ -37,9 +37,9 @@ import { ensureProps } from '~/utils/componentHelpers';
 import { isDefined } from '~/utils/basicHelpers';
 import { accountsInfoSelector } from '~/features/AccountSlice';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
+import DisplayMetadataUrl from '~/components/Transfers/DisplayMetadataUrl';
 
 import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
-import DisplayMetadataUrl from '~/components/Transfers/DisplayMetadataUrl';
 
 interface DisplayProps extends Partial<AddBakerFlowState & RequiredValues> {
     exchangeRate: Fraction;

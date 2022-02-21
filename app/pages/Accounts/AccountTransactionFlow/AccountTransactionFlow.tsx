@@ -92,6 +92,7 @@ export default function AccountTransactionFlow<
         const transaction = convert(v);
         const serialized = stringify(transaction);
 
+        // Replace current history entry with one updated with current state. Makes going back to flow from submit possible
         dispatch(replace(pathname, v));
 
         const locationState: SubmitTransactionLocationState = {
