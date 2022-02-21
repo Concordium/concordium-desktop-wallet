@@ -50,11 +50,13 @@ const MetadataUrlPage = ({
                     Leave it blank if you don&apos;t have any.
                 </p>
                 <div className="mT50">
-                    {existing && (
+                    {existing !== undefined && (
                         <div className="body3 mono mB10">
                             Current url:
                             <br />
-                            {existing}
+                            {existing || (
+                                <span className="textFaded">Empty</span>
+                            )}
                         </div>
                     )}
                     <Form.Input

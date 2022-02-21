@@ -175,7 +175,7 @@ export default withDeps(function UpdateBakerPool({
         >
             {({ openForDelegation, account }) => ({
                 openForDelegation: {
-                    title: 'Pool settings',
+                    title: 'Pool open status',
                     render: (initial, onNext) =>
                         account ? (
                             <DelegationStatusPage
@@ -190,7 +190,7 @@ export default withDeps(function UpdateBakerPool({
                 commissions:
                     openForDelegation !== OpenStatus.ClosedForAll
                         ? {
-                              title: 'Pool settings',
+                              title: 'Commission rates',
                               render: (initial, onNext) =>
                                   account ? (
                                       <CommissionsPage
@@ -204,22 +204,19 @@ export default withDeps(function UpdateBakerPool({
                                   ),
                           }
                         : undefined,
-                metadataUrl:
-                    openForDelegation !== OpenStatus.ClosedForAll
-                        ? {
-                              title: 'Pool settings',
-                              render: (initial, onNext) =>
-                                  account ? (
-                                      <MetadataUrlPage
-                                          initial={initial}
-                                          onNext={onNext}
-                                          account={account}
-                                      />
-                                  ) : (
-                                      toRoot
-                                  ),
-                          }
-                        : undefined,
+                metadataUrl: {
+                    title: 'Metadata URL',
+                    render: (initial, onNext) =>
+                        account ? (
+                            <MetadataUrlPage
+                                initial={initial}
+                                onNext={onNext}
+                                account={account}
+                            />
+                        ) : (
+                            toRoot
+                        ),
+                },
             })}
         </MultiSigAccountTransactionFlow>
     );

@@ -42,12 +42,6 @@ export const getSanitizedBakerPoolValues = (
 
     if (values.openForDelegation === OpenStatus.ClosedForAll) {
         sanitized.commissions = existing.commissions;
-        sanitized.metadataUrl = existing.metadataUrl;
-    } else if (
-        existing.metadataUrl === undefined &&
-        values.metadataUrl === ''
-    ) {
-        delete sanitized.metadataUrl;
     }
 
     return sanitized;

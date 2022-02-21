@@ -110,19 +110,16 @@ export default withDeps(function UpdateBakerPool(props: Props) {
                               title: 'Pool settings',
                           }
                         : undefined,
-                metadataUrl:
-                    openForDelegation !== OpenStatus.ClosedForAll
-                        ? {
-                              render: (initial, onNext) => (
-                                  <MetadataUrlPage
-                                      initial={initial}
-                                      onNext={onNext}
-                                      account={account}
-                                  />
-                              ),
-                              title: 'Pool settings',
-                          }
-                        : undefined,
+                metadataUrl: {
+                    render: (initial, onNext) => (
+                        <MetadataUrlPage
+                            initial={initial}
+                            onNext={onNext}
+                            account={account}
+                        />
+                    ),
+                    title: 'Pool settings',
+                },
             })}
         </AccountTransactionFlow>
     );

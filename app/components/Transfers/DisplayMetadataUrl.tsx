@@ -19,11 +19,11 @@ export default function DisplayMetadataUrl({
     return (
         <>
             <h5 className={styles.title}>Metadata URL:</h5>
-            {metadataUrl !== undefined ? (
+            {metadataUrl ? (
                 <p className={styles.amount}>{metadataUrl}</p>
             ) : (
                 <p className={clsx(styles.amount, 'textFaded')}>
-                    {metadataUrl === '' ? 'Deleted' : 'To be determined'}
+                    {metadataUrl === '' ? 'Empty' : 'To be determined'}
                 </p>
             )}
         </>

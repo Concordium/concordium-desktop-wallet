@@ -45,10 +45,8 @@ export const getSanitizedAddBakerValues = (
 
     if (values.openForDelegation === OpenStatus.ClosedForAll) {
         // Ensure default pool settings are used when opting for closed pool.
-        delete sanitized.metadataUrl;
+        sanitized.metadataUrl = '';
         sanitized.commissions = defaultCommissions;
-    } else if (values.metadataUrl === '') {
-        delete sanitized.metadataUrl;
     }
 
     return sanitized;

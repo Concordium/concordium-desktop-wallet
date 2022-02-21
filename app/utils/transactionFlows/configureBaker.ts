@@ -83,7 +83,7 @@ export const toConfigureBakerPayload = ({
     stake: stake?.stake !== undefined ? toMicroUnits(stake.stake) : undefined,
     restakeEarnings: stake?.restake,
     openForDelegation,
-    metadataUrl: metadataUrl !== undefined ? metadataUrl : undefined,
+    metadataUrl,
     ...commissions,
 });
 

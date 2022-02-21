@@ -39,6 +39,7 @@ import { accountsInfoSelector } from '~/features/AccountSlice';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
+import DisplayMetadataUrl from '~/components/Transfers/DisplayMetadataUrl';
 
 interface DisplayProps extends Partial<AddBakerFlowState & RequiredValues> {
     exchangeRate: Fraction;
@@ -111,9 +112,7 @@ const DisplayValues = ({
                 value={commissions?.finalizationRewardCommission}
                 placeholder
             />
-            {metadataUrl && (
-                <PlainDetail title="Metadata URL" value={metadataUrl} />
-            )}
+            <DisplayMetadataUrl metadataUrl={metadataUrl} placeholder />
             <DisplayPublicKey
                 name="Election verify key:"
                 publicKey={keys?.electionPublic}
@@ -218,7 +217,7 @@ export default withDeps(function AddBaker({
                         ),
                 },
                 openForDelegation: {
-                    title: 'Pool settings',
+                    title: 'Pool open status',
                     render: (initial, onNext) =>
                         account ? (
                             <DelegationStatusPage
@@ -231,7 +230,7 @@ export default withDeps(function AddBaker({
                         ),
                 },
                 commissions: {
-                    title: 'Pool settings',
+                    title: 'Commission rates',
                     render: (initial, onNext) =>
                         account ? (
                             <CommissionsPage
@@ -247,7 +246,7 @@ export default withDeps(function AddBaker({
                 metadataUrl:
                     openForDelegation !== OpenStatus.ClosedForAll
                         ? {
-                              title: 'Pool settings',
+                              title: 'Metadata URL',
                               render: (initial, onNext) =>
                                   account ? (
                                       <MetadataUrlPage
