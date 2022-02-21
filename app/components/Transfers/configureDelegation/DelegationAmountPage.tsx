@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useForm, useFormContext, Validate } from 'react-hook-form';
 import { Redirect } from 'react-router';
 import clsx from 'clsx';
@@ -29,8 +29,8 @@ import {
     Fraction,
 } from '~/utils/types';
 import DelegationPendingChange from '~/components/DelegationPendingChange';
-import { getPoolInfo } from '~/node/nodeRequests';
 import Loading from '~/cross-app-components/Loading';
+import { getPoolInfoLatest } from '~/node/nodeHelpers';
 
 import styles from './DelegationPage.module.scss';
 
@@ -127,11 +127,10 @@ export default function DelegationAmountPage({
     baseRoute,
 }: Props) {
     const cooldownUntil = useCalcDelegateAmountCooldownUntil();
-    const bh = ''; // TODO get proper block hash
     const poolInfo = useAsyncMemo(
-        () => getPoolInfo('', target != null ? BigInt(target) : undefined),
+        () => getPoolInfoLatest(target != null ? BigInt(target) : undefined),
         noOp,
-        [bh, target]
+        [target]
     );
     const existing = getExistingDelegationValues(accountInfo);
 
@@ -149,10 +148,6 @@ export default function DelegationAmountPage({
         defaultValues,
     });
 
-    if (target === undefined) {
-        return <Redirect to={baseRoute} />;
-    }
-
     const values = form.watch();
     const allValues: ConfigureDelegationFlowState = {
         target,
@@ -162,11 +157,24 @@ export default function DelegationAmountPage({
         existing !== undefined
             ? getDelegationFlowChanges(existing, allValues)
             : allValues;
-    const estimatedFee = getEstimatedConfigureDelegationFee(
-        changes,
-        exchangeRate,
-        account.signatureThreshold
+
+    const redelgateChanged = changes.delegate?.redelegate === undefined;
+    const amountChanged = changes.delegate?.amount === undefined;
+
+    const estimatedFee = useMemo(
+        () =>
+            getEstimatedConfigureDelegationFee(
+                changes,
+                exchangeRate,
+                account.signatureThreshold
+            ),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [redelgateChanged, amountChanged] // fee only changes when
     );
+
+    if (target === undefined) {
+        return <Redirect to={baseRoute} />;
+    }
 
     if (poolInfo === undefined) {
         return <Loading inline text="Loading delegation target data" />;

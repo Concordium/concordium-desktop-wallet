@@ -6,6 +6,7 @@ import {
 import { credentials, Metadata } from '@grpc/grpc-js';
 import SendTransactionClient from '~/node/ConcordiumNodeClient';
 import { GRPC, ConsensusAndGlobalResult } from '~/preload/preloadTypes';
+import { toMicroUnits } from '~/utils/gtu';
 import { BakerId, BakerPoolStatus } from '~/utils/types';
 
 const defaultDeadlineMs = 15000;
@@ -107,11 +108,11 @@ const exposedMethods: GRPC = {
         const dummyPoolInfo: BakerPoolStatus = {
             bakerId: BigInt(123),
             bakerAddress: '123',
-            delegatedCapital: BigInt(123),
-            bakerEquityCapital: BigInt(123),
-            delegatedCapitalCap: BigInt(1230),
+            delegatedCapital: toMicroUnits('123'),
+            bakerEquityCapital: toMicroUnits('123'),
+            delegatedCapitalCap: toMicroUnits('1234'),
             currentPaydayStatus: {
-                delegatedCapital: BigInt(123),
+                delegatedCapital: toMicroUnits('123'),
             },
             poolInfo: '',
             bakerStakePendingChange: '',

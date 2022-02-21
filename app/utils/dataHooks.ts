@@ -26,6 +26,7 @@ import {
     IpInfo,
     ArInfo,
 } from './types';
+import { noOp } from './basicHelpers';
 
 /** Hook for looking up an account name from an address */
 export function useAccountName(address: string) {
@@ -90,12 +91,12 @@ export function useLastFinalizedBlockSummary() {
     return useAsyncMemo<{
         lastFinalizedBlockSummary: BlockSummary;
         consensusStatus: ConsensusStatus;
-    }>(fetchLastFinalizedBlockSummary);
+    }>(fetchLastFinalizedBlockSummary, noOp, []);
 }
 
 /** Hook for fetching consensus status */
 export function useConsensusStatus() {
-    return useAsyncMemo<ConsensusStatus>(getConsensusStatus);
+    return useAsyncMemo<ConsensusStatus>(getConsensusStatus, noOp, []);
 }
 
 /** Hook for fetching identity providers */
@@ -217,7 +218,7 @@ export function useCalcBakerStakeCooldownUntil() {
 }
 
 export function useProtocolVersion(): bigint | undefined {
-    const { protocolVersion } = useConsensusStatus() ?? {};
+    // const { protocolVersion } = useConsensusStatus() ?? {};
 
     return protocolVersion;
     // return BigInt(4);

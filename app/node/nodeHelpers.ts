@@ -11,6 +11,7 @@ import {
     getAnonymityRevokers,
     getPeerList,
     getTransactionStatus,
+    getPoolInfo,
 } from './nodeRequests';
 import { PeerElement } from '../proto/concordium_p2p_rpc_pb';
 import {
@@ -52,6 +53,22 @@ export async function fetchLastFinalizedBlockSummary() {
         lastFinalizedBlockSummary,
     };
 }
+
+/**
+ * Takes a function expecting a blockHash as the first argument, and returns a new function with the hash of the last block applied to it.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const applyLastBlockHash = <A extends any[], R>(
+    fun: (hash: string, ...args: A) => Promise<R>
+): ((...args: A) => Promise<R>) => async (...args) =>
+    fun(await getlastFinalizedBlockHash(), ...args);
+
+/**
+ * Gets pool info for baker ID, or L-pool if parameter is left undefined.
+ *
+ * @throws if no baker is found with supplied baker ID.
+ */
+export const getPoolInfoLatest = applyLastBlockHash(getPoolInfo);
 
 export async function fetchLastFinalizedIdentityProviders() {
     const blockHash = await getlastFinalizedBlockHash();

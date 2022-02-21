@@ -3,7 +3,7 @@ import { useForm, Validate } from 'react-hook-form';
 import Form from '~/components/Form';
 import { validBigInt } from '~/components/Form/util/validation';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
-import { getPoolInfo } from '~/node/nodeRequests';
+import { getPoolInfoLatest } from '~/node/nodeHelpers';
 import {
     ConfigureDelegationFlowState,
     getExistingDelegationValues,
@@ -54,11 +54,7 @@ export default function DelegationTargetPage({
 
         try {
             const bakerId = BigInt(value);
-            const res = await getPoolInfo('', bakerId);
-
-            if (res === undefined) {
-                throw new Error();
-            }
+            await getPoolInfoLatest(bakerId); // Throws if response is undefined.
 
             return true;
         } catch {
