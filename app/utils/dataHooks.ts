@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { ChainParameters } from '@concordium/node-sdk';
 import { getAccount } from '~/database/AccountDao';
 import { BlockSummary, ConsensusStatus } from '~/node/NodeApiTypes';
 import { getConsensusStatus } from '~/node/nodeRequests';
@@ -155,8 +156,9 @@ export function useTransactionExpiryState(
     return [expiryTime, setExpiryTime, expiryTimeError] as const;
 }
 
-/** Hook for calculating the date of the delegation cooldown ending, will result in undefined while loading */
-export function useCalcDelegateAmountCooldownUntil() {
+function useCooldownUntil(
+    findEpoch: (cp: ChainParameters) => number
+): Date | undefined {
     const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
     const now = useCurrentTime(60000);
 
@@ -176,8 +178,7 @@ export function useCalcDelegateAmountCooldownUntil() {
     );
     const nextEpochIndex = currentEpochIndex + 1;
 
-    const cooldownUntilEpochIndex =
-        nextEpochIndex + Number(chainParameters.bakerCooldownEpochs); // TODO change to param related to delegation.
+    const cooldownUntilEpochIndex = nextEpochIndex + findEpoch(chainParameters); // TODO change to param related to delegation.
 
     return epochDate(
         cooldownUntilEpochIndex,
@@ -186,35 +187,16 @@ export function useCalcDelegateAmountCooldownUntil() {
     );
 }
 
+/** Hook for calculating the date of the delegation cooldown ending, will result in undefined while loading */
+export function useCalcDelegateAmountCooldownUntil() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return useCooldownUntil((cp) => Number((cp as any).delegatorCooldown)); // TODO #delegation remove any.
+}
+
 /** Hook for calculating the date of the baking stake cooldown ending, will result in undefined while loading */
 export function useCalcBakerStakeCooldownUntil() {
-    const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
-    const now = useCurrentTime(60000);
-
-    if (lastFinalizedBlockSummary === undefined) {
-        return undefined;
-    }
-
-    const { consensusStatus } = lastFinalizedBlockSummary;
-    const {
-        chainParameters,
-    } = lastFinalizedBlockSummary.lastFinalizedBlockSummary.updates;
-    const genesisTime = new Date(consensusStatus.currentEraGenesisTime);
-    const currentEpochIndex = getEpochIndexAt(
-        now,
-        consensusStatus.epochDuration,
-        genesisTime
-    );
-    const nextEpochIndex = currentEpochIndex + 1;
-
-    const cooldownUntilEpochIndex =
-        nextEpochIndex + Number(chainParameters.bakerCooldownEpochs);
-
-    return epochDate(
-        cooldownUntilEpochIndex,
-        consensusStatus.epochDuration,
-        genesisTime
-    );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return useCooldownUntil((cp) => Number((cp as any).poolOwnerCooldown)); // TODO #delegation remove any.
 }
 
 export function useProtocolVersion(): bigint | undefined {
