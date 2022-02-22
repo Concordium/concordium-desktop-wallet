@@ -1,22 +1,22 @@
 import React from 'react';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
 import Button from '~/cross-app-components/Button';
-import { useCalcBakerStakeCooldownUntil } from '~/utils/dataHooks';
+import { useCalcDelegatorCooldownUntil } from '~/utils/dataHooks';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import { AccountInfo } from '~/utils/types';
+import { withPendingDelegationChangeGuard } from './util';
 
 import styles from './DelegationPage.module.scss';
-import { withPendingDelegationChangeGuard } from './util';
 
 interface RemoveDelegationPageProps
     extends Pick<MultiStepFormPageProps<undefined>, 'onNext'> {
     // eslint-disable-next-line react/no-unused-prop-types
-    accountInfo: AccountInfo | undefined;
+    accountInfo: AccountInfo | undefined; // This is needed for the pending delegation change guard HoC.
 }
 
 const RemoveDelegationPage = withPendingDelegationChangeGuard(
     ({ onNext }: RemoveDelegationPageProps) => {
-        const cooldownUntil = useCalcBakerStakeCooldownUntil();
+        const cooldownUntil = useCalcDelegatorCooldownUntil();
 
         return (
             <>

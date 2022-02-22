@@ -188,7 +188,7 @@ function useCooldownUntil(
 }
 
 /** Hook for calculating the date of the delegation cooldown ending, will result in undefined while loading */
-export function useCalcDelegateAmountCooldownUntil() {
+export function useCalcDelegatorCooldownUntil() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return useCooldownUntil((cp) => Number((cp as any).delegatorCooldown)); // TODO #delegation remove any.
 }

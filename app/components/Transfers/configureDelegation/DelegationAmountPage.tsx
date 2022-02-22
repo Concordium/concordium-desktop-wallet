@@ -8,7 +8,7 @@ import ErrorMessage from '~/components/Form/ErrorMessage';
 import Label from '~/components/Label';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
 import { collapseFraction, noOp } from '~/utils/basicHelpers';
-import { useCalcDelegateAmountCooldownUntil } from '~/utils/dataHooks';
+import { useCalcDelegatorCooldownUntil } from '~/utils/dataHooks';
 import { getGTUSymbol } from '~/utils/gtu';
 import { useAsyncMemo, useUpdateEffect } from '~/utils/hooks';
 import { getFormattedDateString } from '~/utils/timeHelpers';
@@ -126,7 +126,7 @@ export default function DelegationAmountPage({
     exchangeRate,
     baseRoute,
 }: Props) {
-    const cooldownUntil = useCalcDelegateAmountCooldownUntil();
+    const cooldownUntil = useCalcDelegatorCooldownUntil();
     const poolInfo = useAsyncMemo(
         () => getPoolInfoLatest(target != null ? BigInt(target) : undefined),
         noOp,
