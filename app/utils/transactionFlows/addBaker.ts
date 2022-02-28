@@ -2,6 +2,7 @@ import { AccountInfo } from '@concordium/node-sdk';
 import { ValidateValues } from '~/components/MultiStepForm';
 import { BlockSummary } from '~/node/NodeApiTypes';
 import { collapseFraction } from '../basicHelpers';
+import { getMinimumStakeForBaking } from '../blockSummaryHelpers';
 import { getConfigureBakerFullCost } from '../transactionCosts';
 import { validateBakerStake } from '../transactionHelpers';
 import { serializeTransferPayload } from '../transactionSerialization';
@@ -94,9 +95,7 @@ export const validateAddBakerValues = (
     accountInfo: AccountInfo,
     exchangeRate: Fraction
 ): ValidateValues<AddBakerFlowState> => (values) => {
-    const minimumStake = BigInt(
-        blockSummary.updates.chainParameters.minimumThresholdForBaking
-    );
+    const minimumStake = BigInt(getMinimumStakeForBaking(blockSummary));
     const estimatedFee = getEstimatedAddBakerFee(
         exchangeRate,
         values,

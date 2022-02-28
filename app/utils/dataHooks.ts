@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChainParameters } from '@concordium/node-sdk';
+import type { ChainParameters } from '@concordium/node-sdk';
+import { isChainParametersV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { getAccount } from '~/database/AccountDao';
 import { BlockSummary, ConsensusStatus } from '~/node/NodeApiTypes';
 import { getConsensusStatus } from '~/node/nodeRequests';
@@ -125,7 +127,7 @@ export function useAnonymityRevokers() {
 /** Hook for fetching staked amount for a given account address, Returns undefined while loading and 0 if account is not a baker */
 export function useStakedAmount(accountAddress: string): Amount | undefined {
     const accountInfo = useAccountInfo(accountAddress);
-    if (accountInfo === undefined) {
+    if (accountInfo === undefined || !isBakerAccount(accountInfo)) {
         return undefined;
     }
     return BigInt(accountInfo.accountBaker?.stakedAmount ?? '0');
@@ -156,6 +158,7 @@ export function useTransactionExpiryState(
     return [expiryTime, setExpiryTime, expiryTimeError] as const;
 }
 
+// TODO #delegation revise, as updated cooldowns are in seconds instead of epochs.
 function useCooldownUntil(
     findEpoch: (cp: ChainParameters) => number
 ): Date | undefined {
@@ -189,19 +192,29 @@ function useCooldownUntil(
 
 /** Hook for calculating the date of the delegation cooldown ending, will result in undefined while loading */
 export function useCalcDelegatorCooldownUntil() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return useCooldownUntil((cp) => Number((cp as any).delegatorCooldown)); // TODO #delegation remove any.
+    return useCooldownUntil((cp) => {
+        if (!isChainParametersV1(cp)) {
+            throw new Error(
+                'Trying to add chain parameters for delegation on wrong protocol version.'
+            );
+        }
+        return Number(cp.delegatorCooldown);
+    });
 }
 
 /** Hook for calculating the date of the baking stake cooldown ending, will result in undefined while loading */
 export function useCalcBakerStakeCooldownUntil() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return useCooldownUntil((cp) => Number((cp as any).poolOwnerCooldown)); // TODO #delegation remove any.
+    return useCooldownUntil((cp) => {
+        if (!isChainParametersV1(cp)) {
+            return Number(cp.bakerCooldownEpochs);
+        }
+        return Number(cp.poolOwnerCooldown);
+    });
 }
 
 export function useProtocolVersion(): bigint | undefined {
     // const { protocolVersion } = useConsensusStatus() ?? {};
 
-    return protocolVersion;
-    // return BigInt(4);
+    // return protocolVersion;
+    return BigInt(4);
 }

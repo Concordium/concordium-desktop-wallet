@@ -2,7 +2,8 @@
 import React, { ComponentType, useCallback } from 'react';
 import { Redirect } from 'react-router';
 import { useSelector } from 'react-redux';
-import { ChainParameters } from '@concordium/node-sdk';
+import type { BlockSummaryV1, ChainParametersV1 } from '@concordium/node-sdk';
+import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import CommissionsPage from '~/components/Transfers/configureBaker/CommissionsPage';
 import DelegationStatusPage from '~/components/Transfers/configureBaker/DelegationStatusPage';
 import KeysPage from '~/components/Transfers/configureBaker/KeysPage';
@@ -24,7 +25,12 @@ import {
     displayPoolOpen,
     displayRestakeEarnings,
 } from '~/utils/transactionFlows/configureBaker';
-import { ConfigureBaker, Fraction, OpenStatus } from '~/utils/types';
+import {
+    ConfigureBaker,
+    ExtendableProps,
+    Fraction,
+    OpenStatus,
+} from '~/utils/types';
 import MultiSigAccountTransactionFlow, {
     MultiSigAccountTransactionFlowLoading,
     RequiredValues,
@@ -43,7 +49,7 @@ import displayTransferStyles from '~/components/Transfers/transferDetails.module
 
 interface DisplayProps extends Partial<AddBakerFlowState & RequiredValues> {
     exchangeRate: Fraction;
-    chainParameters: ChainParameters;
+    chainParameters: ChainParametersV1;
 }
 
 const DisplayValues = ({
@@ -134,13 +140,14 @@ const DisplayValues = ({
 
 const toRoot = <Redirect to={routes.MULTISIGTRANSACTIONS_ADD_BAKER} />;
 
-type Props = ConfigureBakerFlowDependencies;
-type UnsafeProps = Partial<Props>;
+type Deps = ConfigureBakerFlowDependencies;
+type Props = ExtendableProps<Deps, { blockSummary: BlockSummaryV1 }>;
+type UnsafeDeps = Partial<Deps>;
 
-const hasNecessaryProps = (props: UnsafeProps): props is Props =>
+const hasNecessaryProps = (props: UnsafeDeps): props is Deps =>
     [props.exchangeRate, props.blockSummary].every(isDefined);
 
-const withDeps = (component: ComponentType<Props>) =>
+const withDeps = (component: ComponentType<Deps>) =>
     withExchangeRate(
         withChainData(
             ensureProps(
@@ -151,128 +158,137 @@ const withDeps = (component: ComponentType<Props>) =>
         )
     );
 
-export default withDeps(function AddBaker({
-    exchangeRate,
-    blockSummary,
-}: Props) {
-    const accountsInfo = useSelector(accountsInfoSelector);
-    const cp = blockSummary.updates.chainParameters;
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const convert = useCallback(
-        (
-            { account, ...values }: RequiredValues & AddBakerFlowState,
-            nonce: bigint
-        ) =>
-            convertToAddBakerTransaction(
-                getDefaultCommissions(cp),
-                account,
-                nonce,
-                exchangeRate
-            )(values, values.expiry),
-        [exchangeRate, cp]
+const ensureDelegationProtocol = (c: ComponentType<Props>) =>
+    ensureProps<Props, Deps>(
+        c,
+        (p): p is Props => isBlockSummaryV1(p.blockSummary),
+        toRoot
     );
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const validate = useCallback(
-        ({ account, ...values }: RequiredValues & AddBakerFlowState) =>
-            validateAddBakerValues(
-                blockSummary,
-                account,
-                accountsInfo[account.address],
-                exchangeRate
-            )(values),
-        [blockSummary, exchangeRate, accountsInfo]
-    );
+export default withDeps(
+    ensureDelegationProtocol(function AddBaker({
+        exchangeRate,
+        blockSummary,
+    }: Props) {
+        const accountsInfo = useSelector(accountsInfoSelector);
+        const cp = blockSummary.updates.chainParameters;
 
-    return (
-        <MultiSigAccountTransactionFlow<AddBakerFlowState, ConfigureBaker>
-            title={addBakerTitle}
-            convert={convert}
-            validate={validate}
-            preview={(v) => (
-                <DisplayValues
-                    {...v}
-                    exchangeRate={exchangeRate}
-                    chainParameters={cp}
-                />
-            )}
-        >
-            {({ openForDelegation, account }) => ({
-                stake: {
-                    title: 'Stake settings',
-                    render: (initial, onNext, formValues) =>
-                        account ? (
-                            <AddBakerStakePage
-                                account={account}
-                                exchangeRate={exchangeRate}
-                                blockSummary={blockSummary}
-                                initial={initial}
-                                onNext={onNext}
-                                formValues={formValues}
-                                isMultiSig
-                            />
-                        ) : (
-                            toRoot
-                        ),
-                },
-                openForDelegation: {
-                    title: 'Pool open status',
-                    render: (initial, onNext) =>
-                        account ? (
-                            <DelegationStatusPage
-                                initial={initial}
-                                onNext={onNext}
-                                account={account}
-                            />
-                        ) : (
-                            toRoot
-                        ),
-                },
-                commissions: {
-                    title: 'Commission rates',
-                    render: (initial, onNext) =>
-                        account ? (
-                            <CommissionsPage
-                                initial={initial}
-                                onNext={onNext}
-                                chainParameters={cp}
-                                account={account}
-                            />
-                        ) : (
-                            toRoot
-                        ),
-                },
-                metadataUrl:
-                    openForDelegation !== OpenStatus.ClosedForAll
-                        ? {
-                              title: 'Metadata URL',
-                              render: (initial, onNext) =>
-                                  account ? (
-                                      <MetadataUrlPage
-                                          initial={initial}
-                                          onNext={onNext}
-                                          account={account}
-                                      />
-                                  ) : (
-                                      toRoot
-                                  ),
-                          }
-                        : undefined,
-                keys: {
-                    title: 'Generated keys',
-                    render: (initial, onNext) =>
-                        account ? (
-                            <KeysPage
-                                account={account}
-                                initial={initial}
-                                onNext={onNext}
-                            />
-                        ) : (
-                            toRoot
-                        ),
-                },
-            })}
-        </MultiSigAccountTransactionFlow>
-    );
-});
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        const convert = useCallback(
+            (
+                { account, ...values }: RequiredValues & AddBakerFlowState,
+                nonce: bigint
+            ) =>
+                convertToAddBakerTransaction(
+                    getDefaultCommissions(cp),
+                    account,
+                    nonce,
+                    exchangeRate
+                )(values, values.expiry),
+            [exchangeRate, cp]
+        );
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        const validate = useCallback(
+            ({ account, ...values }: RequiredValues & AddBakerFlowState) =>
+                validateAddBakerValues(
+                    blockSummary,
+                    account,
+                    accountsInfo[account.address],
+                    exchangeRate
+                )(values),
+            [blockSummary, exchangeRate, accountsInfo]
+        );
+
+        return (
+            <MultiSigAccountTransactionFlow<AddBakerFlowState, ConfigureBaker>
+                title={addBakerTitle}
+                convert={convert}
+                validate={validate}
+                preview={(v) => (
+                    <DisplayValues
+                        {...v}
+                        exchangeRate={exchangeRate}
+                        chainParameters={cp}
+                    />
+                )}
+            >
+                {({ openForDelegation, account }) => ({
+                    stake: {
+                        title: 'Stake settings',
+                        render: (initial, onNext, formValues) =>
+                            account ? (
+                                <AddBakerStakePage
+                                    account={account}
+                                    exchangeRate={exchangeRate}
+                                    blockSummary={blockSummary}
+                                    initial={initial}
+                                    onNext={onNext}
+                                    formValues={formValues}
+                                    isMultiSig
+                                />
+                            ) : (
+                                toRoot
+                            ),
+                    },
+                    openForDelegation: {
+                        title: 'Pool open status',
+                        render: (initial, onNext) =>
+                            account ? (
+                                <DelegationStatusPage
+                                    initial={initial}
+                                    onNext={onNext}
+                                    account={account}
+                                />
+                            ) : (
+                                toRoot
+                            ),
+                    },
+                    commissions: {
+                        title: 'Commission rates',
+                        render: (initial, onNext) =>
+                            account ? (
+                                <CommissionsPage
+                                    initial={initial}
+                                    onNext={onNext}
+                                    chainParameters={cp}
+                                    account={account}
+                                />
+                            ) : (
+                                toRoot
+                            ),
+                    },
+                    metadataUrl:
+                        openForDelegation !== OpenStatus.ClosedForAll
+                            ? {
+                                  title: 'Metadata URL',
+                                  render: (initial, onNext) =>
+                                      account ? (
+                                          <MetadataUrlPage
+                                              initial={initial}
+                                              onNext={onNext}
+                                              account={account}
+                                          />
+                                      ) : (
+                                          toRoot
+                                      ),
+                              }
+                            : undefined,
+                    keys: {
+                        title: 'Generated keys',
+                        render: (initial, onNext) =>
+                            account ? (
+                                <KeysPage
+                                    account={account}
+                                    initial={initial}
+                                    onNext={onNext}
+                                />
+                            ) : (
+                                toRoot
+                            ),
+                    },
+                })}
+            </MultiSigAccountTransactionFlow>
+        );
+    })
+);

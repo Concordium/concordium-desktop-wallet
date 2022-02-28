@@ -1,7 +1,8 @@
 /* eslint-disable react/display-name */
+import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import React, { ComponentType } from 'react';
 import { useSelector } from 'react-redux';
-import DelegationPendingChange from '~/components/DelegationPendingChange';
+import StakePendingChange from '~/components/StakePendingChange';
 import { accountsInfoSelector } from '~/features/AccountSlice';
 import { AccountInfo, Account } from '~/utils/types';
 
@@ -14,20 +15,24 @@ interface AccountOrInfo {
 export const withPendingDelegationChangeGuard = <P extends AccountOrInfo>(
     Component: ComponentType<P>
 ): ComponentType<P> => (p) => {
-    const accountsInfo = useSelector(accountsInfoSelector);
+    const accountsInfo: Record<string, AccountInfo> = useSelector(
+        accountsInfoSelector
+    );
     const info =
         p.accountInfo ??
         (p.account !== undefined ? accountsInfo[p.account.address] : undefined);
 
-    // TODO #delegation not actual prop...
-    const pendingChange = info?.accountDelegation?.pendingChange;
+    const pendingChange =
+        info !== undefined && isDelegatorAccount(info)
+            ? info.accountDelegation.pendingChange
+            : undefined;
 
     if (pendingChange) {
         return (
             <p className="mT30 mB0">
                 Cannot update delegation at this time:
                 <div className="bodyEmphasized textError mV10">
-                    <DelegationPendingChange pending={pendingChange} />
+                    <StakePendingChange pending={pendingChange} />
                 </div>
                 It will be possible to proceed after this time has passed.
             </p>

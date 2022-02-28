@@ -1,3 +1,4 @@
+import { AccountInfoBaker } from '@concordium/node-sdk';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
@@ -8,12 +9,7 @@ import Card from '~/cross-app-components/Card';
 import routes from '~/constants/routes.json';
 import { stringify } from '~/utils/JSONHelper';
 import { createUpdateBakerRestakeEarningsTransaction } from '~/utils/transactionHelpers';
-import {
-    AccountInfo,
-    EqualRecord,
-    NotOptional,
-    TransactionKindId,
-} from '~/utils/types';
+import { EqualRecord, NotOptional, TransactionKindId } from '~/utils/types';
 import { SubmitTransactionLocationState } from '../../SubmitTransaction/SubmitTransaction';
 import Label from '~/components/Label';
 import { isMultiSig } from '~/utils/accountHelpers';
@@ -30,7 +26,7 @@ interface FormModel {
 }
 
 interface Props extends NotOptional<ExchangeRateAndNonceProps> {
-    accountInfo?: AccountInfo;
+    accountInfo?: AccountInfoBaker;
 }
 
 const fieldNames: EqualRecord<FormModel> = {
@@ -101,7 +97,7 @@ export default ensureExchangeRateAndNonce(function UpdateBakerRestake({
             <div className="mV30">
                 <Label>Current restake:</Label>
                 <span className="body1">
-                    {accountInfo?.accountBaker?.restakeEarnings ?? true
+                    {accountInfo?.accountBaker.restakeEarnings ?? true
                         ? 'Yes'
                         : 'No'}
                 </span>
@@ -109,7 +105,7 @@ export default ensureExchangeRateAndNonce(function UpdateBakerRestake({
             <Form<FormModel> onSubmit={submit}>
                 <PickBakerRestake
                     fieldName={fieldNames.restake}
-                    initial={accountInfo?.accountBaker?.restakeEarnings}
+                    initial={accountInfo?.accountBaker.restakeEarnings}
                 />
                 <Form.Submit className={styles.bakerFlowContinue}>
                     Continue

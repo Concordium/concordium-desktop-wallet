@@ -9,6 +9,7 @@ import BakerImage from '@resources/svg/baker.svg';
 import ReadonlyImage from '@resources/svg/read-only.svg';
 import LedgerImage from '@resources/svg/ledger.svg';
 import InfoImage from '@resources/svg/info.svg';
+import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { displayAsGTU } from '~/utils/gtu';
 import { AccountInfo, Account, AccountStatus, ClassName } from '~/utils/types';
 import {
@@ -290,7 +291,10 @@ export default function AccountCard({
     const shielded = account.totalDecrypted
         ? BigInt(account.totalDecrypted)
         : 0n;
-    const accountBaker = accountInfo?.accountBaker;
+    const accountBaker =
+        accountInfo !== undefined && isBakerAccount(accountInfo)
+            ? accountInfo.accountBaker
+            : undefined;
     const { total: unShielded, staked, atDisposal } = getPublicAccountAmounts(
         accountInfo
     );

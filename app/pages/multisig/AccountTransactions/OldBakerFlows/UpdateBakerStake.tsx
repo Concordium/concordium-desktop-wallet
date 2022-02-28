@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
+import { BlockSummaryV0 } from '@concordium/node-sdk';
+import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import MultiSignatureLayout from '../../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
@@ -30,7 +32,7 @@ import PickAmount from '../PickAmount';
 import UpdateBakerStakeProposalDetails from '../proposal-details/UpdateBakerStakeProposalDetails';
 import { microGtuToGtu, toMicroUnits } from '~/utils/gtu';
 import { getFormattedDateString } from '~/utils/timeHelpers';
-import PendingChange from '~/components/BakerPendingChange';
+import StakePendingChange from '~/components/StakePendingChange';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
@@ -149,7 +151,8 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                                         setAccount={setAccount}
                                         chosenAccount={account}
                                         filter={(a, info) =>
-                                            info?.accountBaker !== undefined &&
+                                            info !== undefined &&
+                                            isBakerAccount(info) &&
                                             isMultiSig(a)
                                         }
                                         messageWhenEmpty="There are no baker accounts that require multiple signatures"
@@ -164,13 +167,14 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                                             );
                                         }}
                                         isDisabled={(_, info) =>
-                                            info?.accountBaker
-                                                ?.pendingChange !==
-                                            undefined ? (
+                                            info !== undefined &&
+                                            isBakerAccount(info) &&
+                                            info.accountBaker.pendingChange !==
+                                                undefined ? (
                                                 <>
                                                     The stake is frozen because:
                                                     <br />
-                                                    <PendingChange
+                                                    <StakePendingChange
                                                         pending={
                                                             info.accountBaker
                                                                 .pendingChange
@@ -306,7 +310,8 @@ function PickNewStake({
 }: PickNewStakeProps) {
     const stakedAlready = useStakedAmount(account.address);
     const minimumThresholdForBaking = BigInt(
-        blockSummary.updates.chainParameters.minimumThresholdForBaking
+        (blockSummary as BlockSummaryV0).updates.chainParameters
+            .minimumThresholdForBaking
     );
     const cooldownUntil = useCalcBakerStakeCooldownUntil();
     const stakeGtu = toMicroUnitsSafe(stake);

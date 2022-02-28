@@ -2,6 +2,8 @@ import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Redirect } from 'react-router';
+import { BlockSummaryV0 } from '@concordium/node-sdk';
+import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import Form from '~/components/Form';
 import Label from '~/components/Label';
 import PickBakerStakeAmount from '~/components/PickBakerStakeAmount';
@@ -28,7 +30,7 @@ import {
 } from '~/utils/types';
 import { SubmitTransactionLocationState } from '../../SubmitTransaction/SubmitTransaction';
 import { multiplyFraction } from '~/utils/basicHelpers';
-import BakerPendingChange from '~/components/BakerPendingChange';
+import StakePendingChange from '~/components/StakePendingChange';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
@@ -115,21 +117,26 @@ const UpdateBakerStakeForm = ensureExchangeRateAndNonce(
         }
 
         const minimumStake = BigInt(
-            blockSummary.updates.chainParameters.minimumThresholdForBaking
+            (blockSummary as BlockSummaryV0).updates.chainParameters
+                .minimumThresholdForBaking
         );
 
         if (!accountInfo) {
             return <LoadingComponent />;
         }
 
-        const pendingChange = accountInfo.accountBaker?.pendingChange;
+        if (!isBakerAccount(accountInfo)) {
+            return <Redirect to={routes.ACCOUNTS} />;
+        }
+
+        const { pendingChange } = accountInfo.accountBaker;
 
         if (pendingChange) {
             return (
                 <p className="mT30 mB0">
                     Cannot update baker stake at this time:
                     <div className="bodyEmphasized textError mV10">
-                        <BakerPendingChange pending={pendingChange} />
+                        <StakePendingChange pending={pendingChange} />
                     </div>
                     It will be possible to proceed after this time has passed.
                 </p>

@@ -1,3 +1,4 @@
+import { BlockSummaryV0 } from '@concordium/node-sdk';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import {
@@ -8,6 +9,7 @@ import {
     Redirect,
 } from 'react-router';
 import { push } from 'connected-react-router';
+import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import MultiSignatureLayout from '../../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
@@ -80,7 +82,8 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
         AccountTransaction<AddBakerPayload>
     >();
     const minimumThresholdForBaking = BigInt(
-        blockSummary.updates.chainParameters.minimumThresholdForBaking
+        (blockSummary as BlockSummaryV0).updates.chainParameters
+            .minimumThresholdForBaking
     );
     const [
         expiryTime,
@@ -231,7 +234,8 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                                         setAccount={setAccount}
                                         chosenAccount={account}
                                         filter={(a, info) =>
-                                            info?.accountBaker === undefined &&
+                                            info !== undefined &&
+                                            isBakerAccount(info) &&
                                             isMultiSig(a)
                                         }
                                         onAccountClicked={() =>

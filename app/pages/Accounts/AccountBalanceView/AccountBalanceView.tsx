@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import ShieldImage from '@resources/svg/shield.svg';
 import BakerImage from '@resources/svg/baker.svg';
 import ArrowIcon from '@resources/svg/back-arrow.svg';
+import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
 import { displayAsGTU } from '~/utils/gtu';
@@ -105,7 +106,10 @@ export default function AccountBalanceView(): JSX.Element | null {
             </>
         );
     } else {
-        const accountBaker = accountInfo?.accountBaker;
+        const accountBaker =
+            accountInfo !== undefined && isBakerAccount(accountInfo)
+                ? accountInfo.accountBaker
+                : undefined;
         const { total, staked, atDisposal } = getPublicAccountAmounts(
             accountInfo
         );

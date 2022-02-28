@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
+import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import MultiSignatureLayout from '../../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
@@ -23,7 +24,7 @@ import {
 import SignTransaction from '../SignTransaction';
 import RemoveBakerProposalDetails from '../proposal-details/RemoveBakerProposalDetails';
 import { getFormattedDateString } from '~/utils/timeHelpers';
-import PendingChange from '~/components/BakerPendingChange';
+import StakePendingChange from '~/components/StakePendingChange';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
@@ -127,7 +128,8 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                         setAccount={setAccount}
                                         chosenAccount={account}
                                         filter={(a, info) =>
-                                            info?.accountBaker !== undefined &&
+                                            info !== undefined &&
+                                            isBakerAccount(info) &&
                                             isMultiSig(a)
                                         }
                                         onAccountClicked={() => {
@@ -141,13 +143,14 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                             );
                                         }}
                                         isDisabled={(_, info) =>
-                                            info?.accountBaker
-                                                ?.pendingChange !==
-                                            undefined ? (
+                                            info !== undefined &&
+                                            isBakerAccount(info) &&
+                                            info.accountBaker.pendingChange !==
+                                                undefined ? (
                                                 <>
                                                     The stake is frozen because:
                                                     <br />
-                                                    <PendingChange
+                                                    <StakePendingChange
                                                         pending={
                                                             info.accountBaker
                                                                 .pendingChange

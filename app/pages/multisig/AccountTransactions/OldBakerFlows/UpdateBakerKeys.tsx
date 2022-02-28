@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
+import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import MultiSignatureLayout from '../../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
@@ -197,7 +198,8 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                                         setAccount={setAccount}
                                         chosenAccount={account}
                                         filter={(a, info) =>
-                                            info?.accountBaker !== undefined &&
+                                            info !== undefined &&
+                                            isBakerAccount(info) &&
                                             isMultiSig(a)
                                         }
                                         messageWhenEmpty="There are no baker accounts that require multiple signatures"

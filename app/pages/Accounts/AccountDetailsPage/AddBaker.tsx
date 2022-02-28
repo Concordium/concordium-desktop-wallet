@@ -1,11 +1,15 @@
 /* eslint-disable react/display-name */
 import React, { ComponentType, useCallback } from 'react';
+import type { BlockSummaryV1 } from '@concordium/node-sdk';
+import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { Redirect } from 'react-router';
 import withExchangeRate from '~/components/Transfers/withExchangeRate';
 import withNonce, { AccountAndNonce } from '~/components/Transfers/withNonce';
 import { isDefined } from '~/utils/basicHelpers';
 import {
     AccountInfo,
     ConfigureBaker as ConfigureBakerTransaction,
+    ExtendableProps,
     MakeRequired,
     NotOptional,
     OpenStatus,
@@ -32,124 +36,144 @@ import MetadataUrlPage from '~/components/Transfers/configureBaker/MetadataUrlPa
 import KeysPage from '~/components/Transfers/configureBaker/KeysPage';
 import routes from '~/constants/routes.json';
 
-interface Props
+interface Deps
     extends ConfigureBakerFlowDependencies,
         NotOptional<AccountAndNonce> {
     accountInfo: AccountInfo;
 }
 
-type UnsafeProps = MakeRequired<Partial<Props>, 'account' | 'accountInfo'>;
+type Props = ExtendableProps<Deps, { blockSummary: BlockSummaryV1 }>;
 
-const hasNecessaryProps = (props: UnsafeProps): props is Props => {
+type UnsafeDeps = MakeRequired<Partial<Deps>, 'account' | 'accountInfo'>;
+
+const hasLoadedDeps = (props: UnsafeDeps): props is Deps => {
     return [props.exchangeRate, props.nonce, props.blockSummary].every(
         isDefined
     );
 };
 
-const withDeps = (component: ComponentType<Props>) =>
+const withDeps = (component: ComponentType<Deps>) =>
     withNonce(
         withExchangeRate(
             withChainData(
                 ensureProps(
                     component,
-                    hasNecessaryProps,
+                    hasLoadedDeps,
                     <AccountTransactionFlowLoading title={addBakerTitle} />
                 )
             )
         )
     );
 
-export default withDeps(function AddBaker(props: Props) {
-    const { nonce, account, exchangeRate, blockSummary, accountInfo } = props;
-    const cp = blockSummary.updates.chainParameters;
+const ensureDelegationProtocol = (c: ComponentType<Props>) =>
+    ensureProps<Props, Deps>(
+        c,
+        (p): p is Props => isBlockSummaryV1(p.blockSummary),
+        <Redirect to={routes.ACCOUNTS} />
+    );
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const convert = useCallback(
-        convertToAddBakerTransaction(
-            getDefaultCommissions(cp),
-            account,
+export default withDeps(
+    ensureDelegationProtocol(function AddBaker(props: Props) {
+        const {
             nonce,
-            exchangeRate
-        ),
-        [account, nonce, exchangeRate, cp]
-    );
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const validate = useCallback(
-        validateAddBakerValues(
-            blockSummary,
             account,
+            exchangeRate,
+            blockSummary,
             accountInfo,
-            exchangeRate
-        ),
-        [blockSummary, account, accountInfo, exchangeRate]
-    );
+        } = props;
+        const cp = blockSummary.updates.chainParameters;
 
-    return (
-        <AccountTransactionFlow<AddBakerFlowState, ConfigureBakerTransaction>
-            title={addBakerTitle}
-            convert={convert}
-            validate={validate}
-            multisigRoute={routes.MULTISIGTRANSACTIONS_ADD_BAKER}
-        >
-            {({ openForDelegation }) => ({
-                stake: {
-                    render: (initial, onNext, formValues) => (
-                        <AddBakerStakePage
-                            account={account}
-                            exchangeRate={exchangeRate}
-                            blockSummary={blockSummary}
-                            initial={initial}
-                            onNext={onNext}
-                            formValues={formValues}
-                        />
-                    ),
-                },
-                openForDelegation: {
-                    render: (initial, onNext) => (
-                        <DelegationStatusPage
-                            initial={initial}
-                            onNext={onNext}
-                            account={account}
-                        />
-                    ),
-                    title: 'Pool settings',
-                },
-                commissions: {
-                    render: (initial, onNext) => (
-                        <CommissionsPage
-                            initial={initial}
-                            onNext={onNext}
-                            chainParameters={cp}
-                            account={account}
-                        />
-                    ),
-                    title: 'Pool settings',
-                },
-                metadataUrl:
-                    openForDelegation !== OpenStatus.ClosedForAll
-                        ? {
-                              render: (initial, onNext) => (
-                                  <MetadataUrlPage
-                                      initial={initial}
-                                      onNext={onNext}
-                                      account={account}
-                                  />
-                              ),
-                              title: 'Pool settings',
-                          }
-                        : undefined,
-                keys: {
-                    render: (initial, onNext) => (
-                        <KeysPage
-                            account={account}
-                            initial={initial}
-                            onNext={onNext}
-                        />
-                    ),
-                    title: 'Generated keys',
-                },
-            })}
-        </AccountTransactionFlow>
-    );
-});
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        const convert = useCallback(
+            convertToAddBakerTransaction(
+                getDefaultCommissions(cp),
+                account,
+                nonce,
+                exchangeRate
+            ),
+            [account, nonce, exchangeRate, cp]
+        );
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        const validate = useCallback(
+            validateAddBakerValues(
+                blockSummary,
+                account,
+                accountInfo,
+                exchangeRate
+            ),
+            [blockSummary, account, accountInfo, exchangeRate]
+        );
+
+        return (
+            <AccountTransactionFlow<
+                AddBakerFlowState,
+                ConfigureBakerTransaction
+            >
+                title={addBakerTitle}
+                convert={convert}
+                validate={validate}
+                multisigRoute={routes.MULTISIGTRANSACTIONS_ADD_BAKER}
+            >
+                {({ openForDelegation }) => ({
+                    stake: {
+                        render: (initial, onNext, formValues) => (
+                            <AddBakerStakePage
+                                account={account}
+                                exchangeRate={exchangeRate}
+                                blockSummary={blockSummary}
+                                initial={initial}
+                                onNext={onNext}
+                                formValues={formValues}
+                            />
+                        ),
+                    },
+                    openForDelegation: {
+                        render: (initial, onNext) => (
+                            <DelegationStatusPage
+                                initial={initial}
+                                onNext={onNext}
+                                account={account}
+                            />
+                        ),
+                        title: 'Pool settings',
+                    },
+                    commissions: {
+                        render: (initial, onNext) => (
+                            <CommissionsPage
+                                initial={initial}
+                                onNext={onNext}
+                                chainParameters={cp}
+                                account={account}
+                            />
+                        ),
+                        title: 'Pool settings',
+                    },
+                    metadataUrl:
+                        openForDelegation !== OpenStatus.ClosedForAll
+                            ? {
+                                  render: (initial, onNext) => (
+                                      <MetadataUrlPage
+                                          initial={initial}
+                                          onNext={onNext}
+                                          account={account}
+                                      />
+                                  ),
+                                  title: 'Pool settings',
+                              }
+                            : undefined,
+                    keys: {
+                        render: (initial, onNext) => (
+                            <KeysPage
+                                account={account}
+                                initial={initial}
+                                onNext={onNext}
+                            />
+                        ),
+                        title: 'Generated keys',
+                    },
+                })}
+            </AccountTransactionFlow>
+        );
+    })
+);

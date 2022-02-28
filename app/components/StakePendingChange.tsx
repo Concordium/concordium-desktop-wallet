@@ -1,14 +1,15 @@
 import React from 'react';
+import type { StakePendingChange as PendingChange } from '@concordium/node-sdk';
 import { useConsensusStatus } from '~/utils/dataHooks';
 import { displayAsGTU } from '~/utils/gtu';
 import { epochDate, getFormattedDateString } from '~/utils/timeHelpers';
 
-type Props = {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    pending: any; // TODO #delegation change to actual model.
-};
+interface Props {
+    pending: PendingChange;
+}
 
-export default function PendingChange({ pending }: Props) {
+/** Render a bakers pending change */
+export default function StakePendingChange({ pending }: Props) {
     const status = useConsensusStatus();
     if (status === undefined) {
         return null;
@@ -21,16 +22,15 @@ export default function PendingChange({ pending }: Props) {
         )
     );
 
-    return pending.change === 'RemoveDelegation' ? (
+    return pending.change === 'RemoveStake' ? (
         <>
-            Delegated amount is withdrawn on
+            Stake is being removed on
             <br />
             {changeAtDate}
         </>
     ) : (
         <>
-            Delegated amount is set to be reduced to{' '}
-            {displayAsGTU(pending.newStake)} on
+            Stake is set to be reduced to {displayAsGTU(pending.newStake)} on
             <br />
             {changeAtDate}
         </>

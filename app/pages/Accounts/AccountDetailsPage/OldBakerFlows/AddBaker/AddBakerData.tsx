@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { BlockSummaryV0 } from '@concordium/node-sdk';
 import BakerStakeSettings from '~/components/BakerTransactions/BakerStakeSettings';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import Card from '~/cross-app-components/Card';
@@ -12,9 +13,9 @@ import {
     PropsOf,
     TransactionKindId,
 } from '~/utils/types';
+import { StakeSettings } from '~/utils/transactionFlows/configureBaker';
 
 import styles from '../../AccountDetailsPage.module.scss';
-import { StakeSettings } from '~/utils/transactionFlows/configureBaker';
 
 type FormWrapperProps = Omit<
     PropsOf<typeof BakerStakeSettings>,
@@ -27,7 +28,8 @@ const FormWrapper = ensureChainData(
     ({ blockSummary, exchangeRate, ...props }: FormWrapperProps) => {
         const { account } = props;
         const minimumStake = BigInt(
-            blockSummary.updates.chainParameters.minimumThresholdForBaking
+            (blockSummary as BlockSummaryV0).updates.chainParameters
+                .minimumThresholdForBaking
         );
         const estimatedFee = useTransactionCostEstimate(
             TransactionKindId.Add_baker,

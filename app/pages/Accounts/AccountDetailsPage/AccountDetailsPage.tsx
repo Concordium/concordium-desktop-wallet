@@ -1,4 +1,5 @@
 /* eslint-disable no-nested-ternary */
+import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, Route } from 'react-router';
@@ -67,7 +68,7 @@ export default withAccountSync(function DetailsPage() {
         };
     }, [account?.address]);
 
-    const isBaker = Boolean(accountInfo?.accountBaker);
+    const isBaker = accountInfo !== undefined && isBakerAccount(accountInfo);
     const isDelegating = false;
     const isDelegationPV = pv !== undefined && hasDelegationProtocol(pv);
     const canTransfer = hasCredentials && accountInfo !== undefined;
@@ -190,7 +191,10 @@ export default withAccountSync(function DetailsPage() {
                         )}
                     </Route>
                     <Route path={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}>
-                        {canTransfer && !isDelegationPV && isBaker ? (
+                        {canTransfer &&
+                        !isDelegationPV &&
+                        accountInfo !== undefined &&
+                        isBakerAccount(accountInfo) ? (
                             <OldUpdateBakerRestake
                                 account={account}
                                 accountInfo={accountInfo}

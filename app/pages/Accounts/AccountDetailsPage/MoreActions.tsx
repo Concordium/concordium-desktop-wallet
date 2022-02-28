@@ -1,5 +1,9 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import {
+    isBakerAccount,
+    isDelegatorAccount,
+} from '@concordium/node-sdk/lib/src/accountHelpers';
 import { Account, AccountInfo, TransactionKindId } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import ButtonNavLink from '~/components/ButtonNavLink';
@@ -19,9 +23,9 @@ export default function MoreActions({ account, accountInfo }: Props) {
         accountHasDeployedCredentialsSelector(account)
     );
     const hasUsedEncrypted = hasEncryptedBalance(account);
-    const isBaker = Boolean(accountInfo?.accountBaker);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const isDelegating = Boolean((accountInfo as any)?.accountDelegation); // TODO #delegation remove any and ensure correct prop name
+    const isBaker = accountInfo !== undefined && isBakerAccount(accountInfo);
+    const isDelegating =
+        accountInfo !== undefined && isDelegatorAccount(accountInfo);
     const pv = useProtocolVersion();
     const isDelegationPV = pv !== undefined && hasDelegationProtocol(pv);
     const canDelegate =

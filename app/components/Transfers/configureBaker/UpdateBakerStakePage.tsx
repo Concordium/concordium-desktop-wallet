@@ -4,6 +4,7 @@ import BakerStakeSettings from '~/components/BakerTransactions/BakerStakeSetting
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
 import { accountInfoSelector } from '~/features/AccountSlice';
 import { RootState } from '~/store/store';
+import { getMinimumStakeForBaking } from '~/utils/blockSummaryHelpers';
 import {
     ConfigureBakerFlowDependencies,
     StakeSettings,
@@ -34,9 +35,7 @@ function UpdateBakerStakePage({
     isMultiSig = false,
 }: Props) {
     const { stake: existing } = getExistingBakerValues(accountInfo) ?? {};
-    const minimumStake = BigInt(
-        blockSummary.updates.chainParameters.minimumThresholdForBaking
-    );
+    const minimumStake = BigInt(getMinimumStakeForBaking(blockSummary));
     const changes = getBakerFlowChanges(
         { stake: existing },
         { stake: initial }

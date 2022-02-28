@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Redirect } from 'react-router';
+import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
 import routes from '~/constants/routes.json';
@@ -9,7 +10,7 @@ import { stringify } from '~/utils/JSONHelper';
 import { createRemoveBakerTransaction } from '~/utils/transactionHelpers';
 import { SubmitTransactionLocationState } from '../../SubmitTransaction/SubmitTransaction';
 import { multiplyFraction } from '~/utils/basicHelpers';
-import BakerPendingChange from '~/components/BakerPendingChange';
+import StakePendingChange from '~/components/StakePendingChange';
 import { AccountInfo, NotOptional, TransactionKindId } from '~/utils/types';
 import { useCalcBakerStakeCooldownUntil } from '~/utils/dataHooks';
 import { getFormattedDateString } from '~/utils/timeHelpers';
@@ -33,8 +34,6 @@ export default ensureExchangeRateAndNonce(function RemoveBaker({
 }: Props) {
     const dispatch = useDispatch();
     const cooldownUntil = useCalcBakerStakeCooldownUntil();
-
-    const pendingChange = accountInfo?.accountBaker?.pendingChange;
 
     const next = useCallback(() => {
         if (!account) {
@@ -76,6 +75,11 @@ export default ensureExchangeRateAndNonce(function RemoveBaker({
         );
     }
 
+    const pendingChange =
+        accountInfo !== undefined && isBakerAccount(accountInfo)
+            ? accountInfo.accountBaker.pendingChange
+            : undefined;
+
     return (
         <Card className="textCenter pB40">
             <h3 className="bodyEmphasized">Remove baker</h3>
@@ -83,7 +87,7 @@ export default ensureExchangeRateAndNonce(function RemoveBaker({
                 <p className="mT30 mB0">
                     Cannot remove baker at this time:
                     <div className="bodyEmphasized textError mV10">
-                        <BakerPendingChange pending={pendingChange} />
+                        <StakePendingChange pending={pendingChange} />
                     </div>
                     It will be possible to proceed after this time has passed.
                 </p>

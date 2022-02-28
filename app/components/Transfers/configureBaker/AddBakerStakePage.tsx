@@ -11,6 +11,7 @@ import {
     AddBakerFlowState,
 } from '~/utils/transactionFlows/addBaker';
 import { Account } from '~/utils/types';
+import { getMinimumStakeForBaking } from '~/utils/blockSummaryHelpers';
 
 import styles from './ConfigureBakerPage.module.scss';
 
@@ -30,9 +31,7 @@ export default function AddBakerStakePage({
     account,
     isMultiSig = false,
 }: Props) {
-    const minimumStake = BigInt(
-        blockSummary.updates.chainParameters.minimumThresholdForBaking
-    );
+    const minimumStake = BigInt(getMinimumStakeForBaking(blockSummary));
     const { stake, ...otherValues } = formValues;
     const hasKeys = otherValues.keys !== undefined;
 

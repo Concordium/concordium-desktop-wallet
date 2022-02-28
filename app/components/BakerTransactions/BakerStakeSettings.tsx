@@ -1,5 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
+import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import {
     useAccountInfo,
     useCalcBakerStakeCooldownUntil,
@@ -11,7 +12,7 @@ import PickBakerRestake from '../PickBakerRestake';
 import Form from '../Form';
 import { StakeSettings } from '~/utils/transactionFlows/configureBaker';
 import { getFormattedDateString } from '~/utils/timeHelpers';
-import BakerPendingChange from '../BakerPendingChange';
+import StakePendingChange from '../StakePendingChange';
 
 const fieldNames: EqualRecord<StakeSettings> = {
     stake: 'stake',
@@ -43,7 +44,10 @@ export default function BakerStakeSettings({
     showCooldown = false,
 }: Props) {
     const accountInfo = useAccountInfo(account.address);
-    const { pendingChange } = accountInfo?.accountBaker ?? {};
+    const pendingChange =
+        accountInfo !== undefined && isBakerAccount(accountInfo)
+            ? accountInfo?.accountBaker.pendingChange
+            : undefined;
     const cooldownUntil = useCalcBakerStakeCooldownUntil();
 
     return (
@@ -82,7 +86,7 @@ export default function BakerStakeSettings({
                     <div className="mV10">
                         Cannot update baker stake at this time:
                         <div className="bodyEmphasized textError mV10">
-                            <BakerPendingChange pending={pendingChange} />
+                            <StakePendingChange pending={pendingChange} />
                         </div>
                         It will be possible to proceed after this time has
                         passed.

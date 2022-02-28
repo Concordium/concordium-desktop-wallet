@@ -2,6 +2,8 @@
 import React, { ComponentType, useCallback } from 'react';
 import { Redirect } from 'react-router';
 import { useSelector } from 'react-redux';
+import type { BlockSummaryV1 } from '@concordium/node-sdk';
+import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import CommissionsPage from '~/components/Transfers/configureBaker/CommissionsPage';
 import DelegationStatusPage from '~/components/Transfers/configureBaker/DelegationStatusPage';
 import MetadataUrlPage from '~/components/Transfers/configureBaker/MetadataUrlPage';
@@ -9,6 +11,7 @@ import DisplayBakerCommission from '~/components/Transfers/DisplayBakerCommissio
 import {
     AccountInfo,
     ConfigureBaker,
+    ExtendableProps,
     Fraction,
     OpenStatus,
 } from '~/utils/types';
@@ -121,13 +124,14 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
 
 const toRoot = <Redirect to={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_POOL} />;
 
-type Props = UpdateBakerPoolDependencies;
-type UnsafeProps = Partial<Props>;
+type Deps = UpdateBakerPoolDependencies;
+type Props = ExtendableProps<Deps, { blockSummary: BlockSummaryV1 }>;
+type UnsafeDeps = Partial<Deps>;
 
-const hasNecessaryProps = (props: UnsafeProps): props is Props =>
+const hasNecessaryProps = (props: UnsafeDeps): props is Deps =>
     [props.exchangeRate, props.blockSummary].every(isDefined);
 
-const withDeps = (component: ComponentType<Props>) =>
+const withDeps = (component: ComponentType<Deps>) =>
     withChainData(
         withExchangeRate(
             ensureProps(
@@ -139,85 +143,98 @@ const withDeps = (component: ComponentType<Props>) =>
             )
         )
     );
-export default withDeps(function UpdateBakerPool({
-    exchangeRate,
-    blockSummary: {
-        updates: { chainParameters },
-    },
-}: Props) {
-    const accountsInfo = useSelector(accountsInfoSelector);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const convert = useCallback(
-        (
-            { account, ...values }: RequiredValues & UpdateBakerPoolFlowState,
-            nonce: bigint
-        ) =>
-            convertToUpdateBakerPoolTransaction(
-                account,
-                nonce,
-                exchangeRate,
-                accountsInfo[account.address]
-            )(values, values.expiry),
-        [exchangeRate, accountsInfo]
+const ensureDelegationProtocol = (c: ComponentType<Props>) =>
+    ensureProps<Props, Deps>(
+        c,
+        (p): p is Props => isBlockSummaryV1(p.blockSummary),
+        toRoot
     );
 
-    return (
-        <MultiSigAccountTransactionFlow<
-            UpdateBakerPoolFlowState,
-            ConfigureBaker
-        >
-            title={updateBakerPoolTitle}
-            convert={convert}
-            preview={(v) => (
-                <DisplayValues {...v} exchangeRate={exchangeRate} />
-            )}
-        >
-            {({ openForDelegation, account }) => ({
-                openForDelegation: {
-                    title: 'Pool open status',
-                    render: (initial, onNext) =>
-                        account ? (
-                            <DelegationStatusPage
-                                initial={initial}
-                                onNext={onNext}
-                                account={account}
-                            />
-                        ) : (
-                            toRoot
-                        ),
-                },
-                commissions:
-                    openForDelegation !== OpenStatus.ClosedForAll
-                        ? {
-                              title: 'Commission rates',
-                              render: (initial, onNext) =>
-                                  account ? (
-                                      <CommissionsPage
-                                          initial={initial}
-                                          onNext={onNext}
-                                          chainParameters={chainParameters}
-                                          account={account}
-                                      />
-                                  ) : (
-                                      toRoot
-                                  ),
-                          }
-                        : undefined,
-                metadataUrl: {
-                    title: 'Metadata URL',
-                    render: (initial, onNext) =>
-                        account ? (
-                            <MetadataUrlPage
-                                initial={initial}
-                                onNext={onNext}
-                                account={account}
-                            />
-                        ) : (
-                            toRoot
-                        ),
-                },
-            })}
-        </MultiSigAccountTransactionFlow>
-    );
-});
+export default withDeps(
+    ensureDelegationProtocol(function UpdateBakerPool({
+        exchangeRate,
+        blockSummary: {
+            updates: { chainParameters },
+        },
+    }: Props) {
+        const accountsInfo = useSelector(accountsInfoSelector);
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        const convert = useCallback(
+            (
+                {
+                    account,
+                    ...values
+                }: RequiredValues & UpdateBakerPoolFlowState,
+                nonce: bigint
+            ) =>
+                convertToUpdateBakerPoolTransaction(
+                    account,
+                    nonce,
+                    exchangeRate,
+                    accountsInfo[account.address]
+                )(values, values.expiry),
+            [exchangeRate, accountsInfo]
+        );
+
+        return (
+            <MultiSigAccountTransactionFlow<
+                UpdateBakerPoolFlowState,
+                ConfigureBaker
+            >
+                title={updateBakerPoolTitle}
+                convert={convert}
+                preview={(v) => (
+                    <DisplayValues {...v} exchangeRate={exchangeRate} />
+                )}
+            >
+                {({ openForDelegation, account }) => ({
+                    openForDelegation: {
+                        title: 'Pool open status',
+                        render: (initial, onNext) =>
+                            account ? (
+                                <DelegationStatusPage
+                                    initial={initial}
+                                    onNext={onNext}
+                                    account={account}
+                                />
+                            ) : (
+                                toRoot
+                            ),
+                    },
+                    commissions:
+                        openForDelegation !== OpenStatus.ClosedForAll
+                            ? {
+                                  title: 'Commission rates',
+                                  render: (initial, onNext) =>
+                                      account ? (
+                                          <CommissionsPage
+                                              initial={initial}
+                                              onNext={onNext}
+                                              chainParameters={chainParameters}
+                                              account={account}
+                                          />
+                                      ) : (
+                                          toRoot
+                                      ),
+                              }
+                            : undefined,
+                    metadataUrl: {
+                        title: 'Metadata URL',
+                        render: (initial, onNext) =>
+                            account ? (
+                                <MetadataUrlPage
+                                    initial={initial}
+                                    onNext={onNext}
+                                    account={account}
+                                />
+                            ) : (
+                                toRoot
+                            ),
+                    },
+                })}
+            </MultiSigAccountTransactionFlow>
+        );
+    })
+);

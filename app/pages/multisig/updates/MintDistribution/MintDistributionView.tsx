@@ -1,5 +1,5 @@
 import React from 'react';
-import { MintDistribution } from '~/utils/types';
+import { MintDistributionV0 } from '@concordium/node-sdk';
 import Loading from '~/cross-app-components/Loading';
 import withChainData, { ChainData } from '~/utils/withChainData';
 import {
@@ -16,7 +16,7 @@ import MintRateInput from './MintRateInput';
 import Label from '~/components/Label';
 
 interface Props extends ChainData {
-    mintDistribution: MintDistribution;
+    mintDistribution: MintDistributionV0; // TODO fix if this is supposed to work with delegation protocol
 }
 
 /**
@@ -35,7 +35,7 @@ export default withChainData(function MintDistributionView({
     const {
         mintPerSlot: currentMintPerSlot,
         ...currentRewardDistribution
-    } = getCurrentValue(blockSummary);
+    } = getCurrentValue(blockSummary) as MintDistributionV0; // TODO fix if this is supposed to work with delegation protocol
     const currentDistribitionRatio: RewardDistributionValue = toRewardDistributionValue(
         currentRewardDistribution
     );

@@ -1,7 +1,8 @@
 /* eslint-disable react/display-name */
+import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import React, { ComponentType } from 'react';
 import { useSelector } from 'react-redux';
-import BakerPendingChange from '~/components/BakerPendingChange';
+import StakePendingChange from '~/components/StakePendingChange';
 import { accountsInfoSelector } from '~/features/AccountSlice';
 import { AccountInfo, Account } from '~/utils/types';
 
@@ -14,19 +15,24 @@ interface AccountOrInfo {
 export const withPendingBakerChangeGuard = <P extends AccountOrInfo>(
     Component: ComponentType<P>
 ): ComponentType<P> => (p) => {
-    const accountsInfo = useSelector(accountsInfoSelector);
+    const accountsInfo: Record<string, AccountInfo> = useSelector(
+        accountsInfoSelector
+    );
     const info =
         p.accountInfo ??
         (p.account !== undefined ? accountsInfo[p.account.address] : undefined);
 
-    const pendingChange = info?.accountBaker?.pendingChange;
+    const pendingChange =
+        info !== undefined && isBakerAccount(info)
+            ? info.accountBaker.pendingChange
+            : undefined;
 
     if (pendingChange) {
         return (
             <p className="mT30 mB0">
                 Cannot update baker stake at this time:
                 <div className="bodyEmphasized textError mV10">
-                    <BakerPendingChange pending={pendingChange} />
+                    <StakePendingChange pending={pendingChange} />
                 </div>
                 It will be possible to proceed after this time has passed.
             </p>

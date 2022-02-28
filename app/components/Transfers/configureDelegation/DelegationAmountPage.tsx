@@ -2,6 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useForm, useFormContext, Validate } from 'react-hook-form';
 import { Redirect } from 'react-router';
 import clsx from 'clsx';
+import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import AccountCard from '~/components/AccountCard';
 import Form from '~/components/Form';
 import ErrorMessage from '~/components/Form/ErrorMessage';
@@ -28,7 +29,7 @@ import {
     EqualRecord,
     Fraction,
 } from '~/utils/types';
-import DelegationPendingChange from '~/components/DelegationPendingChange';
+import StakePendingChange from '~/components/StakePendingChange';
 import Loading from '~/cross-app-components/Loading';
 import { getPoolInfoLatest } from '~/node/nodeHelpers';
 
@@ -134,9 +135,10 @@ export default function DelegationAmountPage({
     );
     const existing = getExistingDelegationValues(accountInfo);
 
-    // TODO #delegation not actual prop...
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { pendingChange } = (accountInfo as any)?.accountDelegation ?? {};
+    const pendingChange =
+        accountInfo !== undefined && isDelegatorAccount(accountInfo)
+            ? accountInfo.accountDelegation.pendingChange
+            : undefined;
     const defaultValues: SubState = {
         amount: '0.00',
         redelegate: true,
@@ -216,7 +218,7 @@ export default function DelegationAmountPage({
                     <div className="mV10">
                         Cannot update delegated amount at this time:
                         <div className="bodyEmphasized textError mV10">
-                            <DelegationPendingChange pending={pendingChange} />
+                            <StakePendingChange pending={pendingChange} />
                         </div>
                         It will be possible to proceed after this time has
                         passed.

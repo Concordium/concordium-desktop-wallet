@@ -1,7 +1,6 @@
 import React from 'react';
-// import { Validate } from 'react-hook-form';
-
 import { Validate } from 'react-hook-form';
+import { MintDistributionV0 } from '@concordium/node-sdk';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 
@@ -54,7 +53,7 @@ export default function UpdateMintDistribution({
 }: UpdateProps): JSX.Element | null {
     const { mintPerSlot, ...rewardDistribution } = getCurrentValue(
         blockSummary
-    );
+    ) as MintDistributionV0; // TODO fix if this is supposed to work with delegation protocol.
     const slotsPerYear = getSlotsPerYear(consensusStatus);
     const currentDistribitionRatio: RewardDistributionValue = toRewardDistributionValue(
         rewardDistribution

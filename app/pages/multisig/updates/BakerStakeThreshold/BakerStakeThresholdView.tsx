@@ -5,6 +5,7 @@ import { BakerStakeThreshold } from '~/utils/types';
 import withChainData, { ChainData } from '~/utils/withChainData';
 import { displayAsGTU } from '~/utils/gtu';
 import Label from '~/components/Label';
+import { getMinimumStakeForBaking } from '~/utils/blockSummaryHelpers';
 
 interface Props extends ChainData {
     bakerStakeThreshold: BakerStakeThreshold;
@@ -22,9 +23,7 @@ export default withChainData(function BakerStakeThresholdView({
             <div>
                 <Label className="mB5">Current baker stake threshold:</Label>
                 <div className="body3 mono">
-                    {displayAsGTU(
-                        bs.updates.chainParameters.minimumThresholdForBaking
-                    )}
+                    {displayAsGTU(getMinimumStakeForBaking(bs))}
                 </div>
             </div>
         );
