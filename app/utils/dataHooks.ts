@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { ChainParameters } from '@concordium/node-sdk';
-import { isChainParametersV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { getAccount } from '~/database/AccountDao';
 import { BlockSummary, ConsensusStatus } from '~/node/NodeApiTypes';
@@ -158,85 +157,78 @@ export function useTransactionExpiryState(
     return [expiryTime, setExpiryTime, expiryTimeError] as const;
 }
 
-function useEpochCooldownUntil(
-    findEpochValue: (cp: ChainParameters) => number | undefined
-): Date | undefined {
-    const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
-    const now = useCurrentTime(60000);
-
-    if (lastFinalizedBlockSummary === undefined) {
-        return undefined;
-    }
-
-    const { consensusStatus } = lastFinalizedBlockSummary;
-    const {
-        chainParameters,
-    } = lastFinalizedBlockSummary.lastFinalizedBlockSummary.updates;
-    const genesisTime = new Date(consensusStatus.currentEraGenesisTime);
+function getV0Cooldown(
+    cooldownEpochs: number,
+    cs: ConsensusStatus,
+    now: Date
+): Date {
+    const genesisTime = new Date(cs.currentEraGenesisTime);
     const currentEpochIndex = getEpochIndexAt(
         now,
-        consensusStatus.epochDuration,
+        cs.epochDuration,
         genesisTime
     );
     const nextEpochIndex = currentEpochIndex + 1;
-    const cooldownValue = findEpochValue(chainParameters);
-
-    if (cooldownValue === undefined) {
-        return undefined;
-    }
 
     return epochDate(
-        nextEpochIndex + cooldownValue,
-        consensusStatus.epochDuration,
+        nextEpochIndex + cooldownEpochs,
+        cs.epochDuration,
         genesisTime
     );
 }
 
-function useSecondsCooldownUntil(
-    findSecondsValue: (cp: ChainParameters) => number | undefined
-): Date | undefined {
-    const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
-    const now = useCurrentTime(60000);
-
-    if (lastFinalizedBlockSummary === undefined) {
-        return undefined;
-    }
-
-    const {
-        chainParameters,
-    } = lastFinalizedBlockSummary.lastFinalizedBlockSummary.updates;
-
-    const cooldownValue = findSecondsValue(chainParameters);
-
-    if (cooldownValue === undefined) {
-        return undefined;
-    }
-
-    return new Date(now.getTime() + cooldownValue * 1000); // TODO #delegation maybe this is wrong...?
+function getV1Cooldown(cooldownSeconds: number, now: Date): Date {
+    return new Date(now.getTime() + cooldownSeconds * 1000); // TODO #delegation revise this...
 }
 
 /** Hook for calculating the date of the delegation cooldown ending, will result in undefined while loading */
 export function useCalcDelegatorCooldownUntil() {
-    return useSecondsCooldownUntil((cp) => {
-        if (!isChainParametersV1(cp)) {
-            throw new Error(
-                'Trying to get chain parameters for delegation on wrong protocol version.'
-            );
-        }
-        return Number(cp.delegatorCooldown);
-    });
+    const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
+    const now = useCurrentTime(60000);
+
+    if (lastFinalizedBlockSummary === undefined) {
+        return undefined;
+    }
+
+    const { lastFinalizedBlockSummary: bs } = lastFinalizedBlockSummary;
+
+    if (isBlockSummaryV1(bs)) {
+        return getV1Cooldown(
+            Number(bs.updates.chainParameters.delegatorCooldown),
+            now
+        );
+    }
+    throw new Error(
+        'Delegation cooldown not available for current protocol version.'
+    );
 }
 
 /** Hook for calculating the date of the baking stake cooldown ending, will result in undefined while loading */
 export function useCalcBakerStakeCooldownUntil() {
-    const v0Cooldown = useEpochCooldownUntil((cp) =>
-        isChainParametersV1(cp) ? undefined : Number(cp.bakerCooldownEpochs)
-    );
-    const v1Cooldown = useSecondsCooldownUntil((cp) =>
-        isChainParametersV1(cp) ? Number(cp.poolOwnerCooldown) : undefined
-    );
+    const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
+    const now = useCurrentTime(60000);
 
-    return v0Cooldown ?? v1Cooldown; // Only one of these will be defined.
+    if (lastFinalizedBlockSummary === undefined) {
+        return undefined;
+    }
+
+    const {
+        lastFinalizedBlockSummary: bs,
+        consensusStatus: cs,
+    } = lastFinalizedBlockSummary;
+
+    if (isBlockSummaryV1(bs)) {
+        return getV1Cooldown(
+            Number(bs.updates.chainParameters.poolOwnerCooldown),
+            now
+        );
+    }
+
+    return getV0Cooldown(
+        Number(bs.updates.chainParameters.bakerCooldownEpochs),
+        cs,
+        now
+    );
 }
 
 export function useProtocolVersion(): bigint | undefined {
