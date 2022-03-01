@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChainParametersV1, RewardFraction } from '@concordium/node-sdk';
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
