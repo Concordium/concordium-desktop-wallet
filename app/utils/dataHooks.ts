@@ -158,9 +158,8 @@ export function useTransactionExpiryState(
     return [expiryTime, setExpiryTime, expiryTimeError] as const;
 }
 
-// TODO #delegation revise, as updated cooldowns are in seconds instead of epochs.
-function useCooldownUntil(
-    findEpoch: (cp: ChainParameters) => number
+function useEpochCooldownUntil(
+    findEpochValue: (cp: ChainParameters) => number | undefined
 ): Date | undefined {
     const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
     const now = useCurrentTime(60000);
@@ -180,22 +179,48 @@ function useCooldownUntil(
         genesisTime
     );
     const nextEpochIndex = currentEpochIndex + 1;
+    const cooldownValue = findEpochValue(chainParameters);
 
-    const cooldownUntilEpochIndex = nextEpochIndex + findEpoch(chainParameters); // TODO change to param related to delegation.
+    if (cooldownValue === undefined) {
+        return undefined;
+    }
 
     return epochDate(
-        cooldownUntilEpochIndex,
+        nextEpochIndex + cooldownValue,
         consensusStatus.epochDuration,
         genesisTime
     );
 }
 
+function useSecondsCooldownUntil(
+    findSecondsValue: (cp: ChainParameters) => number | undefined
+): Date | undefined {
+    const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
+    const now = useCurrentTime(60000);
+
+    if (lastFinalizedBlockSummary === undefined) {
+        return undefined;
+    }
+
+    const {
+        chainParameters,
+    } = lastFinalizedBlockSummary.lastFinalizedBlockSummary.updates;
+
+    const cooldownValue = findSecondsValue(chainParameters);
+
+    if (cooldownValue === undefined) {
+        return undefined;
+    }
+
+    return new Date(now.getTime() + cooldownValue * 1000); // TODO #delegation maybe this is wrong...?
+}
+
 /** Hook for calculating the date of the delegation cooldown ending, will result in undefined while loading */
 export function useCalcDelegatorCooldownUntil() {
-    return useCooldownUntil((cp) => {
+    return useSecondsCooldownUntil((cp) => {
         if (!isChainParametersV1(cp)) {
             throw new Error(
-                'Trying to add chain parameters for delegation on wrong protocol version.'
+                'Trying to get chain parameters for delegation on wrong protocol version.'
             );
         }
         return Number(cp.delegatorCooldown);
@@ -204,17 +229,17 @@ export function useCalcDelegatorCooldownUntil() {
 
 /** Hook for calculating the date of the baking stake cooldown ending, will result in undefined while loading */
 export function useCalcBakerStakeCooldownUntil() {
-    return useCooldownUntil((cp) => {
-        if (!isChainParametersV1(cp)) {
-            return Number(cp.bakerCooldownEpochs);
-        }
-        return Number(cp.poolOwnerCooldown);
-    });
+    const v0Cooldown = useEpochCooldownUntil((cp) =>
+        isChainParametersV1(cp) ? undefined : Number(cp.bakerCooldownEpochs)
+    );
+    const v1Cooldown = useSecondsCooldownUntil((cp) =>
+        isChainParametersV1(cp) ? Number(cp.poolOwnerCooldown) : undefined
+    );
+
+    return v0Cooldown ?? v1Cooldown; // Only one of these will be defined.
 }
 
 export function useProtocolVersion(): bigint | undefined {
-    // const { protocolVersion } = useConsensusStatus() ?? {};
-
-    // return protocolVersion;
-    return BigInt(4);
+    return useConsensusStatus()?.protocolVersion;
+    // return BigInt(4);
 }

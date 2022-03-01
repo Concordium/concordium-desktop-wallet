@@ -11,7 +11,6 @@ import { stringify } from '~/utils/JSONHelper';
 import { createUpdateBakerRestakeEarningsTransaction } from '~/utils/transactionHelpers';
 import { EqualRecord, NotOptional, TransactionKindId } from '~/utils/types';
 import { SubmitTransactionLocationState } from '../../SubmitTransaction/SubmitTransaction';
-import Label from '~/components/Label';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
 import ensureExchangeRateAndNonce, {
@@ -90,22 +89,17 @@ export default ensureExchangeRateAndNonce(function UpdateBakerRestake({
         );
     }
 
+    const existingValue = accountInfo?.accountBaker.restakeEarnings;
+
     return (
         <Card className="textCenter pB40">
             <h3 className="bodyEmphasized">Update baker restake earnings</h3>
             <p className="mV30">Choose to restake earnings or not, below.</p>
-            <div className="mV30">
-                <Label>Current restake:</Label>
-                <span className="body1">
-                    {accountInfo?.accountBaker.restakeEarnings ?? true
-                        ? 'Yes'
-                        : 'No'}
-                </span>
-            </div>
             <Form<FormModel> onSubmit={submit}>
                 <PickBakerRestake
                     fieldName={fieldNames.restake}
-                    initial={accountInfo?.accountBaker.restakeEarnings}
+                    initial={existingValue}
+                    existing={existingValue}
                 />
                 <Form.Submit className={styles.bakerFlowContinue}>
                     Continue

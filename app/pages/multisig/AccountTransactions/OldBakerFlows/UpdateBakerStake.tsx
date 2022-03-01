@@ -325,12 +325,12 @@ function PickNewStake({
             <PickAmount
                 account={account}
                 amount={microGtuToGtu(stakedAlready)}
+                existing={microGtuToGtu(stakedAlready)}
                 setAmount={setStake}
                 validateAmount={(...args) =>
                     validateBakerStake(minimumThresholdForBaking, ...args)
                 }
             />
-            <p>Enter your new stake here</p>
             {cooldownUntil !== undefined &&
             stakeGtu !== undefined &&
             stakedAlready !== undefined &&

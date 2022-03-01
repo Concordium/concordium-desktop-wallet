@@ -3,6 +3,7 @@ import { useForm, useFormContext, Validate } from 'react-hook-form';
 import { Redirect } from 'react-router';
 import clsx from 'clsx';
 import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { BakerPoolStatus } from '@concordium/node-sdk';
 import AccountCard from '~/components/AccountCard';
 import Form from '~/components/Form';
 import ErrorMessage from '~/components/Form/ErrorMessage';
@@ -22,13 +23,7 @@ import {
     getExistingDelegationValues,
 } from '~/utils/transactionFlows/configureDelegation';
 import { validateDelegateAmount } from '~/utils/transactionHelpers';
-import {
-    Account,
-    AccountInfo,
-    BakerPoolStatus,
-    EqualRecord,
-    Fraction,
-} from '~/utils/types';
+import { Account, AccountInfo, EqualRecord, Fraction } from '~/utils/types';
 import StakePendingChange from '~/components/StakePendingChange';
 import Loading from '~/cross-app-components/Loading';
 import { getPoolInfoLatest } from '~/node/nodeHelpers';
@@ -231,7 +226,10 @@ export default function DelegationAmountPage({
                     accountInfo={accountInfo}
                     existing={existing?.delegate?.amount}
                     estimatedFee={estimatedFee}
-                    max={(poolInfo as BakerPoolStatus).delegatedCapitalCap}
+                    max={
+                        (poolInfo as BakerPoolStatus).poolStatus
+                            .delegatedCapitalCap
+                    }
                     hasPendingChange={pendingChange !== undefined}
                 />
                 <p className="mB30">

@@ -5,7 +5,6 @@ import { Redirect } from 'react-router';
 import { BlockSummaryV0 } from '@concordium/node-sdk';
 import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import Form from '~/components/Form';
-import Label from '~/components/Label';
 import PickBakerStakeAmount from '~/components/PickBakerStakeAmount';
 import Card from '~/cross-app-components/Card';
 import Loading from '~/cross-app-components/Loading';
@@ -19,7 +18,7 @@ import {
     useCalcBakerStakeCooldownUntil,
     useTransactionCostEstimate,
 } from '~/utils/dataHooks';
-import { displayAsGTU, microGtuToGtu, toMicroUnits } from '~/utils/gtu';
+import { microGtuToGtu, toMicroUnits } from '~/utils/gtu';
 import { stringify } from '~/utils/JSONHelper';
 import { createUpdateBakerStakeTransaction } from '~/utils/transactionHelpers';
 import {
@@ -143,9 +142,13 @@ const UpdateBakerStakeForm = ensureExchangeRateAndNonce(
             );
         }
 
+        const existingValue = microGtuToGtu(
+            accountInfo.accountBaker?.stakedAmount
+        );
+
         return (
             <Form<FormModel> onSubmit={submit}>
-                <p className="mT30">
+                <div className="body2 mT30">
                     Enter your new desired amount to stake. If you raise the
                     stake it will take effect after two epochs, and if you lower
                     the stake it will take effect after the grace period.
@@ -159,26 +162,15 @@ const UpdateBakerStakeForm = ensureExchangeRateAndNonce(
                             </div>
                         </>
                     )}
-                </p>
-                {accountInfo.accountBaker?.stakedAmount && (
-                    <>
-                        <Label className="mT30">Current stake:</Label>
-                        <em className="body2">
-                            {displayAsGTU(
-                                accountInfo.accountBaker?.stakedAmount
-                            )}
-                        </em>
-                    </>
-                )}
+                </div>
                 <PickBakerStakeAmount
                     header="New stake:"
-                    initial={microGtuToGtu(
-                        accountInfo.accountBaker?.stakedAmount
-                    )}
+                    initial={existingValue}
                     accountInfo={accountInfo}
                     fieldName={fieldNames.stake}
                     minimumStake={minimumStake}
                     estimatedFee={estimatedFee}
+                    existing={existingValue}
                 />
                 <Form.Submit className={styles.bakerFlowContinue}>
                     Continue

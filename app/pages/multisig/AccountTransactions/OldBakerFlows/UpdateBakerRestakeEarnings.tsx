@@ -33,9 +33,9 @@ import {
 } from '~/utils/accountRouterHelpers';
 import DatePicker from '~/components/Form/DatePicker';
 import { isMultiSig } from '~/utils/accountHelpers';
-import Label from '~/components/Label';
 import Radios from '~/components/Form/Radios';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
+import { displayRestakeEarnings } from '~/utils/transactionFlows/configureBaker';
 
 import styles from '../MultisignatureAccountTransactions.module.scss';
 
@@ -293,10 +293,11 @@ function RestakeEarnings({
     return (
         <>
             <p className="mV30">Choose to restake earnings or not, below.</p>
-            <div className="mV30">
-                <Label>Current restake:</Label>
-                <span className="body1">{restake ? 'Yes' : 'No'}</span>
-            </div>
+            {restake !== undefined && (
+                <div className="body3 mono mB10">
+                    Current option: {displayRestakeEarnings(restake)}
+                </div>
+            )}
             <Radios
                 label="Enable restake earnings"
                 options={[

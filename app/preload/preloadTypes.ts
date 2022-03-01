@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
     AccountInfo,
+    BakerId,
     BlockSummary,
     ConsensusStatus,
     CryptographicParameters,
     NextAccountNonce,
+    PoolStatus,
     TransactionStatus,
     Versioned,
 } from '@concordium/node-sdk';
@@ -40,8 +42,6 @@ import {
     ArInfo,
     IdentityVersion,
     DecryptedTransferTransaction,
-    BakerId,
-    PoolStatus,
 } from '~/utils/types';
 import { ExternalCredential } from '../database/types';
 import type LedgerCommands from './preloadLedgerTypes';

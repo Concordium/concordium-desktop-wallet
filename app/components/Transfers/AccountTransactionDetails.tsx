@@ -113,7 +113,6 @@ export default function AccountTransactionDetails({ transaction }: Props) {
             />
         );
     }
-    // TODO remove following 5.
     if (instanceOfAddBaker(transaction)) {
         return <DisplayAddBaker transaction={transaction} />;
     }

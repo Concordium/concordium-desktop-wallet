@@ -2,12 +2,11 @@ import {
     AccountAddress,
     CredentialRegistrationId,
     ConcordiumNodeClient,
+    BakerId,
 } from '@concordium/node-sdk';
 import { credentials, Metadata } from '@grpc/grpc-js';
 import SendTransactionClient from '~/node/ConcordiumNodeClient';
 import { GRPC, ConsensusAndGlobalResult } from '~/preload/preloadTypes';
-import { toMicroUnits } from '~/utils/gtu';
-import { BakerId, BakerPoolStatus } from '~/utils/types';
 
 const defaultDeadlineMs = 15000;
 let client: ConcordiumNodeClient;
@@ -103,22 +102,7 @@ const exposedMethods: GRPC = {
         return getConsensusStatusAndCryptographicParameters(address, port);
     },
     getPoolInfo: (blockHash: string, bakerId?: BakerId) => {
-        // eslint-disable-next-line no-console
-        console.log(blockHash, bakerId);
-        const dummyPoolInfo: BakerPoolStatus = {
-            bakerId: BigInt(123),
-            bakerAddress: '123',
-            delegatedCapital: toMicroUnits('123'),
-            bakerEquityCapital: toMicroUnits('123'),
-            delegatedCapitalCap: toMicroUnits('1234'),
-            currentPaydayStatus: {
-                delegatedCapital: toMicroUnits('123'),
-            },
-            poolInfo: '',
-            bakerStakePendingChange: '',
-        };
-
-        return Promise.resolve(dummyPoolInfo);
+        return client.getPoolStatus(blockHash, bakerId);
     },
 };
 

@@ -13,6 +13,7 @@ import Label from './Label';
 interface Props {
     header: string;
     initial?: string;
+    /** existing value in CCD. */
     existing?: string;
     minimumStake: bigint;
     fieldName: string;
