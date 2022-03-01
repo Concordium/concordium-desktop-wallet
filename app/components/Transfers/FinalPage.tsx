@@ -26,6 +26,11 @@ import {
     instanceOfEncryptedTransferWithMemo,
     instanceOfSimpleTransferWithMemo,
     instanceOfConfigureBaker,
+    instanceOfAddBaker,
+    instanceOfRemoveBaker,
+    instanceOfUpdateBakerKeys,
+    instanceOfUpdateBakerRestakeEarnings,
+    instanceOfUpdateBakerStake,
     instanceOfConfigureDelegation,
 } from '~/utils/types';
 
@@ -83,6 +88,14 @@ function getSpecificsHandler(transaction: AccountTransaction) {
     ) {
         title = 'Shielded transfer submitted!';
         amount = transaction.payload.plainTransferAmount;
+    } else if (
+        instanceOfAddBaker(transaction) ||
+        instanceOfRemoveBaker(transaction) ||
+        instanceOfUpdateBakerKeys(transaction) ||
+        instanceOfUpdateBakerRestakeEarnings(transaction) ||
+        instanceOfUpdateBakerStake(transaction)
+    ) {
+        title = 'Baker transaction submitted!';
     } else if (instanceOfConfigureBaker(transaction)) {
         title = 'Configure baker transaction submitted!';
     } else if (instanceOfConfigureDelegation(transaction)) {

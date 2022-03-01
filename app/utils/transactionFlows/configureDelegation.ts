@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AccountInfo } from '@concordium/node-sdk';
+import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { multiplyFraction } from '../basicHelpers';
-import { toMicroUnits } from '../gtu';
+import { microGtuToGtu, toMicroUnits } from '../gtu';
 import { getTransactionKindCost } from '../transactionCosts';
 import { createConfigureDelegationTransaction } from '../transactionHelpers';
 import { serializeTransferPayload } from '../transactionSerialization';
@@ -19,6 +19,7 @@ import {
 export type ConfigureDelegationFlowDependencies = NotOptional<ExchangeRate>;
 
 export interface DelegateSettings {
+    /** in CCD */
     amount: string;
     redelegate: boolean;
 }
@@ -33,7 +34,7 @@ export const configureDelegationTitle = 'Configure delegation';
 export const getExistingDelegationValues = (
     accountInfo: AccountInfo
 ): NotOptional<ConfigureDelegationFlowState> | undefined => {
-    if ((accountInfo as any).accountDelegation === undefined) {
+    if (!isDelegatorAccount(accountInfo)) {
         return undefined;
     }
 
@@ -41,11 +42,11 @@ export const getExistingDelegationValues = (
         delegationTarget,
         stakedAmount,
         restakeEarnings,
-    } = (accountInfo as any).accountDelegation;
+    } = accountInfo.accountDelegation;
 
     return {
         delegate: {
-            amount: stakedAmount,
+            amount: microGtuToGtu(stakedAmount) ?? '0.00',
             redelegate: restakeEarnings,
         },
         target: delegationTarget?.toString(),

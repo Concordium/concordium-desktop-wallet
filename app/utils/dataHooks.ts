@@ -241,5 +241,4 @@ export function useCalcBakerStakeCooldownUntil() {
 
 export function useProtocolVersion(): bigint | undefined {
     return useConsensusStatus()?.protocolVersion;
-    // return BigInt(4);
 }

@@ -29,7 +29,6 @@ export const energyConstants = {
     RemoveBaker: 300n,
     UpdateBakerStake: 300n,
     UpdateBakerRestakeEarnings: 300n,
-    // TODO transaction cost
     ConfigureBaker: 300n,
     ConfigureBakerWithKeys: 4050n,
     ConfigureDelegation: 300n,

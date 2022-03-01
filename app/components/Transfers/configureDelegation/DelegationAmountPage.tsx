@@ -166,7 +166,7 @@ export default function DelegationAmountPage({
                 account.signatureThreshold
             ),
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [redelgateChanged, amountChanged] // fee only changes when
+        [redelgateChanged, amountChanged] // fee only changes when either of these change from being defined to undefined or vice versa.
     );
 
     if (target === undefined) {

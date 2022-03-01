@@ -1,9 +1,11 @@
 /* eslint-disable no-nested-ternary */
-import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import {
+    isBakerAccount,
+    isDelegatorAccount,
+} from '@concordium/node-sdk/lib/src/accountHelpers';
 import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, Route } from 'react-router';
-// import { LocationDescriptorObject } from 'history';
 import { LocationDescriptorObject } from 'history';
 import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
 import {
@@ -69,7 +71,8 @@ export default withAccountSync(function DetailsPage() {
     }, [account?.address]);
 
     const isBaker = accountInfo !== undefined && isBakerAccount(accountInfo);
-    const isDelegating = false;
+    const isDelegating =
+        accountInfo !== undefined && isDelegatorAccount(accountInfo);
     const isDelegationPV = pv !== undefined && hasDelegationProtocol(pv);
     const canTransfer = hasCredentials && accountInfo !== undefined;
     const canDelegate = isDelegationPV && !isBaker && canTransfer;

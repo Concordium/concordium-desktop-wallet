@@ -15,9 +15,9 @@ import MultiStepForm, {
     MultiStepFormProps,
     OrRenderValues,
 } from '~/components/MultiStepForm';
+import { isMultiSig } from '~/utils/accountHelpers';
 
 import styles from './AccountTransactionFlow.module.scss';
-import { isMultiSig } from '~/utils/accountHelpers';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface FlowChild<F, K extends keyof F = any> extends FormChild<F, K> {

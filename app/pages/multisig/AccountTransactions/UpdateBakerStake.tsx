@@ -25,12 +25,12 @@ import {
 } from '~/utils/transactionFlows/updateBakerStake';
 import withChainData from '~/utils/withChainData';
 import UpdateBakerStakePage from '~/components/Transfers/configureBaker/UpdateBakerStakePage';
-
-import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
 import {
     accountInfoSelector,
     accountsInfoSelector,
 } from '~/features/AccountSlice';
+
+import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
 
 interface DisplayProps
     extends Partial<RequiredValues & UpdateBakerStakeFlowState> {

@@ -16,8 +16,6 @@ import {
     accountInfoSelector,
     accountsInfoSelector,
 } from '~/features/AccountSlice';
-
-import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
 import {
     ConfigureDelegationFlowDependencies,
     ConfigureDelegationFlowState,
@@ -31,6 +29,8 @@ import {
 } from '~/utils/transactionFlows/configureDelegation';
 import DelegationTargetPage from '~/components/Transfers/configureDelegation/DelegationTargetPage';
 import DelegationAmountPage from '~/components/Transfers/configureDelegation/DelegationAmountPage';
+
+import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
 
 interface DisplayProps
     extends Partial<RequiredValues & ConfigureDelegationFlowState> {

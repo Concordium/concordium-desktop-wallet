@@ -3,11 +3,17 @@ import type { Buffer } from 'buffer/';
 import type { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import type { HTMLAttributes } from 'react';
 import type { RegisterOptions } from 'react-hook-form';
-import { BakerId } from '@concordium/node-sdk/';
+import type { BakerId } from '@concordium/node-sdk';
+import { OpenStatus } from '@concordium/node-sdk/lib/src/types';
 import { RejectReason } from './node/RejectReasonHelper';
 import type { ExternalCredential, Genesis } from '~/database/types';
 
-export { AccountInfo, AccountEncryptedAmount } from '@concordium/node-sdk/';
+export type {
+    AccountInfo,
+    AccountEncryptedAmount,
+    BakerId,
+} from '@concordium/node-sdk';
+export { OpenStatus } from '@concordium/node-sdk/lib/src/types';
 
 export type Dispatch = GenericDispatch<AnyAction>;
 
@@ -19,12 +25,6 @@ type Word16 = number;
 export type Word8 = number;
 type JSONString = string; // indicates that it is some object that has been stringified.
 export type Amount = bigint;
-
-export enum OpenStatus {
-    OpenForAll = 0,
-    ClosedForNew = 1,
-    ClosedForAll = 2,
-}
 
 export interface Fraction {
     numerator: Word64;

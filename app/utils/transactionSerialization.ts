@@ -444,7 +444,6 @@ export const serializeConfigureBakerPayload = (
         configureBakerOrder
     );
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function serializeConfigureBaker(payload: ConfigureBakerPayload) {
     return Buffer.concat([
         putInt8(TransactionKind.Configure_baker),
@@ -468,7 +467,6 @@ const configureDelegationSerializationSpec: SerializationSpec<ConfigureDelegatio
     delegationTarget: orUndefined(serializeDelegationTarget),
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function serializeConfigureDelegation(
     payload: ConfigureDelegationPayload
 ) {
