@@ -27,6 +27,12 @@ import httpMethods from './http';
 import decryptAmountsDao from './database/decryptedAmountsDao';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
 import isSuccessfulEncryptedTransaction from '~/utils/decryptHelpers';
+import {
+    formatGtuString,
+    microGtuToGtu,
+    getGTUSymbol,
+    getMicroSymbol,
+} from '~/utils/gtu';
 
 async function enrichWithDecryptedAmounts(
     credentialNumber: number,
@@ -168,14 +174,23 @@ function calculateShieldedBalanceChange(
     }
 }
 
-const getName = (i: string[]) => i[0];
-const getLabel = (i: string[]) => i[1];
+const getName = (i: [string, string]) => i[0];
+const getLabel = (i: [string, string]) => i[1];
 const exportedFields = Object.entries(exportTransactionFields);
+const amountFields = ['cost', 'subtotal', 'publicBalance', 'shieldedBalance'];
+const getLabelWithUnit = (unit: string) => (i: [string, string]) => {
+    const label = getLabel(i);
+    if (amountFields.includes(getName(i))) {
+        return `${label} (${unit})`;
+    }
+    return label;
+};
 
 // Parse a transaction into a array of values, corresponding to those of the exported fields.
 function parseTransaction(
     transaction: TransferTransactionWithNames,
-    address: string
+    address: string,
+    convertToCCD: boolean
 ) {
     const fieldValues: Record<string, string> = {};
     Object.entries(transaction).forEach(([key, value]) => {
@@ -197,6 +212,14 @@ function parseTransaction(
     );
     if (!isOutgoing) {
         fieldValues.cost = '';
+    }
+
+    if (convertToCCD) {
+        for (const field of amountFields) {
+            fieldValues[field] = formatGtuString(
+                microGtuToGtu(fieldValues[field])
+            );
+        }
     }
 
     return exportedFields.map((field) => fieldValues[getName(field)]);
@@ -228,6 +251,7 @@ async function streamTransactions(
         credentialNumber: number,
         global: Global
     ) => Promise<DecryptedTransferTransaction[]>,
+    convertToCCD: boolean,
     abortController: AbortController
 ) {
     const getAddressName = async (address: string) => {
@@ -253,7 +277,16 @@ async function streamTransactions(
     let startId = '';
     let hasMore = true;
 
-    stream.write(toCSV([exportedFields.map(getLabel)]));
+    const header = toCSV([
+        exportedFields.map(
+            getLabelWithUnit(
+                convertToCCD
+                    ? getGTUSymbol()
+                    : getMicroSymbol() + getGTUSymbol()
+            )
+        ),
+    ]);
+    stream.write(header);
     stream.write('\n');
 
     const idReducer = (acc: bigint, t: TransferTransaction) =>
@@ -323,7 +356,9 @@ async function streamTransactions(
             }))
         );
         const asCSV = toCSV(
-            withNames.map((t) => parseTransaction(t, account.address))
+            withNames.map((t) =>
+                parseTransaction(t, account.address, convertToCCD)
+            )
         );
         stream.write(asCSV);
         stream.write('\n');
@@ -360,6 +395,7 @@ async function buildAccountReportForSingleAccount(
         credentialNumber: number,
         global: Global
     ) => Promise<DecryptedTransferTransaction[]>,
+    convertToCCD: boolean,
     abortController: AbortController
 ) {
     abortController.start();
@@ -375,6 +411,7 @@ async function buildAccountReportForSingleAccount(
         global,
         keys,
         decryptTransactions,
+        convertToCCD,
         abortController
     );
     stream.end();
@@ -399,6 +436,7 @@ async function buildAccountReportForMultipleAccounts(
         credentialNumber: number,
         global: Global
     ) => Promise<DecryptedTransferTransaction[]>,
+    convertToCCD: boolean,
     abortController: AbortController
 ) {
     abortController.start();
@@ -422,6 +460,7 @@ async function buildAccountReportForMultipleAccounts(
             global,
             keys,
             decryptTransactions,
+            convertToCCD,
             abortController
         );
         middleMan.end();

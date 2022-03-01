@@ -11,6 +11,8 @@ export function getGTUSymbol(): string {
     return '\u03FE';
 }
 
+export const getMicroSymbol = () => '\u03BC';
+
 export const microGTUPerGTU = 1000000n;
 const separator = '.';
 
@@ -69,7 +71,7 @@ export function toMicroUnits(amount: string): bigint {
     return BigInt(amount) * microGTUPerGTU;
 }
 
-const formatGtuString = formatNumberStringWithDigits(2);
+export const formatGtuString = formatNumberStringWithDigits(2);
 
 /**
  * Given a microCCD amount, returns the same amount in CCD

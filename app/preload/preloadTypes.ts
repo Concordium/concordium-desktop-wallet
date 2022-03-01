@@ -414,7 +414,8 @@ export interface AccountReportMethods {
             identityVersion: IdentityVersion,
             credentialNumber: number,
             global: Global
-        ) => Promise<DecryptedTransferTransaction[]>
+        ) => Promise<DecryptedTransferTransaction[]>,
+        convertToCCD: boolean
     ) => Promise<void>;
     multiple: (
         fileName: string,
@@ -429,7 +430,8 @@ export interface AccountReportMethods {
             identityVersion: IdentityVersion,
             credentialNumber: number,
             global: Global
-        ) => Promise<DecryptedTransferTransaction[]>
+        ) => Promise<DecryptedTransferTransaction[]>,
+        convertToCCD: boolean
     ) => Promise<void>;
     abort: () => void;
 }
