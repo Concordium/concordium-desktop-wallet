@@ -190,17 +190,14 @@ function getV1Cooldown(
     const genesisTime = new Date(cs.currentEraGenesisTime);
     const ei = (t: Date) => getEpochIndexAt(t, cs.epochDuration, genesisTime);
 
-    const currentEpochIndex = ei(now);
     const { rewardPeriodLength } = bs.updates.chainParameters;
     const nRewardPeriodLength = Number(rewardPeriodLength);
 
     const nextRewardPeriodStartIndex = ei(nextPaydayTime);
-    const nextFromNow = nextRewardPeriodStartIndex - currentEpochIndex;
-
     const cooldownEpochIndex = ei(
         new Date(now.getTime() + cooldownSeconds * 1000)
     );
-    const remainingAtNext = cooldownEpochIndex - nextFromNow;
+    const remainingAtNext = cooldownEpochIndex - nextRewardPeriodStartIndex;
 
     let cooldownEnd: number;
     if (remainingAtNext < 1) {
