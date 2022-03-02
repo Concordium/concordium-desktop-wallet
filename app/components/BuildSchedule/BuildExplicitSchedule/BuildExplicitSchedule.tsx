@@ -10,11 +10,11 @@ import PlusIcon from '@resources/svg/plus.svg';
 import CloseIcon from '@resources/svg/cross.svg';
 import { EqualRecord, Schedule } from '~/utils/types';
 import {
-    displayAsGTU,
-    getGTUSymbol,
-    isValidGTUString,
+    displayAsCCD,
+    getCCDSymbol,
+    isValidCCDString,
     toMicroUnits,
-} from '~/utils/gtu';
+} from '~/utils/ccd';
 import { getDefaultScheduledStartTime } from '~/utils/timeHelpers';
 import { toReleaseSchedule } from '~/utils/transactionHelpers';
 import Form from '../../Form';
@@ -121,7 +121,7 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
 
         const validateCurrentAmount: Validate = (pointAmount: string) => {
             let isValid = false;
-            if (pointAmount && isValidGTUString(pointAmount)) {
+            if (pointAmount && isValidCCDString(pointAmount)) {
                 const value = toMicroUnits(pointAmount);
 
                 if (value === 0n) {
@@ -141,7 +141,7 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
             <Form onSubmit={addToSchedule} formMethods={methods}>
                 <div className={styles.amountInputWrapper}>
                     <Label>Amount:</Label>
-                    {getGTUSymbol()}
+                    {getCCDSymbol()}
                     <Form.InlineNumber
                         name={addSchedulePointFormNames.amount}
                         defaultValue="0.00"
@@ -180,7 +180,7 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
                 <div className={styles.explicitSchedule}>
                     <p className={styles.releases}>Releases:</p>
                     <p className={styles.amountUsed}>
-                        ({displayAsGTU(usedAmount)} of {displayAsGTU(amount)} in
+                        ({displayAsCCD(usedAmount)} of {displayAsCCD(amount)} in
                         schedule)
                     </p>
                     <Card className={styles.addScheduleCard}>

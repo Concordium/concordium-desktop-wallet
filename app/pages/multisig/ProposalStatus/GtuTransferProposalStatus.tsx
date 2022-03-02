@@ -1,6 +1,6 @@
 /* eslint-disable promise/catch-or-return */
 import React, { useEffect, useState } from 'react';
-import { displayAsGTU } from '~/utils/gtu';
+import { displayAsCCD } from '~/utils/ccd';
 
 import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
 import { lookupName } from '~/utils/addressBookHelpers';
@@ -72,7 +72,7 @@ export default function GtuTransferProposalStatus({
             title={title}
         >
             <span className="textFaded">
-                {displayAsGTU(amount)} to{' '}
+                {displayAsCCD(amount)} to{' '}
                 {receiverName ? `${receiverName} ` : ''}(
                 {transaction.payload.toAddress.substr(0, 8)}...)
             </span>

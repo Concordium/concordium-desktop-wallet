@@ -20,7 +20,7 @@ import {
     Fraction,
 } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
-import { toMicroUnits } from '~/utils/gtu';
+import { toMicroUnits } from '~/utils/ccd';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
 import SignTransactionColumn from '../SignTransactionProposal/SignTransaction';

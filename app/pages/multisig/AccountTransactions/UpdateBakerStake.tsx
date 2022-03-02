@@ -28,7 +28,7 @@ import {
 import SignTransaction from './SignTransaction';
 import PickAmount from './PickAmount';
 import UpdateBakerStakeProposalDetails from './proposal-details/UpdateBakerStakeProposalDetails';
-import { microGtuToGtu, toMicroUnits } from '~/utils/gtu';
+import { microCCDToCCD, toMicroUnits } from '~/utils/ccd';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import PendingChange from '~/components/BakerPendingChange';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
@@ -319,7 +319,7 @@ function PickNewStake({
         <>
             <PickAmount
                 account={account}
-                amount={microGtuToGtu(stakedAlready)}
+                amount={microCCDToCCD(stakedAlready)}
                 setAmount={setStake}
                 validateAmount={(...args) =>
                     validateBakerStake(minimumThresholdForBaking, ...args)

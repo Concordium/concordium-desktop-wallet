@@ -9,7 +9,7 @@ import {
     getAccountTransactionHash,
     getAccountTransactionSignDigest,
 } from './transactionSerialization';
-import { displayAsGTU } from '~/utils/gtu';
+import { displayAsCCD } from '~/utils/ccd';
 import { collapseFraction } from '~/utils/basicHelpers';
 import { getStatusText } from '~/pages/multisig/ProposalStatus/util';
 import { parseTime, getNow } from '~/utils/timeHelpers';
@@ -43,7 +43,7 @@ export const totalWithdrawn = (
             <tr>
                 <td>Total amount withdrawn</td>
                 <td>
-                    {displayAsGTU(
+                    {displayAsCCD(
                         BigInt(microGTUAmount) + BigInt(transaction.cost)
                     )}
                 </td>
@@ -54,7 +54,7 @@ export const totalWithdrawn = (
         <tr>
             <td>Est. total amount withdrawn</td>
             <td>
-                {displayAsGTU(
+                {displayAsCCD(
                     BigInt(microGTUAmount) +
                         (transaction.estimatedFee
                             ? collapseFraction(transaction.estimatedFee)
@@ -68,7 +68,7 @@ export const totalWithdrawn = (
 export const displayAmount = (microGTUAmount: string | bigint) => (
     <tr>
         <td>Amount</td>
-        <td>{displayAsGTU(microGTUAmount)}</td>
+        <td>{displayAsCCD(microGTUAmount)}</td>
     </tr>
 );
 
@@ -77,7 +77,7 @@ export const fee = (transaction: AccountTransaction) => {
         return (
             <tr>
                 <td>Fee</td>
-                <td>{displayAsGTU(transaction.cost)}</td>
+                <td>{displayAsCCD(transaction.cost)}</td>
             </tr>
         );
     }
@@ -86,7 +86,7 @@ export const fee = (transaction: AccountTransaction) => {
             <td>Estimated fee</td>
             <td>
                 {transaction.estimatedFee
-                    ? displayAsGTU(collapseFraction(transaction.estimatedFee))
+                    ? displayAsCCD(collapseFraction(transaction.estimatedFee))
                     : 'unknown'}
             </td>
         </tr>

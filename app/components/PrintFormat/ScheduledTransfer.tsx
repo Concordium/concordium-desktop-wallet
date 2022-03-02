@@ -21,7 +21,7 @@ import {
     displayMemo,
 } from '~/utils/printUtility';
 import { parseTime } from '~/utils/timeHelpers';
-import { displayAsGTU } from '~/utils/gtu';
+import { displayAsCCD } from '~/utils/ccd';
 import withNames from '~/components/Transfers/withNames';
 
 interface Props {
@@ -93,7 +93,7 @@ function PrintFormatScheduledTransfer({
                                         TimeStampUnit.milliSeconds
                                     )}
                                 </td>
-                                <td>{displayAsGTU(schedulePoint.amount)}</td>
+                                <td>{displayAsCCD(schedulePoint.amount)}</td>
                             </tr>
                         )
                     )}

@@ -11,7 +11,7 @@ import routes from '~/constants/routes.json';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
 import { multiplyFraction } from '~/utils/basicHelpers';
-import { toMicroUnits } from '~/utils/gtu';
+import { toMicroUnits } from '~/utils/ccd';
 import { stringify } from '~/utils/JSONHelper';
 import { BakerKeys } from '~/utils/rustInterface';
 import { createAddBakerTransaction } from '~/utils/transactionHelpers';

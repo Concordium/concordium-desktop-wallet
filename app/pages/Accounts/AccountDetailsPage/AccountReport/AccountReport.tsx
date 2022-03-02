@@ -32,7 +32,7 @@ import Radios from '~/components/Form/Radios';
 
 import styles from './AccountReport.module.scss';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
-import { getGTUSymbol } from '~/utils/gtu';
+import { getCCDSymbol } from '~/utils/ccd';
 import { globalSelector } from '~/features/GlobalSlice';
 import decryptTransactions from '~/utils/decryptTransactions';
 
@@ -47,9 +47,10 @@ interface Props {
     location: LocationDescriptorObject<State>;
 }
 
+// unit options for the amounts. the value corresponds to convertToCCD variable.
 export const unitOptions = [
-    { label: getGTUSymbol(), value: true },
-    { label: `micro${getGTUSymbol()}`, value: false },
+    { label: getCCDSymbol(), value: true },
+    { label: `micro${getCCDSymbol()}`, value: false },
 ];
 
 /**
@@ -64,7 +65,8 @@ export default function AccountReport({ location }: Props) {
         );
     }
 
-    const [unit, setUnit] = useState(false);
+    // Default to CCD
+    const [unit, setUnit] = useState(true);
 
     const [showError, setShowError] = useState<ModalErrorInput>({
         show: false,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { toMicroUnits } from '~/utils/gtu';
+import { toMicroUnits } from '~/utils/ccd';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import {
     Account,

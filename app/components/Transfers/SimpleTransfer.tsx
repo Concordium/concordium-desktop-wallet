@@ -10,7 +10,7 @@ import {
     TransactionKindId,
     Fraction,
 } from '../../utils/types';
-import { toMicroUnits } from '../../utils/gtu';
+import { toMicroUnits } from '../../utils/ccd';
 import {
     createSimpleTransferTransaction,
     createSimpleTransferWithMemoTransaction,

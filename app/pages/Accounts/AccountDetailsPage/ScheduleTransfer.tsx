@@ -9,7 +9,7 @@ import {
     Fraction,
 } from '~/utils/types';
 import routes from '~/constants/routes.json';
-import { toMicroUnits } from '~/utils/gtu';
+import { toMicroUnits } from '~/utils/ccd';
 import { stringify } from '~/utils/JSONHelper';
 import ExternalTransfer from '~/components/Transfers/ExternalTransfer';
 import ensureExchangeRateAndNonce from '~/components/Transfers/ensureExchangeRateAndNonce';

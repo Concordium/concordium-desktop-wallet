@@ -4,7 +4,7 @@ import { Story, Meta } from '@storybook/react/types-6-0';
 import Form, { FormProps } from '../Form';
 import { futureDate } from '../util/validation';
 import { maxFileSizeKb } from '../FileInput/validation';
-import { getGTUSymbol } from '~/utils/gtu';
+import { getCCDSymbol } from '~/utils/ccd';
 
 export const {
     Checkbox,
@@ -95,7 +95,7 @@ export const ValidationTemplate: Story<FormProps> = (args) => (
             }}
         />
         <div>
-            Please send {getGTUSymbol()}
+            Please send {getCCDSymbol()}
             <Form.InlineNumber
                 name="gtuAmount"
                 rules={{ required: true, min: 0 }}
@@ -149,7 +149,7 @@ export const AllFieldsTemplate: Story<FormProps> = (args) => (
         />
         <Form.Switch name="setting">Enable setting</Form.Switch>
         <div>
-            Please send {getGTUSymbol()}
+            Please send {getCCDSymbol()}
             <Form.InlineNumber name="gtuAmount" /> to John.
         </div>
         <Form.Submit>Submit</Form.Submit>

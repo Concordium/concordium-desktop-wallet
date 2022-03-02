@@ -36,7 +36,7 @@ import {
 } from '~/features/AccountSlice';
 import { validateMemo } from '~/utils/transactionHelpers';
 import { collapseFraction } from '~/utils/basicHelpers';
-import { toMicroUnits, displayAsGTU } from '~/utils/gtu';
+import { toMicroUnits, displayAsCCD } from '~/utils/ccd';
 import { useAsyncMemo } from '~/utils/hooks';
 import { nodeSupportsMemo } from '~/node/nodeHelpers';
 import { stringify } from '~/utils/JSONHelper';
@@ -154,7 +154,7 @@ function CreateTransferProposal({
             atDisposal < toMicroUnits(amount) + collapseFraction(estimatedFee)
         ) {
             setAmountError(
-                `Insufficient funds: ${displayAsGTU(atDisposal)} at disposal.`
+                `Insufficient funds: ${displayAsCCD(atDisposal)} at disposal.`
             );
         } else {
             setAmountError(undefined);

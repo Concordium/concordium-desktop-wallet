@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { useFormContext, Validate } from 'react-hook-form';
 import { collapseFraction } from '~/utils/basicHelpers';
-import { getGTUSymbol } from '~/utils/gtu';
+import { getCCDSymbol } from '~/utils/ccd';
 import { useUpdateEffect } from '~/utils/hooks';
 import { validateBakerStake } from '~/utils/transactionHelpers';
 import { AccountInfo, Fraction } from '~/utils/types';
@@ -57,7 +57,7 @@ export default function PickBakerStakeAmount({
         <div className="mV30">
             <Label>{header}</Label>
             <div className="h1 mV5">
-                {getGTUSymbol()}
+                {getCCDSymbol()}
                 <Form.GtuInput
                     defaultValue={initial}
                     name={fieldName}

@@ -47,7 +47,7 @@ import {
     getUpdateAccountCredentialEnergy,
     getPayloadSizeEstimate,
 } from './transactionCosts';
-import { toMicroUnits, isValidGTUString, displayAsGTU } from './gtu';
+import { toMicroUnits, isValidCCDString, displayAsCCD } from './ccd';
 import { getEncodedSize } from './cborHelper';
 import externalConstants from '~/constants/externalConstants.json';
 import { isASCII } from './basicHelpers';
@@ -520,7 +520,7 @@ export function validateShieldedAmount(
     accountInfo: AccountInfo | undefined,
     estimatedFee: bigint | undefined
 ): string | undefined {
-    if (!isValidGTUString(amountToValidate)) {
+    if (!isValidCCDString(amountToValidate)) {
         return 'Value is not a valid CCD amount';
     }
     const amountToValidateMicroGTU = toMicroUnits(amountToValidate);
@@ -547,7 +547,7 @@ export function validateTransferAmount(
     accountInfo: AccountInfo | undefined,
     estimatedFee: bigint | undefined
 ): string | undefined {
-    if (!isValidGTUString(amountToValidate)) {
+    if (!isValidCCDString(amountToValidate)) {
         return 'Value is not a valid CCD amount';
     }
     const amountToValidateMicroGTU = toMicroUnits(amountToValidate);
@@ -583,12 +583,12 @@ export function validateBakerStake(
     accountInfo: AccountInfo | undefined,
     estimatedFee: bigint | undefined
 ): string | undefined {
-    if (!isValidGTUString(amountToValidate)) {
+    if (!isValidCCDString(amountToValidate)) {
         return 'Value is not a valid CCD amount';
     }
     const amount = toMicroUnits(amountToValidate);
     if (bakerStakeThreshold && bakerStakeThreshold > amount) {
-        return `Stake is below the threshold (${displayAsGTU(
+        return `Stake is below the threshold (${displayAsCCD(
             bakerStakeThreshold
         )}) for baking `;
     }

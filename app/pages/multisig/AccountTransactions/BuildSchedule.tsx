@@ -1,6 +1,6 @@
 import React, { forwardRef, useState } from 'react';
 import clsx from 'clsx';
-import { toMicroUnits } from '~/utils/gtu';
+import { toMicroUnits } from '~/utils/ccd';
 import { Schedule } from '~/utils/types';
 import RegularInterval from '~/components/BuildSchedule/BuildRegularInterval';
 import ExplicitSchedule from '~/components/BuildSchedule/BuildExplicitSchedule';

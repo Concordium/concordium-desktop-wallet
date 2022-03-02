@@ -27,7 +27,7 @@ import httpMethods from './http';
 import decryptAmountsDao from './database/decryptedAmountsDao';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
 import isSuccessfulEncryptedTransaction from '~/utils/decryptHelpers';
-import { formatGtuString, microGtuToGtu, getGTUSymbol } from '~/utils/gtu';
+import { formatCCDString, microCCDToCCD, getCCDSymbol } from '~/utils/ccd';
 
 async function enrichWithDecryptedAmounts(
     credentialNumber: number,
@@ -173,6 +173,7 @@ const getName = (i: [string, string]) => i[0];
 const getLabel = (i: [string, string]) => i[1];
 const exportedFields = Object.entries(exportTransactionFields);
 const amountFields = ['cost', 'subtotal', 'publicBalance', 'shieldedBalance'];
+// Function to replace the field name to its label, with the chosen unit appended.
 const getLabelWithUnit = (unit: string) => (i: [string, string]) => {
     const label = getLabel(i);
     if (amountFields.includes(getName(i))) {
@@ -211,8 +212,8 @@ function parseTransaction(
 
     if (convertToCCD) {
         for (const field of amountFields) {
-            fieldValues[field] = formatGtuString(
-                microGtuToGtu(fieldValues[field])
+            fieldValues[field] = formatCCDString(
+                microCCDToCCD(fieldValues[field])
             );
         }
     }
@@ -275,7 +276,7 @@ async function streamTransactions(
     const header = toCSV([
         exportedFields.map(
             getLabelWithUnit(
-                convertToCCD ? getGTUSymbol() : `micro${getGTUSymbol()}`
+                convertToCCD ? getCCDSymbol() : `micro${getCCDSymbol()}`
             )
         ),
     ]);
