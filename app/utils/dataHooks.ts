@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isRewardStatusV1 } from '@concordium/node-sdk/lib/src/rewardStatusHelpers';
 import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { BlockSummaryV1 } from '@concordium/node-sdk';
 import { getAccount } from '~/database/AccountDao';
 import { BlockSummary, ConsensusStatus } from '~/node/NodeApiTypes';
 import { getConsensusStatus } from '~/node/nodeRequests';
@@ -9,6 +11,7 @@ import {
     fetchLastFinalizedBlockSummary,
     getAccountInfoOfAddress,
     fetchLastFinalizedAnonymityRevokers,
+    getRewardStatusLatest,
 } from '../node/nodeHelpers';
 import { useCurrentTime, useAsyncMemo } from './hooks';
 import {
@@ -177,24 +180,66 @@ function getV0Cooldown(
     );
 }
 
-function getV1Cooldown(cooldownSeconds: number, now: Date): Date {
-    return new Date(now.getTime() + cooldownSeconds * 1000); // TODO #delegation revise this...
+function getV1Cooldown(
+    cooldownSeconds: number,
+    bs: BlockSummaryV1,
+    cs: ConsensusStatus,
+    nextPaydayTime: Date,
+    now: Date
+): Date {
+    const genesisTime = new Date(cs.currentEraGenesisTime);
+    const ei = (t: Date) => getEpochIndexAt(t, cs.epochDuration, genesisTime);
+
+    const currentEpochIndex = ei(now);
+    const { rewardPeriodLength } = bs.updates.chainParameters;
+    const nRewardPeriodLength = Number(rewardPeriodLength);
+
+    const nextRewardPeriodStartIndex = ei(nextPaydayTime);
+    const nextFromNow = nextRewardPeriodStartIndex - currentEpochIndex;
+
+    const cooldownEpochIndex = ei(
+        new Date(now.getTime() + cooldownSeconds * 1000)
+    );
+    const remainingAtNext = cooldownEpochIndex - nextFromNow;
+
+    let cooldownEnd: number;
+    if (remainingAtNext < 1) {
+        cooldownEnd = nextRewardPeriodStartIndex;
+    } else {
+        const remainingRewardPeriods = Math.ceil(
+            remainingAtNext / nRewardPeriodLength
+        );
+        cooldownEnd = remainingRewardPeriods * nRewardPeriodLength;
+    }
+
+    return epochDate(cooldownEnd, cs.epochDuration, genesisTime);
 }
 
 /** Hook for calculating the date of the delegation cooldown ending, will result in undefined while loading */
 export function useCalcDelegatorCooldownUntil() {
     const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
+    const rs = useAsyncMemo(getRewardStatusLatest);
     const now = useCurrentTime(60000);
 
-    if (lastFinalizedBlockSummary === undefined) {
+    if (lastFinalizedBlockSummary === undefined || rs === undefined) {
         return undefined;
     }
 
-    const { lastFinalizedBlockSummary: bs } = lastFinalizedBlockSummary;
+    const {
+        lastFinalizedBlockSummary: bs,
+        consensusStatus: cs,
+    } = lastFinalizedBlockSummary;
 
     if (isBlockSummaryV1(bs)) {
+        if (!isRewardStatusV1(rs)) {
+            throw new Error('Block summary and reward status do not match.'); // Should not happen, as this indicates rs and bs are queried with different blocks.
+        }
+
         return getV1Cooldown(
             Number(bs.updates.chainParameters.delegatorCooldown),
+            bs,
+            cs,
+            rs.nextPaydayTime,
             now
         );
     }
@@ -206,9 +251,10 @@ export function useCalcDelegatorCooldownUntil() {
 /** Hook for calculating the date of the baking stake cooldown ending, will result in undefined while loading */
 export function useCalcBakerStakeCooldownUntil() {
     const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
+    const rs = useAsyncMemo(getRewardStatusLatest);
     const now = useCurrentTime(60000);
 
-    if (lastFinalizedBlockSummary === undefined) {
+    if (lastFinalizedBlockSummary === undefined || rs === undefined) {
         return undefined;
     }
 
@@ -218,8 +264,15 @@ export function useCalcBakerStakeCooldownUntil() {
     } = lastFinalizedBlockSummary;
 
     if (isBlockSummaryV1(bs)) {
+        if (!isRewardStatusV1(rs)) {
+            throw new Error('Block summary and reward status do not match.'); // Should not happen, as this indicates rs and bs are queried with different blocks.
+        }
+
         return getV1Cooldown(
             Number(bs.updates.chainParameters.poolOwnerCooldown),
+            bs,
+            cs,
+            rs.nextPaydayTime,
             now
         );
     }

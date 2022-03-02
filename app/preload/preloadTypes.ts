@@ -6,6 +6,7 @@ import {
     CryptographicParameters,
     NextAccountNonce,
     PoolStatus,
+    RewardStatus,
     TransactionStatus,
     Versioned,
 } from '@concordium/node-sdk';
@@ -114,6 +115,7 @@ export type GRPC = {
     getAnonymityRevokers: (blockHash: string) => Promise<ArInfo[] | undefined>;
     // We return a Uint8Array here, because PeerListResponse must be manually serialized/deserialized.
     getPeerList: (includeBootstrappers: boolean) => Promise<Uint8Array>;
+    getRewardStatus: (blockHash: string) => Promise<RewardStatus | undefined>;
     getPoolInfo: (
         blockHash: string,
         bakerId?: BakerId

@@ -12,6 +12,7 @@ import {
     getPeerList,
     getTransactionStatus,
     getPoolInfo,
+    getRewardStatus,
 } from './nodeRequests';
 import { PeerElement } from '../proto/concordium_p2p_rpc_pb';
 import {
@@ -64,9 +65,16 @@ export const applyLastBlockHash = <A extends any[], R>(
     fun(await getlastFinalizedBlockHash(), ...args);
 
 /**
+ * Gets reward status object from newest block.
+ *
+ * @throws if invalid block hash is given.
+ */
+export const getRewardStatusLatest = applyLastBlockHash(getRewardStatus);
+
+/**
  * Gets pool info for baker ID, or L-pool if parameter is left undefined.
  *
- * @throws if no baker is found with supplied baker ID.
+ * @throws if no baker is found with supplied baker ID or if invalid block hash given.
  */
 export const getPoolInfoLatest = applyLastBlockHash(getPoolInfo);
 

@@ -62,6 +62,10 @@ export const getIdentityProviders = throwIfUndefined(
     window.grpc.getIdentityProviders,
     (blockHash) => `Unable to load identity providers, on block: ${blockHash}`
 );
+export const getRewardStatus = throwIfUndefined(
+    window.grpc.getRewardStatus,
+    (blockHash) => `Unable to load reward status, on block: ${blockHash}`
+);
 
 export const getPoolInfo = throwIfUndefined(
     window.grpc.getPoolInfo,

@@ -101,9 +101,9 @@ const exposedMethods: GRPC = {
     nodeConsensusAndGlobal: async (address: string, port: string) => {
         return getConsensusStatusAndCryptographicParameters(address, port);
     },
-    getPoolInfo: (blockHash: string, bakerId?: BakerId) => {
-        return client.getPoolStatus(blockHash, bakerId);
-    },
+    getRewardStatus: (blockHash: string) => client.getRewardStatus(blockHash),
+    getPoolInfo: (blockHash: string, bakerId?: BakerId) =>
+        client.getPoolStatus(blockHash, bakerId),
 };
 
 export default exposedMethods;
