@@ -32,7 +32,7 @@ import Radios from '~/components/Form/Radios';
 
 import styles from './AccountReport.module.scss';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
-import { getGTUSymbol, getMicroSymbol } from '~/utils/gtu';
+import { getGTUSymbol } from '~/utils/gtu';
 import { globalSelector } from '~/features/GlobalSlice';
 import decryptTransactions from '~/utils/decryptTransactions';
 
@@ -49,7 +49,7 @@ interface Props {
 
 export const unitOptions = [
     { label: getGTUSymbol(), value: true },
-    { label: getMicroSymbol() + getGTUSymbol(), value: false },
+    { label: `micro${getGTUSymbol()}`, value: false },
 ];
 
 /**

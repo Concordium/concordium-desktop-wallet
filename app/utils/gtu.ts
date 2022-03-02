@@ -11,8 +11,6 @@ export function getGTUSymbol(): string {
     return '\u03FE';
 }
 
-export const getMicroSymbol = () => '\u03BC';
-
 export const microGTUPerGTU = 1000000n;
 const separator = '.';
 

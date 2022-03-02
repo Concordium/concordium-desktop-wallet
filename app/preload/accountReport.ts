@@ -27,12 +27,7 @@ import httpMethods from './http';
 import decryptAmountsDao from './database/decryptedAmountsDao';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
 import isSuccessfulEncryptedTransaction from '~/utils/decryptHelpers';
-import {
-    formatGtuString,
-    microGtuToGtu,
-    getGTUSymbol,
-    getMicroSymbol,
-} from '~/utils/gtu';
+import { formatGtuString, microGtuToGtu, getGTUSymbol } from '~/utils/gtu';
 
 async function enrichWithDecryptedAmounts(
     credentialNumber: number,
@@ -280,9 +275,7 @@ async function streamTransactions(
     const header = toCSV([
         exportedFields.map(
             getLabelWithUnit(
-                convertToCCD
-                    ? getGTUSymbol()
-                    : getMicroSymbol() + getGTUSymbol()
+                convertToCCD ? getGTUSymbol() : `micro${getGTUSymbol()}`
             )
         ),
     ]);
