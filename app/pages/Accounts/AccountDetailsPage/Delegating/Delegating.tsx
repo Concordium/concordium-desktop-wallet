@@ -1,4 +1,8 @@
-import { AccountInfo } from '@concordium/node-sdk';
+import {
+    AccountDelegationDetails,
+    AccountInfo,
+    AccountInfoDelegator,
+} from '@concordium/node-sdk';
 import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router';
@@ -11,19 +15,18 @@ import ButtonNavLink from '~/components/ButtonNavLink';
 const toRoot = <Redirect to={routes.ACCOUNTS_DELEGATING} />;
 
 interface DetailsProps {
-    accountInfo: AccountInfo;
+    details: AccountDelegationDetails | undefined;
 }
 
-function Details({ accountInfo: _ }: DetailsProps) {
+function Details({ details: _ }: DetailsProps) {
     return <div>Delegation details...</div>;
 }
 
 interface ActionsProps {
-    accountInfo: AccountInfo;
+    isDelegating: boolean;
 }
 
-function Actions({ accountInfo }: ActionsProps) {
-    const isDelegating = isDelegatorAccount(accountInfo);
+function Actions({ isDelegating }: ActionsProps) {
     return (
         <>
             <ButtonNavLink
@@ -74,8 +77,12 @@ export default function Delegating({ account, accountInfo }: Props) {
                 )}
             </Route>
             <Route default>
-                <Details accountInfo={accountInfo} />
-                <Actions accountInfo={accountInfo} />
+                <Details
+                    details={
+                        (accountInfo as AccountInfoDelegator).accountDelegation
+                    }
+                />
+                <Actions isDelegating={isDelegating} />
             </Route>
         </Switch>
     );

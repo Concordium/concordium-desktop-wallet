@@ -15,7 +15,7 @@ import { stringify } from '~/utils/JSONHelper';
 import { BakerKeys } from '~/utils/rustInterface';
 import { createAddBakerTransaction } from '~/utils/transactionHelpers';
 import { AddBakerPayload, NotOptional, TransactionKindId } from '~/utils/types';
-import { SubmitTransactionLocationState } from '../../../SubmitTransaction/SubmitTransaction';
+import { SubmitTransactionLocationState } from '../../../../SubmitTransaction/SubmitTransaction';
 import AddBakerData from './AddBakerData';
 import GenerateBakerKeys from '~/components/Transfers/configureBaker/GenerateBakerKeys';
 import { StakeSettings } from '~/utils/transactionFlows/configureBaker';

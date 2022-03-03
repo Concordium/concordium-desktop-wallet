@@ -10,7 +10,7 @@ import routes from '~/constants/routes.json';
 import { stringify } from '~/utils/JSONHelper';
 import { createUpdateBakerRestakeEarningsTransaction } from '~/utils/transactionHelpers';
 import { EqualRecord, NotOptional, TransactionKindId } from '~/utils/types';
-import { SubmitTransactionLocationState } from '../../SubmitTransaction/SubmitTransaction';
+import { SubmitTransactionLocationState } from '../../../SubmitTransaction/SubmitTransaction';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
 import ensureExchangeRateAndNonce, {
@@ -18,7 +18,7 @@ import ensureExchangeRateAndNonce, {
 } from '~/components/Transfers/ensureExchangeRateAndNonce';
 import { multiplyFraction } from '~/utils/basicHelpers';
 
-import styles from '../AccountDetailsPage.module.scss';
+import styles from '../../AccountDetailsPage.module.scss';
 
 interface FormModel {
     restake: boolean;

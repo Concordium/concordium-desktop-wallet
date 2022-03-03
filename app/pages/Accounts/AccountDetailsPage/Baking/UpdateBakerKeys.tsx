@@ -10,7 +10,7 @@ import {
 } from '~/utils/types';
 import AccountTransactionFlow, {
     AccountTransactionFlowLoading,
-} from '../AccountTransactionFlow';
+} from '../../AccountTransactionFlow';
 import { ensureProps } from '~/utils/componentHelpers';
 import { convertToBakerTransaction } from '~/utils/transactionFlows/configureBaker';
 import routes from '~/constants/routes.json';

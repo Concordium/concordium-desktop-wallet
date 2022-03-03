@@ -12,7 +12,7 @@ import {
     UpdateBakerKeysPayload,
 } from '~/utils/types';
 import { createUpdateBakerKeysTransaction } from '~/utils/transactionHelpers';
-import { SubmitTransactionLocationState } from '../../SubmitTransaction/SubmitTransaction';
+import { SubmitTransactionLocationState } from '../../../SubmitTransaction/SubmitTransaction';
 import { stringify } from '~/utils/JSONHelper';
 import { multiplyFraction } from '~/utils/basicHelpers';
 import { isMultiSig } from '~/utils/accountHelpers';
@@ -22,7 +22,7 @@ import ensureExchangeRateAndNonce, {
 } from '~/components/Transfers/ensureExchangeRateAndNonce';
 import GenerateBakerKeys from '~/components/Transfers/configureBaker/GenerateBakerKeys';
 
-import styles from '../AccountDetailsPage.module.scss';
+import styles from '../../AccountDetailsPage.module.scss';
 
 const header = 'Update baker keys';
 
