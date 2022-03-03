@@ -110,7 +110,16 @@ async function getTransactions(
     }
 
     const response = await walletProxy.get(proxyPath, {
-        transformResponse: (res) => parse(intToString(res, 'id')),
+        transformResponse: (res) => {
+            try {
+                return parse(intToString(res, 'id'));
+            } catch (e) {
+                throw new Error(
+                    `Unable to parse response from wallet proxy: ${res}`
+                );
+                // TODO: log the error and response?
+            }
+        },
     });
 
     const {

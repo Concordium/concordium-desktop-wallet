@@ -1,4 +1,9 @@
-import { ipcRenderer, contextBridge, Rectangle } from 'electron';
+import {
+    ipcRenderer,
+    contextBridge,
+    Rectangle,
+    MessageBoxOptions,
+} from 'electron';
 import EventEmitter from 'events';
 import ipcRendererCommands from '~/constants/ipcRendererCommands.json';
 import ledgerIpcCommands from '~/constants/ledgerIpcCommands.json';
@@ -54,6 +59,7 @@ const Exposed: EqualRecord<WindowFunctions> = {
     autoUpdate: 'autoUpdate',
     accountReport: 'accountReport',
     platform: 'platform',
+    messageBox: 'messageBox',
 };
 
 const eventEmitter = new EventEmitter();
@@ -127,6 +133,9 @@ contextBridge.exposeInMainWorld(
     initializeLedgerMethods(eventEmitter)
 );
 contextBridge.exposeInMainWorld(Exposed.http, initializeHttpMethods);
+contextBridge.exposeInMainWorld(Exposed.messageBox, (opts: MessageBoxOptions) =>
+    ipcRenderer.invoke(ipcCommands.messageBox, opts)
+);
 
 // Gather all database relevant functions in the same subdomain
 const databaseMethods: Database = {
