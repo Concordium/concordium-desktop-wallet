@@ -1,8 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import {
-    isBakerAccount,
-    isDelegatorAccount,
-} from '@concordium/node-sdk/lib/src/accountHelpers';
+import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, Route } from 'react-router';
@@ -39,11 +36,10 @@ import RemoveBaker from './RemoveBaker';
 import UpdateBakerStake from './UpdateBakerStake';
 import UpdateBakerPool from './UpdateBakerPool';
 import UpdateBakerKeys from './UpdateBakerKeys';
-import ConfigureDelegation from './ConfigureDelegation';
-import RemoveDelegation from './RemoveDelegation';
 import { useProtocolVersion } from '~/utils/dataHooks';
 import { StakeSettings } from '~/utils/transactionFlows/configureBaker';
 import { hasDelegationProtocol } from '~/utils/protocolVersion';
+import Delegating from './Delegating';
 
 const { Master, Detail } = MasterDetailPageLayout;
 const ToAccounts = () => <Redirect to={routes.ACCOUNTS} />;
@@ -71,8 +67,6 @@ export default withAccountSync(function DetailsPage() {
     }, [account?.address]);
 
     const isBaker = accountInfo !== undefined && isBakerAccount(accountInfo);
-    const isDelegating =
-        accountInfo !== undefined && isDelegatorAccount(accountInfo);
     const isDelegationPV = pv !== undefined && hasDelegationProtocol(pv);
     const canTransfer = hasCredentials && accountInfo !== undefined;
     const canDelegate = isDelegationPV && !isBaker && canTransfer;
@@ -218,21 +212,9 @@ export default withAccountSync(function DetailsPage() {
                             <ToAccounts />
                         )}
                     </Route>
-                    <Route path={routes.ACCOUNTS_CONFIGURE_DELEGATION}>
+                    <Route path={routes.ACCOUNTS_DELEGATING}>
                         {canDelegate && accountInfo !== undefined ? (
-                            <ConfigureDelegation
-                                account={account}
-                                accountInfo={accountInfo}
-                            />
-                        ) : (
-                            <ToAccounts />
-                        )}
-                    </Route>
-                    <Route path={routes.ACCOUNTS_REMOVE_DELEGATION}>
-                        {canDelegate &&
-                        isDelegating &&
-                        accountInfo !== undefined ? (
-                            <RemoveDelegation
+                            <Delegating
                                 account={account}
                                 accountInfo={accountInfo}
                             />

@@ -12,7 +12,7 @@ import {
 } from '~/utils/types';
 import AccountTransactionFlow, {
     AccountTransactionFlowLoading,
-} from '../AccountTransactionFlow';
+} from '../../AccountTransactionFlow';
 import {
     ConfigureDelegationFlowDependencies,
     ConfigureDelegationFlowState,
