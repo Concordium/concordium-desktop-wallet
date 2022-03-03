@@ -1,9 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import {
-    isBakerAccount,
-    isDelegatorAccount,
-} from '@concordium/node-sdk/lib/src/accountHelpers';
+import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { Account, AccountInfo, TransactionKindId } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import ButtonNavLink from '~/components/ButtonNavLink';
@@ -24,8 +21,6 @@ export default function MoreActions({ account, accountInfo }: Props) {
     );
     const hasUsedEncrypted = hasEncryptedBalance(account);
     const isBaker = accountInfo !== undefined && isBakerAccount(accountInfo);
-    const isDelegating =
-        accountInfo !== undefined && isDelegatorAccount(accountInfo);
     const pv = useProtocolVersion();
     const isDelegationPV = pv !== undefined && hasDelegationProtocol(pv);
     const canDelegate =
@@ -91,41 +86,33 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     Update credentials
                 </ButtonNavLink>
             )}
-            {accountHasDeployedCredentials && !isBaker && (
+            {accountHasDeployedCredentials && isDelegationPV && (
                 <ButtonNavLink
                     className="mB20:notLast flex width100"
-                    to={routes.ACCOUNTS_ADD_BAKER}
+                    to={routes.ACCOUNTS_BAKING}
                     disabled={!accountInfo}
                 >
-                    Add baker
+                    Baking
                 </ButtonNavLink>
             )}
-            {accountHasDeployedCredentials && isBaker && (
-                <>
-                    <ButtonNavLink
-                        className="mB20:notLast flex width100"
-                        to={routes.ACCOUNTS_REMOVE_BAKER}
-                        disabled={!accountInfo}
-                    >
-                        Remove baker
-                    </ButtonNavLink>
-                    <ButtonNavLink
-                        className="mB20:notLast flex width100"
-                        to={routes.ACCOUNTS_UPDATE_BAKER_STAKE}
-                        disabled={!accountInfo}
-                    >
-                        Update baker stake
-                    </ButtonNavLink>
-                    {isDelegationPV && (
+            {accountHasDeployedCredentials &&
+                !isDelegationPV &&
+                (isBaker ? (
+                    <>
                         <ButtonNavLink
                             className="mB20:notLast flex width100"
-                            to={routes.ACCOUNTS_UPDATE_BAKER_POOL}
+                            to={routes.ACCOUNTS_REMOVE_BAKER}
                             disabled={!accountInfo}
                         >
-                            Update baker pool
+                            Remove baker
                         </ButtonNavLink>
-                    )}
-                    {!isDelegationPV && (
+                        <ButtonNavLink
+                            className="mB20:notLast flex width100"
+                            to={routes.ACCOUNTS_UPDATE_BAKER_STAKE}
+                            disabled={!accountInfo}
+                        >
+                            Update baker stake
+                        </ButtonNavLink>
                         <ButtonNavLink
                             className="mB20:notLast flex width100"
                             to={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}
@@ -133,32 +120,30 @@ export default function MoreActions({ account, accountInfo }: Props) {
                         >
                             Update baker restake earnings
                         </ButtonNavLink>
-                    )}
+                        <ButtonNavLink
+                            className="mB20:notLast flex width100"
+                            to={routes.ACCOUNTS_UPDATE_BAKER_KEYS}
+                            disabled={!accountInfo}
+                        >
+                            Update baker keys
+                        </ButtonNavLink>
+                    </>
+                ) : (
                     <ButtonNavLink
                         className="mB20:notLast flex width100"
-                        to={routes.ACCOUNTS_UPDATE_BAKER_KEYS}
+                        to={routes.ACCOUNTS_ADD_BAKER}
                         disabled={!accountInfo}
                     >
-                        Update baker keys
+                        Add baker
                     </ButtonNavLink>
-                </>
-            )}
+                ))}
             {canDelegate && (
                 <ButtonNavLink
                     className="mB20:notLast flex width100"
-                    to={routes.ACCOUNTS_CONFIGURE_DELEGATION}
+                    to={routes.ACCOUNTS_DELEGATING}
                     disabled={!accountInfo}
                 >
-                    Delegate to pool
-                </ButtonNavLink>
-            )}
-            {canDelegate && isDelegating && (
-                <ButtonNavLink
-                    className="mB20:notLast flex width100"
-                    to={routes.ACCOUNTS_REMOVE_DELEGATION}
-                    disabled={!accountInfo}
-                >
-                    Remove delegation
+                    Delegating
                 </ButtonNavLink>
             )}
         </>
