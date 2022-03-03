@@ -70,6 +70,7 @@ export default withDeps(function UpdateBakerStake(props: Props) {
             title={updateBakerStakeTitle}
             convert={convert}
             multisigRoute={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_STAKE}
+            firstPageBack
         >
             {{
                 stake: {

@@ -72,6 +72,7 @@ function ConfigureDelegation(props: Props) {
             title={configureDelegationTitle}
             convert={convert}
             multisigRoute={routes.MULTISIGTRANSACTIONS_CONFIGURE_DELEGATION}
+            firstPageBack
         >
             {{
                 target: {

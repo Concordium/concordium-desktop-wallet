@@ -45,6 +45,10 @@ interface Props<F extends Record<string, unknown>, T extends AccountTransaction>
      */
     convert(values: F): T;
     /**
+     * Whether to include a back button on the first page or not.
+     */
+    firstPageBack?: boolean;
+    /**
      * Corresponding multisig transaction flow (used if account is a multisig account).
      */
     multisigRoute: string;
@@ -69,6 +73,7 @@ export default function AccountTransactionFlow<
     convert,
     children,
     multisigRoute,
+    firstPageBack = false,
     ...formProps
 }: Props<F, T>) {
     const { pathname, state } = useLocation<F | null>();
@@ -117,12 +122,13 @@ export default function AccountTransactionFlow<
 
     return (
         <Card className={styles.root}>
-            {isFirstPage || (
-                <BackButton
-                    className={styles.backButton}
-                    onClick={() => dispatch(goBack())}
-                />
-            )}
+            {!isFirstPage ||
+                (firstPageBack && (
+                    <BackButton
+                        className={styles.backButton}
+                        onClick={() => dispatch(goBack())}
+                    />
+                ))}
             <h3 className="mT0 bodyEmphasized">{title}</h3>
             <MultiStepForm<F>
                 initialValues={state ?? undefined}

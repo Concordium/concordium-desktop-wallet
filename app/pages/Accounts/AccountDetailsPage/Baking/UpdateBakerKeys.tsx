@@ -56,6 +56,7 @@ export default withDeps(function UpdateBakerKeys(props: Props) {
             title={updateBakerKeysTitle}
             convert={convert}
             multisigRoute={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_KEYS}
+            firstPageBack
         >
             {{
                 keys: {

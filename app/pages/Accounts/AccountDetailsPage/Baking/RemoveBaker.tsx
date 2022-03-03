@@ -57,6 +57,7 @@ export default withDeps(function RemoveBaker(props: Props) {
             title={removeBakerTitle}
             convert={convert}
             multisigRoute={routes.MULTISIGTRANSACTIONS_REMOVE_BAKER}
+            firstPageBack
         >
             {{
                 confirm: {

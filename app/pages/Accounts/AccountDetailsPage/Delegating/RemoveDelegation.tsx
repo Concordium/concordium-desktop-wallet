@@ -64,6 +64,7 @@ export default withDeps(function RemoveDelegation(props: Props) {
             title={removeDelegationTitle}
             convert={convert}
             multisigRoute={routes.MULTISIGTRANSACTIONS_REMOVE_DELEGATION}
+            firstPageBack
         >
             {{
                 confirm: {
