@@ -4,11 +4,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import ShieldImage from '@resources/svg/shield.svg';
 import BakerImage from '@resources/svg/baker.svg';
 import ArrowIcon from '@resources/svg/back-arrow.svg';
+import type { DelegationTarget } from '@concordium/node-sdk';
 import {
     isBakerAccount,
     isDelegatorAccount,
 } from '@concordium/node-sdk/lib/src/accountHelpers';
-import type { DelegationTarget } from '@concordium/node-sdk';
 import { DelegationTargetType } from '@concordium/node-sdk/lib/src/types';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
@@ -139,7 +139,7 @@ export default function AccountBalanceView(): JSX.Element | null {
     }
 
     return (
-        <Card className={styles.accountBalanceView}>
+        <Card className={styles.accountBalanceView} dark>
             <div
                 className={clsx(
                     styles.accountNameWrapper,

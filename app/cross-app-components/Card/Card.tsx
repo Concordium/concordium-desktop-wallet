@@ -11,6 +11,7 @@ export type CardProps<
     {
         className?: string;
         header?: string | JSX.Element;
+        dark?: boolean;
     }
 >;
 
@@ -18,12 +19,16 @@ function Card<TAs extends ElementType = 'div'>({
     children,
     className,
     header,
+    dark = false,
     as,
     ...props
 }: PropsWithChildren<CardProps<TAs>>): JSX.Element {
     const Component = as ?? 'div';
     return (
-        <Component className={clsx(styles.root, className)} {...props}>
+        <Component
+            className={clsx(styles.root, dark && styles.dark, className)}
+            {...props}
+        >
             {header && <h2 className={styles.header}>{header}</h2>}
             {children}
         </Component>

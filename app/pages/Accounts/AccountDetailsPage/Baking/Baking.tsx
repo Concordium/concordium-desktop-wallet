@@ -23,6 +23,9 @@ import RemoveBaker from './RemoveBaker';
 import UpdateBakerStake from './UpdateBakerStake';
 import UpdateBakerPool from './UpdateBakerPool';
 import UpdateBakerKeys from './UpdateBakerKeys';
+import Card from '~/cross-app-components/Card';
+
+import styles from './Baking.module.scss';
 
 const toRoot = <Redirect to={routes.ACCOUNTS_BAKING} />;
 
@@ -30,8 +33,18 @@ interface DetailsProps {
     details: AccountBakerDetails | undefined;
 }
 
-function Details({ details: _ }: DetailsProps) {
-    return <div>Baker pool details...</div>;
+function Details({ details }: DetailsProps) {
+    return (
+        <Card className={styles.details} dark>
+            <header className={styles.detailsHeader}>
+                <h3 className="mB0">
+                    {details !== undefined
+                        ? 'Baker registered'
+                        : 'No baker registered'}
+                </h3>
+            </header>
+        </Card>
+    );
 }
 
 interface ActionsProps {
