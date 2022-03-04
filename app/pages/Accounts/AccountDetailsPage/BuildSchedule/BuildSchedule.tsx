@@ -176,7 +176,7 @@ export default function BuildSchedule({ location }: Props) {
             }
         >
             <div className={styles.buildScheduleCommon}>
-                <h3 className={styles.title}> Send CCD with a schedule </h3>
+                <h3 className={styles.title}>Send CCD with a schedule</h3>
                 <div className="body3">
                     <h2 className="m0">
                         {displayAsGTU(amount)} to {recipient.name}

@@ -1,7 +1,7 @@
 import { AccountInfoBaker } from '@concordium/node-sdk';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { push } from 'connected-react-router';
+import { goBack, push } from 'connected-react-router';
 import { Redirect } from 'react-router';
 import Form from '~/components/Form';
 import PickBakerRestake from '~/components/PickBakerRestake';
@@ -17,6 +17,7 @@ import ensureExchangeRateAndNonce, {
     ExchangeRateAndNonceProps,
 } from '~/components/Transfers/ensureExchangeRateAndNonce';
 import { multiplyFraction } from '~/utils/basicHelpers';
+import BackButton from '~/cross-app-components/BackButton';
 
 import styles from '../../AccountDetailsPage.module.scss';
 
@@ -92,7 +93,11 @@ export default ensureExchangeRateAndNonce(function UpdateBakerRestake({
     const existingValue = accountInfo?.accountBaker.restakeEarnings;
 
     return (
-        <Card className="textCenter pB40">
+        <Card className="textCenter pB40 relative">
+            <BackButton
+                className={styles.backButton}
+                onClick={() => dispatch(goBack())}
+            />
             <h3 className="bodyEmphasized">Update baker restake earnings</h3>
             <p className="mV30">Choose to restake earnings or not, below.</p>
             <Form<FormModel> onSubmit={submit}>

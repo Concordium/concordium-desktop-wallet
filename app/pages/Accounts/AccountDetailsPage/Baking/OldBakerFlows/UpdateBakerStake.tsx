@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { push } from 'connected-react-router';
+import { goBack, push } from 'connected-react-router';
 import { Redirect } from 'react-router';
 import { BlockSummaryV0 } from '@concordium/node-sdk';
 import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
@@ -36,6 +36,7 @@ import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
 import ensureExchangeRateAndNonce, {
     ExchangeRateAndNonceProps,
 } from '~/components/Transfers/ensureExchangeRateAndNonce';
+import BackButton from '~/cross-app-components/BackButton';
 
 import styles from '../../AccountDetailsPage.module.scss';
 
@@ -183,8 +184,14 @@ const UpdateBakerStakeForm = ensureExchangeRateAndNonce(
 export default function UpdateBakerStake(
     props: Pick<Props, 'account' | 'accountInfo'>
 ) {
+    const dispatch = useDispatch();
+
     return (
-        <Card className="textCenter pB40">
+        <Card className="textCenter pB40 relative">
+            <BackButton
+                className={styles.backButton}
+                onClick={() => dispatch(goBack())}
+            />
             <h3 className="bodyEmphasized">Update baker stake</h3>
             <UpdateBakerStakeForm {...props} />
         </Card>

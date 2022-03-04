@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { push } from 'connected-react-router';
+import { goBack, push } from 'connected-react-router';
 import { Redirect } from 'react-router';
 import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import Button from '~/cross-app-components/Button';
@@ -19,6 +19,7 @@ import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
 import ensureExchangeRateAndNonce, {
     ExchangeRateAndNonceProps,
 } from '~/components/Transfers/ensureExchangeRateAndNonce';
+import BackButton from '~/cross-app-components/BackButton';
 
 import styles from '../../AccountDetailsPage.module.scss';
 
@@ -81,7 +82,11 @@ export default ensureExchangeRateAndNonce(function RemoveBaker({
             : undefined;
 
     return (
-        <Card className="textCenter pB40">
+        <Card className="textCenter pB40 relative">
+            <BackButton
+                className={styles.backButton}
+                onClick={() => dispatch(goBack())}
+            />
             <h3 className="bodyEmphasized">Remove baker</h3>
             {pendingChange ? (
                 <p className="mT30 mB0">

@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { Redirect, Route, Switch } from 'react-router';
 import { useDispatch } from 'react-redux';
-import { push, replace } from 'connected-react-router';
+import { goBack, push, replace } from 'connected-react-router';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
 import routes from '~/constants/routes.json';
@@ -21,6 +21,7 @@ import ensureExchangeRateAndNonce, {
     ExchangeRateAndNonceProps,
 } from '~/components/Transfers/ensureExchangeRateAndNonce';
 import GenerateBakerKeys from '~/components/Transfers/configureBaker/GenerateBakerKeys';
+import BackButton from '~/cross-app-components/BackButton';
 
 import styles from '../../AccountDetailsPage.module.scss';
 
@@ -127,15 +128,21 @@ export default ensureExchangeRateAndNonce(function UpdateBakerKeys({
     }
 
     return (
-        <Switch>
-            <Route path={routes.ACCOUNTS_EXPORT_BAKER_KEYS}>
-                <GenerateBakerKeys
-                    onContinue={next}
-                    keyVariant="UPDATE"
-                    account={account}
-                />
-            </Route>
-            <Route component={UpdateBakerKeysIntro} />
-        </Switch>
+        <div className="relative">
+            <BackButton
+                className={styles.backButton}
+                onClick={() => dispatch(goBack())}
+            />
+            <Switch>
+                <Route path={routes.ACCOUNTS_EXPORT_BAKER_KEYS}>
+                    <GenerateBakerKeys
+                        onContinue={next}
+                        keyVariant="UPDATE"
+                        account={account}
+                    />
+                </Route>
+                <Route component={UpdateBakerKeysIntro} />
+            </Switch>
+        </div>
     );
 });
