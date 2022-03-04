@@ -59,7 +59,7 @@ function Actions({ isBaker, isDelegationPV }: ActionsProps) {
                 className="flex width100"
                 to={routes.ACCOUNTS_ADD_BAKER}
             >
-                Add baker
+                Register baker
             </ButtonNavLink>
         );
     }
@@ -97,7 +97,7 @@ function Actions({ isBaker, isDelegationPV }: ActionsProps) {
                 to={routes.ACCOUNTS_REMOVE_BAKER}
                 negative
             >
-                Remove baker
+                Stop baking
             </ButtonNavLink>
         </>
     );

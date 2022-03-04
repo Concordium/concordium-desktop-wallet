@@ -179,13 +179,7 @@ const configureBakerLinks = (
             className={styles.link}
             to={routes.MULTISIGTRANSACTIONS_ADD_BAKER}
         >
-            Add baker
-        </ButtonNavLink>
-        <ButtonNavLink
-            className={styles.link}
-            to={routes.MULTISIGTRANSACTIONS_REMOVE_BAKER}
-        >
-            Remove baker
+            Register baker
         </ButtonNavLink>
         <ButtonNavLink
             className={styles.link}
@@ -204,6 +198,12 @@ const configureBakerLinks = (
             to={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_KEYS}
         >
             Update baker keys
+        </ButtonNavLink>
+        <ButtonNavLink
+            className={styles.link}
+            to={routes.MULTISIGTRANSACTIONS_REMOVE_BAKER}
+        >
+            Stop baking
         </ButtonNavLink>
     </>
 );

@@ -34,7 +34,7 @@ export type AddBakerPayload = MakeOptional<
     'metadataUrl'
 >;
 
-export const addBakerTitle = 'Add baker';
+export const addBakerTitle = 'Register baker';
 
 export const getSanitizedAddBakerValues = (
     values: Partial<AddBakerFlowState>,
