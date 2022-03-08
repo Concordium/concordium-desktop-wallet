@@ -14,9 +14,10 @@ import {
 } from '../../common/RewardDistribution';
 import MintRateInput from './MintRateInput';
 import Label from '~/components/Label';
+import { MintDistribution } from '~/utils/types';
 
 interface Props extends ChainData {
-    mintDistribution: MintDistributionV0; // TODO fix if this is supposed to work with delegation protocol
+    mintDistribution: MintDistribution; // TODO fix if this is supposed to work with delegation protocol
 }
 
 /**

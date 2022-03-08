@@ -1,4 +1,4 @@
-import { ChainParametersV1, RewardFraction } from '@concordium/node-sdk';
+import { ChainParametersV1 } from '@concordium/node-sdk';
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -7,10 +7,6 @@ import Label from '~/components/Label';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
 import { accountInfoSelector } from '~/features/AccountSlice';
 import { toFixed } from '~/utils/numberStringHelpers';
-import {
-    fractionResolutionToPercentage,
-    percentageToFractionResolution,
-} from '~/utils/rewardFractionHelpers';
 import {
     Commissions,
     ConfigureBakerFlowState,
@@ -36,29 +32,33 @@ const commonSliderProps: Pick<
     className: 'mB30',
 };
 
-const fromRewardFractions = (values: Commissions): Commissions => ({
-    transactionFeeCommission: fractionResolutionToPercentage(
-        values.transactionFeeCommission
-    ),
-    bakingRewardCommission: fractionResolutionToPercentage(
-        values.bakingRewardCommission
-    ),
-    finalizationRewardCommission: fractionResolutionToPercentage(
-        values.finalizationRewardCommission
-    ),
+const fromDecimalsToPercentages = (decimals: Commissions): Commissions => ({
+    transactionFeeCommission: decimals.transactionFeeCommission * 100,
+    bakingRewardCommission: decimals.bakingRewardCommission * 100,
+    finalizationRewardCommission: decimals.finalizationRewardCommission * 100,
+});
+
+const fromPercentagesToDecimals = (percentages: Commissions): Commissions => ({
+    transactionFeeCommission: percentages.transactionFeeCommission / 100,
+    bakingRewardCommission: percentages.bakingRewardCommission / 100,
+    finalizationRewardCommission:
+        percentages.finalizationRewardCommission / 100,
 });
 
 const formatCommission = toFixed(3);
 
 const renderExistingValue = (value: number) =>
-    formatCommission(fractionResolutionToPercentage(value).toString());
+    formatCommission((value * 100).toString());
 
 interface CommissionFieldProps {
     label: string;
     name: string;
-    min: RewardFraction;
-    max: RewardFraction;
-    existing: RewardFraction | undefined;
+    /** Decimal */
+    min: number;
+    /** Decimal */
+    max: number;
+    /** Decimal */
+    existing: number | undefined;
 }
 
 const CommissionField = ({
@@ -68,14 +68,14 @@ const CommissionField = ({
     max,
     existing,
 }: CommissionFieldProps) => {
-    const minFormatted = fractionResolutionToPercentage(min);
-    const maxFormatted = fractionResolutionToPercentage(max);
+    const minPercentage = min * 100;
+    const maxPercentage = max * 100;
 
     if (min === max) {
         return (
             <div>
                 <Label className="mB5">{label}</Label>
-                <span className="textFaded body2">{minFormatted}%</span>
+                <span className="textFaded body2">{minPercentage}%</span>
             </div>
         );
     }
@@ -91,8 +91,8 @@ const CommissionField = ({
             <Form.Slider
                 label={label}
                 name={name}
-                min={minFormatted}
-                max={maxFormatted}
+                min={minPercentage}
+                max={maxPercentage}
                 {...commonSliderProps}
             />
         </>
@@ -124,25 +124,14 @@ export default function CommissionsPage({
     };
 
     const handleSubmit = useCallback(
-        (values: Commissions) =>
-            onNext({
-                transactionFeeCommission: percentageToFractionResolution(
-                    values.transactionFeeCommission
-                ),
-                bakingRewardCommission: percentageToFractionResolution(
-                    values.bakingRewardCommission
-                ),
-                finalizationRewardCommission: percentageToFractionResolution(
-                    values.finalizationRewardCommission
-                ),
-            }),
+        (values: Commissions) => onNext(fromPercentagesToDecimals(values)),
         [onNext]
     );
 
     return (
         <Form<Commissions>
             onSubmit={handleSubmit}
-            defaultValues={fromRewardFractions(defaultValues)}
+            defaultValues={fromDecimalsToPercentages(defaultValues)}
             className="flexColumn flexChildFill"
         >
             <div className="flexChildFill">
