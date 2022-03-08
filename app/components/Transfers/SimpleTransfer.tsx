@@ -10,7 +10,7 @@ import {
     TransactionKindId,
     Fraction,
 } from '../../utils/types';
-import { toMicroUnits } from '../../utils/ccd';
+import { ccdToMicroCcd } from '../../utils/ccd';
 import {
     createSimpleTransferTransaction,
     createSimpleTransferWithMemoTransaction,
@@ -50,7 +50,7 @@ function SimpleTransfer({
             if (memo) {
                 transaction = await createSimpleTransferWithMemoTransaction(
                     account.address,
-                    toMicroUnits(amount),
+                    ccdToMicroCcd(amount),
                     recipient.address,
                     nonce,
                     memo
@@ -58,7 +58,7 @@ function SimpleTransfer({
             } else {
                 transaction = await createSimpleTransferTransaction(
                     account.address,
-                    toMicroUnits(amount),
+                    ccdToMicroCcd(amount),
                     recipient.address,
                     nonce
                 );

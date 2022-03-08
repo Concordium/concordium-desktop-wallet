@@ -6,7 +6,7 @@ import BakerImage from '@resources/svg/baker.svg';
 import ArrowIcon from '@resources/svg/back-arrow.svg';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
-import { displayAsCCD } from '~/utils/ccd';
+import { displayAsCcd } from '~/utils/ccd';
 import {
     setViewingShieldedAndReset,
     viewingShieldedSelector,
@@ -90,7 +90,7 @@ export default function AccountBalanceView(): JSX.Element | null {
             <>
                 <ShieldImage className={styles.backgroundImage} />
                 <h1 className={clsx(styles.shieldedAmount, 'mV20')}>
-                    {displayAsCCD(totalDecrypted)}
+                    {displayAsCcd(totalDecrypted)}
                     {account.allDecrypted || (
                         <>
                             {' '}
@@ -113,18 +113,18 @@ export default function AccountBalanceView(): JSX.Element | null {
         main = (
             <>
                 <h1 className={clsx(styles.blueText, 'mV20')}>
-                    {displayAsCCD(total)}
+                    {displayAsCcd(total)}
                 </h1>
                 <div className={styles.details}>
                     <SidedRow
                         className={clsx(styles.amountRow, 'mT0')}
                         left={<span className="mR5">At disposal:</span>}
-                        right={displayAsCCD(atDisposal)}
+                        right={displayAsCcd(atDisposal)}
                     />
                     <SidedRow
                         className={clsx(styles.amountRow, 'mB0')}
                         left={<span className="mR5">Staked:</span>}
-                        right={displayAsCCD(staked)}
+                        right={displayAsCcd(staked)}
                     />
                 </div>
                 {accountBaker && (

@@ -6,7 +6,7 @@ import {
     accountsInfoSelector,
 } from '~/features/AccountSlice';
 import { Account, AccountInfo } from '~/utils/types';
-import { displayAsCCD } from '~/utils/ccd';
+import { displayAsCcd } from '~/utils/ccd';
 import { sumToBigInt } from '~/utils/basicHelpers';
 import { getPublicAccountAmounts } from '~/utils/accountHelpers';
 
@@ -58,19 +58,19 @@ export default function AccountPageHeader() {
             <h3 className="pR20 mR20">
                 Wallet total:{' '}
                 <b>
-                    {displayAsCCD(totalAmount)}
+                    {displayAsCcd(totalAmount)}
                     {hidden}{' '}
                 </b>
             </h3>
             <h3 className="pR20 mR20">
                 At disposal:{' '}
                 <b>
-                    {displayAsCCD(totalAtDisposal)}
+                    {displayAsCcd(totalAtDisposal)}
                     {hidden}{' '}
                 </b>
             </h3>
             <h3>
-                Stake: <b>{displayAsCCD(totalStaked)}</b>
+                Stake: <b>{displayAsCcd(totalStaked)}</b>
             </h3>
         </span>
     );

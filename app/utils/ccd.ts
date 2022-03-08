@@ -7,11 +7,11 @@ import {
     addThousandSeparators,
 } from '~/utils/numberStringHelpers';
 
-export function getCCDSymbol(): string {
+export function getCcdSymbol(): string {
     return '\u03FE';
 }
 
-export const microCCDPerCCD = 1000000n;
+export const microCcdPerCcd = 1000000n;
 const separator = '.';
 
 /**
@@ -32,8 +32,8 @@ function toBigInt(input: bigint | string): bigint {
 }
 
 // Checks that the input is a valid CCD string.
-export const isValidCCDString = isValidResolutionString(
-    microCCDPerCCD,
+export const isValidCcdString = isValidResolutionString(
+    microCcdPerCcd,
     false,
     false,
     false
@@ -43,7 +43,7 @@ export const isValidCCDString = isValidResolutionString(
  * expects the fractional part of the a CCD string.
  * i.e. from an amount of 10.001, the subCCD string is 001.
  */
-const parseSubCCD = parseSubNumber(getPowerOf10(microCCDPerCCD));
+const parseSubCcd = parseSubNumber(getPowerOf10(microCcdPerCcd));
 
 /**
  * Convert a microCCD amount to a ccd string.
@@ -51,25 +51,25 @@ const parseSubCCD = parseSubNumber(getPowerOf10(microCCDPerCCD));
  * N.B. Gives the absolute value of the amount.
  * N.B. In case the input is a string, it is assumed that it represents the value in microCCD.
  */
-export const microCCDToCCD = toFraction(microCCDPerCCD);
+export const microCcdToCcd = toFraction(microCcdPerCcd);
 
 /**
  * Given a CCD string, convert to microCCD
  */
-export function toMicroUnits(amount: string): bigint {
-    if (!isValidCCDString(amount)) {
+export function ccdToMicroCcd(amount: string): bigint {
+    if (!isValidCcdString(amount)) {
         throw new Error('Given string that was not a valid CCD string.');
     }
     if (amount.includes(separator)) {
         const separatorIndex = amount.indexOf(separator);
         const ccd = amount.slice(0, separatorIndex);
-        const microCCD = parseSubCCD(amount.slice(separatorIndex + 1));
-        return BigInt(ccd) * microCCDPerCCD + BigInt(microCCD);
+        const microCcd = parseSubCcd(amount.slice(separatorIndex + 1));
+        return BigInt(ccd) * microCcdPerCcd + BigInt(microCcd);
     }
-    return BigInt(amount) * microCCDPerCCD;
+    return BigInt(amount) * microCcdPerCcd;
 }
 
-export const formatCCDString = formatNumberStringWithDigits(2);
+export const formatCcdString = formatNumberStringWithDigits(2);
 
 /**
  * Given a microCCD amount, returns the same amount in CCD
@@ -77,12 +77,12 @@ export const formatCCDString = formatNumberStringWithDigits(2);
  * Allows input type string, because microCCD from external sources are strings.
  * N.B. In case the input is a string, it is assumed that it represents the value in microCCD.
  */
-export function displayAsCCD(microCCDAmount: bigint | string) {
-    const amount: bigint = toBigInt(microCCDAmount);
+export function displayAsCcd(microCcdAmount: bigint | string) {
+    const amount: bigint = toBigInt(microCcdAmount);
     const negative = amount < 0n ? '-' : '';
     const abs = amount < 0n ? -amount : amount;
     const formatted = addThousandSeparators(
-        formatCCDString(microCCDToCCD(abs))
+        formatCcdString(microCcdToCcd(abs))
     );
-    return `${negative}${getCCDSymbol()}${formatted}`;
+    return `${negative}${getCcdSymbol()}${formatted}`;
 }

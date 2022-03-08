@@ -3,7 +3,7 @@ import Loading from '~/cross-app-components/Loading';
 import { BlockSummary } from '~/node/NodeApiTypes';
 import { BakerStakeThreshold } from '~/utils/types';
 import withChainData, { ChainData } from '../../common/withChainData';
-import { displayAsCCD } from '~/utils/ccd';
+import { displayAsCcd } from '~/utils/ccd';
 import Label from '~/components/Label';
 
 interface Props extends ChainData {
@@ -22,7 +22,7 @@ export default withChainData(function BakerStakeThresholdView({
             <div>
                 <Label className="mB5">Current baker stake threshold:</Label>
                 <div className="body3 mono">
-                    {displayAsCCD(
+                    {displayAsCcd(
                         bs.updates.chainParameters.minimumThresholdForBaking
                     )}
                 </div>
@@ -39,7 +39,7 @@ export default withChainData(function BakerStakeThresholdView({
             <div>
                 <Label className="mB5">New baker stake threshold:</Label>
                 <div className="body3 mono">
-                    {displayAsCCD(bakerStakeThreshold.threshold)}
+                    {displayAsCcd(bakerStakeThreshold.threshold)}
                 </div>
             </div>
         </>

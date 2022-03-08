@@ -6,7 +6,7 @@ import {
     getScheduledTransferAmount,
     toReleaseSchedule,
 } from '~/utils/transactionHelpers';
-import { displayAsCCD } from '~/utils/ccd';
+import { displayAsCcd } from '~/utils/ccd';
 import DisplayFee from '~/components/DisplayFee';
 import ScheduleList from '~/components/ScheduleList';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
@@ -45,7 +45,7 @@ export default function DisplayScheduledTransfer({
                 address={transaction.payload.toAddress}
             />
             <h5 className={styles.title}>Amount:</h5>
-            <p className={styles.amount}>{displayAsCCD(amount)}</p>
+            <p className={styles.amount}>{displayAsCcd(amount)}</p>
             <DisplayFee className={styles.fee} transaction={transaction} />
             <DisplayMemo memo={memo} />
             {Boolean(singleSigTransfer) || (

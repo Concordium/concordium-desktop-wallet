@@ -32,7 +32,7 @@ import Radios from '~/components/Form/Radios';
 
 import styles from './AccountReport.module.scss';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
-import { getCCDSymbol } from '~/utils/ccd';
+import { getCcdSymbol } from '~/utils/ccd';
 import { globalSelector } from '~/features/GlobalSlice';
 import decryptTransactions from '~/utils/decryptTransactions';
 
@@ -49,8 +49,8 @@ interface Props {
 
 // unit options for the amounts. the value corresponds to convertToCCD variable.
 export const unitOptions = [
-    { label: getCCDSymbol(), value: true },
-    { label: `micro${getCCDSymbol()}`, value: false },
+    { label: getCcdSymbol(), value: true },
+    { label: `micro${getCcdSymbol()}`, value: false },
 ];
 
 /**

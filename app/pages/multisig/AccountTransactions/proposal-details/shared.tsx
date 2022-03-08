@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import React, { ReactNode } from 'react';
-import { getCCDSymbol } from '~/utils/ccd';
+import { getCcdSymbol } from '~/utils/ccd';
 import { AddressBookEntry, Account } from '~/utils/types';
 import DisplayAddress from '~/components/DisplayAddress';
 
@@ -23,7 +23,7 @@ const formatAccount = (account: Account | AddressBookEntry) => (
     </>
 );
 const formatAmount = (amount: string) =>
-    formatValue(`${getCCDSymbol()}${amount}`);
+    formatValue(`${getCcdSymbol()}${amount}`);
 const formatEnabled = (enable: boolean) => formatValue(enable ? 'Yes' : 'No');
 
 export type DetailsProps = {

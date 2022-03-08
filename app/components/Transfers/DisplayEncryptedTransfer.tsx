@@ -6,7 +6,7 @@ import {
     EncryptedTransfer,
     EncryptedTransferWithMemo,
 } from '~/utils/types';
-import { displayAsCCD } from '~/utils/ccd';
+import { displayAsCcd } from '~/utils/ccd';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
@@ -43,7 +43,7 @@ export default function DisplayEncryptedTransfer({
             />
             <p className={styles.title}>Amount:</p>
             <p className={styles.amount}>
-                {displayAsCCD(transaction.payload.plainTransferAmount)}
+                {displayAsCcd(transaction.payload.plainTransferAmount)}
             </p>
             <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
             <DisplayMemo memo={memo} />

@@ -12,7 +12,7 @@ import {
     TransactionKindId,
     Fraction,
 } from '~/utils/types';
-import { toMicroUnits } from '~/utils/ccd';
+import { ccdToMicroCcd } from '~/utils/ccd';
 import { TransferState } from '~/utils/transactionTypes';
 import { getTransactionKindCost } from '~/utils/transactionCosts';
 import TransferView from './TransferView';
@@ -55,7 +55,7 @@ function InternalTransfer<T extends TransferToPublic | TransferToEncrypted>({
         async (amount: string) => {
             const transaction = await specific.createTransaction(
                 account.address,
-                toMicroUnits(amount),
+                ccdToMicroCcd(amount),
                 nonce
             );
             transaction.estimatedFee = estimatedFee;

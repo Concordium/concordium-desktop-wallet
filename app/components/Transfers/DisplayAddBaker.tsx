@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRouteMatch } from 'react-router';
 import { AddBaker } from '~/utils/types';
-import { displayAsCCD } from '~/utils/ccd';
+import { displayAsCcd } from '~/utils/ccd';
 import DisplayFee from '~/components/DisplayFee';
 import { useAccountName } from '~/utils/dataHooks';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
@@ -31,7 +31,7 @@ export default function DisplayAddBaker({ transaction }: Props) {
             />
             <h5 className={styles.title}>Staked amount:</h5>
             <p className={styles.amount}>
-                {displayAsCCD(transaction.payload.bakingStake)}
+                {displayAsCcd(transaction.payload.bakingStake)}
             </p>
             <DisplayFee className={styles.fee} transaction={transaction} />
             <h5 className={styles.title}>Restake earnings:</h5>

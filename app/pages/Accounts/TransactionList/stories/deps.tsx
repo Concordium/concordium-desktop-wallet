@@ -1,7 +1,7 @@
 import React, { PropsWithChildren } from 'react';
 import { AccountState } from '~/features/AccountSlice';
 import { StoreWrapper } from '~/store/store';
-import { microCCDPerCCD } from '~/utils/ccd';
+import { microCcdPerCcd } from '~/utils/ccd';
 import {
     PropsOf,
     Account,
@@ -23,8 +23,8 @@ export const transactionBase: TransferTransaction = {
     toAddress: account.address,
     fromAddress: 'Hjku41290updfaæljsDA',
     blockTime: `${Date.now() / 1000}`,
-    subtotal: `${Number(100n * microCCDPerCCD)}`,
-    cost: `${Number(123n * microCCDPerCCD) / 1000}`,
+    subtotal: `${Number(100n * microCcdPerCcd)}`,
+    cost: `${Number(123n * microCcdPerCcd) / 1000}`,
     blockHash: 'æk13h2æ4ljh1234h',
     status: TransactionStatus.Finalized,
     transactionKind: TransactionKindString.Transfer,

@@ -28,7 +28,7 @@ import {
 import SignTransaction from './SignTransaction';
 import PickAmount from './PickAmount';
 import UpdateBakerStakeProposalDetails from './proposal-details/UpdateBakerStakeProposalDetails';
-import { microCCDToCCD, toMicroUnits } from '~/utils/ccd';
+import { microCcdToCcd, ccdToMicroCcd } from '~/utils/ccd';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import PendingChange from '~/components/BakerPendingChange';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
@@ -51,7 +51,7 @@ function toMicroUnitsSafe(str: string | undefined) {
         return undefined;
     }
     try {
-        return toMicroUnits(str);
+        return ccdToMicroCcd(str);
     } catch (error) {
         return undefined;
     }
@@ -101,7 +101,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
             return;
         }
 
-        const payload = { stake: toMicroUnits(stake) };
+        const payload = { stake: ccdToMicroCcd(stake) };
         const accountNonce = await getNextAccountNonce(account.address);
         setTransaction(
             createUpdateBakerStakeTransaction(
@@ -319,7 +319,7 @@ function PickNewStake({
         <>
             <PickAmount
                 account={account}
-                amount={microCCDToCCD(stakedAlready)}
+                amount={microCcdToCcd(stakedAlready)}
                 setAmount={setStake}
                 validateAmount={(...args) =>
                     validateBakerStake(minimumThresholdForBaking, ...args)

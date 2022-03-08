@@ -9,7 +9,7 @@ import Sidebar, { SidebarLink } from '~/cross-app-components/Sidebar';
 import routes from '~/constants/routes.json';
 import pkg from '~/package.json';
 import { RootState } from '~/store/store';
-import { getCCDSymbol } from '~/utils/ccd';
+import { getCcdSymbol } from '~/utils/ccd';
 
 import Status from '../Status';
 
@@ -19,7 +19,7 @@ const links: SidebarLink[] = [
     {
         route: routes.ACCOUNTS,
         title: 'Accounts',
-        icon: <div className={styles.ccdIcon}>{getCCDSymbol()}</div>,
+        icon: <div className={styles.ccdIcon}>{getCcdSymbol()}</div>,
     },
     {
         route: routes.IDENTITIES,

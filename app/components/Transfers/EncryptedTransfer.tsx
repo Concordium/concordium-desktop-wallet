@@ -9,7 +9,7 @@ import {
     TransactionKindId,
     Fraction,
 } from '~/utils/types';
-import { toMicroUnits } from '~/utils/ccd';
+import { ccdToMicroCcd } from '~/utils/ccd';
 import { createEncryptedTransferTransaction } from '~/utils/transactionHelpers';
 import ExternalTransfer from '~/components/Transfers/ExternalTransfer';
 import { multiplyFraction } from '~/utils/basicHelpers';
@@ -43,7 +43,7 @@ function EncryptedTransfer({
 
             const transaction = await createEncryptedTransferTransaction(
                 account.address,
-                toMicroUnits(amount),
+                ccdToMicroCcd(amount),
                 recipient.address,
                 nonce,
                 memo

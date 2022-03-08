@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import BinIcon from '@resources/svg/bin.svg';
 import { ReleaseSchedule } from '@concordium/node-sdk/';
 import Button from '~/cross-app-components/Button';
-import { displayAsCCD } from '~/utils/ccd';
+import { displayAsCcd } from '~/utils/ccd';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import styles from './ScheduleList.module.scss';
 
@@ -37,7 +37,7 @@ export default function ScheduleList({
                         {getFormattedDateString(schedulePoint.timestamp)}
                     </div>
                     <div>
-                        {displayAsCCD(schedulePoint.amount)}{' '}
+                        {displayAsCcd(schedulePoint.amount)}{' '}
                         {removeFromSchedule ? (
                             <Button
                                 clear

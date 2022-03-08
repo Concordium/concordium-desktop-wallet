@@ -8,7 +8,7 @@ import { Account, AccountInfo, AccountStatus } from '~/utils/types';
 import { stringify } from '~/utils/JSONHelper';
 
 import AccountBalanceViewComponent from './AccountBalanceView';
-import { microCCDPerCCD } from '~/utils/ccd';
+import { microCcdPerCcd } from '~/utils/ccd';
 
 export default {
     title: 'Account Page/Account Balance View',
@@ -54,9 +54,9 @@ const account: Account = {
 const accountInfo: AccountInfo = {
     accountNonce: 1n,
     accountCredentials: [{} as any],
-    accountAmount: 1000n * microCCDPerCCD,
+    accountAmount: 1000n * microCcdPerCcd,
     accountReleaseSchedule: {
-        total: 100n * microCCDPerCCD,
+        total: 100n * microCcdPerCcd,
         schedule: [],
     },
     accountIndex: 0n,
@@ -87,7 +87,7 @@ Baker.args = {
         ...accountInfo,
         accountBaker: {
             bakerId: 123,
-            stakedAmount: `${400n * microCCDPerCCD}`,
+            stakedAmount: `${400n * microCcdPerCcd}`,
         } as any,
     },
 };

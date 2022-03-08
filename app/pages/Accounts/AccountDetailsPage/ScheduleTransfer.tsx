@@ -9,7 +9,7 @@ import {
     Fraction,
 } from '~/utils/types';
 import routes from '~/constants/routes.json';
-import { toMicroUnits } from '~/utils/ccd';
+import { ccdToMicroCcd } from '~/utils/ccd';
 import { stringify } from '~/utils/JSONHelper';
 import ExternalTransfer from '~/components/Transfers/ExternalTransfer';
 import ensureExchangeRateAndNonce from '~/components/Transfers/ensureExchangeRateAndNonce';
@@ -51,7 +51,7 @@ function ScheduleTransfer({ account, exchangeRate, nonce }: Props) {
                     account,
                     nonce: stringify(nonce),
                     memo,
-                    amount: toMicroUnits(amount).toString(),
+                    amount: ccdToMicroCcd(amount).toString(),
                     recipient,
                     exchangeRate: stringify(exchangeRate),
                 },

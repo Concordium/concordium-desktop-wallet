@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { toMicroUnits } from '~/utils/ccd';
+import { ccdToMicroCcd } from '~/utils/ccd';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import {
     Account,
@@ -69,7 +69,7 @@ function CreateTransaction({
         );
         const t = handler.createTransaction({
             sender: account.address,
-            amount: toMicroUnits(amount),
+            amount: ccdToMicroCcd(amount),
             recipient: recipient.address,
             signatureAmount: account.signatureThreshold,
             memo,

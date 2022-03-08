@@ -1,6 +1,6 @@
 import React from 'react';
 import { AccountInfo } from '~/utils/types';
-import { displayAsCCD } from '~/utils/ccd';
+import { displayAsCcd } from '~/utils/ccd';
 import Card from '~/cross-app-components/Card';
 import ScheduleList from '~/components/ScheduleList';
 import SidedRow from '~/components/SidedRow';
@@ -25,7 +25,7 @@ export default function ShowReleaseSchedule({ accountInfo }: Props) {
         <Card className="flexColumn alignCenter relative pB0">
             <h3 className={styles.releaseScheduleTitle}>
                 Locked amount:{' '}
-                {displayAsCCD(accountInfo.accountReleaseSchedule.total)}
+                {displayAsCcd(accountInfo.accountReleaseSchedule.total)}
             </h3>
             <SidedRow
                 className={styles.releaseScheduleListHeader}

@@ -20,7 +20,7 @@ import {
     useCalcBakerStakeCooldownUntil,
     useTransactionCostEstimate,
 } from '~/utils/dataHooks';
-import { displayAsCCD, microCCDToCCD, toMicroUnits } from '~/utils/ccd';
+import { displayAsCcd, microCcdToCcd, ccdToMicroCcd } from '~/utils/ccd';
 import { stringify } from '~/utils/JSONHelper';
 import { createUpdateBakerStakeTransaction } from '~/utils/transactionHelpers';
 import {
@@ -77,7 +77,7 @@ const UpdateBakerStakeForm = ensureExchangeRateAndNonce(
 
                 const transaction = createUpdateBakerStakeTransaction(
                     account.address,
-                    { stake: toMicroUnits(stake) },
+                    { stake: ccdToMicroCcd(stake) },
                     nonce
                 );
 
@@ -163,7 +163,7 @@ const UpdateBakerStakeForm = ensureExchangeRateAndNonce(
                     <>
                         <Label className="mT30">Current stake:</Label>
                         <em className="body2">
-                            {displayAsCCD(
+                            {displayAsCcd(
                                 accountInfo.accountBaker?.stakedAmount
                             )}
                         </em>
@@ -171,7 +171,7 @@ const UpdateBakerStakeForm = ensureExchangeRateAndNonce(
                 )}
                 <PickBakerStakeAmount
                     header="New stake:"
-                    initial={microCCDToCCD(
+                    initial={microCcdToCcd(
                         accountInfo.accountBaker?.stakedAmount
                     )}
                     accountInfo={accountInfo}

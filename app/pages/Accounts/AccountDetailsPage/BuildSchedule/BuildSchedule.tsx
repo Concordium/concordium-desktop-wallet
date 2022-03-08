@@ -5,7 +5,7 @@ import { LocationDescriptorObject } from 'history';
 import { stringify, parse } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
 import { Account, AddressBookEntry, Schedule } from '~/utils/types';
-import { displayAsCCD, microCCDToCCD } from '~/utils/ccd';
+import { displayAsCcd, microCcdToCcd } from '~/utils/ccd';
 import { collapseFraction } from '~/utils/basicHelpers';
 import {
     createScheduledTransferWithMemoTransaction,
@@ -90,7 +90,7 @@ export default function BuildSchedule({ location }: Props) {
             atDisposal < BigInt(amount) + collapseFraction(estimatedFee)
         ) {
             setAmountError(
-                `Insufficient funds: ${displayAsCCD(atDisposal)} at disposal.`
+                `Insufficient funds: ${displayAsCcd(atDisposal)} at disposal.`
             );
         } else {
             setAmountError(undefined);
@@ -167,7 +167,7 @@ export default function BuildSchedule({ location }: Props) {
                     push({
                         pathname: routes.ACCOUNTS_CREATESCHEDULEDTRANSFER,
                         state: {
-                            amount: microCCDToCCD(amount),
+                            amount: microCcdToCcd(amount),
                             recipient,
                             memo,
                         },
@@ -179,7 +179,7 @@ export default function BuildSchedule({ location }: Props) {
                 <h3 className={styles.title}> Send CCD with a schedule </h3>
                 <div className="body3">
                     <h2 className="m0">
-                        {displayAsCCD(amount)} to {recipient.name}
+                        {displayAsCcd(amount)} to {recipient.name}
                     </h2>
                     <DisplayEstimatedFee estimatedFee={estimatedFee} />
                     <ErrorMessage>{amountError}</ErrorMessage>
