@@ -20,6 +20,7 @@ import {
     PrivateKeys,
     BlsKeyTypes,
     TimeParameters,
+    CooldownParameters,
 } from '~/utils/types';
 import { pipe } from '~/utils/basicHelpers';
 
@@ -296,6 +297,20 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         return toBuffer(
             window.ledger.signTimeParameters(
+                transaction,
+                serializedPayload,
+                path
+            )
+        );
+    }
+
+    signCooldownParameters(
+        transaction: UpdateInstruction<CooldownParameters>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return toBuffer(
+            window.ledger.signCooldownParameters(
                 transaction,
                 serializedPayload,
                 path

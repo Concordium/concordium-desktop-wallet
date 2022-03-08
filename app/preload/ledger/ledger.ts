@@ -27,6 +27,7 @@ import {
     AddAnonymityRevoker,
     BlsKeyTypes,
     TimeParameters,
+    CooldownParameters,
 } from '~/utils/types';
 import { LedgerCommands } from '~/preload/preloadTypes';
 
@@ -244,6 +245,17 @@ export default function exposedMethods(
             keypath: number[]
         ) => {
             return getLedgerClient().signTimeParameters(
+                transaction,
+                serializedPayload,
+                keypath
+            );
+        },
+        signCooldownParameters: (
+            transaction: UpdateInstruction<CooldownParameters>,
+            serializedPayload: Buffer,
+            keypath: number[]
+        ) => {
+            return getLedgerClient().signCooldownParameters(
                 transaction,
                 serializedPayload,
                 keypath

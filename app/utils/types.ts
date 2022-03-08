@@ -776,6 +776,7 @@ export type UpdateInstructionPayload =
     | AuthorizationKeysUpdate
     | AddAnonymityRevoker
     | AddIdentityProvider
+    | CooldownParameters
     | TimeParameters;
 
 // An actual signature, which goes into an account transaction.
@@ -1088,6 +1089,12 @@ export function isTimeParameters(
     return UpdateType.TimeParameters === transaction.type;
 }
 
+export function isCooldownParameters(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<CooldownParameters> {
+    return UpdateType.CooldownParameters === transaction.type;
+}
+
 /**
  * Enum for the different states that a multi signature transaction proposal
  * can go through.
@@ -1187,6 +1194,11 @@ export interface ElectionDifficulty {
 export interface TimeParameters {
     rewardPeriodLength: Word64;
     mintRatePerPayday: MintRate;
+}
+
+export interface CooldownParameters {
+    poolOwnerCooldown: Word64;
+    delegatorCooldown: Word64;
 }
 
 export enum KeyUpdateEntryStatus {

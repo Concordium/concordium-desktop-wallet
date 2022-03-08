@@ -29,6 +29,7 @@ import {
     AddIdentityProvider,
     SerializedTextWithLength,
     TimeParameters,
+    CooldownParameters,
 } from './types';
 
 /**
@@ -358,7 +359,7 @@ export function serializeAddAnonymityRevoker(
 }
 
 /**
- * Serializes timeParameters to bytes.
+ * Serializes time parameters to bytes.
  */
 export function serializeTimeParameters(timeParameters: TimeParameters) {
     const serializedRewardPeriod = encodeWord64(
@@ -371,6 +372,24 @@ export function serializeTimeParameters(timeParameters: TimeParameters) {
     );
     serializedMintRate.writeInt8(timeParameters.mintRatePerPayday.exponent, 4);
     return Buffer.concat([serializedRewardPeriod, serializedMintRate]);
+}
+
+/**
+ * Serializes cooldown parameters to bytes.
+ */
+export function serializeCooldownParameters(
+    cooldownParameters: CooldownParameters
+) {
+    const serializedPoolOwnerCooldown = encodeWord64(
+        BigInt(cooldownParameters.poolOwnerCooldown)
+    );
+    const serializedDelegatorCooldown = encodeWord64(
+        BigInt(cooldownParameters.delegatorCooldown)
+    );
+    return Buffer.concat([
+        serializedPoolOwnerCooldown,
+        serializedDelegatorCooldown,
+    ]);
 }
 
 /**
@@ -468,6 +487,8 @@ function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
             return OnChainUpdateType.AddIdentityProvider;
         case UpdateType.AddAnonymityRevoker:
             return OnChainUpdateType.AddAnonymityRevoker;
+        case UpdateType.CooldownParameters:
+            return OnChainUpdateType.UpdateCooldownParameters;
         case UpdateType.TimeParameters:
             return OnChainUpdateType.UpdateTimeParameters;
         default:

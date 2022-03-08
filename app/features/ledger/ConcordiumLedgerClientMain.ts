@@ -41,6 +41,7 @@ import {
     PrivateKeys,
     BlsKeyTypes,
     TimeParameters,
+    CooldownParameters,
 } from '~/utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
@@ -290,6 +291,20 @@ export default class ConcordiumLedgerClientMain {
         return signUpdateTransaction(
             this.transport,
             0x26,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signCooldownParameters(
+        transaction: UpdateInstruction<CooldownParameters>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
+            this.transport,
+            0x40,
             path,
             transaction,
             serializedPayload
