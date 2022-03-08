@@ -28,6 +28,7 @@ import {
     BlsKeyTypes,
     TimeParameters,
     CooldownParameters,
+    PoolParameters,
 } from '~/utils/types';
 import { LedgerCommands } from '~/preload/preloadTypes';
 
@@ -256,6 +257,17 @@ export default function exposedMethods(
             keypath: number[]
         ) => {
             return getLedgerClient().signCooldownParameters(
+                transaction,
+                serializedPayload,
+                keypath
+            );
+        },
+        signPoolParameters: (
+            transaction: UpdateInstruction<PoolParameters>,
+            serializedPayload: Buffer,
+            keypath: number[]
+        ) => {
+            return getLedgerClient().signPoolParameters(
                 transaction,
                 serializedPayload,
                 keypath

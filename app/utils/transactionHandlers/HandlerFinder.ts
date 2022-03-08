@@ -52,6 +52,7 @@ import ConfigureBakerHandler from './ConfigureBakerHandler';
 import ConfigureDelegationHandler from './ConfigureDelegationHandler';
 import TimeParametersHandler from './TimeParameterHandler';
 import CooldownParametersHandler from './CooldownParametersHandler';
+import PoolParametersHandler from './PoolParametersHandlers';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -215,6 +216,10 @@ export function findUpdateInstructionHandler(
         case UpdateType.CooldownParameters:
             return new UpdateInstructionHandlerTypeMiddleware(
                 new CooldownParametersHandler()
+            );
+        case UpdateType.PoolParameters:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new PoolParametersHandler()
             );
         default:
             throw new Error(`Unsupported transaction type: ${type}`);

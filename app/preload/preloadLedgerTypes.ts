@@ -23,6 +23,7 @@ import {
     BlsKeyTypes,
     TimeParameters,
     CooldownParameters,
+    PoolParameters,
 } from '~/utils/types';
 import { AppAndVersion } from '../features/ledger/GetAppAndVersion';
 import { AccountPathInput } from '../features/ledger/Path';
@@ -90,6 +91,7 @@ type LedgerCommands = {
     signAddAnonymityRevoker: SignUpdate<AddAnonymityRevoker>;
     signTimeParameters: SignUpdate<TimeParameters>;
     signCooldownParameters: SignUpdate<CooldownParameters>;
+    signPoolParameters: SignUpdate<PoolParameters>;
     signHigherLevelKeysUpdate: SignKeyUpdate<HigherLevelKeyUpdate>;
     signAuthorizationKeysUpdate: SignKeyUpdate<AuthorizationKeysUpdate>;
     getAppAndVersion: () => Promise<AppAndVersion>;

@@ -30,6 +30,9 @@ import {
     SerializedTextWithLength,
     TimeParameters,
     CooldownParameters,
+    PoolParameters,
+    CommissionRates,
+    CommissionRanges,
 } from './types';
 
 /**
@@ -392,6 +395,66 @@ export function serializeCooldownParameters(
     ]);
 }
 
+export function serializeCommisionRates(commisionRates: CommissionRates) {
+    const serializedRates = Buffer.alloc(12);
+    serializedRates.writeUInt32BE(commisionRates.transactionFeeCommission, 0);
+    serializedRates.writeUInt32BE(commisionRates.bakingRewardCommission, 4);
+    serializedRates.writeUInt32BE(
+        commisionRates.finalizationRewardCommission,
+        8
+    );
+    return serializedRates;
+}
+
+export function serializeCommisionRanges(commisionRates: CommissionRanges) {
+    const serializedRanges = Buffer.alloc(24);
+    serializedRanges.writeUInt32BE(
+        commisionRates.transactionFeeCommission.min,
+        0
+    );
+    serializedRanges.writeUInt32BE(
+        commisionRates.transactionFeeCommission.max,
+        4
+    );
+    serializedRanges.writeUInt32BE(
+        commisionRates.bakingRewardCommission.min,
+        8
+    );
+    serializedRanges.writeUInt32BE(
+        commisionRates.bakingRewardCommission.max,
+        12
+    );
+    serializedRanges.writeUInt32BE(
+        commisionRates.finalizationRewardCommission.min,
+        16
+    );
+    serializedRanges.writeUInt32BE(
+        commisionRates.finalizationRewardCommission.max,
+        20
+    );
+    return serializedRanges;
+}
+
+export function serializeEquityBounds(poolParameters: PoolParameters) {
+    return Buffer.concat([
+        encodeWord64(BigInt(poolParameters.minimumEquityCapital)),
+        encodeWord32(poolParameters.capitalBound),
+        encodeWord64(BigInt(poolParameters.leverageBound.numerator)),
+        encodeWord64(BigInt(poolParameters.leverageBound.denominator)),
+    ]);
+}
+
+/**
+ * Serializes pool parameters to bytes.
+ */
+export function serializePoolParameters(poolParameters: PoolParameters) {
+    return Buffer.concat([
+        serializeCommisionRates(poolParameters.lPoolCommissions),
+        serializeCommisionRanges(poolParameters.commissionBounds),
+        serializeEquityBounds(poolParameters),
+    ]);
+}
+
 /**
  * Serializes an UpdateHeader to exactly 28 bytes. See the interface
  * UpdateHeader for comments regarding the byte allocation for each field.
@@ -489,6 +552,8 @@ function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
             return OnChainUpdateType.AddAnonymityRevoker;
         case UpdateType.CooldownParameters:
             return OnChainUpdateType.UpdateCooldownParameters;
+        case UpdateType.PoolParameters:
+            return OnChainUpdateType.UpdatePoolParameters;
         case UpdateType.TimeParameters:
             return OnChainUpdateType.UpdateTimeParameters;
         default:

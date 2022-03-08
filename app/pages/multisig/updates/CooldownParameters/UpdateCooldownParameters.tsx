@@ -2,8 +2,8 @@ import React from 'react';
 import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
+import Input from '~/components/Form/Input/';
 import Form from '~/components/Form/';
-import Label from '~/components/Label';
 import { mustBeAnInteger, requiredMessage, enterHere } from '../common/util';
 
 export interface UpdateCooldownParametersFields {
@@ -40,17 +40,26 @@ export default function UpdateCooldownParameters({
     return (
         <>
             <div>
-                <Label className="mB5">Current pool owner cooldown:</Label>
-                {currentPoolOwnerCooldown} seconds
-                <Label className="mB5">Current delegator cooldown:</Label>
-                {currentDelegatorCooldown} seconds
+                <Input
+                    className="body2 mB20"
+                    value={currentPoolOwnerCooldown.toString()}
+                    label={`Current ${fieldDisplays.poolOwnerCooldown} (seconds)`}
+                    disabled
+                />
+                <Input
+                    className="body2"
+                    value={currentDelegatorCooldown.toString()}
+                    label={`Current ${fieldDisplays.delegatorCooldown} (seconds)`}
+                    disabled
+                />
             </div>
             <div>
                 <Form.Input
-                    className="body2"
+                    className="body2 mB20"
                     name={fieldNames.poolOwnerCooldown}
                     defaultValue={
-                        defaults.poolOwnerCooldown || currentPoolOwnerCooldown
+                        defaults.poolOwnerCooldown ||
+                        currentPoolOwnerCooldown.toString()
                     }
                     label="New pool owner cooldown (seconds)"
                     placeholder={enterHere(fieldDisplays.poolOwnerCooldown)}
@@ -62,6 +71,11 @@ export default function UpdateCooldownParameters({
                             value: 1,
                             message: 'Pool owner cooldown must be positive',
                         },
+                        max: {
+                            value: '18446744073709551615',
+                            message:
+                                'Pool owner cooldown must be below 18446744073709551615',
+                        },
                         validate: {
                             mustBeAnInteger,
                         },
@@ -71,7 +85,8 @@ export default function UpdateCooldownParameters({
                     className="body2"
                     name={fieldNames.delegatorCooldown}
                     defaultValue={
-                        defaults.delegatorCooldown || currentDelegatorCooldown
+                        defaults.delegatorCooldown ||
+                        currentDelegatorCooldown.toString()
                     }
                     label="New pool owner cooldown (seconds)"
                     placeholder={enterHere(fieldDisplays.delegatorCooldown)}
@@ -82,6 +97,11 @@ export default function UpdateCooldownParameters({
                         min: {
                             value: 1,
                             message: 'Delegator cooldown must be positive',
+                        },
+                        max: {
+                            value: '18446744073709551615',
+                            message:
+                                'Delegator cooldown must be below 18446744073709551615',
                         },
                         validate: {
                             mustBeAnInteger,

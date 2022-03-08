@@ -777,6 +777,7 @@ export type UpdateInstructionPayload =
     | AddAnonymityRevoker
     | AddIdentityProvider
     | CooldownParameters
+    | PoolParameters
     | TimeParameters;
 
 // An actual signature, which goes into an account transaction.
@@ -1095,6 +1096,12 @@ export function isCooldownParameters(
     return UpdateType.CooldownParameters === transaction.type;
 }
 
+export function isPoolParameters(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<PoolParameters> {
+    return UpdateType.PoolParameters === transaction.type;
+}
+
 /**
  * Enum for the different states that a multi signature transaction proposal
  * can go through.
@@ -1199,6 +1206,31 @@ export interface TimeParameters {
 export interface CooldownParameters {
     poolOwnerCooldown: Word64;
     delegatorCooldown: Word64;
+}
+
+export interface CommissionRates {
+    transactionFeeCommission: RewardFraction;
+    bakingRewardCommission: RewardFraction;
+    finalizationRewardCommission: RewardFraction;
+}
+
+export interface CommissionRange {
+    min: RewardFraction;
+    max: RewardFraction;
+}
+
+export interface CommissionRanges {
+    transactionFeeCommission: CommissionRange;
+    bakingRewardCommission: CommissionRange;
+    finalizationRewardCommission: CommissionRange;
+}
+
+export interface PoolParameters {
+    lPoolCommissions: CommissionRates;
+    commissionBounds: CommissionRanges;
+    minimumEquityCapital: Word64;
+    capitalBound: RewardFraction;
+    leverageBound: Fraction;
 }
 
 export enum KeyUpdateEntryStatus {

@@ -107,6 +107,11 @@ const updateInstructionTypes: [TransactionTypes, UpdateType, string][] = [
     ],
     [
         TransactionTypes.UpdateInstruction,
+        UpdateType.PoolParameters,
+        'Update pool parameters',
+    ],
+    [
+        TransactionTypes.UpdateInstruction,
         UpdateType.TimeParameters,
         'Update time parameters',
     ],

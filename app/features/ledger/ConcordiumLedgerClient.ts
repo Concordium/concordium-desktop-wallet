@@ -21,6 +21,7 @@ import {
     BlsKeyTypes,
     TimeParameters,
     CooldownParameters,
+    PoolParameters,
 } from '~/utils/types';
 import { pipe } from '~/utils/basicHelpers';
 
@@ -311,6 +312,20 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         return toBuffer(
             window.ledger.signCooldownParameters(
+                transaction,
+                serializedPayload,
+                path
+            )
+        );
+    }
+
+    signPoolParameters(
+        transaction: UpdateInstruction<PoolParameters>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return toBuffer(
+            window.ledger.signPoolParameters(
                 transaction,
                 serializedPayload,
                 path

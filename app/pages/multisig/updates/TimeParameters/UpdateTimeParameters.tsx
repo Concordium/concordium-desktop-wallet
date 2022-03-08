@@ -10,6 +10,7 @@ import MintRateInput, {
 import { getCurrentValue, getSlotsPerYear } from './util';
 import { parseMintPerSlot } from '~/utils/mintDistributionHelpers';
 import Label from '~/components/Label';
+import { mustBeAnInteger, requiredMessage, enterHere } from '../common/util';
 
 export interface UpdateTimeParametersFields {
     mintPerPayday: string;
@@ -21,6 +22,11 @@ const fieldNames: EqualRecord<UpdateTimeParametersFields> = {
     rewardPeriodLength: 'rewardPeriodLength',
 };
 
+const fieldDisplays = {
+    mintPerPayday: 'mint per payday',
+    rewardPeriodLength: 'reward period length',
+};
+
 const canParseMintPerSlot: Validate = (value?: string) =>
     (value !== undefined && parseMintPerSlot(value) !== undefined) ||
     'Invalid mint per slot value';
@@ -30,7 +36,6 @@ const isValidNumber = (parseFun: (v: string) => number): Validate => (
 ) => !Number.isNaN(parseFun(v)) || 'Value must be a valid number';
 
 const isValidFloat = isValidNumber(parseFloat);
-const isValidInteger = isValidNumber(parseInt);
 
 const MINT_PER_SLOT_MAX = 2 ** 32 - 1; // UInt32 upper bound
 
@@ -61,7 +66,7 @@ export default function UpdateTimeParameters({
                     className="mB20"
                 />
                 <Label className="mB5">Current reward period length:</Label>
-                {rewardPeriodLength} milliseconds
+                {rewardPeriodLength.toString()} milliseconds
             </div>
             <div>
                 <Label className="mB5">New mint distribution</Label>
@@ -88,21 +93,32 @@ export default function UpdateTimeParameters({
                         },
                     }}
                 />
-                <Label className="mB5">New reward period length:</Label>
-                <Form.InlineNumber
+                <Form.Input
+                    className="body2"
                     name={fieldNames.rewardPeriodLength}
                     defaultValue={
-                        defaults.rewardPeriodLength || rewardPeriodLength
+                        defaults.rewardPeriodLength ||
+                        rewardPeriodLength.toString()
                     }
+                    label={`${fieldDisplays.rewardPeriodLength} (milliseconds)`}
+                    placeholder={enterHere(fieldDisplays.rewardPeriodLength)}
                     rules={{
+                        required: requiredMessage(
+                            fieldDisplays.rewardPeriodLength
+                        ),
                         min: {
                             value: 1,
-                            message: 'Reward period length must be positive',
+                            message: `${fieldDisplays.rewardPeriodLength} must be positive`,
                         },
-                        validate: { isValidInteger },
+                        max: {
+                            value: '18446744073709551615',
+                            message: `${fieldDisplays.rewardPeriodLength} must be below 18446744073709551615`,
+                        },
+                        validate: {
+                            mustBeAnInteger,
+                        },
                     }}
-                />{' '}
-                milliseconds
+                />
             </div>
         </>
     );
