@@ -28,6 +28,7 @@ import {
     AddAnonymityRevoker,
     AddIdentityProvider,
     SerializedTextWithLength,
+    TimeParameters,
 } from './types';
 
 /**
@@ -51,6 +52,10 @@ export enum OnChainUpdateType {
     AddAnonymityRevoker = 12,
     // eslint-disable-next-line no-shadow
     AddIdentityProvider = 13,
+    // eslint-disable-next-line no-shadow
+    UpdateCooldownParameters = 14,
+    UpdatePoolParameters = 15,
+    UpdateTimeParameters = 16,
 }
 
 /**
@@ -353,6 +358,22 @@ export function serializeAddAnonymityRevoker(
 }
 
 /**
+ * Serializes timeParameters to bytes.
+ */
+export function serializeTimeParameters(timeParameters: TimeParameters) {
+    const serializedRewardPeriod = encodeWord64(
+        BigInt(timeParameters.rewardPeriodLength)
+    );
+    const serializedMintRate = Buffer.alloc(5);
+    serializedMintRate.writeUInt32BE(
+        timeParameters.mintRatePerPayday.mantissa,
+        0
+    );
+    serializedMintRate.writeInt8(timeParameters.mintRatePerPayday.exponent, 4);
+    return Buffer.concat([serializedRewardPeriod, serializedMintRate]);
+}
+
+/**
  * Serializes an UpdateHeader to exactly 28 bytes. See the interface
  * UpdateHeader for comments regarding the byte allocation for each field.
  */
@@ -447,6 +468,8 @@ function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
             return OnChainUpdateType.AddIdentityProvider;
         case UpdateType.AddAnonymityRevoker:
             return OnChainUpdateType.AddAnonymityRevoker;
+        case UpdateType.TimeParameters:
+            return OnChainUpdateType.UpdateTimeParameters;
         default:
             throw new Error(`An invalid update type was given: ${type}`);
     }

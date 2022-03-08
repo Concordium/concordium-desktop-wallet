@@ -226,10 +226,7 @@ export default function DelegationAmountPage({
                     accountInfo={accountInfo}
                     existing={existing?.delegate?.amount}
                     estimatedFee={estimatedFee}
-                    max={
-                        (poolInfo as BakerPoolStatus).poolStatus
-                            .delegatedCapitalCap
-                    }
+                    max={(poolInfo as BakerPoolStatus).delegatedCapitalCap}
                     hasPendingChange={pendingChange !== undefined}
                 />
                 <p className="mB30">

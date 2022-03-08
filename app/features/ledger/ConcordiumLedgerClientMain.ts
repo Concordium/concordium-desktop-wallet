@@ -40,6 +40,7 @@ import {
     AddAnonymityRevoker,
     PrivateKeys,
     BlsKeyTypes,
+    TimeParameters,
 } from '~/utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
@@ -289,6 +290,20 @@ export default class ConcordiumLedgerClientMain {
         return signUpdateTransaction(
             this.transport,
             0x26,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signTimeParameters(
+        transaction: UpdateInstruction<TimeParameters>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
+            this.transport,
+            0x42,
             path,
             transaction,
             serializedPayload

@@ -19,6 +19,7 @@ import {
     AddAnonymityRevoker,
     PrivateKeys,
     BlsKeyTypes,
+    TimeParameters,
 } from '~/utils/types';
 import { pipe } from '~/utils/basicHelpers';
 
@@ -284,6 +285,20 @@ export default class ConcordiumLedgerClient {
                 serializedPayload,
                 path,
                 INS
+            )
+        );
+    }
+
+    signTimeParameters(
+        transaction: UpdateInstruction<TimeParameters>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return toBuffer(
+            window.ledger.signTimeParameters(
+                transaction,
+                serializedPayload,
+                path
             )
         );
     }

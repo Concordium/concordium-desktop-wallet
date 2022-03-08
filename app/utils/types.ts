@@ -775,7 +775,8 @@ export type UpdateInstructionPayload =
     | HigherLevelKeyUpdate
     | AuthorizationKeysUpdate
     | AddAnonymityRevoker
-    | AddIdentityProvider;
+    | AddIdentityProvider
+    | TimeParameters;
 
 // An actual signature, which goes into an account transaction.
 export type Signature = Hex;
@@ -824,6 +825,9 @@ export enum UpdateType {
     UpdateLevel2KeysUsingLevel1Keys,
     AddAnonymityRevoker,
     AddIdentityProvider,
+    CooldownParameters,
+    PoolParameters,
+    TimeParameters,
 }
 
 export enum RootKeysUpdateTypes {
@@ -1078,6 +1082,12 @@ export function isUpdateUsingLevel1Keys(
     );
 }
 
+export function isTimeParameters(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<TimeParameters> {
+    return UpdateType.TimeParameters === transaction.type;
+}
+
 /**
  * Enum for the different states that a multi signature transaction proposal
  * can go through.
@@ -1172,6 +1182,11 @@ export interface BakerStakeThreshold {
 
 export interface ElectionDifficulty {
     electionDifficulty: Word32;
+}
+
+export interface TimeParameters {
+    rewardPeriodLength: Word64;
+    mintRatePerPayday: MintRate;
 }
 
 export enum KeyUpdateEntryStatus {

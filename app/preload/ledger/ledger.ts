@@ -26,6 +26,7 @@ import {
     AddIdentityProvider,
     AddAnonymityRevoker,
     BlsKeyTypes,
+    TimeParameters,
 } from '~/utils/types';
 import { LedgerCommands } from '~/preload/preloadTypes';
 
@@ -235,6 +236,17 @@ export default function exposedMethods(
                 serializedPayload,
                 keypath,
                 INS
+            );
+        },
+        signTimeParameters: (
+            transaction: UpdateInstruction<TimeParameters>,
+            serializedPayload: Buffer,
+            keypath: number[]
+        ) => {
+            return getLedgerClient().signTimeParameters(
+                transaction,
+                serializedPayload,
+                keypath
             );
         },
         getAppAndVersion: () => getLedgerClient().getAppAndVersion(),

@@ -1,4 +1,5 @@
 import React from 'react';
+import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import BakerStakeThresholdView from '~/pages/multisig/updates/BakerStakeThreshold/BakerStakeThresholdView';
 import UpdateBakerStakeThreshold, {
     UpdateBakerStakeThresholdFields,
@@ -36,7 +37,7 @@ export default class BakerStakeThresholdHandler
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
-        if (!blockSummary) {
+        if (!blockSummary || isBlockSummaryV1(blockSummary)) {
             return undefined;
         }
 

@@ -50,6 +50,7 @@ import EncryptedTransferWithMemoHandler from './EncryptedTransferWithMemoHandler
 import SimpleTransferWithMemoHandler from './SimpleTransferWithMemoHandler';
 import ConfigureBakerHandler from './ConfigureBakerHandler';
 import ConfigureDelegationHandler from './ConfigureDelegationHandler';
+import TimeParametersHandler from './TimeParameterHandler';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -205,6 +206,10 @@ export function findUpdateInstructionHandler(
         case UpdateType.AddAnonymityRevoker:
             return new UpdateInstructionHandlerTypeMiddleware(
                 new AddAnonymityRevokerHandler()
+            );
+        case UpdateType.TimeParameters:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new TimeParametersHandler()
             );
         default:
             throw new Error(`Unsupported transaction type: ${type}`);

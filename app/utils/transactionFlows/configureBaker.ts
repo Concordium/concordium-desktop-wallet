@@ -1,4 +1,5 @@
-import { AccountInfo, ChainParametersV1 } from '@concordium/node-sdk';
+import type { AccountInfo, ChainParametersV1 } from '@concordium/node-sdk';
+import { OpenStatusText } from '@concordium/node-sdk/lib/src/types';
 import { isBakerAccountV1 } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { isDefined, multiplyFraction } from '../basicHelpers';
@@ -45,6 +46,19 @@ export interface ConfigureBakerFlowState {
     commissions?: Commissions;
     metadataUrl?: MetadataUrl;
     keys?: BakerKeys;
+}
+
+function openStatusTextToOpenStatus(statusText: OpenStatusText) {
+    switch (statusText) {
+        case OpenStatusText.OpenForAll:
+            return OpenStatus.OpenForAll;
+        case OpenStatusText.ClosedForNew:
+            return OpenStatus.ClosedForNew;
+        case OpenStatusText.ClosedForAll:
+            return OpenStatus.ClosedForAll;
+        default:
+            throw new Error(`Status not supported: ${statusText}`);
+    }
 }
 
 export const getDefaultCommissions = (cp: ChainParametersV1): Commissions => ({
@@ -94,7 +108,9 @@ export const getExistingBakerValues = (
             stake: microGtuToGtu(accountBaker.stakedAmount) ?? '1000.00',
             restake: accountBaker.restakeEarnings,
         },
-        openForDelegation: accountBaker.bakerPoolInfo.openStatus,
+        openForDelegation: openStatusTextToOpenStatus(
+            accountBaker.bakerPoolInfo.openStatus
+        ),
         metadataUrl: accountBaker.bakerPoolInfo.metadataUrl,
         commissions: {
             transactionFeeCommission:

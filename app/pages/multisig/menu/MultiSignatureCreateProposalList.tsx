@@ -100,6 +100,11 @@ const updateInstructionTypes: [TransactionTypes, UpdateType, string][] = [
         UpdateType.AddAnonymityRevoker,
         'Add anonymity revoker',
     ],
+    [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.TimeParameters,
+        'Update time parameters',
+    ],
 ];
 
 /**
@@ -248,34 +253,34 @@ export default function MultiSignatureCreateProposalView() {
 
     return (
         <>
-            {availableTransactionTypes.map(
-                ([transactionType, specificType, label, filter]) =>
-                    filter === undefined ||
-                    (pv !== undefined && filter(pv) && (
-                        <Fragment key={`${transactionType}${specificType}`}>
-                            {[
-                                TransactionKindId.Configure_baker,
-                                TransactionKindId.Configure_delegation,
-                            ].every((k) => k !== specificType) && (
-                                <ButtonNavLink
-                                    className={styles.link}
-                                    to={createProposalRoute(
-                                        transactionType,
-                                        specificType
-                                    )}
-                                >
-                                    {label}
-                                </ButtonNavLink>
-                            )}
-                            {specificType ===
-                                TransactionKindId.Configure_baker &&
-                                configureBakerLinks}
-                            {specificType ===
-                                TransactionKindId.Configure_delegation &&
-                                configureDelegationLinks}
-                        </Fragment>
-                    ))
-            )}
+            {availableTransactionTypes
+                .filter(
+                    ([, , , filter]) =>
+                        filter === undefined || (pv !== undefined && filter(pv))
+                )
+                .map(([transactionType, specificType, label]) => (
+                    <Fragment key={`${transactionType}${specificType}`}>
+                        {[
+                            TransactionKindId.Configure_baker,
+                            TransactionKindId.Configure_delegation,
+                        ].every((k) => k !== specificType) && (
+                            <ButtonNavLink
+                                className={styles.link}
+                                to={createProposalRoute(
+                                    transactionType,
+                                    specificType
+                                )}
+                            >
+                                {label}
+                            </ButtonNavLink>
+                        )}
+                        {specificType === TransactionKindId.Configure_baker &&
+                            configureBakerLinks}
+                        {specificType ===
+                            TransactionKindId.Configure_delegation &&
+                            configureDelegationLinks}
+                    </Fragment>
+                ))}
         </>
     );
 }
