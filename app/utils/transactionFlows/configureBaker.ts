@@ -1,8 +1,10 @@
-import { AccountInfo, ChainParametersV1 } from '@concordium/node-sdk';
+import type { AccountInfo, ChainParametersV1 } from '@concordium/node-sdk';
 import { isBakerAccountV1 } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { OpenStatus, OpenStatusText } from '@concordium/node-sdk/lib/src/types';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { isDefined, multiplyFraction } from '../basicHelpers';
 import { microGtuToGtu, toMicroUnits } from '../gtu';
+import { fractionResolution } from '../rewardFractionHelpers';
 import { BakerKeys } from '../rustInterface';
 import { getConfigureBakerCost } from '../transactionCosts';
 import { createConfigureBakerTransaction } from '../transactionHelpers';
@@ -12,7 +14,6 @@ import {
     ConfigureBakerPayload,
     Fraction,
     NotOptional,
-    OpenStatus,
     TransactionKindId,
     Account,
     DeepPartial,
@@ -28,14 +29,12 @@ export interface StakeSettings {
     stake: string;
     restake: boolean;
 }
-export type Commissions = NotOptional<
-    Pick<
-        ConfigureBakerPayload,
-        | 'transactionFeeCommission'
-        | 'bakingRewardCommission'
-        | 'finalizationRewardCommission'
-    >
->;
+
+export interface Commissions {
+    transactionFeeCommission: number;
+    bakingRewardCommission: number;
+    finalizationRewardCommission: number;
+}
 
 export type MetadataUrl = string;
 
@@ -52,6 +51,29 @@ export const getDefaultCommissions = (cp: ChainParametersV1): Commissions => ({
     bakingRewardCommission: cp.bakingCommissionRange.max,
     finalizationRewardCommission: cp.finalizationCommissionRange.max,
 });
+
+const decimalToRewardFraction = (d: number | undefined) =>
+    d === undefined ? undefined : d * fractionResolution;
+
+const convertCommissionsToRewardFractions = (
+    c: Partial<Commissions> | undefined
+): Partial<Commissions> | undefined => {
+    if (c === undefined) {
+        return undefined;
+    }
+
+    return {
+        bakingRewardCommission: decimalToRewardFraction(
+            c.bakingRewardCommission
+        ),
+        transactionFeeCommission: decimalToRewardFraction(
+            c.transactionFeeCommission
+        ),
+        finalizationRewardCommission: decimalToRewardFraction(
+            c.finalizationRewardCommission
+        ),
+    };
+};
 
 export const toConfigureBakerPayload = ({
     keys,
@@ -78,8 +100,21 @@ export const toConfigureBakerPayload = ({
     restakeEarnings: stake?.restake,
     openForDelegation,
     metadataUrl,
-    ...commissions,
+    ...convertCommissionsToRewardFractions(commissions),
 });
+
+const openStatusEnumFromText = (text: OpenStatusText): OpenStatus => {
+    switch (text) {
+        case OpenStatusText.OpenForAll:
+            return OpenStatus.OpenForAll;
+        case OpenStatusText.ClosedForNew:
+            return OpenStatus.ClosedForNew;
+        case OpenStatusText.ClosedForAll:
+            return OpenStatus.ClosedForAll;
+        default:
+            throw new Error(`Case not handled: ${text}`);
+    }
+};
 
 export const getExistingBakerValues = (
     ai: AccountInfo | undefined
@@ -94,7 +129,9 @@ export const getExistingBakerValues = (
             stake: microGtuToGtu(accountBaker.stakedAmount) ?? '1000.00',
             restake: accountBaker.restakeEarnings,
         },
-        openForDelegation: accountBaker.bakerPoolInfo.openStatus,
+        openForDelegation: openStatusEnumFromText(
+            accountBaker.bakerPoolInfo.openStatus
+        ),
         metadataUrl: accountBaker.bakerPoolInfo.metadataUrl,
         commissions: {
             transactionFeeCommission:
