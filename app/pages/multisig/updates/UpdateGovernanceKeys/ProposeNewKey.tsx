@@ -8,6 +8,7 @@ import {
     UpdateType,
     TransactionTypes,
     VerifyKey,
+    SchemeId,
 } from '~/utils/types';
 import { createProposalRoute } from '~/utils/routerHelper';
 import Card from '~/cross-app-components/Card';
@@ -80,6 +81,18 @@ export default function ProposeNewKey({ type, addKey, newKeys }: Props) {
                     show: true,
                     header: 'Invalid key file',
                     content: 'The loaded file did not contain a valid key.',
+                });
+                return;
+            }
+
+            if (
+                !Object.keys(SchemeId).includes(exportedPublicKey.key.schemeId)
+            ) {
+                setShowError({
+                    show: true,
+                    header: 'Invalid scheme',
+                    content:
+                        'The loaded key file contains a key with a unsupported scheme. Please try another governance key file.',
                 });
                 return;
             }
