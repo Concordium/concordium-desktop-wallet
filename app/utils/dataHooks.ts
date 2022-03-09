@@ -206,7 +206,9 @@ function getV1Cooldown(
         const remainingRewardPeriods = Math.ceil(
             remainingAtNext / nRewardPeriodLength
         );
-        cooldownEnd = remainingRewardPeriods * nRewardPeriodLength;
+        cooldownEnd =
+            nextRewardPeriodStartIndex +
+            remainingRewardPeriods * nRewardPeriodLength;
     }
 
     return epochDate(cooldownEnd, cs.epochDuration, genesisTime);
