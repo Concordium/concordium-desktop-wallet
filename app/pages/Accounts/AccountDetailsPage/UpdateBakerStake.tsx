@@ -20,7 +20,7 @@ import {
     useCalcBakerStakeCooldownUntil,
     useTransactionCostEstimate,
 } from '~/utils/dataHooks';
-import { displayAsGTU, microGtuToGtu, toMicroUnits } from '~/utils/gtu';
+import { displayAsCcd, microCcdToCcd, ccdToMicroCcd } from '~/utils/ccd';
 import { stringify } from '~/utils/JSONHelper';
 import { createUpdateBakerStakeTransaction } from '~/utils/transactionHelpers';
 import {
@@ -77,7 +77,7 @@ const UpdateBakerStakeForm = ensureExchangeRateAndNonce(
 
                 const transaction = createUpdateBakerStakeTransaction(
                     account.address,
-                    { stake: toMicroUnits(stake) },
+                    { stake: ccdToMicroCcd(stake) },
                     nonce
                 );
 
@@ -163,7 +163,7 @@ const UpdateBakerStakeForm = ensureExchangeRateAndNonce(
                     <>
                         <Label className="mT30">Current stake:</Label>
                         <em className="body2">
-                            {displayAsGTU(
+                            {displayAsCcd(
                                 accountInfo.accountBaker?.stakedAmount
                             )}
                         </em>
@@ -171,7 +171,7 @@ const UpdateBakerStakeForm = ensureExchangeRateAndNonce(
                 )}
                 <PickBakerStakeAmount
                     header="New stake:"
-                    initial={microGtuToGtu(
+                    initial={microCcdToCcd(
                         accountInfo.accountBaker?.stakedAmount
                     )}
                     accountInfo={accountInfo}

@@ -1,7 +1,7 @@
 import React from 'react';
 import type { BakerPendingChange } from '@concordium/node-sdk';
 import { useConsensusStatus } from '~/utils/dataHooks';
-import { displayAsGTU } from '~/utils/gtu';
+import { displayAsCcd } from '~/utils/ccd';
 import { epochDate, getFormattedDateString } from '~/utils/timeHelpers';
 
 type PendingChangeProps = {
@@ -30,7 +30,7 @@ export default function PendingChange({ pending }: PendingChangeProps) {
         </>
     ) : (
         <>
-            Stake is set to be reduced to {displayAsGTU(pending.newStake)} on
+            Stake is set to be reduced to {displayAsCcd(pending.newStake)} on
             <br />
             {changeAtDate}
         </>

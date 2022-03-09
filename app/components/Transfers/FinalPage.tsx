@@ -5,7 +5,7 @@ import { useLocation } from 'react-router-dom';
 import clsx from 'clsx';
 import { parse } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
-import { displayAsGTU } from '~/utils/gtu';
+import { displayAsCcd } from '~/utils/ccd';
 import { parseTime } from '~/utils/timeHelpers';
 import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
@@ -139,7 +139,7 @@ export default function FinalPage(): JSX.Element {
             <h3 className="textCenter mB0">{handler.title}</h3>
             {handler.amount && (
                 <h1 className="textCenter mT10 mB0">
-                    {displayAsGTU(handler.amount)}
+                    {displayAsCcd(handler.amount)}
                 </h1>
             )}
             <DisplayEstimatedFee

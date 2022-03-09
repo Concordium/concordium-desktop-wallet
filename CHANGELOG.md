@@ -5,6 +5,7 @@
 ### Added
 
 -   Allow users to verify address on Ledger device.
+-   Allow users to choose CCD or microCCD as the unit used in account report.
 
 ## 1.3.1
 

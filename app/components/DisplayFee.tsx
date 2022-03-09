@@ -1,7 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import { AccountTransaction } from '~/utils/types';
-import { displayAsGTU } from '~/utils/gtu';
+import { displayAsCcd } from '~/utils/ccd';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 interface Props {
@@ -17,7 +17,7 @@ export default function DisplayFee({ className, transaction }: Props) {
         return (
             <p className={clsx('body5', className)}>
                 {' '}
-                Fee: {displayAsGTU(transaction.cost)}{' '}
+                Fee: {displayAsCcd(transaction.cost)}{' '}
             </p>
         );
     }

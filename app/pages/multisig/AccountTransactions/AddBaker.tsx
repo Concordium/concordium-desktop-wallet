@@ -20,7 +20,7 @@ import {
     Fraction,
 } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
-import { toMicroUnits } from '~/utils/gtu';
+import { ccdToMicroCcd } from '~/utils/ccd';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
 import SignTransactionColumn from '../SignTransactionProposal/SignTransaction';
@@ -131,7 +131,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
             proofElection: bakerKeys.proofElection,
             proofSignature: bakerKeys.proofSignature,
             proofAggregation: bakerKeys.proofAggregation,
-            bakingStake: toMicroUnits(stake),
+            bakingStake: ccdToMicroCcd(stake),
             restakeEarnings: restakeEnabled,
         };
         const accountNonce = await getNextAccountNonce(account.address);

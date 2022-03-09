@@ -1,6 +1,6 @@
 import { BlockSummary } from '~/node/NodeApiTypes';
 import { ExchangeRate } from '~/utils/types';
-import { getGTUSymbol } from '~/utils/gtu';
+import { getCcdSymbol } from '~/utils/ccd';
 import { RelativeRateFieldProps } from '../../common/RelativeRateField';
 
 export const getCurrentValue = (blockSummary: BlockSummary): ExchangeRate =>
@@ -10,6 +10,6 @@ export const commonFieldProps: Pick<
     RelativeRateFieldProps,
     'numeratorUnit' | 'denominatorUnit'
 > = {
-    numeratorUnit: { position: 'prefix', value: `µ${getGTUSymbol()}` },
+    numeratorUnit: { position: 'prefix', value: `µ${getCcdSymbol()}` },
     denominatorUnit: { position: 'prefix', value: '€' },
 };

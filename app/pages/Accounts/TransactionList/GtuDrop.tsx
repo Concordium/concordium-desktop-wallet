@@ -9,7 +9,7 @@ import { insertTransactions } from '~/database/TransactionDao';
 import { chosenAccountSelector } from '~/features/AccountSlice';
 import { reloadTransactions } from '~/features/TransactionSlice';
 import { displayTargetNet, getTargetNet } from '~/utils/ConfigHelper';
-import { getGTUSymbol, microGtuToGtu } from '~/utils/gtu';
+import { getCcdSymbol, microCcdToCcd } from '~/utils/ccd';
 import { gtuDrop } from '~/utils/httpRequests';
 import { secondsSinceUnixEpoch } from '~/utils/timeHelpers';
 import { monitorTransactionStatus } from '~/utils/TransactionStatusPoller';
@@ -118,8 +118,8 @@ export default function GtuDrop() {
                         }
                     }}
                 >
-                    Request {getGTUSymbol()}
-                    {microGtuToGtu(microGtuDropAmount)}
+                    Request {getCcdSymbol()}
+                    {microCcdToCcd(microGtuDropAmount)}
                 </Button>
             </div>
         </>
