@@ -137,7 +137,7 @@ export default function DelegationAmountPage({
     const defaultValues: SubState = {
         amount: '0.00',
         redelegate: true,
-        ...existing,
+        ...existing?.delegate,
         ...initial,
     };
     const form = useForm<SubState>({
@@ -184,14 +184,14 @@ export default function DelegationAmountPage({
             formMethods={form}
         >
             <div className="flexChildFill">
-                {existing || (
+                {existing !== undefined || (
                     <p className="mT0">
                         This transaction will delegate an amount of CCD to an
                         active baker. You must choose the amount to delegate, if
                         you want to add rewards to the delegated amount.
                     </p>
                 )}
-                {existing && pendingChange === undefined && (
+                {existing !== undefined && pendingChange === undefined && (
                     <p className="mT0">
                         Enter your new desired amount to delegate. If you raise
                         the stake it will take effect after two epochs, and if

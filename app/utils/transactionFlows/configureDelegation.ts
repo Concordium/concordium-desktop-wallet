@@ -1,5 +1,6 @@
 import { AccountInfo } from '@concordium/node-sdk';
 import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { DelegationTargetType } from '@concordium/node-sdk/lib/src/types';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { multiplyFraction } from '../basicHelpers';
 import { microGtuToGtu, toMicroUnits } from '../gtu';
@@ -49,7 +50,10 @@ export const getExistingDelegationValues = (
             amount: microGtuToGtu(stakedAmount) ?? '0.00',
             redelegate: restakeEarnings,
         },
-        target: delegationTarget?.toString(),
+        target:
+            delegationTarget.delegateType === DelegationTargetType.Baker
+                ? delegationTarget.bakerId.toString()
+                : null,
     };
 };
 
@@ -66,13 +70,17 @@ export const getDelegationFlowChanges = (
         delegate: {},
     };
 
-    if (
-        existingValues.delegate?.amount === undefined ||
-        newValues.delegate?.amount === undefined ||
-        toMicroUnits(existingValues.delegate?.amount) !==
-            toMicroUnits(newValues.delegate?.amount)
-    ) {
-        changes.delegate.amount = newValues.delegate?.amount;
+    try {
+        if (
+            existingValues.delegate?.amount === undefined ||
+            newValues.delegate?.amount === undefined ||
+            toMicroUnits(existingValues.delegate?.amount) !==
+                toMicroUnits(newValues.delegate?.amount)
+        ) {
+            changes.delegate.amount = newValues.delegate?.amount;
+        }
+    } catch {
+        // Nothing...
     }
     if (
         existingValues.delegate?.redelegate !== newValues.delegate?.redelegate

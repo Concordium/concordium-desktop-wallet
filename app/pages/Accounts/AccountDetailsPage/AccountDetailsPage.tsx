@@ -124,6 +124,7 @@ export default withAccountSync(function DetailsPage() {
                             if (
                                 !canTransfer ||
                                 isBaker ||
+                                isDelegating ||
                                 accountInfo === undefined
                             ) {
                                 return <ToAccounts />;

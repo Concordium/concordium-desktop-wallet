@@ -91,7 +91,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     Update credentials
                 </ButtonNavLink>
             )}
-            {accountHasDeployedCredentials && !isBaker && (
+            {accountHasDeployedCredentials && !isBaker && !isDelegating && (
                 <ButtonNavLink
                     className="mB20:notLast flex width100"
                     to={routes.ACCOUNTS_ADD_BAKER}
