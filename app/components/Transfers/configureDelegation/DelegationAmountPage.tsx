@@ -210,7 +210,7 @@ export default function DelegationAmountPage({
                     </p>
                 )}
                 {pendingChange !== undefined && (
-                    <div className="mV10">
+                    <div className="mV10 body2">
                         Cannot update delegated amount at this time:
                         <div className="bodyEmphasized textError mV10">
                             <StakePendingChange pending={pendingChange} />

@@ -83,7 +83,7 @@ export default function BakerStakeSettings({
                     </p>
                 )}
                 {pendingChange !== undefined && (
-                    <div className="mV10">
+                    <div className="mV10 body2">
                         Cannot update baker stake at this time:
                         <div className="bodyEmphasized textError mV10">
                             <StakePendingChange pending={pendingChange} />
