@@ -14,7 +14,7 @@ const KeysPage = ({ onNext, initial, account }: GenerateKeysPageProps) => (
         onContinue={onNext}
         account={account}
         initialKeys={initial}
-        keyVariant="ADD"
+        keyVariant="CONFIGURE"
     />
 );
 

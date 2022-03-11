@@ -149,7 +149,8 @@ pub fn create_genesis_account_ext(
 #[wasm_bindgen]
 pub enum BakerKeyVariant {
     ADD,
-    UPDATE
+    UPDATE,
+    CONFIGURE,
 }
 
 #[wasm_bindgen(js_name = generateBakerKeys)]
