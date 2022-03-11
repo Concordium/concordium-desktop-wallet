@@ -81,20 +81,21 @@ export const toConfigureBakerPayload = ({
     openForDelegation,
     metadataUrl,
     commissions,
-}: DeepPartial<ConfigureBakerFlowState>): ConfigureBakerPayload => ({
-    electionVerifyKey:
-        keys?.electionPublic !== undefined && keys?.proofElection !== undefined
-            ? [keys.electionPublic, keys.proofElection]
-            : undefined,
-    signatureVerifyKey:
-        keys?.signaturePublic !== undefined &&
-        keys?.proofSignature !== undefined
-            ? [keys.signaturePublic, keys.proofSignature]
-            : undefined,
-    aggregationVerifyKey:
-        keys?.aggregationPublic !== undefined &&
-        keys?.proofAggregation !== undefined
-            ? [keys.aggregationPublic, keys.proofAggregation]
+}: DeepPartial<Omit<ConfigureBakerFlowState, 'keys'>> &
+    Pick<ConfigureBakerFlowState, 'keys'>): ConfigureBakerPayload => ({
+    keys:
+        keys !== undefined
+            ? {
+                  electionVerifyKey: [keys.electionPublic, keys.proofElection],
+                  signatureVerifyKey: [
+                      keys.signaturePublic,
+                      keys.proofSignature,
+                  ],
+                  aggregationVerifyKey: [
+                      keys.aggregationPublic,
+                      keys.proofAggregation,
+                  ],
+              }
             : undefined,
     stake: stake?.stake !== undefined ? toMicroUnits(stake.stake) : undefined,
     restakeEarnings: stake?.restake,
@@ -151,8 +152,9 @@ const isAccountInfo = (
 ): dyn is AccountInfo => (dyn as AccountInfo).accountIndex !== undefined;
 
 export type ConfigureBakerFlowStateChanges = MakeRequired<
-    DeepPartial<ConfigureBakerFlowState>,
-    'stake' | 'commissions' | 'keys'
+    DeepPartial<Omit<ConfigureBakerFlowState, 'keys'>> &
+        Pick<ConfigureBakerFlowState, 'keys'>,
+    'stake' | 'commissions'
 >;
 
 export function getBakerFlowChanges(
@@ -182,7 +184,6 @@ export function getBakerFlowChanges(
     const changes: ConfigureBakerFlowStateChanges = {
         stake: {},
         commissions: {},
-        keys: {},
     };
 
     if (
@@ -227,7 +228,9 @@ export function getBakerFlowChanges(
         changes.metadataUrl = newValues.metadataUrl;
     }
 
-    changes.keys = { ...newValues.keys };
+    if (newValues.keys !== undefined) {
+        changes.keys = { ...newValues.keys };
+    }
 
     return changes;
 }
@@ -262,7 +265,8 @@ export const convertToBakerTransaction = (
 };
 
 export function getEstimatedConfigureBakerFee(
-    values: DeepPartial<ConfigureBakerFlowState>,
+    values: DeepPartial<Omit<ConfigureBakerFlowState, 'keys'>> &
+        Pick<ConfigureBakerFlowState, 'keys'>,
     exchangeRate: Fraction,
     signatureThreshold = 1
 ) {

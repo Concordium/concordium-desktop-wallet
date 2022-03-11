@@ -73,7 +73,7 @@ const CommissionField = ({
 
     if (min === max) {
         return (
-            <div>
+            <div className={commonSliderProps.className}>
                 <Label className="mB5">{label}</Label>
                 <span className="textFaded body2">{minPercentage}%</span>
             </div>

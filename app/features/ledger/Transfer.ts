@@ -30,6 +30,7 @@ import {
     instanceOfConfigureBaker,
     instanceOfConfigureDelegation,
     SerializedTextWithLength,
+    ConfigureBakerPayload,
 } from '~/utils/types';
 import {
     serializeTransactionHeader,
@@ -48,6 +49,7 @@ import {
     serializeConfigureBakerPayload,
     getSerializedMetadataUrlWithLength,
     getSerializedConfigureBakerBitmap,
+    serializeVerifyKey,
 } from '~/utils/transactionSerialization';
 import pathAsBuffer from './Path';
 import {
@@ -481,44 +483,45 @@ async function signConfigureBaker(
         stake,
         restakeEarnings,
         openForDelegation,
-        electionVerifyKey,
-        signatureVerifyKey,
-        aggregationVerifyKey,
+        keys,
         ...commissions
     } = transaction.payload;
 
-    const dataPayload = {
+    const dataPayload: ConfigureBakerPayload = {
         stake,
         restakeEarnings,
         openForDelegation,
-        electionVerifyKey,
-        signatureVerifyKey,
     };
 
-    if (Object.values(dataPayload).some(isDefined)) {
+    if (Object.values(dataPayload).some(isDefined) || keys !== undefined) {
         p1 = 0x01;
-        const data = serializeConfigureBakerPayload(dataPayload);
+        const data = Buffer.concat([
+            serializeConfigureBakerPayload(dataPayload),
+            ...(keys !== undefined
+                ? [
+                      serializeVerifyKey(keys.signatureVerifyKey),
+                      serializeVerifyKey(keys.electionVerifyKey),
+                  ]
+                : []),
+        ]);
         response = await send(data);
     }
 
-    if (aggregationVerifyKey !== undefined) {
+    if (keys !== undefined) {
         p1 = 0x02;
-        const aggKey = serializeConfigureBakerPayload({
-            aggregationVerifyKey,
-        });
+        const aggKey = serializeVerifyKey(keys.aggregationVerifyKey);
         response = await send(aggKey);
     }
 
-    const { data: urlBuffer, length: urlLength } = metadataUrl
-        ? getSerializedMetadataUrlWithLength(metadataUrl)
-        : ({} as Partial<SerializedTextWithLength>);
+    const { data: urlBuffer, length: urlLength } =
+        metadataUrl !== undefined
+            ? getSerializedMetadataUrlWithLength(metadataUrl)
+            : ({} as Partial<SerializedTextWithLength>);
 
-    if (urlLength) {
+    if (urlLength !== undefined && urlBuffer !== undefined) {
         p1 = 0x03;
-        response = await send(urlLength);
-    }
+        await send(urlLength);
 
-    if (urlBuffer !== undefined) {
         p1 = 0x04;
         const chunks = chunkBuffer(urlBuffer, 255);
 

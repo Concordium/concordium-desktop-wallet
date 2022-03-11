@@ -28,6 +28,7 @@ import {
     DelegationTarget,
     NotOptional,
     BakerKeyWithProof,
+    BakerKeysWithProofs,
 } from './types';
 import {
     encodeWord32,
@@ -398,17 +399,22 @@ const configureBakerOrder: Array<keyof ConfigureBakerPayload> = [
     'stake',
     'restakeEarnings',
     'openForDelegation',
-    'signatureVerifyKey',
-    'electionVerifyKey',
-    'aggregationVerifyKey',
+    'keys',
     'metadataUrl',
     'transactionFeeCommission',
     'bakingRewardCommission',
     'finalizationRewardCommission',
 ];
 
-const serializeVerifyKey = ([key, proof]: BakerKeyWithProof) =>
+export const serializeVerifyKey = ([key, proof]: BakerKeyWithProof) =>
     Buffer.concat([putHexString(key), putHexString(proof)]);
+
+const serializeVerifyKeys = (keys: BakerKeysWithProofs) =>
+    Buffer.concat([
+        serializeVerifyKey(keys.signatureVerifyKey),
+        serializeVerifyKey(keys.electionVerifyKey),
+        serializeVerifyKey(keys.aggregationVerifyKey),
+    ]);
 
 export const getSerializedMetadataUrlWithLength = (url: string) =>
     getSerializedTextWithLength(url, encodeWord16);
@@ -422,9 +428,7 @@ const configureBakerSerializationSpec: SerializationSpec<ConfigureBakerPayload> 
     stake: orUndefined(encodeWord64),
     restakeEarnings: orUndefined(serializeBoolean),
     openForDelegation: orUndefined(putInt8),
-    signatureVerifyKey: orUndefined(serializeVerifyKey),
-    electionVerifyKey: orUndefined(serializeVerifyKey),
-    aggregationVerifyKey: orUndefined(serializeVerifyKey),
+    keys: orUndefined(serializeVerifyKeys),
     metadataUrl: orUndefined(serializeUrl),
     transactionFeeCommission: orUndefined(encodeWord32),
     bakingRewardCommission: orUndefined(encodeWord32),

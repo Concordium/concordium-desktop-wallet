@@ -75,15 +75,15 @@ export default function DisplayConfigureBaker({ transaction }: Props) {
             <DisplayMetadataUrl metadataUrl={payload.metadataUrl} />
             <DisplayPublicKey
                 name="Election verify key:"
-                publicKey={payload?.electionVerifyKey?.[0]}
+                publicKey={payload?.keys?.electionVerifyKey[0]}
             />
             <DisplayPublicKey
                 name="Signature verify key:"
-                publicKey={payload?.signatureVerifyKey?.[0]}
+                publicKey={payload?.keys?.signatureVerifyKey[0]}
             />
             <DisplayPublicKey
                 name="Aggregation verify key:"
-                publicKey={payload?.aggregationVerifyKey?.[0]}
+                publicKey={payload?.keys?.aggregationVerifyKey[0]}
             />
             {Boolean(isSingleSig) || (
                 <DisplayTransactionExpiryTime
