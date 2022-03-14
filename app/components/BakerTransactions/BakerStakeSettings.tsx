@@ -103,6 +103,7 @@ export default function BakerStakeSettings({
                     fieldName={fieldNames.stake}
                     minimumStake={minimumStake}
                     existing={existingValues?.stake}
+                    hasPendingChange={pendingChange !== undefined}
                 />
                 <p className="mB30">
                     By default all baker rewards are added to the staked amount.
