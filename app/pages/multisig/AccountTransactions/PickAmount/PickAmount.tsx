@@ -8,9 +8,9 @@ import { getCcdSymbol } from '~/utils/ccd';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import { useAccountInfo } from '~/utils/dataHooks';
 import GtuInput from '~/components/Form/GtuInput';
+import Label from '~/components/Label';
 
 import styles from './PickAmount.module.scss';
-import Label from '~/components/Label';
 
 interface Props {
     account: Account | undefined;
