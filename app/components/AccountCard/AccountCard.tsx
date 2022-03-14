@@ -10,7 +10,7 @@ import ReadonlyImage from '@resources/svg/read-only.svg';
 import LedgerImage from '@resources/svg/ledger.svg';
 import InfoImage from '@resources/svg/info.svg';
 import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
-import { displayAsGTU } from '~/utils/gtu';
+import { displayAsCcd } from '~/utils/ccd';
 import { AccountInfo, Account, AccountStatus, ClassName } from '~/utils/types';
 import {
     isInitialAccount,
@@ -73,7 +73,7 @@ function ShieldedBalance({
                     left={rowLeftSide}
                     right={
                         <h3>
-                            {displayAsGTU(shielded)}
+                            {displayAsCcd(shielded)}
                             {hidden}
                         </h3>
                     }
@@ -223,7 +223,7 @@ export function AccountCardView({
                 left={<h3>Account total:</h3>}
                 right={
                     <h3>
-                        {displayAsGTU(shielded + unShielded)}
+                        {displayAsCcd(shielded + unShielded)}
                         {hidden}
                     </h3>
                 }
@@ -232,17 +232,17 @@ export function AccountCardView({
             <SidedRow
                 className={styles.row}
                 left={<h3>Balance:</h3>}
-                right={<h3>{displayAsGTU(unShielded)}</h3>}
+                right={<h3>{displayAsCcd(unShielded)}</h3>}
             />
             <SidedRow
                 className={styles.row}
                 left="- At disposal:"
-                right={displayAsGTU(amountAtDisposal)}
+                right={displayAsCcd(amountAtDisposal)}
             />
             <SidedRow
                 className={styles.row}
                 left="- Staked:"
-                right={displayAsGTU(stakedAmount)}
+                right={displayAsCcd(stakedAmount)}
             />
             <div className={styles.dividingLine} />
             <ShieldedBalance

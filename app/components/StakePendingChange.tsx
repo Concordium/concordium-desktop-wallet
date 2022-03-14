@@ -5,7 +5,7 @@ import {
     isStakePendingChangeV1,
 } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { useConsensusStatus } from '~/utils/dataHooks';
-import { displayAsGTU } from '~/utils/gtu';
+import { displayAsCcd } from '~/utils/ccd';
 import { epochDate, getFormattedDateString } from '~/utils/timeHelpers';
 
 interface Props {
@@ -37,7 +37,7 @@ export default function StakePendingChange({ pending }: Props) {
         </>
     ) : (
         <>
-            Stake is set to be reduced to {displayAsGTU(pending.newStake)} on
+            Stake is set to be reduced to {displayAsCcd(pending.newStake)} on
             <br />
             {formattedDate}
         </>

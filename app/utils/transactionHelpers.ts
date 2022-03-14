@@ -52,7 +52,7 @@ import {
     getUpdateAccountCredentialEnergy,
     getPayloadSizeEstimate,
 } from './transactionCosts';
-import { toMicroUnits, isValidGTUString, displayAsGTU } from './gtu';
+import { ccdToMicroCcd, isValidCcdString, displayAsCcd } from './ccd';
 import { getEncodedSize } from './cborHelper';
 import externalConstants from '~/constants/externalConstants.json';
 import { isASCII } from './basicHelpers';
@@ -559,10 +559,10 @@ export function validateShieldedAmount(
     accountInfo: AccountInfo | undefined,
     estimatedFee: bigint | undefined
 ): string | undefined {
-    if (!isValidGTUString(amountToValidate)) {
+    if (!isValidCcdString(amountToValidate)) {
         return 'Value is not a valid CCD amount';
     }
-    const amountToValidateMicroGTU = toMicroUnits(amountToValidate);
+    const amountToValidateMicroGTU = ccdToMicroCcd(amountToValidate);
     if (
         accountInfo &&
         getAmountAtDisposal(accountInfo) < (estimatedFee || 0n)
@@ -586,10 +586,10 @@ export function validateTransferAmount(
     accountInfo: AccountInfo | undefined,
     estimatedFee: bigint | undefined
 ): string | undefined {
-    if (!isValidGTUString(amountToValidate)) {
+    if (!isValidCcdString(amountToValidate)) {
         return 'Value is not a valid CCD amount';
     }
-    const amountToValidateMicroGTU = toMicroUnits(amountToValidate);
+    const amountToValidateMicroGTU = ccdToMicroCcd(amountToValidate);
     if (
         accountInfo &&
         getAmountAtDisposal(accountInfo) <
@@ -621,14 +621,14 @@ export const validateDelegateAmount = (
     estimatedFee: bigint,
     max?: bigint
 ): Validate => (value: string) => {
-    if (!isValidGTUString(value)) {
+    if (!isValidCcdString(value)) {
         return 'Value is not a valid CCD amount';
     }
 
-    const amount = toMicroUnits(value);
+    const amount = ccdToMicroCcd(value);
 
     if (max !== undefined && amount > max) {
-        return `Cannot delegate more than (${displayAsGTU(max)})`;
+        return `Cannot delegate more than (${displayAsCcd(max)})`;
     }
 
     if (BigInt(accountInfo.accountAmount) < amount + estimatedFee) {
@@ -644,12 +644,12 @@ export function validateBakerStake(
     accountInfo: AccountInfo | undefined,
     estimatedFee: bigint | undefined
 ): string | undefined {
-    if (!isValidGTUString(amountToValidate)) {
+    if (!isValidCcdString(amountToValidate)) {
         return 'Value is not a valid CCD amount';
     }
-    const amount = toMicroUnits(amountToValidate);
+    const amount = ccdToMicroCcd(amountToValidate);
     if (bakerStakeThreshold && bakerStakeThreshold > amount) {
-        return `Stake is below the threshold (${displayAsGTU(
+        return `Stake is below the threshold (${displayAsCcd(
             bakerStakeThreshold
         )}) for baking`;
     }

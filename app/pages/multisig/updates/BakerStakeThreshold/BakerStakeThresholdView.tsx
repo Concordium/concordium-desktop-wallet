@@ -3,7 +3,7 @@ import Loading from '~/cross-app-components/Loading';
 import { BlockSummary } from '~/node/NodeApiTypes';
 import { BakerStakeThreshold } from '~/utils/types';
 import withChainData, { ChainData } from '~/utils/withChainData';
-import { displayAsGTU } from '~/utils/gtu';
+import { displayAsCcd } from '~/utils/ccd';
 import Label from '~/components/Label';
 import { getMinimumStakeForBaking } from '~/utils/blockSummaryHelpers';
 
@@ -23,7 +23,7 @@ export default withChainData(function BakerStakeThresholdView({
             <div>
                 <Label className="mB5">Current baker stake threshold:</Label>
                 <div className="body3 mono">
-                    {displayAsGTU(getMinimumStakeForBaking(bs))}
+                    {displayAsCcd(getMinimumStakeForBaking(bs))}
                 </div>
             </div>
         );
@@ -38,7 +38,7 @@ export default withChainData(function BakerStakeThresholdView({
             <div>
                 <Label className="mB5">New baker stake threshold:</Label>
                 <div className="body3 mono">
-                    {displayAsGTU(bakerStakeThreshold.threshold)}
+                    {displayAsCcd(bakerStakeThreshold.threshold)}
                 </div>
             </div>
         </>

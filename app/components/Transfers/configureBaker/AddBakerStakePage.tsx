@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import BakerStakeSettings from '~/components/BakerTransactions/BakerStakeSettings';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
-import { microGtuToGtu } from '~/utils/gtu';
 import {
     ConfigureBakerFlowDependencies,
     StakeSettings,
@@ -12,6 +11,7 @@ import {
 } from '~/utils/transactionFlows/addBaker';
 import { Account } from '~/utils/types';
 import { getMinimumStakeForBaking } from '~/utils/blockSummaryHelpers';
+import { microCcdToCcd } from '~/utils/ccd';
 
 import styles from './ConfigureBakerPage.module.scss';
 
@@ -37,7 +37,7 @@ export default function AddBakerStakePage({
 
     const defaultValues: StakeSettings = useMemo(
         () => ({
-            stake: microGtuToGtu(minimumStake.toString()) ?? '0.00',
+            stake: microCcdToCcd(minimumStake.toString()) ?? '0.00',
             restake: true,
             ...initial,
         }),

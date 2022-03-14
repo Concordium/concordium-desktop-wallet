@@ -3,7 +3,7 @@ import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers'
 import { DelegationTargetType } from '@concordium/node-sdk/lib/src/types';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { multiplyFraction } from '../basicHelpers';
-import { microGtuToGtu, toMicroUnits } from '../gtu';
+import { ccdToMicroCcd, microCcdToCcd } from '../ccd';
 import { getTransactionKindCost } from '../transactionCosts';
 import { createConfigureDelegationTransaction } from '../transactionHelpers';
 import { serializeTransferPayload } from '../transactionSerialization';
@@ -47,7 +47,7 @@ export const getExistingDelegationValues = (
 
     return {
         delegate: {
-            amount: microGtuToGtu(stakedAmount) ?? '0.00',
+            amount: microCcdToCcd(stakedAmount) ?? '0.00',
             redelegate: restakeEarnings,
         },
         target:
@@ -74,8 +74,8 @@ export const getDelegationFlowChanges = (
         if (
             existingValues.delegate?.amount === undefined ||
             newValues.delegate?.amount === undefined ||
-            toMicroUnits(existingValues.delegate?.amount) !==
-                toMicroUnits(newValues.delegate?.amount)
+            microCcdToCcd(existingValues.delegate?.amount) !==
+                microCcdToCcd(newValues.delegate?.amount)
         ) {
             changes.delegate.amount = newValues.delegate?.amount;
         }
@@ -99,7 +99,7 @@ const toPayload = (
     values: DeepPartial<ConfigureDelegationFlowState>
 ): ConfigureDelegationPayload => ({
     stake: values?.delegate?.amount
-        ? toMicroUnits(values.delegate.amount)
+        ? ccdToMicroCcd(values.delegate.amount)
         : undefined,
     restakeEarnings: values?.delegate?.redelegate,
     delegationTarget:

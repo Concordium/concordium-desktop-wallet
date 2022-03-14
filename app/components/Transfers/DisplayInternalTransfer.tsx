@@ -6,7 +6,7 @@ import {
     TransferToPublic,
     instanceOfTransferToEncrypted,
 } from '~/utils/types';
-import { displayAsGTU } from '~/utils/gtu';
+import { displayAsCcd } from '~/utils/ccd';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
@@ -46,7 +46,7 @@ export default function DisplayInternalTransfer({
             <DisplayFromAccount name={fromName} address={transaction.sender} />
             <h5 className={styles.title}>Amount:</h5>
             <p className={styles.amount}>
-                {displayAsGTU(transactionDetails.amount)}
+                {displayAsCcd(transactionDetails.amount)}
             </p>
             <DisplayEstimatedFee
                 className={styles.fee}

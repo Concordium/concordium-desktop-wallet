@@ -3,7 +3,7 @@ import { isBakerAccountV1 } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { OpenStatus, OpenStatusText } from '@concordium/node-sdk/lib/src/types';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { isDefined, multiplyFraction } from '../basicHelpers';
-import { microGtuToGtu, toMicroUnits } from '../gtu';
+import { ccdToMicroCcd, microCcdToCcd } from '../ccd';
 import { fractionResolution } from '../rewardFractionHelpers';
 import { BakerKeys } from '../rustInterface';
 import { getConfigureBakerCost } from '../transactionCosts';
@@ -97,7 +97,7 @@ export const toConfigureBakerPayload = ({
                   ],
               }
             : undefined,
-    stake: stake?.stake !== undefined ? toMicroUnits(stake.stake) : undefined,
+    stake: stake?.stake !== undefined ? ccdToMicroCcd(stake.stake) : undefined,
     restakeEarnings: stake?.restake,
     openForDelegation,
     metadataUrl,
@@ -127,7 +127,7 @@ export const getExistingBakerValues = (
 
     return {
         stake: {
-            stake: microGtuToGtu(accountBaker.stakedAmount) ?? '1000.00',
+            stake: microCcdToCcd(accountBaker.stakedAmount) ?? '1000.00',
             restake: accountBaker.restakeEarnings,
         },
         openForDelegation: openStatusEnumFromText(
@@ -189,8 +189,8 @@ export function getBakerFlowChanges(
     if (
         existingValues.stake?.stake === undefined ||
         newValues.stake?.stake === undefined ||
-        toMicroUnits(existingValues.stake?.stake) !==
-            toMicroUnits(newValues.stake?.stake)
+        ccdToMicroCcd(existingValues.stake?.stake) !==
+            ccdToMicroCcd(newValues.stake?.stake)
     ) {
         changes.stake.stake = newValues.stake?.stake;
     }

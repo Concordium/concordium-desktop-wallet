@@ -18,7 +18,6 @@ import {
     useCalcBakerStakeCooldownUntil,
     useTransactionCostEstimate,
 } from '~/utils/dataHooks';
-import { microGtuToGtu, toMicroUnits } from '~/utils/gtu';
 import { stringify } from '~/utils/JSONHelper';
 import { createUpdateBakerStakeTransaction } from '~/utils/transactionHelpers';
 import {
@@ -36,6 +35,7 @@ import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
 import ensureExchangeRateAndNonce, {
     ExchangeRateAndNonceProps,
 } from '~/components/Transfers/ensureExchangeRateAndNonce';
+import { ccdToMicroCcd, microCcdToCcd } from '~/utils/ccd';
 
 import styles from '../AccountDetailsPage.module.scss';
 
@@ -75,7 +75,7 @@ const UpdateBakerStakeForm = ensureExchangeRateAndNonce(
 
                 const transaction = createUpdateBakerStakeTransaction(
                     account.address,
-                    { stake: toMicroUnits(stake) },
+                    { stake: ccdToMicroCcd(stake) },
                     nonce
                 );
 
@@ -142,7 +142,7 @@ const UpdateBakerStakeForm = ensureExchangeRateAndNonce(
             );
         }
 
-        const existingValue = microGtuToGtu(
+        const existingValue = microCcdToCcd(
             accountInfo.accountBaker?.stakedAmount
         );
 

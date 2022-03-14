@@ -3,7 +3,7 @@ import { Account, Amount, Fraction } from '~/utils/types';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import { AccountDetail, AmountDetail, Details, formatNote } from './shared';
 import { useStakedAmount } from '~/utils/dataHooks';
-import { displayAsGTU, microGtuToGtu } from '~/utils/gtu';
+import { displayAsCcd, microCcdToCcd } from '~/utils/ccd';
 import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 
 interface Props {
@@ -24,7 +24,7 @@ export default function UpdateBakerStakeProposalDetails({
             <AccountDetail title="Account" value={account} first />
             <AmountDetail
                 title="Amount to stake"
-                value={microGtuToGtu(stake)}
+                value={microCcdToCcd(stake)}
             />
             {account !== undefined && stake !== undefined ? (
                 <StakedAmountNote
@@ -59,9 +59,9 @@ function StakedAmountNote({ accountAddress, stake }: StakedAmountNoteProps) {
         return (
             <>
                 {formatNote(
-                    `Increase of ${displayAsGTU(
+                    `Increase of ${displayAsCcd(
                         difference
-                    )} from ${displayAsGTU(stakedAlready)}`
+                    )} from ${displayAsCcd(stakedAlready)}`
                 )}
             </>
         );
@@ -69,9 +69,9 @@ function StakedAmountNote({ accountAddress, stake }: StakedAmountNoteProps) {
     return (
         <>
             {formatNote(
-                `Decrease of ${displayAsGTU(
+                `Decrease of ${displayAsCcd(
                     difference * -1n
-                )} from ${displayAsGTU(stakedAlready)}`
+                )} from ${displayAsCcd(stakedAlready)}`
             )}
         </>
     );

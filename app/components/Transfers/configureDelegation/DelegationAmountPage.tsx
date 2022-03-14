@@ -11,7 +11,6 @@ import Label from '~/components/Label';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
 import { collapseFraction, noOp } from '~/utils/basicHelpers';
 import { useCalcDelegatorCooldownUntil } from '~/utils/dataHooks';
-import { getGTUSymbol } from '~/utils/gtu';
 import { useAsyncMemo, useUpdateEffect } from '~/utils/hooks';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import {
@@ -27,6 +26,7 @@ import { Account, AccountInfo, EqualRecord, Fraction } from '~/utils/types';
 import StakePendingChange from '~/components/StakePendingChange';
 import Loading from '~/cross-app-components/Loading';
 import { getPoolInfoLatest } from '~/node/nodeHelpers';
+import { getCcdSymbol } from '~/utils/ccd';
 
 import styles from './DelegationPage.module.scss';
 
@@ -78,14 +78,14 @@ function PickDelegateAmount({
         <div className="mV30">
             {existing && (
                 <div className="body3 mono mB10">
-                    Current stake: {getGTUSymbol()}
+                    Current stake: {getCcdSymbol()}
                     {existing}
                 </div>
             )}
             <Label>Amount</Label>
             <div className="h1 mV5">
                 <span className={clsx(hasPendingChange && 'textFaded')}>
-                    {getGTUSymbol()}
+                    {getCcdSymbol()}
                 </span>
                 <Form.GtuInput
                     name={fieldNames.amount}

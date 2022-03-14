@@ -1,7 +1,6 @@
 import React from 'react';
 import { useRouteMatch } from 'react-router';
 import { ConfigureDelegation } from '~/utils/types';
-import { displayAsGTU } from '~/utils/gtu';
 import DisplayFee from '~/components/DisplayFee';
 import { useAccountName } from '~/utils/dataHooks';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
@@ -12,6 +11,7 @@ import {
     displayDelegationTarget,
     displayRedelegate,
 } from '~/utils/transactionFlows/configureDelegation';
+import { displayAsCcd } from '~/utils/ccd';
 
 import styles from './transferDetails.module.scss';
 
@@ -45,7 +45,7 @@ export default function DisplayConfigureDelegation({ transaction }: Props) {
                 <>
                     <h5 className={styles.title}>Delegated amount:</h5>
                     <p className={styles.amount}>
-                        {displayAsGTU(payload.stake)}
+                        {displayAsCcd(payload.stake)}
                     </p>
                 </>
             )}
