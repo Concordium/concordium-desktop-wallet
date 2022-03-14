@@ -499,8 +499,8 @@ async function signConfigureBaker(
             serializeConfigureBakerPayload(dataPayload),
             ...(keys !== undefined
                 ? [
-                      serializeVerifyKey(keys.signatureVerifyKey),
                       serializeVerifyKey(keys.electionVerifyKey),
+                      serializeVerifyKey(keys.signatureVerifyKey),
                   ]
                 : []),
         ]);

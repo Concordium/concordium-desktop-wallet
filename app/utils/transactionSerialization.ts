@@ -411,8 +411,8 @@ export const serializeVerifyKey = ([key, proof]: BakerKeyWithProof) =>
 
 const serializeVerifyKeys = (keys: BakerKeysWithProofs) =>
     Buffer.concat([
-        serializeVerifyKey(keys.signatureVerifyKey),
         serializeVerifyKey(keys.electionVerifyKey),
+        serializeVerifyKey(keys.signatureVerifyKey),
         serializeVerifyKey(keys.aggregationVerifyKey),
     ]);
 
