@@ -29,7 +29,6 @@ import {
     ConfigureDelegation,
     instanceOfConfigureBaker,
     instanceOfConfigureDelegation,
-    SerializedTextWithLength,
     ConfigureBakerPayload,
 } from '~/utils/types';
 import {
@@ -495,15 +494,16 @@ async function signConfigureBaker(
 
     if (Object.values(dataPayload).some(isDefined) || keys !== undefined) {
         p1 = 0x01;
-        const data = Buffer.concat([
-            serializeConfigureBakerPayload(dataPayload),
-            ...(keys !== undefined
-                ? [
-                      serializeVerifyKey(keys.electionVerifyKey),
-                      serializeVerifyKey(keys.signatureVerifyKey),
-                  ]
-                : []),
-        ]);
+        let data = serializeConfigureBakerPayload(dataPayload);
+
+        if (keys !== undefined) {
+            data = Buffer.concat([
+                data,
+                serializeVerifyKey(keys.electionVerifyKey),
+                serializeVerifyKey(keys.signatureVerifyKey),
+            ]);
+        }
+
         response = await send(data);
     }
 
@@ -513,12 +513,12 @@ async function signConfigureBaker(
         response = await send(aggKey);
     }
 
-    const { data: urlBuffer, length: urlLength } =
-        metadataUrl !== undefined
-            ? getSerializedMetadataUrlWithLength(metadataUrl)
-            : ({} as Partial<SerializedTextWithLength>);
+    if (metadataUrl !== undefined) {
+        const {
+            data: urlBuffer,
+            length: urlLength,
+        } = getSerializedMetadataUrlWithLength(metadataUrl);
 
-    if (urlLength !== undefined && urlBuffer !== undefined) {
         p1 = 0x03;
         await send(urlLength);
 
