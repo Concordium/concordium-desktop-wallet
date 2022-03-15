@@ -1,12 +1,12 @@
 import React from 'react';
 import type { StakePendingChange as PendingChange } from '@concordium/node-sdk';
-import {
-    isRemovalPendingChange,
-    isStakePendingChangeV1,
-} from '@concordium/node-sdk/lib/src/accountHelpers';
+import { isRemovalPendingChange } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { useConsensusStatus } from '~/utils/dataHooks';
 import { displayAsCcd } from '~/utils/ccd';
-import { epochDate, getFormattedDateString } from '~/utils/timeHelpers';
+import {
+    dateFromStakePendingChange,
+    getFormattedDateString,
+} from '~/utils/timeHelpers';
 
 interface Props {
     pending: PendingChange;
@@ -20,13 +20,7 @@ export default function StakePendingChange({ pending }: Props) {
         return null;
     }
 
-    const changeAtDate = isStakePendingChangeV1(pending)
-        ? pending.effectiveTime
-        : epochDate(
-              Number(pending.epoch),
-              status.epochDuration,
-              new Date(status.currentEraGenesisTime)
-          );
+    const changeAtDate = dateFromStakePendingChange(pending, status);
     const formattedDate = getFormattedDateString(changeAtDate);
 
     return isRemovalPendingChange(pending) ? (
