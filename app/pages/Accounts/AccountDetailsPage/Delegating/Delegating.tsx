@@ -27,6 +27,8 @@ function Details({ details }: DetailsProps) {
                     ? 'Delegation registered'
                     : 'No delegation registered'
             }
+            pending={details?.pendingChange}
+            type="delegator"
         />
     );
 }
