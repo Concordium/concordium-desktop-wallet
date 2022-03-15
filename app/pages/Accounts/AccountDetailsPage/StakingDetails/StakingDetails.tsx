@@ -14,9 +14,9 @@ interface ValueProps {
 
 function Value({ title, value }: ValueProps) {
     return (
-        <div className="mB30:notLast">
-            <Label className="mB5">{title}</Label>
-            {value}
+        <div className="mB20">
+            <Label className="mB5 textWhite">{title}:</Label>
+            <span className="body2">{value}</span>
         </div>
     );
 }
@@ -49,7 +49,7 @@ export default function StakingDetails({
     return (
         <Card className={styles.root} dark>
             <header className={styles.header}>
-                <h3 className="mB0">{title}</h3>
+                <h2 className="mB0">{title}</h2>
             </header>
             {children}
             {pending !== undefined && (
@@ -60,7 +60,7 @@ export default function StakingDetails({
                             value={displayAsCcd(pending.newStake)}
                         />
                     ) : (
-                        <span>{removeTitles[type]}</span>
+                        <span className="mB30">{removeTitles[type]}</span>
                     )}
                 </>
             )}

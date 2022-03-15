@@ -1,6 +1,10 @@
 import { AccountInfo } from '@concordium/node-sdk';
 import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
-import { DelegationTargetType } from '@concordium/node-sdk/lib/src/types';
+import {
+    DelegationTarget,
+    DelegationTargetBaker,
+    DelegationTargetType,
+} from '@concordium/node-sdk/lib/src/types';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { multiplyFraction } from '../basicHelpers';
 import { ccdToMicroCcd, microCcdToCcd } from '../ccd';
@@ -155,8 +159,21 @@ export const convertToConfigureDelegationTransaction = (
     return transaction;
 };
 
-export const displayDelegationTarget = (target: string | bigint | null) =>
-    target === null ? 'L-pool' : target.toString();
+export const displayDelegationTarget = (
+    target: DelegationTarget | string | bigint | null
+) => {
+    if (
+        target === null ||
+        (target as DelegationTarget)?.delegateType ===
+            DelegationTargetType.LPool
+    ) {
+        return 'L-pool';
+    }
+
+    const id = (target as DelegationTargetBaker).bakerId ?? target;
+
+    return id.toString();
+};
 
 export const displayRedelegate = (value: boolean) =>
     value ? 'Redelegate' : "Don't redelegate";

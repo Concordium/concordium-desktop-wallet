@@ -122,13 +122,12 @@ export default function AccountTransactionFlow<
 
     return (
         <Card className={styles.root}>
-            {!isFirstPage ||
-                (firstPageBack && (
-                    <BackButton
-                        className={styles.backButton}
-                        onClick={() => dispatch(goBack())}
-                    />
-                ))}
+            {(!isFirstPage || firstPageBack) && (
+                <BackButton
+                    className={styles.backButton}
+                    onClick={() => dispatch(goBack())}
+                />
+            )}
             <h3 className="mT0 bodyEmphasized">{title}</h3>
             <MultiStepForm<F>
                 initialValues={state ?? undefined}

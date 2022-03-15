@@ -12,6 +12,8 @@ import ConfigureDelegation from './ConfigureDelegation';
 import RemoveDelegation from './RemoveDelegation';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import StakingDetails from '../StakingDetails';
+import { displayAsCcd } from '~/utils/ccd';
+import { displayDelegationTarget } from '~/utils/transactionFlows/configureDelegation';
 
 const toRoot = <Redirect to={routes.ACCOUNTS_DELEGATING} />;
 
@@ -29,7 +31,30 @@ function Details({ details }: DetailsProps) {
             }
             pending={details?.pendingChange}
             type="delegator"
-        />
+        >
+            {details !== undefined && (
+                <>
+                    <StakingDetails.Value
+                        title="Delegation amount"
+                        value={displayAsCcd(details.stakedAmount)}
+                    />
+                    <StakingDetails.Value
+                        title="Target pool"
+                        value={displayDelegationTarget(
+                            details.delegationTarget
+                        )}
+                    />
+                    <StakingDetails.Value
+                        title="Rewards wil be"
+                        value={
+                            details.restakeEarnings
+                                ? 'Added to delegation amount'
+                                : 'Added to public balance'
+                        }
+                    />
+                </>
+            )}
+        </StakingDetails>
     );
 }
 

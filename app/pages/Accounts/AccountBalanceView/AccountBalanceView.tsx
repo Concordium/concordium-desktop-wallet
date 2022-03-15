@@ -2,7 +2,6 @@ import React from 'react';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import ShieldImage from '@resources/svg/shield.svg';
-import BakerImage from '@resources/svg/baker.svg';
 import ArrowIcon from '@resources/svg/back-arrow.svg';
 import type { DelegationTarget } from '@concordium/node-sdk';
 import {
@@ -25,10 +24,10 @@ import {
     previousConfirmedAccount,
     nextConfirmedAccount,
 } from '~/features/AccountSlice';
-import SidedRow from '~/components/SidedRow';
 import AccountName from './AccountName';
 import AccountDefaultButton from './AccountDefaultButton';
 import { getPublicAccountAmounts } from '~/utils/accountHelpers';
+import Label from '~/components/Label';
 
 import styles from './AccountBalanceView.module.scss';
 
@@ -86,31 +85,29 @@ function PublicInfo({ accountInfo }: PublicInfoProps) {
                 {displayAsCcd(total)}
             </h1>
             <div className={styles.details}>
-                <SidedRow
-                    className={clsx(styles.amountRow, 'mT0')}
-                    left={<span className="mR5">At disposal:</span>}
-                    right={displayAsCcd(atDisposal)}
-                />
-                <SidedRow
-                    className={clsx(styles.amountRow, 'mB0')}
-                    left={<span className="mR5">Staked:</span>}
-                    right={displayAsCcd(staked)}
-                />
-            </div>
-            {(accountBaker === undefined &&
-                accountDelegation === undefined) || (
-                <div className={styles.bakerRow}>
-                    <BakerImage className={styles.bakerImage} height="18" />
-                    <h3 className="m0">
-                        {accountBaker !== undefined &&
-                            `Baking: ${accountBaker.bakerId}`}
-                        {accountDelegation !== undefined &&
-                            `Delegating: ${getDelegationTargetId(
-                                accountDelegation.delegationTarget
-                            )}`}
-                    </h3>
+                <div className="mB20">
+                    <Label className="mB5 textWhite">At disposal:</Label>
+                    <span className="body2 textBlue">
+                        {displayAsCcd(atDisposal)}
+                    </span>
                 </div>
-            )}
+                {(accountBaker !== undefined ||
+                    accountDelegation !== undefined) && (
+                    <div className="mB20">
+                        <Label className="mB5 textWhite">
+                            {accountBaker !== undefined &&
+                                `Staked for baking: ${accountBaker.bakerId}`}
+                            {accountDelegation !== undefined &&
+                                `Delegating to ${getDelegationTargetId(
+                                    accountDelegation.delegationTarget
+                                )}:`}
+                        </Label>
+                        <span className="body2 textBlue">
+                            {displayAsCcd(staked)}
+                        </span>
+                    </div>
+                )}
+            </div>
         </>
     );
 }
