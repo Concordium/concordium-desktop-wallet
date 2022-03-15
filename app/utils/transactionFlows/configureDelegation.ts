@@ -78,8 +78,8 @@ export const getDelegationFlowChanges = (
         if (
             existingValues.delegate?.amount === undefined ||
             newValues.delegate?.amount === undefined ||
-            microCcdToCcd(existingValues.delegate?.amount) !==
-                microCcdToCcd(newValues.delegate?.amount)
+            ccdToMicroCcd(existingValues.delegate?.amount) !==
+                ccdToMicroCcd(newValues.delegate?.amount)
         ) {
             changes.delegate.amount = newValues.delegate?.amount;
         }
