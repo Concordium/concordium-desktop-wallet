@@ -232,7 +232,7 @@ const configureDelegationLinks = (
  */
 export default function MultiSignatureCreateProposalView() {
     const proposals = useSelector(proposalsSelector);
-    const pv = useProtocolVersion();
+    const pv = useProtocolVersion(true);
     const foundationTransactionsEnabled: boolean = useSelector(
         foundationTransactionsEnabledSelector
     );

@@ -26,7 +26,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
     const isBaker = accountInfo !== undefined && isBakerAccount(accountInfo);
     const isDelegating =
         accountInfo !== undefined && isDelegatorAccount(accountInfo);
-    const pv = useProtocolVersion();
+    const pv = useProtocolVersion(true);
     const isDelegationPV = pv !== undefined && hasDelegationProtocol(pv);
     const canDelegate =
         isDelegationPV && !isBaker && accountHasDeployedCredentials;
