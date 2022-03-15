@@ -12,8 +12,8 @@ import {
 import { DelegationTargetType } from '@concordium/node-sdk/lib/src/types';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
-import { displayAsGTU } from '~/utils/gtu';
 import { Account, AccountInfo } from '~/utils/types';
+import { displayAsCcd } from '~/utils/ccd';
 import {
     setViewingShieldedAndReset,
     viewingShieldedSelector,
@@ -43,7 +43,7 @@ function ShieldedInfo({
         <>
             <ShieldImage className={styles.backgroundImage} />
             <h1 className={clsx(styles.shieldedAmount, 'mV20')}>
-                {displayAsGTU(totalDecrypted)}
+                {displayAsCcd(totalDecrypted)}
                 {allDecrypted || (
                     <>
                         {' '}
@@ -83,18 +83,18 @@ function PublicInfo({ accountInfo }: PublicInfoProps) {
     return (
         <>
             <h1 className={clsx(styles.blueText, 'mV20')}>
-                {displayAsGTU(total)}
+                {displayAsCcd(total)}
             </h1>
             <div className={styles.details}>
                 <SidedRow
                     className={clsx(styles.amountRow, 'mT0')}
                     left={<span className="mR5">At disposal:</span>}
-                    right={displayAsGTU(atDisposal)}
+                    right={displayAsCcd(atDisposal)}
                 />
                 <SidedRow
                     className={clsx(styles.amountRow, 'mB0')}
                     left={<span className="mR5">Staked:</span>}
-                    right={displayAsGTU(staked)}
+                    right={displayAsCcd(staked)}
                 />
             </div>
             {(accountBaker === undefined &&

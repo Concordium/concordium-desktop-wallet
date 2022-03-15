@@ -3,7 +3,7 @@ import { isBakerAccountV1 } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { OpenStatus, OpenStatusText } from '@concordium/node-sdk/lib/src/types';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { isDefined, multiplyFraction } from '../basicHelpers';
-import { microGtuToGtu, toMicroUnits } from '../gtu';
+import { ccdToMicroCcd, microCcdToCcd } from '../ccd';
 import { fractionResolution } from '../rewardFractionHelpers';
 import { BakerKeys } from '../rustInterface';
 import { getConfigureBakerCost } from '../transactionCosts';
@@ -81,22 +81,23 @@ export const toConfigureBakerPayload = ({
     openForDelegation,
     metadataUrl,
     commissions,
-}: DeepPartial<ConfigureBakerFlowState>): ConfigureBakerPayload => ({
-    electionVerifyKey:
-        keys?.electionPublic !== undefined && keys?.proofElection !== undefined
-            ? [keys.electionPublic, keys.proofElection]
+}: DeepPartial<Omit<ConfigureBakerFlowState, 'keys'>> &
+    Pick<ConfigureBakerFlowState, 'keys'>): ConfigureBakerPayload => ({
+    keys:
+        keys !== undefined
+            ? {
+                  electionVerifyKey: [keys.electionPublic, keys.proofElection],
+                  signatureVerifyKey: [
+                      keys.signaturePublic,
+                      keys.proofSignature,
+                  ],
+                  aggregationVerifyKey: [
+                      keys.aggregationPublic,
+                      keys.proofAggregation,
+                  ],
+              }
             : undefined,
-    signatureVerifyKey:
-        keys?.signaturePublic !== undefined &&
-        keys?.proofSignature !== undefined
-            ? [keys.signaturePublic, keys.proofSignature]
-            : undefined,
-    aggregationVerifyKey:
-        keys?.aggregationPublic !== undefined &&
-        keys?.proofAggregation !== undefined
-            ? [keys.aggregationPublic, keys.proofAggregation]
-            : undefined,
-    stake: stake?.stake !== undefined ? toMicroUnits(stake.stake) : undefined,
+    stake: stake?.stake !== undefined ? ccdToMicroCcd(stake.stake) : undefined,
     restakeEarnings: stake?.restake,
     openForDelegation,
     metadataUrl,
@@ -126,7 +127,7 @@ export const getExistingBakerValues = (
 
     return {
         stake: {
-            stake: microGtuToGtu(accountBaker.stakedAmount) ?? '1000.00',
+            stake: microCcdToCcd(accountBaker.stakedAmount) ?? '1000.00',
             restake: accountBaker.restakeEarnings,
         },
         openForDelegation: openStatusEnumFromText(
@@ -151,8 +152,9 @@ const isAccountInfo = (
 ): dyn is AccountInfo => (dyn as AccountInfo).accountIndex !== undefined;
 
 export type ConfigureBakerFlowStateChanges = MakeRequired<
-    DeepPartial<ConfigureBakerFlowState>,
-    'stake' | 'commissions' | 'keys'
+    DeepPartial<Omit<ConfigureBakerFlowState, 'keys'>> &
+        Pick<ConfigureBakerFlowState, 'keys'>,
+    'stake' | 'commissions'
 >;
 
 export function getBakerFlowChanges(
@@ -182,14 +184,13 @@ export function getBakerFlowChanges(
     const changes: ConfigureBakerFlowStateChanges = {
         stake: {},
         commissions: {},
-        keys: {},
     };
 
     if (
         existingValues.stake?.stake === undefined ||
         newValues.stake?.stake === undefined ||
-        toMicroUnits(existingValues.stake?.stake) !==
-            toMicroUnits(newValues.stake?.stake)
+        ccdToMicroCcd(existingValues.stake?.stake) !==
+            ccdToMicroCcd(newValues.stake?.stake)
     ) {
         changes.stake.stake = newValues.stake?.stake;
     }
@@ -227,7 +228,9 @@ export function getBakerFlowChanges(
         changes.metadataUrl = newValues.metadataUrl;
     }
 
-    changes.keys = { ...newValues.keys };
+    if (newValues.keys !== undefined) {
+        changes.keys = { ...newValues.keys };
+    }
 
     return changes;
 }
@@ -262,7 +265,8 @@ export const convertToBakerTransaction = (
 };
 
 export function getEstimatedConfigureBakerFee(
-    values: DeepPartial<ConfigureBakerFlowState>,
+    values: DeepPartial<Omit<ConfigureBakerFlowState, 'keys'>> &
+        Pick<ConfigureBakerFlowState, 'keys'>,
     exchangeRate: Fraction,
     signatureThreshold = 1
 ) {

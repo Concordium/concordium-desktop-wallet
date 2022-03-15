@@ -192,9 +192,7 @@ function getScheduledTransferEnergy(
 }
 
 function getConfigureBakerEnergyCost({ payload }: ConfigureBaker) {
-    return payload.electionVerifyKey ||
-        payload.signatureVerifyKey ||
-        payload.aggregationVerifyKey
+    return payload.keys !== undefined
         ? energyConstants.ConfigureBakerWithKeys
         : energyConstants.ConfigureBaker;
 }

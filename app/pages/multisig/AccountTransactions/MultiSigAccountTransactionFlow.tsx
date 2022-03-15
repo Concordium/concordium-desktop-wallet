@@ -76,14 +76,11 @@ const SelectAccountPage = ({
         [filter]
     );
 
-    // eslint-disable-next-line no-console
-    console.log(extendedFilter);
-
     return (
         <PickAccount
             chosenAccount={initial}
             onAccountClicked={(a) => onNext(a)}
-            // filter={extendedFilter}
+            filter={extendedFilter}
             messageWhenEmpty="No elligable accounts requiring multiple signatures"
             isDisabled={disabled}
         />

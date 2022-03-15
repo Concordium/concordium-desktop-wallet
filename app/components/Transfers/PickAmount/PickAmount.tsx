@@ -11,7 +11,7 @@ import {
     Fraction,
     EqualRecord,
 } from '~/utils/types';
-import { getGTUSymbol } from '~/utils/gtu';
+import { getCcdSymbol } from '~/utils/ccd';
 import AddressBookEntryButton from '~/components/AddressBookEntryButton';
 import Button from '~/cross-app-components/Button';
 import Form from '~/components/Form';
@@ -116,7 +116,7 @@ export default function PickAmount({
             <h3 className={transferStyles.header}>{header}</h3>
             <Form formMethods={form} onSubmit={handleSubmit}>
                 <div className={styles.amountInputWrapper}>
-                    {getGTUSymbol()}
+                    {getCcdSymbol()}
                     <Form.GtuInput
                         name={fieldNames.amount}
                         defaultValue={defaultAmount}

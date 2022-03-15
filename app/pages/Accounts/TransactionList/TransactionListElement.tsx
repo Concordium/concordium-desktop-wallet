@@ -5,7 +5,7 @@ import DoubleCheckmarkIcon from '@resources/svg/double-grey-checkmark.svg';
 import CheckmarkIcon from '@resources/svg/grey-checkmark.svg';
 import Warning from '@resources/svg/warning.svg';
 import { dateFromTimeStamp, parseTime } from '~/utils/timeHelpers';
-import { displayAsGTU } from '~/utils/gtu';
+import { displayAsCcd } from '~/utils/ccd';
 
 import {
     TransferTransaction,
@@ -86,8 +86,8 @@ function getName(
 
 function buildOutgoingAmountStrings(subtotal: bigint, fee: bigint) {
     return {
-        amount: `${displayAsGTU(-(subtotal + fee))}`,
-        amountFormula: `${displayAsGTU(BigInt(subtotal))} + ${displayAsGTU(
+        amount: `${displayAsCcd(-(subtotal + fee))}`,
+        amountFormula: `${displayAsCcd(BigInt(subtotal))} + ${displayAsCcd(
             fee
         )} Fee`,
     };
@@ -95,15 +95,15 @@ function buildOutgoingAmountStrings(subtotal: bigint, fee: bigint) {
 
 function buildCostString(fee: bigint) {
     return {
-        amount: `${displayAsGTU(-fee)}`,
-        amountFormula: `${displayAsGTU(fee)} Fee`,
+        amount: `${displayAsCcd(-fee)}`,
+        amountFormula: `${displayAsCcd(fee)} Fee`,
     };
 }
 
 function buildCostFreeAmountString(amount: bigint, flipSign = false) {
     const displayAmount = flipSign ? -amount : amount;
     return {
-        amount: `${displayAsGTU(displayAmount)}`,
+        amount: `${displayAsCcd(displayAmount)}`,
         amountFormula: '',
     };
 }
@@ -153,7 +153,7 @@ function parseAmount(transaction: TransferTransaction, isOutgoing: boolean) {
                 ].includes(transaction.transactionKind)
             ) {
                 return {
-                    amount: `${displayAsGTU(-cost)}`,
+                    amount: `${displayAsCcd(-cost)}`,
                     amountFormula: `Shielded transaction fee`,
                 };
             }

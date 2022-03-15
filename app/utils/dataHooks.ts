@@ -3,6 +3,7 @@ import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpe
 import { isRewardStatusV1 } from '@concordium/node-sdk/lib/src/rewardStatusHelpers';
 import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { BlockSummaryV1 } from '@concordium/node-sdk';
+import { useDispatch, useSelector } from 'react-redux';
 import { getAccount } from '~/database/AccountDao';
 import { BlockSummary, ConsensusStatus } from '~/node/NodeApiTypes';
 import { getConsensusStatus } from '~/node/nodeRequests';
@@ -32,6 +33,8 @@ import {
     ArInfo,
 } from './types';
 import { noOp } from './basicHelpers';
+import { RootState } from '~/store/store';
+import { setBlockSummary, setConsensusStatus } from '~/features/ChainDataSlice';
 
 /** Hook for looking up an account name from an address */
 export function useAccountName(address: string) {
@@ -91,17 +94,49 @@ export function useTransactionCostEstimate(
     );
 }
 
-/** Hook for fetching last finalized block summary */
-export function useLastFinalizedBlockSummary() {
-    return useAsyncMemo<{
+/**
+ * Hook for fetching last finalized block summary
+ *
+ * @param swr If true, returns stale response from store while fetching update.
+ */
+export function useLastFinalizedBlockSummary(swr = false) {
+    const cd = useAsyncMemo<{
         lastFinalizedBlockSummary: BlockSummary;
         consensusStatus: ConsensusStatus;
     }>(fetchLastFinalizedBlockSummary, noOp, []);
+    const stale = useSelector((s: RootState) => ({
+        consensusStatus: s.chainData.consensusStatus,
+        lastFinalizedBlockSummary: s.chainData.blockSummary,
+    }));
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        if (cd !== undefined) {
+            dispatch(setConsensusStatus(cd.consensusStatus));
+            dispatch(setBlockSummary(cd.lastFinalizedBlockSummary));
+        }
+    }, [cd, dispatch]);
+
+    return swr ? stale ?? cd : cd;
 }
 
-/** Hook for fetching consensus status */
-export function useConsensusStatus() {
-    return useAsyncMemo<ConsensusStatus>(getConsensusStatus, noOp, []);
+/**
+ * Hook for fetching consensus status
+ *
+ * @param swr If true, returns stale response from store while fetching update.
+ */
+export function useConsensusStatus(swr = false) {
+    const cs = useAsyncMemo<ConsensusStatus>(getConsensusStatus, noOp, []);
+    const stale = useSelector((s: RootState) => s.chainData.consensusStatus);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        if (cs !== undefined) {
+            dispatch(setConsensusStatus(cs));
+        }
+    }, [cs, dispatch]);
+
+    return swr ? stale ?? cs : cs;
 }
 
 /** Hook for fetching identity providers */
@@ -138,7 +173,7 @@ export function useStakedAmount(accountAddress: string): Amount | undefined {
 /** Hook for accessing chain parameters of the last finalized block */
 export function useChainParameters() {
     const lastFinalizedBlock = useLastFinalizedBlockSummary();
-    return lastFinalizedBlock?.lastFinalizedBlockSummary.updates
+    return lastFinalizedBlock?.lastFinalizedBlockSummary?.updates
         .chainParameters;
 }
 
@@ -206,7 +241,9 @@ function getV1Cooldown(
         const remainingRewardPeriods = Math.ceil(
             remainingAtNext / nRewardPeriodLength
         );
-        cooldownEnd = remainingRewardPeriods * nRewardPeriodLength;
+        cooldownEnd =
+            nextRewardPeriodStartIndex +
+            remainingRewardPeriods * nRewardPeriodLength;
     }
 
     return epochDate(cooldownEnd, cs.epochDuration, genesisTime);
@@ -218,7 +255,12 @@ export function useCalcDelegatorCooldownUntil() {
     const rs = useAsyncMemo(getRewardStatusLatest);
     const now = useCurrentTime(60000);
 
-    if (lastFinalizedBlockSummary === undefined || rs === undefined) {
+    if (
+        lastFinalizedBlockSummary === undefined ||
+        lastFinalizedBlockSummary.lastFinalizedBlockSummary === undefined ||
+        lastFinalizedBlockSummary.consensusStatus === undefined ||
+        rs === undefined
+    ) {
         return undefined;
     }
 
@@ -251,7 +293,12 @@ export function useCalcBakerStakeCooldownUntil() {
     const rs = useAsyncMemo(getRewardStatusLatest);
     const now = useCurrentTime(60000);
 
-    if (lastFinalizedBlockSummary === undefined || rs === undefined) {
+    if (
+        lastFinalizedBlockSummary === undefined ||
+        lastFinalizedBlockSummary.lastFinalizedBlockSummary === undefined ||
+        lastFinalizedBlockSummary.consensusStatus === undefined ||
+        rs === undefined
+    ) {
         return undefined;
     }
 
@@ -281,6 +328,11 @@ export function useCalcBakerStakeCooldownUntil() {
     );
 }
 
-export function useProtocolVersion(): bigint | undefined {
-    return useConsensusStatus()?.protocolVersion;
+/**
+ * Hook for getting chain protocol version
+ *
+ * @param swr If true, returns stale response from store while fetching update.
+ */
+export function useProtocolVersion(swr = false): bigint | undefined {
+    return useConsensusStatus(swr)?.protocolVersion;
 }

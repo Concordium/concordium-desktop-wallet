@@ -2,6 +2,7 @@
 import React, { ComponentType, useCallback } from 'react';
 import { Redirect, useRouteMatch } from 'react-router';
 import { useSelector } from 'react-redux';
+import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { AccountInfo, ConfigureBaker, Fraction } from '~/utils/types';
 import MultiSigAccountTransactionFlow, {
     MultiSigAccountTransactionFlowLoading,
@@ -125,6 +126,7 @@ export default withDeps(function UpdateBakerStake({
         >
             title={updateBakerStakeTitle}
             convert={convert}
+            accountFilter={(_, i) => isDefined(i) && isBakerAccount(i)}
             preview={(v) => (
                 <DisplayValues {...v} exchangeRate={exchangeRate} />
             )}

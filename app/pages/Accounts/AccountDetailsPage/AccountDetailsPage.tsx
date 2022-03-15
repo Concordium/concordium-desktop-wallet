@@ -42,8 +42,8 @@ export default withAccountSync(function DetailsPage() {
     const accountChanged = useSelector(
         (s: RootState) => s.accounts.accountChanged
     );
+    const pv = useProtocolVersion(true);
     const viewingShielded = useSelector(viewingShieldedSelector);
-    const pv = useProtocolVersion();
     const hasCredentials = useSelector(
         account ? accountHasDeployedCredentialsSelector(account) : () => false
     );

@@ -83,7 +83,7 @@ export default function BakerStakeSettings({
                     </p>
                 )}
                 {pendingChange !== undefined && (
-                    <div className="mV10">
+                    <div className="mV10 body2">
                         Cannot update baker stake at this time:
                         <div className="bodyEmphasized textError mV10">
                             <StakePendingChange pending={pendingChange} />
@@ -103,6 +103,7 @@ export default function BakerStakeSettings({
                     fieldName={fieldNames.stake}
                     minimumStake={minimumStake}
                     existing={existingValues?.stake}
+                    hasPendingChange={pendingChange !== undefined}
                 />
                 <p className="mB30">
                     By default all baker rewards are added to the staked amount.

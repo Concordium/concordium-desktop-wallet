@@ -3,7 +3,7 @@ import { useRouteMatch } from 'react-router';
 import { UpdateBakerStake } from '~/utils/types';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import { useAccountName } from '~/utils/dataHooks';
-import { displayAsGTU } from '~/utils/gtu';
+import { displayAsCcd } from '~/utils/ccd';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import routes from '~/constants/routes.json';
@@ -30,7 +30,7 @@ export default function DisplayUpdateBakerStake({ transaction }: Props) {
             />
             <p className={styles.title}>New staked amount:</p>
             <p className={styles.amount}>
-                {displayAsGTU(transaction.payload.stake)}
+                {displayAsCcd(transaction.payload.stake)}
             </p>
             <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
             {Boolean(isSingleSig) || (

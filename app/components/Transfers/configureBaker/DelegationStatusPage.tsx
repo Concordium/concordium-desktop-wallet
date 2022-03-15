@@ -19,15 +19,16 @@ interface DelegationStatusPageProps
 }
 
 export default function DelegationStatusPage({
-    initial = OpenStatus.OpenForAll,
+    initial,
     onNext,
     account,
 }: DelegationStatusPageProps) {
-    const [value, setValue] = useState(initial);
     const accountInfo = useSelector(accountInfoSelector(account));
-
     const { openForDelegation: existing } =
         getExistingBakerValues(accountInfo) ?? {};
+    const [value, setValue] = useState(
+        initial ?? existing ?? OpenStatus.OpenForAll
+    );
 
     return (
         <>

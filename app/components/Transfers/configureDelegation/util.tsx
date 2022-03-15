@@ -29,13 +29,13 @@ export const withPendingDelegationChangeGuard = <P extends AccountOrInfo>(
 
     if (pendingChange) {
         return (
-            <p className="mT30 mB0">
+            <div className="mT30 mB0 body2">
                 Cannot update delegation at this time:
                 <div className="bodyEmphasized textError mV10">
                     <StakePendingChange pending={pendingChange} />
                 </div>
                 It will be possible to proceed after this time has passed.
-            </p>
+            </div>
         );
     }
 

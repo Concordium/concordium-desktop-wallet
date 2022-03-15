@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRouteMatch } from 'react-router';
 import { AddressBookEntry, SimpleTransfer } from '~/utils/types';
-import { displayAsGTU } from '~/utils/gtu';
+import { displayAsCcd } from '~/utils/ccd';
 import routes from '~/constants/routes.json';
 import DisplayFee from '~/components/DisplayFee';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
@@ -39,7 +39,7 @@ export default function DisplaySimpleTransfer({
             />
             <h5 className={styles.title}>Amount:</h5>
             <p className={styles.amount}>
-                {displayAsGTU(transaction.payload.amount)}
+                {displayAsCcd(transaction.payload.amount)}
             </p>
             <DisplayFee className={styles.fee} transaction={transaction} />
             <DisplayMemo memo={memo} />

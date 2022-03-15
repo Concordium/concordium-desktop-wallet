@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 // also exported from '@storybook/react' if you can deal with breaking changes in 6.1
 import { Story, Meta } from '@storybook/react/types-6-0';
 import InlineNumber, { InlineNumberProps } from './InlineNumber';
-import { getGTUSymbol } from '~/utils/gtu';
+import { getCcdSymbol } from '~/utils/ccd';
 
 export default {
     title: 'Components/Form/Fields/Inline Number',
@@ -37,7 +37,7 @@ const LabelTemplate: Story<InlineNumberProps> = (args) => {
         <div style={{ width: '500px', margin: '0 auto' }}>
             <div>Input Value: {`${value}`}</div>
             <label>
-                Specify amount: {getGTUSymbol()}
+                Specify amount: {getCcdSymbol()}
                 <InlineNumber {...args} value={value} onChange={setValue} />
             </label>
         </div>

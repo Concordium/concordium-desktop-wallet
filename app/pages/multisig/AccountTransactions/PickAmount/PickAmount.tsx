@@ -4,13 +4,13 @@ import AccountCard from '~/components/AccountCard';
 import { Account, AccountInfo, Fraction } from '~/utils/types';
 import { validateTransferAmount } from '~/utils/transactionHelpers';
 import { collapseFraction } from '~/utils/basicHelpers';
-import { getGTUSymbol } from '~/utils/gtu';
+import { getCcdSymbol } from '~/utils/ccd';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import { useAccountInfo } from '~/utils/dataHooks';
 import GtuInput from '~/components/Form/GtuInput';
+import Label from '~/components/Label';
 
 import styles from './PickAmount.module.scss';
-import Label from '~/components/Label';
 
 interface Props {
     account: Account | undefined;
@@ -66,13 +66,13 @@ export default function PickAmount({
             <div className="mT30">
                 {existing && (
                     <div className="body3 mono mB10">
-                        Current stake: {getGTUSymbol()}
+                        Current stake: {getCcdSymbol()}
                         {existing}
                     </div>
                 )}
                 <Label className="mB5">Amount:</Label>
                 <div className={clsx(styles.inputWrapper)}>
-                    {getGTUSymbol()}
+                    {getCcdSymbol()}
                     <GtuInput
                         value={state}
                         onChange={onChange}

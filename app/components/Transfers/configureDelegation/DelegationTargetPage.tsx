@@ -75,19 +75,20 @@ export default function DelegationTargetPage({
                 <p className="mV30">
                     First you must choose the target you want to delegate to.
                 </p>
-                {existing !== undefined && (
-                    <div className="body3 mono mB10">
-                        Current target: {existing ?? 'L-pool'}
-                    </div>
-                )}
-                <Form.Radios
-                    className="mT50"
-                    name={fieldNames.toSpecificPool}
-                    options={[
-                        { label: 'Delegate to baker', value: true },
-                        { label: 'Delegate to L-pool', value: false },
-                    ]}
-                />
+                <div className="mT50">
+                    {existing !== undefined && (
+                        <div className="body3 mono mB10">
+                            Current target: {existing ?? 'L-pool'}
+                        </div>
+                    )}
+                    <Form.Radios
+                        name={fieldNames.toSpecificPool}
+                        options={[
+                            { label: 'Delegate to baker', value: true },
+                            { label: 'Delegate to L-pool', value: false },
+                        ]}
+                    />
+                </div>
                 {toSpecificPoolValue && (
                     <Form.Input
                         name={fieldNames.poolId}
