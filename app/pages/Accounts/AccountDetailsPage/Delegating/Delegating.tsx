@@ -11,6 +11,7 @@ import routes from '~/constants/routes.json';
 import ConfigureDelegation from './ConfigureDelegation';
 import RemoveDelegation from './RemoveDelegation';
 import ButtonNavLink from '~/components/ButtonNavLink';
+import StakingDetails from '../StakingDetails';
 
 const toRoot = <Redirect to={routes.ACCOUNTS_DELEGATING} />;
 
@@ -18,8 +19,16 @@ interface DetailsProps {
     details: AccountDelegationDetails | undefined;
 }
 
-function Details({ details: _ }: DetailsProps) {
-    return <div>Delegation details...</div>;
+function Details({ details }: DetailsProps) {
+    return (
+        <StakingDetails
+            title={
+                details !== undefined
+                    ? 'Delegation registered'
+                    : 'No delegation registered'
+            }
+        />
+    );
 }
 
 interface ActionsProps {

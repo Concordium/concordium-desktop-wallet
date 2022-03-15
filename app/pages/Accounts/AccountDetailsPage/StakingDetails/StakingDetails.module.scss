@@ -1,0 +1,19 @@
+@import 'config/bundle';
+
+.root {
+    min-height: 300px;
+    padding: 15px 20px 10px;
+    margin-bottom: 20px;
+    color: $color-pale-blue;
+    text-align: center;
+}
+
+.header {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 -20px 10px;
+    padding: 0 20px 10px;
+    border-bottom: 2px solid rgba($color-grey, 0.3);
+}

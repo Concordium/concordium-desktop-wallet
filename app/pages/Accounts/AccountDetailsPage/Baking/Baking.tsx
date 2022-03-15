@@ -109,7 +109,7 @@ interface Props {
 }
 
 export default function Baking({ account, accountInfo }: Props) {
-    const pv = useProtocolVersion();
+    const pv = useProtocolVersion(true);
     const isDelegationPV = pv !== undefined && hasDelegationProtocol(pv);
     const isBaker = isBakerAccount(accountInfo);
 

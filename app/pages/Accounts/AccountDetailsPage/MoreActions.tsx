@@ -1,6 +1,9 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import {
+    isBakerAccount,
+    isDelegatorAccount,
+} from '@concordium/node-sdk/lib/src/accountHelpers';
 import { Account, AccountInfo, TransactionKindId } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import ButtonNavLink from '~/components/ButtonNavLink';
@@ -21,6 +24,8 @@ export default function MoreActions({ account, accountInfo }: Props) {
     );
     const hasUsedEncrypted = hasEncryptedBalance(account);
     const isBaker = accountInfo !== undefined && isBakerAccount(accountInfo);
+    const isDelegating =
+        accountInfo !== undefined && isDelegatorAccount(accountInfo);
     const pv = useProtocolVersion(true);
     const isDelegationPV = pv !== undefined && hasDelegationProtocol(pv);
     const canDelegate =
@@ -86,7 +91,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     Update credentials
                 </ButtonNavLink>
             )}
-            {accountHasDeployedCredentials && (
+            {accountHasDeployedCredentials && !isDelegating && (
                 <ButtonNavLink
                     className="mB20:notLast flex width100"
                     to={routes.ACCOUNTS_BAKING}
