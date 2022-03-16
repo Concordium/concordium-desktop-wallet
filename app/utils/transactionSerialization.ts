@@ -367,22 +367,22 @@ type SerializationSpec<T> = NotOptional<
 >;
 
 /**
- * Given a payload and a specification describing how to serialize the fields of the payload this function returns a buffer of the serialized fields, ordered by the order supplied.
+ * Given a specification describing how to serialize the fields of a payload of type T, this function produces a function
+ * that serializes payloads of type T, returning a buffer of the serialized fields by order of occurance in serialization spec.
  */
-function serializeFromSpec<T, S extends SerializationSpec<T>>(
-    payload: T,
-    spec: S
-) {
+const serializeFromSpec = <T>(spec: SerializationSpec<T>) => (payload: T) => {
     const buffers = Object.keys(spec)
         .map((k) => {
             const v = payload[k as keyof T];
-            const f = spec[k as keyof S] as (x: typeof v) => Buffer | undefined;
+            const f = spec[k as keyof typeof spec] as (
+                x: typeof v
+            ) => Buffer | undefined;
             return f(v);
         })
         .filter(isDefined);
 
     return Buffer.concat(buffers);
-}
+};
 
 /**
  * Takes a callback function taking 1 argument, returning a new function taking same argument, applying callback only if supplied argument is defined.
@@ -401,8 +401,9 @@ const bakerKeysSerializationSpec: SerializationSpec<BakerKeysWithProofs> = {
     aggregationVerifyKey: serializeVerifyKey,
 };
 
-const serializeVerifyKeys = (keys: BakerKeysWithProofs) =>
-    serializeFromSpec(keys, bakerKeysSerializationSpec);
+const serializeVerifyKeys = serializeFromSpec<BakerKeysWithProofs>(
+    bakerKeysSerializationSpec
+);
 
 export const getSerializedMetadataUrlWithLength = (url: string) =>
     getSerializedTextWithLength(url, encodeWord16);
@@ -435,9 +436,9 @@ export const getSerializedConfigureBakerBitmap = (
         )
     );
 
-export const serializeConfigureBakerPayload = (
-    payload: ConfigureBakerPayload
-) => serializeFromSpec(payload, configureBakerSerializationSpec);
+export const serializeConfigureBakerPayload = serializeFromSpec<ConfigureBakerPayload>(
+    configureBakerSerializationSpec
+);
 
 export function serializeConfigureBaker(payload: ConfigureBakerPayload) {
     const type = putInt8(TransactionKind.Configure_baker);
@@ -468,9 +469,8 @@ export function serializeConfigureDelegation(
             >
         )
     );
-    const sPayload = serializeFromSpec(
-        payload,
-        configureDelegationSerializationSpec
+    const sPayload = serializeFromSpec(configureDelegationSerializationSpec)(
+        payload
     );
 
     return Buffer.concat([type, bitmap, sPayload]);
