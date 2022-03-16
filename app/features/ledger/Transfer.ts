@@ -520,7 +520,7 @@ async function signConfigureBaker(
         } = getSerializedMetadataUrlWithLength(metadataUrl);
 
         p1 = 0x03;
-        await send(urlLength);
+        response = await send(urlLength);
 
         p1 = 0x04;
         const chunks = chunkBuffer(urlBuffer, 255);
