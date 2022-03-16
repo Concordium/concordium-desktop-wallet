@@ -3,7 +3,8 @@ import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpe
 import { CooldownParameters } from '~/utils/types';
 import Loading from '~/cross-app-components/Loading';
 import withChainData, { ChainData } from '~/utils/withChainData';
-import Label from '~/components/Label';
+import Input from '~/components/Form/Input';
+import { fieldDisplays } from './UpdateCooldownParameters';
 
 interface Props extends ChainData {
     cooldownParameters: CooldownParameters;
@@ -37,16 +38,32 @@ export default withChainData(function CooldownParametersView({
     return (
         <>
             <div>
-                <Label className="mB5">Current pool owner cooldown:</Label>
-                {currentPoolOwnerCooldown} seconds
-                <Label className="mB5">Current delegator cooldown:</Label>
-                {currentDelegatorCooldown} seconds
+                <Input
+                    className="body2 mB20"
+                    value={currentPoolOwnerCooldown.toString()}
+                    label={`Current ${fieldDisplays.poolOwnerCooldown} (seconds)`}
+                    disabled
+                />
+                <Input
+                    className="body2"
+                    value={currentDelegatorCooldown.toString()}
+                    label={`Current ${fieldDisplays.delegatorCooldown} (seconds)`}
+                    disabled
+                />
             </div>
             <div>
-                <Label className="mB5">New pool owner cooldown:</Label>
-                {newPoolOwnerCooldown} seconds
-                <Label className="mB5">New delegator cooldown:</Label>
-                {newDelegatorCooldown} seconds
+                <Input
+                    className="body2 mB20"
+                    value={newPoolOwnerCooldown.toString()}
+                    label={`New ${fieldDisplays.poolOwnerCooldown} (seconds)`}
+                    disabled
+                />
+                <Input
+                    className="body2"
+                    value={newDelegatorCooldown.toString()}
+                    label={`New ${fieldDisplays.delegatorCooldown} (seconds)`}
+                    disabled
+                />
             </div>
         </>
     );

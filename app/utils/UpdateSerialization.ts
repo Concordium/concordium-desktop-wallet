@@ -33,6 +33,7 @@ import {
     PoolParameters,
     CommissionRates,
     CommissionRanges,
+    AuthorizationKeysUpdateType,
 } from './types';
 
 /**
@@ -108,6 +109,26 @@ function serializeAccessStructure(accessStructure: AccessStructure) {
 }
 
 /**
+ * Takes an AuthorizationKeysUpdateType and gives the value it should be serialized as.
+ */
+export function convertAuthorizationKeyUpdateType(
+    type: AuthorizationKeysUpdateType
+): number {
+    switch (type) {
+        case AuthorizationKeysUpdateType.Level1V0:
+            return 1;
+        case AuthorizationKeysUpdateType.Level1V1:
+            return 2;
+        case AuthorizationKeysUpdateType.RootV0:
+            return 2;
+        case AuthorizationKeysUpdateType.RootV1:
+            return 3;
+        default:
+            throw new Error('Unknown authorization key update type');
+    }
+}
+
+/**
  * Serializes an AuthorizationKeysUpdate to the byte format
  * expected by the chain.
  */
@@ -116,7 +137,9 @@ export function serializeAuthorizationKeysUpdate(
 ) {
     const serializedAuthorizationKeysUpdate = Buffer.alloc(3);
     serializedAuthorizationKeysUpdate.writeInt8(
-        authorizationKeysUpdate.keyUpdateType,
+        convertAuthorizationKeyUpdateType(
+            authorizationKeysUpdate.keyUpdateType
+        ),
         0
     );
     serializedAuthorizationKeysUpdate.writeUInt16BE(
@@ -243,22 +266,16 @@ export function serializeFoundationAccount(
  * Serializes a MintDistribution to bytes.
  */
 export function serializeMintDistribution(mintDistribution: MintDistribution) {
-    const serializedMintDistribution = Buffer.alloc(13);
-    serializedMintDistribution.writeUInt32BE(
-        mintDistribution.mintPerSlot.mantissa,
-        0
-    );
-    serializedMintDistribution.writeInt8(
-        mintDistribution.mintPerSlot.exponent,
-        4
-    );
-    serializedMintDistribution.writeUInt32BE(mintDistribution.bakingReward, 5);
-    serializedMintDistribution.writeUInt32BE(
-        mintDistribution.finalizationReward,
-        9
-    );
-
-    return serializedMintDistribution;
+    const serializedRewards = Buffer.alloc(8);
+    serializedRewards.writeUInt32BE(mintDistribution.bakingReward, 0);
+    serializedRewards.writeUInt32BE(mintDistribution.finalizationReward, 4);
+    if (mintDistribution.version === 0) {
+        const serializedMint = Buffer.alloc(5);
+        serializedMint.writeUInt32BE(mintDistribution.mintPerSlot.mantissa, 0);
+        serializedMint.writeInt8(mintDistribution.mintPerSlot.exponent, 4);
+        return Buffer.concat([serializedMint, serializedRewards]);
+    }
+    return serializedRewards;
 }
 
 /**

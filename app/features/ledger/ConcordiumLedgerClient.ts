@@ -168,12 +168,14 @@ export default class ConcordiumLedgerClient {
     signMintDistribution(
         transaction: UpdateInstruction<MintDistribution>,
         serializedPayload: Buffer,
+        version: number,
         path: number[]
     ): Promise<Buffer> {
         return toBuffer(
             window.ledger.signMintDistribution(
                 transaction,
                 serializedPayload,
+                version,
                 path
             )
         );
@@ -279,14 +281,16 @@ export default class ConcordiumLedgerClient {
         transaction: UpdateInstruction<AuthorizationKeysUpdate>,
         serializedPayload: Buffer,
         path: number[],
-        INS: number
+        INS: number,
+        version: number
     ): Promise<Buffer> {
         return toBuffer(
             window.ledger.signAuthorizationKeysUpdate(
                 transaction,
                 serializedPayload,
                 path,
-                INS
+                INS,
+                version
             )
         );
     }

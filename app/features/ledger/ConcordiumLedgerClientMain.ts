@@ -233,6 +233,7 @@ export default class ConcordiumLedgerClientMain {
     signMintDistribution(
         transaction: UpdateInstruction<MintDistribution>,
         serializedPayload: Buffer,
+        version: number,
         path: number[]
     ): Promise<Buffer> {
         return signUpdateTransaction(
@@ -240,7 +241,8 @@ export default class ConcordiumLedgerClientMain {
             0x25,
             path,
             transaction,
-            serializedPayload
+            serializedPayload,
+            version
         );
     }
 
@@ -359,14 +361,16 @@ export default class ConcordiumLedgerClientMain {
         transaction: UpdateInstruction<AuthorizationKeysUpdate>,
         serializedPayload: Buffer,
         path: number[],
-        INS: number
+        INS: number,
+        version: number
     ): Promise<Buffer> {
         return signAuthorizationKeysUpdate(
             this.transport,
             path,
             transaction,
             serializedPayload,
-            INS
+            INS,
+            version
         );
     }
 

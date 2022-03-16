@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Route, Switch, useRouteMatch } from 'react-router';
 import { FieldValues } from 'react-hook-form';
 import Columns from '~/components/Columns/Columns';
-import { BlockSummary, Key } from '~/node/NodeApiTypes';
+import { BlockSummary, Key, ConsensusStatus } from '~/node/NodeApiTypes';
 import {
     AccessStructure,
     AccessStructureEnum,
@@ -34,9 +34,21 @@ import SetExpiryAndEffectiveTime from './SetExpiryAndEffectiveTime';
 import styles from '../../common/MultiSignatureFlowPage.module.scss';
 import localStyles from './UpdateAuthorizationKeys.module.scss';
 
+function getKeyUpdateType(protocolVersion: bigint, type: UpdateType) {
+    if (type === UpdateType.UpdateLevel2KeysUsingRootKeys) {
+        return protocolVersion > 3
+            ? AuthorizationKeysUpdateType.RootV1
+            : AuthorizationKeysUpdateType.RootV0;
+    }
+    return protocolVersion > 3
+        ? AuthorizationKeysUpdateType.Level1V1
+        : AuthorizationKeysUpdateType.Level1V0;
+}
+
 interface Props {
     defaults: FieldValues;
     blockSummary: BlockSummary;
+    consensusStatus: ConsensusStatus;
     type: UpdateType;
     handleKeySubmit(
         effectiveTime: Date,
@@ -48,6 +60,7 @@ interface Props {
 export default function UpdateAuthorizationKeys({
     defaults,
     blockSummary,
+    consensusStatus,
     type,
     handleKeySubmit,
 }: Props) {
@@ -61,10 +74,10 @@ export default function UpdateAuthorizationKeys({
 
     const [error, setError] = useState<string>();
 
-    const keyUpdateType: AuthorizationKeysUpdateType =
-        UpdateType.UpdateLevel2KeysUsingRootKeys === type
-            ? AuthorizationKeysUpdateType.Root
-            : AuthorizationKeysUpdateType.Level1;
+    const keyUpdateType = getKeyUpdateType(
+        consensusStatus.protocolVersion,
+        type
+    );
     const currentKeys = blockSummary.updates.keys.level2Keys.keys;
     const currentKeySetSize = currentKeys.length;
     const currentAuthorizations = blockSummary.updates.keys.level2Keys;

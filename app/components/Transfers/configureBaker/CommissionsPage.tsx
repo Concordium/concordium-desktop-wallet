@@ -1,4 +1,4 @@
-import { ChainParametersV1, RewardFraction } from '@concordium/node-sdk';
+import { ChainParametersV1 } from '@concordium/node-sdk';
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -56,9 +56,9 @@ const renderExistingValue = (value: number) =>
 interface CommissionFieldProps {
     label: string;
     name: string;
-    min: RewardFraction;
-    max: RewardFraction;
-    existing: RewardFraction | undefined;
+    min: number;
+    max: number;
+    existing: number | undefined;
 }
 
 const CommissionField = ({

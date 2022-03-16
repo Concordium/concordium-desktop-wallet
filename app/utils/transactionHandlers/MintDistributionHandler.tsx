@@ -37,8 +37,7 @@ export default class MintDistributionHandler
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
-        const parsedMintPerSlot = parseMintPerSlot(mintPerSlot);
-        if (!blockSummary || !parsedMintPerSlot) {
+        if (!blockSummary) {
             return undefined;
         }
 
@@ -49,11 +48,27 @@ export default class MintDistributionHandler
             threshold,
         } = blockSummary.updates.keys.level2Keys.mintDistribution;
 
-        const mintDistribution: MintDistribution = {
-            mintPerSlot: parsedMintPerSlot,
-            bakingReward: rewardDistribution.first,
-            finalizationReward: rewardDistribution.second,
-        };
+        let mintDistribution: MintDistribution;
+        if (mintPerSlot) {
+            // version 0
+            const parsedMintPerSlot = parseMintPerSlot(mintPerSlot);
+
+            if (!parsedMintPerSlot) {
+                return undefined;
+            }
+            mintDistribution = {
+                version: 0,
+                mintPerSlot: parsedMintPerSlot,
+                bakingReward: rewardDistribution.first,
+                finalizationReward: rewardDistribution.second,
+            };
+        } else {
+            mintDistribution = {
+                version: 1,
+                bakingReward: rewardDistribution.first,
+                finalizationReward: rewardDistribution.second,
+            };
+        }
 
         return createUpdateMultiSignatureTransaction(
             mintDistribution,
@@ -77,6 +92,7 @@ export default class MintDistributionHandler
         return ledger.signMintDistribution(
             transaction,
             this.serializePayload(transaction),
+            transaction.payload.version,
             path
         );
     }

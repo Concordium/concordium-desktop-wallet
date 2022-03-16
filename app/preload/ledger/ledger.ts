@@ -140,11 +140,13 @@ export default function exposedMethods(
         signMintDistribution: (
             transaction: UpdateInstruction<MintDistribution>,
             serializedPayload: Buffer,
+            version: number,
             keypath: number[]
         ) => {
             return getLedgerClient().signMintDistribution(
                 transaction,
                 serializedPayload,
+                version,
                 keypath
             );
         },
@@ -231,13 +233,15 @@ export default function exposedMethods(
             transaction: UpdateInstruction<AuthorizationKeysUpdate>,
             serializedPayload: Buffer,
             keypath: number[],
-            INS: number
+            INS: number,
+            version: number
         ) => {
             return getLedgerClient().signAuthorizationKeysUpdate(
                 transaction,
                 serializedPayload,
                 keypath,
-                INS
+                INS,
+                version
             );
         },
         signTimeParameters: (

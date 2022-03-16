@@ -19,7 +19,12 @@ import { not } from '~/utils/basicHelpers';
 import styles from '../MultiSignaturePage/MultiSignaturePage.module.scss';
 
 // Defines the list of options for creating multi signature transactions.
-const updateInstructionTypes: [TransactionTypes, UpdateType, string][] = [
+const updateInstructionTypes: [
+    TransactionTypes,
+    UpdateType,
+    string,
+    ((pv: bigint) => boolean)?
+][] = [
     [
         TransactionTypes.UpdateInstruction,
         UpdateType.UpdateMicroGTUPerEuro,
@@ -64,6 +69,7 @@ const updateInstructionTypes: [TransactionTypes, UpdateType, string][] = [
         TransactionTypes.UpdateInstruction,
         UpdateType.UpdateBakerStakeThreshold,
         'Update baker stake threshold',
+        not(hasDelegationProtocol),
     ],
     [
         TransactionTypes.UpdateInstruction,
@@ -104,16 +110,19 @@ const updateInstructionTypes: [TransactionTypes, UpdateType, string][] = [
         TransactionTypes.UpdateInstruction,
         UpdateType.CooldownParameters,
         'Update cooldown parameters',
+        hasDelegationProtocol,
     ],
     [
         TransactionTypes.UpdateInstruction,
         UpdateType.PoolParameters,
         'Update pool parameters',
+        hasDelegationProtocol,
     ],
     [
         TransactionTypes.UpdateInstruction,
         UpdateType.TimeParameters,
         'Update time parameters',
+        hasDelegationProtocol,
     ],
 ];
 
@@ -124,25 +133,22 @@ const accountTransactionTypes: [
     TransactionTypes,
     TransactionKind,
     string,
-    ((pv: bigint) => boolean) | undefined
+    ((pv: bigint) => boolean)?
 ][] = [
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Update_credentials,
         'Update account credentials',
-        undefined,
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Simple_transfer,
         'Send CCD',
-        undefined,
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Transfer_with_schedule,
         'Send CCD with a schedule',
-        undefined,
     ],
     [
         TransactionTypes.AccountTransaction,

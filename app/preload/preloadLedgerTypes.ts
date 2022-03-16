@@ -41,11 +41,26 @@ type SignUpdate<PayloadType extends UpdateInstructionPayload> = (
     keypath: number[]
 ) => ReturnBuffer;
 
+type SignVersionedUpdate<PayloadType extends UpdateInstructionPayload> = (
+    transaction: UpdateInstruction<PayloadType>,
+    serializedPayload: Buffer,
+    version: number,
+    keypath: number[]
+) => ReturnBuffer;
+
 type SignKeyUpdate<PayloadType extends UpdateInstructionPayload> = (
     transaction: UpdateInstruction<PayloadType>,
     serializedPayload: Buffer,
     keypath: number[],
     INS: number
+) => ReturnBuffer;
+
+type SignVersionedKeyUpdate<PayloadType extends UpdateInstructionPayload> = (
+    transaction: UpdateInstruction<PayloadType>,
+    serializedPayload: Buffer,
+    keypath: number[],
+    INS: number,
+    version: number
 ) => ReturnBuffer;
 
 type LedgerCommands = {
@@ -82,7 +97,7 @@ type LedgerCommands = {
     signEuroPerEnergy: SignUpdate<ExchangeRate>;
     signTransactionFeeDistribution: SignUpdate<TransactionFeeDistribution>;
     signFoundationAccount: SignUpdate<FoundationAccount>;
-    signMintDistribution: SignUpdate<MintDistribution>;
+    signMintDistribution: SignVersionedUpdate<MintDistribution>;
     signProtocolUpdate: SignUpdate<ProtocolUpdate>;
     signGasRewards: SignUpdate<GasRewards>;
     signBakerStakeThreshold: SignUpdate<BakerStakeThreshold>;
@@ -93,7 +108,7 @@ type LedgerCommands = {
     signCooldownParameters: SignUpdate<CooldownParameters>;
     signPoolParameters: SignUpdate<PoolParameters>;
     signHigherLevelKeysUpdate: SignKeyUpdate<HigherLevelKeyUpdate>;
-    signAuthorizationKeysUpdate: SignKeyUpdate<AuthorizationKeysUpdate>;
+    signAuthorizationKeysUpdate: SignVersionedKeyUpdate<AuthorizationKeysUpdate>;
     getAppAndVersion: () => Promise<AppAndVersion>;
     subscribe: () => Promise<void>;
     closeTransport: () => void;

@@ -767,7 +767,8 @@ export type UpdateInstructionPayload =
     | ExchangeRate
     | TransactionFeeDistribution
     | FoundationAccount
-    | MintDistribution
+    | MintDistributionV0
+    | MintDistributionV1
     | ProtocolUpdate
     | GasRewards
     | BakerStakeThreshold
@@ -1170,11 +1171,20 @@ export interface MintRate {
     exponent: Word8;
 }
 
-export interface MintDistribution {
+export interface MintDistributionV0 {
+    version: 0;
     mintPerSlot: MintRate;
     bakingReward: RewardFraction;
     finalizationReward: RewardFraction;
 }
+
+export interface MintDistributionV1 {
+    version: 1;
+    bakingReward: RewardFraction;
+    finalizationReward: RewardFraction;
+}
+
+export type MintDistribution = MintDistributionV0 | MintDistributionV1;
 
 export interface ProtocolUpdate {
     message: string;
@@ -1278,6 +1288,8 @@ export enum AccessStructureEnum {
     bakerStakeThreshold,
     addAnonymityRevoker,
     addIdentityProvider,
+    cooldownParameters,
+    timeParameters,
 }
 
 export interface AccessStructure {
@@ -1286,10 +1298,33 @@ export interface AccessStructure {
     type: AccessStructureEnum;
 }
 
+/**
+ * Tag to determine which keys are updated (and which version of the update it is)
+ * Note that these values don't align with the values on chain, because the on-chain values
+ * have collision between the versions.
+ */
 export enum AuthorizationKeysUpdateType {
-    Level1 = 1,
-    Root = 2,
+    Level1V0, // serialized as 1
+    Level1V1, // serialized as 2
+    RootV0, // serialized as 2
+    RootV1, // serialized as 3
 }
+
+export function getAuthorizationKeysUpdateVersion(
+    type: AuthorizationKeysUpdateType
+): number {
+    switch (type) {
+        case AuthorizationKeysUpdateType.RootV0:
+        case AuthorizationKeysUpdateType.Level1V0:
+            return 0;
+        case AuthorizationKeysUpdateType.RootV1:
+        case AuthorizationKeysUpdateType.Level1V1:
+            return 1;
+        default:
+            throw new Error('Unknown authorization key update type');
+    }
+}
+
 export interface AuthorizationKeysUpdate {
     keyUpdateType: AuthorizationKeysUpdateType;
     keys: VerifyKey[];
