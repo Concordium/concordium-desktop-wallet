@@ -60,7 +60,7 @@ function ShieldedInfo({
 
 const getDelegationTargetId = (dt: DelegationTarget) =>
     dt.delegateType === DelegationTargetType.Baker
-        ? dt.bakerId.toString()
+        ? `baker ${dt.bakerId}`
         : 'L-pool';
 
 interface PublicInfoProps {

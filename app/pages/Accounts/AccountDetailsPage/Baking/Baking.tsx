@@ -1,8 +1,4 @@
-import {
-    AccountBakerDetails,
-    AccountInfo,
-    AccountInfoBaker,
-} from '@concordium/node-sdk';
+import { AccountInfo, AccountInfoBaker } from '@concordium/node-sdk';
 import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router';
@@ -23,29 +19,9 @@ import RemoveBaker from './RemoveBaker';
 import UpdateBakerStake from './UpdateBakerStake';
 import UpdateBakerPool from './UpdateBakerPool';
 import UpdateBakerKeys from './UpdateBakerKeys';
-import Card from '~/cross-app-components/Card';
-
-import styles from './Baking.module.scss';
+import StakingDetails from '../StakingDetails';
 
 const toRoot = <Redirect to={routes.ACCOUNTS_BAKING} />;
-
-interface DetailsProps {
-    details: AccountBakerDetails | undefined;
-}
-
-function Details({ details }: DetailsProps) {
-    return (
-        <Card className={styles.details} dark>
-            <header className={styles.detailsHeader}>
-                <h3 className="mB0">
-                    {details !== undefined
-                        ? 'Baker registered'
-                        : 'No baker registered'}
-                </h3>
-            </header>
-        </Card>
-    );
-}
 
 interface ActionsProps {
     isBaker: boolean;
@@ -198,7 +174,9 @@ export default function Baking({ account, accountInfo }: Props) {
                 )}
             </Route>
             <Route default>
-                <Details
+                <StakingDetails
+                    type="baker"
+                    hasPendingTransaction
                     details={(accountInfo as AccountInfoBaker).accountBaker}
                 />
                 <Actions isBaker={isBaker} isDelegationPV={isDelegationPV} />

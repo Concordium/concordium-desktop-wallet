@@ -1,8 +1,4 @@
-import {
-    AccountDelegationDetails,
-    AccountInfo,
-    AccountInfoDelegator,
-} from '@concordium/node-sdk';
+import { AccountInfo, AccountInfoDelegator } from '@concordium/node-sdk';
 import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router';
@@ -12,51 +8,8 @@ import ConfigureDelegation from './ConfigureDelegation';
 import RemoveDelegation from './RemoveDelegation';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import StakingDetails from '../StakingDetails';
-import { displayAsCcd } from '~/utils/ccd';
-import { displayDelegationTarget } from '~/utils/transactionFlows/configureDelegation';
 
 const toRoot = <Redirect to={routes.ACCOUNTS_DELEGATING} />;
-
-interface DetailsProps {
-    details: AccountDelegationDetails | undefined;
-}
-
-function Details({ details }: DetailsProps) {
-    return (
-        <StakingDetails
-            title={
-                details !== undefined
-                    ? 'Delegation registered'
-                    : 'No delegation registered'
-            }
-            pending={details?.pendingChange}
-            type="delegator"
-        >
-            {details !== undefined && (
-                <>
-                    <StakingDetails.Value
-                        title="Delegation amount"
-                        value={displayAsCcd(details.stakedAmount)}
-                    />
-                    <StakingDetails.Value
-                        title="Target pool"
-                        value={displayDelegationTarget(
-                            details.delegationTarget
-                        )}
-                    />
-                    <StakingDetails.Value
-                        title="Rewards wil be"
-                        value={
-                            details.restakeEarnings
-                                ? 'Added to delegation amount'
-                                : 'Added to public balance'
-                        }
-                    />
-                </>
-            )}
-        </StakingDetails>
-    );
-}
 
 interface ActionsProps {
     isDelegating: boolean;
@@ -113,7 +66,9 @@ export default function Delegating({ account, accountInfo }: Props) {
                 )}
             </Route>
             <Route default>
-                <Details
+                <StakingDetails
+                    type="delegator"
+                    hasPendingTransaction
                     details={
                         (accountInfo as AccountInfoDelegator).accountDelegation
                     }

@@ -1,4 +1,7 @@
-import { StakePendingChange } from '@concordium/node-sdk';
+import {
+    AccountBakerDetails,
+    AccountDelegationDetails,
+} from '@concordium/node-sdk';
 import { isReduceStakePendingChange } from '@concordium/node-sdk/lib/src/accountHelpers';
 import React, { PropsWithChildren } from 'react';
 import Label from '~/components/Label';
@@ -9,52 +12,131 @@ import {
     dateFromStakePendingChange,
     getFormattedDateString,
 } from '~/utils/timeHelpers';
+import { displayDelegationTarget } from '~/utils/transactionFlows/configureDelegation';
 
 import styles from './StakingDetails.module.scss';
 
-interface ValueProps {
+interface ValueProps<T> {
     title: string;
-    value: string | JSX.Element;
+    value: T | undefined;
+    format(v: T): string | JSX.Element;
 }
 
-function Value({ title, value }: ValueProps) {
+function Value<T>({ title, value, format = (v) => `${v}` }: ValueProps<T>) {
     return (
         <div className="mB20">
             <Label className="mB5 textWhite">{title}:</Label>
-            <span className="body2">{value}</span>
+            <span className="body2">
+                {value !== undefined ? format(value) : 'N/A'}
+            </span>
         </div>
     );
 }
 
 type StakingType = 'baker' | 'delegator';
 
-const reduceTitles: { [k in StakingType]: string } = {
-    baker: 'New baker stake',
-    delegator: 'New delegation amount',
-};
-const removeTitles: { [k in StakingType]: string } = {
-    baker:
+interface ValuesProps<T> {
+    details: T | undefined;
+}
+
+function BakerValues({ details }: ValuesProps<AccountBakerDetails>) {
+    return <>{details?.bakerId}</>;
+}
+
+function DelegatorValues({ details }: ValuesProps<AccountDelegationDetails>) {
+    return (
+        <>
+            <Value
+                title="Delegation amount"
+                value={details?.stakedAmount}
+                format={displayAsCcd}
+            />
+            <Value
+                title="Target pool"
+                value={details?.delegationTarget}
+                format={displayDelegationTarget}
+            />
+            <Value
+                title="Rewards wil be"
+                value={details?.restakeEarnings}
+                format={(v) =>
+                    v ? 'Added to delegation amount' : 'Added to public balance'
+                }
+            />
+        </>
+    );
+}
+
+interface DetailsText {
+    titleRegistered: string;
+    titleNotRegistrered: string;
+    titlePendingTransaction: string;
+    pendingReduce: string;
+    pendingRemove: string;
+}
+
+const bakerText: DetailsText = {
+    titleRegistered: 'Baker registered',
+    titleNotRegistrered: 'No baker registered',
+    titlePendingTransaction: 'Waiting for finalization',
+    pendingReduce: 'New baker stake',
+    pendingRemove:
         'Baking will be stopped, and the staked amount will be unlocked on the public balance of the account.',
-    delegator:
+};
+
+const delegatorText: DetailsText = {
+    titleRegistered: 'Delegation registered',
+    titleNotRegistrered: 'No delegation registered',
+    titlePendingTransaction: 'Waiting for finalization',
+    pendingReduce: 'New delegation amount',
+    pendingRemove:
         'The delegation will be stopped, and the delegation amount will be unlocked on the public balance of the account.',
 };
 
+type StakingDetails = AccountBakerDetails | AccountDelegationDetails;
+
+const isBakerDetails = (
+    details: StakingDetails
+): details is AccountBakerDetails =>
+    (details as AccountBakerDetails).bakerId !== undefined;
+const isDelegationDetails = (
+    details: StakingDetails
+): details is AccountDelegationDetails =>
+    (details as AccountDelegationDetails).delegationTarget !== undefined;
+
 type Props = PropsWithChildren<{
-    title: string;
-    pending: StakePendingChange | undefined;
     type: StakingType;
+    details: StakingDetails | undefined;
+    hasPendingTransaction: boolean;
 }>;
 
 export default function StakingDetails({
-    children,
-    title,
-    pending,
+    details,
     type,
+    hasPendingTransaction,
 }: Props) {
     const cs = useConsensusStatus(true);
+    const text = type === 'baker' ? bakerText : delegatorText;
+    const Values = type === 'baker' ? BakerValues : DelegatorValues;
+
+    let title = text.titleNotRegistrered;
+    if (hasPendingTransaction) {
+        title = text.titlePendingTransaction;
+    } else if (details !== undefined) {
+        title = text.titleRegistered;
+    }
+
+    if (
+        details !== undefined &&
+        ((type === 'baker' && isDelegationDetails(details)) ||
+            (type === 'delegator' && isBakerDetails(details)))
+    ) {
+        throw new Error('Wrong type for details given to component');
+    }
+
     const pendingChangeDate =
-        pending !== undefined
-            ? dateFromStakePendingChange(pending, cs)
+        details?.pendingChange !== undefined
+            ? dateFromStakePendingChange(details.pendingChange, cs)
             : undefined;
 
     return (
@@ -62,26 +144,28 @@ export default function StakingDetails({
             <header className={styles.header}>
                 <h2 className="mB0">{title}</h2>
             </header>
-            {children}
-            {pending !== undefined && pendingChangeDate !== undefined && (
-                <div className="mT50">
-                    <div className="textWhite mB20">
-                        The following changes will take effect on
-                        <br />
-                        {getFormattedDateString(pendingChangeDate)}
+            {/* We already know here, that the type prop and the details type match. */}
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            <Values details={details as any} />
+            {details?.pendingChange !== undefined &&
+                pendingChangeDate !== undefined && (
+                    <div className={styles.pending}>
+                        <div className="textWhite mB20">
+                            The following changes will take effect on
+                            <br />
+                            {getFormattedDateString(pendingChangeDate)}
+                        </div>
+                        {isReduceStakePendingChange(details.pendingChange) ? (
+                            <Value
+                                title={text.pendingReduce}
+                                value={details.pendingChange.newStake}
+                                format={displayAsCcd}
+                            />
+                        ) : (
+                            <span className="mB20">{text.pendingRemove}</span>
+                        )}
                     </div>
-                    {isReduceStakePendingChange(pending) ? (
-                        <Value
-                            title={reduceTitles[type]}
-                            value={displayAsCcd(pending.newStake)}
-                        />
-                    ) : (
-                        <span className="mB20">{removeTitles[type]}</span>
-                    )}
-                </div>
-            )}
+                )}
         </Card>
     );
 }
-
-StakingDetails.Value = Value;
