@@ -1,6 +1,7 @@
 /* eslint-disable react/display-name */
 import React, { ComponentType, useCallback } from 'react';
 import { Redirect, useRouteMatch } from 'react-router';
+import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { ConfigureBaker, Fraction } from '~/utils/types';
 import MultiSigAccountTransactionFlow, {
     MultiSigAccountTransactionFlowLoading,
@@ -94,6 +95,7 @@ export default withDeps(function UpdateBakerKeys({ exchangeRate }: Props) {
         >
             title={updateBakerKeysTitle}
             convert={convert}
+            accountFilter={(_, i) => isDefined(i) && isBakerAccount(i)}
             preview={(values) => (
                 <DisplayValues {...values} exchangeRate={exchangeRate} />
             )}

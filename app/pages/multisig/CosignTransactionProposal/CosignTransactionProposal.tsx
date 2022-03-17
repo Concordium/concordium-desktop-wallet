@@ -88,11 +88,13 @@ function CosignTransactionProposal({
         transactionSignDigest,
         setTransactionSignDigest,
     ] = useState<string>();
-    useEffect(() => {
-        getTransactionSignDigest(transactionObject)
-            .then((digest) => setTransactionSignDigest(digest))
-            .catch(() => {});
-    }, [transactionObject]);
+    useEffect(
+        () =>
+            setTransactionSignDigest(
+                getTransactionSignDigest(transactionObject)
+            ),
+        [transactionObject]
+    );
 
     const signingFunction: LedgerCallback = async (
         ledger: ConcordiumLedgerClient,

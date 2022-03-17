@@ -16,7 +16,7 @@ export interface RemoveDelegationFlowState {
     confirm: undefined;
 }
 
-export const removeDelegationTitle = 'Withdraw delegation';
+export const removeDelegationTitle = 'Remove delegation';
 
 export const convertToRemoveDelegationTransaction = (
     account: Account,

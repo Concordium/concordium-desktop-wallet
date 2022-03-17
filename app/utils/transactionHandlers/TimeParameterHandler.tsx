@@ -9,7 +9,7 @@ import TimeParametersView from '~/pages/multisig/updates/TimeParameters/TimePara
 import UpdateTimeParameters, {
     UpdateTimeParametersFields,
 } from '~/pages/multisig/updates/TimeParameters/UpdateTimeParameters';
-import { parseMintPerSlot } from '../mintDistributionHelpers';
+import { parseMintRate } from '../mintDistributionHelpers';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
@@ -41,7 +41,7 @@ export default class TimeParametersHandler
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
-        const parsedMintRate = parseMintPerSlot(mintPerPayday);
+        const parsedMintRate = parseMintRate(mintPerPayday);
         if (
             !blockSummary ||
             !parsedMintRate ||

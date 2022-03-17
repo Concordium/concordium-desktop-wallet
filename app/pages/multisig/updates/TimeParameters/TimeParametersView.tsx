@@ -4,8 +4,9 @@ import { TimeParameters } from '~/utils/types';
 import Loading from '~/cross-app-components/Loading';
 import withChainData, { ChainData } from '~/utils/withChainData';
 import { getCurrentValue, getPaydaysPerYear } from './util';
-import MintRateInput from './MintRateInput';
+import MintRateInput from '../common/MintRateInput';
 import Label from '~/components/Label';
+import { stringifyMintRate } from '~/utils/mintDistributionHelpers';
 
 interface Props extends ChainData {
     timeParameters: TimeParameters;
@@ -42,7 +43,7 @@ export default withChainData(function TimeParametersView({
                 <Label className="mB5">Current time parameters:</Label>
                 <MintRateInput
                     value={currentMintRate.toString()}
-                    slotsPerYear={getPaydaysPerYear(
+                    paydaysPerYear={getPaydaysPerYear(
                         currentRewardPeriodLength,
                         consensusStatus
                     )}
@@ -50,21 +51,21 @@ export default withChainData(function TimeParametersView({
                     className="mB20"
                 />
                 <Label className="mB5">Current reward period length:</Label>
-                {currentRewardPeriodLength}
+                {currentRewardPeriodLength.toString()} epochs
             </div>
             <div>
                 <Label className="mB5">New time parameters:</Label>
                 <MintRateInput
-                    value={newMintRate.toString()}
-                    slotsPerYear={getPaydaysPerYear(
-                        newRewardPeriodLength,
+                    value={stringifyMintRate(newMintRate)}
+                    paydaysPerYear={getPaydaysPerYear(
+                        BigInt(newRewardPeriodLength),
                         consensusStatus
                     )}
                     disabled
                     className="mB20"
                 />
                 <Label className="mB5">New reward period length:</Label>
-                {newRewardPeriodLength} milliseconds
+                {newRewardPeriodLength.toString()} epochs
             </div>
         </>
     );

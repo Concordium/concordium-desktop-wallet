@@ -1,6 +1,7 @@
 import { loadAllSettings } from '~/database/SettingsDao';
 import { initAccounts } from '~/features/AccountSlice';
 import { loadAddressBook } from '~/features/AddressBookSlice';
+import { init as initChainData } from '~/features/ChainDataSlice';
 import {
     loadCredentials,
     loadExternalCredentials,
@@ -37,6 +38,7 @@ async function loadSettingsIntoStore(dispatch: Dispatch) {
  */
 export default async function initApplication(dispatch: Dispatch) {
     await loadSettingsIntoStore(dispatch);
+    initChainData(dispatch);
 
     await Promise.all([
         loadAddressBook(dispatch),
@@ -46,7 +48,7 @@ export default async function initApplication(dispatch: Dispatch) {
         loadCredentials(dispatch),
         loadExternalCredentials(dispatch),
     ]);
-    dispatch(unlock());
 
+    dispatch(unlock());
     listenForIdentityStatus(dispatch);
 }

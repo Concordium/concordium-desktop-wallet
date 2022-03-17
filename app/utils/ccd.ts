@@ -5,13 +5,13 @@ import {
     parseSubNumber,
     toFraction,
     addThousandSeparators,
-} from './numberStringHelpers';
+} from '~/utils/numberStringHelpers';
 
-export function getGTUSymbol(): string {
+export function getCcdSymbol(): string {
     return '\u03FE';
 }
 
-export const microGTUPerGTU = 1000000n;
+export const microCcdPerCcd = 1000000n;
 const separator = '.';
 
 /**
@@ -32,8 +32,8 @@ function toBigInt(input: bigint | string): bigint {
 }
 
 // Checks that the input is a valid CCD string.
-export const isValidGTUString = isValidResolutionString(
-    microGTUPerGTU,
+export const isValidCcdString = isValidResolutionString(
+    microCcdPerCcd,
     false,
     false,
     false
@@ -43,33 +43,33 @@ export const isValidGTUString = isValidResolutionString(
  * expects the fractional part of the a CCD string.
  * i.e. from an amount of 10.001, the subCCD string is 001.
  */
-const parseSubGTU = parseSubNumber(getPowerOf10(microGTUPerGTU));
+const parseSubCcd = parseSubNumber(getPowerOf10(microCcdPerCcd));
 
 /**
- * Convert a microCCD amount to a gtu string.
+ * Convert a microCCD amount to a ccd string.
  * Should be used for user interaction.
  * N.B. Gives the absolute value of the amount.
  * N.B. In case the input is a string, it is assumed that it represents the value in microCCD.
  */
-export const microGtuToGtu = toFraction(microGTUPerGTU);
+export const microCcdToCcd = toFraction(microCcdPerCcd);
 
 /**
  * Given a CCD string, convert to microCCD
  */
-export function toMicroUnits(amount: string): bigint {
-    if (!isValidGTUString(amount)) {
+export function ccdToMicroCcd(amount: string): bigint {
+    if (!isValidCcdString(amount)) {
         throw new Error('Given string that was not a valid CCD string.');
     }
     if (amount.includes(separator)) {
         const separatorIndex = amount.indexOf(separator);
-        const gtu = amount.slice(0, separatorIndex);
-        const microGTU = parseSubGTU(amount.slice(separatorIndex + 1));
-        return BigInt(gtu) * microGTUPerGTU + BigInt(microGTU);
+        const ccd = amount.slice(0, separatorIndex);
+        const microCcd = parseSubCcd(amount.slice(separatorIndex + 1));
+        return BigInt(ccd) * microCcdPerCcd + BigInt(microCcd);
     }
-    return BigInt(amount) * microGTUPerGTU;
+    return BigInt(amount) * microCcdPerCcd;
 }
 
-const formatGtuString = formatNumberStringWithDigits(2);
+export const formatCcdString = formatNumberStringWithDigits(2);
 
 /**
  * Given a microCCD amount, returns the same amount in CCD
@@ -77,12 +77,12 @@ const formatGtuString = formatNumberStringWithDigits(2);
  * Allows input type string, because microCCD from external sources are strings.
  * N.B. In case the input is a string, it is assumed that it represents the value in microCCD.
  */
-export function displayAsGTU(microGTUAmount: bigint | string) {
-    const amount: bigint = toBigInt(microGTUAmount);
+export function displayAsCcd(microCcdAmount: bigint | string) {
+    const amount: bigint = toBigInt(microCcdAmount);
     const negative = amount < 0n ? '-' : '';
     const abs = amount < 0n ? -amount : amount;
     const formatted = addThousandSeparators(
-        formatGtuString(microGtuToGtu(abs))
+        formatCcdString(microCcdToCcd(abs))
     );
-    return `${negative}${getGTUSymbol()}${formatted}`;
+    return `${negative}${getCcdSymbol()}${formatted}`;
 }

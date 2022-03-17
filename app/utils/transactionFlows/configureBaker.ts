@@ -1,9 +1,10 @@
 import type { AccountInfo, ChainParametersV1 } from '@concordium/node-sdk';
-import { OpenStatusText } from '@concordium/node-sdk/lib/src/types';
 import { isBakerAccountV1 } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { OpenStatus, OpenStatusText } from '@concordium/node-sdk/lib/src/types';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { isDefined, multiplyFraction } from '../basicHelpers';
-import { microGtuToGtu, toMicroUnits } from '../gtu';
+import { ccdToMicroCcd, microCcdToCcd } from '../ccd';
+import { fractionResolution } from '../rewardFractionHelpers';
 import { BakerKeys } from '../rustInterface';
 import { getConfigureBakerCost } from '../transactionCosts';
 import { createConfigureBakerTransaction } from '../transactionHelpers';
@@ -13,7 +14,6 @@ import {
     ConfigureBakerPayload,
     Fraction,
     NotOptional,
-    OpenStatus,
     TransactionKindId,
     Account,
     DeepPartial,
@@ -29,14 +29,12 @@ export interface StakeSettings {
     stake: string;
     restake: boolean;
 }
-export type Commissions = NotOptional<
-    Pick<
-        ConfigureBakerPayload,
-        | 'transactionFeeCommission'
-        | 'bakingRewardCommission'
-        | 'finalizationRewardCommission'
-    >
->;
+
+export interface Commissions {
+    transactionFeeCommission: number;
+    bakingRewardCommission: number;
+    finalizationRewardCommission: number;
+}
 
 export type MetadataUrl = string;
 
@@ -48,24 +46,34 @@ export interface ConfigureBakerFlowState {
     keys?: BakerKeys;
 }
 
-function openStatusTextToOpenStatus(statusText: OpenStatusText) {
-    switch (statusText) {
-        case OpenStatusText.OpenForAll:
-            return OpenStatus.OpenForAll;
-        case OpenStatusText.ClosedForNew:
-            return OpenStatus.ClosedForNew;
-        case OpenStatusText.ClosedForAll:
-            return OpenStatus.ClosedForAll;
-        default:
-            throw new Error(`Status not supported: ${statusText}`);
-    }
-}
-
 export const getDefaultCommissions = (cp: ChainParametersV1): Commissions => ({
     transactionFeeCommission: cp.transactionCommissionRange.max,
     bakingRewardCommission: cp.bakingCommissionRange.max,
     finalizationRewardCommission: cp.finalizationCommissionRange.max,
 });
+
+const decimalToRewardFraction = (d: number | undefined) =>
+    d === undefined ? undefined : d * fractionResolution;
+
+const convertCommissionsToRewardFractions = (
+    c: Partial<Commissions> | undefined
+): Partial<Commissions> | undefined => {
+    if (c === undefined) {
+        return undefined;
+    }
+
+    return {
+        bakingRewardCommission: decimalToRewardFraction(
+            c.bakingRewardCommission
+        ),
+        transactionFeeCommission: decimalToRewardFraction(
+            c.transactionFeeCommission
+        ),
+        finalizationRewardCommission: decimalToRewardFraction(
+            c.finalizationRewardCommission
+        ),
+    };
+};
 
 export const toConfigureBakerPayload = ({
     keys,
@@ -73,27 +81,41 @@ export const toConfigureBakerPayload = ({
     openForDelegation,
     metadataUrl,
     commissions,
-}: DeepPartial<ConfigureBakerFlowState>): ConfigureBakerPayload => ({
-    electionVerifyKey:
-        keys?.electionPublic !== undefined && keys?.proofElection !== undefined
-            ? [keys.electionPublic, keys.proofElection]
+}: DeepPartial<Omit<ConfigureBakerFlowState, 'keys'>> &
+    Pick<ConfigureBakerFlowState, 'keys'>): ConfigureBakerPayload => ({
+    keys:
+        keys !== undefined
+            ? {
+                  electionVerifyKey: [keys.electionPublic, keys.proofElection],
+                  signatureVerifyKey: [
+                      keys.signaturePublic,
+                      keys.proofSignature,
+                  ],
+                  aggregationVerifyKey: [
+                      keys.aggregationPublic,
+                      keys.proofAggregation,
+                  ],
+              }
             : undefined,
-    signatureVerifyKey:
-        keys?.signaturePublic !== undefined &&
-        keys?.proofSignature !== undefined
-            ? [keys.signaturePublic, keys.proofSignature]
-            : undefined,
-    aggregationVerifyKey:
-        keys?.aggregationPublic !== undefined &&
-        keys?.proofAggregation !== undefined
-            ? [keys.aggregationPublic, keys.proofAggregation]
-            : undefined,
-    stake: stake?.stake !== undefined ? toMicroUnits(stake.stake) : undefined,
+    stake: stake?.stake !== undefined ? ccdToMicroCcd(stake.stake) : undefined,
     restakeEarnings: stake?.restake,
     openForDelegation,
     metadataUrl,
-    ...commissions,
+    ...convertCommissionsToRewardFractions(commissions),
 });
+
+const openStatusEnumFromText = (text: OpenStatusText): OpenStatus => {
+    switch (text) {
+        case OpenStatusText.OpenForAll:
+            return OpenStatus.OpenForAll;
+        case OpenStatusText.ClosedForNew:
+            return OpenStatus.ClosedForNew;
+        case OpenStatusText.ClosedForAll:
+            return OpenStatus.ClosedForAll;
+        default:
+            throw new Error(`Case not handled: ${text}`);
+    }
+};
 
 export const getExistingBakerValues = (
     ai: AccountInfo | undefined
@@ -105,10 +127,10 @@ export const getExistingBakerValues = (
 
     return {
         stake: {
-            stake: microGtuToGtu(accountBaker.stakedAmount) ?? '1000.00',
+            stake: microCcdToCcd(accountBaker.stakedAmount) ?? '1000.00',
             restake: accountBaker.restakeEarnings,
         },
-        openForDelegation: openStatusTextToOpenStatus(
+        openForDelegation: openStatusEnumFromText(
             accountBaker.bakerPoolInfo.openStatus
         ),
         metadataUrl: accountBaker.bakerPoolInfo.metadataUrl,
@@ -130,8 +152,9 @@ const isAccountInfo = (
 ): dyn is AccountInfo => (dyn as AccountInfo).accountIndex !== undefined;
 
 export type ConfigureBakerFlowStateChanges = MakeRequired<
-    DeepPartial<ConfigureBakerFlowState>,
-    'stake' | 'commissions' | 'keys'
+    DeepPartial<Omit<ConfigureBakerFlowState, 'keys'>> &
+        Pick<ConfigureBakerFlowState, 'keys'>,
+    'stake' | 'commissions'
 >;
 
 export function getBakerFlowChanges(
@@ -161,14 +184,13 @@ export function getBakerFlowChanges(
     const changes: ConfigureBakerFlowStateChanges = {
         stake: {},
         commissions: {},
-        keys: {},
     };
 
     if (
         existingValues.stake?.stake === undefined ||
         newValues.stake?.stake === undefined ||
-        toMicroUnits(existingValues.stake?.stake) !==
-            toMicroUnits(newValues.stake?.stake)
+        ccdToMicroCcd(existingValues.stake?.stake) !==
+            ccdToMicroCcd(newValues.stake?.stake)
     ) {
         changes.stake.stake = newValues.stake?.stake;
     }
@@ -206,7 +228,9 @@ export function getBakerFlowChanges(
         changes.metadataUrl = newValues.metadataUrl;
     }
 
-    changes.keys = { ...newValues.keys };
+    if (newValues.keys !== undefined) {
+        changes.keys = { ...newValues.keys };
+    }
 
     return changes;
 }
@@ -241,7 +265,8 @@ export const convertToBakerTransaction = (
 };
 
 export function getEstimatedConfigureBakerFee(
-    values: DeepPartial<ConfigureBakerFlowState>,
+    values: DeepPartial<Omit<ConfigureBakerFlowState, 'keys'>> &
+        Pick<ConfigureBakerFlowState, 'keys'>,
     exchangeRate: Fraction,
     signatureThreshold = 1
 ) {

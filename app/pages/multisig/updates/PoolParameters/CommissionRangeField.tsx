@@ -14,7 +14,7 @@ export interface CommissionRangeFieldProps
     label: string;
     value: CommissionRange | undefined;
     display?: boolean;
-    onChange?(v: CommissionRange | undefined): void;
+    onChange?(v: Partial<CommissionRange>): void;
     onBlur?(): void;
 }
 
@@ -31,7 +31,7 @@ export function CommissionRangeField({
     const [max, setMax] = useState<number | undefined>(value?.max);
 
     useUpdateEffect(() => {
-        onChange(min && max ? { min, max } : undefined);
+        onChange({ min, max });
     }, [min, max]);
     useUpdateEffect(() => {
         setMin(value?.min);

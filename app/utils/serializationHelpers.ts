@@ -196,8 +196,8 @@ export function serializeCredentialDeploymentInformation(
 }
 
 /**
- *  Given a string, return a serializedTextWithLength object.
- * N.B. This function assumes the text length can fit into a uint32, and the length buffer will always have a length of 4 bytes.
+ * Given a string, return a serializedTextWithLength object.
+ * N.B. By default, this function assumes the text length can fit into a uint32, and the length buffer will always have a length of 4 bytes.
  */
 export function getSerializedTextWithLength(
     text: string,

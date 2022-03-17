@@ -2,6 +2,7 @@
 import React, { ComponentType, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, useRouteMatch } from 'react-router';
+import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { ConfigureBaker, Fraction } from '~/utils/types';
 import MultiSigAccountTransactionFlow, {
     MultiSigAccountTransactionFlowLoading,
@@ -90,6 +91,7 @@ export default withDeps(function RemoveDelegation({ exchangeRate }: Props) {
         >
             title={removeDelegationTitle}
             convert={convert}
+            accountFilter={(_, i) => isDefined(i) && isDelegatorAccount(i)}
             preview={(p) => (
                 <DisplayValues {...p} exchangeRate={exchangeRate} />
             )}

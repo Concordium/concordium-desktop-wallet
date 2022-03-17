@@ -548,7 +548,8 @@ pub fn generate_baker_keys(sender: &AccountAddress, key_variant: BakerKeyVariant
 
     let mut challenge = match key_variant {
         BakerKeyVariant::ADD => b"addBaker".to_vec(),
-        BakerKeyVariant::UPDATE => b"updateBakerKeys".to_vec()
+        BakerKeyVariant::UPDATE => b"updateBakerKeys".to_vec(),
+        BakerKeyVariant::CONFIGURE => b"configureBaker".to_vec(),
     };
 
     sender.serial(&mut challenge);

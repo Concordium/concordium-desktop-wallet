@@ -4,6 +4,7 @@ import { Redirect } from 'react-router';
 import { useSelector } from 'react-redux';
 import type { BlockSummaryV1 } from '@concordium/node-sdk';
 import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import CommissionsPage from '~/components/Transfers/configureBaker/CommissionsPage';
 import DelegationStatusPage from '~/components/Transfers/configureBaker/DelegationStatusPage';
 import MetadataUrlPage from '~/components/Transfers/configureBaker/MetadataUrlPage';
@@ -185,6 +186,7 @@ export default withDeps(
             >
                 title={updateBakerPoolTitle}
                 convert={convert}
+                accountFilter={(_, i) => isDefined(i) && isBakerAccount(i)}
                 preview={(v) => (
                     <DisplayValues {...v} exchangeRate={exchangeRate} />
                 )}

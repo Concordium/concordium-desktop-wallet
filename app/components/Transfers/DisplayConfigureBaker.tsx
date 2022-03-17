@@ -1,7 +1,6 @@
 import React from 'react';
 import { useRouteMatch } from 'react-router';
 import { ConfigureBaker } from '~/utils/types';
-import { displayAsGTU } from '~/utils/gtu';
 import DisplayFee from '~/components/DisplayFee';
 import { useAccountName } from '~/utils/dataHooks';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
@@ -15,6 +14,7 @@ import {
 } from '~/utils/transactionFlows/configureBaker';
 import DisplayBakerCommission from './DisplayBakerCommission';
 import DisplayMetadataUrl from './DisplayMetadataUrl';
+import { displayAsCcd } from '~/utils/ccd';
 
 import styles from './transferDetails.module.scss';
 
@@ -40,7 +40,7 @@ export default function DisplayConfigureBaker({ transaction }: Props) {
                 <>
                     <h5 className={styles.title}>Staked amount:</h5>
                     <p className={styles.amount}>
-                        {displayAsGTU(payload.stake)}
+                        {displayAsCcd(payload.stake)}
                     </p>
                 </>
             )}
@@ -75,15 +75,15 @@ export default function DisplayConfigureBaker({ transaction }: Props) {
             <DisplayMetadataUrl metadataUrl={payload.metadataUrl} />
             <DisplayPublicKey
                 name="Election verify key:"
-                publicKey={payload?.electionVerifyKey?.[0]}
+                publicKey={payload?.keys?.electionVerifyKey[0]}
             />
             <DisplayPublicKey
                 name="Signature verify key:"
-                publicKey={payload?.signatureVerifyKey?.[0]}
+                publicKey={payload?.keys?.signatureVerifyKey[0]}
             />
             <DisplayPublicKey
                 name="Aggregation verify key:"
-                publicKey={payload?.aggregationVerifyKey?.[0]}
+                publicKey={payload?.keys?.aggregationVerifyKey[0]}
             />
             {Boolean(isSingleSig) || (
                 <DisplayTransactionExpiryTime

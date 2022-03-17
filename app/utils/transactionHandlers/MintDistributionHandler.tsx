@@ -5,7 +5,7 @@ import MintDistributionView from '~/pages/multisig/updates/MintDistribution/Mint
 import UpdateMintDistribution, {
     UpdateMintDistributionFields,
 } from '~/pages/multisig/updates/MintDistribution/UpdateMintDistribution';
-import { parseMintPerSlot } from '../mintDistributionHelpers';
+import { parseMintRate } from '../mintDistributionHelpers';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
@@ -51,7 +51,7 @@ export default class MintDistributionHandler
         let mintDistribution: MintDistribution;
         if (mintPerSlot) {
             // version 0
-            const parsedMintPerSlot = parseMintPerSlot(mintPerSlot);
+            const parsedMintPerSlot = parseMintRate(mintPerSlot);
 
             if (!parsedMintPerSlot) {
                 return undefined;

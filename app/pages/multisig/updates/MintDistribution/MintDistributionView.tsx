@@ -12,8 +12,9 @@ import {
     RewardDistribution,
     RewardDistributionValue,
 } from '../../common/RewardDistribution';
-import MintRateInput from './MintRateInput';
+import MintRateInput from '../common/MintRateInput';
 import Label from '~/components/Label';
+import { stringifyMintRate } from '~/utils/mintDistributionHelpers';
 
 interface Props extends ChainData {
     mintDistribution: MintDistribution;
@@ -56,7 +57,7 @@ export default withChainData(function MintDistributionView({
                 {isBlockSummaryV1(blockSummary) || (
                     <MintRateInput
                         value={blockSummary.updates.chainParameters.rewardParameters.mintDistribution.mintPerSlot.toString()}
-                        slotsPerYear={slotsPerYear}
+                        paydaysPerYear={slotsPerYear}
                         disabled
                         className="mB20"
                     />
@@ -71,8 +72,8 @@ export default withChainData(function MintDistributionView({
                 <Label className="mB5">New mint distribution:</Label>
                 {mintDistribution.version === 0 && (
                     <MintRateInput
-                        value={mintDistribution.mintPerSlot.toString()}
-                        slotsPerYear={slotsPerYear}
+                        value={stringifyMintRate(mintDistribution.mintPerSlot)}
+                        paydaysPerYear={slotsPerYear}
                         disabled
                         className="mB20"
                     />

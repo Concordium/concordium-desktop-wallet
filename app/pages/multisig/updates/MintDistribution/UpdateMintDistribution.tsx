@@ -9,16 +9,14 @@ import {
     FormRewardDistribution,
     RewardDistribution,
 } from '../../common/RewardDistribution';
-import MintRateInput, {
-    FormMintRateInput,
-} from './MintRateInput/MintRateInput';
+import MintRateInput, { FormMintRateInput } from '../common/MintRateInput';
 import {
     getCurrentValue,
     getSlotsPerYear,
     rewardDistributionLabels,
     toRewardDistributionValue,
 } from './util';
-import { parseMintPerSlot } from '~/utils/mintDistributionHelpers';
+import { parseMintRate } from '~/utils/mintDistributionHelpers';
 import Label from '~/components/Label';
 
 export interface UpdateMintDistributionFields {
@@ -34,7 +32,7 @@ const fieldNames: EqualRecord<UpdateMintDistributionFields> = {
 };
 
 const canParseMintPerSlot: Validate = (value?: string) =>
-    (value !== undefined && parseMintPerSlot(value) !== undefined) ||
+    (value !== undefined && parseMintRate(value) !== undefined) ||
     'Invalid mint per slot value';
 
 const isValidNumber = (parseFun: (v: string) => number): Validate => (
@@ -69,7 +67,7 @@ export default function UpdateMintDistribution({
                 {version === 0 && (
                     <MintRateInput
                         value={mintPerSlot.toString()}
-                        slotsPerYear={slotsPerYear}
+                        paydaysPerYear={slotsPerYear}
                         disabled
                         className="mB20"
                     />
@@ -88,7 +86,7 @@ export default function UpdateMintDistribution({
                         defaultValue={
                             defaults.mintPerSlot || mintPerSlot.toString()
                         }
-                        slotsPerYear={slotsPerYear}
+                        paydaysPerYear={slotsPerYear}
                         className="mB20"
                         rules={{
                             required: 'Mint per slot value is required',

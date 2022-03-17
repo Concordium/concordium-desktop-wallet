@@ -41,6 +41,10 @@ export default class BakerStakeThresholdHandler
             return undefined;
         }
 
+        if (isBlockSummaryV1(blockSummary)) {
+            throw new Error('Update incompatible with chain protocol version');
+        }
+
         const sequenceNumber =
             blockSummary.updates.updateQueues.bakerStakeThreshold
                 .nextSequenceNumber;

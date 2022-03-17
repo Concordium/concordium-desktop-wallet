@@ -57,7 +57,7 @@ export default withAccountSync(function DetailsPage() {
     const accountChanged = useSelector(
         (s: RootState) => s.accounts.accountChanged
     );
-    const pv = useProtocolVersion();
+    const pv = useProtocolVersion(true);
     const viewingShielded = useSelector(viewingShieldedSelector);
     const hasCredentials = useSelector(
         account ? accountHasDeployedCredentialsSelector(account) : () => false
@@ -124,6 +124,7 @@ export default withAccountSync(function DetailsPage() {
                             if (
                                 !canTransfer ||
                                 isBaker ||
+                                isDelegating ||
                                 accountInfo === undefined
                             ) {
                                 return <ToAccounts />;

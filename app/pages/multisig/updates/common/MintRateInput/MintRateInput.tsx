@@ -6,7 +6,7 @@ import ErrorMessage from '~/components/Form/ErrorMessage';
 import InlineNumber from '~/components/Form/InlineNumber';
 import { noOp } from '~/utils/basicHelpers';
 import { useUpdateEffect } from '~/utils/hooks';
-import { parseMintPerSlot } from '~/utils/mintDistributionHelpers';
+import { parseMintRate } from '~/utils/mintDistributionHelpers';
 import { ClassName, MintRate } from '~/utils/types';
 
 import styles from './MintRateInput.module.scss';
@@ -24,13 +24,13 @@ export interface MintRateInputProps extends ClassName, CommonFieldProps {
     value: string;
     onChange?(v: string): void;
     onBlur?(): void;
-    slotsPerYear: number;
+    paydaysPerYear: number;
     disabled?: boolean;
 }
 
 export default function MintRateInput({
-    value: mintPerSlot,
-    slotsPerYear,
+    value: mintPerPayday,
+    paydaysPerYear,
     disabled = false,
     className,
     error,
@@ -41,33 +41,33 @@ export default function MintRateInput({
     const [annualFocused, setAnnualFocused] = useState<boolean>(false);
 
     const calculateAnnualRate = useCallback(
-        (m: number) => (1 + Number(m)) ** Number(slotsPerYear) - 1,
-        [slotsPerYear]
+        (m: number) => (1 + Number(m)) ** Number(paydaysPerYear) - 1,
+        [paydaysPerYear]
     );
-    const calculateMintPerSlot = useCallback(
-        (a: number) => (1 + Number(a)) ** (1 / Number(slotsPerYear)) - 1,
-        [slotsPerYear]
+    const calculateMintPerPayday = useCallback(
+        (a: number) => (1 + Number(a)) ** (1 / Number(paydaysPerYear)) - 1,
+        [paydaysPerYear]
     );
 
     useEffect(() => {
-        const calculated = calculateAnnualRate(Number(mintPerSlot));
+        const calculated = calculateAnnualRate(Number(mintPerPayday));
         setAnnualRate(calculated.toString());
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [mintPerSlot]);
+    }, [mintPerPayday, calculateAnnualRate]);
 
     useUpdateEffect(() => {
         if (!annualFocused) {
             return;
         }
 
-        const calculated = calculateMintPerSlot(Number(annualRate));
+        const calculated = calculateMintPerPayday(Number(annualRate));
         onChange(mintRateFormat(calculated));
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [annualRate]);
+    }, [annualRate, calculateMintPerPayday]);
 
     const { mantissa, exponent } = useMemo(
-        () => parseMintPerSlot(mintPerSlot) ?? ({} as Partial<MintRate>),
-        [mintPerSlot]
+        () => parseMintRate(mintPerPayday) ?? ({} as Partial<MintRate>),
+        [mintPerPayday]
     );
 
     return (
@@ -87,8 +87,8 @@ export default function MintRateInput({
             ≈ (1 +{' '}
             <InlineNumber
                 className={styles.field}
-                value={mintRateFormat(Number(mintPerSlot))}
-                title="Mint per slot (product of chain value)"
+                value={mintRateFormat(Number(mintPerPayday))}
+                title="Mint per payday (product of chain value)"
                 disabled={disabled}
                 onChange={onChange}
                 onBlur={onBlur}
@@ -102,8 +102,8 @@ export default function MintRateInput({
                 allowFractions
             />
             )
-            <span className={styles.exponent} title="Slots per year">
-                {BigInt(slotsPerYear).toLocaleString()}
+            <span className={styles.exponent} title="Paydays per year">
+                {paydaysPerYear.toLocaleString()}
             </span>{' '}
             - 1
             {mantissa && exponent && (

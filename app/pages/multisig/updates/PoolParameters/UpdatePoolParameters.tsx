@@ -67,9 +67,11 @@ function rangeValidationRules(name: string): RegisterOptions {
             minNeg: (v) => v.min >= 0 || `${name} minimum can not be negative`,
             maxNeg: (v) => v.max >= 0 || `${name} maximum can not be negative`,
             minCeil: (v) =>
-                v.min >= 100 || `${name} minimum can not be above 100`,
+                v.min <= updateConstants.rewardFractionResolution ||
+                `${name} minimum can not be above 100`,
             maxCeil: (v) =>
-                v.max >= 100 || `${name} maximum can not be above 100`,
+                v.max <= updateConstants.rewardFractionResolution ||
+                `${name} maximum can not be above 100`,
             order: (v) =>
                 v.max >= v.min ||
                 `${name} maximum can not be lower than minimum`,

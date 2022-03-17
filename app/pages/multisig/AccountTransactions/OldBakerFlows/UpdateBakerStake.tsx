@@ -30,7 +30,6 @@ import {
 import SignTransaction from '../SignTransaction';
 import PickAmount from '../PickAmount';
 import UpdateBakerStakeProposalDetails from '../proposal-details/UpdateBakerStakeProposalDetails';
-import { microGtuToGtu, toMicroUnits } from '~/utils/gtu';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import StakePendingChange from '~/components/StakePendingChange';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
@@ -45,6 +44,7 @@ import { ensureChainData, ChainData } from '~/utils/withChainData';
 import DatePicker from '~/components/Form/DatePicker';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
+import { ccdToMicroCcd, microCcdToCcd } from '~/utils/ccd';
 
 import styles from '../MultisignatureAccountTransactions.module.scss';
 
@@ -53,7 +53,7 @@ function toMicroUnitsSafe(str: string | undefined) {
         return undefined;
     }
     try {
-        return toMicroUnits(str);
+        return ccdToMicroCcd(str);
     } catch (error) {
         return undefined;
     }
@@ -103,7 +103,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
             return;
         }
 
-        const payload = { stake: toMicroUnits(stake) };
+        const payload = { stake: ccdToMicroCcd(stake) };
         const accountNonce = await getNextAccountNonce(account.address);
         setTransaction(
             createUpdateBakerStakeTransaction(
@@ -324,8 +324,8 @@ function PickNewStake({
         <>
             <PickAmount
                 account={account}
-                amount={microGtuToGtu(stakedAlready)}
-                existing={microGtuToGtu(stakedAlready)}
+                amount={microCcdToCcd(stakedAlready)}
+                existing={microCcdToCcd(stakedAlready)}
                 setAmount={setStake}
                 validateAmount={(...args) =>
                     validateBakerStake(minimumThresholdForBaking, ...args)

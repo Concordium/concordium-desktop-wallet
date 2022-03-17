@@ -253,7 +253,7 @@ const configureDelegationLinks = (
  */
 export default function MultiSignatureCreateProposalView() {
     const proposals = useSelector(proposalsSelector);
-    const pv = useProtocolVersion();
+    const pv = useProtocolVersion(true);
     const foundationTransactionsEnabled: boolean = useSelector(
         foundationTransactionsEnabledSelector
     );
@@ -269,34 +269,34 @@ export default function MultiSignatureCreateProposalView() {
 
     return (
         <>
-            {availableTransactionTypes
-                .filter(
-                    ([, , , filter]) =>
-                        filter === undefined || (pv !== undefined && filter(pv))
-                )
-                .map(([transactionType, specificType, label]) => (
-                    <Fragment key={`${transactionType}${specificType}`}>
-                        {[
-                            TransactionKindId.Configure_baker,
-                            TransactionKindId.Configure_delegation,
-                        ].every((k) => k !== specificType) && (
-                            <ButtonNavLink
-                                className={styles.link}
-                                to={createProposalRoute(
-                                    transactionType,
-                                    specificType
-                                )}
-                            >
-                                {label}
-                            </ButtonNavLink>
-                        )}
-                        {specificType === TransactionKindId.Configure_baker &&
-                            configureBakerLinks}
-                        {specificType ===
-                            TransactionKindId.Configure_delegation &&
-                            configureDelegationLinks}
-                    </Fragment>
-                ))}
+            {availableTransactionTypes.map(
+                ([transactionType, specificType, label, filter = () => true]) =>
+                    pv !== undefined &&
+                    filter(pv) && (
+                        <Fragment key={`${transactionType}${specificType}`}>
+                            {[
+                                TransactionKindId.Configure_baker,
+                                TransactionKindId.Configure_delegation,
+                            ].every((k) => k !== specificType) && (
+                                <ButtonNavLink
+                                    className={styles.link}
+                                    to={createProposalRoute(
+                                        transactionType,
+                                        specificType
+                                    )}
+                                >
+                                    {label}
+                                </ButtonNavLink>
+                            )}
+                            {specificType ===
+                                TransactionKindId.Configure_baker &&
+                                configureBakerLinks}
+                            {specificType ===
+                                TransactionKindId.Configure_delegation &&
+                                configureDelegationLinks}
+                        </Fragment>
+                    )
+            )}
         </>
     );
 }

@@ -11,7 +11,6 @@ import Label from '~/components/Label';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
 import { collapseFraction, noOp } from '~/utils/basicHelpers';
 import { useCalcDelegatorCooldownUntil } from '~/utils/dataHooks';
-import { getGTUSymbol } from '~/utils/gtu';
 import { useAsyncMemo, useUpdateEffect } from '~/utils/hooks';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import {
@@ -27,6 +26,7 @@ import { Account, AccountInfo, EqualRecord, Fraction } from '~/utils/types';
 import StakePendingChange from '~/components/StakePendingChange';
 import Loading from '~/cross-app-components/Loading';
 import { getPoolInfoLatest } from '~/node/nodeHelpers';
+import { getCcdSymbol } from '~/utils/ccd';
 
 import styles from './DelegationPage.module.scss';
 
@@ -78,14 +78,14 @@ function PickDelegateAmount({
         <div className="mV30">
             {existing && (
                 <div className="body3 mono mB10">
-                    Current stake: {getGTUSymbol()}
+                    Current stake: {getCcdSymbol()}
                     {existing}
                 </div>
             )}
             <Label>Amount</Label>
             <div className="h1 mV5">
                 <span className={clsx(hasPendingChange && 'textFaded')}>
-                    {getGTUSymbol()}
+                    {getCcdSymbol()}
                 </span>
                 <Form.GtuInput
                     name={fieldNames.amount}
@@ -137,7 +137,7 @@ export default function DelegationAmountPage({
     const defaultValues: SubState = {
         amount: '0.00',
         redelegate: true,
-        ...existing,
+        ...existing?.delegate,
         ...initial,
     };
     const form = useForm<SubState>({
@@ -184,14 +184,14 @@ export default function DelegationAmountPage({
             formMethods={form}
         >
             <div className="flexChildFill">
-                {existing || (
+                {existing !== undefined || (
                     <p className="mT0">
                         This transaction will delegate an amount of CCD to an
                         active baker. You must choose the amount to delegate, if
                         you want to add rewards to the delegated amount.
                     </p>
                 )}
-                {existing && pendingChange === undefined && (
+                {existing !== undefined && pendingChange === undefined && (
                     <p className="mT0">
                         Enter your new desired amount to delegate. If you raise
                         the stake it will take effect after two epochs, and if
@@ -210,7 +210,7 @@ export default function DelegationAmountPage({
                     </p>
                 )}
                 {pendingChange !== undefined && (
-                    <div className="mV10">
+                    <div className="mV10 body2">
                         Cannot update delegated amount at this time:
                         <div className="bodyEmphasized textError mV10">
                             <StakePendingChange pending={pendingChange} />

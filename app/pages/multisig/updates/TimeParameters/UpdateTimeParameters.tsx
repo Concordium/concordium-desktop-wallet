@@ -1,14 +1,13 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { Validate } from 'react-hook-form';
 import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import Form from '~/components/Form/';
-import MintRateInput, {
-    FormMintRateInput,
-} from './MintRateInput/MintRateInput';
-import { getCurrentValue, getSlotsPerYear } from './util';
-import { parseMintPerSlot } from '~/utils/mintDistributionHelpers';
+import MintRateInput, { FormMintRateInput } from '../common/MintRateInput';
+import { getCurrentValue, getPaydaysPerYear } from './util';
+import { parseMintRate } from '~/utils/mintDistributionHelpers';
+import { isValidBigInt } from '~/utils/numberStringHelpers';
 import Label from '~/components/Label';
 import { mustBeAnInteger, requiredMessage, enterHere } from '../common/util';
 
@@ -27,9 +26,9 @@ const fieldDisplays = {
     rewardPeriodLength: 'reward period length',
 };
 
-const canParseMintPerSlot: Validate = (value?: string) =>
-    (value !== undefined && parseMintPerSlot(value) !== undefined) ||
-    'Invalid mint per slot value';
+const canParseMintPerPayday: Validate = (value?: string) =>
+    (value !== undefined && parseMintRate(value) !== undefined) ||
+    'Invalid mint per payday value';
 
 const isValidNumber = (parseFun: (v: string) => number): Validate => (
     v: string
@@ -37,7 +36,7 @@ const isValidNumber = (parseFun: (v: string) => number): Validate => (
 
 const isValidFloat = isValidNumber(parseFloat);
 
-const MINT_PER_SLOT_MAX = 2 ** 32 - 1; // UInt32 upper bound
+const MINT_PER_PAYDAY_MAX = 2 ** 32 - 1; // UInt32 upper bound
 
 /**
  * Component for creating an update time parameters transaction.
@@ -53,7 +52,26 @@ export default function UpdateTimeParameters({
 
     const { mintPerPayday, rewardPeriodLength } = getCurrentValue(blockSummary);
 
-    const slotsPerYear = getSlotsPerYear(consensusStatus);
+    const [newRewardPeriodLength, setNewRewardPeriodLength] = useState(
+        rewardPeriodLength
+    );
+
+    const currentPaydaysPerYear = useMemo(
+        () => getPaydaysPerYear(rewardPeriodLength, consensusStatus),
+        [rewardPeriodLength, consensusStatus]
+    );
+
+    const newPaydaysPerYear = useMemo(
+        () =>
+            newRewardPeriodLength
+                ? getPaydaysPerYear(
+                      newRewardPeriodLength,
+                      consensusStatus
+                      // eslint-disable-next-line react-hooks/exhaustive-deps
+                  )
+                : currentPaydaysPerYear,
+        [newRewardPeriodLength, consensusStatus]
+    );
 
     return (
         <>
@@ -61,12 +79,12 @@ export default function UpdateTimeParameters({
                 <Label className="mB5">Current mint distribution</Label>
                 <MintRateInput
                     value={mintPerPayday.toString()}
-                    slotsPerYear={slotsPerYear}
+                    paydaysPerYear={currentPaydaysPerYear}
                     disabled
                     className="mB20"
                 />
                 <Label className="mB5">Current reward period length:</Label>
-                {rewardPeriodLength.toString()} milliseconds
+                {rewardPeriodLength.toString()} epochs
             </div>
             <div>
                 <Label className="mB5">New mint distribution</Label>
@@ -75,21 +93,21 @@ export default function UpdateTimeParameters({
                     defaultValue={
                         defaults.mintPerPayday || mintPerPayday.toString()
                     }
-                    slotsPerYear={slotsPerYear}
+                    paydaysPerYear={newPaydaysPerYear}
                     className="mB20"
                     rules={{
-                        required: 'Mint per slot value is required',
+                        required: 'Mint per payday value is required',
                         min: {
                             value: 0,
-                            message: "Mint per slot value can't be negative",
+                            message: "Mint per payday value can't be negative",
                         },
                         max: {
-                            value: MINT_PER_SLOT_MAX,
-                            message: `Mint per slot cannot exceed ${MINT_PER_SLOT_MAX}`,
+                            value: MINT_PER_PAYDAY_MAX,
+                            message: `Mint per payday cannot exceed ${MINT_PER_PAYDAY_MAX}`,
                         },
                         validate: {
                             isValidFloat,
-                            canParseMintPerSlot,
+                            canParseMintPerPayday,
                         },
                     }}
                 />
@@ -100,7 +118,12 @@ export default function UpdateTimeParameters({
                         defaults.rewardPeriodLength ||
                         rewardPeriodLength.toString()
                     }
-                    label={`${fieldDisplays.rewardPeriodLength} (milliseconds)`}
+                    onChange={(e) => {
+                        if (isValidBigInt(e.target.value)) {
+                            setNewRewardPeriodLength(BigInt(e.target.value));
+                        }
+                    }}
+                    label={`${fieldDisplays.rewardPeriodLength} (epochs)`}
                     placeholder={enterHere(fieldDisplays.rewardPeriodLength)}
                     rules={{
                         required: requiredMessage(

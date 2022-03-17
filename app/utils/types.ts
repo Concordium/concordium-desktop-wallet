@@ -338,14 +338,17 @@ export type BakerVerifyKey = Hex;
 export type BakerKeyProof = Hex;
 
 export type BakerKeyWithProof = [BakerVerifyKey, BakerKeyProof];
+export interface BakerKeysWithProofs {
+    signatureVerifyKey: BakerKeyWithProof;
+    electionVerifyKey: BakerKeyWithProof;
+    aggregationVerifyKey: BakerKeyWithProof;
+}
 
 export interface ConfigureBakerPayload {
     stake?: Amount;
     restakeEarnings?: boolean;
     openForDelegation?: OpenStatus;
-    signatureVerifyKey?: BakerKeyWithProof;
-    electionVerifyKey?: BakerKeyWithProof;
-    aggregationVerifyKey?: BakerKeyWithProof;
+    keys?: BakerKeysWithProofs;
     metadataUrl?: string;
     transactionFeeCommission?: RewardFraction;
     bakingRewardCommission?: RewardFraction;

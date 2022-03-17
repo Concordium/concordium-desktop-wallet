@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import React, { useCallback } from 'react';
 import { useFormContext, Validate } from 'react-hook-form';
 import { collapseFraction } from '~/utils/basicHelpers';
-import { getGTUSymbol } from '~/utils/gtu';
+import { getCcdSymbol } from '~/utils/ccd';
 import { useUpdateEffect } from '~/utils/hooks';
 import { validateBakerStake } from '~/utils/transactionHelpers';
 import { AccountInfo, Fraction } from '~/utils/types';
@@ -63,14 +63,14 @@ export default function PickBakerStakeAmount({
         <div className="mV30">
             {existing && (
                 <div className="body3 mono mB10">
-                    Current stake: {getGTUSymbol()}
+                    Current stake: {getCcdSymbol()}
                     {existing}
                 </div>
             )}
             <Label>{header}</Label>
             <div className="h1 mV5">
                 <span className={clsx(hasPendingChange && 'textFaded')}>
-                    {getGTUSymbol()}
+                    {getCcdSymbol()}
                 </span>
                 <Form.GtuInput
                     disabled={hasPendingChange}
