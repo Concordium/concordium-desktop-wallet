@@ -9,6 +9,7 @@ import Label from '~/components/Label';
 import Card from '~/cross-app-components/Card';
 import { displayAsCcd } from '~/utils/ccd';
 import { useConsensusStatus } from '~/utils/dataHooks';
+import { toFixed } from '~/utils/numberStringHelpers';
 import { hasDelegationProtocol } from '~/utils/protocolVersion';
 import {
     dateFromStakePendingChange,
@@ -42,6 +43,9 @@ interface ValuesProps<T> {
     details: T | undefined;
 }
 
+const formatCommission = (value: number) =>
+    `${toFixed(3)((value * 100).toString())}%`;
+
 interface BakerValuesProps extends ValuesProps<AccountBakerDetails> {
     isDelegationProtocol: boolean;
 }
@@ -71,6 +75,30 @@ function BakerValues({ details, isDelegationProtocol }: BakerValuesProps) {
                                 .openStatus
                         }
                         format={displayPoolOpen}
+                    />
+                    <Value
+                        title="Transaction fee commission"
+                        value={
+                            (details as AccountBakerDetailsV1)?.bakerPoolInfo
+                                .commissionRates.transactionCommission
+                        }
+                        format={formatCommission}
+                    />
+                    <Value
+                        title="Baking reward commission"
+                        value={
+                            (details as AccountBakerDetailsV1)?.bakerPoolInfo
+                                .commissionRates.bakingCommission
+                        }
+                        format={formatCommission}
+                    />
+                    <Value
+                        title="Finalization reward commission"
+                        value={
+                            (details as AccountBakerDetailsV1)?.bakerPoolInfo
+                                .commissionRates.finalizationCommission
+                        }
+                        format={formatCommission}
                     />
                 </>
             )}
