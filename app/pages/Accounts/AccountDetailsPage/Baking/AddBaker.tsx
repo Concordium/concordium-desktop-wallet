@@ -114,7 +114,6 @@ export default withDeps(
                 convert={convert}
                 validate={validate}
                 multisigRoute={routes.MULTISIGTRANSACTIONS_ADD_BAKER}
-                firstPageBack
             >
                 {({ openForDelegation }) => ({
                     stake: {

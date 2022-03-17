@@ -1,7 +1,7 @@
 import { AccountInfo, AccountInfoBaker } from '@concordium/node-sdk';
 import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import React from 'react';
-import { Redirect, Route, Switch } from 'react-router';
+import { Redirect, Route, Switch, useLocation } from 'react-router';
 import { useSelector } from 'react-redux';
 import { LocationDescriptorObject } from 'history';
 import { Account } from '~/utils/types';
@@ -23,26 +23,12 @@ import UpdateBakerKeys from './UpdateBakerKeys';
 import StakingDetails from '../StakingDetails';
 import { hasPendingBakerTransactionSelector } from '~/features/TransactionSlice';
 
-const toRoot = <Redirect to={routes.ACCOUNTS_BAKING} />;
-
 interface ActionsProps {
-    isBaker: boolean;
     isDelegationPV: boolean;
     disabled: boolean;
 }
 
-function Actions({ isBaker, isDelegationPV, disabled }: ActionsProps) {
-    if (!isBaker) {
-        return (
-            <ButtonNavLink
-                className="flex width100"
-                to={routes.ACCOUNTS_ADD_BAKER}
-                disabled={disabled}
-            >
-                Register baker
-            </ButtonNavLink>
-        );
-    }
+function Actions({ isDelegationPV, disabled }: ActionsProps) {
     return (
         <>
             <ButtonNavLink
@@ -95,11 +81,16 @@ interface Props {
 
 export default function Baking({ account, accountInfo }: Props) {
     const pv = useProtocolVersion(true);
+    const { pathname } = useLocation();
     const isDelegationPV = pv !== undefined && hasDelegationProtocol(pv);
     const isBaker = isBakerAccount(accountInfo);
     const hasPendingTransaction = useSelector(
         hasPendingBakerTransactionSelector
     );
+
+    if (pathname !== routes.ACCOUNTS_ADD_BAKER && !isBaker) {
+        return <Redirect to={routes.ACCOUNTS} />;
+    }
 
     return (
         <Switch>
@@ -107,7 +98,7 @@ export default function Baking({ account, accountInfo }: Props) {
                 path={routes.ACCOUNTS_ADD_BAKER}
                 render={({ location }) => {
                     if (isBaker) {
-                        return toRoot;
+                        return <Redirect to={routes.ACCOUNTS_BAKING} />;
                     }
 
                     if (isDelegationPV) {
@@ -130,7 +121,6 @@ export default function Baking({ account, accountInfo }: Props) {
                 }}
             />
             <Route path={routes.ACCOUNTS_REMOVE_BAKER}>
-                {isBaker || toRoot}
                 {isBaker && isDelegationPV && (
                     <RemoveBaker account={account} accountInfo={accountInfo} />
                 )}
@@ -142,7 +132,6 @@ export default function Baking({ account, accountInfo }: Props) {
                 )}
             </Route>
             <Route path={routes.ACCOUNTS_UPDATE_BAKER_KEYS}>
-                {isBaker || toRoot}
                 {isBaker && isDelegationPV && (
                     <UpdateBakerKeys account={account} />
                 )}
@@ -151,7 +140,6 @@ export default function Baking({ account, accountInfo }: Props) {
                 )}
             </Route>
             <Route path={routes.ACCOUNTS_UPDATE_BAKER_STAKE}>
-                {isBaker || toRoot}
                 {isBaker && isDelegationPV && (
                     <UpdateBakerStake
                         account={account}
@@ -166,34 +154,21 @@ export default function Baking({ account, accountInfo }: Props) {
                 )}
             </Route>
             <Route path={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}>
-                {isBaker && !isDelegationPV ? (
-                    <OldUpdateBakerRestake
-                        account={account}
-                        accountInfo={accountInfo as AccountInfoBaker}
-                    />
-                ) : (
-                    toRoot
-                )}
+                <OldUpdateBakerRestake
+                    account={account}
+                    accountInfo={accountInfo as AccountInfoBaker}
+                />
             </Route>
             <Route path={routes.ACCOUNTS_UPDATE_BAKER_POOL}>
-                {isDelegationPV && isBaker ? (
-                    <UpdateBakerPool
-                        account={account}
-                        accountInfo={accountInfo}
-                    />
-                ) : (
-                    toRoot
-                )}
+                <UpdateBakerPool account={account} accountInfo={accountInfo} />
             </Route>
             <Route default>
                 <StakingDetails
-                    type="baker"
                     hasPendingTransaction={hasPendingTransaction}
                     details={(accountInfo as AccountInfoBaker).accountBaker}
                 />
                 <Actions
                     disabled={hasPendingTransaction}
-                    isBaker={isBaker}
                     isDelegationPV={isDelegationPV}
                 />
             </Route>

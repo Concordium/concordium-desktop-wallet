@@ -5,7 +5,6 @@ import {
 } from '@concordium/node-sdk';
 import { isReduceStakePendingChange } from '@concordium/node-sdk/lib/src/accountHelpers';
 import React, { PropsWithChildren } from 'react';
-import NotRegisteredIcon from '@resources/svg/logo-error.svg';
 import RegisteredIcon from '@resources/svg/logo-checkmark.svg';
 import Label from '~/components/Label';
 import Card from '~/cross-app-components/Card';
@@ -23,27 +22,22 @@ import { displayDelegationTarget } from '~/utils/transactionFlows/configureDeleg
 
 import styles from './StakingDetails.module.scss';
 
-interface ValueProps<T> {
+interface ValueProps {
     title: string;
-    value: T | undefined;
-    format?(v: T): string | JSX.Element;
+    value: string;
 }
 
-function Value<T>({ title, value, format = (v) => `${v}` }: ValueProps<T>) {
+function Value({ title, value }: ValueProps) {
     return (
         <div className="mB20:notLast">
             <Label className="mB5 textWhite">{title}:</Label>
-            <span className="body2">
-                {value !== undefined ? format(value) : 'N/A'}
-            </span>
+            <span className="body2">{value}</span>
         </div>
     );
 }
 
-type StakingType = 'baker' | 'delegator';
-
 interface ValuesProps<T> {
-    details: T | undefined;
+    details: T;
 }
 
 const formatCommission = (value: number) =>
@@ -58,50 +52,46 @@ function BakerValues({ details, isDelegationProtocol }: BakerValuesProps) {
         <>
             <Value
                 title="Baker stake"
-                value={details?.stakedAmount}
-                format={displayAsCcd}
+                value={displayAsCcd(details.stakedAmount)}
             />
-            <Value title="Baker ID" value={details?.bakerId} />
+            <Value title="Baker ID" value={details.bakerId.toString()} />
             <Value
                 title="Rewards wil be"
-                value={details?.restakeEarnings}
-                format={(v) =>
-                    v ? 'Added to stake' : 'Added to public balance'
+                value={
+                    details.restakeEarnings
+                        ? 'Added to stake'
+                        : 'Added to public balance'
                 }
             />
             {isDelegationProtocol && (
                 <>
                     <Value
                         title="Delegation pool status"
-                        value={
-                            (details as AccountBakerDetailsV1)?.bakerPoolInfo
+                        value={displayPoolOpen(
+                            (details as AccountBakerDetailsV1).bakerPoolInfo
                                 .openStatus
-                        }
-                        format={displayPoolOpen}
+                        )}
                     />
                     <Value
                         title="Transaction fee commission"
-                        value={
-                            (details as AccountBakerDetailsV1)?.bakerPoolInfo
+                        value={formatCommission(
+                            (details as AccountBakerDetailsV1).bakerPoolInfo
                                 .commissionRates.transactionCommission
-                        }
-                        format={formatCommission}
+                        )}
                     />
                     <Value
                         title="Baking reward commission"
-                        value={
-                            (details as AccountBakerDetailsV1)?.bakerPoolInfo
+                        value={formatCommission(
+                            (details as AccountBakerDetailsV1).bakerPoolInfo
                                 .commissionRates.bakingCommission
-                        }
-                        format={formatCommission}
+                        )}
                     />
                     <Value
                         title="Finalization reward commission"
-                        value={
-                            (details as AccountBakerDetailsV1)?.bakerPoolInfo
+                        value={formatCommission(
+                            (details as AccountBakerDetailsV1).bakerPoolInfo
                                 .commissionRates.finalizationCommission
-                        }
-                        format={formatCommission}
+                        )}
                     />
                 </>
             )}
@@ -114,19 +104,18 @@ function DelegatorValues({ details }: ValuesProps<AccountDelegationDetails>) {
         <>
             <Value
                 title="Delegation amount"
-                value={details?.stakedAmount}
-                format={displayAsCcd}
+                value={displayAsCcd(details.stakedAmount)}
             />
             <Value
                 title="Target pool"
-                value={details?.delegationTarget}
-                format={displayDelegationTarget}
+                value={displayDelegationTarget(details.delegationTarget)}
             />
             <Value
                 title="Rewards wil be"
-                value={details?.restakeEarnings}
-                format={(v) =>
-                    v ? 'Added to delegation amount' : 'Added to public balance'
+                value={
+                    details.restakeEarnings
+                        ? 'Added to delegation amount'
+                        : 'Added to public balance'
                 }
             />
         </>
@@ -135,7 +124,6 @@ function DelegatorValues({ details }: ValuesProps<AccountDelegationDetails>) {
 
 interface DetailsText {
     titleRegistered: string;
-    titleNotRegistrered: string;
     titlePendingTransaction: string;
     pendingReduce: string;
     pendingRemove: string;
@@ -143,7 +131,6 @@ interface DetailsText {
 
 const bakerText: DetailsText = {
     titleRegistered: 'Baker registered',
-    titleNotRegistrered: 'No baker registered',
     titlePendingTransaction: 'Waiting for finalization',
     pendingReduce: 'New baker stake',
     pendingRemove:
@@ -152,7 +139,6 @@ const bakerText: DetailsText = {
 
 const delegatorText: DetailsText = {
     titleRegistered: 'Delegation registered',
-    titleNotRegistrered: 'No delegation registered',
     titlePendingTransaction: 'Waiting for finalization',
     pendingReduce: 'New delegation amount',
     pendingRemove:
@@ -171,39 +157,28 @@ const isDelegationDetails = (
     (details as AccountDelegationDetails).delegationTarget !== undefined;
 
 type Props = PropsWithChildren<{
-    type: StakingType;
-    details: StakingDetails | undefined;
+    details: StakingDetails;
     hasPendingTransaction: boolean;
 }>;
 
 export default function StakingDetails({
     details,
-    type,
     hasPendingTransaction,
 }: Props) {
     const cs = useConsensusStatus(true);
-    const text = type === 'baker' ? bakerText : delegatorText;
+    const text = isBakerDetails(details) ? bakerText : delegatorText;
 
-    let title = text.titleNotRegistrered;
-    let icon = <NotRegisteredIcon width={35} className="svgBlue" />;
-    if (hasPendingTransaction) {
-        title = text.titlePendingTransaction;
-        icon = <Loading inline iconWidth={35} />;
-    } else if (details !== undefined) {
-        title = text.titleRegistered;
-        icon = <RegisteredIcon width={35} />;
-    }
-
-    if (
-        details !== undefined &&
-        ((type === 'baker' && isDelegationDetails(details)) ||
-            (type === 'delegator' && isBakerDetails(details)))
-    ) {
-        throw new Error('Wrong type for details given to component');
-    }
+    const title = hasPendingTransaction
+        ? text.titlePendingTransaction
+        : text.titleRegistered;
+    const icon = hasPendingTransaction ? (
+        <Loading inline iconWidth={35} />
+    ) : (
+        <RegisteredIcon width={35} />
+    );
 
     const pendingChangeDate =
-        details?.pendingChange !== undefined
+        details.pendingChange !== undefined
             ? dateFromStakePendingChange(details.pendingChange, cs)
             : undefined;
 
@@ -214,12 +189,7 @@ export default function StakingDetails({
                 <h2 className="mV0 mL10">{title}</h2>
             </header>
             <section className="flexColumn justifyCenter mB20 flexChildFill">
-                {details === undefined && (
-                    <span className="body2 textFaded">
-                        No information to display
-                    </span>
-                )}
-                {details !== undefined && isBakerDetails(details) && (
+                {isBakerDetails(details) && (
                     <BakerValues
                         isDelegationProtocol={hasDelegationProtocol(
                             cs?.protocolVersion ?? 1n
@@ -227,11 +197,11 @@ export default function StakingDetails({
                         details={details}
                     />
                 )}
-                {details !== undefined && isDelegationDetails(details) && (
+                {isDelegationDetails(details) && (
                     <DelegatorValues details={details} />
                 )}
             </section>
-            {details?.pendingChange !== undefined &&
+            {details.pendingChange !== undefined &&
                 pendingChangeDate !== undefined && (
                     <div className={styles.pending}>
                         <div className="textWhite mB20">
@@ -242,8 +212,9 @@ export default function StakingDetails({
                         {isReduceStakePendingChange(details.pendingChange) ? (
                             <Value
                                 title={text.pendingReduce}
-                                value={details.pendingChange.newStake}
-                                format={displayAsCcd}
+                                value={displayAsCcd(
+                                    details.pendingChange.newStake
+                                )}
                             />
                         ) : (
                             <span className="mB20">{text.pendingRemove}</span>

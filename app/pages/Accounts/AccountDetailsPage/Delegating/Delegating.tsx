@@ -1,7 +1,7 @@
 import { AccountInfo, AccountInfoDelegator } from '@concordium/node-sdk';
 import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import React from 'react';
-import { Redirect, Route, Switch } from 'react-router';
+import { Redirect, Route, Switch, useLocation } from 'react-router';
 import { useSelector } from 'react-redux';
 import { Account } from '~/utils/types';
 import routes from '~/constants/routes.json';
@@ -10,8 +10,6 @@ import RemoveDelegation from './RemoveDelegation';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import StakingDetails from '../StakingDetails';
 import { hasPendingDelegationTransactionSelector } from '~/features/TransactionSlice';
-
-const toRoot = <Redirect to={routes.ACCOUNTS_DELEGATING} />;
 
 interface ActionsProps {
     isDelegating: boolean;
@@ -26,9 +24,7 @@ function Actions({ isDelegating, disabled }: ActionsProps) {
                 to={routes.ACCOUNTS_CONFIGURE_DELEGATION}
                 disabled={disabled}
             >
-                {isDelegating
-                    ? 'Update current delegation'
-                    : 'Register delegation'}
+                Update current delegation
             </ButtonNavLink>
             {isDelegating && (
                 <ButtonNavLink
@@ -51,9 +47,14 @@ interface Props {
 
 export default function Delegating({ account, accountInfo }: Props) {
     const isDelegating = isDelegatorAccount(accountInfo);
+    const { pathname } = useLocation();
     const hasPendingTransaction = useSelector(
         hasPendingDelegationTransactionSelector
     );
+
+    if (pathname !== routes.ACCOUNTS_CONFIGURE_DELEGATION && !isDelegating) {
+        return <Redirect to={routes.ACCOUNTS} />;
+    }
 
     return (
         <Switch>
@@ -61,21 +62,14 @@ export default function Delegating({ account, accountInfo }: Props) {
                 <ConfigureDelegation
                     account={account}
                     accountInfo={accountInfo}
+                    firstPageBack={isDelegating}
                 />
             </Route>
             <Route path={routes.ACCOUNTS_REMOVE_DELEGATION}>
-                {isDelegating ? (
-                    <RemoveDelegation
-                        account={account}
-                        accountInfo={accountInfo}
-                    />
-                ) : (
-                    toRoot
-                )}
+                <RemoveDelegation account={account} accountInfo={accountInfo} />
             </Route>
             <Route default>
                 <StakingDetails
-                    type="delegator"
                     hasPendingTransaction={hasPendingTransaction}
                     details={
                         (accountInfo as AccountInfoDelegator).accountDelegation

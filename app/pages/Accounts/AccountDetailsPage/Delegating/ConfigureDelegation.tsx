@@ -28,6 +28,7 @@ interface Props
     extends ConfigureDelegationFlowDependencies,
         NotOptional<AccountAndNonce> {
     accountInfo: AccountInfo;
+    firstPageBack?: boolean;
 }
 
 type UnsafeProps = MakeRequired<Partial<Props>, 'account' | 'accountInfo'>;
@@ -50,7 +51,13 @@ const withDeps = (component: ComponentType<Props>) =>
     );
 
 function ConfigureDelegation(props: Props) {
-    const { nonce, account, exchangeRate, accountInfo } = props;
+    const {
+        nonce,
+        account,
+        exchangeRate,
+        accountInfo,
+        firstPageBack = false,
+    } = props;
     const { path: matchedRoute } = useRouteMatch();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -72,7 +79,7 @@ function ConfigureDelegation(props: Props) {
             title={configureDelegationTitle}
             convert={convert}
             multisigRoute={routes.MULTISIGTRANSACTIONS_CONFIGURE_DELEGATION}
-            firstPageBack
+            firstPageBack={firstPageBack}
         >
             {{
                 target: {

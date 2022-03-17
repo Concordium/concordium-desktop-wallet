@@ -28,8 +28,6 @@ export default function MoreActions({ account, accountInfo }: Props) {
         accountInfo !== undefined && isDelegatorAccount(accountInfo);
     const pv = useProtocolVersion(true);
     const isDelegationPV = pv !== undefined && hasDelegationProtocol(pv);
-    const canDelegate =
-        isDelegationPV && !isBaker && accountHasDeployedCredentials;
 
     return (
         <>
@@ -91,7 +89,27 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     Update credentials
                 </ButtonNavLink>
             )}
-            {accountHasDeployedCredentials && !isDelegating && (
+            {accountHasDeployedCredentials && !isDelegating && !isBaker && (
+                <>
+                    <ButtonNavLink
+                        className="mB20:notLast flex width100"
+                        to={routes.ACCOUNTS_ADD_BAKER}
+                        disabled={!accountInfo}
+                    >
+                        Register baker
+                    </ButtonNavLink>
+                    {isDelegationPV && (
+                        <ButtonNavLink
+                            className="mB20:notLast flex width100"
+                            to={routes.ACCOUNTS_CONFIGURE_DELEGATION}
+                            disabled={!accountInfo}
+                        >
+                            Setup delegation
+                        </ButtonNavLink>
+                    )}
+                </>
+            )}
+            {accountHasDeployedCredentials && !isDelegating && isBaker && (
                 <ButtonNavLink
                     className="mB20:notLast flex width100"
                     to={routes.ACCOUNTS_BAKING}
@@ -100,15 +118,18 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     Baking
                 </ButtonNavLink>
             )}
-            {canDelegate && (
-                <ButtonNavLink
-                    className="mB20:notLast flex width100"
-                    to={routes.ACCOUNTS_DELEGATING}
-                    disabled={!accountInfo}
-                >
-                    Delegating
-                </ButtonNavLink>
-            )}
+            {accountHasDeployedCredentials &&
+                isDelegationPV &&
+                isDelegating &&
+                !isBaker && (
+                    <ButtonNavLink
+                        className="mB20:notLast flex width100"
+                        to={routes.ACCOUNTS_DELEGATING}
+                        disabled={!accountInfo}
+                    >
+                        Delegating
+                    </ButtonNavLink>
+                )}
         </>
     );
 }
