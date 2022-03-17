@@ -2,6 +2,7 @@ import { AccountInfo, AccountInfoBaker } from '@concordium/node-sdk';
 import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router';
+import { useSelector } from 'react-redux';
 import { LocationDescriptorObject } from 'history';
 import { Account } from '~/utils/types';
 import routes from '~/constants/routes.json';
@@ -20,20 +21,23 @@ import UpdateBakerStake from './UpdateBakerStake';
 import UpdateBakerPool from './UpdateBakerPool';
 import UpdateBakerKeys from './UpdateBakerKeys';
 import StakingDetails from '../StakingDetails';
+import { hasPendingBakerTransactionSelector } from '~/features/TransactionSlice';
 
 const toRoot = <Redirect to={routes.ACCOUNTS_BAKING} />;
 
 interface ActionsProps {
     isBaker: boolean;
     isDelegationPV: boolean;
+    disabled: boolean;
 }
 
-function Actions({ isBaker, isDelegationPV }: ActionsProps) {
+function Actions({ isBaker, isDelegationPV, disabled }: ActionsProps) {
     if (!isBaker) {
         return (
             <ButtonNavLink
                 className="flex width100"
                 to={routes.ACCOUNTS_ADD_BAKER}
+                disabled={disabled}
             >
                 Register baker
             </ButtonNavLink>
@@ -44,27 +48,31 @@ function Actions({ isBaker, isDelegationPV }: ActionsProps) {
             <ButtonNavLink
                 className="mB20:notLast flex width100"
                 to={routes.ACCOUNTS_UPDATE_BAKER_STAKE}
+                disabled={disabled}
             >
                 Update baker stake
             </ButtonNavLink>
             {isDelegationPV ? (
                 <ButtonNavLink
                     className="mB20:notLast flex width100"
-                    to={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}
+                    to={routes.ACCOUNTS_UPDATE_BAKER_POOL}
+                    disabled={disabled}
                 >
-                    Update baker restake earnings
+                    Update baker pool
                 </ButtonNavLink>
             ) : (
                 <ButtonNavLink
                     className="mB20:notLast flex width100"
-                    to={routes.ACCOUNTS_UPDATE_BAKER_POOL}
+                    to={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}
+                    disabled={disabled}
                 >
-                    Update baker pool
+                    Update baker restake earnings
                 </ButtonNavLink>
             )}
             <ButtonNavLink
                 className="mB20:notLast flex width100"
                 to={routes.ACCOUNTS_UPDATE_BAKER_KEYS}
+                disabled={disabled}
             >
                 Update baker keys
             </ButtonNavLink>
@@ -72,6 +80,7 @@ function Actions({ isBaker, isDelegationPV }: ActionsProps) {
                 className="flex width100"
                 to={routes.ACCOUNTS_REMOVE_BAKER}
                 negative
+                disabled={disabled}
             >
                 Stop baking
             </ButtonNavLink>
@@ -88,6 +97,9 @@ export default function Baking({ account, accountInfo }: Props) {
     const pv = useProtocolVersion(true);
     const isDelegationPV = pv !== undefined && hasDelegationProtocol(pv);
     const isBaker = isBakerAccount(accountInfo);
+    const hasPendingTransaction = useSelector(
+        hasPendingBakerTransactionSelector
+    );
 
     return (
         <Switch>
@@ -176,10 +188,14 @@ export default function Baking({ account, accountInfo }: Props) {
             <Route default>
                 <StakingDetails
                     type="baker"
-                    hasPendingTransaction
+                    hasPendingTransaction={hasPendingTransaction}
                     details={(accountInfo as AccountInfoBaker).accountBaker}
                 />
-                <Actions isBaker={isBaker} isDelegationPV={isDelegationPV} />
+                <Actions
+                    disabled={hasPendingTransaction}
+                    isBaker={isBaker}
+                    isDelegationPV={isDelegationPV}
+                />
             </Route>
         </Switch>
     );
