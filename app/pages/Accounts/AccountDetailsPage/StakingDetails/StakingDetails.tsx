@@ -1,5 +1,6 @@
 import {
     AccountBakerDetails,
+    AccountBakerDetailsV1,
     AccountDelegationDetails,
 } from '@concordium/node-sdk';
 import { isReduceStakePendingChange } from '@concordium/node-sdk/lib/src/accountHelpers';
@@ -8,10 +9,12 @@ import Label from '~/components/Label';
 import Card from '~/cross-app-components/Card';
 import { displayAsCcd } from '~/utils/ccd';
 import { useConsensusStatus } from '~/utils/dataHooks';
+import { hasDelegationProtocol } from '~/utils/protocolVersion';
 import {
     dateFromStakePendingChange,
     getFormattedDateString,
 } from '~/utils/timeHelpers';
+import { displayPoolOpen } from '~/utils/transactionFlows/configureBaker';
 import { displayDelegationTarget } from '~/utils/transactionFlows/configureDelegation';
 
 import styles from './StakingDetails.module.scss';
@@ -19,7 +22,7 @@ import styles from './StakingDetails.module.scss';
 interface ValueProps<T> {
     title: string;
     value: T | undefined;
-    format(v: T): string | JSX.Element;
+    format?(v: T): string | JSX.Element;
 }
 
 function Value<T>({ title, value, format = (v) => `${v}` }: ValueProps<T>) {
@@ -39,8 +42,40 @@ interface ValuesProps<T> {
     details: T | undefined;
 }
 
-function BakerValues({ details }: ValuesProps<AccountBakerDetails>) {
-    return <>{details?.bakerId}</>;
+interface BakerValuesProps extends ValuesProps<AccountBakerDetails> {
+    isDelegationProtocol: boolean;
+}
+
+function BakerValues({ details, isDelegationProtocol }: BakerValuesProps) {
+    return (
+        <>
+            <Value
+                title="Baker stake"
+                value={details?.stakedAmount}
+                format={displayAsCcd}
+            />
+            <Value title="Baker ID" value={details?.bakerId} />
+            <Value
+                title="Rewards wil be"
+                value={details?.restakeEarnings}
+                format={(v) =>
+                    v ? 'Added to stake' : 'Added to public balance'
+                }
+            />
+            {isDelegationProtocol && (
+                <>
+                    <Value
+                        title="Delegation pool status"
+                        value={
+                            (details as AccountBakerDetailsV1)?.bakerPoolInfo
+                                .openStatus
+                        }
+                        format={displayPoolOpen}
+                    />
+                </>
+            )}
+        </>
+    );
 }
 
 function DelegatorValues({ details }: ValuesProps<AccountDelegationDetails>) {
@@ -117,7 +152,6 @@ export default function StakingDetails({
 }: Props) {
     const cs = useConsensusStatus(true);
     const text = type === 'baker' ? bakerText : delegatorText;
-    const Values = type === 'baker' ? BakerValues : DelegatorValues;
 
     let title = text.titleNotRegistrered;
     if (hasPendingTransaction) {
@@ -144,9 +178,18 @@ export default function StakingDetails({
             <header className={styles.header}>
                 <h2 className="mB0">{title}</h2>
             </header>
-            {/* We already know here, that the type prop and the details type match. */}
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            <Values details={details as any} />
+            {type === 'baker' ? (
+                <BakerValues
+                    isDelegationProtocol={hasDelegationProtocol(
+                        cs?.protocolVersion ?? 1n
+                    )}
+                    details={details as AccountBakerDetails}
+                />
+            ) : (
+                <DelegatorValues
+                    details={details as AccountDelegationDetails}
+                />
+            )}
             {details?.pendingChange !== undefined &&
                 pendingChangeDate !== undefined && (
                     <div className={styles.pending}>

@@ -283,8 +283,11 @@ export function getEstimatedConfigureBakerFee(
     );
 }
 
-export const displayPoolOpen = (status: OpenStatus) => {
-    switch (status) {
+export const displayPoolOpen = (status: OpenStatus | OpenStatusText) => {
+    const parsed =
+        typeof status === 'number' ? status : openStatusEnumFromText(status);
+
+    switch (parsed) {
         case OpenStatus.OpenForAll:
             return 'Open for delegation';
         case OpenStatus.ClosedForNew:
@@ -292,7 +295,7 @@ export const displayPoolOpen = (status: OpenStatus) => {
         case OpenStatus.ClosedForAll:
             return 'Closed for delegation';
         default:
-            throw new Error(`Status not supported: ${status}`);
+            throw new Error(`Status not supported: ${parsed}`);
     }
 };
 
