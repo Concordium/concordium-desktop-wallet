@@ -5,8 +5,11 @@ import {
 } from '@concordium/node-sdk';
 import { isReduceStakePendingChange } from '@concordium/node-sdk/lib/src/accountHelpers';
 import React, { PropsWithChildren } from 'react';
+import NotRegisteredIcon from '@resources/svg/logo-error.svg';
+import RegisteredIcon from '@resources/svg/logo-checkmark.svg';
 import Label from '~/components/Label';
 import Card from '~/cross-app-components/Card';
+import Loading from '~/cross-app-components/Loading';
 import { displayAsCcd } from '~/utils/ccd';
 import { useConsensusStatus } from '~/utils/dataHooks';
 import { toFixed } from '~/utils/numberStringHelpers';
@@ -182,10 +185,13 @@ export default function StakingDetails({
     const text = type === 'baker' ? bakerText : delegatorText;
 
     let title = text.titleNotRegistrered;
+    let icon = <NotRegisteredIcon width={35} className="svgBlue" />;
     if (hasPendingTransaction) {
         title = text.titlePendingTransaction;
+        icon = <Loading inline iconWidth={35} />;
     } else if (details !== undefined) {
         title = text.titleRegistered;
+        icon = <RegisteredIcon width={35} />;
     }
 
     if (
@@ -204,7 +210,8 @@ export default function StakingDetails({
     return (
         <Card className={styles.root} dark>
             <header className={styles.header}>
-                <h2 className="mB0">{title}</h2>
+                {icon}
+                <h2 className="mV0 mL10">{title}</h2>
             </header>
             <section className="flexColumn justifyCenter mB20 flexChildFill">
                 {details === undefined && (
