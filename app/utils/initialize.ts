@@ -38,6 +38,7 @@ async function loadSettingsIntoStore(dispatch: Dispatch) {
  */
 export default async function initApplication(dispatch: Dispatch) {
     await loadSettingsIntoStore(dispatch);
+    initChainData(dispatch);
 
     await Promise.all([
         loadAddressBook(dispatch),
@@ -46,9 +47,8 @@ export default async function initApplication(dispatch: Dispatch) {
         loadProposals(dispatch),
         loadCredentials(dispatch),
         loadExternalCredentials(dispatch),
-        initChainData(dispatch),
     ]);
-    dispatch(unlock());
 
+    dispatch(unlock());
     listenForIdentityStatus(dispatch);
 }

@@ -25,12 +25,12 @@ import {
     instanceOfScheduledTransferWithMemo,
     instanceOfEncryptedTransferWithMemo,
     instanceOfSimpleTransferWithMemo,
-    instanceOfConfigureBaker,
     instanceOfAddBaker,
     instanceOfRemoveBaker,
     instanceOfUpdateBakerKeys,
     instanceOfUpdateBakerRestakeEarnings,
     instanceOfUpdateBakerStake,
+    instanceOfConfigureBaker,
     instanceOfConfigureDelegation,
 } from '~/utils/types';
 

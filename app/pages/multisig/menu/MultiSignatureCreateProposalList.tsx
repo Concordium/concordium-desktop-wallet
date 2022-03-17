@@ -249,9 +249,9 @@ export default function MultiSignatureCreateProposalView() {
     return (
         <>
             {availableTransactionTypes.map(
-                ([transactionType, specificType, label, filter]) =>
-                    filter === undefined ||
-                    (pv !== undefined && filter(pv) && (
+                ([transactionType, specificType, label, filter = () => true]) =>
+                    pv !== undefined &&
+                    filter(pv) && (
                         <Fragment key={`${transactionType}${specificType}`}>
                             {[
                                 TransactionKindId.Configure_baker,
@@ -274,7 +274,7 @@ export default function MultiSignatureCreateProposalView() {
                                 TransactionKindId.Configure_delegation &&
                                 configureDelegationLinks}
                         </Fragment>
-                    ))
+                    )
             )}
         </>
     );
