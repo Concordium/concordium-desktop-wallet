@@ -6,6 +6,8 @@
     margin-bottom: 20px;
     color: $color-pale-blue;
     text-align: center;
+    display: flex;
+    flex-direction: column;
 }
 
 .header {
@@ -23,7 +25,7 @@
 }
 
 .pending {
-    margin: 20px -20px 0;
+    margin: 0 -20px 20px;
     padding: 20px 20px 0;
     border-top: 2px solid rgba($color-grey, 0.3);
 }

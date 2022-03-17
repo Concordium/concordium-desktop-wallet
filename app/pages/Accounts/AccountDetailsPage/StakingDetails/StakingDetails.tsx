@@ -28,7 +28,7 @@ interface ValueProps<T> {
 
 function Value<T>({ title, value, format = (v) => `${v}` }: ValueProps<T>) {
     return (
-        <div className="mB20">
+        <div className="mB20:notLast">
             <Label className="mB5 textWhite">{title}:</Label>
             <span className="body2">
                 {value !== undefined ? format(value) : 'N/A'}
@@ -206,18 +206,24 @@ export default function StakingDetails({
             <header className={styles.header}>
                 <h2 className="mB0">{title}</h2>
             </header>
-            {type === 'baker' ? (
-                <BakerValues
-                    isDelegationProtocol={hasDelegationProtocol(
-                        cs?.protocolVersion ?? 1n
-                    )}
-                    details={details as AccountBakerDetails}
-                />
-            ) : (
-                <DelegatorValues
-                    details={details as AccountDelegationDetails}
-                />
-            )}
+            <section className="flexColumn justifyCenter mB20 flexChildFill">
+                {details === undefined && (
+                    <span className="body2 textFaded">
+                        No information to display
+                    </span>
+                )}
+                {details !== undefined && isBakerDetails(details) && (
+                    <BakerValues
+                        isDelegationProtocol={hasDelegationProtocol(
+                            cs?.protocolVersion ?? 1n
+                        )}
+                        details={details}
+                    />
+                )}
+                {details !== undefined && isDelegationDetails(details) && (
+                    <DelegatorValues details={details} />
+                )}
+            </section>
             {details?.pendingChange !== undefined &&
                 pendingChangeDate !== undefined && (
                     <div className={styles.pending}>
