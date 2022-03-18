@@ -6,7 +6,7 @@ import { BlockSummaryV1 } from '@concordium/node-sdk';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAccount } from '~/database/AccountDao';
 import { BlockSummary, ConsensusStatus } from '~/node/NodeApiTypes';
-import { getConsensusStatus } from '~/node/nodeRequests';
+import { getConsensusStatus, getRewardStatus } from '~/node/nodeRequests';
 import {
     fetchLastFinalizedIdentityProviders,
     fetchLastFinalizedBlockSummary,
@@ -100,20 +100,20 @@ export function useTransactionCostEstimate(
  * Hook for fetching last finalized block summary
  */
 export function useLastFinalizedBlockSummary() {
-    const cd = useAsyncMemo<{
+    const chainData = useAsyncMemo<{
         lastFinalizedBlockSummary: BlockSummary;
         consensusStatus: ConsensusStatus;
     }>(fetchLastFinalizedBlockSummary, noOp, []);
 
-    return cd;
+    return chainData;
 }
 
 /**
  * Hook for fetching consensus status
  *
- * @param swr If true, returns stale response from store while fetching update.
+ * @param staleWhileRevalidate If true, returns stale response from store while fetching update.
  */
-export function useConsensusStatus(swr = false) {
+export function useConsensusStatus(staleWhileRevalidate = false) {
     const cs = useAsyncMemo<ConsensusStatus>(getConsensusStatus, noOp, []);
     const stale = useSelector(consensusStatusSelector);
     const dispatch = useDispatch();
@@ -124,7 +124,7 @@ export function useConsensusStatus(swr = false) {
         }
     }, [cs, dispatch]);
 
-    return swr ? stale ?? cs : cs;
+    return staleWhileRevalidate ? stale ?? cs : cs;
 }
 
 /** Hook for fetching identity providers */
@@ -155,7 +155,7 @@ export function useStakedAmount(accountAddress: string): Amount | undefined {
     if (accountInfo === undefined || !isBakerAccount(accountInfo)) {
         return undefined;
     }
-    return BigInt(accountInfo.accountBaker?.stakedAmount ?? '0');
+    return BigInt(accountInfo.accountBaker.stakedAmount);
 }
 
 /** Hook for accessing chain parameters of the last finalized block */
@@ -278,7 +278,19 @@ export function useCalcDelegatorCooldownUntil() {
 /** Hook for calculating the date of the baking stake cooldown ending, will result in undefined while loading */
 export function useCalcBakerStakeCooldownUntil() {
     const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
-    const rs = useAsyncMemo(getRewardStatusLatest);
+    const rs = useAsyncMemo(
+        async () => {
+            if (lastFinalizedBlockSummary === undefined) {
+                return undefined;
+            }
+
+            return getRewardStatus(
+                lastFinalizedBlockSummary.consensusStatus.lastFinalizedBlock
+            );
+        },
+        noOp,
+        [lastFinalizedBlockSummary]
+    );
     const now = useCurrentTime(60000);
 
     if (
@@ -319,8 +331,10 @@ export function useCalcBakerStakeCooldownUntil() {
 /**
  * Hook for getting chain protocol version
  *
- * @param swr If true, returns stale response from store while fetching update.
+ * @param staleWhileRevalidate If true, returns stale response from store while fetching update.
  */
-export function useProtocolVersion(swr = false): bigint | undefined {
-    return useConsensusStatus(swr)?.protocolVersion;
+export function useProtocolVersion(
+    staleWhileRevalidate = false
+): bigint | undefined {
+    return useConsensusStatus(staleWhileRevalidate)?.protocolVersion;
 }

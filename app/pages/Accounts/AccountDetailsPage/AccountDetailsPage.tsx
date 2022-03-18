@@ -208,7 +208,8 @@ export default withAccountSync(function DetailsPage() {
                         )}
                     </Route>
                     <Route path={routes.ACCOUNTS_UPDATE_BAKER_POOL}>
-                        {isDelegationPV &&
+                        {canTransfer &&
+                        isDelegationPV &&
                         isBaker &&
                         accountInfo !== undefined ? (
                             <UpdateBakerPool

@@ -163,6 +163,12 @@ const ACCOUNT_STEP_TITLE = 'Select account';
 const EXPIRY_STEP_TITLE = 'Select transaction expiry';
 const SIGN_STEP_TITLE = 'Signature and hardware wallet';
 
+/**
+ * A component for composing flows for multi-signature account transactions.
+ *
+ * @template F Type of the form as a whole. Each step in the form flow should correspond to a member on the type.
+ * @template T Type of the transaction produced by the flow.
+ */
 export default function MultiSigAccountTransactionFlow<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     F extends Record<string, any>,
