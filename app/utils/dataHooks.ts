@@ -33,10 +33,8 @@ import {
     ArInfo,
 } from './types';
 import { noOp } from './basicHelpers';
-import { RootState } from '~/store/store';
 import {
     consensusStatusSelector,
-    setBlockSummary,
     setConsensusStatus,
 } from '~/features/ChainDataSlice';
 
@@ -100,28 +98,14 @@ export function useTransactionCostEstimate(
 
 /**
  * Hook for fetching last finalized block summary
- *
- * @param swr If true, returns stale response from store while fetching update.
  */
-export function useLastFinalizedBlockSummary(swr = false) {
+export function useLastFinalizedBlockSummary() {
     const cd = useAsyncMemo<{
         lastFinalizedBlockSummary: BlockSummary;
         consensusStatus: ConsensusStatus;
     }>(fetchLastFinalizedBlockSummary, noOp, []);
-    const stale = useSelector((s: RootState) => ({
-        consensusStatus: s.chainData.consensusStatus,
-        lastFinalizedBlockSummary: s.chainData.blockSummary,
-    }));
-    const dispatch = useDispatch();
 
-    useEffect(() => {
-        if (cd !== undefined) {
-            dispatch(setConsensusStatus(cd.consensusStatus));
-            dispatch(setBlockSummary(cd.lastFinalizedBlockSummary));
-        }
-    }, [cd, dispatch]);
-
-    return swr ? stale ?? cd : cd;
+    return cd;
 }
 
 /**

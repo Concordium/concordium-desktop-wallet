@@ -1,11 +1,7 @@
-import {
-    BlockSummary,
-    ConsensusStatus,
-    KeysMatching,
-} from '@concordium/node-sdk';
+import { ConsensusStatus, KeysMatching } from '@concordium/node-sdk';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Dispatch } from 'redux';
-import { getBlockSummary, getConsensusStatus } from '~/node/nodeRequests';
+import { getConsensusStatus } from '~/node/nodeRequests';
 import type { RootState } from '~/store/store';
 import { pipe } from '~/utils/basicHelpers';
 import { orUndefined } from '~/utils/functionHelpers';
@@ -60,7 +56,6 @@ function toOriginalCS(scs: SerializableConsensusStatus): ConsensusStatus {
 }
 
 interface ChainDataState {
-    blockSummary?: BlockSummary;
     consensusStatus?: SerializableConsensusStatus;
 }
 
@@ -70,9 +65,6 @@ const chainDataSlice = createSlice({
     name: 'chainData',
     initialState,
     reducers: {
-        setBlockSummary(state, input: PayloadAction<BlockSummary>) {
-            state.blockSummary = input.payload;
-        },
         setConsensusStatus(
             state,
             input: PayloadAction<SerializableConsensusStatus>
@@ -82,7 +74,6 @@ const chainDataSlice = createSlice({
     },
 });
 
-export const { setBlockSummary } = chainDataSlice.actions;
 export const setConsensusStatus = pipe(
     toSerializableCS,
     chainDataSlice.actions.setConsensusStatus
@@ -94,10 +85,8 @@ export const consensusStatusSelector = (s: RootState) =>
 export async function init(dispatch: Dispatch) {
     try {
         const cs: ConsensusStatus = await getConsensusStatus();
-        const bs = await getBlockSummary(cs.lastFinalizedBlock);
 
         dispatch(setConsensusStatus(cs));
-        dispatch(setBlockSummary(bs));
     } catch (e) {
         // eslint-disable-next-line no-console
         console.error('Could initialize chain data state:', e); // TODO add proper logging instead
