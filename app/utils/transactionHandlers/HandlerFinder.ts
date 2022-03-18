@@ -162,6 +162,7 @@ export function findUpdateInstructionHandler(
                 new FoundationAccountHandler()
             );
         case UpdateType.UpdateMintDistribution:
+        case UpdateType.UpdateMintDistributionV1:
             return new UpdateInstructionHandlerTypeMiddleware(
                 new MintDistributionHandler()
             );

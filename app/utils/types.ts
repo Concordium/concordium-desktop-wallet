@@ -834,6 +834,7 @@ export enum UpdateType {
     CooldownParameters,
     PoolParameters,
     TimeParameters,
+    UpdateMintDistributionV1,
 }
 
 export enum RootKeysUpdateTypes {
@@ -1012,7 +1013,10 @@ export function isFoundationAccount(
 export function isMintDistribution(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<MintDistribution> {
-    return UpdateType.UpdateMintDistribution === transaction.type;
+    return (
+        UpdateType.UpdateMintDistribution === transaction.type ||
+        UpdateType.UpdateMintDistributionV1 === transaction.type
+    );
 }
 
 export function isProtocolUpdate(

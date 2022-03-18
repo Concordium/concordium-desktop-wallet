@@ -61,6 +61,7 @@ export enum OnChainUpdateType {
     UpdateCooldownParameters = 14,
     UpdatePoolParameters = 15,
     UpdateTimeParameters = 16,
+    UpdateMintDistributionV1 = 17,
 }
 
 /**
@@ -573,6 +574,8 @@ function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
             return OnChainUpdateType.UpdatePoolParameters;
         case UpdateType.TimeParameters:
             return OnChainUpdateType.UpdateTimeParameters;
+        case UpdateType.UpdateMintDistributionV1:
+            return OnChainUpdateType.UpdateMintDistributionV1;
         default:
             throw new Error(`An invalid update type was given: ${type}`);
     }

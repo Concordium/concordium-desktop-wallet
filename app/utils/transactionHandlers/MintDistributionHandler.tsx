@@ -49,8 +49,10 @@ export default class MintDistributionHandler
         } = blockSummary.updates.keys.level2Keys.mintDistribution;
 
         let mintDistribution: MintDistribution;
+        let updateType: UpdateType;
         if (mintPerSlot) {
             // version 0
+            updateType = UpdateType.UpdateMintDistribution;
             const parsedMintPerSlot = parseMintRate(mintPerSlot);
 
             if (!parsedMintPerSlot) {
@@ -63,6 +65,7 @@ export default class MintDistributionHandler
                 finalizationReward: rewardDistribution.second,
             };
         } else {
+            updateType = UpdateType.UpdateMintDistributionV1;
             mintDistribution = {
                 version: 1,
                 bakingReward: rewardDistribution.first,
@@ -72,7 +75,7 @@ export default class MintDistributionHandler
 
         return createUpdateMultiSignatureTransaction(
             mintDistribution,
-            UpdateType.UpdateMintDistribution,
+            updateType,
             sequenceNumber,
             threshold,
             effectiveTime,
