@@ -415,23 +415,23 @@ export function serializeCooldownParameters(
 
 export function serializeCommisionRates(commisionRates: CommissionRates) {
     const serializedRates = Buffer.alloc(12);
-    serializedRates.writeUInt32BE(commisionRates.transactionFeeCommission, 0);
-    serializedRates.writeUInt32BE(commisionRates.bakingRewardCommission, 4);
     serializedRates.writeUInt32BE(
         commisionRates.finalizationRewardCommission,
-        8
+        0
     );
+    serializedRates.writeUInt32BE(commisionRates.bakingRewardCommission, 4);
+    serializedRates.writeUInt32BE(commisionRates.transactionFeeCommission, 8);
     return serializedRates;
 }
 
 export function serializeCommisionRanges(commisionRates: CommissionRanges) {
     const serializedRanges = Buffer.alloc(24);
     serializedRanges.writeUInt32BE(
-        commisionRates.transactionFeeCommission.min,
+        commisionRates.finalizationRewardCommission.min,
         0
     );
     serializedRanges.writeUInt32BE(
-        commisionRates.transactionFeeCommission.max,
+        commisionRates.finalizationRewardCommission.max,
         4
     );
     serializedRanges.writeUInt32BE(
@@ -443,11 +443,11 @@ export function serializeCommisionRanges(commisionRates: CommissionRanges) {
         12
     );
     serializedRanges.writeUInt32BE(
-        commisionRates.finalizationRewardCommission.min,
+        commisionRates.transactionFeeCommission.min,
         16
     );
     serializedRanges.writeUInt32BE(
-        commisionRates.finalizationRewardCommission.max,
+        commisionRates.transactionFeeCommission.max,
         20
     );
     return serializedRanges;

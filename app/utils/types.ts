@@ -1226,9 +1226,9 @@ export interface CooldownParameters {
 }
 
 export interface CommissionRates {
-    transactionFeeCommission: RewardFraction;
-    bakingRewardCommission: RewardFraction;
     finalizationRewardCommission: RewardFraction;
+    bakingRewardCommission: RewardFraction;
+    transactionFeeCommission: RewardFraction;
 }
 
 export interface CommissionRange {
@@ -1237,9 +1237,9 @@ export interface CommissionRange {
 }
 
 export interface CommissionRanges {
-    transactionFeeCommission: CommissionRange;
-    bakingRewardCommission: CommissionRange;
     finalizationRewardCommission: CommissionRange;
+    bakingRewardCommission: CommissionRange;
+    transactionFeeCommission: CommissionRange;
 }
 
 export interface PoolParameters {

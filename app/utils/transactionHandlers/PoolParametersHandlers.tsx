@@ -58,14 +58,14 @@ export default class PoolParametersHandler
 
         const poolParameters: PoolParameters = {
             lPoolCommissions: {
-                transactionFeeCommission: finalizationCommissionLPool,
+                transactionFeeCommission: transactionCommissionLPool,
                 bakingRewardCommission: bakingCommissionLPool,
-                finalizationRewardCommission: transactionCommissionLPool,
+                finalizationRewardCommission: finalizationCommissionLPool,
             },
             commissionBounds: {
-                transactionFeeCommission: finalizationCommissionRange,
+                transactionFeeCommission: transactionCommissionRange,
                 bakingRewardCommission: bakingCommissionRange,
-                finalizationRewardCommission: transactionCommissionRange,
+                finalizationRewardCommission: finalizationCommissionRange,
             },
             minimumEquityCapital,
             capitalBound,
