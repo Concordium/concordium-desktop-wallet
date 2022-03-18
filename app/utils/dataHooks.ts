@@ -34,7 +34,11 @@ import {
 } from './types';
 import { noOp } from './basicHelpers';
 import { RootState } from '~/store/store';
-import { setBlockSummary, setConsensusStatus } from '~/features/ChainDataSlice';
+import {
+    consensusStatusSelector,
+    setBlockSummary,
+    setConsensusStatus,
+} from '~/features/ChainDataSlice';
 
 /** Hook for looking up an account name from an address */
 export function useAccountName(address: string) {
@@ -127,7 +131,7 @@ export function useLastFinalizedBlockSummary(swr = false) {
  */
 export function useConsensusStatus(swr = false) {
     const cs = useAsyncMemo<ConsensusStatus>(getConsensusStatus, noOp, []);
-    const stale = useSelector((s: RootState) => s.chainData.consensusStatus);
+    const stale = useSelector(consensusStatusSelector);
     const dispatch = useDispatch();
 
     useEffect(() => {
