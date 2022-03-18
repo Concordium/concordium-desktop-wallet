@@ -14,7 +14,7 @@ import { expireProposals } from '~/utils/ProposalHelper';
 import routes from '~/constants/routes.json';
 import { useProtocolVersion } from '~/utils/dataHooks';
 import { hasDelegationProtocol } from '~/utils/protocolVersion';
-import { not } from '~/utils/basicHelpers';
+import { not } from '~/utils/functionHelpers';
 
 import styles from '../MultiSignaturePage/MultiSignaturePage.module.scss';
 

@@ -22,6 +22,9 @@ import {
 import { useUpdateEffect } from '~/utils/hooks';
 import { hasDelegationProtocol } from '~/utils/protocolVersion';
 
+/**
+ * Single type filters, that, when applied, toggle showing of that transaction type.
+ */
 type CheckableFilters = Pick<
     TransactionFilter,
     | TransactionKindString.TransferToEncrypted
@@ -38,6 +41,9 @@ interface DateFilters {
     fromDate: Date | null | undefined;
 }
 
+/**
+ * Grouped type filters, that, when applied, toggle showing of transactions of that type, and similar types included in the group of "GroupedField".
+ */
 interface GroupedFilters
     extends Pick<
         TransactionFilter,
@@ -79,13 +85,19 @@ interface CheckableField<F> {
     pvFilter?: (pv: bigint) => boolean;
 }
 
+/**
+ * Filter object represented by a single transaction type.
+ */
 type SingleField = CheckableField<keyof CheckableFilters>;
 
+/**
+ * Filter object represented by multiple transaction types.
+ */
 interface GroupedField extends CheckableField<keyof GroupedFilters> {
     group: TransactionKindString[];
 }
 
-const transactionFilters: (SingleField | GroupedField)[] = [
+const transactionTypeFilters: (SingleField | GroupedField)[] = [
     {
         field: TransactionKindString.Transfer,
         group: [
@@ -245,9 +257,9 @@ const TransactionFilters = forwardRef<
                     };
                 }
 
-                const filter = transactionFilters.find((t) => t.field === k) as
-                    | GroupedField
-                    | undefined;
+                const filter = transactionTypeFilters.find(
+                    (t) => t.field === k
+                ) as GroupedField | undefined;
                 const filterGroup = filter?.group;
 
                 if (!filterGroup) {
@@ -326,7 +338,7 @@ const TransactionFilters = forwardRef<
                     maxDate={new Date()}
                 />
                 <div className="m40 mB10 flexColumn">
-                    {transactionFilters.map(({ field, display }) => (
+                    {transactionTypeFilters.map(({ field, display }) => (
                         <Form.Checkbox
                             name={field}
                             size="large"
