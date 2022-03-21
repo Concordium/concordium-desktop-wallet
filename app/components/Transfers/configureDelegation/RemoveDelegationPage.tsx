@@ -11,7 +11,7 @@ import styles from './DelegationPage.module.scss';
 interface RemoveDelegationPageProps
     extends Pick<MultiStepFormPageProps<undefined>, 'onNext'> {
     // eslint-disable-next-line react/no-unused-prop-types
-    accountInfo: AccountInfo | undefined; // This is needed for the pending delegation change guard HoC.
+    accountInfo: AccountInfo | undefined; // This is needed for the pending delegation change guard HOC.
 }
 
 const RemoveDelegationPage = withPendingDelegationChangeGuard(

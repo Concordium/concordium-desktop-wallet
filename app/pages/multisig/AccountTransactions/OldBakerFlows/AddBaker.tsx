@@ -235,7 +235,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
                                         chosenAccount={account}
                                         filter={(a, info) =>
                                             info !== undefined &&
-                                            isBakerAccount(info) &&
+                                            !isBakerAccount(info) &&
                                             isMultiSig(a)
                                         }
                                         onAccountClicked={() =>

@@ -201,6 +201,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                                             stake={stake}
                                             setStake={setStake}
                                             blockSummary={blockSummary}
+                                            estimatedFee={estimatedFee}
                                         />
                                     ) : null}
                                 </div>
@@ -300,6 +301,7 @@ type PickNewStakeProps = {
     stake?: string;
     setStake: (s: string | undefined) => void;
     blockSummary: BlockSummary;
+    estimatedFee: Fraction;
 };
 
 function PickNewStake({
@@ -307,6 +309,7 @@ function PickNewStake({
     stake,
     setStake,
     blockSummary,
+    estimatedFee,
 }: PickNewStakeProps) {
     const stakedAlready = useStakedAmount(account.address);
     const minimumThresholdForBaking = BigInt(
@@ -330,6 +333,7 @@ function PickNewStake({
                 validateAmount={(...args) =>
                     validateBakerStake(minimumThresholdForBaking, ...args)
                 }
+                estimatedFee={estimatedFee}
             />
             {cooldownUntil !== undefined &&
             stakeGtu !== undefined &&

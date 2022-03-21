@@ -64,6 +64,12 @@ interface InternalState {
     title?: string;
 }
 
+/**
+ * A component for composing flows for single-signature account transactions.
+ *
+ * @template F Type of the form as a whole. Each step in the form flow should correspond to a member on the type.
+ * @template T Type of the transaction produced by the flow.
+ */
 export default function AccountTransactionFlow<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     F extends Record<string, any>,

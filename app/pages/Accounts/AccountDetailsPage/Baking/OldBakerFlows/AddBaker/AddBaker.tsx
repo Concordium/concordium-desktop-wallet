@@ -20,6 +20,7 @@ import AddBakerData from './AddBakerData';
 import GenerateBakerKeys from '~/components/Transfers/configureBaker/GenerateBakerKeys';
 import { StakeSettings } from '~/utils/transactionFlows/configureBaker';
 import BackButton from '~/cross-app-components/BackButton';
+import Card from '~/cross-app-components/Card';
 
 import styles from '../../../AccountDetailsPage.module.scss';
 
@@ -127,11 +128,13 @@ const AddBaker = ensureExchangeRateAndNonce(
                 <Switch>
                     <Route path={routes.ACCOUNTS_EXPORT_BAKER_KEYS}>
                         {bakerData ? (
-                            <GenerateBakerKeys
-                                onContinue={next}
-                                keyVariant="ADD"
-                                account={account}
-                            />
+                            <Card className="textCenter pB40 pT0">
+                                <GenerateBakerKeys
+                                    onContinue={next}
+                                    keyVariant="ADD"
+                                    account={account}
+                                />
+                            </Card>
                         ) : (
                             <Redirect to={routes.ACCOUNTS_ADD_BAKER} />
                         )}

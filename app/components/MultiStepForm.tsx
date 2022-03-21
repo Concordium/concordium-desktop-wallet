@@ -93,18 +93,34 @@ interface Props<F extends Record<string, unknown>> {
 
 interface InternalValueStoreProps<F extends Record<string, unknown>>
     extends Props<F> {
+    /**
+     * Initial values for the form.
+     */
     initialValues?: F;
 }
 
 interface ExternalValueStoreProps<F extends Record<string, unknown>>
     extends Props<F> {
+    /**
+     * Matches the return type of "useState" hook
+     */
     valueStore: [Partial<F>, Dispatch<SetStateAction<Partial<F>>>];
 }
 
+/**
+ * Props for multi step form component. Can either use an internal or external value store, which simply matches the tuple returned from the "useState" hook
+ *
+ * @template F Type of the form as a whole. Each step in the form flow should correspond to a member on the type.
+ */
 export type MultiStepFormProps<F extends Record<string, unknown>> =
     | InternalValueStoreProps<F>
     | ExternalValueStoreProps<F>;
 
+/**
+ * A component for spanning forms over multiple pages. This component doesn't render any UI, but merely handles collecting data from the different steps and routing between the steps.
+ *
+ * @template F Type of the form as a whole. Each step in the form flow should correspond to a member on the type.
+ */
 export default function MultiStepForm<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     F extends Record<string, any>

@@ -78,15 +78,13 @@ export const getRewardStatusLatest = applyLastBlockHash(getRewardStatus);
  */
 export const getPoolInfoLatest = applyLastBlockHash(getPoolInfo);
 
-export async function fetchLastFinalizedIdentityProviders() {
-    const blockHash = await getlastFinalizedBlockHash();
-    return getIdentityProviders(blockHash);
-}
+export const fetchLastFinalizedIdentityProviders = applyLastBlockHash(
+    getIdentityProviders
+);
 
-export async function fetchLastFinalizedAnonymityRevokers() {
-    const blockHash = await getlastFinalizedBlockHash();
-    return getAnonymityRevokers(blockHash);
-}
+export const fetchLastFinalizedAnonymityRevokers = applyLastBlockHash(
+    getAnonymityRevokers
+);
 
 export async function fetchGlobal(specificBlockHash?: string): Promise<Global> {
     let blockHash = specificBlockHash;
