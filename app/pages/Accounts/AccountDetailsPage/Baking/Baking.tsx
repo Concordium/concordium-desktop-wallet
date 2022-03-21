@@ -88,7 +88,7 @@ export default function Baking({ account, accountInfo }: Props) {
         hasPendingBakerTransactionSelector
     );
 
-    if (pathname !== routes.ACCOUNTS_ADD_BAKER && !isBaker) {
+    if (!pathname.startsWith(routes.ACCOUNTS_ADD_BAKER) && !isBaker) {
         return <Redirect to={routes.ACCOUNTS} />;
     }
 

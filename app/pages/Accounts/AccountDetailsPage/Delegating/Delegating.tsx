@@ -52,7 +52,10 @@ export default function Delegating({ account, accountInfo }: Props) {
         hasPendingDelegationTransactionSelector
     );
 
-    if (pathname !== routes.ACCOUNTS_CONFIGURE_DELEGATION && !isDelegating) {
+    if (
+        !pathname.startsWith(routes.ACCOUNTS_CONFIGURE_DELEGATION) &&
+        !isDelegating
+    ) {
         return <Redirect to={routes.ACCOUNTS} />;
     }
 
