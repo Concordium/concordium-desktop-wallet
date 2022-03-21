@@ -34,7 +34,7 @@ export default class UpdateLevel2KeysUsingRootKeysHandler
         authorizationKeysUpdate: AuthorizationKeysUpdate,
         effectiveTime: bigint,
         expiryTime: bigint
-    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+    ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         if (!blockSummary) {
             return undefined;
         }

@@ -34,7 +34,7 @@ import MultiSignatureLayout from '../MultiSignatureLayout';
 import { parse, stringify } from '~/utils/JSONHelper';
 
 interface Props {
-    proposal: MultiSignatureTransaction;
+    proposal: Omit<MultiSignatureTransaction, 'id'>;
     blockSummary: BlockSummary;
 }
 
@@ -98,7 +98,7 @@ function SignTransactionProposalView({ proposal, blockSummary }: Props) {
 
         updateInstruction.signatures = signatures;
 
-        const updatedProposal = {
+        const updatedProposal: MakeOptional<MultiSignatureTransaction, 'id'> = {
             ...proposal,
             transaction: stringify(updateInstruction),
         };
