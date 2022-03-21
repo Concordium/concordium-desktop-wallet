@@ -334,14 +334,13 @@ export type UpdateBakerRestakeEarningsPayload = {
     restakeEarnings: boolean;
 };
 
-export type BakerVerifyKey = Hex;
-export type BakerKeyProof = Hex;
-
-export type BakerKeyWithProof = [BakerVerifyKey, BakerKeyProof];
 export interface BakerKeysWithProofs {
-    signatureVerifyKey: BakerKeyWithProof;
-    electionVerifyKey: BakerKeyWithProof;
-    aggregationVerifyKey: BakerKeyWithProof;
+    signatureVerifyKey: Hex;
+    signatureKeyProof: Hex;
+    electionVerifyKey: Hex;
+    electionKeyProof: Hex;
+    aggregationVerifyKey: Hex;
+    aggregationKeyProof: Hex;
 }
 
 export interface ConfigureBakerPayload {

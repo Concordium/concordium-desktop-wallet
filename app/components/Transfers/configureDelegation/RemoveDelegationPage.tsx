@@ -21,9 +21,8 @@ const RemoveDelegationPage = withPendingDelegationChangeGuard(
         return (
             <>
                 <p className="flexChildFill">
-                    This will withdraw the delegated amount of the account.
-                    After the grace period the full delegated amount will be
-                    unlocked for disposal.
+                    This will return the delegated amount to the public balance
+                    of the account after a grace period.
                     {cooldownUntil && (
                         <>
                             <br />

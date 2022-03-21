@@ -17,6 +17,8 @@ import {
     instanceOfRemoveBaker,
     instanceOfUpdateBakerStake,
     instanceOfUpdateBakerRestakeEarnings,
+    instanceOfConfigureBaker,
+    instanceOfConfigureDelegation,
 } from '~/utils/types';
 import BakerStakeThresholdHandler from './BakerStakeThresholdHandler';
 import ElectionDifficultyHandler from './ElectionDifficultyHandler';
@@ -43,13 +45,11 @@ import AddIdentityProviderHandler from './AddIdentityProviderHandler';
 import AddAnonymityRevokerHandler from './AddAnonymityRevokerHandler';
 
 import EncryptedTransferHandler from './EncryptedTransferHandler';
-import BakerHandler from './BakerHandler';
+import StakingHandler from './StakingHandler';
 import { parse } from '../JSONHelper';
 import ScheduledTransferWithMemoHandler from './ScheduledTransferWithMemoHandler';
 import EncryptedTransferWithMemoHandler from './EncryptedTransferWithMemoHandler';
 import SimpleTransferWithMemoHandler from './SimpleTransferWithMemoHandler';
-import ConfigureBakerHandler from './ConfigureBakerHandler';
-import ConfigureDelegationHandler from './ConfigureDelegationHandler';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -73,26 +73,29 @@ export function findAccountTransactionHandler(
             );
         case TransactionKindId.Add_baker:
             return new AccountHandlerTypeMiddleware(
-                new BakerHandler('Add baker', instanceOfAddBaker)
+                new StakingHandler('Add baker', instanceOfAddBaker)
             );
         case TransactionKindId.Update_baker_keys:
             return new AccountHandlerTypeMiddleware(
-                new BakerHandler('Update baker keys', instanceOfUpdateBakerKeys)
+                new StakingHandler(
+                    'Update baker keys',
+                    instanceOfUpdateBakerKeys
+                )
             );
         case TransactionKindId.Remove_baker:
             return new AccountHandlerTypeMiddleware(
-                new BakerHandler('Remove baker', instanceOfRemoveBaker)
+                new StakingHandler('Remove baker', instanceOfRemoveBaker)
             );
         case TransactionKindId.Update_baker_stake:
             return new AccountHandlerTypeMiddleware(
-                new BakerHandler(
+                new StakingHandler(
                     'Update baker stake',
                     instanceOfUpdateBakerStake
                 )
             );
         case TransactionKindId.Update_baker_restake_earnings:
             return new AccountHandlerTypeMiddleware(
-                new BakerHandler(
+                new StakingHandler(
                     'Update baker restake earnings',
                     instanceOfUpdateBakerRestakeEarnings
                 )
@@ -123,11 +126,14 @@ export function findAccountTransactionHandler(
             );
         case TransactionKindId.Configure_baker:
             return new AccountHandlerTypeMiddleware(
-                new ConfigureBakerHandler()
+                new StakingHandler('Configure baker', instanceOfConfigureBaker)
             );
         case TransactionKindId.Configure_delegation:
             return new AccountHandlerTypeMiddleware(
-                new ConfigureDelegationHandler()
+                new StakingHandler(
+                    'Configure delegation',
+                    instanceOfConfigureDelegation
+                )
             );
         default:
             throw new Error(`Unsupported transaction type: ${transactionKind}`);
