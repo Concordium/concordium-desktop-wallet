@@ -30,6 +30,7 @@ import {
     accountInfoSelector,
     accountsInfoSelector,
 } from '~/features/AccountSlice';
+import { shouldShowField } from './utils';
 
 import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
 
@@ -37,11 +38,18 @@ interface DisplayProps
     extends Partial<RequiredValues & UpdateBakerStakeFlowState> {
     exchangeRate: Fraction;
 }
-const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
+const DisplayValues = ({
+    account,
+    exchangeRate,
+    expiry,
+    ...values
+}: DisplayProps) => {
     const accountInfo: AccountInfo | undefined = useSelector(
         accountInfoSelector(account)
     );
     const changes = getBakerFlowChanges(values, accountInfo) ?? values;
+    const showField = shouldShowField(values, changes);
+
     const estimatedFee =
         account !== undefined
             ? getEstimatedConfigureBakerFee(
@@ -56,15 +64,13 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
                 className={displayTransferStyles.fee}
                 estimatedFee={estimatedFee}
             />
-            {(values.stake?.stake !== undefined &&
-                changes.stake?.stake === undefined) || (
+            {showField((v) => v.stake?.stake) && (
                 <AmountDetail
                     title="Staked amount"
                     value={changes.stake?.stake}
                 />
             )}
-            {(values.stake?.restake !== undefined &&
-                changes.stake?.restake === undefined) || (
+            {showField((v) => v.stake?.restake) && (
                 <PlainDetail
                     title="Restake earnings"
                     value={
