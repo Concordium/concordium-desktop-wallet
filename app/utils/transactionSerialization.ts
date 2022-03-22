@@ -27,7 +27,6 @@ import {
     ConfigureDelegationPayload,
     DelegationTarget,
     NotOptional,
-    BakerKeyWithProof,
     BakerKeysWithProofs,
 } from './types';
 import {
@@ -48,6 +47,7 @@ import {
 } from './serializationHelpers';
 import { encodeAsCBOR } from './cborHelper';
 import { isDefined } from './basicHelpers';
+import { orUndefined } from './functionHelpers';
 
 function serializeMemo(memo: string) {
     const encoded = encodeAsCBOR(memo);
@@ -384,26 +384,14 @@ const serializeFromSpec = <T>(spec: SerializationSpec<T>) => (payload: T) => {
     return Buffer.concat(buffers);
 };
 
-/**
- * Takes a callback function taking 1 argument, returning a new function taking same argument, applying callback only if supplied argument is defined.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const orUndefined = <F extends (v: any) => any>(fun: F) => (
-    v: Parameters<F>[0] | undefined
-): ReturnType<F> | undefined => (isDefined(v) ? fun(v) : undefined);
-
-export const serializeVerifyKey = ([key, proof]: BakerKeyWithProof) =>
-    Buffer.concat([putHexString(key), putHexString(proof)]);
-
-const bakerKeysSerializationSpec: SerializationSpec<BakerKeysWithProofs> = {
-    electionVerifyKey: serializeVerifyKey,
-    signatureVerifyKey: serializeVerifyKey,
-    aggregationVerifyKey: serializeVerifyKey,
-};
-
-const serializeVerifyKeys = serializeFromSpec<BakerKeysWithProofs>(
-    bakerKeysSerializationSpec
-);
+const serializeVerifyKeys = serializeFromSpec<BakerKeysWithProofs>({
+    electionVerifyKey: putHexString,
+    electionKeyProof: putHexString,
+    signatureVerifyKey: putHexString,
+    signatureKeyProof: putHexString,
+    aggregationVerifyKey: putHexString,
+    aggregationKeyProof: putHexString,
+});
 
 export const getSerializedMetadataUrlWithLength = (url: string) =>
     getSerializedTextWithLength(url, encodeWord16);
@@ -457,11 +445,10 @@ const configureDelegationSerializationSpec: SerializationSpec<ConfigureDelegatio
     delegationTarget: orUndefined(serializeDelegationTarget),
 };
 
-export function serializeConfigureDelegation(
+export const getSerializedConfigureDelegationBitmap = (
     payload: ConfigureDelegationPayload
-) {
-    const type = putInt8(TransactionKind.Configure_delegation);
-    const bitmap = encodeWord16(
+) =>
+    encodeWord16(
         getPayloadBitmap(
             payload,
             Object.keys(configureDelegationSerializationSpec) as Array<
@@ -469,6 +456,12 @@ export function serializeConfigureDelegation(
             >
         )
     );
+
+export function serializeConfigureDelegation(
+    payload: ConfigureDelegationPayload
+) {
+    const type = putInt8(TransactionKind.Configure_delegation);
+    const bitmap = getSerializedConfigureDelegationBitmap(payload);
     const sPayload = serializeFromSpec(configureDelegationSerializationSpec)(
         payload
     );

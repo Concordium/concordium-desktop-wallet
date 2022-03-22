@@ -40,7 +40,7 @@ export default class TimeParametersHandler
         { mintPerPayday, rewardPeriodLength }: UpdateTimeParametersFields,
         effectiveTime: bigint,
         expiryTime: bigint
-    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+    ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         const parsedMintRate = parseMintRate(mintPerPayday);
         if (
             !blockSummary ||

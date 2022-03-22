@@ -14,17 +14,20 @@ import { expireProposals } from '~/utils/ProposalHelper';
 import routes from '~/constants/routes.json';
 import { useProtocolVersion } from '~/utils/dataHooks';
 import { hasDelegationProtocol } from '~/utils/protocolVersion';
-import { not } from '~/utils/basicHelpers';
+import { not } from '~/utils/functionHelpers';
 
 import styles from '../MultiSignaturePage/MultiSignaturePage.module.scss';
 
-// Defines the list of options for creating multi signature transactions.
-const updateInstructionTypes: [
+type SpecificType = UpdateType | TransactionKind;
+type TypeTuple = [
     TransactionTypes,
-    UpdateType,
+    SpecificType,
     string,
     ((pv: bigint) => boolean)?
-][] = [
+];
+
+// Defines the list of options for creating multi signature transactions.
+const updateInstructionTypes: TypeTuple[] = [
     [
         TransactionTypes.UpdateInstruction,
         UpdateType.UpdateMicroGTUPerEuro,
@@ -129,12 +132,7 @@ const updateInstructionTypes: [
 /**
  * [Transaction type, Transaction kind, Button label, Protocol version filter]
  */
-const accountTransactionTypes: [
-    TransactionTypes,
-    TransactionKind,
-    string,
-    ((pv: bigint) => boolean)?
-][] = [
+const accountTransactionTypes: TypeTuple[] = [
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Update_credentials,
@@ -246,6 +244,29 @@ const configureDelegationLinks = (
     </>
 );
 
+// eslint-disable-next-line react/display-name
+const toLink = (pv: bigint | undefined) => ([
+    transactionType,
+    specificType,
+    label,
+    filter = () => true,
+]: TypeTuple) =>
+    pv !== undefined &&
+    filter(pv) && (
+        <Fragment key={`${transactionType}${specificType}`}>
+            {[
+                TransactionKindId.Configure_baker,
+                TransactionKindId.Configure_delegation,
+            ].every((k) => k !== specificType) && (
+                <ButtonNavLink
+                    className={styles.link}
+                    to={createProposalRoute(transactionType, specificType)}
+                >
+                    {label}
+                </ButtonNavLink>
+            )}
+        </Fragment>
+    );
 /**
  * Component that displays a menu containing the available multi signature
  * transaction types. If foundation transactions area enabled in settings,
@@ -259,44 +280,21 @@ export default function MultiSignatureCreateProposalView() {
     );
     const dispatch = useDispatch();
 
-    const availableTransactionTypes = foundationTransactionsEnabled
-        ? [...accountTransactionTypes, ...updateInstructionTypes]
-        : accountTransactionTypes;
-
     useEffect(() => {
         return expireProposals(proposals, dispatch);
     }, [dispatch, proposals]);
 
     return (
         <>
-            {availableTransactionTypes.map(
-                ([transactionType, specificType, label, filter = () => true]) =>
-                    pv !== undefined &&
-                    filter(pv) && (
-                        <Fragment key={`${transactionType}${specificType}`}>
-                            {[
-                                TransactionKindId.Configure_baker,
-                                TransactionKindId.Configure_delegation,
-                            ].every((k) => k !== specificType) && (
-                                <ButtonNavLink
-                                    className={styles.link}
-                                    to={createProposalRoute(
-                                        transactionType,
-                                        specificType
-                                    )}
-                                >
-                                    {label}
-                                </ButtonNavLink>
-                            )}
-                            {specificType ===
-                                TransactionKindId.Configure_baker &&
-                                configureBakerLinks}
-                            {specificType ===
-                                TransactionKindId.Configure_delegation &&
-                                configureDelegationLinks}
-                        </Fragment>
-                    )
+            {accountTransactionTypes.map(toLink(pv))}
+            {pv !== undefined && hasDelegationProtocol(pv) && (
+                <>
+                    {configureBakerLinks}
+                    {configureDelegationLinks}
+                </>
             )}
+            {foundationTransactionsEnabled &&
+                updateInstructionTypes.map(toLink(pv))}
         </>
     );
 }

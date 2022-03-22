@@ -86,15 +86,12 @@ export const toConfigureBakerPayload = ({
     keys:
         keys !== undefined
             ? {
-                  electionVerifyKey: [keys.electionPublic, keys.proofElection],
-                  signatureVerifyKey: [
-                      keys.signaturePublic,
-                      keys.proofSignature,
-                  ],
-                  aggregationVerifyKey: [
-                      keys.aggregationPublic,
-                      keys.proofAggregation,
-                  ],
+                  electionVerifyKey: keys.electionPublic,
+                  electionKeyProof: keys.proofElection,
+                  signatureVerifyKey: keys.signaturePublic,
+                  signatureKeyProof: keys.proofSignature,
+                  aggregationVerifyKey: keys.aggregationPublic,
+                  aggregationKeyProof: keys.proofAggregation,
               }
             : undefined,
     stake: stake?.stake !== undefined ? ccdToMicroCcd(stake.stake) : undefined,

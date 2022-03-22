@@ -44,6 +44,7 @@ import {
 } from '~/utils/transactionFlows/configureBaker';
 import DisplayMetadataUrl from '~/components/Transfers/DisplayMetadataUrl';
 import withChainData from '~/utils/withChainData';
+import { shouldShowField } from './utils';
 
 import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
 
@@ -58,6 +59,7 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
     );
     const sanitized = getSanitizedBakerPoolValues(values, accountInfo);
     const changes = getBakerFlowChanges(sanitized, accountInfo) ?? sanitized;
+    const showField = shouldShowField(sanitized, changes);
 
     const estimatedFee =
         account !== undefined
@@ -74,8 +76,7 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
                 className={displayTransferStyles.fee}
                 estimatedFee={estimatedFee}
             />
-            {(sanitized.openForDelegation !== undefined &&
-                changes.openForDelegation === undefined) || (
+            {showField((v) => v.openForDelegation) && (
                 <PlainDetail
                     title="Pool delegation status"
                     value={
@@ -85,35 +86,28 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
                     }
                 />
             )}
-            {(sanitized.commissions?.transactionFeeCommission !== undefined &&
-                changes.commissions?.transactionFeeCommission ===
-                    undefined) || (
+            {showField((v) => v.commissions?.transactionFeeCommission) && (
                 <DisplayBakerCommission
                     title="Transaction fee commission"
                     value={changes.commissions?.transactionFeeCommission}
                     placeholder
                 />
             )}
-            {(sanitized.commissions?.bakingRewardCommission !== undefined &&
-                changes.commissions?.bakingRewardCommission === undefined) || (
+            {showField((v) => v.commissions?.bakingRewardCommission) && (
                 <DisplayBakerCommission
                     title="Baking reward commission"
                     value={changes.commissions?.bakingRewardCommission}
                     placeholder
                 />
             )}
-            {(sanitized.commissions?.finalizationRewardCommission !==
-                undefined &&
-                changes.commissions?.finalizationRewardCommission ===
-                    undefined) || (
+            {showField((v) => v.commissions?.finalizationRewardCommission) && (
                 <DisplayBakerCommission
                     title="Finalization reward commission"
                     value={changes.commissions?.finalizationRewardCommission}
                     placeholder
                 />
             )}
-            {(sanitized.metadataUrl !== undefined &&
-                changes.metadataUrl === undefined) || (
+            {showField((v) => v.metadataUrl) && (
                 <DisplayMetadataUrl
                     metadataUrl={changes.metadataUrl}
                     placeholder

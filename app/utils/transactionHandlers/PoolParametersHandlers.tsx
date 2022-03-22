@@ -45,7 +45,7 @@ export default class PoolParametersHandler
         }: UpdatePoolParametersFields,
         effectiveTime: bigint,
         expiryTime: bigint
-    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+    ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         if (!blockSummary || !isBlockSummaryV1(blockSummary)) {
             return undefined;
         }

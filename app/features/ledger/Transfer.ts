@@ -48,13 +48,13 @@ import {
     serializeConfigureBakerPayload,
     getSerializedMetadataUrlWithLength,
     getSerializedConfigureBakerBitmap,
-    serializeVerifyKey,
 } from '~/utils/transactionSerialization';
 import pathAsBuffer from './Path';
 import {
     encodeWord16,
     encodeWord64,
     base58ToBuffer,
+    putHexString,
 } from '../../utils/serializationHelpers';
 import { chunkBuffer, isDefined } from '~/utils/basicHelpers';
 import { encodeAsCBOR } from '~/utils/cborHelper';
@@ -499,8 +499,10 @@ async function signConfigureBaker(
         if (keys !== undefined) {
             data = Buffer.concat([
                 data,
-                serializeVerifyKey(keys.electionVerifyKey),
-                serializeVerifyKey(keys.signatureVerifyKey),
+                putHexString(keys.electionVerifyKey),
+                putHexString(keys.electionKeyProof),
+                putHexString(keys.signatureVerifyKey),
+                putHexString(keys.signatureKeyProof),
             ]);
         }
 
@@ -509,7 +511,10 @@ async function signConfigureBaker(
 
     if (keys !== undefined) {
         p1 = 0x02;
-        const aggKey = serializeVerifyKey(keys.aggregationVerifyKey);
+        const aggKey = Buffer.concat([
+            putHexString(keys.aggregationVerifyKey),
+            putHexString(keys.aggregationKeyProof),
+        ]);
         response = await send(aggKey);
     }
 

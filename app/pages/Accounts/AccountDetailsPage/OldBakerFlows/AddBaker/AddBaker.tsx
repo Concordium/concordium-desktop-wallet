@@ -19,6 +19,7 @@ import { SubmitTransactionLocationState } from '../../../SubmitTransaction/Submi
 import AddBakerData from './AddBakerData';
 import GenerateBakerKeys from '~/components/Transfers/configureBaker/GenerateBakerKeys';
 import { StakeSettings } from '~/utils/transactionFlows/configureBaker';
+import Card from '~/cross-app-components/Card';
 
 const header = 'Add baker';
 
@@ -119,11 +120,13 @@ const AddBaker = ensureExchangeRateAndNonce(
             <Switch>
                 <Route path={routes.ACCOUNTS_EXPORT_BAKER_KEYS}>
                     {bakerData ? (
-                        <GenerateBakerKeys
-                            onContinue={next}
-                            keyVariant="ADD"
-                            account={account}
-                        />
+                        <Card className="textCenter pB40 pT0">
+                            <GenerateBakerKeys
+                                onContinue={next}
+                                keyVariant="ADD"
+                                account={account}
+                            />
+                        </Card>
                     ) : (
                         <Redirect to={routes.ACCOUNTS_ADD_BAKER} />
                     )}

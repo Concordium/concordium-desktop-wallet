@@ -11,7 +11,7 @@ import styles from './DelegationPage.module.scss';
 interface RemoveDelegationPageProps
     extends Pick<MultiStepFormPageProps<undefined>, 'onNext'> {
     // eslint-disable-next-line react/no-unused-prop-types
-    accountInfo: AccountInfo | undefined; // This is needed for the pending delegation change guard HoC.
+    accountInfo: AccountInfo | undefined; // This is needed for the pending delegation change guard HOC.
 }
 
 const RemoveDelegationPage = withPendingDelegationChangeGuard(
@@ -21,9 +21,8 @@ const RemoveDelegationPage = withPendingDelegationChangeGuard(
         return (
             <>
                 <p className="flexChildFill">
-                    This will withdraw the delegated amount of the account.
-                    After the grace period the full delegated amount will be
-                    unlocked for disposal.
+                    This will return the delegated amount to the public balance
+                    of the account after a grace period.
                     {cooldownUntil && (
                         <>
                             <br />

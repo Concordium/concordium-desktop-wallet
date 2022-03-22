@@ -129,11 +129,13 @@ export default ensureExchangeRateAndNonce(function UpdateBakerKeys({
     return (
         <Switch>
             <Route path={routes.ACCOUNTS_EXPORT_BAKER_KEYS}>
-                <GenerateBakerKeys
-                    onContinue={next}
-                    keyVariant="UPDATE"
-                    account={account}
-                />
+                <Card className="textCenter pB40 pT0">
+                    <GenerateBakerKeys
+                        onContinue={next}
+                        keyVariant="UPDATE"
+                        account={account}
+                    />
+                </Card>
             </Route>
             <Route component={UpdateBakerKeysIntro} />
         </Switch>

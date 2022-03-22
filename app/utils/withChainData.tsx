@@ -6,7 +6,7 @@ import { BlockSummary, ConsensusStatus } from '~/node/NodeApiTypes';
 import { getConsensusStatus, getBlockSummary } from '~/node/nodeRequests';
 import routes from '~/constants/routes.json';
 import Execute from '~/components/Execute';
-import { setBlockSummary, setConsensusStatus } from '~/features/ChainDataSlice';
+import { setConsensusStatus } from '~/features/ChainDataSlice';
 
 export interface ChainData {
     consensusStatus?: ConsensusStatus;
@@ -25,7 +25,6 @@ export default function withChainData<TProps extends ChainData>(
             const bs = await getBlockSummary(cs.lastFinalizedBlock);
 
             dispatch(setConsensusStatus(cs));
-            dispatch(setBlockSummary(bs));
 
             return {
                 blockSummary: bs,

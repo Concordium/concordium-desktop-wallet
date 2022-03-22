@@ -29,6 +29,7 @@ import {
 } from '~/utils/transactionFlows/configureDelegation';
 import DelegationTargetPage from '~/components/Transfers/configureDelegation/DelegationTargetPage';
 import DelegationAmountPage from '~/components/Transfers/configureDelegation/DelegationAmountPage';
+import { shouldShowField } from './utils';
 
 import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
 
@@ -48,6 +49,8 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
         existingValues !== undefined
             ? getDelegationFlowChanges(values, existingValues)
             : undefined ?? values;
+    const showField = shouldShowField(values, changes);
+
     const estimatedFee =
         account !== undefined
             ? getEstimatedConfigureDelegationFee(
@@ -62,7 +65,7 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
                 className={displayTransferStyles.fee}
                 estimatedFee={estimatedFee}
             />
-            {(values.target !== undefined && changes.target === undefined) || (
+            {showField((v) => v.target) && (
                 <PlainDetail
                     title="Delegation target"
                     value={
@@ -72,15 +75,13 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
                     }
                 />
             )}
-            {(values.delegate?.amount !== undefined &&
-                changes.delegate?.amount === undefined) || (
+            {showField((v) => v.delegate?.amount) && (
                 <AmountDetail
                     title="Delegated amount"
                     value={changes.delegate?.amount}
                 />
             )}
-            {(values.delegate?.redelegate !== undefined &&
-                changes.delegate?.redelegate === undefined) || (
+            {showField((v) => v.delegate?.redelegate) && (
                 <PlainDetail
                     title="Redelegate earnings"
                     value={
