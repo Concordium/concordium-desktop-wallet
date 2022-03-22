@@ -27,7 +27,6 @@ import {
     ConfigureDelegationPayload,
     DelegationTarget,
     NotOptional,
-    BakerKeyWithProof,
     BakerKeysWithProofs,
 } from './types';
 import {
@@ -385,18 +384,14 @@ const serializeFromSpec = <T>(spec: SerializationSpec<T>) => (payload: T) => {
     return Buffer.concat(buffers);
 };
 
-export const serializeVerifyKey = ([key, proof]: BakerKeyWithProof) =>
-    Buffer.concat([putHexString(key), putHexString(proof)]);
-
-const bakerKeysSerializationSpec: SerializationSpec<BakerKeysWithProofs> = {
-    electionVerifyKey: serializeVerifyKey,
-    signatureVerifyKey: serializeVerifyKey,
-    aggregationVerifyKey: serializeVerifyKey,
-};
-
-const serializeVerifyKeys = serializeFromSpec<BakerKeysWithProofs>(
-    bakerKeysSerializationSpec
-);
+const serializeVerifyKeys = serializeFromSpec<BakerKeysWithProofs>({
+    electionVerifyKey: putHexString,
+    electionKeyProof: putHexString,
+    signatureVerifyKey: putHexString,
+    signatureKeyProof: putHexString,
+    aggregationVerifyKey: putHexString,
+    aggregationKeyProof: putHexString,
+});
 
 export const getSerializedMetadataUrlWithLength = (url: string) =>
     getSerializedTextWithLength(url, encodeWord16);

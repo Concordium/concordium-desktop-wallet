@@ -55,7 +55,9 @@ function MultiSignatureCreateProposal({
         Partial<FieldValues & MultiSignatureCreateProposalForm>
     >({});
 
-    const [proposal, setProposal] = useState<MultiSignatureTransaction>();
+    const [proposal, setProposal] = useState<
+        Omit<MultiSignatureTransaction, 'id'>
+    >();
     const dispatch = useDispatch();
 
     // TODO Add support for account transactions.
@@ -80,7 +82,7 @@ function MultiSignatureCreateProposal({
     }
 
     function handleProposal(
-        newProposal: MultiSignatureTransaction | undefined,
+        newProposal: Omit<MultiSignatureTransaction, 'id'> | undefined,
         newDefaults: FieldValues
     ) {
         setDefaults(newDefaults);

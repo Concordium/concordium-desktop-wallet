@@ -177,6 +177,7 @@ export default function MultiStepForm<
         if (currentIndex === -1) {
             // Could not find current page. Should not happen.
             dispatch(replace(baseRoute));
+            // TODO add logging.
         } else if (currentIndex !== newPages.length - 1) {
             // From any page that isn't the last, to the next in line.
             const { route } = newPages[currentIndex + 1] ?? {};

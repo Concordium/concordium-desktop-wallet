@@ -5,34 +5,33 @@ import {
     AccountTransactionHandler,
     TransactionExportType,
 } from '~/utils/transactionTypes';
-import {
-    AccountTransaction,
-    ConfigureBaker,
-    instanceOfConfigureBaker,
-    TransactionPayload,
-} from '../types';
+import { AccountTransaction, TransactionPayload } from '../types';
 import { serializeTransferPayload } from '../transactionSerialization';
 
-export default class ConfigureBakerHandler
-    implements
-        AccountTransactionHandler<ConfigureBaker, ConcordiumLedgerClient> {
+export default class StakingHandler<
+    A extends AccountTransaction<TransactionPayload>
+> implements AccountTransactionHandler<A, ConcordiumLedgerClient> {
+    constructor(
+        public type: string,
+        private instanceOf: (
+            obj: AccountTransaction<TransactionPayload>
+        ) => obj is A
+    ) {}
+
     confirmType(transaction: AccountTransaction<TransactionPayload>) {
-        if (instanceOfConfigureBaker(transaction)) {
+        if (this.instanceOf(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
     }
 
-    getFileNameForExport(
-        _: ConfigureBaker,
-        exportType: TransactionExportType
-    ): string {
+    getFileNameForExport(_: A, exportType: TransactionExportType): string {
         return `${this.type
             .toLowerCase()
             .replace(/\s/g, '-')}_${exportType}.json`;
     }
 
-    serializePayload(transaction: ConfigureBaker) {
+    serializePayload(transaction: A) {
         return serializeTransferPayload(
             transaction.transactionKind,
             transaction.payload
@@ -44,24 +43,22 @@ export default class ConfigureBakerHandler
     }
 
     async signTransaction(
-        transaction: ConfigureBaker,
+        transaction: A,
         ledger: ConcordiumLedgerClient,
         path: AccountPathInput
     ) {
         return ledger.signTransfer(transaction, getAccountPath(path));
     }
 
-    view(transaction: ConfigureBaker) {
+    view(transaction: A) {
         return AccountTransactionDetails({ transaction });
     }
 
-    createTransaction(): ConfigureBaker {
+    createTransaction(): A {
         throw new Error('Unimplemented');
     }
 
     print = () => undefined;
-
-    type = 'Configure baker';
 
     title = `Account transaction | ${this.type}`;
 }
