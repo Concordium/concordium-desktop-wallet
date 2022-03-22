@@ -4,6 +4,7 @@ import { OpenStatus, OpenStatusText } from '@concordium/node-sdk/lib/src/types';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { isDefined, multiplyFraction } from '../basicHelpers';
 import { ccdToMicroCcd, microCcdToCcd } from '../ccd';
+import { not } from '../functionHelpers';
 import { fractionResolution } from '../rewardFractionHelpers';
 import { BakerKeys } from '../rustInterface';
 import { getConfigureBakerCost } from '../transactionCosts';
@@ -232,6 +233,11 @@ export function getBakerFlowChanges(
     return changes;
 }
 
+/**
+ * Converts values of flow to a configure baker transaction.
+ *
+ * Throws if no changes to existing values have been made.
+ */
 export const convertToBakerTransaction = (
     account: Account,
     nonce: bigint,
@@ -242,6 +248,15 @@ export const convertToBakerTransaction = (
         accountInfo !== undefined
             ? getExistingBakerValues(accountInfo)
             : undefined;
+    const changes =
+        existing !== undefined ? getBakerFlowChanges(values, existing) : values;
+
+    if (Object.values(changes).every(not(isDefined))) {
+        throw new Error(
+            'Trying to submit a transaction without any changes to the existing baker configuration of an account.'
+        );
+    }
+
     const payload = toConfigureBakerPayload(
         existing !== undefined ? getBakerFlowChanges(values, existing) : values
     );

@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import React, { ComponentType, useCallback } from 'react';
+import React, { ComponentType, useCallback, useState } from 'react';
 import withExchangeRate from '~/components/Transfers/withExchangeRate';
 import withNonce, { AccountAndNonce } from '~/components/Transfers/withNonce';
 import { isDefined } from '~/utils/basicHelpers';
@@ -24,6 +24,8 @@ import {
     updateBakerStakeTitle,
     UpdateBakerStakeFlowState,
 } from '~/utils/transactionFlows/updateBakerStake';
+import { ValidateValues } from '~/components/MultiStepForm';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 interface Props
     extends ConfigureBakerFlowDependencies,
@@ -55,6 +57,7 @@ const withDeps = (component: ComponentType<Props>) =>
 
 export default withDeps(function UpdateBakerStake(props: Props) {
     const { nonce, account, exchangeRate, blockSummary, accountInfo } = props;
+    const [showError, setShowError] = useState(false);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const convert = useCallback(
@@ -62,30 +65,52 @@ export default withDeps(function UpdateBakerStake(props: Props) {
         [account, nonce, exchangeRate, accountInfo]
     );
 
+    const validate: ValidateValues<UpdateBakerStakeFlowState> = useCallback(
+        (v) => {
+            try {
+                convert(v);
+            } catch {
+                setShowError(true);
+                return 'stake';
+            }
+            return undefined;
+        },
+        [convert]
+    );
+
     return (
-        <AccountTransactionFlow<
-            UpdateBakerStakeFlowState,
-            ConfigureBakerTransaction
-        >
-            title={updateBakerStakeTitle}
-            convert={convert}
-            multisigRoute={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_STAKE}
-            firstPageBack
-        >
-            {{
-                stake: {
-                    render: (initial, onNext, formValues) => (
-                        <UpdateBakerStakePage
-                            account={account}
-                            exchangeRate={exchangeRate}
-                            blockSummary={blockSummary}
-                            initial={initial}
-                            onNext={onNext}
-                            formValues={formValues}
-                        />
-                    ),
-                },
-            }}
-        </AccountTransactionFlow>
+        <>
+            <SimpleErrorModal
+                show={showError}
+                onClick={() => setShowError(false)}
+                header="Empty transaction"
+                content="Transaction includes no changes to existing baker configuration for account."
+            />
+            <AccountTransactionFlow<
+                UpdateBakerStakeFlowState,
+                ConfigureBakerTransaction
+            >
+                title={updateBakerStakeTitle}
+                convert={convert}
+                multisigRoute={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_STAKE}
+                firstPageBack
+                validate={validate}
+            >
+                {{
+                    stake: {
+                        render: (initial, onNext, formValues) => (
+                            <UpdateBakerStakePage
+                                account={account}
+                                exchangeRate={exchangeRate}
+                                blockSummary={blockSummary}
+                                initial={initial}
+                                onNext={onNext}
+                                formValues={formValues}
+                            />
+                        ),
+                    },
+                }}
+            </AccountTransactionFlow>
+        </>
     );
 });
