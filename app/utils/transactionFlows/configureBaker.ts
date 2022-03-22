@@ -250,8 +250,16 @@ export const convertToBakerTransaction = (
             : undefined;
     const changes =
         existing !== undefined ? getBakerFlowChanges(values, existing) : values;
+    const { commissions, stake, keys, ...topLevelChanges } = changes;
 
-    if (Object.values(changes).every(not(isDefined))) {
+    if (
+        Object.values({
+            ...commissions,
+            ...stake,
+            ...keys,
+            ...topLevelChanges,
+        }).every(not(isDefined))
+    ) {
         throw new Error(
             'Trying to submit a transaction without any changes to the existing baker configuration of an account.'
         );

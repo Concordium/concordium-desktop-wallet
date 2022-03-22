@@ -149,8 +149,11 @@ export const convertToConfigureDelegationTransaction = (
         existing !== undefined
             ? getDelegationFlowChanges(existing, values)
             : values;
+    const { delegate, ...topLevelChanges } = changes;
 
-    if (Object.values(changes).every(not(isDefined))) {
+    if (
+        Object.values({ ...delegate, ...topLevelChanges }).every(not(isDefined))
+    ) {
         throw new Error(
             'Trying to submit a transaction without any changes to the existing delegation configuration of an account.'
         );

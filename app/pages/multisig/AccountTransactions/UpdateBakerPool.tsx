@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import React, { ComponentType, useCallback } from 'react';
+import React, { ComponentType, useCallback, useState } from 'react';
 import { Redirect } from 'react-router';
 import { useSelector } from 'react-redux';
 import type { BlockSummaryV1 } from '@concordium/node-sdk';
@@ -45,6 +45,8 @@ import {
 import DisplayMetadataUrl from '~/components/Transfers/DisplayMetadataUrl';
 import withChainData from '~/utils/withChainData';
 import { shouldShowField } from './utils';
+import { ValidateValues } from '~/components/MultiStepForm';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
 
@@ -154,6 +156,7 @@ export default withDeps(
         },
     }: Props) {
         const accountsInfo = useSelector(accountsInfoSelector);
+        const [showError, setShowError] = useState(false);
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
         const convert = useCallback(
@@ -173,64 +176,90 @@ export default withDeps(
             [exchangeRate, accountsInfo]
         );
 
+        const validate: ValidateValues<
+            RequiredValues & UpdateBakerPoolFlowState
+        > = useCallback(
+            (v) => {
+                try {
+                    convert(v, 0n);
+                } catch {
+                    setShowError(true);
+                    return 'openForDelegation';
+                }
+                return undefined;
+            },
+            [convert]
+        );
+
         return (
-            <MultiSigAccountTransactionFlow<
-                UpdateBakerPoolFlowState,
-                ConfigureBaker
-            >
-                title={updateBakerPoolTitle}
-                convert={convert}
-                accountFilter={(_, i) => isDefined(i) && isBakerAccount(i)}
-                preview={(v) => (
-                    <DisplayValues {...v} exchangeRate={exchangeRate} />
-                )}
-            >
-                {({ openForDelegation, account }) => ({
-                    openForDelegation: {
-                        title: 'Pool open status',
-                        render: (initial, onNext) =>
-                            account ? (
-                                <DelegationStatusPage
-                                    initial={initial}
-                                    onNext={onNext}
-                                    account={account}
-                                />
-                            ) : (
-                                toRoot
-                            ),
-                    },
-                    commissions:
-                        openForDelegation !== OpenStatus.ClosedForAll
-                            ? {
-                                  title: 'Commission rates',
-                                  render: (initial, onNext) =>
-                                      account ? (
-                                          <CommissionsPage
-                                              initial={initial}
-                                              onNext={onNext}
-                                              chainParameters={chainParameters}
-                                              account={account}
-                                          />
-                                      ) : (
-                                          toRoot
-                                      ),
-                              }
-                            : undefined,
-                    metadataUrl: {
-                        title: 'Metadata URL',
-                        render: (initial, onNext) =>
-                            account ? (
-                                <MetadataUrlPage
-                                    initial={initial}
-                                    onNext={onNext}
-                                    account={account}
-                                />
-                            ) : (
-                                toRoot
-                            ),
-                    },
-                })}
-            </MultiSigAccountTransactionFlow>
+            <>
+                <SimpleErrorModal
+                    show={showError}
+                    onClick={() => setShowError(false)}
+                    header="Empty transaction"
+                    content="Transaction includes no changes to existing baker configuration for account."
+                />
+                <MultiSigAccountTransactionFlow<
+                    UpdateBakerPoolFlowState,
+                    ConfigureBaker
+                >
+                    title={updateBakerPoolTitle}
+                    convert={convert}
+                    accountFilter={(_, i) => isDefined(i) && isBakerAccount(i)}
+                    preview={(v) => (
+                        <DisplayValues {...v} exchangeRate={exchangeRate} />
+                    )}
+                    validate={validate}
+                >
+                    {({ openForDelegation, account }) => ({
+                        openForDelegation: {
+                            title: 'Pool open status',
+                            render: (initial, onNext) =>
+                                account ? (
+                                    <DelegationStatusPage
+                                        initial={initial}
+                                        onNext={onNext}
+                                        account={account}
+                                    />
+                                ) : (
+                                    toRoot
+                                ),
+                        },
+                        commissions:
+                            openForDelegation !== OpenStatus.ClosedForAll
+                                ? {
+                                      title: 'Commission rates',
+                                      render: (initial, onNext) =>
+                                          account ? (
+                                              <CommissionsPage
+                                                  initial={initial}
+                                                  onNext={onNext}
+                                                  chainParameters={
+                                                      chainParameters
+                                                  }
+                                                  account={account}
+                                              />
+                                          ) : (
+                                              toRoot
+                                          ),
+                                  }
+                                : undefined,
+                        metadataUrl: {
+                            title: 'Metadata URL',
+                            render: (initial, onNext) =>
+                                account ? (
+                                    <MetadataUrlPage
+                                        initial={initial}
+                                        onNext={onNext}
+                                        account={account}
+                                    />
+                                ) : (
+                                    toRoot
+                                ),
+                        },
+                    })}
+                </MultiSigAccountTransactionFlow>
+            </>
         );
     })
 );

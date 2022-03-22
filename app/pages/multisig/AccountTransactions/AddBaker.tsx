@@ -4,7 +4,10 @@ import { Redirect } from 'react-router';
 import { useSelector } from 'react-redux';
 import type { BlockSummaryV1, ChainParametersV1 } from '@concordium/node-sdk';
 import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
-import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import {
+    isBakerAccount,
+    isDelegatorAccount,
+} from '@concordium/node-sdk/lib/src/accountHelpers';
 import CommissionsPage from '~/components/Transfers/configureBaker/CommissionsPage';
 import DelegationStatusPage from '~/components/Transfers/configureBaker/DelegationStatusPage';
 import KeysPage from '~/components/Transfers/configureBaker/KeysPage';
@@ -206,7 +209,9 @@ export default withDeps(
                 title={addBakerTitle}
                 convert={convert}
                 validate={validate}
-                accountFilter={(_, i) => isDefined(i) && !isBakerAccount(i)}
+                accountFilter={(_, i) =>
+                    isDefined(i) && !isBakerAccount(i) && !isDelegatorAccount(i)
+                }
                 preview={(v) => (
                     <DisplayValues
                         {...v}
