@@ -384,18 +384,14 @@ const serializeFromSpec = <T>(spec: SerializationSpec<T>) => (payload: T) => {
     return Buffer.concat(buffers);
 };
 
-const bakerKeysSerializationSpec: SerializationSpec<BakerKeysWithProofs> = {
+const serializeVerifyKeys = serializeFromSpec<BakerKeysWithProofs>({
     electionVerifyKey: putHexString,
     electionKeyProof: putHexString,
     signatureVerifyKey: putHexString,
     signatureKeyProof: putHexString,
     aggregationVerifyKey: putHexString,
     aggregationKeyProof: putHexString,
-};
-
-const serializeVerifyKeys = serializeFromSpec<BakerKeysWithProofs>(
-    bakerKeysSerializationSpec
-);
+});
 
 export const getSerializedMetadataUrlWithLength = (url: string) =>
     getSerializedTextWithLength(url, encodeWord16);
