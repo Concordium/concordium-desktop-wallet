@@ -64,12 +64,9 @@ export default function UpdateTimeParameters({
     const newPaydaysPerYear = useMemo(
         () =>
             newRewardPeriodLength
-                ? getPaydaysPerYear(
-                      newRewardPeriodLength,
-                      consensusStatus
-                      // eslint-disable-next-line react-hooks/exhaustive-deps
-                  )
+                ? getPaydaysPerYear(newRewardPeriodLength, consensusStatus)
                 : currentPaydaysPerYear,
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         [newRewardPeriodLength, consensusStatus]
     );
 
