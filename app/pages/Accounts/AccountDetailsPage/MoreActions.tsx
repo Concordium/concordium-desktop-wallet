@@ -124,10 +124,10 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 !isBaker && (
                     <ButtonNavLink
                         className="mB20:notLast flex width100"
-                        to={routes.ACCOUNTS_DELEGATING}
+                        to={routes.ACCOUNTS_DELEGATION}
                         disabled={!accountInfo}
                     >
-                        Delegating
+                        Delegation
                     </ButtonNavLink>
                 )}
         </>

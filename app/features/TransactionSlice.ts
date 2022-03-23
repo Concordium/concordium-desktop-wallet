@@ -717,28 +717,4 @@ export const loadingTransactionsSelector = (state: RootState) =>
 export const hasMoreTransactionsSelector = (state: RootState) =>
     state.transactions.hasMore;
 
-const isPending = (t: TransferTransaction) =>
-    t.status === TransactionStatus.Pending;
-
-export const hasPendingTransactionSelector = (
-    kinds: TransactionKindString[]
-) => (state: RootState) =>
-    state.transactions.transactions
-        .filter(isPending)
-        .some((t) => kinds.includes(t.transactionKind));
-
-export const hasPendingDelegationTransactionSelector = hasPendingTransactionSelector(
-    [TransactionKindString.ConfigureDelegation]
-);
-export const hasPendingBakerTransactionSelector = hasPendingTransactionSelector(
-    [
-        TransactionKindString.ConfigureBaker,
-        TransactionKindString.AddBaker,
-        TransactionKindString.RemoveBaker,
-        TransactionKindString.UpdateBakerStake,
-        TransactionKindString.UpdateBakerKeys,
-        TransactionKindString.UpdateBakerRestakeEarnings,
-    ]
-);
-
 export default transactionSlice.reducer;

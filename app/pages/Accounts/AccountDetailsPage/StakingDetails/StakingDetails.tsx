@@ -8,7 +8,6 @@ import React, { PropsWithChildren } from 'react';
 import RegisteredIcon from '@resources/svg/logo-checkmark.svg';
 import Label from '~/components/Label';
 import Card from '~/cross-app-components/Card';
-import Loading from '~/cross-app-components/Loading';
 import { displayAsCcd } from '~/utils/ccd';
 import { useConsensusStatus } from '~/utils/dataHooks';
 import { toFixed } from '~/utils/numberStringHelpers';
@@ -17,8 +16,14 @@ import {
     dateFromStakePendingChange,
     getFormattedDateString,
 } from '~/utils/timeHelpers';
-import { displayPoolOpen } from '~/utils/transactionFlows/configureBaker';
-import { displayDelegationTarget } from '~/utils/transactionFlows/configureDelegation';
+import {
+    displayPoolOpen,
+    displayRestakeEarnings,
+} from '~/utils/transactionFlows/configureBaker';
+import {
+    displayDelegationTarget,
+    displayRedelegate,
+} from '~/utils/transactionFlows/configureDelegation';
 
 import styles from './StakingDetails.module.scss';
 
@@ -56,12 +61,8 @@ function BakerValues({ details, isDelegationProtocol }: BakerValuesProps) {
             />
             <Value title="Baker ID" value={details.bakerId.toString()} />
             <Value
-                title="Rewards wil be"
-                value={
-                    details.restakeEarnings
-                        ? 'Added to stake'
-                        : 'Added to public balance'
-                }
+                title="Restake earnings"
+                value={displayRestakeEarnings(details.restakeEarnings)}
             />
             {isDelegationProtocol && (
                 <>
@@ -111,35 +112,28 @@ function DelegatorValues({ details }: ValuesProps<AccountDelegationDetails>) {
                 value={displayDelegationTarget(details.delegationTarget)}
             />
             <Value
-                title="Rewards wil be"
-                value={
-                    details.restakeEarnings
-                        ? 'Added to delegation amount'
-                        : 'Added to public balance'
-                }
+                title="Redelegate earnings"
+                value={displayRedelegate(details.restakeEarnings)}
             />
         </>
     );
 }
 
 interface DetailsText {
-    titleRegistered: string;
-    titlePendingTransaction: string;
+    title: string;
     pendingReduce: string;
     pendingRemove: string;
 }
 
 const bakerText: DetailsText = {
-    titleRegistered: 'Baker registered',
-    titlePendingTransaction: 'Waiting for finalization',
+    title: 'Baker registered',
     pendingReduce: 'New baker stake',
     pendingRemove:
         'Baking will be stopped, and the staked amount will be unlocked on the public balance of the account.',
 };
 
 const delegatorText: DetailsText = {
-    titleRegistered: 'Delegation registered',
-    titlePendingTransaction: 'Waiting for finalization',
+    title: 'Delegation registered',
     pendingReduce: 'New delegation amount',
     pendingRemove:
         'The delegation will be stopped, and the delegation amount will be unlocked on the public balance of the account.',
@@ -158,24 +152,11 @@ const isDelegationDetails = (
 
 type Props = PropsWithChildren<{
     details: StakingDetails;
-    hasPendingTransaction: boolean;
 }>;
 
-export default function StakingDetails({
-    details,
-    hasPendingTransaction,
-}: Props) {
+export default function StakingDetails({ details }: Props) {
     const cs = useConsensusStatus(true);
     const text = isBakerDetails(details) ? bakerText : delegatorText;
-
-    const title = hasPendingTransaction
-        ? text.titlePendingTransaction
-        : text.titleRegistered;
-    const icon = hasPendingTransaction ? (
-        <Loading inline iconWidth={35} />
-    ) : (
-        <RegisteredIcon width={35} />
-    );
 
     const pendingChangeDate =
         details.pendingChange !== undefined
@@ -185,8 +166,8 @@ export default function StakingDetails({
     return (
         <Card className={styles.root} dark>
             <header className={styles.header}>
-                {icon}
-                <h2 className="mV0 mL10">{title}</h2>
+                <RegisteredIcon width={35} />
+                <h2 className="mV0 mL10">{text.title}</h2>
             </header>
             <section className="flexColumn justifyCenter mB20 flexChildFill">
                 {isBakerDetails(details) && (

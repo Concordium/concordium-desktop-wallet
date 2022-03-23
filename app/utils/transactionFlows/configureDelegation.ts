@@ -190,5 +190,4 @@ export const displayDelegationTarget = (
     return id.toString();
 };
 
-export const displayRedelegate = (value: boolean) =>
-    value ? 'Redelegate' : "Don't redelegate";
+export const displayRedelegate = (value: boolean) => (value ? 'Yes' : 'No');

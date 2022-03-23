@@ -30,7 +30,7 @@ import BuildSchedule from './BuildSchedule';
 import TransactionLog from './TransactionLog';
 import DecryptComponent from '../DecryptComponent';
 import withAccountSync from '../withAccountSync';
-import Delegating from './Delegating';
+import Delegation from './Delegation';
 import Baking from './Baking/Baking';
 
 const { Master, Detail } = MasterDetailPageLayout;
@@ -114,11 +114,11 @@ export default withAccountSync(function DetailsPage() {
                             <ToAccounts />
                         )}
                     </Route>
-                    <Route path={routes.ACCOUNTS_DELEGATING}>
+                    <Route path={routes.ACCOUNTS_DELEGATION}>
                         {isDelegationPV &&
                         !isBaker &&
                         accountInfo !== undefined ? (
-                            <Delegating
+                            <Delegation
                                 account={account}
                                 accountInfo={accountInfo}
                             />

@@ -2,27 +2,23 @@ import { AccountInfo, AccountInfoDelegator } from '@concordium/node-sdk';
 import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import React from 'react';
 import { Redirect, Route, Switch, useLocation } from 'react-router';
-import { useSelector } from 'react-redux';
 import { Account } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import ConfigureDelegation from './ConfigureDelegation';
 import RemoveDelegation from './RemoveDelegation';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import StakingDetails from '../StakingDetails';
-import { hasPendingDelegationTransactionSelector } from '~/features/TransactionSlice';
 
 interface ActionsProps {
     isDelegating: boolean;
-    disabled: boolean;
 }
 
-function Actions({ isDelegating, disabled }: ActionsProps) {
+function Actions({ isDelegating }: ActionsProps) {
     return (
         <>
             <ButtonNavLink
                 className="mB20:notLast flex width100"
                 to={routes.ACCOUNTS_CONFIGURE_DELEGATION}
-                disabled={disabled}
             >
                 Update current delegation
             </ButtonNavLink>
@@ -31,7 +27,6 @@ function Actions({ isDelegating, disabled }: ActionsProps) {
                     className="flex width100"
                     to={routes.ACCOUNTS_REMOVE_DELEGATION}
                     negative
-                    disabled={disabled}
                 >
                     Remove delegation
                 </ButtonNavLink>
@@ -45,12 +40,9 @@ interface Props {
     accountInfo: AccountInfo;
 }
 
-export default function Delegating({ account, accountInfo }: Props) {
+export default function Delegation({ account, accountInfo }: Props) {
     const isDelegating = isDelegatorAccount(accountInfo);
     const { pathname } = useLocation();
-    const hasPendingTransaction = useSelector(
-        hasPendingDelegationTransactionSelector
-    );
 
     if (
         !pathname.startsWith(routes.ACCOUNTS_CONFIGURE_DELEGATION) &&
@@ -73,15 +65,11 @@ export default function Delegating({ account, accountInfo }: Props) {
             </Route>
             <Route default>
                 <StakingDetails
-                    hasPendingTransaction={hasPendingTransaction}
                     details={
                         (accountInfo as AccountInfoDelegator).accountDelegation
                     }
                 />
-                <Actions
-                    isDelegating={isDelegating}
-                    disabled={hasPendingTransaction}
-                />
+                <Actions isDelegating={isDelegating} />
             </Route>
         </Switch>
     );

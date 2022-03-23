@@ -2,7 +2,6 @@ import { AccountInfo, AccountInfoBaker } from '@concordium/node-sdk';
 import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import React from 'react';
 import { Redirect, Route, Switch, useLocation } from 'react-router';
-import { useSelector } from 'react-redux';
 import { LocationDescriptorObject } from 'history';
 import { Account } from '~/utils/types';
 import routes from '~/constants/routes.json';
@@ -21,44 +20,38 @@ import UpdateBakerStake from './UpdateBakerStake';
 import UpdateBakerPool from './UpdateBakerPool';
 import UpdateBakerKeys from './UpdateBakerKeys';
 import StakingDetails from '../StakingDetails';
-import { hasPendingBakerTransactionSelector } from '~/features/TransactionSlice';
 
 interface ActionsProps {
     isDelegationPV: boolean;
-    disabled: boolean;
 }
 
-function Actions({ isDelegationPV, disabled }: ActionsProps) {
+function Actions({ isDelegationPV }: ActionsProps) {
     return (
         <>
             <ButtonNavLink
-                className="mB20:notLast flex width100"
+                className="mB20 flex width100"
                 to={routes.ACCOUNTS_UPDATE_BAKER_STAKE}
-                disabled={disabled}
             >
                 Update baker stake
             </ButtonNavLink>
             {isDelegationPV ? (
                 <ButtonNavLink
-                    className="mB20:notLast flex width100"
+                    className="mB20 flex width100"
                     to={routes.ACCOUNTS_UPDATE_BAKER_POOL}
-                    disabled={disabled}
                 >
                     Update baker pool
                 </ButtonNavLink>
             ) : (
                 <ButtonNavLink
-                    className="mB20:notLast flex width100"
+                    className="mB20 flex width100"
                     to={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}
-                    disabled={disabled}
                 >
                     Update baker restake earnings
                 </ButtonNavLink>
             )}
             <ButtonNavLink
-                className="mB20:notLast flex width100"
+                className="mB20 flex width100"
                 to={routes.ACCOUNTS_UPDATE_BAKER_KEYS}
-                disabled={disabled}
             >
                 Update baker keys
             </ButtonNavLink>
@@ -66,7 +59,6 @@ function Actions({ isDelegationPV, disabled }: ActionsProps) {
                 className="flex width100"
                 to={routes.ACCOUNTS_REMOVE_BAKER}
                 negative
-                disabled={disabled}
             >
                 Stop baking
             </ButtonNavLink>
@@ -84,9 +76,6 @@ export default function Baking({ account, accountInfo }: Props) {
     const { pathname } = useLocation();
     const isDelegationPV = pv !== undefined && hasDelegationProtocol(pv);
     const isBaker = isBakerAccount(accountInfo);
-    const hasPendingTransaction = useSelector(
-        hasPendingBakerTransactionSelector
-    );
 
     if (!pathname.startsWith(routes.ACCOUNTS_ADD_BAKER) && !isBaker) {
         return <Redirect to={routes.ACCOUNTS} />;
@@ -109,7 +98,6 @@ export default function Baking({ account, accountInfo }: Props) {
                             />
                         );
                     }
-
                     return (
                         <OldAddBaker
                             location={
@@ -164,13 +152,9 @@ export default function Baking({ account, accountInfo }: Props) {
             </Route>
             <Route default>
                 <StakingDetails
-                    hasPendingTransaction={hasPendingTransaction}
                     details={(accountInfo as AccountInfoBaker).accountBaker}
                 />
-                <Actions
-                    disabled={hasPendingTransaction}
-                    isDelegationPV={isDelegationPV}
-                />
+                <Actions isDelegationPV={isDelegationPV} />
             </Route>
         </Switch>
     );
