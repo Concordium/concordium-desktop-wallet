@@ -3,8 +3,9 @@ import type { PoolParametersV1 } from '@concordium/node-sdk';
 import { CommissionRangeField } from './CommissionRangeField';
 import { RewardFractionField } from '../common/RewardFractionField/RewardFractionField';
 import { RelativeRateField } from '../../common/RelativeRateField';
-import Input from '~/components/Form/Input';
 import { fieldDisplays } from './util';
+import { displayAsCcd } from '~/utils/ccd';
+import Label from '~/components/Label';
 
 interface PoolParametersShowProps {
     poolParameters: PoolParametersV1;
@@ -27,8 +28,9 @@ export default function ShowPoolParameters({
 }: PoolParametersShowProps): JSX.Element {
     return (
         <section>
-            <h5>{title}</h5>
+            <h3>{title}</h3>
             <div>
+                <h5>L Pool commissions</h5>
                 <RewardFractionField
                     label={fieldDisplays.transactionCommissionLPool}
                     value={transactionCommissionLPool}
@@ -62,31 +64,33 @@ export default function ShowPoolParameters({
                 <RewardFractionField
                     label={fieldDisplays.capitalBound}
                     value={capitalBound}
+                    className="mV20"
                     disabled
                 />
                 <RelativeRateField
-                    label={fieldDisplays.leverageBound}
+                    label={`${fieldDisplays.leverageBound} (Total stake to equity capital)`}
                     value={{
                         numerator: leverageBound.numerator.toString(),
                         denominator: leverageBound.denominator.toString(),
                     }}
+                    splitSymbol="/"
                     numeratorUnit={{
-                        value: ' max delegator stake',
+                        value: '',
                         position: 'postfix',
                     }}
                     denominatorUnit={{
-                        value: ' equity capital',
+                        value: '',
                         position: 'postfix',
                     }}
                     disabled
                     className="mB20"
                 />
-                <Input
-                    className="body2"
-                    label={fieldDisplays.minimumEquityCapital}
-                    value={minimumEquityCapital.toString()}
-                    disabled
-                />
+                <Label className="mB5">
+                    {fieldDisplays.minimumEquityCapital}:
+                </Label>
+                <div className="body3 mono">
+                    {displayAsCcd(minimumEquityCapital)}
+                </div>
             </div>
         </section>
     );

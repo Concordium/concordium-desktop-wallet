@@ -17,6 +17,7 @@ import {
 } from '../types';
 import { serializePoolParameters } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
+import { getReducedFraction } from '../exchangeRateHelpers';
 
 const TYPE = 'Update pool parameters';
 
@@ -56,6 +57,11 @@ export default class PoolParametersHandler
             threshold,
         } = blockSummary.updates.keys.level2Keys.bakerStakeThreshold;
 
+        const reducedLeverageBound = getReducedFraction({
+            denominator: BigInt(leverageBound.denominator),
+            numerator: BigInt(leverageBound.numerator),
+        });
+
         const poolParameters: PoolParameters = {
             lPoolCommissions: {
                 transactionFeeCommission: transactionCommissionLPool,
@@ -69,7 +75,7 @@ export default class PoolParametersHandler
             },
             minimumEquityCapital,
             capitalBound,
-            leverageBound,
+            leverageBound: reducedLeverageBound,
         };
 
         return createUpdateMultiSignatureTransaction(

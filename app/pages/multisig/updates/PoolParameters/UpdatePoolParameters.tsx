@@ -125,132 +125,143 @@ export default function UpdatePoolParameters({
                 poolParameters={poolParameters}
                 title="Current pool parameters"
             />
-            <h5>New pool parameters</h5>
-            <div>
-                <FractionFieldForm
-                    label={fieldDisplays.transactionCommissionLPool}
-                    name={fieldNames.transactionCommissionLPool}
-                    defaultValue={
-                        defaults.transactionCommissionLPool ||
-                        transactionCommissionLPool.toString()
-                    }
-                    rules={validationRules(
-                        fieldDisplays.transactionCommissionLPool
-                    )}
-                />
-                <FractionFieldForm
-                    label={fieldDisplays.bakingCommissionLPool}
-                    name={fieldNames.bakingCommissionLPool}
-                    defaultValue={
-                        defaults.bakingCommissionLPool ||
-                        bakingCommissionLPool.toString()
-                    }
-                    rules={validationRules(fieldDisplays.bakingCommissionLPool)}
-                />
-                <FractionFieldForm
-                    label={fieldDisplays.finalizationCommissionLPool}
-                    name={fieldNames.finalizationCommissionLPool}
-                    defaultValue={
-                        defaults.finalizationCommissionLPool ||
-                        finalizationCommissionLPool.toString()
-                    }
-                    rules={validationRules(
-                        fieldDisplays.finalizationCommissionLPool
-                    )}
-                />
-                <FormCommissionRangeField
-                    name={fieldNames.transactionCommissionRange}
-                    label={fieldDisplays.transactionCommissionRange}
-                    defaultValue={
-                        defaults.transactionCommissionRange ||
-                        transactionCommissionRange
-                    }
-                    rules={rangeValidationRules(
-                        fieldDisplays.transactionCommissionRange
-                    )}
-                />
-                <FormCommissionRangeField
-                    name={fieldNames.bakingCommissionRange}
-                    label={fieldDisplays.bakingCommissionRange}
-                    defaultValue={
-                        defaults.bakingCommissionRange || bakingCommissionRange
-                    }
-                    rules={rangeValidationRules(
-                        fieldDisplays.bakingCommissionRange
-                    )}
-                />
-                <FormCommissionRangeField
-                    name={fieldNames.finalizationCommissionRange}
-                    label={fieldDisplays.finalizationCommissionRange}
-                    defaultValue={
-                        defaults.transactionCommissionRange ||
-                        finalizationCommissionRange
-                    }
-                    rules={rangeValidationRules(
-                        fieldDisplays.finalizationCommissionRange
-                    )}
-                />
-                <FractionFieldForm
-                    label={fieldDisplays.capitalBound}
-                    name={fieldNames.capitalBound}
-                    defaultValue={
-                        defaults.capitalBound || capitalBound.toString()
-                    }
-                />
-                <ErrorMessage>{firstError}</ErrorMessage>
-                <FormRelativeRateField
-                    name={fieldNames.leverageBound}
-                    label={fieldDisplays.leverageBound}
-                    defaultValue={
-                        defaults.leverageBound || {
-                            numerator: leverageBound.numerator.toString(),
-                            denominator: leverageBound.denominator.toString(),
+            <section>
+                <h3>New pool parameters</h3>
+                <div>
+                    <h5>L Pool commissions</h5>
+                    <FractionFieldForm
+                        label={fieldDisplays.transactionCommissionLPool}
+                        name={fieldNames.transactionCommissionLPool}
+                        defaultValue={
+                            defaults.transactionCommissionLPool ||
+                            transactionCommissionLPool.toString()
                         }
-                    }
-                    numeratorUnit={{
-                        value: ' max delegator stake',
-                        position: 'postfix',
-                    }}
-                    denominatorUnit={{
-                        value: ' equity capital',
-                        position: 'postfix',
-                    }}
-                    className="mB20"
-                    rules={{
-                        required: `${fieldDisplays.leverageBound} is required`,
-                        validate: {
-                            numbers: (v) =>
-                                (onlyDigitsNoLeadingZeroes(v.numerator) &&
-                                    onlyDigitsNoLeadingZeroes(v.denominator)) ||
-                                'Both parts must be a valid number',
-                            max: (v) =>
-                                (v.numerator < 18446744073709551615n &&
-                                    v.denominator < 18446744073709551615n) ||
-                                'Each part must be below 18446744073709551615',
-                        },
-                    }}
-                />
-                <Form.Input
-                    className="body2"
-                    name={fieldNames.minimumEquityCapital}
-                    label={fieldDisplays.minimumEquityCapital}
-                    defaultValue={
-                        defaults.minimumEquityCapital ||
-                        minimumEquityCapital.toString()
-                    }
-                    rules={{
-                        required: 'Threshold is required',
-                        min: { value: 0, message: 'Must be above 0' },
-                        max: {
-                            value: '18446744073709551615',
-                            message: 'Must be below 18446744073709551615',
-                        },
-                        validate: (v) =>
-                            onlyDigitsNoLeadingZeroes(v) ||
-                            'Must be a valid number',
-                    }}
-                />
-            </div>
+                        rules={validationRules(
+                            fieldDisplays.transactionCommissionLPool
+                        )}
+                    />
+                    <FractionFieldForm
+                        label={fieldDisplays.bakingCommissionLPool}
+                        name={fieldNames.bakingCommissionLPool}
+                        defaultValue={
+                            defaults.bakingCommissionLPool ||
+                            bakingCommissionLPool.toString()
+                        }
+                        rules={validationRules(
+                            fieldDisplays.bakingCommissionLPool
+                        )}
+                    />
+                    <FractionFieldForm
+                        label={fieldDisplays.finalizationCommissionLPool}
+                        name={fieldNames.finalizationCommissionLPool}
+                        defaultValue={
+                            defaults.finalizationCommissionLPool ||
+                            finalizationCommissionLPool.toString()
+                        }
+                        rules={validationRules(
+                            fieldDisplays.finalizationCommissionLPool
+                        )}
+                    />
+                    <FormCommissionRangeField
+                        name={fieldNames.transactionCommissionRange}
+                        label={fieldDisplays.transactionCommissionRange}
+                        defaultValue={
+                            defaults.transactionCommissionRange ||
+                            transactionCommissionRange
+                        }
+                        rules={rangeValidationRules(
+                            fieldDisplays.transactionCommissionRange
+                        )}
+                    />
+                    <FormCommissionRangeField
+                        name={fieldNames.bakingCommissionRange}
+                        label={fieldDisplays.bakingCommissionRange}
+                        defaultValue={
+                            defaults.bakingCommissionRange ||
+                            bakingCommissionRange
+                        }
+                        rules={rangeValidationRules(
+                            fieldDisplays.bakingCommissionRange
+                        )}
+                    />
+                    <FormCommissionRangeField
+                        name={fieldNames.finalizationCommissionRange}
+                        label={fieldDisplays.finalizationCommissionRange}
+                        defaultValue={
+                            defaults.transactionCommissionRange ||
+                            finalizationCommissionRange
+                        }
+                        rules={rangeValidationRules(
+                            fieldDisplays.finalizationCommissionRange
+                        )}
+                    />
+                    <FractionFieldForm
+                        label={fieldDisplays.capitalBound}
+                        name={fieldNames.capitalBound}
+                        className="mV20"
+                        defaultValue={
+                            defaults.capitalBound || capitalBound.toString()
+                        }
+                    />
+                    <ErrorMessage>{firstError}</ErrorMessage>
+                    <FormRelativeRateField
+                        name={fieldNames.leverageBound}
+                        label={`${fieldDisplays.leverageBound} (Total stake to equity capital)`}
+                        defaultValue={
+                            defaults.leverageBound || {
+                                numerator: leverageBound.numerator.toString(),
+                                denominator: leverageBound.denominator.toString(),
+                            }
+                        }
+                        splitSymbol="/"
+                        numeratorUnit={{
+                            value: '',
+                            position: 'postfix',
+                        }}
+                        denominatorUnit={{
+                            value: '',
+                            position: 'postfix',
+                        }}
+                        className="mB20"
+                        rules={{
+                            required: `${fieldDisplays.leverageBound} is required`,
+                            validate: {
+                                numbers: (v) =>
+                                    (onlyDigitsNoLeadingZeroes(v.numerator) &&
+                                        onlyDigitsNoLeadingZeroes(
+                                            v.denominator
+                                        )) ||
+                                    'Both parts must be a valid number',
+                                max: (v) =>
+                                    (v.numerator < 18446744073709551615n &&
+                                        v.denominator <
+                                            18446744073709551615n) ||
+                                    'Each part must be below 18446744073709551615',
+                            },
+                        }}
+                    />
+                    <Form.Input
+                        className="body2"
+                        name={fieldNames.minimumEquityCapital}
+                        label={`${fieldDisplays.minimumEquityCapital} (µCCD)`}
+                        defaultValue={
+                            defaults.minimumEquityCapital ||
+                            minimumEquityCapital.toString()
+                        }
+                        rules={{
+                            required: 'Threshold is required',
+                            min: { value: 0, message: 'Must be above 0' },
+                            max: {
+                                value: '18446744073709551615',
+                                message: 'Must be below 18446744073709551615',
+                            },
+                            validate: (v) =>
+                                onlyDigitsNoLeadingZeroes(v) ||
+                                'Must be a valid number',
+                        }}
+                    />
+                </div>
+            </section>
         </>
     );
 }

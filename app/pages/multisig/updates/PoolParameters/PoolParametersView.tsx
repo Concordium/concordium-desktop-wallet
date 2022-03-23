@@ -19,7 +19,7 @@ export default withChainData(function PoolParametersView({
     consensusStatus,
 }: Props) {
     if (!consensusStatus || !blockSummary) {
-        return <Loading />;
+        return <Loading inline />;
     }
     if (!isBlockSummaryV1(blockSummary)) {
         throw new Error('Connected node used outdated blockSummary format');

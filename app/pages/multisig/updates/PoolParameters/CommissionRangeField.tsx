@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import clsx from 'clsx';
 import { connectWithFormControlled } from '~/components/Form/common/connectWithForm';
 import { ClassName, CommissionRange } from '~/utils/types';
 import { useUpdateEffect } from '~/utils/hooks';
 import { noOp } from '~/utils/basicHelpers';
 import { RewardFractionField } from '../common/RewardFractionField/RewardFractionField';
-import styles from '../common/RewardFractionField/RewardFractionField.module.scss';
 import { InlineNumberProps } from '~/components/Form/InlineNumber/InlineNumber';
 
 export interface CommissionRangeFieldProps
@@ -26,7 +24,6 @@ export function CommissionRangeField({
     display = false,
     ...props
 }: CommissionRangeFieldProps): JSX.Element {
-    const { disabled, isInvalid, readOnly } = props;
     const [min, setMin] = useState<number | undefined>(value?.min);
     const [max, setMax] = useState<number | undefined>(value?.max);
 
@@ -40,18 +37,7 @@ export function CommissionRangeField({
 
     return (
         <>
-            <label
-                className={clsx(
-                    styles.root,
-                    disabled && styles.disabled,
-                    display && styles.display,
-                    readOnly && styles.readOnly,
-                    isInvalid && styles.invalid,
-                    className
-                )}
-            >
-                {label}
-            </label>
+            <h5>{label}</h5>
             <RewardFractionField
                 label="Min:"
                 value={min}

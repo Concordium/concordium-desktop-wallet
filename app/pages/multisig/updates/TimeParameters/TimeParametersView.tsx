@@ -21,7 +21,7 @@ export default withChainData(function TimeParametersView({
     consensusStatus,
 }: Props) {
     if (!consensusStatus || !blockSummary) {
-        return <Loading />;
+        return <Loading inline />;
     }
     if (!isBlockSummaryV1(blockSummary)) {
         throw new Error('Connected node used outdated blockSummary format');
@@ -40,7 +40,7 @@ export default withChainData(function TimeParametersView({
     return (
         <>
             <div>
-                <Label className="mB5">Current time parameters:</Label>
+                <Label className="mB5">Current mint rate:</Label>
                 <MintRateInput
                     value={currentMintRate.toString()}
                     paydaysPerYear={getPaydaysPerYear(
@@ -48,13 +48,15 @@ export default withChainData(function TimeParametersView({
                         consensusStatus
                     )}
                     disabled
-                    className="mB20"
+                    className="mB20 mono"
                 />
                 <Label className="mB5">Current reward period length:</Label>
-                {currentRewardPeriodLength.toString()} epochs
+                <div className="mono">
+                    {currentRewardPeriodLength.toString()} epochs
+                </div>
             </div>
             <div>
-                <Label className="mB5">New time parameters:</Label>
+                <Label className="mB5">Current mint rate:</Label>
                 <MintRateInput
                     value={stringifyMintRate(newMintRate)}
                     paydaysPerYear={getPaydaysPerYear(
@@ -62,10 +64,12 @@ export default withChainData(function TimeParametersView({
                         consensusStatus
                     )}
                     disabled
-                    className="mB20"
+                    className="mB20 mono"
                 />
                 <Label className="mB5">New reward period length:</Label>
-                {newRewardPeriodLength.toString()} epochs
+                <div className="mono">
+                    {newRewardPeriodLength.toString()} epochs
+                </div>
             </div>
         </>
     );

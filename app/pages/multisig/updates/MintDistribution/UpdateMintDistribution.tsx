@@ -1,6 +1,6 @@
 import React from 'react';
 import { Validate } from 'react-hook-form';
-import { MintDistributionV0 } from '@concordium/node-sdk';
+import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 
@@ -11,7 +11,6 @@ import {
 } from '../../common/RewardDistribution';
 import MintRateInput, { FormMintRateInput } from '../common/MintRateInput';
 import {
-    getCurrentValue,
     getSlotsPerYear,
     rewardDistributionLabels,
     toRewardDistributionValue,
@@ -20,13 +19,11 @@ import { parseMintRate } from '~/utils/mintDistributionHelpers';
 import Label from '~/components/Label';
 
 export interface UpdateMintDistributionFields {
-    version: 0 | 1;
     mintPerSlot: string;
     rewardDistribution: RewardDistributionValue;
 }
 
 const fieldNames: EqualRecord<UpdateMintDistributionFields> = {
-    version: 'version',
     mintPerSlot: 'mintPerSlot',
     rewardDistribution: 'rewardDistribution',
 };
@@ -51,10 +48,15 @@ export default function UpdateMintDistribution({
     blockSummary,
     consensusStatus,
 }: UpdateProps): JSX.Element | null {
-    const version = consensusStatus.protocolVersion > 3 ? 1 : 0;
-    const { mintPerSlot, ...rewardDistribution } = getCurrentValue(
-        blockSummary
-    ) as MintDistributionV0; // TODO fix if this is supposed to work with delegation protocol.
+    // Use the mintPerSlot as an indicator of whether to use v0 (which has mintPerSlot) or v1 (which doesn't)
+    let mintPerSlot: number | undefined;
+    const rewardDistribution =
+        blockSummary.updates.chainParameters.rewardParameters.mintDistribution;
+    if (!isBlockSummaryV1(blockSummary)) {
+        mintPerSlot =
+            blockSummary.updates.chainParameters.rewardParameters
+                .mintDistribution.mintPerSlot;
+    }
     const slotsPerYear = getSlotsPerYear(consensusStatus);
     const currentDistribitionRatio: RewardDistributionValue = toRewardDistributionValue(
         rewardDistribution
@@ -64,7 +66,7 @@ export default function UpdateMintDistribution({
         <>
             <div>
                 <Label className="mB5">Current mint distribution</Label>
-                {version === 0 && (
+                {mintPerSlot !== undefined && (
                     <MintRateInput
                         value={mintPerSlot.toString()}
                         paydaysPerYear={slotsPerYear}
@@ -80,7 +82,7 @@ export default function UpdateMintDistribution({
             </div>
             <div>
                 <Label className="mB5">New mint distribution</Label>
-                {version === 0 && (
+                {mintPerSlot !== undefined && (
                     <FormMintRateInput
                         name={fieldNames.mintPerSlot}
                         defaultValue={

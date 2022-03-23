@@ -3,7 +3,7 @@ import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpe
 import { CooldownParameters } from '~/utils/types';
 import Loading from '~/cross-app-components/Loading';
 import withChainData, { ChainData } from '~/utils/withChainData';
-import Input from '~/components/Form/Input';
+import Label from '~/components/Label';
 import { fieldDisplays } from './UpdateCooldownParameters';
 
 interface Props extends ChainData {
@@ -19,7 +19,7 @@ export default withChainData(function CooldownParametersView({
     consensusStatus,
 }: Props) {
     if (!consensusStatus || !blockSummary) {
-        return <Loading />;
+        return <Loading inline />;
     }
     if (!isBlockSummaryV1(blockSummary)) {
         throw new Error('Connected node used outdated blockSummary format');
@@ -38,32 +38,32 @@ export default withChainData(function CooldownParametersView({
     return (
         <>
             <div>
-                <Input
-                    className="body2 mB20"
-                    value={currentPoolOwnerCooldown.toString()}
-                    label={`Current ${fieldDisplays.poolOwnerCooldown} (seconds)`}
-                    disabled
-                />
-                <Input
-                    className="body2"
-                    value={currentDelegatorCooldown.toString()}
-                    label={`Current ${fieldDisplays.delegatorCooldown} (seconds)`}
-                    disabled
-                />
+                <Label className="mB5">
+                    Current {fieldDisplays.poolOwnerCooldown}:
+                </Label>
+                <div className="body3 mono mB20">
+                    {currentPoolOwnerCooldown.toString()} seconds
+                </div>
+                <Label className="mB5">
+                    Current {fieldDisplays.delegatorCooldown}:
+                </Label>
+                <div className="body3 mono">
+                    {currentDelegatorCooldown.toString()} seconds
+                </div>
             </div>
             <div>
-                <Input
-                    className="body2 mB20"
-                    value={newPoolOwnerCooldown.toString()}
-                    label={`New ${fieldDisplays.poolOwnerCooldown} (seconds)`}
-                    disabled
-                />
-                <Input
-                    className="body2"
-                    value={newDelegatorCooldown.toString()}
-                    label={`New ${fieldDisplays.delegatorCooldown} (seconds)`}
-                    disabled
-                />
+                <Label className="mB5">
+                    New {fieldDisplays.poolOwnerCooldown}:
+                </Label>
+                <div className="body3 mono mB20">
+                    {newPoolOwnerCooldown.toString()} seconds
+                </div>
+                <Label className="mB5">
+                    New {fieldDisplays.delegatorCooldown}:
+                </Label>
+                <div className="body3 mono">
+                    {newDelegatorCooldown.toString()} seconds
+                </div>
             </div>
         </>
     );

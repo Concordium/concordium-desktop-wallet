@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { Validate } from 'react-hook-form';
+import React, { useMemo } from 'react';
+import { Validate, useFormContext } from 'react-hook-form';
 import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
@@ -7,7 +7,6 @@ import Form from '~/components/Form/';
 import MintRateInput, { FormMintRateInput } from '../common/MintRateInput';
 import { getCurrentValue, getPaydaysPerYear } from './util';
 import { parseMintRate } from '~/utils/mintDistributionHelpers';
-import { isValidBigInt } from '~/utils/numberStringHelpers';
 import Label from '~/components/Label';
 import { mustBeAnInteger, requiredMessage, enterHere } from '../common/util';
 
@@ -52,9 +51,8 @@ export default function UpdateTimeParameters({
 
     const { mintPerPayday, rewardPeriodLength } = getCurrentValue(blockSummary);
 
-    const [newRewardPeriodLength, setNewRewardPeriodLength] = useState(
-        rewardPeriodLength
-    );
+    const form = useFormContext();
+    const newRewardPeriodLength = form.watch(fieldNames.rewardPeriodLength);
 
     const currentPaydaysPerYear = useMemo(
         () => getPaydaysPerYear(rewardPeriodLength, consensusStatus),
@@ -73,18 +71,20 @@ export default function UpdateTimeParameters({
     return (
         <>
             <div>
-                <Label className="mB5">Current mint distribution</Label>
+                <Label className="mB5">Current mint rate</Label>
                 <MintRateInput
                     value={mintPerPayday.toString()}
                     paydaysPerYear={currentPaydaysPerYear}
                     disabled
-                    className="mB20"
+                    className="mB20 mono"
                 />
                 <Label className="mB5">Current reward period length:</Label>
-                {rewardPeriodLength.toString()} epochs
+                <div className="mono">
+                    {rewardPeriodLength.toString()} epochs
+                </div>
             </div>
             <div>
-                <Label className="mB5">New mint distribution</Label>
+                <Label className="mB5">New mint rate</Label>
                 <FormMintRateInput
                     name={fieldNames.mintPerPayday}
                     defaultValue={
@@ -115,11 +115,6 @@ export default function UpdateTimeParameters({
                         defaults.rewardPeriodLength ||
                         rewardPeriodLength.toString()
                     }
-                    onChange={(e) => {
-                        if (isValidBigInt(e.target.value)) {
-                            setNewRewardPeriodLength(BigInt(e.target.value));
-                        }
-                    }}
                     label={`${fieldDisplays.rewardPeriodLength} (epochs)`}
                     placeholder={enterHere(fieldDisplays.rewardPeriodLength)}
                     rules={{
