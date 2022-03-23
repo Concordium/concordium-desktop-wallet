@@ -5,7 +5,7 @@ import MintDistributionView from '~/pages/multisig/updates/MintDistribution/Mint
 import UpdateMintDistribution, {
     UpdateMintDistributionFields,
 } from '~/pages/multisig/updates/MintDistribution/UpdateMintDistribution';
-import { parseMintPerSlot } from '../mintDistributionHelpers';
+import { parseMintRate } from '../mintDistributionHelpers';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
@@ -37,8 +37,7 @@ export default class MintDistributionHandler
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        const parsedMintPerSlot = parseMintPerSlot(mintPerSlot);
-        if (!blockSummary || !parsedMintPerSlot) {
+        if (!blockSummary) {
             return undefined;
         }
 
@@ -49,15 +48,34 @@ export default class MintDistributionHandler
             threshold,
         } = blockSummary.updates.keys.level2Keys.mintDistribution;
 
-        const mintDistribution: MintDistribution = {
-            mintPerSlot: parsedMintPerSlot,
-            bakingReward: rewardDistribution.first,
-            finalizationReward: rewardDistribution.second,
-        };
+        let mintDistribution: MintDistribution;
+        let updateType: UpdateType;
+        if (mintPerSlot) {
+            // version 0
+            updateType = UpdateType.UpdateMintDistribution;
+            const parsedMintPerSlot = parseMintRate(mintPerSlot);
+
+            if (!parsedMintPerSlot) {
+                return undefined;
+            }
+            mintDistribution = {
+                version: 0,
+                mintPerSlot: parsedMintPerSlot,
+                bakingReward: rewardDistribution.first,
+                finalizationReward: rewardDistribution.second,
+            };
+        } else {
+            updateType = UpdateType.UpdateMintDistributionV1;
+            mintDistribution = {
+                version: 1,
+                bakingReward: rewardDistribution.first,
+                finalizationReward: rewardDistribution.second,
+            };
+        }
 
         return createUpdateMultiSignatureTransaction(
             mintDistribution,
-            UpdateType.UpdateMintDistribution,
+            updateType,
             sequenceNumber,
             threshold,
             effectiveTime,
@@ -77,6 +95,7 @@ export default class MintDistributionHandler
         return ledger.signMintDistribution(
             transaction,
             this.serializePayload(transaction),
+            transaction.payload.version,
             path
         );
     }

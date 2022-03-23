@@ -50,6 +50,9 @@ import { parse } from '../JSONHelper';
 import ScheduledTransferWithMemoHandler from './ScheduledTransferWithMemoHandler';
 import EncryptedTransferWithMemoHandler from './EncryptedTransferWithMemoHandler';
 import SimpleTransferWithMemoHandler from './SimpleTransferWithMemoHandler';
+import TimeParametersHandler from './TimeParameterHandler';
+import CooldownParametersHandler from './CooldownParametersHandler';
+import PoolParametersHandler from './PoolParametersHandlers';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -165,6 +168,7 @@ export function findUpdateInstructionHandler(
                 new FoundationAccountHandler()
             );
         case UpdateType.UpdateMintDistribution:
+        case UpdateType.UpdateMintDistributionV1:
             return new UpdateInstructionHandlerTypeMiddleware(
                 new MintDistributionHandler()
             );
@@ -211,6 +215,18 @@ export function findUpdateInstructionHandler(
         case UpdateType.AddAnonymityRevoker:
             return new UpdateInstructionHandlerTypeMiddleware(
                 new AddAnonymityRevokerHandler()
+            );
+        case UpdateType.TimeParameters:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new TimeParametersHandler()
+            );
+        case UpdateType.CooldownParameters:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new CooldownParametersHandler()
+            );
+        case UpdateType.PoolParameters:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new PoolParametersHandler()
             );
         default:
             throw new Error(`Unsupported transaction type: ${type}`);

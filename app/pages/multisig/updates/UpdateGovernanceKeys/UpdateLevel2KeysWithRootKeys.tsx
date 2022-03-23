@@ -5,6 +5,7 @@ import UpdateAuthorizationKeys from './UpdateAuthorizationKeys';
 
 export default function UpdateLevel2KeysWithRootKeys({
     blockSummary,
+    consensusStatus,
     handleAuthorizationKeySubmit,
     defaults,
 }: UpdateProps): JSX.Element | null {
@@ -15,6 +16,7 @@ export default function UpdateLevel2KeysWithRootKeys({
     return (
         <UpdateAuthorizationKeys
             defaults={defaults}
+            consensusStatus={consensusStatus}
             blockSummary={blockSummary}
             type={UpdateType.UpdateLevel2KeysUsingRootKeys}
             handleKeySubmit={handleAuthorizationKeySubmit}

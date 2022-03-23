@@ -19,6 +19,9 @@ import {
     AddAnonymityRevoker,
     PrivateKeys,
     BlsKeyTypes,
+    TimeParameters,
+    CooldownParameters,
+    PoolParameters,
 } from '~/utils/types';
 import { pipe } from '~/utils/basicHelpers';
 
@@ -165,12 +168,14 @@ export default class ConcordiumLedgerClient {
     signMintDistribution(
         transaction: UpdateInstruction<MintDistribution>,
         serializedPayload: Buffer,
+        version: number,
         path: number[]
     ): Promise<Buffer> {
         return toBuffer(
             window.ledger.signMintDistribution(
                 transaction,
                 serializedPayload,
+                version,
                 path
             )
         );
@@ -276,14 +281,58 @@ export default class ConcordiumLedgerClient {
         transaction: UpdateInstruction<AuthorizationKeysUpdate>,
         serializedPayload: Buffer,
         path: number[],
-        INS: number
+        INS: number,
+        version: number
     ): Promise<Buffer> {
         return toBuffer(
             window.ledger.signAuthorizationKeysUpdate(
                 transaction,
                 serializedPayload,
                 path,
-                INS
+                INS,
+                version
+            )
+        );
+    }
+
+    signTimeParameters(
+        transaction: UpdateInstruction<TimeParameters>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return toBuffer(
+            window.ledger.signTimeParameters(
+                transaction,
+                serializedPayload,
+                path
+            )
+        );
+    }
+
+    signCooldownParameters(
+        transaction: UpdateInstruction<CooldownParameters>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return toBuffer(
+            window.ledger.signCooldownParameters(
+                transaction,
+                serializedPayload,
+                path
+            )
+        );
+    }
+
+    signPoolParameters(
+        transaction: UpdateInstruction<PoolParameters>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return toBuffer(
+            window.ledger.signPoolParameters(
+                transaction,
+                serializedPayload,
+                path
             )
         );
     }

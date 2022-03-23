@@ -12,10 +12,10 @@ import { noOp } from '~/utils/basicHelpers';
 import InlineNumber from '~/components/Form/InlineNumber';
 import { getPowerOf10 } from '~/utils/numberStringHelpers';
 
-import styles from './GasRewardFractionField.module.scss';
+import styles from './RewardFractionField.module.scss';
 import { InlineNumberProps } from '~/components/Form/InlineNumber/InlineNumber';
 
-export interface GasRewardFractionFieldProps
+export interface RewardFractionFieldProps
     extends Pick<InlineNumberProps, 'disabled' | 'readOnly' | 'isInvalid'>,
         ClassName {
     label: string;
@@ -39,16 +39,16 @@ function parseValue(v = ''): number {
     return percentageToFractionResolution(parsed);
 }
 
-export const gasRewardFractionFieldResolution = percentageModifier;
+export const rewardFractionFieldResolution = percentageModifier;
 
-export function GasRewardFractionField({
+export function RewardFractionField({
     label,
     onChange = noOp,
     value,
     className,
     display = false,
     ...props
-}: GasRewardFractionFieldProps): JSX.Element {
+}: RewardFractionFieldProps): JSX.Element {
     const { disabled, isInvalid, readOnly } = props;
     const [innerValue, setInnerValue] = useState<string | undefined>(
         formatValue(value)
@@ -75,9 +75,7 @@ export function GasRewardFractionField({
             <span>{label}</span>
             <span className={styles.value}>
                 <InlineNumber
-                    allowFractions={getPowerOf10(
-                        gasRewardFractionFieldResolution
-                    )}
+                    allowFractions={getPowerOf10(rewardFractionFieldResolution)}
                     value={innerValue}
                     onChange={setInnerValue}
                     {...props}
@@ -88,7 +86,7 @@ export function GasRewardFractionField({
     );
 }
 
-export const FormGasRewardFractionField = connectWithFormControlled<
+export const FormRewardFractionField = connectWithFormControlled<
     RewardFraction,
-    GasRewardFractionFieldProps
->(GasRewardFractionField);
+    RewardFractionFieldProps
+>(RewardFractionField);

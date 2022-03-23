@@ -37,7 +37,7 @@ export default class BakerStakeThresholdHandler
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!blockSummary) {
+        if (!blockSummary || isBlockSummaryV1(blockSummary)) {
             return undefined;
         }
 

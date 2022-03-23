@@ -16,12 +16,12 @@ const Template: Story<MintRateInputProps> = (args) => {
 export const Primary = Template.bind({});
 Primary.args = {
     value: '7.555665e-10',
-    slotsPerYear: 126144000,
+    paydaysPerYear: 126144000,
 };
 
 export const Disabled = Template.bind({});
 Disabled.args = {
     value: '7.555665e-10',
-    slotsPerYear: 126144000,
+    paydaysPerYear: 126144000,
     disabled: true,
 };

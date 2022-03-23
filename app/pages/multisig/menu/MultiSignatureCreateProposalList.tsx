@@ -18,10 +18,16 @@ import { not } from '~/utils/functionHelpers';
 
 import styles from '../MultiSignaturePage/MultiSignaturePage.module.scss';
 
-type UpdateInstructionTuple = [TransactionTypes, UpdateType, string];
+type SpecificType = UpdateType | TransactionKind;
+type TypeTuple = [
+    TransactionTypes,
+    SpecificType,
+    string,
+    ((pv: bigint) => boolean)?
+];
 
 // Defines the list of options for creating multi signature transactions.
-const updateInstructionTypes: UpdateInstructionTuple[] = [
+const updateInstructionTypes: TypeTuple[] = [
     [
         TransactionTypes.UpdateInstruction,
         UpdateType.UpdateMicroGTUPerEuro,
@@ -66,6 +72,7 @@ const updateInstructionTypes: UpdateInstructionTuple[] = [
         TransactionTypes.UpdateInstruction,
         UpdateType.UpdateBakerStakeThreshold,
         'Update baker stake threshold',
+        not(hasDelegationProtocol),
     ],
     [
         TransactionTypes.UpdateInstruction,
@@ -102,36 +109,44 @@ const updateInstructionTypes: UpdateInstructionTuple[] = [
         UpdateType.AddAnonymityRevoker,
         'Add anonymity revoker',
     ],
-];
-
-type AccountTransactionTuple = [
-    TransactionTypes,
-    TransactionKind,
-    string,
-    ((pv: bigint) => boolean) | undefined
+    [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.CooldownParameters,
+        'Update cooldown parameters',
+        hasDelegationProtocol,
+    ],
+    [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.PoolParameters,
+        'Update pool parameters',
+        hasDelegationProtocol,
+    ],
+    [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.TimeParameters,
+        'Update time parameters',
+        hasDelegationProtocol,
+    ],
 ];
 
 /**
  * [Transaction type, Transaction kind, Button label, Protocol version filter]
  */
-const accountTransactionTypes: AccountTransactionTuple[] = [
+const accountTransactionTypes: TypeTuple[] = [
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Update_credentials,
         'Update account credentials',
-        undefined,
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Simple_transfer,
         'Send CCD',
-        undefined,
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Transfer_with_schedule,
         'Send CCD with a schedule',
-        undefined,
     ],
     [
         TransactionTypes.AccountTransaction,
@@ -235,7 +250,7 @@ const toLink = (pv: bigint | undefined) => ([
     specificType,
     label,
     filter = () => true,
-]: AccountTransactionTuple | UpdateInstructionTuple) =>
+]: TypeTuple) =>
     pv !== undefined &&
     filter(pv) && (
         <Fragment key={`${transactionType}${specificType}`}>
