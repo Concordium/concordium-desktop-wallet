@@ -1,4 +1,4 @@
-import { push, replace } from 'connected-react-router';
+import { goBack, push, replace } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import React, { useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -15,11 +15,14 @@ import { stringify } from '~/utils/JSONHelper';
 import { BakerKeys } from '~/utils/rustInterface';
 import { createAddBakerTransaction } from '~/utils/transactionHelpers';
 import { AddBakerPayload, NotOptional, TransactionKindId } from '~/utils/types';
-import { SubmitTransactionLocationState } from '../../../SubmitTransaction/SubmitTransaction';
+import { SubmitTransactionLocationState } from '../../../../SubmitTransaction/SubmitTransaction';
 import AddBakerData from './AddBakerData';
 import GenerateBakerKeys from '~/components/Transfers/configureBaker/GenerateBakerKeys';
 import { StakeSettings } from '~/utils/transactionFlows/configureBaker';
+import BackButton from '~/cross-app-components/BackButton';
 import Card from '~/cross-app-components/Card';
+
+import styles from '../../../AccountDetailsPage.module.scss';
 
 const header = 'Add baker';
 
@@ -117,29 +120,35 @@ const AddBaker = ensureExchangeRateAndNonce(
         }
 
         return (
-            <Switch>
-                <Route path={routes.ACCOUNTS_EXPORT_BAKER_KEYS}>
-                    {bakerData ? (
-                        <Card className="textCenter pB40 pT0">
-                            <GenerateBakerKeys
-                                onContinue={next}
-                                keyVariant="ADD"
-                                account={account}
-                            />
-                        </Card>
-                    ) : (
-                        <Redirect to={routes.ACCOUNTS_ADD_BAKER} />
-                    )}
-                </Route>
-                <Route path={routes.ACCOUNTS_ADD_BAKER}>
-                    <AddBakerData
-                        header={header}
-                        onSubmit={handleSubmit}
-                        initialData={location.state}
-                        exchangeRate={exchangeRate}
-                    />
-                </Route>
-            </Switch>
+            <div className="relative">
+                <BackButton
+                    className={styles.backButton}
+                    onClick={() => dispatch(goBack())}
+                />
+                <Switch>
+                    <Route path={routes.ACCOUNTS_EXPORT_BAKER_KEYS}>
+                        {bakerData ? (
+                            <Card className="textCenter pB40 pT0">
+                                <GenerateBakerKeys
+                                    onContinue={next}
+                                    keyVariant="ADD"
+                                    account={account}
+                                />
+                            </Card>
+                        ) : (
+                            <Redirect to={routes.ACCOUNTS_ADD_BAKER} />
+                        )}
+                    </Route>
+                    <Route path={routes.ACCOUNTS_ADD_BAKER}>
+                        <AddBakerData
+                            header={header}
+                            onSubmit={handleSubmit}
+                            initialData={location.state}
+                            exchangeRate={exchangeRate}
+                        />
+                    </Route>
+                </Switch>
+            </div>
         );
     }
 );

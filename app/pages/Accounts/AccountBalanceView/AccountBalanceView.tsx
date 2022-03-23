@@ -2,11 +2,16 @@ import React from 'react';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import ShieldImage from '@resources/svg/shield.svg';
-import BakerImage from '@resources/svg/baker.svg';
 import ArrowIcon from '@resources/svg/back-arrow.svg';
-import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import type { DelegationTarget } from '@concordium/node-sdk';
+import {
+    isBakerAccount,
+    isDelegatorAccount,
+} from '@concordium/node-sdk/lib/src/accountHelpers';
+import { DelegationTargetType } from '@concordium/node-sdk/lib/src/types';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
+import { Account, AccountInfo } from '~/utils/types';
 import { displayAsCcd } from '~/utils/ccd';
 import {
     setViewingShieldedAndReset,
@@ -19,12 +24,93 @@ import {
     previousConfirmedAccount,
     nextConfirmedAccount,
 } from '~/features/AccountSlice';
-import SidedRow from '~/components/SidedRow';
 import AccountName from './AccountName';
 import AccountDefaultButton from './AccountDefaultButton';
 import { getPublicAccountAmounts } from '~/utils/accountHelpers';
+import Label from '~/components/Label';
 
 import styles from './AccountBalanceView.module.scss';
+
+interface ShieldedInfoProps {
+    account: Account;
+}
+
+function ShieldedInfo({
+    account: { totalDecrypted = '0', allDecrypted },
+}: ShieldedInfoProps) {
+    return (
+        <>
+            <ShieldImage className={styles.backgroundImage} />
+            <h1 className={clsx(styles.shieldedAmount, 'mV20')}>
+                {displayAsCcd(totalDecrypted)}
+                {allDecrypted || (
+                    <>
+                        {' '}
+                        +{' '}
+                        <ShieldImage
+                            className={styles.blueShield}
+                            height="30"
+                        />
+                    </>
+                )}
+            </h1>
+        </>
+    );
+}
+
+const getDelegationTargetId = (dt: DelegationTarget) =>
+    dt.delegateType === DelegationTargetType.Baker
+        ? `baker ${dt.bakerId}`
+        : 'L-pool';
+
+interface PublicInfoProps {
+    accountInfo: AccountInfo | undefined;
+}
+
+function PublicInfo({ accountInfo }: PublicInfoProps) {
+    const accountBaker =
+        accountInfo !== undefined && isBakerAccount(accountInfo)
+            ? accountInfo.accountBaker
+            : undefined;
+    const accountDelegation =
+        accountInfo !== undefined && isDelegatorAccount(accountInfo)
+            ? accountInfo.accountDelegation
+            : undefined;
+
+    const { total, staked, atDisposal } = getPublicAccountAmounts(accountInfo);
+
+    return (
+        <>
+            <h1 className={clsx(styles.blueText, 'mV20')}>
+                {displayAsCcd(total)}
+            </h1>
+            <div className={styles.details}>
+                <div className="mB20">
+                    <Label className="mB5 textWhite">At disposal:</Label>
+                    <span className="body2 textBlue">
+                        {displayAsCcd(atDisposal)}
+                    </span>
+                </div>
+                {(accountBaker !== undefined ||
+                    accountDelegation !== undefined) && (
+                    <div className="mB20">
+                        <Label className="mB5 textWhite">
+                            {accountBaker !== undefined &&
+                                `Staked for baking: ${accountBaker.bakerId}`}
+                            {accountDelegation !== undefined &&
+                                `Delegating to ${getDelegationTargetId(
+                                    accountDelegation.delegationTarget
+                                )}:`}
+                        </Label>
+                        <span className="body2 textBlue">
+                            {displayAsCcd(staked)}
+                        </span>
+                    </div>
+                )}
+            </div>
+        </>
+    );
+}
 
 /**
  * Displays the chosen Account's balance, and contains
@@ -49,102 +135,8 @@ export default function AccountBalanceView(): JSX.Element | null {
         setViewingShieldedAndReset(dispatch, false);
     }
 
-    const buttons = (
-        <div
-            className={clsx(
-                styles.viewingShielded,
-                isMultiSig && 'justifyCenter'
-            )}
-        >
-            <Button
-                clear
-                disabled={!viewingShielded}
-                className={clsx(
-                    styles.viewingShieldedButton,
-                    !viewingShielded && styles.active
-                )}
-                onClick={() => setViewingShieldedAndReset(dispatch, false)}
-            >
-                Balance
-            </Button>
-            {!isMultiSig && (
-                <Button
-                    clear
-                    disabled={viewingShielded}
-                    className={clsx(
-                        styles.viewingShieldedButton,
-                        viewingShielded && styles.active
-                    )}
-                    onClick={() => setViewingShieldedAndReset(dispatch, true)}
-                >
-                    Shielded balance
-                </Button>
-            )}
-        </div>
-    );
-
-    let main;
-    if (viewingShielded) {
-        const totalDecrypted = account.totalDecrypted || 0n;
-
-        main = (
-            <>
-                <ShieldImage className={styles.backgroundImage} />
-                <h1 className={clsx(styles.shieldedAmount, 'mV20')}>
-                    {displayAsCcd(totalDecrypted)}
-                    {account.allDecrypted || (
-                        <>
-                            {' '}
-                            +{' '}
-                            <ShieldImage
-                                className={styles.blueShield}
-                                height="30"
-                            />
-                        </>
-                    )}
-                </h1>
-            </>
-        );
-    } else {
-        const accountBaker =
-            accountInfo !== undefined && isBakerAccount(accountInfo)
-                ? accountInfo.accountBaker
-                : undefined;
-        const { total, staked, atDisposal } = getPublicAccountAmounts(
-            accountInfo
-        );
-
-        main = (
-            <>
-                <h1 className={clsx(styles.blueText, 'mV20')}>
-                    {displayAsCcd(total)}
-                </h1>
-                <div className={styles.details}>
-                    <SidedRow
-                        className={clsx(styles.amountRow, 'mT0')}
-                        left={<span className="mR5">At disposal:</span>}
-                        right={displayAsCcd(atDisposal)}
-                    />
-                    <SidedRow
-                        className={clsx(styles.amountRow, 'mB0')}
-                        left={<span className="mR5">Staked:</span>}
-                        right={displayAsCcd(staked)}
-                    />
-                </div>
-                {accountBaker && (
-                    <div className={styles.bakerRow}>
-                        <BakerImage className={styles.bakerImage} height="18" />
-                        <h3 className="m0">
-                            {accountBaker.bakerId.toString()}
-                        </h3>
-                    </div>
-                )}
-            </>
-        );
-    }
-
     return (
-        <Card className={styles.accountBalanceView}>
+        <Card className={styles.accountBalanceView} dark>
             <div
                 className={clsx(
                     styles.accountNameWrapper,
@@ -169,8 +161,44 @@ export default function AccountBalanceView(): JSX.Element | null {
                     </Button>
                 )}
             </div>
-            {buttons}
-            {main}
+            <div
+                className={clsx(
+                    styles.viewingShielded,
+                    isMultiSig && 'justifyCenter'
+                )}
+            >
+                <Button
+                    clear
+                    disabled={!viewingShielded}
+                    className={clsx(
+                        styles.viewingShieldedButton,
+                        !viewingShielded && styles.active
+                    )}
+                    onClick={() => setViewingShieldedAndReset(dispatch, false)}
+                >
+                    Balance
+                </Button>
+                {!isMultiSig && (
+                    <Button
+                        clear
+                        disabled={viewingShielded}
+                        className={clsx(
+                            styles.viewingShieldedButton,
+                            viewingShielded && styles.active
+                        )}
+                        onClick={() =>
+                            setViewingShieldedAndReset(dispatch, true)
+                        }
+                    >
+                        Shielded balance
+                    </Button>
+                )}
+            </div>
+            {viewingShielded ? (
+                <ShieldedInfo account={account} />
+            ) : (
+                <PublicInfo accountInfo={accountInfo} />
+            )}
             <AccountDefaultButton
                 account={account}
                 className={styles.defaultButton}

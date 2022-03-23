@@ -10,7 +10,7 @@ import {
 } from '~/utils/types';
 import AccountTransactionFlow, {
     AccountTransactionFlowLoading,
-} from '../AccountTransactionFlow';
+} from '../../AccountTransactionFlow';
 import { ensureProps } from '~/utils/componentHelpers';
 import { convertToBakerTransaction } from '~/utils/transactionFlows/configureBaker';
 import routes from '~/constants/routes.json';
@@ -56,6 +56,7 @@ export default withDeps(function UpdateBakerKeys(props: Props) {
             title={updateBakerKeysTitle}
             convert={convert}
             multisigRoute={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_KEYS}
+            firstPageBack
         >
             {{
                 keys: {

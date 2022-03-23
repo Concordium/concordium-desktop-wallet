@@ -1,9 +1,14 @@
 import { AccountInfo } from '@concordium/node-sdk';
 import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
-import { DelegationTargetType } from '@concordium/node-sdk/lib/src/types';
+import {
+    DelegationTarget,
+    DelegationTargetBaker,
+    DelegationTargetType,
+} from '@concordium/node-sdk/lib/src/types';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
-import { multiplyFraction } from '../basicHelpers';
+import { isDefined, multiplyFraction } from '../basicHelpers';
 import { ccdToMicroCcd, microCcdToCcd } from '../ccd';
+import { not } from '../functionHelpers';
 import { getTransactionKindCost } from '../transactionCosts';
 import { createConfigureDelegationTransaction } from '../transactionHelpers';
 import { serializeTransferPayload } from '../transactionSerialization';
@@ -125,6 +130,11 @@ export function getEstimatedConfigureDelegationFee(
     );
 }
 
+/**
+ * Converts values of flow to a configure delegation transaction.
+ *
+ * Throws if no changes to existing values have been made.
+ */
 export const convertToConfigureDelegationTransaction = (
     account: Account,
     nonce: bigint,
@@ -139,6 +149,15 @@ export const convertToConfigureDelegationTransaction = (
         existing !== undefined
             ? getDelegationFlowChanges(existing, values)
             : values;
+    const { delegate, ...topLevelChanges } = changes;
+
+    if (
+        Object.values({ ...delegate, ...topLevelChanges }).every(not(isDefined))
+    ) {
+        throw new Error(
+            'Trying to submit a transaction without any changes to the existing delegation configuration of an account.'
+        );
+    }
 
     const transaction = createConfigureDelegationTransaction(
         account.address,
@@ -155,8 +174,20 @@ export const convertToConfigureDelegationTransaction = (
     return transaction;
 };
 
-export const displayDelegationTarget = (target: string | bigint | null) =>
-    target === null ? 'L-pool' : target.toString();
+export const displayDelegationTarget = (
+    target: DelegationTarget | string | bigint | null
+) => {
+    if (
+        target === null ||
+        (target as DelegationTarget)?.delegateType ===
+            DelegationTargetType.LPool
+    ) {
+        return 'L-pool';
+    }
 
-export const displayRedelegate = (value: boolean) =>
-    value ? 'Redelegate' : "Don't redelegate";
+    const id = (target as DelegationTargetBaker).bakerId ?? target;
+
+    return id.toString();
+};
+
+export const displayRedelegate = (value: boolean) => (value ? 'Yes' : 'No');

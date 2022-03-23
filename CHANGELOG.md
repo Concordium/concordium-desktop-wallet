@@ -6,12 +6,15 @@
 
 -   Allow users to verify address on Ledger device.
 -   Allow users to choose CCD or microCCD as the unit used in account report.
+-   Dedicated spaces to baking/delegating in accounts section.
 -   New flows for configuring account as baker, which will be effective when the node is updated to protocol version 4.
 -   Flows for configuring delegation of stake for accounts, which will be effective when the node is updated to protocol version 4.
 
 ### Changed
 
 -   Flows for pre-delegation baker transactions will be unavailable when protocol version 4 is activated on the node.
+-   Updated account views to include delegated stake.
+-   Moved flows for updating baker configuration in newly added baking section.
 
 ## 1.3.1
 

@@ -1,3 +1,5 @@
+import { ConsensusStatus, StakePendingChange } from '@concordium/node-sdk';
+import { isStakePendingChangeV1 } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { ensureNumberLength } from './basicHelpers';
 import { TimeStampUnit, YearMonth, YearMonthDate } from './types';
 
@@ -264,3 +266,30 @@ export const isDateEqual = (
 
     return stripTime(left).getTime() === stripTime(right).getTime();
 };
+
+export function dateFromStakePendingChange(
+    spc: StakePendingChange,
+    status: ConsensusStatus
+): Date;
+export function dateFromStakePendingChange(
+    spc: StakePendingChange,
+    status: ConsensusStatus | undefined
+): Date | undefined;
+export function dateFromStakePendingChange(
+    spc: StakePendingChange,
+    status: ConsensusStatus | undefined
+): Date | undefined {
+    if (isStakePendingChangeV1(spc)) {
+        return spc.effectiveTime;
+    }
+
+    if (status === undefined) {
+        return undefined;
+    }
+
+    return epochDate(
+        Number(spc.epoch),
+        status.epochDuration,
+        new Date(status.currentEraGenesisTime)
+    );
+}

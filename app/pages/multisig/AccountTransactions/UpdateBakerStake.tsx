@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import React, { ComponentType, useCallback } from 'react';
+import React, { ComponentType, useCallback, useState } from 'react';
 import { Redirect, useRouteMatch } from 'react-router';
 import { useSelector } from 'react-redux';
 import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
@@ -33,6 +33,8 @@ import {
 import { shouldShowField } from './utils';
 
 import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
+import { ValidateValues } from '~/components/MultiStepForm';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 interface DisplayProps
     extends Partial<RequiredValues & UpdateBakerStakeFlowState> {
@@ -110,6 +112,7 @@ export default withDeps(function UpdateBakerStake({
 }: Props) {
     const { path: matchedPath } = useRouteMatch();
     const accountsInfo = useSelector(accountsInfoSelector);
+    const [showError, setShowError] = useState(false);
 
     const convert = useCallback(
         (
@@ -125,36 +128,60 @@ export default withDeps(function UpdateBakerStake({
         [exchangeRate, accountsInfo]
     );
 
+    const validate: ValidateValues<
+        RequiredValues & UpdateBakerStakeFlowState
+    > = useCallback(
+        (v) => {
+            try {
+                convert(v, 0n);
+            } catch {
+                setShowError(true);
+                return 'stake';
+            }
+            return undefined;
+        },
+        [convert]
+    );
+
     return (
-        <MultiSigAccountTransactionFlow<
-            UpdateBakerStakeFlowState,
-            ConfigureBaker
-        >
-            title={updateBakerStakeTitle}
-            convert={convert}
-            accountFilter={(_, i) => isDefined(i) && isBakerAccount(i)}
-            preview={(v) => (
-                <DisplayValues {...v} exchangeRate={exchangeRate} />
-            )}
-        >
-            {({ account }) => ({
-                stake: {
-                    render: (initial, onNext, formValues) =>
-                        isDefined(account) ? (
-                            <UpdateBakerStakePage
-                                account={account}
-                                exchangeRate={exchangeRate}
-                                blockSummary={blockSummary}
-                                initial={initial}
-                                onNext={onNext}
-                                formValues={formValues}
-                            />
-                        ) : (
-                            <Redirect to={matchedPath} />
-                        ),
-                    title: 'Stake settings',
-                },
-            })}
-        </MultiSigAccountTransactionFlow>
+        <>
+            <SimpleErrorModal
+                show={showError}
+                onClick={() => setShowError(false)}
+                header="Empty transaction"
+                content="Transaction includes no changes to existing baker configuration for account."
+            />
+            <MultiSigAccountTransactionFlow<
+                UpdateBakerStakeFlowState,
+                ConfigureBaker
+            >
+                title={updateBakerStakeTitle}
+                convert={convert}
+                accountFilter={(_, i) => isDefined(i) && isBakerAccount(i)}
+                preview={(v) => (
+                    <DisplayValues {...v} exchangeRate={exchangeRate} />
+                )}
+                validate={validate}
+            >
+                {({ account }) => ({
+                    stake: {
+                        render: (initial, onNext, formValues) =>
+                            isDefined(account) ? (
+                                <UpdateBakerStakePage
+                                    account={account}
+                                    exchangeRate={exchangeRate}
+                                    blockSummary={blockSummary}
+                                    initial={initial}
+                                    onNext={onNext}
+                                    formValues={formValues}
+                                />
+                            ) : (
+                                <Redirect to={matchedPath} />
+                            ),
+                        title: 'Stake settings',
+                    },
+                })}
+            </MultiSigAccountTransactionFlow>
+        </>
     );
 });

@@ -17,7 +17,7 @@ import {
 import withChainData from '~/utils/withChainData';
 import AccountTransactionFlow, {
     AccountTransactionFlowLoading,
-} from '../AccountTransactionFlow';
+} from '../../AccountTransactionFlow';
 import { ensureProps } from '~/utils/componentHelpers';
 import {
     AddBakerFlowState,

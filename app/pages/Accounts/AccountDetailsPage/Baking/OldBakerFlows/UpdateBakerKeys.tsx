@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { Redirect, Route, Switch } from 'react-router';
 import { useDispatch } from 'react-redux';
-import { push, replace } from 'connected-react-router';
+import { goBack, push, replace } from 'connected-react-router';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
 import routes from '~/constants/routes.json';
@@ -12,7 +12,7 @@ import {
     UpdateBakerKeysPayload,
 } from '~/utils/types';
 import { createUpdateBakerKeysTransaction } from '~/utils/transactionHelpers';
-import { SubmitTransactionLocationState } from '../../SubmitTransaction/SubmitTransaction';
+import { SubmitTransactionLocationState } from '../../../SubmitTransaction/SubmitTransaction';
 import { stringify } from '~/utils/JSONHelper';
 import { multiplyFraction } from '~/utils/basicHelpers';
 import { isMultiSig } from '~/utils/accountHelpers';
@@ -21,8 +21,9 @@ import ensureExchangeRateAndNonce, {
     ExchangeRateAndNonceProps,
 } from '~/components/Transfers/ensureExchangeRateAndNonce';
 import GenerateBakerKeys from '~/components/Transfers/configureBaker/GenerateBakerKeys';
+import BackButton from '~/cross-app-components/BackButton';
 
-import styles from '../AccountDetailsPage.module.scss';
+import styles from '../../AccountDetailsPage.module.scss';
 
 const header = 'Update baker keys';
 
@@ -127,17 +128,23 @@ export default ensureExchangeRateAndNonce(function UpdateBakerKeys({
     }
 
     return (
-        <Switch>
-            <Route path={routes.ACCOUNTS_EXPORT_BAKER_KEYS}>
-                <Card className="textCenter pB40 pT0">
-                    <GenerateBakerKeys
-                        onContinue={next}
-                        keyVariant="UPDATE"
-                        account={account}
-                    />
-                </Card>
-            </Route>
-            <Route component={UpdateBakerKeysIntro} />
-        </Switch>
+        <div className="relative">
+            <BackButton
+                className={styles.backButton}
+                onClick={() => dispatch(goBack())}
+            />
+            <Switch>
+                <Route path={routes.ACCOUNTS_EXPORT_BAKER_KEYS}>
+                    <Card className="textCenter pB40 pT0">
+                        <GenerateBakerKeys
+                            onContinue={next}
+                            keyVariant="UPDATE"
+                            account={account}
+                        />
+                    </Card>
+                </Route>
+                <Route component={UpdateBakerKeysIntro} />
+            </Switch>
+        </div>
     );
 });

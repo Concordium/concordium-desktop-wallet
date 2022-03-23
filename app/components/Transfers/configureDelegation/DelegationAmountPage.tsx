@@ -16,7 +16,6 @@ import { getFormattedDateString } from '~/utils/timeHelpers';
 import {
     ConfigureDelegationFlowState,
     DelegateSettings,
-    displayRedelegate,
     getDelegationFlowChanges,
     getEstimatedConfigureDelegationFee,
     getExistingDelegationValues,
@@ -236,7 +235,9 @@ export default function DelegationAmountPage({
                 {existing !== undefined && (
                     <div className="body3 mono mB10">
                         Current option:{' '}
-                        {displayRedelegate(existing.delegate.redelegate)}
+                        {existing.delegate.redelegate
+                            ? 'Redelegate'
+                            : "Don't redelegate"}
                     </div>
                 )}
                 <Form.Radios

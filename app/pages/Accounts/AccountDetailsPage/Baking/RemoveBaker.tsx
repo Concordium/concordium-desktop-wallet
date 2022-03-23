@@ -5,26 +5,24 @@ import withNonce, { AccountAndNonce } from '~/components/Transfers/withNonce';
 import { isDefined } from '~/utils/basicHelpers';
 import {
     AccountInfo,
-    ConfigureDelegation,
+    ConfigureBaker as ConfigureBakerTransaction,
     MakeRequired,
     NotOptional,
 } from '~/utils/types';
 import AccountTransactionFlow, {
     AccountTransactionFlowLoading,
-} from '../AccountTransactionFlow';
+} from '../../AccountTransactionFlow';
 import { ensureProps } from '~/utils/componentHelpers';
-import routes from '~/constants/routes.json';
 import {
-    convertToRemoveDelegationTransaction,
-    RemoveDelegationDependencies,
-    RemoveDelegationFlowState,
-    removeDelegationTitle,
-} from '~/utils/transactionFlows/removeDelegation';
-import RemoveDelegationPage from '~/components/Transfers/configureDelegation/RemoveDelegationPage';
+    removeBakerTitle,
+    convertToRemoveBakerTransaction,
+    RemoveBakerFlowState,
+    RemoveBakerDependencies,
+} from '~/utils/transactionFlows/removeBaker';
+import routes from '~/constants/routes.json';
+import RemoveBakerPage from '~/components/Transfers/configureBaker/RemoveBakerPage';
 
-interface Props
-    extends RemoveDelegationDependencies,
-        NotOptional<AccountAndNonce> {
+interface Props extends RemoveBakerDependencies, NotOptional<AccountAndNonce> {
     accountInfo: AccountInfo;
 }
 
@@ -40,37 +38,33 @@ const withDeps = (component: ComponentType<Props>) =>
             ensureProps(
                 component,
                 hasNecessaryProps,
-                <AccountTransactionFlowLoading title={removeDelegationTitle} />
+                <AccountTransactionFlowLoading title={removeBakerTitle} />
             )
         )
     );
 
-export default withDeps(function RemoveDelegation(props: Props) {
+export default withDeps(function RemoveBaker(props: Props) {
     const { nonce, account, exchangeRate, accountInfo } = props;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const convert = useCallback(
-        () =>
-            convertToRemoveDelegationTransaction(
-                account,
-                nonce,
-                exchangeRate
-            )(),
+        () => convertToRemoveBakerTransaction(account, nonce, exchangeRate)(),
         [account, nonce, exchangeRate]
     );
 
     return (
-        <AccountTransactionFlow<RemoveDelegationFlowState, ConfigureDelegation>
-            title={removeDelegationTitle}
+        <AccountTransactionFlow<RemoveBakerFlowState, ConfigureBakerTransaction>
+            title={removeBakerTitle}
             convert={convert}
-            multisigRoute={routes.MULTISIGTRANSACTIONS_REMOVE_DELEGATION}
+            multisigRoute={routes.MULTISIGTRANSACTIONS_REMOVE_BAKER}
+            firstPageBack
         >
             {{
                 confirm: {
                     render: (_, onNext) => (
-                        <RemoveDelegationPage
-                            accountInfo={accountInfo}
+                        <RemoveBakerPage
                             onNext={onNext}
+                            accountInfo={accountInfo}
                         />
                     ),
                 },

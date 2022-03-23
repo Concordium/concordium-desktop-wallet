@@ -15,7 +15,7 @@ import {
 } from '~/utils/types';
 import { StakeSettings } from '~/utils/transactionFlows/configureBaker';
 
-import styles from '../../AccountDetailsPage.module.scss';
+import styles from '../../../AccountDetailsPage.module.scss';
 
 type FormWrapperProps = Omit<
     PropsOf<typeof BakerStakeSettings>,

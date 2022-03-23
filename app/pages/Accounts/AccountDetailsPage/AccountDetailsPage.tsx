@@ -6,7 +6,6 @@ import {
 import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, Route } from 'react-router';
-import { LocationDescriptorObject } from 'history';
 import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
 import {
     chosenAccountSelector,
@@ -14,6 +13,10 @@ import {
 } from '~/features/AccountSlice';
 import routes from '~/constants/routes.json';
 import { viewingShieldedSelector } from '~/features/TransactionSlice';
+import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
+import { RootState } from '~/store/store';
+import { useProtocolVersion } from '~/utils/dataHooks';
+import { hasDelegationProtocol } from '~/utils/protocolVersion';
 import AccountBalanceView from '../AccountBalanceView';
 import AccountPageLayout from '../AccountPageLayout';
 import AccountViewActions from '../AccountViewActions';
@@ -27,23 +30,8 @@ import BuildSchedule from './BuildSchedule';
 import TransactionLog from './TransactionLog';
 import DecryptComponent from '../DecryptComponent';
 import withAccountSync from '../withAccountSync';
-import OldAddBaker from './OldBakerFlows/AddBaker';
-import OldRemoveBaker from './OldBakerFlows/RemoveBaker';
-import OldUpdateBakerKeys from './OldBakerFlows/UpdateBakerKeys';
-import OldUpdateBakerStake from './OldBakerFlows/UpdateBakerStake';
-import OldUpdateBakerRestake from './OldBakerFlows/UpdateBakerRestake';
-import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
-import { RootState } from '~/store/store';
-import AddBaker from './AddBaker';
-import RemoveBaker from './RemoveBaker';
-import UpdateBakerStake from './UpdateBakerStake';
-import UpdateBakerPool from './UpdateBakerPool';
-import UpdateBakerKeys from './UpdateBakerKeys';
-import ConfigureDelegation from './ConfigureDelegation';
-import RemoveDelegation from './RemoveDelegation';
-import { useProtocolVersion } from '~/utils/dataHooks';
-import { StakeSettings } from '~/utils/transactionFlows/configureBaker';
-import { hasDelegationProtocol } from '~/utils/protocolVersion';
+import Delegation from './Delegation';
+import Baking from './Baking/Baking';
 
 const { Master, Detail } = MasterDetailPageLayout;
 const ToAccounts = () => <Redirect to={routes.ACCOUNTS} />;
@@ -74,8 +62,6 @@ export default withAccountSync(function DetailsPage() {
     const isDelegating =
         accountInfo !== undefined && isDelegatorAccount(accountInfo);
     const isDelegationPV = pv !== undefined && hasDelegationProtocol(pv);
-    const canTransfer = hasCredentials && accountInfo !== undefined;
-    const canDelegate = isDelegationPV && !isBaker && canTransfer;
 
     if (!account) {
         return null;
@@ -118,88 +104,9 @@ export default withAccountSync(function DetailsPage() {
                             accountInfo={accountInfo}
                         />
                     </Route>
-                    <Route
-                        path={routes.ACCOUNTS_ADD_BAKER}
-                        render={({ location }) => {
-                            if (
-                                !canTransfer ||
-                                isBaker ||
-                                isDelegating ||
-                                accountInfo === undefined
-                            ) {
-                                return <ToAccounts />;
-                            }
-
-                            if (isDelegationPV) {
-                                return (
-                                    <AddBaker
-                                        account={account}
-                                        accountInfo={accountInfo}
-                                    />
-                                );
-                            }
-
-                            return (
-                                <OldAddBaker
-                                    location={
-                                        location as LocationDescriptorObject<StakeSettings>
-                                    }
-                                    account={account}
-                                />
-                            );
-                        }}
-                    />
-                    <Route path={routes.ACCOUNTS_REMOVE_BAKER}>
-                        {canTransfer && isBaker && accountInfo !== undefined ? (
-                            isDelegationPV ? (
-                                <RemoveBaker
-                                    account={account}
-                                    accountInfo={accountInfo}
-                                />
-                            ) : (
-                                <OldRemoveBaker
-                                    account={account}
-                                    accountInfo={accountInfo}
-                                />
-                            )
-                        ) : (
-                            <ToAccounts />
-                        )}
-                    </Route>
-                    <Route path={routes.ACCOUNTS_UPDATE_BAKER_KEYS}>
-                        {canTransfer && isBaker ? (
-                            isDelegationPV ? (
-                                <UpdateBakerKeys account={account} />
-                            ) : (
-                                <OldUpdateBakerKeys account={account} />
-                            )
-                        ) : (
-                            <ToAccounts />
-                        )}
-                    </Route>
-                    <Route path={routes.ACCOUNTS_UPDATE_BAKER_STAKE}>
-                        {canTransfer && isBaker && accountInfo !== undefined ? (
-                            isDelegationPV ? (
-                                <UpdateBakerStake
-                                    account={account}
-                                    accountInfo={accountInfo}
-                                />
-                            ) : (
-                                <OldUpdateBakerStake
-                                    account={account}
-                                    accountInfo={accountInfo}
-                                />
-                            )
-                        ) : (
-                            <ToAccounts />
-                        )}
-                    </Route>
-                    <Route path={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}>
-                        {canTransfer &&
-                        !isDelegationPV &&
-                        accountInfo !== undefined &&
-                        isBakerAccount(accountInfo) ? (
-                            <OldUpdateBakerRestake
+                    <Route path={routes.ACCOUNTS_BAKING}>
+                        {accountInfo !== undefined && !isDelegating ? (
+                            <Baking
                                 account={account}
                                 accountInfo={accountInfo}
                             />
@@ -207,34 +114,11 @@ export default withAccountSync(function DetailsPage() {
                             <ToAccounts />
                         )}
                     </Route>
-                    <Route path={routes.ACCOUNTS_UPDATE_BAKER_POOL}>
-                        {canTransfer &&
-                        isDelegationPV &&
-                        isBaker &&
+                    <Route path={routes.ACCOUNTS_DELEGATION}>
+                        {isDelegationPV &&
+                        !isBaker &&
                         accountInfo !== undefined ? (
-                            <UpdateBakerPool
-                                account={account}
-                                accountInfo={accountInfo}
-                            />
-                        ) : (
-                            <ToAccounts />
-                        )}
-                    </Route>
-                    <Route path={routes.ACCOUNTS_CONFIGURE_DELEGATION}>
-                        {canDelegate && accountInfo !== undefined ? (
-                            <ConfigureDelegation
-                                account={account}
-                                accountInfo={accountInfo}
-                            />
-                        ) : (
-                            <ToAccounts />
-                        )}
-                    </Route>
-                    <Route path={routes.ACCOUNTS_REMOVE_DELEGATION}>
-                        {canDelegate &&
-                        isDelegating &&
-                        accountInfo !== undefined ? (
-                            <RemoveDelegation
+                            <Delegation
                                 account={account}
                                 accountInfo={accountInfo}
                             />

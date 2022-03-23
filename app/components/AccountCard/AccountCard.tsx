@@ -9,7 +9,10 @@ import BakerImage from '@resources/svg/baker.svg';
 import ReadonlyImage from '@resources/svg/read-only.svg';
 import LedgerImage from '@resources/svg/ledger.svg';
 import InfoImage from '@resources/svg/info.svg';
-import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import {
+    isBakerAccount,
+    isDelegatorAccount,
+} from '@concordium/node-sdk/lib/src/accountHelpers';
 import { displayAsCcd } from '~/utils/ccd';
 import { AccountInfo, Account, AccountStatus, ClassName } from '~/utils/types';
 import {
@@ -34,7 +37,7 @@ interface ViewProps extends ClassName {
     accountStatus?: AccountStatus;
     connected?: boolean;
     multiSig?: boolean;
-    isBaker?: boolean;
+    isStaking?: boolean;
     hasEncryptedFunds?: boolean;
     hasDeployedCredentials?: boolean;
     shielded?: bigint;
@@ -132,7 +135,7 @@ export function AccountCardView({
     onClick,
     accountName,
     initialAccount = false,
-    isBaker = false,
+    isStaking = false,
     accountStatus,
     hasDeployedCredentials = false,
     connected = false,
@@ -183,7 +186,7 @@ export function AccountCardView({
                                 className={styles.statusImage}
                             />
                         )}
-                        {isBaker && (
+                        {isStaking && (
                             <BakerImage
                                 width="20"
                                 className={styles.bakerImage}
@@ -291,10 +294,9 @@ export default function AccountCard({
     const shielded = account.totalDecrypted
         ? BigInt(account.totalDecrypted)
         : 0n;
-    const accountBaker =
-        accountInfo !== undefined && isBakerAccount(accountInfo)
-            ? accountInfo.accountBaker
-            : undefined;
+    const hasStakedBalance =
+        accountInfo !== undefined &&
+        (isBakerAccount(accountInfo) || isDelegatorAccount(accountInfo));
     const { total: unShielded, staked, atDisposal } = getPublicAccountAmounts(
         accountInfo
     );
@@ -313,7 +315,7 @@ export default function AccountCard({
             accountStatus={account.status}
             multiSig={accountInfo && isMultiCred(accountInfo)}
             identityName={account.identityName}
-            isBaker={Boolean(accountBaker)}
+            isStaking={hasStakedBalance}
             initialAccount={isInitialAccount(account)}
         />
     );

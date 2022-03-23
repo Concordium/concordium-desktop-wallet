@@ -1,7 +1,8 @@
 /* eslint-disable react/display-name */
-import React, { ComponentType, useCallback } from 'react';
+import React, { ComponentType, useCallback, useState } from 'react';
 import { Redirect, useRouteMatch } from 'react-router';
 import { useSelector } from 'react-redux';
+import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { AccountInfo, ConfigureBaker, Fraction } from '~/utils/types';
 import MultiSigAccountTransactionFlow, {
     MultiSigAccountTransactionFlowLoading,
@@ -30,6 +31,8 @@ import {
 import DelegationTargetPage from '~/components/Transfers/configureDelegation/DelegationTargetPage';
 import DelegationAmountPage from '~/components/Transfers/configureDelegation/DelegationAmountPage';
 import { shouldShowField } from './utils';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
+import { ValidateValues } from '~/components/MultiStepForm';
 
 import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
 
@@ -116,6 +119,7 @@ const withDeps = (component: ComponentType<Props>) =>
 export default withDeps(function ConfigureDelegation({ exchangeRate }: Props) {
     const { path: matchedPath } = useRouteMatch();
     const accountsInfo = useSelector(accountsInfoSelector);
+    const [showError, setShowError] = useState(false);
 
     const convert = useCallback(
         (
@@ -135,50 +139,75 @@ export default withDeps(function ConfigureDelegation({ exchangeRate }: Props) {
         [exchangeRate, accountsInfo]
     );
 
+    const validate: ValidateValues<
+        RequiredValues & ConfigureDelegationFlowState
+    > = useCallback(
+        (v) => {
+            try {
+                convert(v, 0n);
+            } catch {
+                setShowError(true);
+                return 'target';
+            }
+            return undefined;
+        },
+        [convert]
+    );
+
     return (
-        <MultiSigAccountTransactionFlow<
-            ConfigureDelegationFlowState,
-            ConfigureBaker
-        >
-            title={configureDelegationTitle}
-            convert={convert}
-            preview={(v) => (
-                <DisplayValues {...v} exchangeRate={exchangeRate} />
-            )}
-        >
-            {({ account }) => ({
-                target: {
-                    render: (initial, onNext) =>
-                        isDefined(account) ? (
-                            <DelegationTargetPage
-                                onNext={onNext}
-                                initial={initial}
-                                accountInfo={accountsInfo[account.address]}
-                            />
-                        ) : (
-                            <Redirect to={matchedPath} />
-                        ),
-                    title: 'Delegation target',
-                },
-                delegate: {
-                    render: (initial, onNext, formValues) =>
-                        isDefined(account) ? (
-                            <DelegationAmountPage
-                                showAccountCard
-                                account={account}
-                                accountInfo={accountsInfo[account.address]}
-                                exchangeRate={exchangeRate}
-                                initial={initial}
-                                onNext={onNext}
-                                formValues={formValues}
-                                baseRoute={matchedPath}
-                            />
-                        ) : (
-                            <Redirect to={matchedPath} />
-                        ),
-                    title: 'Delegation settings',
-                },
-            })}
-        </MultiSigAccountTransactionFlow>
+        <>
+            <SimpleErrorModal
+                show={showError}
+                onClick={() => setShowError(false)}
+                header="Empty transaction"
+                content="Transaction includes no changes to existing delegation configuration for account."
+            />
+            <MultiSigAccountTransactionFlow<
+                ConfigureDelegationFlowState,
+                ConfigureBaker
+            >
+                title={configureDelegationTitle}
+                convert={convert}
+                preview={(v) => (
+                    <DisplayValues {...v} exchangeRate={exchangeRate} />
+                )}
+                validate={validate}
+                accountFilter={(_, i) => isDefined(i) && !isBakerAccount(i)}
+            >
+                {({ account }) => ({
+                    target: {
+                        render: (initial, onNext) =>
+                            isDefined(account) ? (
+                                <DelegationTargetPage
+                                    onNext={onNext}
+                                    initial={initial}
+                                    accountInfo={accountsInfo[account.address]}
+                                />
+                            ) : (
+                                <Redirect to={matchedPath} />
+                            ),
+                        title: 'Delegation target',
+                    },
+                    delegate: {
+                        render: (initial, onNext, formValues) =>
+                            isDefined(account) ? (
+                                <DelegationAmountPage
+                                    showAccountCard
+                                    account={account}
+                                    accountInfo={accountsInfo[account.address]}
+                                    exchangeRate={exchangeRate}
+                                    initial={initial}
+                                    onNext={onNext}
+                                    formValues={formValues}
+                                    baseRoute={matchedPath}
+                                />
+                            ) : (
+                                <Redirect to={matchedPath} />
+                            ),
+                        title: 'Delegation settings',
+                    },
+                })}
+            </MultiSigAccountTransactionFlow>
+        </>
     );
 });
