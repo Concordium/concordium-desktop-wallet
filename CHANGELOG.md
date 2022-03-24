@@ -11,6 +11,7 @@
 -   Flows for configuring delegation of stake for accounts, which will be effective when the node is updated to protocol version 4.
 -   Support for chain updates added in protocol version 4 (Cooldown, Pool and Time parameters).
 -   Support for chain updates that are changed in protocol version 4 (Mint distribution and level2 key updates).
+-   Support for new reward types introduced with delegation in transaction list and account export.
 
 ### Changed
 
