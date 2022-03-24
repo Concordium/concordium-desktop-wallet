@@ -44,15 +44,13 @@ interface DateFilters {
 /**
  * Grouped type filters, that, when applied, toggle showing of transactions of that type, and similar types included in the group of "GroupedField".
  */
-interface GroupedFilters
-    extends Pick<
-        TransactionFilter,
-        | TransactionKindString.Transfer
-        | TransactionKindString.TransferWithSchedule
-        | TransactionKindString.EncryptedAmountTransfer
-    > {
-    bakerTransactions: boolean;
-}
+type GroupedFilters = Pick<
+    TransactionFilter,
+    | TransactionKindString.Transfer
+    | TransactionKindString.TransferWithSchedule
+    | TransactionKindString.EncryptedAmountTransfer
+    | TransactionKindString.ConfigureBaker
+>;
 
 type FilterForm = CheckableFilters & DateFilters & GroupedFilters;
 
@@ -74,7 +72,8 @@ const fieldNames: NotOptional<EqualRecord<FilterForm>> = {
     [TransactionKindString.BlockReward]: TransactionKindString.BlockReward,
     [TransactionKindString.UpdateCredentials]:
         TransactionKindString.UpdateCredentials,
-    bakerTransactions: 'bakerTransactions',
+    [TransactionKindString.ConfigureBaker]:
+        TransactionKindString.ConfigureBaker,
     [TransactionKindString.ConfigureDelegation]:
         TransactionKindString.ConfigureDelegation,
 };
@@ -147,7 +146,7 @@ const transactionTypeFilters: (SingleField | GroupedField)[] = [
         display: 'Update account credentials',
     },
     {
-        field: 'bakerTransactions',
+        field: TransactionKindString.ConfigureBaker,
         group: [
             TransactionKindString.AddBaker,
             TransactionKindString.RemoveBaker,

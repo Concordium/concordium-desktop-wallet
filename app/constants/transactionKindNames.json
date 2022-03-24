@@ -22,5 +22,6 @@
     "updateCredentials": "Credentials update",
     "registerData": "Data registration",
     "configureBaker": "Configure baker",
-    "configureDelegation": "Configure delegation"
+    "configureDelegation": "Configure delegation",
+    "paydayAccountReward": "Staking reward"
 }
