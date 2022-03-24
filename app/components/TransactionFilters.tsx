@@ -30,7 +30,6 @@ type CheckableFilters = Pick<
     | TransactionKindString.TransferToEncrypted
     | TransactionKindString.TransferToPublic
     | TransactionKindString.FinalizationReward
-    | TransactionKindString.BakingReward
     | TransactionKindString.BlockReward
     | TransactionKindString.UpdateCredentials
     | TransactionKindString.ConfigureDelegation
@@ -49,6 +48,7 @@ type GroupedFilters = Pick<
     | TransactionKindString.Transfer
     | TransactionKindString.TransferWithSchedule
     | TransactionKindString.EncryptedAmountTransfer
+    | TransactionKindString.StakingReward
     | TransactionKindString.ConfigureBaker
 >;
 
@@ -68,7 +68,7 @@ const fieldNames: NotOptional<EqualRecord<FilterForm>> = {
         TransactionKindString.EncryptedAmountTransfer,
     [TransactionKindString.FinalizationReward]:
         TransactionKindString.FinalizationReward,
-    [TransactionKindString.BakingReward]: TransactionKindString.BakingReward,
+    [TransactionKindString.StakingReward]: TransactionKindString.StakingReward,
     [TransactionKindString.BlockReward]: TransactionKindString.BlockReward,
     [TransactionKindString.UpdateCredentials]:
         TransactionKindString.UpdateCredentials,
@@ -134,8 +134,12 @@ const transactionTypeFilters: (SingleField | GroupedField)[] = [
         display: 'Finalization rewards',
     },
     {
-        field: TransactionKindString.BakingReward,
-        display: 'Baker rewards',
+        field: TransactionKindString.StakingReward,
+        display: 'Staking rewards',
+        group: [
+            TransactionKindString.BakingReward,
+            TransactionKindString.StakingReward,
+        ],
     },
     {
         field: TransactionKindString.BlockReward,
@@ -229,9 +233,6 @@ const TransactionFilters = forwardRef<
             ),
             toDate: toDate ? new Date(toDate) : null,
             fromDate: fromDate ? new Date(fromDate) : null,
-            bakerTransactions: booleanFilters.includes(
-                TransactionKindString.AddBaker
-            ),
         }),
         [fromDate, toDate, booleanFilters]
     );
