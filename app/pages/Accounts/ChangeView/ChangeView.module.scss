@@ -12,8 +12,29 @@
     padding: 7px;
     width: 180px;
     z-index: 1;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    transition: border-bottom-color $anim-easing $anim-timing,
+        border-left-color $anim-easing $anim-timing,
+        border-right-color $anim-easing $anim-timing;
+
+    &,
+    &:focus {
+        outline: none;
+    }
+
+    &:focus,
+    &:hover {
+        border-bottom-color: $color-pale-blue;
+        border-left-color: $color-pale-blue;
+        border-right-color: $color-pale-blue;
+        color: $color-pale-blue;
+
+        svg,
+        svg path {
+            fill: $color-pale-blue;
+        }
+    }
 }
 
 .text {
