@@ -8,6 +8,7 @@ import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
 import PageLayout from '~/components/PageLayout';
 
 import AccountPageHeader from './AccountPageHeader';
+import ChangeView from './ChangeView';
 
 const { Header } = MasterDetailPageLayout;
 
@@ -28,6 +29,7 @@ export default function AccountPageLayout({ children }: Props) {
                 >
                     <PlusIcon height="20" />
                 </PageLayout.HeaderButton>
+                <ChangeView />
             </Header>
             {children[0]}
             {children[1]}

@@ -107,22 +107,24 @@ function AccountViewAction({
     const disabled = isDisabled(hasCredentials, isMultiSig, hasInfo);
     const dispatch = useDispatch();
 
+    const sharedProps = {
+        className: clsx(
+            styles.actionButton,
+            disabled && styles.disabledActionButton
+        ),
+        disabled,
+    };
+
     const body = (
         <>
             <Image height={height} width={width} className={imageClassName} />
             {label}
         </>
     );
+
     if (typeof action === 'string') {
         return (
-            <ButtonNavLink
-                className={clsx(
-                    styles.actionButton,
-                    disabled && styles.disabledActionButton
-                )}
-                disabled={disabled}
-                to={action}
-            >
+            <ButtonNavLink to={action} {...sharedProps}>
                 {body}
             </ButtonNavLink>
         );
@@ -130,14 +132,10 @@ function AccountViewAction({
 
     return (
         <Button
-            className={clsx(
-                styles.actionButton,
-                disabled && styles.disabledActionButton
-            )}
             size="huge"
             inverted
-            disabled={disabled}
             onClick={() => action(dispatch)}
+            {...sharedProps}
         >
             {body}
         </Button>

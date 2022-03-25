@@ -1,0 +1,23 @@
+@import 'config/bundle';
+
+.root {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    bottom: 0;
+    transform: translateY(100%);
+    background-color: $color-off-white;
+    border: 1px solid $color-grey;
+    padding: 7px;
+    width: 180px;
+    z-index: 1;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.text {
+    padding-right: 10px;
+    width: 90px;
+    text-align: center;
+}
