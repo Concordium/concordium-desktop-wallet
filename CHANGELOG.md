@@ -18,6 +18,7 @@
 -   Flows for pre-delegation baker transactions will be unavailable when protocol version 4 is activated on the node.
 -   Updated account views to include delegated stake.
 -   Moved flows for updating baker configuration in newly added baking section.
+-   Grouped all rewards under a single checkbox in transactions filter.
 
 ## 1.3.1
 
