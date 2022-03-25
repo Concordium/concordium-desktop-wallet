@@ -29,8 +29,6 @@ type CheckableFilters = Pick<
     TransactionFilter,
     | TransactionKindString.TransferToEncrypted
     | TransactionKindString.TransferToPublic
-    | TransactionKindString.FinalizationReward
-    | TransactionKindString.BlockReward
     | TransactionKindString.UpdateCredentials
     | TransactionKindString.ConfigureDelegation
 >;
@@ -66,10 +64,7 @@ const fieldNames: NotOptional<EqualRecord<FilterForm>> = {
         TransactionKindString.TransferToPublic,
     [TransactionKindString.EncryptedAmountTransfer]:
         TransactionKindString.EncryptedAmountTransfer,
-    [TransactionKindString.FinalizationReward]:
-        TransactionKindString.FinalizationReward,
     [TransactionKindString.StakingReward]: TransactionKindString.StakingReward,
-    [TransactionKindString.BlockReward]: TransactionKindString.BlockReward,
     [TransactionKindString.UpdateCredentials]:
         TransactionKindString.UpdateCredentials,
     [TransactionKindString.ConfigureBaker]:
@@ -130,20 +125,14 @@ const transactionTypeFilters: (SingleField | GroupedField)[] = [
         display: 'Shielded transfers',
     },
     {
-        field: TransactionKindString.FinalizationReward,
-        display: 'Finalization rewards',
-    },
-    {
         field: TransactionKindString.StakingReward,
         display: 'Staking rewards',
         group: [
             TransactionKindString.BakingReward,
+            TransactionKindString.BlockReward,
+            TransactionKindString.FinalizationReward,
             TransactionKindString.StakingReward,
         ],
-    },
-    {
-        field: TransactionKindString.BlockReward,
-        display: 'Block rewards',
     },
     {
         field: TransactionKindString.UpdateCredentials,
