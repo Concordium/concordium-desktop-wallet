@@ -21,7 +21,6 @@ export function CommissionRangeField({
     onChange = noOp,
     value,
     className,
-    display = false,
     ...props
 }: CommissionRangeFieldProps): JSX.Element {
     const [min, setMin] = useState<number | undefined>(value?.min);
