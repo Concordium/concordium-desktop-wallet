@@ -76,7 +76,9 @@ $columns-header-height: 28px;
     height: 100%;
 
     .rootColumnScroll & {
-        overflow-y: overlay;
+        overflow-y: scroll;
+        padding-left: $page-gutter;
+        padding-right: $page-gutter - $scrollbar-width;
     }
 
     .rootPadded & {
