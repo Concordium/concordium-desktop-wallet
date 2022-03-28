@@ -4,7 +4,7 @@
     text-align: center;
     padding-bottom: 10px;
     padding-top: 15px;
-    height: 300px;
+    height: $account-balance-height;
     position: relative;
     overflow: hidden;
 }
@@ -112,23 +112,6 @@
 .accountNameHeader,
 .accountNameField {
     max-width: 100%;
-}
-
-.prevAccountIcon,
-.nextAccountIcon {
-    width: 10px;
-
-    path {
-        fill: rgba($color-pale-blue, 0.7);
-    }
-
-    &:hover path {
-        fill: $color-pale-blue;
-    }
-}
-
-.nextAccountIcon {
-    transform: rotate(180deg);
 }
 
 .editNameButton {

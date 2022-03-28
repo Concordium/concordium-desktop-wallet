@@ -2,7 +2,6 @@ import React from 'react';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import ShieldImage from '@resources/svg/shield.svg';
-import ArrowIcon from '@resources/svg/back-arrow.svg';
 import type { DelegationTarget } from '@concordium/node-sdk';
 import {
     isBakerAccount,
@@ -20,9 +19,6 @@ import {
 import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
-    accountsSelector,
-    previousConfirmedAccount,
-    nextConfirmedAccount,
 } from '~/features/AccountSlice';
 import AccountName from './AccountName';
 import AccountDefaultButton from './AccountDefaultButton';
@@ -118,7 +114,6 @@ function PublicInfo({ accountInfo }: PublicInfoProps) {
  */
 export default function AccountBalanceView(): JSX.Element | null {
     const dispatch = useDispatch();
-    const accounts = useSelector(accountsSelector);
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
     const viewingShielded = useSelector(viewingShieldedSelector);
@@ -129,7 +124,6 @@ export default function AccountBalanceView(): JSX.Element | null {
 
     const isMultiSig =
         Object.values(accountInfo?.accountCredentials ?? {}).length > 1;
-    const canChangeAccount = accounts.length > 1;
 
     if (isMultiSig && viewingShielded) {
         setViewingShieldedAndReset(dispatch, false);
@@ -137,29 +131,8 @@ export default function AccountBalanceView(): JSX.Element | null {
 
     return (
         <Card className={styles.accountBalanceView} dark>
-            <div
-                className={clsx(
-                    styles.accountNameWrapper,
-                    canChangeAccount && 'justifySpaceBetween'
-                )}
-            >
-                {canChangeAccount && (
-                    <Button
-                        clear
-                        onClick={() => dispatch(previousConfirmedAccount())}
-                    >
-                        <ArrowIcon className={styles.prevAccountIcon} />
-                    </Button>
-                )}
+            <div className={styles.accountNameWrapper}>
                 <AccountName name={account.name} address={account.address} />
-                {canChangeAccount && (
-                    <Button
-                        clear
-                        onClick={() => dispatch(nextConfirmedAccount())}
-                    >
-                        <ArrowIcon className={styles.nextAccountIcon} />
-                    </Button>
-                )}
             </div>
             <div
                 className={clsx(

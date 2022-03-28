@@ -1,7 +1,7 @@
 @import 'config/bundle';
 
 .root {
-    min-height: 300px;
+    min-height: $account-balance-height;
     padding: 15px 20px 10px;
     margin-bottom: 20px;
     color: $color-pale-blue;

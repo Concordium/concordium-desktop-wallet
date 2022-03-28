@@ -1,0 +1,39 @@
+@import 'config/bundle';
+
+.root {
+    display: grid;
+    grid-template-columns: 60px auto 60px;
+    grid-gap: 15px;
+    margin-left: -75px;
+    margin-right: -75px;
+}
+
+.prev,
+.next {
+    height: $account-balance-height;
+    width: 60px;
+    background: linear-gradient(
+        90deg,
+        rgba(50, 93, 118, 0.38) 0%,
+        rgba(196, 196, 196, 0) 73.55%
+    );
+    border-radius: 10px 0 0 10px;
+}
+
+.prev {
+    transform: rotate(180deg);
+}
+
+.icon {
+    width: 15px;
+    margin-right: 20px;
+    transform: rotate(180deg);
+
+    path {
+        fill: rgba($color-pale-blue, 0.7);
+    }
+
+    &:hover path {
+        fill: $color-pale-blue;
+    }
+}

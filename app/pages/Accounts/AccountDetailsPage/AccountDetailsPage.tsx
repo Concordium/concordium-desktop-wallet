@@ -16,7 +16,6 @@ import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlic
 import { RootState } from '~/store/store';
 import { useProtocolVersion } from '~/utils/dataHooks';
 import { hasDelegationProtocol } from '~/utils/protocolVersion';
-import AccountBalanceView from '../AccountBalanceView';
 import AccountPageLayout from '../AccountPageLayout';
 import AccountViewActions from '../AccountViewActions';
 import BasicTransferRoutes from '../BasicTransferRoutes';
@@ -28,6 +27,7 @@ import BuildSchedule from './BuildSchedule';
 import withAccountSync from '../withAccountSync';
 import Delegation from './Delegation';
 import Baking from './Baking/Baking';
+import AccountCarousel from './AccountCarousel';
 
 const { Master, Detail } = MasterDetailPageLayout;
 const ToAccounts = () => <Redirect to={routes.ACCOUNTS} />;
@@ -58,7 +58,7 @@ export default withAccountSync(function DetailsPage() {
     return (
         <AccountPageLayout>
             <Master>
-                <AccountBalanceView />
+                <AccountCarousel />
                 <AccountViewActions
                     account={account}
                     accountInfo={accountInfo}
