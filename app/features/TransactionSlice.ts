@@ -118,6 +118,7 @@ function shieldedOnlyFilter(filter: TransactionFilter): TransactionFilter {
         updateBakerRestakeEarnings: false,
         configureBaker: false,
         configureDelegation: false,
+        paydayAccountReward: false,
     };
 
     return {

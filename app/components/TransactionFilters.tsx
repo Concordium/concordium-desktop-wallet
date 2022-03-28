@@ -29,9 +29,6 @@ type CheckableFilters = Pick<
     TransactionFilter,
     | TransactionKindString.TransferToEncrypted
     | TransactionKindString.TransferToPublic
-    | TransactionKindString.FinalizationReward
-    | TransactionKindString.BakingReward
-    | TransactionKindString.BlockReward
     | TransactionKindString.UpdateCredentials
     | TransactionKindString.ConfigureDelegation
 >;
@@ -44,15 +41,14 @@ interface DateFilters {
 /**
  * Grouped type filters, that, when applied, toggle showing of transactions of that type, and similar types included in the group of "GroupedField".
  */
-interface GroupedFilters
-    extends Pick<
-        TransactionFilter,
-        | TransactionKindString.Transfer
-        | TransactionKindString.TransferWithSchedule
-        | TransactionKindString.EncryptedAmountTransfer
-    > {
-    bakerTransactions: boolean;
-}
+type GroupedFilters = Pick<
+    TransactionFilter,
+    | TransactionKindString.Transfer
+    | TransactionKindString.TransferWithSchedule
+    | TransactionKindString.EncryptedAmountTransfer
+    | TransactionKindString.StakingReward
+    | TransactionKindString.ConfigureBaker
+>;
 
 type FilterForm = CheckableFilters & DateFilters & GroupedFilters;
 
@@ -68,13 +64,11 @@ const fieldNames: NotOptional<EqualRecord<FilterForm>> = {
         TransactionKindString.TransferToPublic,
     [TransactionKindString.EncryptedAmountTransfer]:
         TransactionKindString.EncryptedAmountTransfer,
-    [TransactionKindString.FinalizationReward]:
-        TransactionKindString.FinalizationReward,
-    [TransactionKindString.BakingReward]: TransactionKindString.BakingReward,
-    [TransactionKindString.BlockReward]: TransactionKindString.BlockReward,
+    [TransactionKindString.StakingReward]: TransactionKindString.StakingReward,
     [TransactionKindString.UpdateCredentials]:
         TransactionKindString.UpdateCredentials,
-    bakerTransactions: 'bakerTransactions',
+    [TransactionKindString.ConfigureBaker]:
+        TransactionKindString.ConfigureBaker,
     [TransactionKindString.ConfigureDelegation]:
         TransactionKindString.ConfigureDelegation,
 };
@@ -131,23 +125,21 @@ const transactionTypeFilters: (SingleField | GroupedField)[] = [
         display: 'Shielded transfers',
     },
     {
-        field: TransactionKindString.FinalizationReward,
-        display: 'Finalization rewards',
-    },
-    {
-        field: TransactionKindString.BakingReward,
-        display: 'Baker rewards',
-    },
-    {
-        field: TransactionKindString.BlockReward,
-        display: 'Block rewards',
+        field: TransactionKindString.StakingReward,
+        display: 'Staking rewards',
+        group: [
+            TransactionKindString.BakingReward,
+            TransactionKindString.BlockReward,
+            TransactionKindString.FinalizationReward,
+            TransactionKindString.StakingReward,
+        ],
     },
     {
         field: TransactionKindString.UpdateCredentials,
         display: 'Update account credentials',
     },
     {
-        field: 'bakerTransactions',
+        field: TransactionKindString.ConfigureBaker,
         group: [
             TransactionKindString.AddBaker,
             TransactionKindString.RemoveBaker,
@@ -156,7 +148,7 @@ const transactionTypeFilters: (SingleField | GroupedField)[] = [
             TransactionKindString.UpdateBakerStake,
             TransactionKindString.ConfigureBaker,
         ],
-        display: 'Baker transactions',
+        display: 'Configure baker',
     },
     {
         field: TransactionKindString.ConfigureDelegation,
@@ -230,9 +222,6 @@ const TransactionFilters = forwardRef<
             ),
             toDate: toDate ? new Date(toDate) : null,
             fromDate: fromDate ? new Date(fromDate) : null,
-            bakerTransactions: booleanFilters.includes(
-                TransactionKindString.AddBaker
-            ),
         }),
         [fromDate, toDate, booleanFilters]
     );

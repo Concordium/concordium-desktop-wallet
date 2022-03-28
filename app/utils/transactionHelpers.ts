@@ -703,6 +703,7 @@ export function isRewardKind(kind: TransactionKindString) {
         case TransactionKindString.BakingReward:
         case TransactionKindString.BlockReward:
         case TransactionKindString.FinalizationReward:
+        case TransactionKindString.StakingReward:
             return true;
         default:
             return false;

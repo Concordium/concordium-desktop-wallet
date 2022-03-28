@@ -194,6 +194,7 @@ export enum TransactionKindString {
     TransferWithScheduleAndMemo = 'transferWithScheduleAndMemo',
     ConfigureBaker = 'configureBaker',
     ConfigureDelegation = 'configureDelegation',
+    StakingReward = 'paydayAccountReward',
 }
 
 // The ids of the different types of an AccountTransaction.
