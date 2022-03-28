@@ -19,7 +19,7 @@ interface ActionObject {
     label: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Image: any;
-    imageClassName: string;
+    imageClassName?: string;
     height: number;
     width?: number;
     isDisabled(
@@ -33,8 +33,7 @@ const receiveAction: ActionObject = {
     action: routes.ACCOUNTS_ADDRESS,
     label: 'Receive',
     Image: QrImage,
-    imageClassName: clsx(styles.actionImage, 'mB5'),
-    height: 27,
+    height: 22,
     isDisabled: () => false,
 };
 const shieldedActions: ActionObject[] = [
@@ -42,8 +41,8 @@ const shieldedActions: ActionObject[] = [
         action: routes.ACCOUNTS_ENCRYPTEDTRANSFER,
         label: 'Send',
         Image: SendEncryptedImage,
-        imageClassName: clsx(styles.actionImage, 'mB5'),
-        height: 35,
+        imageClassName: styles.shieldActionImage,
+        height: 25,
         isDisabled: (hasCredential: boolean, _, hasInfo) =>
             !hasCredential || !hasInfo,
     },
@@ -51,8 +50,7 @@ const shieldedActions: ActionObject[] = [
         action: routes.ACCOUNTS_UNSHIELDAMOUNT,
         label: 'Unshield',
         Image: UnshieldImage,
-        imageClassName: clsx(styles.actionImage, 'mB5'),
-        height: 40,
+        height: 25,
         isDisabled: (hasCredential: boolean, _, hasInfo) =>
             !hasCredential || !hasInfo,
     },
@@ -63,8 +61,7 @@ const unshieldedActions: ActionObject[] = [
         action: routes.ACCOUNTS_SIMPLETRANSFER,
         label: 'Send',
         Image: SendImage,
-        imageClassName: clsx(styles.actionImage, 'mB5'),
-        height: 30,
+        height: 25,
         isDisabled: (hasCredential: boolean, _, hasInfo) =>
             !hasCredential || !hasInfo,
     },
@@ -72,8 +69,8 @@ const unshieldedActions: ActionObject[] = [
         action: routes.ACCOUNTS_SHIELDAMOUNT,
         label: 'Shield',
         Image: ShieldImage,
-        imageClassName: clsx(styles.actionImage, 'mB5'),
-        height: 30,
+        imageClassName: styles.shieldActionImage,
+        height: 25,
         isDisabled: (hasCredential: boolean, isMultiSig, hasInfo) =>
             !hasCredential || !hasInfo || isMultiSig,
     },
@@ -98,24 +95,22 @@ function AccountViewAction({
 }): JSX.Element {
     const disabled = isDisabled(hasCredentials, isMultiSig, hasInfo);
 
-    const sharedProps = {
-        className: clsx(
-            styles.actionButton,
-            disabled && styles.disabledActionButton
-        ),
-        disabled,
-    };
-
-    const body = (
-        <>
-            <Image height={height} width={width} className={imageClassName} />
-            {label}
-        </>
-    );
-
     return (
-        <ButtonNavLink to={action} {...sharedProps}>
-            {body}
+        <ButtonNavLink
+            to={action}
+            className={clsx(
+                styles.actionButton,
+                disabled && styles.disabledActionButton
+            )}
+            disabled={disabled}
+            inverted={false}
+        >
+            <Image
+                height={height}
+                width={width}
+                className={clsx(styles.actionImage, 'mB5', imageClassName)}
+            />
+            {label}
         </ButtonNavLink>
     );
 }
@@ -136,7 +131,7 @@ export default function AccountViewActions({ account, accountInfo }: Props) {
     const actions = viewingShielded ? shieldedActions : unshieldedActions;
 
     return (
-        <div className={styles.actionButtonsCard}>
+        <div className={styles.actionButtons}>
             {actions.map((props, i) => (
                 <AccountViewAction
                     // eslint-disable-next-line react/no-array-index-key
