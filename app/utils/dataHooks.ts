@@ -1,12 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
+import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isRewardStatusV1 } from '@concordium/node-sdk/lib/src/rewardStatusHelpers';
+import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { BlockSummaryV1 } from '@concordium/node-sdk';
+import { useDispatch, useSelector } from 'react-redux';
 import { getAccount } from '~/database/AccountDao';
 import { BlockSummary, ConsensusStatus } from '~/node/NodeApiTypes';
-import { getConsensusStatus } from '~/node/nodeRequests';
+import { getConsensusStatus, getRewardStatus } from '~/node/nodeRequests';
 import {
     fetchLastFinalizedIdentityProviders,
     fetchLastFinalizedBlockSummary,
     getAccountInfoOfAddress,
     fetchLastFinalizedAnonymityRevokers,
+    getRewardStatusLatest,
 } from '../node/nodeHelpers';
 import { useCurrentTime, useAsyncMemo } from './hooks';
 import {
@@ -26,6 +32,11 @@ import {
     IpInfo,
     ArInfo,
 } from './types';
+import { noOp } from './basicHelpers';
+import {
+    consensusStatusSelector,
+    setConsensusStatus,
+} from '~/features/ChainDataSlice';
 
 /** Hook for looking up an account name from an address */
 export function useAccountName(address: string) {
@@ -85,17 +96,35 @@ export function useTransactionCostEstimate(
     );
 }
 
-/** Hook for fetching last finalized block summary */
+/**
+ * Hook for fetching last finalized block summary
+ */
 export function useLastFinalizedBlockSummary() {
-    return useAsyncMemo<{
+    const chainData = useAsyncMemo<{
         lastFinalizedBlockSummary: BlockSummary;
         consensusStatus: ConsensusStatus;
-    }>(fetchLastFinalizedBlockSummary);
+    }>(fetchLastFinalizedBlockSummary, noOp, []);
+
+    return chainData;
 }
 
-/** Hook for fetching consensus status */
-export function useConsensusStatus() {
-    return useAsyncMemo<ConsensusStatus>(getConsensusStatus);
+/**
+ * Hook for fetching consensus status
+ *
+ * @param staleWhileRevalidate If true, returns stale response from store while fetching update.
+ */
+export function useConsensusStatus(staleWhileRevalidate = false) {
+    const cs = useAsyncMemo<ConsensusStatus>(getConsensusStatus, noOp, []);
+    const stale = useSelector(consensusStatusSelector);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        if (cs !== undefined) {
+            dispatch(setConsensusStatus(cs));
+        }
+    }, [cs, dispatch]);
+
+    return staleWhileRevalidate ? stale ?? cs : cs;
 }
 
 /** Hook for fetching identity providers */
@@ -123,16 +152,16 @@ export function useAnonymityRevokers() {
 /** Hook for fetching staked amount for a given account address, Returns undefined while loading and 0 if account is not a baker */
 export function useStakedAmount(accountAddress: string): Amount | undefined {
     const accountInfo = useAccountInfo(accountAddress);
-    if (accountInfo === undefined) {
+    if (accountInfo === undefined || !isBakerAccount(accountInfo)) {
         return undefined;
     }
-    return BigInt(accountInfo.accountBaker?.stakedAmount ?? '0');
+    return BigInt(accountInfo.accountBaker.stakedAmount);
 }
 
 /** Hook for accessing chain parameters of the last finalized block */
 export function useChainParameters() {
     const lastFinalizedBlock = useLastFinalizedBlockSummary();
-    return lastFinalizedBlock?.lastFinalizedBlockSummary.updates
+    return lastFinalizedBlock?.lastFinalizedBlockSummary?.updates
         .chainParameters;
 }
 
@@ -154,33 +183,158 @@ export function useTransactionExpiryState(
     return [expiryTime, setExpiryTime, expiryTimeError] as const;
 }
 
-/** Hook for calculating the date of the baking stake cooldown ending, will result in undefined while loading */
-export function useCalcBakerStakeCooldownUntil() {
-    const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
-    const now = useCurrentTime(60000);
-
-    if (lastFinalizedBlockSummary === undefined) {
-        return undefined;
-    }
-
-    const { consensusStatus } = lastFinalizedBlockSummary;
-    const {
-        chainParameters,
-    } = lastFinalizedBlockSummary.lastFinalizedBlockSummary.updates;
-    const genesisTime = new Date(consensusStatus.currentEraGenesisTime);
+function getV0Cooldown(
+    cooldownEpochs: number,
+    cs: ConsensusStatus,
+    now: Date
+): Date {
+    const genesisTime = new Date(cs.currentEraGenesisTime);
     const currentEpochIndex = getEpochIndexAt(
         now,
-        consensusStatus.epochDuration,
+        cs.epochDuration,
         genesisTime
     );
     const nextEpochIndex = currentEpochIndex + 1;
 
-    const cooldownUntilEpochIndex =
-        nextEpochIndex + Number(chainParameters.bakerCooldownEpochs);
-
     return epochDate(
-        cooldownUntilEpochIndex,
-        consensusStatus.epochDuration,
+        nextEpochIndex + cooldownEpochs,
+        cs.epochDuration,
         genesisTime
     );
+}
+
+function getV1Cooldown(
+    cooldownSeconds: number,
+    bs: BlockSummaryV1,
+    cs: ConsensusStatus,
+    nextPaydayTime: Date,
+    now: Date
+): Date {
+    const genesisTime = new Date(cs.currentEraGenesisTime);
+    const ei = (t: Date) => getEpochIndexAt(t, cs.epochDuration, genesisTime);
+
+    const { rewardPeriodLength } = bs.updates.chainParameters;
+    const nRewardPeriodLength = Number(rewardPeriodLength);
+
+    const nextRewardPeriodStartIndex = ei(nextPaydayTime);
+    const cooldownEpochIndex = ei(
+        new Date(now.getTime() + cooldownSeconds * 1000)
+    );
+    const remainingAtNext = cooldownEpochIndex - nextRewardPeriodStartIndex;
+
+    let cooldownEnd: number;
+    if (remainingAtNext < 1) {
+        cooldownEnd = nextRewardPeriodStartIndex;
+    } else {
+        const remainingRewardPeriods = Math.ceil(
+            remainingAtNext / nRewardPeriodLength
+        );
+        cooldownEnd =
+            nextRewardPeriodStartIndex +
+            remainingRewardPeriods * nRewardPeriodLength;
+    }
+
+    return epochDate(cooldownEnd, cs.epochDuration, genesisTime);
+}
+
+/** Hook for calculating the date of the delegation cooldown ending, will result in undefined while loading */
+export function useCalcDelegatorCooldownUntil() {
+    const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
+    const rs = useAsyncMemo(getRewardStatusLatest);
+    const now = useCurrentTime(60000);
+
+    if (
+        lastFinalizedBlockSummary === undefined ||
+        lastFinalizedBlockSummary.lastFinalizedBlockSummary === undefined ||
+        lastFinalizedBlockSummary.consensusStatus === undefined ||
+        rs === undefined
+    ) {
+        return undefined;
+    }
+
+    const {
+        lastFinalizedBlockSummary: bs,
+        consensusStatus: cs,
+    } = lastFinalizedBlockSummary;
+
+    if (isBlockSummaryV1(bs)) {
+        if (!isRewardStatusV1(rs)) {
+            throw new Error('Block summary and reward status do not match.'); // Should not happen, as this indicates rs and bs are queried with different blocks.
+        }
+
+        return getV1Cooldown(
+            Number(bs.updates.chainParameters.delegatorCooldown),
+            bs,
+            cs,
+            rs.nextPaydayTime,
+            now
+        );
+    }
+    throw new Error(
+        'Delegation cooldown not available for current protocol version.'
+    );
+}
+
+/** Hook for calculating the date of the baking stake cooldown ending, will result in undefined while loading */
+export function useCalcBakerStakeCooldownUntil() {
+    const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
+    const rs = useAsyncMemo(
+        async () => {
+            if (lastFinalizedBlockSummary === undefined) {
+                return undefined;
+            }
+
+            return getRewardStatus(
+                lastFinalizedBlockSummary.consensusStatus.lastFinalizedBlock
+            );
+        },
+        noOp,
+        [lastFinalizedBlockSummary]
+    );
+    const now = useCurrentTime(60000);
+
+    if (
+        lastFinalizedBlockSummary === undefined ||
+        lastFinalizedBlockSummary.lastFinalizedBlockSummary === undefined ||
+        lastFinalizedBlockSummary.consensusStatus === undefined ||
+        rs === undefined
+    ) {
+        return undefined;
+    }
+
+    const {
+        lastFinalizedBlockSummary: bs,
+        consensusStatus: cs,
+    } = lastFinalizedBlockSummary;
+
+    if (isBlockSummaryV1(bs)) {
+        if (!isRewardStatusV1(rs)) {
+            throw new Error('Block summary and reward status do not match.'); // Should not happen, as this indicates rs and bs are queried with different blocks.
+        }
+
+        return getV1Cooldown(
+            Number(bs.updates.chainParameters.poolOwnerCooldown),
+            bs,
+            cs,
+            rs.nextPaydayTime,
+            now
+        );
+    }
+
+    return getV0Cooldown(
+        Number(bs.updates.chainParameters.bakerCooldownEpochs),
+        cs,
+        now
+    );
+}
+
+/**
+ * Hook for getting chain protocol version
+ *
+ * @param staleWhileRevalidate If true, returns stale response from store while fetching update.
+ */
+export function useProtocolVersion(
+    staleWhileRevalidate = false
+): bigint | undefined {
+    return useConsensusStatus(staleWhileRevalidate)?.protocolVersion;
 }

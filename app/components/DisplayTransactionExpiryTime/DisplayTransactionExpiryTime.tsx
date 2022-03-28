@@ -15,9 +15,11 @@ export default function DisplayTransactionExpiryTime({
         <>
             <p className={styles.title}>Transaction expiry time:</p>
             <p className={styles.value}>
-                {expiryTime === undefined
-                    ? placeholder
-                    : getFormattedDateString(expiryTime)}
+                {expiryTime === undefined ? (
+                    <span className="textFaded">{placeholder}</span>
+                ) : (
+                    getFormattedDateString(expiryTime)
+                )}
             </p>
             {expiryTime === undefined ? null : (
                 <p className={styles.note}>

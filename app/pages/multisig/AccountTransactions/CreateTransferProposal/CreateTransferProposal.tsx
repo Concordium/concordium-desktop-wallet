@@ -36,7 +36,7 @@ import {
 } from '~/features/AccountSlice';
 import { validateMemo } from '~/utils/transactionHelpers';
 import { collapseFraction } from '~/utils/basicHelpers';
-import { toMicroUnits, displayAsGTU } from '~/utils/gtu';
+import { ccdToMicroCcd, displayAsCcd } from '~/utils/ccd';
 import { useAsyncMemo } from '~/utils/hooks';
 import { nodeSupportsMemo } from '~/node/nodeHelpers';
 import { stringify } from '~/utils/JSONHelper';
@@ -151,10 +151,10 @@ function CreateTransferProposal({
         if (
             estimatedFee &&
             amount &&
-            atDisposal < toMicroUnits(amount) + collapseFraction(estimatedFee)
+            atDisposal < ccdToMicroCcd(amount) + collapseFraction(estimatedFee)
         ) {
             setAmountError(
-                `Insufficient funds: ${displayAsGTU(atDisposal)} at disposal.`
+                `Insufficient funds: ${displayAsCcd(atDisposal)} at disposal.`
             );
         } else {
             setAmountError(undefined);
@@ -194,7 +194,7 @@ function CreateTransferProposal({
             <CreateTransaction
                 transactionKind={transactionKind}
                 account={account}
-                amount={toMicroUnits(amount)}
+                amount={ccdToMicroCcd(amount)}
                 recipient={recipient.address}
                 schedule={schedule}
                 memo={memo}
@@ -385,7 +385,9 @@ function CreateTransferProposal({
                                         setAccount={setAccount}
                                         chosenAccount={account}
                                         filter={isMultiSig}
-                                        onAccountClicked={continueAction}
+                                        onAccountClicked={() =>
+                                            continueAction()
+                                        }
                                         messageWhenEmpty="There are no accounts that require multiple signatures"
                                     />
                                 </div>

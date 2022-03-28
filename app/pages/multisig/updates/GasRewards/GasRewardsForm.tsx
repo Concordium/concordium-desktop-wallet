@@ -3,11 +3,11 @@ import { RegisterOptions, useFormContext, Validate } from 'react-hook-form';
 import { EqualRecord, GasRewards } from '~/utils/types';
 import updateConstants from '~/constants/updateConstants.json';
 import {
-    FormGasRewardFractionField,
-    GasRewardFractionField,
-    GasRewardFractionFieldProps,
-    gasRewardFractionFieldResolution,
-} from './GasRewardFractionField';
+    FormRewardFractionField,
+    RewardFractionField,
+    RewardFractionFieldProps,
+    rewardFractionFieldResolution,
+} from '../common/RewardFractionField';
 import { isDefined } from '~/utils/basicHelpers';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import { isValidBigInt } from '~/utils/numberStringHelpers';
@@ -30,7 +30,7 @@ const labels: { [P in keyof UpdateGasRewardsFields]: string } = {
 
 const convertsToInteger: Validate = (v: number) =>
     isValidBigInt(v) ||
-    `Value must be divisible by ${1 / gasRewardFractionFieldResolution}`;
+    `Value must be divisible by ${1 / rewardFractionFieldResolution}`;
 
 const validationRules: RegisterOptions = {
     required: 'Value is required',
@@ -73,7 +73,7 @@ export default function GasRewardsForm({
                 const value = gasRewards[field];
 
                 const common: Pick<
-                    GasRewardFractionFieldProps,
+                    RewardFractionFieldProps,
                     'className' | 'label'
                 > & { key: string } = {
                     label,
@@ -82,7 +82,7 @@ export default function GasRewardsForm({
                 };
 
                 return disabled || readOnly ? (
-                    <GasRewardFractionField
+                    <RewardFractionField
                         {...common}
                         value={value}
                         disabled={disabled}
@@ -90,7 +90,7 @@ export default function GasRewardsForm({
                         display={display}
                     />
                 ) : (
-                    <FormGasRewardFractionField
+                    <FormRewardFractionField
                         {...common}
                         name={field}
                         defaultValue={value}

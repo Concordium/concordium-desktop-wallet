@@ -6,6 +6,7 @@ import routes from '~/constants/routes.json';
 import { BlockSummary } from '~/node/NodeApiTypes';
 import {
     AccountTransaction,
+    MakeOptional,
     MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
@@ -33,7 +34,7 @@ import MultiSignatureLayout from '../MultiSignatureLayout';
 import { parse, stringify } from '~/utils/JSONHelper';
 
 interface Props {
-    proposal: MultiSignatureTransaction;
+    proposal: Omit<MultiSignatureTransaction, 'id'>;
     blockSummary: BlockSummary;
 }
 
@@ -97,7 +98,7 @@ function SignTransactionProposalView({ proposal, blockSummary }: Props) {
 
         updateInstruction.signatures = signatures;
 
-        const updatedProposal = {
+        const updatedProposal: MakeOptional<MultiSignatureTransaction, 'id'> = {
             ...proposal,
             transaction: stringify(updateInstruction),
         };
@@ -157,7 +158,7 @@ function SignTransactionProposalView({ proposal, blockSummary }: Props) {
 
 const SignTransactionProposal = ensureProps(
     SignTransactionProposalView,
-    ({ proposal }) => !!proposal,
+    (p: MakeOptional<Props, 'proposal'>): p is Props => !!p.proposal,
     <Redirect to={routes.MULTISIGTRANSACTIONS} />
 );
 

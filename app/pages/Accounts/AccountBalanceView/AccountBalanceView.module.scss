@@ -1,7 +1,6 @@
 @import 'config/bundle';
 
 .accountBalanceView {
-    background-color: $color-off-black;
     text-align: center;
     padding-bottom: 10px;
     padding-top: 15px;
@@ -27,9 +26,7 @@
     margin: 0 20px;
 }
 
-.bakerRow,
 .amountRow,
-.viewingShieldedButton,
 .shieldedAmount,
 .blueText {
     color: $color-pale-blue;
@@ -41,6 +38,7 @@
 }
 
 .viewingShieldedButton {
+    color: $color-off-white;
     text-decoration: underline;
     z-index: 1;
 }
@@ -53,12 +51,6 @@
 .amountRow {
     display: inline-flex;
     margin: 10px 0;
-}
-
-.bakerRow {
-    display: flex;
-    justify-content: center;
-    margin-top: 25px;
 }
 
 .bakerImage {

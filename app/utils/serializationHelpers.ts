@@ -196,12 +196,15 @@ export function serializeCredentialDeploymentInformation(
 }
 
 /**
- *  Given a string, return a serializedTextWithLength object.
- * N.B. This function assumes the text length can fit into a uint32, and the length buffer will always have a length of 4 bytes.
+ * Given a string, return a serializedTextWithLength object.
+ * N.B. By default, this function assumes the text length can fit into a uint32, and the length buffer will always have a length of 4 bytes.
  */
-function getSerializedTextWithLength(text: string): SerializedTextWithLength {
+export function getSerializedTextWithLength(
+    text: string,
+    encodeLength = encodeWord32
+): SerializedTextWithLength {
     const encoded = Buffer.from(new TextEncoder().encode(text));
-    const serializedLength = encodeWord32(encoded.length);
+    const serializedLength = encodeLength(encoded.length);
     return {
         data: encoded,
         length: serializedLength,

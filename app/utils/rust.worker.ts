@@ -5,7 +5,7 @@ import workerCommands from '../constants/workerCommands.json';
 
 type RustInterface = typeof import('@pkg/index');
 
-export type BakerKeyVariants = 'ADD' | 'UPDATE';
+export type BakerKeyVariants = 'ADD' | 'UPDATE' | 'CONFIGURE';
 
 let rustReference: RustInterface;
 async function getRust(): Promise<RustInterface> {
@@ -122,12 +122,22 @@ function generateBakerKeys(
     rust: RustInterface,
     message: Record<string, string>
 ) {
-    return rust.generateBakerKeys(
-        message.sender,
-        message.keyVariant === 'ADD'
-            ? rust.BakerKeyVariant.ADD
-            : rust.BakerKeyVariant.UPDATE
-    );
+    let keyVariant: number;
+
+    switch (message.keyVariant as BakerKeyVariants) {
+        case 'ADD':
+            keyVariant = rust.BakerKeyVariant.ADD;
+            break;
+        case 'UPDATE':
+            keyVariant = rust.BakerKeyVariant.UPDATE;
+            break;
+        case 'CONFIGURE':
+            keyVariant = rust.BakerKeyVariant.CONFIGURE;
+            break;
+        default:
+            throw new Error('Unknown key variant.');
+    }
+    return rust.generateBakerKeys(message.sender, keyVariant);
 }
 
 function getAddressFromCredId(

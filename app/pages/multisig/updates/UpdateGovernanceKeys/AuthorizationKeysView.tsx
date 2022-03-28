@@ -6,13 +6,14 @@ import {
     KeyWithStatus,
     VerifyKey,
 } from '~/utils/types';
-import withChainData, { ChainData } from '../../common/withChainData';
+import withChainData, { ChainData } from '~/utils/withChainData';
 import { generateStatusLabel } from './KeyUpdateEntry';
 import { getAccessStructureTitle, removeRemovedKeys } from './util';
 import PublicKeyDetails from '~/components/ledger/PublicKeyDetails';
+import Label from '~/components/Label';
+
 import styles from './HigherLevelKeysView.module.scss';
 import localStyles from './UpdateAuthorizationKeys.module.scss';
-import Label from '~/components/Label';
 
 interface Props extends ChainData {
     authorizationKeysUpdate: AuthorizationKeysUpdate;

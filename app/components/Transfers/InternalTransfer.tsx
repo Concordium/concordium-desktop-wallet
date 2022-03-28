@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { push } from 'connected-react-router';
+import { push, replace } from 'connected-react-router';
 import { useLocation } from 'react-router-dom';
 import { stringify } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
@@ -12,7 +12,7 @@ import {
     TransactionKindId,
     Fraction,
 } from '~/utils/types';
-import { toMicroUnits } from '~/utils/gtu';
+import { ccdToMicroCcd } from '~/utils/ccd';
 import { TransferState } from '~/utils/transactionTypes';
 import { getTransactionKindCost } from '~/utils/transactionCosts';
 import TransferView from './TransferView';
@@ -55,12 +55,14 @@ function InternalTransfer<T extends TransferToPublic | TransferToEncrypted>({
         async (amount: string) => {
             const transaction = await specific.createTransaction(
                 account.address,
-                toMicroUnits(amount),
+                ccdToMicroCcd(amount),
                 nonce
             );
             transaction.estimatedFee = estimatedFee;
 
             const transactionJSON = stringify(transaction);
+
+            dispatch(replace(specific.location, { amount }));
             dispatch(
                 push({
                     pathname: routes.SUBMITTRANSFER,
@@ -69,12 +71,6 @@ function InternalTransfer<T extends TransferToPublic | TransferToEncrypted>({
                             pathname: routes.ACCOUNTS_FINAL_PAGE,
                             state: {
                                 transaction: transactionJSON,
-                            },
-                        },
-                        cancelled: {
-                            pathname: specific.location,
-                            state: {
-                                amount,
                             },
                         },
                         transaction: transactionJSON,

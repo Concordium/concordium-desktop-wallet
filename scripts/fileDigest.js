@@ -177,9 +177,9 @@ async function verifyRemote(file, sigFile) {
 /**
  * Produce signature of file checksum.
  *
- * The signature can be verified by running the following command:
- * openssl dgst -<hash-algorithm> -verify <pubkey-file> -signature <signature-file> <file>
- * (e.g. openssl dgst -sha256 -verify ./Downloads/concordium-desktop-wallet.pem -signature ./Downloads/concordium-desktop-wallet-1.0.0.dmg.hash.sig ./Downloads/concordium-desktop-wallet-1.0.0.dmg)
+ * The signature can be verified by running the following command (with openssl 3):
+ * openssl pkeyutl -verify -pubin -inkey <pubkey-file> -rawin -in <file> -sigfile <signature-file>
+ * (e.g. openssl pkeyutl -verify -pubin -inkey concordium-desktop-wallet-pubkey.pem -rawin -in concordium-desktop-wallet-1.3.1.dmg -sigfile concordium-desktop-wallet-1.3.1.dmg.sig)
  */
 async function writeSignature(file) {
     const sigOutFile = `${file}.sig`;
@@ -200,7 +200,7 @@ async function writeSignature(file) {
 
 const linuxTargets = build.linux.target;
 const winTargets = ['exe'];
-const macTargets = ['dmg'];
+const macTargets = ['dmg', 'zip'];
 
 function getTargetsFromArgs() {
     return [

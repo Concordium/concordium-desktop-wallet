@@ -9,7 +9,7 @@ import { useIdentityProviders } from '~/utils/dataHooks';
 import {
     lengthRule,
     validateHex,
-    mustBeANumber,
+    mustBeAnInteger,
     requiredMessage,
     pasteHere,
     enterHere,
@@ -96,7 +96,7 @@ export default function CreateAddIdentityProvider({
                 rules={{
                     required: requiredMessage(fieldDisplays.ipIdentity),
                     validate: {
-                        mustBeANumber,
+                        mustBeAnInteger,
                         ipIdentityMustBeUnique,
                     },
                 }}

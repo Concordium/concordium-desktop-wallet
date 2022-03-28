@@ -3,10 +3,17 @@ import type { Buffer } from 'buffer/';
 import type { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import type { HTMLAttributes } from 'react';
 import type { RegisterOptions } from 'react-hook-form';
+import type { BakerId } from '@concordium/node-sdk';
+import { OpenStatus } from '@concordium/node-sdk/lib/src/types';
 import { RejectReason } from './node/RejectReasonHelper';
 import type { ExternalCredential, Genesis } from '~/database/types';
 
-export { AccountInfo, AccountEncryptedAmount } from '@concordium/node-sdk/';
+export type {
+    AccountInfo,
+    AccountEncryptedAmount,
+    BakerId,
+} from '@concordium/node-sdk';
+export { OpenStatus } from '@concordium/node-sdk/lib/src/types';
 
 export type Dispatch = GenericDispatch<AnyAction>;
 
@@ -185,6 +192,9 @@ export enum TransactionKindString {
     TransferWithMemo = 'transferWithMemo',
     EncryptedAmountTransferWithMemo = 'encryptedAmountTransferWithMemo',
     TransferWithScheduleAndMemo = 'transferWithScheduleAndMemo',
+    ConfigureBaker = 'configureBaker',
+    ConfigureDelegation = 'configureDelegation',
+    StakingReward = 'paydayAccountReward',
 }
 
 // The ids of the different types of an AccountTransaction.
@@ -208,15 +218,19 @@ export enum TransactionKindId {
     Simple_transfer_with_memo = 22,
     Encrypted_transfer_with_memo = 23,
     Transfer_with_schedule_and_memo = 24,
+    Configure_baker = 25,
+    Configure_delegation = 26,
 }
 
 export type BooleanFilters = { [P in TransactionKindString]?: boolean };
 type DateString = string;
 
-export interface TransactionFilter extends BooleanFilters {
+export interface TransactionDateFilter {
     fromDate?: DateString;
     toDate?: DateString;
 }
+
+export type TransactionFilter = BooleanFilters & TransactionDateFilter;
 
 /**
  * This Interface models the structure of the accounts stored in the database
@@ -325,6 +339,34 @@ export type RegisterDataPayload = {
     data: string;
 };
 
+export interface BakerKeysWithProofs {
+    signatureVerifyKey: Hex;
+    signatureKeyProof: Hex;
+    electionVerifyKey: Hex;
+    electionKeyProof: Hex;
+    aggregationVerifyKey: Hex;
+    aggregationKeyProof: Hex;
+}
+
+export interface ConfigureBakerPayload {
+    stake?: Amount;
+    restakeEarnings?: boolean;
+    openForDelegation?: OpenStatus;
+    keys?: BakerKeysWithProofs;
+    metadataUrl?: string;
+    transactionFeeCommission?: RewardFraction;
+    bakingRewardCommission?: RewardFraction;
+    finalizationRewardCommission?: RewardFraction;
+}
+
+export type DelegationTarget = null | BakerId;
+
+export interface ConfigureDelegationPayload {
+    stake?: Amount;
+    restakeEarnings?: boolean;
+    delegationTarget?: DelegationTarget;
+}
+
 export type TransactionPayload =
     | UpdateAccountCredentialsPayload
     | TransferToPublicPayload
@@ -337,7 +379,9 @@ export type TransactionPayload =
     | RemoveBakerPayload
     | UpdateBakerStakePayload
     | UpdateBakerRestakeEarningsPayload
-    | RegisterDataPayload;
+    | RegisterDataPayload
+    | ConfigureBakerPayload
+    | ConfigureDelegationPayload;
 
 // Structure of an accountTransaction, which is expected
 // the blockchain's nodes
@@ -376,6 +420,8 @@ export type RemoveBaker = AccountTransaction<RemoveBakerPayload>;
 export type UpdateBakerStake = AccountTransaction<UpdateBakerStakePayload>;
 export type UpdateBakerRestakeEarnings = AccountTransaction<UpdateBakerRestakeEarningsPayload>;
 export type RegisterData = AccountTransaction<RegisterDataPayload>;
+export type ConfigureBaker = AccountTransaction<ConfigureBakerPayload>;
+export type ConfigureDelegation = AccountTransaction<ConfigureDelegationPayload>;
 
 // Types of block items, and their identifier numbers
 export enum BlockItemKind {
@@ -730,7 +776,8 @@ export type UpdateInstructionPayload =
     | ExchangeRate
     | TransactionFeeDistribution
     | FoundationAccount
-    | MintDistribution
+    | MintDistributionV0
+    | MintDistributionV1
     | ProtocolUpdate
     | GasRewards
     | BakerStakeThreshold
@@ -738,7 +785,10 @@ export type UpdateInstructionPayload =
     | HigherLevelKeyUpdate
     | AuthorizationKeysUpdate
     | AddAnonymityRevoker
-    | AddIdentityProvider;
+    | AddIdentityProvider
+    | CooldownParameters
+    | PoolParameters
+    | TimeParameters;
 
 // An actual signature, which goes into an account transaction.
 export type Signature = Hex;
@@ -787,6 +837,10 @@ export enum UpdateType {
     UpdateLevel2KeysUsingLevel1Keys,
     AddAnonymityRevoker,
     AddIdentityProvider,
+    CooldownParameters,
+    PoolParameters,
+    TimeParameters,
+    UpdateMintDistributionV1,
 }
 
 export enum RootKeysUpdateTypes {
@@ -923,6 +977,18 @@ export function instanceOfUpdateBakerRestakeEarnings(
     );
 }
 
+export function instanceOfConfigureBaker(
+    object: AccountTransaction<TransactionPayload>
+): object is ConfigureBaker {
+    return object.transactionKind === TransactionKindId.Configure_baker;
+}
+
+export function instanceOfConfigureDelegation(
+    object: AccountTransaction<TransactionPayload>
+): object is ConfigureDelegation {
+    return object.transactionKind === TransactionKindId.Configure_delegation;
+}
+
 export function isExchangeRate(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<ExchangeRate> {
@@ -959,7 +1025,10 @@ export function isFoundationAccount(
 export function isMintDistribution(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<MintDistribution> {
-    return UpdateType.UpdateMintDistribution === transaction.type;
+    return (
+        UpdateType.UpdateMintDistribution === transaction.type ||
+        UpdateType.UpdateMintDistributionV1 === transaction.type
+    );
 }
 
 export function isProtocolUpdate(
@@ -1035,6 +1104,24 @@ export function isUpdateUsingLevel1Keys(
     );
 }
 
+export function isTimeParameters(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<TimeParameters> {
+    return UpdateType.TimeParameters === transaction.type;
+}
+
+export function isCooldownParameters(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<CooldownParameters> {
+    return UpdateType.CooldownParameters === transaction.type;
+}
+
+export function isPoolParameters(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<PoolParameters> {
+    return UpdateType.PoolParameters === transaction.type;
+}
+
 /**
  * Enum for the different states that a multi signature transaction proposal
  * can go through.
@@ -1103,11 +1190,20 @@ export interface MintRate {
     exponent: Word8;
 }
 
-export interface MintDistribution {
+export interface MintDistributionV0 {
+    version: 0;
     mintPerSlot: MintRate;
     bakingReward: RewardFraction;
     finalizationReward: RewardFraction;
 }
+
+export interface MintDistributionV1 {
+    version: 1;
+    bakingReward: RewardFraction;
+    finalizationReward: RewardFraction;
+}
+
+export type MintDistribution = MintDistributionV0 | MintDistributionV1;
 
 export interface ProtocolUpdate {
     message: string;
@@ -1129,6 +1225,41 @@ export interface BakerStakeThreshold {
 
 export interface ElectionDifficulty {
     electionDifficulty: Word32;
+}
+
+export interface TimeParameters {
+    rewardPeriodLength: Word64;
+    mintRatePerPayday: MintRate;
+}
+
+export interface CooldownParameters {
+    poolOwnerCooldown: Word64;
+    delegatorCooldown: Word64;
+}
+
+export interface CommissionRates {
+    finalizationRewardCommission: RewardFraction;
+    bakingRewardCommission: RewardFraction;
+    transactionFeeCommission: RewardFraction;
+}
+
+export interface CommissionRange {
+    min: RewardFraction;
+    max: RewardFraction;
+}
+
+export interface CommissionRanges {
+    finalizationRewardCommission: CommissionRange;
+    bakingRewardCommission: CommissionRange;
+    transactionFeeCommission: CommissionRange;
+}
+
+export interface PoolParameters {
+    lPoolCommissions: CommissionRates;
+    commissionBounds: CommissionRanges;
+    minimumEquityCapital: Word64;
+    capitalBound: RewardFraction;
+    leverageBound: Fraction;
 }
 
 export enum KeyUpdateEntryStatus {
@@ -1176,6 +1307,8 @@ export enum AccessStructureEnum {
     bakerStakeThreshold,
     addAnonymityRevoker,
     addIdentityProvider,
+    cooldownParameters,
+    timeParameters,
 }
 
 export interface AccessStructure {
@@ -1184,10 +1317,33 @@ export interface AccessStructure {
     type: AccessStructureEnum;
 }
 
+/**
+ * Tag to determine which keys are updated (and which version of the update it is)
+ * Note that these values don't align with the values on chain, because the on-chain values
+ * have collision between the versions.
+ */
 export enum AuthorizationKeysUpdateType {
-    Level1 = 1,
-    Root = 2,
+    Level1V0, // serialized as 1
+    Level1V1, // serialized as 2
+    RootV0, // serialized as 2
+    RootV1, // serialized as 3
 }
+
+export function getAuthorizationKeysUpdateVersion(
+    type: AuthorizationKeysUpdateType
+): number {
+    switch (type) {
+        case AuthorizationKeysUpdateType.RootV0:
+        case AuthorizationKeysUpdateType.Level1V0:
+            return 0;
+        case AuthorizationKeysUpdateType.RootV1:
+        case AuthorizationKeysUpdateType.Level1V1:
+            return 1;
+        default:
+            throw new Error('Unknown authorization key update type');
+    }
+}
+
 export interface AuthorizationKeysUpdate {
     keyUpdateType: AuthorizationKeysUpdateType;
     keys: VerifyKey[];
@@ -1452,3 +1608,15 @@ export interface CredentialNumberPrfKey {
     prfKeySeed: string;
     credentialNumber: number;
 }
+
+export declare type DeepPartial<T> = T extends Array<infer U>
+    ? Array<DeepPartial<U>>
+    : T extends ReadonlyArray<infer U>
+    ? ReadonlyArray<DeepPartial<U>>
+    : T extends {
+          [key in keyof T]: T[key];
+      }
+    ? {
+          [K in keyof T]?: DeepPartial<T[K]>;
+      }
+    : T;

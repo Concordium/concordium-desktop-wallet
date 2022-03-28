@@ -1,6 +1,11 @@
+import { Authorizations } from '@concordium/node-sdk/';
 import { RewardFraction, VerifyKey } from '../utils/types';
 
-export { BlockSummary, ConsensusStatus } from '@concordium/node-sdk/';
+export {
+    BlockSummary,
+    ConsensusStatus,
+    Authorizations,
+} from '@concordium/node-sdk/';
 
 // This file contains interfaces that matches what is returned
 // from the Concordium Node using GRPC.
@@ -13,22 +18,6 @@ export interface Authorization {
 export interface Key {
     verifyKey: string;
     schemeId: string;
-}
-
-export interface Authorizations {
-    emergency: Authorization;
-    microGTUPerEuro: Authorization;
-    euroPerEnergy: Authorization;
-    transactionFeeDistribution: Authorization;
-    foundationAccount: Authorization;
-    mintDistribution: Authorization;
-    protocol: Authorization;
-    paramGASRewards: Authorization;
-    bakerStakeThreshold: Authorization;
-    electionDifficulty: Authorization;
-    addAnonymityRevoker: Authorization;
-    addIdentityProvider: Authorization;
-    keys: Key[];
 }
 
 // The node returns the mint per slot value as a scientific notation String,

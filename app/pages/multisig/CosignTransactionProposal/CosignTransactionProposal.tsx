@@ -14,6 +14,7 @@ import {
     UpdateInstructionSignature,
     TransactionAccountSignature,
     MultiSignatureTransactionStatus,
+    MakeRequired,
 } from '~/utils/types';
 import {
     TransactionExportType,
@@ -55,8 +56,10 @@ const fieldNames: EqualRecord<CosignTransactionProposalForm> = {
     signDigestMatch: 'signDigestMatch',
 };
 
+type UnsafeCosignLocation = LocationDescriptorObject<TransactionInput>;
+
 interface CosignTransactionProposalProps {
-    location: LocationDescriptorObject<TransactionInput>;
+    location: MakeRequired<UnsafeCosignLocation, 'state'>;
 }
 
 /**
@@ -76,7 +79,7 @@ function CosignTransactionProposal({
 
     const dispatch = useDispatch();
 
-    const { transaction } = location.state as TransactionInput;
+    const { transaction } = location.state;
     const [transactionObject] = useState(parse(transaction));
 
     const [transactionHandler] = useState(() => findHandler(transactionObject));
@@ -85,11 +88,13 @@ function CosignTransactionProposal({
         transactionSignDigest,
         setTransactionSignDigest,
     ] = useState<string>();
-    useEffect(() => {
-        getTransactionSignDigest(transactionObject)
-            .then((digest) => setTransactionSignDigest(digest))
-            .catch(() => {});
-    }, [transactionObject]);
+    useEffect(
+        () =>
+            setTransactionSignDigest(
+                getTransactionSignDigest(transactionObject)
+            ),
+        [transactionObject]
+    );
 
     const signingFunction: LedgerCallback = async (
         ledger: ConcordiumLedgerClient,
@@ -299,8 +304,11 @@ function CosignTransactionProposal({
     );
 }
 
-export default ensureProps(
+export default ensureProps<
+    CosignTransactionProposalProps,
+    { location: UnsafeCosignLocation }
+>(
     CosignTransactionProposal,
-    (p) => !!p.location.state,
+    (p): p is CosignTransactionProposalProps => !!p.location.state,
     <Redirect to={routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION} />
 );

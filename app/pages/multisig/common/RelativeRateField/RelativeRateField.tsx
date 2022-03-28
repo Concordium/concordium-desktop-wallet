@@ -45,6 +45,10 @@ export interface RelativeRateFieldProps
     extends CommonInputProps,
         InputFieldProps {
     /**
+     * Symbol that splits the values. Defaults to "="
+     */
+    splitSymbol?: string;
+    /**
      * Unit of denominator. Position is "prefix" if string value.
      */
     denominatorUnit: RelativeRateFieldUnit;
@@ -68,6 +72,7 @@ export interface RelativeRateFieldProps
 export function RelativeRateField({
     denominatorUnit,
     numeratorUnit,
+    splitSymbol = '=',
     label,
     isInvalid,
     error,
@@ -113,24 +118,6 @@ export function RelativeRateField({
                 <span className={styles.label}>{label}</span>
                 <div className={styles.container}>
                     <label className={styles.fieldWrapper}>
-                        <UnitContext {...denominatorUnit}>
-                            <InlineNumber
-                                className={styles.field}
-                                fallbackValue={0}
-                                value={value.denominator}
-                                onChange={(v) =>
-                                    onChange({ ...value, denominator: v })
-                                }
-                                disabled={disabled}
-                                onBlur={onBlur}
-                                isInvalid={
-                                    !isValidRelativeRatePart(value.denominator)
-                                }
-                            />
-                        </UnitContext>
-                    </label>
-                    {' = '}
-                    <label className={styles.fieldWrapper}>
                         <UnitContext {...numeratorUnit}>
                             <InlineNumber
                                 className={styles.field}
@@ -147,16 +134,34 @@ export function RelativeRateField({
                             />
                         </UnitContext>
                     </label>
+                    {` ${splitSymbol} `}
+                    <label className={styles.fieldWrapper}>
+                        <UnitContext {...denominatorUnit}>
+                            <InlineNumber
+                                className={styles.field}
+                                fallbackValue={0}
+                                value={value.denominator}
+                                onChange={(v) =>
+                                    onChange({ ...value, denominator: v })
+                                }
+                                disabled={disabled}
+                                onBlur={onBlur}
+                                isInvalid={
+                                    !isValidRelativeRatePart(value.denominator)
+                                }
+                            />
+                        </UnitContext>
+                    </label>
                 </div>
                 {reduced && (
                     <div className={styles.reduced}>
                         Reduced to:{' '}
-                        <UnitContext {...denominatorUnit}>
-                            {reduced.denominator}
-                        </UnitContext>
-                        {' = '}
                         <UnitContext {...numeratorUnit}>
                             {reduced.numerator}
+                        </UnitContext>
+                        {` ${splitSymbol} `}
+                        <UnitContext {...denominatorUnit}>
+                            {reduced.denominator}
                         </UnitContext>
                     </div>
                 )}

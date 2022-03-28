@@ -116,7 +116,7 @@ export interface UpdateInstructionHandler<T, S, P = UpdateInstruction>
         fields: any,
         effectiveTime: bigint,
         expiryTime: bigint
-    ) => Promise<Partial<MultiSignatureTransaction> | undefined>;
+    ) => Promise<Omit<MultiSignatureTransaction, 'id'> | undefined>;
     signTransaction: (transaction: T, signer: S) => Promise<Buffer>;
     /**
      * Returns a React element, which contains the details of the transaction for print

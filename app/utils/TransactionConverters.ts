@@ -26,6 +26,8 @@ import {
     instanceOfUpdateBakerStake,
     instanceOfUpdateBakerKeys,
     instanceOfUpdateBakerRestakeEarnings,
+    instanceOfConfigureBaker,
+    instanceOfConfigureDelegation,
 } from './types';
 import { getScheduledTransferAmount } from './transactionHelpers';
 import { collapseFraction, abs } from './basicHelpers';
@@ -354,6 +356,12 @@ export async function convertAccountTransaction(
     } else if (instanceOfUpdateBakerRestakeEarnings(transaction)) {
         typeSpecific = getBaseTransaction(
             TransactionKindString.UpdateBakerRestakeEarnings
+        );
+    } else if (instanceOfConfigureBaker(transaction)) {
+        typeSpecific = getBaseTransaction(TransactionKindString.ConfigureBaker);
+    } else if (instanceOfConfigureDelegation(transaction)) {
+        typeSpecific = getBaseTransaction(
+            TransactionKindString.ConfigureDelegation
         );
     } else {
         throw new Error('unsupported transaction type - please implement');

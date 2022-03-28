@@ -13,6 +13,7 @@ import credentialReducer from '../features/CredentialSlice';
 import walletReducer from '~/features/WalletSlice';
 import miscReducer from '~/features/MiscSlice';
 import notificationReducer from '~/features/NotificationSlice';
+import chainDataReducer from '~/features/ChainDataSlice';
 /* eslint-disable import/no-cycle */
 
 export default function createRootReducer(history: History) {
@@ -29,5 +30,6 @@ export default function createRootReducer(history: History) {
         wallet: walletReducer,
         misc: miscReducer,
         notification: notificationReducer,
+        chainData: chainDataReducer,
     });
 }

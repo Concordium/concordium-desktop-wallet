@@ -15,7 +15,7 @@ export function setClientLocation(address: string, port: string) {
  * Takes an async function, which might return undefined, and throws an error instead.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function wrapper<T extends any[], V>(
+function throwIfUndefined<T extends any[], V>(
     func: (...inputs: T) => Promise<V | undefined>,
     getErrorMessage: (...inputs: T) => string
 ): (...inputs: T) => Promise<V> {
@@ -41,26 +41,38 @@ export async function getPeerList(includeBootstrappers = false) {
     );
 }
 
-export const getBlockSummary = wrapper(
+export const getBlockSummary = throwIfUndefined(
     window.grpc.getBlockSummary,
     (blockHash) => `Unable to load blocksummary, on block: ${blockHash}`
 );
-export const getNextAccountNonce = wrapper(
+export const getNextAccountNonce = throwIfUndefined(
     window.grpc.getNextAccountNonce,
     (address) => `Unable to fetch next nonce on address: ${address}`
 );
-export const getCryptographicParameters = wrapper(
+export const getCryptographicParameters = throwIfUndefined(
     window.grpc.getCryptographicParameters,
     (blockHash) =>
         `Unable to load cryptographic parameters, on block: ${blockHash}`
 );
-export const getAnonymityRevokers = wrapper(
+export const getAnonymityRevokers = throwIfUndefined(
     window.grpc.getAnonymityRevokers,
     (blockHash) => `Unable to load anonymity revokers, on block: ${blockHash}`
 );
-export const getIdentityProviders = wrapper(
+export const getIdentityProviders = throwIfUndefined(
     window.grpc.getIdentityProviders,
     (blockHash) => `Unable to load identity providers, on block: ${blockHash}`
+);
+export const getRewardStatus = throwIfUndefined(
+    window.grpc.getRewardStatus,
+    (blockHash) => `Unable to load reward status, on block: ${blockHash}`
+);
+
+export const getPoolInfo = throwIfUndefined(
+    window.grpc.getPoolInfo,
+    (blockHash, target) =>
+        `Unable to get pool info for ${
+            target === undefined ? 'L-pool' : target
+        }, on block: ${blockHash}`
 );
 
 export const {

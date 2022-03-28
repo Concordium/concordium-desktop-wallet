@@ -1,317 +1,187 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
-import { push } from 'connected-react-router';
-import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
-import Columns from '~/components/Columns';
-import Button from '~/cross-app-components/Button';
-import { BlockSummary } from '~/node/NodeApiTypes';
+/* eslint-disable react/display-name */
+import React, { ComponentType, useCallback, useState } from 'react';
+import { Redirect, useRouteMatch } from 'react-router';
+import { useSelector } from 'react-redux';
+import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { AccountInfo, ConfigureBaker, Fraction } from '~/utils/types';
+import MultiSigAccountTransactionFlow, {
+    MultiSigAccountTransactionFlowLoading,
+    RequiredValues,
+} from './MultiSigAccountTransactionFlow';
+import { AmountDetail, PlainDetail } from './proposal-details/shared';
+import withExchangeRate from '~/components/Transfers/withExchangeRate';
+import { ensureProps } from '~/utils/componentHelpers';
+import { isDefined } from '~/utils/basicHelpers';
 import {
-    Account,
-    TransactionKindId,
-    UpdateBakerStake,
-    Fraction,
-} from '~/utils/types';
-import PickAccount from '~/components/PickAccount';
+    convertToBakerTransaction,
+    ConfigureBakerFlowDependencies,
+    displayRestakeEarnings,
+    getBakerFlowChanges,
+    getEstimatedConfigureBakerFee,
+} from '~/utils/transactionFlows/configureBaker';
+import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
+import {
+    updateBakerStakeTitle,
+    UpdateBakerStakeFlowState,
+} from '~/utils/transactionFlows/updateBakerStake';
+import withChainData from '~/utils/withChainData';
+import UpdateBakerStakePage from '~/components/Transfers/configureBaker/UpdateBakerStakePage';
+import {
+    accountInfoSelector,
+    accountsInfoSelector,
+} from '~/features/AccountSlice';
+import { shouldShowField } from './utils';
+
+import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
+import { ValidateValues } from '~/components/MultiStepForm';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
-import {
-    createUpdateBakerStakeTransaction,
-    validateBakerStake,
-} from '~/utils/transactionHelpers';
-import routes from '~/constants/routes.json';
-import {
-    useCalcBakerStakeCooldownUntil,
-    useStakedAmount,
-    useTransactionCostEstimate,
-} from '~/utils/dataHooks';
-import SignTransaction from './SignTransaction';
-import PickAmount from './PickAmount';
-import UpdateBakerStakeProposalDetails from './proposal-details/UpdateBakerStakeProposalDetails';
-import { microGtuToGtu, toMicroUnits } from '~/utils/gtu';
-import { getFormattedDateString } from '~/utils/timeHelpers';
-import PendingChange from '~/components/BakerPendingChange';
-import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
-import { getNextAccountNonce } from '~/node/nodeRequests';
-import errorMessages from '~/constants/errorMessages.json';
-import LoadingComponent from './LoadingComponent';
-import {
-    AccountTransactionSubRoutes,
-    getLocationAfterAccounts,
-} from '~/utils/accountRouterHelpers';
-import { ensureChainData, ChainData } from '../common/withChainData';
-import ChooseExpiry from './ChooseExpiry';
-import { isMultiSig } from '~/utils/accountHelpers';
-import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 
-import styles from '../common/MultiSignatureFlowPage.module.scss';
-
-function toMicroUnitsSafe(str: string | undefined) {
-    if (str === undefined) {
-        return undefined;
-    }
-    try {
-        return toMicroUnits(str);
-    } catch (error) {
-        return undefined;
-    }
-}
-interface PageProps extends ChainData {
+interface DisplayProps
+    extends Partial<RequiredValues & UpdateBakerStakeFlowState> {
     exchangeRate: Fraction;
-    blockSummary: BlockSummary;
 }
-
-interface State {
-    account?: Account;
-}
-
-function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
-    const dispatch = useDispatch();
-
-    const { state } = useLocation<State>();
-
-    const { path, url } = useRouteMatch();
-    const [account, setAccount] = useState<Account | undefined>(state?.account);
-    const [stake, setStake] = useState<string>();
-    const [error, setError] = useState<string>();
-    const [transaction, setTransaction] = useState<UpdateBakerStake>();
-    const handler = findAccountTransactionHandler(
-        TransactionKindId.Update_baker_stake
+const DisplayValues = ({
+    account,
+    exchangeRate,
+    expiry,
+    ...values
+}: DisplayProps) => {
+    const accountInfo: AccountInfo | undefined = useSelector(
+        accountInfoSelector(account)
     );
+    const changes = getBakerFlowChanges(values, accountInfo) ?? values;
+    const showField = shouldShowField(values, changes);
 
-    const estimatedFee = useTransactionCostEstimate(
-        TransactionKindId.Update_baker_stake,
-        exchangeRate,
-        account?.signatureThreshold
-    );
-    const [expiryTime, setExpiryTime] = useState<Date>();
-
-    const onCreateTransaction = async () => {
-        if (account === undefined) {
-            setError('Account is needed to make transaction');
-            return;
-        }
-
-        if (stake === undefined) {
-            setError('Stake is needed to make transaction');
-            return;
-        }
-
-        const payload = { stake: toMicroUnits(stake) };
-        const accountNonce = await getNextAccountNonce(account.address);
-        setTransaction(
-            createUpdateBakerStakeTransaction(
-                account.address,
-                payload,
-                accountNonce.nonce,
-                account?.signatureThreshold,
-                expiryTime
-            )
-        );
-    };
-
+    const estimatedFee =
+        account !== undefined
+            ? getEstimatedConfigureBakerFee(
+                  changes,
+                  exchangeRate,
+                  account.signatureThreshold
+              )
+            : undefined;
     return (
-        <MultiSignatureLayout pageTitle={handler.title} delegateScroll>
-            <SimpleErrorModal
-                show={Boolean(error)}
-                header="Unable to perform transfer"
-                content={error}
-                onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
+        <>
+            <DisplayEstimatedFee
+                className={displayTransferStyles.fee}
+                estimatedFee={estimatedFee}
             />
-            <Columns
-                divider
-                columnScroll
-                className={styles.subtractContainerPadding}
-            >
-                <Columns.Column header="Transaction details">
-                    <div className={styles.columnContent}>
-                        <UpdateBakerStakeProposalDetails
-                            account={account}
-                            estimatedFee={estimatedFee}
-                            stake={toMicroUnitsSafe(stake)}
-                            expiryTime={expiryTime}
-                        />
-                    </div>
-                </Columns.Column>
-                <Switch>
-                    <Route exact path={path}>
-                        <Columns.Column
-                            header="Accounts"
-                            className={styles.stretchColumn}
-                        >
-                            <div className={styles.columnContent}>
-                                <div className="flexChildFill">
-                                    <PickAccount
-                                        setAccount={setAccount}
-                                        chosenAccount={account}
-                                        filter={(a, info) =>
-                                            info?.accountBaker !== undefined &&
-                                            isMultiSig(a)
-                                        }
-                                        messageWhenEmpty="There are no baker accounts that require multiple signatures"
-                                        onAccountClicked={() => {
-                                            dispatch(
-                                                push(
-                                                    getLocationAfterAccounts(
-                                                        url,
-                                                        TransactionKindId.Update_baker_stake
-                                                    )
-                                                )
-                                            );
-                                        }}
-                                        isDisabled={(_, info) =>
-                                            info?.accountBaker
-                                                ?.pendingChange !==
-                                            undefined ? (
-                                                <>
-                                                    The stake is frozen because:
-                                                    <br />
-                                                    <PendingChange
-                                                        pending={
-                                                            info.accountBaker
-                                                                .pendingChange
-                                                        }
-                                                    />
-                                                </>
-                                            ) : undefined
-                                        }
-                                    />
-                                </div>
-                            </div>
-                        </Columns.Column>
-                    </Route>
-                    <Route
-                        path={`${path}/${AccountTransactionSubRoutes.stake}`}
-                    >
-                        <Columns.Column
-                            header="New staked amount"
-                            className={styles.stretchColumn}
-                        >
-                            <div className={styles.columnContent}>
-                                <div className="flexChildFill">
-                                    {account !== undefined ? (
-                                        <PickNewStake
-                                            account={account}
-                                            stake={stake}
-                                            setStake={setStake}
-                                            blockSummary={blockSummary}
-                                        />
-                                    ) : null}
-                                </div>
-                                <Button
-                                    className="mT40"
-                                    disabled={stake === undefined}
-                                    onClick={() => {
-                                        dispatch(
-                                            push(
-                                                `${url}/${AccountTransactionSubRoutes.expiry}`
-                                            )
-                                        );
-                                    }}
-                                >
-                                    Continue
-                                </Button>
-                            </div>
-                        </Columns.Column>
-                    </Route>
-                    <Route
-                        path={`${path}/${AccountTransactionSubRoutes.expiry}`}
-                    >
-                        <Columns.Column
-                            header="Transaction expiry time"
-                            className={styles.stretchColumn}
-                        >
-                            <ChooseExpiry
-                                buttonText="Continue"
-                                onClick={(expiry: Date) => {
-                                    setExpiryTime(expiry);
-                                    onCreateTransaction()
-                                        .then(() =>
-                                            dispatch(
-                                                push(
-                                                    `${url}/${AccountTransactionSubRoutes.sign}`
-                                                )
-                                            )
-                                        )
-                                        .catch(() =>
-                                            setError(
-                                                errorMessages.unableToReachNode
-                                            )
-                                        );
-                                }}
-                            />
-                        </Columns.Column>
-                    </Route>
-                    <Route path={`${path}/${AccountTransactionSubRoutes.sign}`}>
-                        <Columns.Column
-                            header="Signature and hardware wallet"
-                            className={styles.stretchColumn}
-                        >
-                            {transaction !== undefined &&
-                            account !== undefined ? (
-                                <SignTransaction
-                                    transaction={transaction}
-                                    account={account}
-                                />
-                            ) : null}
-                        </Columns.Column>
-                    </Route>
-                </Switch>
-            </Columns>
-        </MultiSignatureLayout>
+            {showField((v) => v.stake?.stake) && (
+                <AmountDetail
+                    title="Staked amount"
+                    value={changes.stake?.stake}
+                />
+            )}
+            {showField((v) => v.stake?.restake) && (
+                <PlainDetail
+                    title="Restake earnings"
+                    value={
+                        changes.stake?.restake !== undefined
+                            ? displayRestakeEarnings(changes.stake.restake)
+                            : undefined
+                    }
+                />
+            )}
+        </>
     );
-}
-
-type PickNewStakeProps = {
-    account: Account;
-    stake?: string;
-    setStake: (s: string | undefined) => void;
-    blockSummary: BlockSummary;
 };
 
-function PickNewStake({
-    account,
-    stake,
-    setStake,
-    blockSummary,
-}: PickNewStakeProps) {
-    const stakedAlready = useStakedAmount(account.address);
-    const minimumThresholdForBaking = BigInt(
-        blockSummary.updates.chainParameters.minimumThresholdForBaking
-    );
-    const cooldownUntil = useCalcBakerStakeCooldownUntil();
-    const stakeGtu = toMicroUnitsSafe(stake);
+type Props = ConfigureBakerFlowDependencies;
+type UnsafeProps = Partial<Props>;
 
-    if (stakedAlready === undefined) {
-        return null;
-    }
+const hasNecessaryProps = (props: UnsafeProps): props is Props => {
+    return [props.exchangeRate, props.blockSummary].every(isDefined);
+};
+
+const withDeps = (component: ComponentType<Props>) =>
+    withExchangeRate(
+        withChainData(
+            ensureProps(
+                component,
+                hasNecessaryProps,
+                <MultiSigAccountTransactionFlowLoading
+                    title={updateBakerStakeTitle}
+                />
+            )
+        )
+    );
+
+export default withDeps(function UpdateBakerStake({
+    exchangeRate,
+    blockSummary,
+}: Props) {
+    const { path: matchedPath } = useRouteMatch();
+    const accountsInfo = useSelector(accountsInfoSelector);
+    const [showError, setShowError] = useState(false);
+
+    const convert = useCallback(
+        (
+            { account, ...values }: RequiredValues & UpdateBakerStakeFlowState,
+            nonce: bigint
+        ) =>
+            convertToBakerTransaction(
+                account,
+                nonce,
+                exchangeRate,
+                accountsInfo[account.address]
+            )(values, values.expiry),
+        [exchangeRate, accountsInfo]
+    );
+
+    const validate: ValidateValues<
+        RequiredValues & UpdateBakerStakeFlowState
+    > = useCallback(
+        (v) => {
+            try {
+                convert(v, 0n);
+            } catch {
+                setShowError(true);
+                return 'stake';
+            }
+            return undefined;
+        },
+        [convert]
+    );
 
     return (
         <>
-            <PickAmount
-                account={account}
-                amount={microGtuToGtu(stakedAlready)}
-                setAmount={setStake}
-                validateAmount={(...args) =>
-                    validateBakerStake(minimumThresholdForBaking, ...args)
-                }
+            <SimpleErrorModal
+                show={showError}
+                onClick={() => setShowError(false)}
+                header="Empty transaction"
+                content="Transaction includes no changes to existing baker configuration for account."
             />
-            <p>Enter your new stake here</p>
-            {cooldownUntil !== undefined &&
-            stakeGtu !== undefined &&
-            stakedAlready !== undefined &&
-            stakeGtu < stakedAlready ? (
-                <p>
-                    You are decreasing the baker stake and the stake will be
-                    frozen until <br />
-                    {getFormattedDateString(cooldownUntil)}
-                    <br /> where the actual decrease will take effect.
-                </p>
-            ) : null}
+            <MultiSigAccountTransactionFlow<
+                UpdateBakerStakeFlowState,
+                ConfigureBaker
+            >
+                title={updateBakerStakeTitle}
+                convert={convert}
+                accountFilter={(_, i) => isDefined(i) && isBakerAccount(i)}
+                preview={(v) => (
+                    <DisplayValues {...v} exchangeRate={exchangeRate} />
+                )}
+                validate={validate}
+            >
+                {({ account }) => ({
+                    stake: {
+                        render: (initial, onNext, formValues) =>
+                            isDefined(account) ? (
+                                <UpdateBakerStakePage
+                                    account={account}
+                                    exchangeRate={exchangeRate}
+                                    blockSummary={blockSummary}
+                                    initial={initial}
+                                    onNext={onNext}
+                                    formValues={formValues}
+                                />
+                            ) : (
+                                <Redirect to={matchedPath} />
+                            ),
+                        title: 'Stake settings',
+                    },
+                })}
+            </MultiSigAccountTransactionFlow>
         </>
     );
-}
-
-export default ensureExchangeRate(
-    ensureChainData(UpdateBakerStakePage, LoadingComponent),
-    LoadingComponent
-);
+});

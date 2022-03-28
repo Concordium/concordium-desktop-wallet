@@ -7,6 +7,7 @@ import UnshieldImage from '@resources/svg/unshield.svg';
 import ShieldImage from '@resources/svg/shield.svg';
 import SendEncryptedImage from '@resources/svg/shielded-paperplane.svg';
 import { Dispatch } from 'redux';
+import { push } from 'connected-react-router';
 import routes from '~/constants/routes.json';
 import { viewingShieldedSelector } from '~/features/TransactionSlice';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
@@ -33,7 +34,10 @@ interface ActionObject {
 }
 
 const changeView: ActionObject = {
-    action: (dispatch) => toggleAccountView(dispatch),
+    action: (dispatch) => {
+        toggleAccountView(dispatch);
+        dispatch(push(routes.ACCOUNTS));
+    },
     label: 'Change view',
     Image: BracketsImage,
     imageClassName: clsx(styles.actionImage, 'mB15'),

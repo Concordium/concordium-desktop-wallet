@@ -1,6 +1,6 @@
 import React from 'react';
 import { FieldValues } from 'react-hook-form';
-import { ChainData } from '../common/withChainData';
+import { ChainData } from '~/utils/withChainData';
 import {
     UpdateType,
     AuthorizationKeysUpdate,
@@ -20,7 +20,7 @@ interface Props extends Required<ChainData> {
     defaults: FieldValues;
     type: UpdateType;
     onFinish: (
-        proposal: Partial<MultiSignatureTransaction>,
+        proposal: MultiSignatureTransaction | undefined,
         defaults: FieldValues
     ) => void;
 }
@@ -64,7 +64,7 @@ export default function BuildProposal({
 
         const newDefaults = { effectiveTime, expiryTime, keyUpdate };
         if (newProposal) {
-            onFinish(newProposal, newDefaults);
+            onFinish(newProposal as MultiSignatureTransaction, newDefaults);
         }
     }
 

@@ -40,6 +40,9 @@ import {
     AddAnonymityRevoker,
     PrivateKeys,
     BlsKeyTypes,
+    TimeParameters,
+    CooldownParameters,
+    PoolParameters,
 } from '~/utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
@@ -50,6 +53,7 @@ import signUpdateCredentialTransaction from './SignUpdateCredentials';
 import signAuthorizationKeysUpdate from './SignAuthorizationKeysUpdate';
 import signAddIdentityProviderTransaction from './SignAddIdentityProvider';
 import signAddAnonymityRevokerTransaction from './SignAddAnonymityRevoker';
+import signPoolParameters from './SignPoolParameters';
 import EmulatorTransport from './EmulatorTransport';
 import verifyAddress from './verifyAddress';
 
@@ -229,6 +233,7 @@ export default class ConcordiumLedgerClientMain {
     signMintDistribution(
         transaction: UpdateInstruction<MintDistribution>,
         serializedPayload: Buffer,
+        version: number,
         path: number[]
     ): Promise<Buffer> {
         return signUpdateTransaction(
@@ -236,7 +241,8 @@ export default class ConcordiumLedgerClientMain {
             0x25,
             path,
             transaction,
-            serializedPayload
+            serializedPayload,
+            version
         );
     }
 
@@ -295,6 +301,47 @@ export default class ConcordiumLedgerClientMain {
         );
     }
 
+    signCooldownParameters(
+        transaction: UpdateInstruction<CooldownParameters>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
+            this.transport,
+            0x40,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signPoolParameters(
+        transaction: UpdateInstruction<PoolParameters>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signPoolParameters(
+            this.transport,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signTimeParameters(
+        transaction: UpdateInstruction<TimeParameters>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
+            this.transport,
+            0x42,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
     signHigherLevelKeysUpdate(
         transaction: UpdateInstruction<HigherLevelKeyUpdate>,
         serializedPayload: Buffer,
@@ -314,14 +361,16 @@ export default class ConcordiumLedgerClientMain {
         transaction: UpdateInstruction<AuthorizationKeysUpdate>,
         serializedPayload: Buffer,
         path: number[],
-        INS: number
+        INS: number,
+        version: number
     ): Promise<Buffer> {
         return signAuthorizationKeysUpdate(
             this.transport,
             path,
             transaction,
             serializedPayload,
-            INS
+            INS,
+            version
         );
     }
 
