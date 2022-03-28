@@ -1,25 +1,21 @@
 import React from 'react';
 import clsx from 'clsx';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import SendImage from '@resources/svg/paperplane.svg';
-import BracketsImage from '@resources/svg/brackets.svg';
+import QrImage from '@resources/svg/qr.svg';
 import UnshieldImage from '@resources/svg/unshield.svg';
 import ShieldImage from '@resources/svg/shield.svg';
 import SendEncryptedImage from '@resources/svg/shielded-paperplane.svg';
-import { Dispatch } from 'redux';
-import { push } from 'connected-react-router';
 import routes from '~/constants/routes.json';
 import { viewingShieldedSelector } from '~/features/TransactionSlice';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import { Account, AccountInfo } from '~/utils/types';
-import Button from '~/cross-app-components/Button';
-import { toggleAccountView } from '~/features/AccountSlice';
 
 import styles from './AccountViewAction.module.scss';
 
 interface ActionObject {
-    action: string | ((dispatch: Dispatch) => void);
+    action: string;
     label: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Image: any;
@@ -33,16 +29,12 @@ interface ActionObject {
     ): boolean;
 }
 
-const changeView: ActionObject = {
-    action: (dispatch) => {
-        toggleAccountView(dispatch);
-        dispatch(push(routes.ACCOUNTS));
-    },
-    label: 'Change view',
-    Image: BracketsImage,
-    imageClassName: clsx(styles.actionImage, 'mB15'),
-    height: 30,
-    width: 48,
+const receiveAction: ActionObject = {
+    action: routes.ACCOUNTS_ADDRESS,
+    label: 'Receive',
+    Image: QrImage,
+    imageClassName: clsx(styles.actionImage, 'mB5'),
+    height: 27,
     isDisabled: () => false,
 };
 const shieldedActions: ActionObject[] = [
@@ -64,7 +56,7 @@ const shieldedActions: ActionObject[] = [
         isDisabled: (hasCredential: boolean, _, hasInfo) =>
             !hasCredential || !hasInfo,
     },
-    changeView,
+    receiveAction,
 ];
 const unshieldedActions: ActionObject[] = [
     {
@@ -85,7 +77,7 @@ const unshieldedActions: ActionObject[] = [
         isDisabled: (hasCredential: boolean, isMultiSig, hasInfo) =>
             !hasCredential || !hasInfo || isMultiSig,
     },
-    changeView,
+    receiveAction,
 ];
 
 function AccountViewAction({
@@ -105,7 +97,6 @@ function AccountViewAction({
     hasInfo: boolean;
 }): JSX.Element {
     const disabled = isDisabled(hasCredentials, isMultiSig, hasInfo);
-    const dispatch = useDispatch();
 
     const sharedProps = {
         className: clsx(
@@ -122,23 +113,10 @@ function AccountViewAction({
         </>
     );
 
-    if (typeof action === 'string') {
-        return (
-            <ButtonNavLink to={action} {...sharedProps}>
-                {body}
-            </ButtonNavLink>
-        );
-    }
-
     return (
-        <Button
-            size="huge"
-            inverted
-            onClick={() => action(dispatch)}
-            {...sharedProps}
-        >
+        <ButtonNavLink to={action} {...sharedProps}>
             {body}
-        </Button>
+        </ButtonNavLink>
     );
 }
 

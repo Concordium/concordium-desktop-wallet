@@ -32,21 +32,15 @@ export default function MoreActions({ account, accountInfo }: Props) {
     return (
         <>
             <ButtonNavLink
-                className="mB20:notLast flex width100"
+                className="mB20 flex width100"
                 exact
                 to={routes.ACCOUNTS}
             >
                 Transaction log
             </ButtonNavLink>
-            <ButtonNavLink
-                className="mB20:notLast flexColumn justifyCenter"
-                to={routes.ACCOUNTS_ADDRESS}
-            >
-                Account address
-            </ButtonNavLink>
             {accountHasDeployedCredentials && (
                 <ButtonNavLink
-                    className="mB20:notLast flex width100"
+                    className="mB20 flex width100"
                     to={routes.ACCOUNTS_CREATESCHEDULEDTRANSFER}
                     disabled={!accountInfo}
                 >
@@ -54,14 +48,14 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 </ButtonNavLink>
             )}
             <ButtonNavLink
-                className="mB20:notLast flex width100"
+                className="mB20 flex width100"
                 to={routes.ACCOUNTS_INSPECTRELEASESCHEDULE}
                 disabled={!accountInfo}
             >
                 Inspect release schedule
             </ButtonNavLink>
             <ButtonNavLink
-                className="mB20:notLast flex width100"
+                className="mB20 flex width100"
                 to={{
                     pathname: routes.ACCOUNT_REPORT,
                     state: { account },
