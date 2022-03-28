@@ -1,6 +1,6 @@
 import React from 'react';
 import { GasRewards } from '~/utils/types';
-import withChainData, { ChainData } from '../../common/withChainData';
+import withChainData, { ChainData } from '~/utils/withChainData';
 import GasRewardsForm from './GasRewardsForm';
 import Loading from '~/cross-app-components/Loading';
 import { getCurrentValue, toRewardFractions } from './util';

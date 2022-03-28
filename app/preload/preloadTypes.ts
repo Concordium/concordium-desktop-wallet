@@ -1,10 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
     AccountInfo,
+    BakerId,
     BlockSummary,
     ConsensusStatus,
     CryptographicParameters,
     NextAccountNonce,
+    PoolStatus,
+    RewardStatus,
     TransactionStatus,
     Versioned,
 } from '@concordium/node-sdk';
@@ -48,6 +50,7 @@ import type LedgerCommands from './preloadLedgerTypes';
 
 export type { default as LedgerCommands } from './preloadLedgerTypes';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Listener = (event: any, ...args: any[]) => void;
 type PutListener = (callback: Listener) => void;
 type PutListenerWithUnsub = (callback: Listener) => () => void;
@@ -114,6 +117,11 @@ export type GRPC = {
     getAnonymityRevokers: (blockHash: string) => Promise<ArInfo[] | undefined>;
     // We return a Uint8Array here, because PeerListResponse must be manually serialized/deserialized.
     getPeerList: (includeBootstrappers: boolean) => Promise<Uint8Array>;
+    getRewardStatus: (blockHash: string) => Promise<RewardStatus | undefined>;
+    getPoolInfo: (
+        blockHash: string,
+        bakerId?: BakerId
+    ) => Promise<PoolStatus | undefined>;
 };
 
 export type FileMethods = {
@@ -129,6 +137,7 @@ export interface DecryptionData {
 }
 interface DecryptionError {
     data?: never;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     error: any;
 }
 export type DecryptionResult = DecryptionData | DecryptionError;
@@ -177,7 +186,9 @@ export type GeneralMethods = {
     setPassword: (password: string) => void;
     invalidateKnexSingleton: () => void;
     migrate: () => Promise<boolean>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     selectFirst: (tableName: string) => Promise<any>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     selectAll: (tableName: string) => Promise<any>;
 };
 
@@ -447,8 +458,10 @@ export interface WindowFunctions {
     files: FileMethods;
     http: HttpMethods;
     view: BrowserViewMethods;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     printElement: (body: string) => any;
     writeImageToClipboard: (dataUrl: string) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     openUrl: (href: string) => any;
     removeAllListeners: (channel: string) => void;
     platform: NodeJS.Platform;

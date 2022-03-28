@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { push } from 'connected-react-router';
+import { push, replace } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { stringify, parse } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
@@ -122,6 +122,18 @@ export default function BuildSchedule({ location }: Props) {
             }
             transaction.estimatedFee = estimatedFee;
             const transactionJSON = stringify(transaction);
+
+            dispatch(
+                replace(routes.ACCOUNTS_SCHEDULED_TRANSFER, {
+                    account,
+                    amount,
+                    defaults: recoverState,
+                    recipient,
+                    nonce,
+                    memo,
+                    exchangeRate,
+                })
+            );
             dispatch(
                 push({
                     pathname: routes.SUBMITTRANSFER,
@@ -132,18 +144,6 @@ export default function BuildSchedule({ location }: Props) {
                                 transaction: transactionJSON,
                                 account,
                                 recipient,
-                            },
-                        },
-                        cancelled: {
-                            pathname: routes.ACCOUNTS_SCHEDULED_TRANSFER,
-                            state: {
-                                account,
-                                amount,
-                                defaults: recoverState,
-                                recipient,
-                                nonce,
-                                memo,
-                                exchangeRate,
                             },
                         },
                         transaction: transactionJSON,
@@ -176,7 +176,7 @@ export default function BuildSchedule({ location }: Props) {
             }
         >
             <div className={styles.buildScheduleCommon}>
-                <h3 className={styles.title}> Send CCD with a schedule </h3>
+                <h3 className={styles.title}>Send CCD with a schedule</h3>
                 <div className="body3">
                     <h2 className="m0">
                         {displayAsCcd(amount)} to {recipient.name}

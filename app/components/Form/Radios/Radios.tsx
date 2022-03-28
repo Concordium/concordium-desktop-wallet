@@ -59,7 +59,7 @@ function Radios<T>({
     const { isInvalid } = inputProps;
     return (
         <div className={clsx(styles.root, className)}>
-            <Label className="mB5">{label}</Label>
+            {label && <Label className="mB5">{label}</Label>}
             <div
                 className={clsx(
                     styles.radios,

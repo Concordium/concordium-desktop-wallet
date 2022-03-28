@@ -1,5 +1,6 @@
 import { RegisterOptions, Validate } from 'react-hook-form';
 import bs58check from 'bs58check';
+import { AccountInfoBaker, AccountInfoDelegator } from '@concordium/node-sdk';
 import {
     Account,
     AccountInfo,
@@ -163,9 +164,10 @@ export function getPublicAccountAmounts(
         return { total: 0n, staked: 0n, scheduled: 0n, atDisposal: 0n };
     }
     const total = BigInt(accountInfo.accountAmount);
-    const staked = accountInfo.accountBaker
-        ? BigInt(accountInfo.accountBaker.stakedAmount)
-        : 0n;
+    const staked =
+        (accountInfo as AccountInfoBaker).accountBaker?.stakedAmount ??
+        (accountInfo as AccountInfoDelegator).accountDelegation?.stakedAmount ??
+        0n;
     const scheduled = accountInfo.accountReleaseSchedule
         ? BigInt(accountInfo.accountReleaseSchedule.total)
         : 0n;

@@ -22,7 +22,7 @@ export default function createMultiSignatureTransaction(
     threshold: number,
     status: MultiSignatureTransactionStatus
 ) {
-    const multiSignatureTransaction: Partial<MultiSignatureTransaction> = {
+    const multiSignatureTransaction: Omit<MultiSignatureTransaction, 'id'> = {
         transaction: stringify(transaction),
         threshold,
         status,

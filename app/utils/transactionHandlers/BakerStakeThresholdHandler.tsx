@@ -1,4 +1,5 @@
 import React from 'react';
+import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import BakerStakeThresholdView from '~/pages/multisig/updates/BakerStakeThreshold/BakerStakeThresholdView';
 import UpdateBakerStakeThreshold, {
     UpdateBakerStakeThresholdFields,
@@ -35,9 +36,13 @@ export default class BakerStakeThresholdHandler
         { threshold: bakerStakeThreshold }: UpdateBakerStakeThresholdFields,
         effectiveTime: bigint,
         expiryTime: bigint
-    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
-        if (!blockSummary) {
+    ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
+        if (!blockSummary || isBlockSummaryV1(blockSummary)) {
             return undefined;
+        }
+
+        if (isBlockSummaryV1(blockSummary)) {
+            throw new Error('Update incompatible with chain protocol version');
         }
 
         const sequenceNumber =

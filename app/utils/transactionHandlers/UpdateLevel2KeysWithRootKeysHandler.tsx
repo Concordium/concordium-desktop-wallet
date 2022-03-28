@@ -9,6 +9,7 @@ import {
     UpdateType,
     isUpdateLevel2KeysWithRootKeys,
     AuthorizationKeysUpdate,
+    getAuthorizationKeysUpdateVersion,
 } from '../types';
 import { serializeAuthorizationKeysUpdate } from '../UpdateSerialization';
 import { UpdateInstructionHandler } from '../transactionTypes';
@@ -34,7 +35,7 @@ export default class UpdateLevel2KeysUsingRootKeysHandler
         authorizationKeysUpdate: AuthorizationKeysUpdate,
         effectiveTime: bigint,
         expiryTime: bigint
-    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+    ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         if (!blockSummary) {
             return undefined;
         }
@@ -77,7 +78,8 @@ export default class UpdateLevel2KeysUsingRootKeysHandler
             transactionWithoutRemoved,
             this.serializePayload(transaction),
             path,
-            0x2a
+            0x2a,
+            getAuthorizationKeysUpdateVersion(transaction.payload.keyUpdateType)
         );
     }
 

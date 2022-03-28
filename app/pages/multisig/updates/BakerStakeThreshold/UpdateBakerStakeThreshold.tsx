@@ -1,6 +1,7 @@
 import React from 'react';
 import Form from '~/components/Form';
 import { onlyDigitsNoLeadingZeroes } from '~/utils/basicHelpers';
+import { getMinimumStakeForBaking } from '~/utils/blockSummaryHelpers';
 import { UpdateProps } from '~/utils/transactionTypes';
 import { EqualRecord } from '~/utils/types';
 
@@ -18,8 +19,7 @@ const fieldNames: EqualRecord<UpdateBakerStakeThresholdFields> = {
 export default function UpdateBakerStakeThreshold({
     blockSummary,
 }: UpdateProps): JSX.Element | null {
-    const currentBakerStakeThreshold =
-        blockSummary.updates.chainParameters.minimumThresholdForBaking;
+    const currentBakerStakeThreshold = getMinimumStakeForBaking(blockSummary);
 
     return (
         <div>
@@ -36,7 +36,7 @@ export default function UpdateBakerStakeThreshold({
                     required: 'Threshold is required',
                     min: { value: 0, message: 'Must be above 0' },
                     max: {
-                        value: 18446744073709551615,
+                        value: '18446744073709551615',
                         message: 'Must be below 18446744073709551615',
                     },
                     validate: (v) =>

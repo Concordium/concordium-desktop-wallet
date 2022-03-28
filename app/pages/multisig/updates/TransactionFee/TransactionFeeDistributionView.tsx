@@ -5,7 +5,7 @@ import {
     RewardDistribution,
     RewardDistributionValue,
 } from '../../common/RewardDistribution';
-import withChainData, { ChainData } from '../../common/withChainData';
+import withChainData, { ChainData } from '~/utils/withChainData';
 import { getCurrentValue, rewardDistributionLabels } from './util';
 
 interface Props extends ChainData {

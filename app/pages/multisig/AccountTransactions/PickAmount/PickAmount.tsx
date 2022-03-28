@@ -8,6 +8,7 @@ import { getCcdSymbol } from '~/utils/ccd';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import { useAccountInfo } from '~/utils/dataHooks';
 import GtuInput from '~/components/Form/GtuInput';
+import Label from '~/components/Label';
 
 import styles from './PickAmount.module.scss';
 
@@ -15,6 +16,8 @@ interface Props {
     account: Account | undefined;
     estimatedFee?: Fraction;
     amount: string | undefined;
+    /** show an existing value above input (in CCD), to indicate a change from an existing value */
+    existing?: string;
     setAmount: (amount: string | undefined) => void;
     validateAmount?: (
         amountToValidate: string,
@@ -32,6 +35,7 @@ export default function PickAmount({
     setAmount,
     amount,
     estimatedFee,
+    existing,
     validateAmount = validateTransferAmount,
 }: Props): JSX.Element {
     if (!account) {
@@ -59,15 +63,23 @@ export default function PickAmount({
     return (
         <div className="flexColumn">
             <AccountCard account={account} accountInfo={accountInfo} />
-            <h5 className="mB0">Amount:</h5>
-            <div className={clsx(styles.inputWrapper)}>
-                {getCcdSymbol()}
-                <GtuInput
-                    value={state}
-                    onChange={onChange}
-                    isInvalid={Boolean(error)}
-                    autoFocus
-                />
+            <div className="mT30">
+                {existing && (
+                    <div className="body3 mono mB10">
+                        Current stake: {getCcdSymbol()}
+                        {existing}
+                    </div>
+                )}
+                <Label className="mB5">Amount:</Label>
+                <div className={clsx(styles.inputWrapper)}>
+                    {getCcdSymbol()}
+                    <GtuInput
+                        value={state}
+                        onChange={onChange}
+                        isInvalid={Boolean(error)}
+                        autoFocus
+                    />
+                </div>
             </div>
             <ErrorMessage>{error}</ErrorMessage>
         </div>

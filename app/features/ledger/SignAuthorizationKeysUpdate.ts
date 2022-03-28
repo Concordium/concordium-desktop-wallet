@@ -8,6 +8,7 @@ import {
 } from '../../utils/types';
 import pathAsBuffer from './Path';
 import {
+    convertAuthorizationKeyUpdateType,
     serializeUpdateHeader,
     serializeUpdateType,
 } from '../../utils/UpdateSerialization';
@@ -21,7 +22,8 @@ import { chunkArray } from '~/utils/basicHelpers';
 async function sendAccessStructure(
     accessStructure: AccessStructure,
     transport: Transport,
-    INS: number
+    INS: number,
+    p2: number
 ): Promise<Buffer> {
     const serializedAccessStructureSize = Buffer.alloc(2);
     serializedAccessStructureSize.writeUInt16BE(
@@ -30,7 +32,6 @@ async function sendAccessStructure(
     );
 
     let p1 = 0x02;
-    const p2 = 0x00;
     await transport.send(0xe0, INS, p1, p2, serializedAccessStructureSize);
 
     p1 = 0x03;
@@ -59,7 +60,8 @@ export default async function signAuthorizationKeysUpdate(
     path: number[],
     transaction: UpdateInstruction<AuthorizationKeysUpdate>,
     serializedPayload: Buffer,
-    INS: number
+    INS: number,
+    p2: number
 ): Promise<Buffer> {
     const updateHeaderWithPayloadSize = {
         ...transaction.header,
@@ -70,10 +72,12 @@ export default async function signAuthorizationKeysUpdate(
     const serializedUpdateType = serializeUpdateType(transaction.type);
 
     let p1 = 0x00;
-    const p2 = 0x00;
 
     const serializedKeyUpdateType = Buffer.alloc(1);
-    serializedKeyUpdateType.writeInt8(transaction.payload.keyUpdateType, 0);
+    serializedKeyUpdateType.writeInt8(
+        convertAuthorizationKeyUpdateType(transaction.payload.keyUpdateType),
+        0
+    );
 
     const updateKeysLength = transaction.payload.keys.length;
     const serializedNumberOfUpdateKeys = Buffer.alloc(2);
@@ -100,7 +104,12 @@ export default async function signAuthorizationKeysUpdate(
 
     let response;
     for (const accessStructure of authorizationKeysUpdate.accessStructures) {
-        response = await sendAccessStructure(accessStructure, transport, INS);
+        response = await sendAccessStructure(
+            accessStructure,
+            transport,
+            INS,
+            p2
+        );
     }
 
     if (!response) {

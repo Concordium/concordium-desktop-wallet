@@ -10,7 +10,7 @@ export interface Nonce {
     nonce?: bigint;
 }
 
-export interface WithAccount extends Nonce {
+export interface AccountAndNonce extends Nonce {
     account: Account;
 }
 
@@ -18,7 +18,7 @@ export interface WithAccount extends Nonce {
  * Component that injects the next nonce on the given account.
  * Requires the component to have prop account containing an Account.
  */
-export default function withNonce<TProps extends WithAccount>(
+export default function withNonce<TProps extends AccountAndNonce>(
     Component: ComponentType<TProps>
 ): ComponentType<Omit<TProps, keyof Nonce>> {
     return ({ account, ...props }) => {
@@ -52,7 +52,7 @@ export default function withNonce<TProps extends WithAccount>(
     };
 }
 
-export function ensureNonce<TProps extends WithAccount>(
+export function ensureNonce<TProps extends AccountAndNonce>(
     Component: ComponentType<TProps>,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     FallBack: ComponentType<any>

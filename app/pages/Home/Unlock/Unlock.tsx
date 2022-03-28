@@ -20,6 +20,7 @@ export default function Unlock() {
     const [validationError, setValidationError] = useState<
         string | undefined
     >();
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (validationError) {
@@ -36,15 +37,20 @@ export default function Unlock() {
 
     const unlock = useCallback(
         async ({ password }: UnlockForm) => {
+            setLoading(true);
+
             window.database.general.setPassword(password);
             window.database.general.invalidateKnexSingleton();
+
             const hasAccess = await window.database.general.checkAccess();
             if (!hasAccess) {
                 // The password was incorrect.
                 setValidationError('Invalid password');
                 form.trigger();
+                setLoading(false);
                 return;
             }
+
             const dbMigrated = await window.database.general.migrate();
             if (!dbMigrated) {
                 // The migration failed.
@@ -52,10 +58,12 @@ export default function Unlock() {
                     'Database migrations failed, please contact support'
                 );
                 form.trigger();
+                setLoading(false);
                 return;
             }
 
             await initApplication(dispatch);
+            setLoading(false);
             dispatch(push({ pathname: routes.ACCOUNTS }));
         },
         [dispatch, form]
@@ -75,7 +83,7 @@ export default function Unlock() {
                     }}
                     autoFocus
                 />
-                <Form.Submit>Unlock</Form.Submit>
+                <Form.Submit loading={loading}>Unlock</Form.Submit>
             </Card>
         </Form>
     );
