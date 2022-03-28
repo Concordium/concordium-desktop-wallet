@@ -42,3 +42,18 @@
     width: 90px;
     text-align: center;
 }
+
+.arrows {
+    overflow: visible;
+
+    path {
+        transition: transform $anim-easing $anim-timing;
+
+        :where(.root:hover, .root:focus) &:first-of-type {
+            transform: translateX(2px);
+        }
+        :where(.root:hover, .root:focus) &:last-of-type {
+            transform: translateX(-2px);
+        }
+    }
+}

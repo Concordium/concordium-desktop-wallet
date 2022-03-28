@@ -21,7 +21,7 @@ export default function ChangeView() {
     return (
         <button className={styles.root} type="button" onClick={toggle}>
             <em className={styles.text}>{text}</em>
-            <Arrows />
+            <Arrows className={styles.arrows} />
         </button>
     );
 }
