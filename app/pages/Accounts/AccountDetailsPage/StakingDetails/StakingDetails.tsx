@@ -34,9 +34,9 @@ interface ValueProps {
 
 function Value({ title, value }: ValueProps) {
     return (
-        <div className="mB20:notLast">
-            <Label className="mB5 textWhite">{title}:</Label>
-            <span className="body2">{value}</span>
+        <div className="mB10:notLast">
+            <Label className="mB5 textWhite">{title}</Label>
+            <span className="body2 mono">{value}</span>
         </div>
     );
 }
@@ -166,10 +166,10 @@ export default function StakingDetails({ details }: Props) {
     return (
         <Card className={styles.root} dark>
             <header className={styles.header}>
-                <RegisteredIcon width={35} />
+                <RegisteredIcon width={30} />
                 <h2 className="mV0 mL10">{text.title}</h2>
             </header>
-            <section className="flexColumn justifyCenter mB20 flexChildFill">
+            <section className="flexColumn justifyCenter mB20">
                 {isBakerDetails(details) && (
                     <BakerValues
                         isDelegationProtocol={hasDelegationProtocol(

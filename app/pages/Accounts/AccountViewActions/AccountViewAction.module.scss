@@ -1,20 +1,20 @@
 @import 'config/bundle';
 
-.actionButtonsCard {
-    display: flex;
+.actionButtons {
+    display: grid;
     justify-content: space-between;
     margin: 20px 0;
-    height: 90px;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-gap: 20px;
 }
 
 .actionButton {
-    width: 32%;
     height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
-    padding: 20px;
+    padding: 14px 20px;
     font-size: $font-size-body3;
     box-shadow: 0 0 0 1px $color-grey inset;
 }
@@ -26,9 +26,17 @@
 }
 
 .actionImage {
-    @include svgColorTransition;
+    @include svgColor($color-off-white);
+}
 
-    .actionButton:hover & {
-        @include svgColor($color-pale-blue);
+.shieldActionImage {
+    path:global(.shield_svg__inverse),
+    path:global(.shielded-paperplane_svg__inverse) {
+        transition: fill $anim-easing $anim-timing;
+        fill: $color-pale-blue;
+
+        :where(.actionButton:hover, .actionButton:focus) & {
+            fill: darken($color: $color-pale-blue, $amount: 3);
+        }
     }
 }
