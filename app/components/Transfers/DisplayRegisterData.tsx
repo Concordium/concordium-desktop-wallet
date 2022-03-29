@@ -1,7 +1,7 @@
 import React from 'react';
 import { RegisterData } from '~/utils/types';
 import { useAccountName } from '~/utils/dataHooks';
-import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
+import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import DisplayAddress from '../DisplayAddress';
 
