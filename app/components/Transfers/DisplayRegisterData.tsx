@@ -1,10 +1,11 @@
 import React from 'react';
 import { RegisterData } from '~/utils/types';
-import styles from './transferDetails.module.scss';
 import { useAccountName } from '~/utils/dataHooks';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import DisplayAddress from '../DisplayAddress';
+
+import styles from './transferDetails.module.scss';
 
 interface Props {
     transaction: RegisterData;

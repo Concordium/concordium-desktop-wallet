@@ -11,7 +11,7 @@ interface Props {
     data?: string;
 }
 
-export default function AddBakerProposalDetails({
+export default function RegisterDataProposalDetails({
     account,
     estimatedFee,
     expiryTime,
@@ -22,7 +22,10 @@ export default function AddBakerProposalDetails({
             <AccountDetail title="Account" value={account} first />
             <DisplayEstimatedFee estimatedFee={estimatedFee} />
             <PlainDetail title="Data" value={data} />
-            <DisplayTransactionExpiryTime expiryTime={expiryTime} />
+            <DisplayTransactionExpiryTime
+                expiryTime={expiryTime}
+                placeholder="To be determined"
+            />
         </Details>
     );
 }
