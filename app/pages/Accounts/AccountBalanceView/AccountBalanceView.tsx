@@ -37,19 +37,22 @@ function ShieldedInfo({
     return (
         <>
             <ShieldImage className={styles.backgroundImage} />
-            <h1 className={clsx(styles.shieldedAmount, 'mV20')}>
-                {displayAsCcd(totalDecrypted)}
-                {allDecrypted || (
-                    <>
-                        {' '}
-                        +{' '}
-                        <ShieldImage
-                            className={styles.blueShield}
-                            height="30"
-                        />
-                    </>
-                )}
-            </h1>
+            <div className={clsx(styles.shieldedAmount, 'mB10')}>
+                <Label className="mB5 textWhite">Shielded balance total</Label>
+                <span className="body1 textBlue mono">
+                    {displayAsCcd(totalDecrypted)}
+                    {allDecrypted || (
+                        <>
+                            {' '}
+                            +{' '}
+                            <ShieldImage
+                                className={styles.blueShield}
+                                height="30"
+                            />
+                        </>
+                    )}
+                </span>
+            </div>
         </>
     );
 }
@@ -77,28 +80,31 @@ function PublicInfo({ accountInfo }: PublicInfoProps) {
 
     return (
         <>
-            <h1 className={clsx(styles.blueText, 'mV20')}>
-                {displayAsCcd(total)}
-            </h1>
             <div className={styles.details}>
-                <div className="mB20">
-                    <Label className="mB5 textWhite">At disposal:</Label>
-                    <span className="body2 textBlue">
+                <div className="mB10">
+                    <Label className="mB5 textWhite">Balance total</Label>
+                    <span className="body1 textBlue mono">
+                        {displayAsCcd(total)}
+                    </span>
+                </div>
+                <div className="mB10">
+                    <Label className="mB5 textWhite">At disposal</Label>
+                    <span className="body1 textBlue mono">
                         {displayAsCcd(atDisposal)}
                     </span>
                 </div>
                 {(accountBaker !== undefined ||
                     accountDelegation !== undefined) && (
-                    <div className="mB20">
+                    <div className="mB10">
                         <Label className="mB5 textWhite">
                             {accountBaker !== undefined &&
-                                `Staked for baking: ${accountBaker.bakerId}`}
+                                `Staked for baking (${accountBaker.bakerId})`}
                             {accountDelegation !== undefined &&
                                 `Delegating to ${getDelegationTargetId(
                                     accountDelegation.delegationTarget
-                                )}:`}
+                                )}`}
                         </Label>
-                        <span className="body2 textBlue">
+                        <span className="body1 textBlue mono">
                             {displayAsCcd(staked)}
                         </span>
                     </div>
@@ -134,24 +140,30 @@ export default function AccountBalanceView(): JSX.Element | null {
             <div className={styles.accountNameWrapper}>
                 <AccountName name={account.name} address={account.address} />
             </div>
-            <div
-                className={clsx(
-                    styles.viewingShielded,
-                    isMultiSig && 'justifyCenter'
-                )}
-            >
-                <Button
-                    clear
-                    disabled={!viewingShielded}
-                    className={clsx(
-                        styles.viewingShieldedButton,
-                        !viewingShielded && styles.active
-                    )}
-                    onClick={() => setViewingShieldedAndReset(dispatch, false)}
-                >
-                    Balance
-                </Button>
-                {!isMultiSig && (
+            {viewingShielded ? (
+                <ShieldedInfo account={account} />
+            ) : (
+                <PublicInfo accountInfo={accountInfo} />
+            )}
+            <AccountDefaultButton
+                account={account}
+                className={styles.defaultButton}
+            />
+            {isMultiSig || (
+                <div className={styles.viewingShielded}>
+                    <Button
+                        clear
+                        disabled={!viewingShielded}
+                        className={clsx(
+                            styles.viewingShieldedButton,
+                            !viewingShielded && styles.active
+                        )}
+                        onClick={() =>
+                            setViewingShieldedAndReset(dispatch, false)
+                        }
+                    >
+                        Balance
+                    </Button>
                     <Button
                         clear
                         disabled={viewingShielded}
@@ -165,17 +177,8 @@ export default function AccountBalanceView(): JSX.Element | null {
                     >
                         Shielded balance
                     </Button>
-                )}
-            </div>
-            {viewingShielded ? (
-                <ShieldedInfo account={account} />
-            ) : (
-                <PublicInfo accountInfo={accountInfo} />
+                </div>
             )}
-            <AccountDefaultButton
-                account={account}
-                className={styles.defaultButton}
-            />
         </Card>
     );
 }

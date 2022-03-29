@@ -21,9 +21,11 @@
 }
 
 .viewingShielded {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
     display: flex;
-    justify-content: space-between;
-    margin: 0 20px;
+    margin-left: -20px;
 }
 
 .amountRow,
@@ -38,14 +40,15 @@
 }
 
 .viewingShieldedButton {
+    flex: 0 0 50%;
+    padding: 7px;
+    background-color: darken($color-pale-blue, 10);
     color: $color-off-white;
-    text-decoration: underline;
     z-index: 1;
 }
 
 .active {
-    text-decoration: none;
-    font-weight: $font-weight-bold;
+    background-color: $color-pale-blue;
 }
 
 .amountRow {
@@ -75,6 +78,7 @@
 }
 
 .shieldedAmount {
+    composes: details;
     position: relative;
     z-index: 1;
 
@@ -84,6 +88,7 @@
 }
 
 .accountNameWrapper {
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -95,12 +100,11 @@
 }
 
 .accountName {
-    position: relative;
     max-width: calc(100% - 40px);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: $color-pale-blue;
+    color: $color-off-white;
     padding: 0 20px;
 }
 
@@ -117,28 +121,36 @@
 .editNameButton {
     width: auto;
     position: absolute;
-    right: 10px;
+    right: 20px;
     display: inline-flex;
 
     svg {
         width: 20px;
-        fill: rgba($color-pale-blue, 0.5);
+        fill: rgba($color-off-white, 0.5);
     }
 
     &:hover svg {
-        fill: $color-pale-blue;
+        fill: $color-off-white;
     }
 
     &[type='submit'] {
         svg,
         svg * {
-            fill: $color-pale-blue;
+            fill: $color-off-white;
         }
     }
 }
 
 .defaultButton {
     position: absolute;
-    bottom: 20px;
-    right: 20px;
+    top: 20px;
+    left: 20px;
+
+    svg path {
+        stroke: $color-off-white;
+
+        &[fill] {
+            fill: $color-off-white;
+        }
+    }
 }
