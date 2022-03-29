@@ -89,7 +89,7 @@ function PublicInfo({ accountInfo }: PublicInfoProps) {
                 </div>
                 <div className="mB10">
                     <Label className="mB5 textWhite">At disposal</Label>
-                    <span className="body1 textBlue mono">
+                    <span className="body2 textBlue mono">
                         {displayAsCcd(atDisposal)}
                     </span>
                 </div>
@@ -98,13 +98,13 @@ function PublicInfo({ accountInfo }: PublicInfoProps) {
                     <div className="mB10">
                         <Label className="mB5 textWhite">
                             {accountBaker !== undefined &&
-                                `Staked for baking (${accountBaker.bakerId})`}
+                                `Stake with baker ${accountBaker.bakerId}`}
                             {accountDelegation !== undefined &&
-                                `Delegating to ${getDelegationTargetId(
+                                `Delegation with ${getDelegationTargetId(
                                     accountDelegation.delegationTarget
                                 )}`}
                         </Label>
-                        <span className="body1 textBlue mono">
+                        <span className="body2 textBlue mono">
                             {displayAsCcd(staked)}
                         </span>
                     </div>
