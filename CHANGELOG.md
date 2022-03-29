@@ -19,6 +19,9 @@
 -   Updated account views to include delegated stake.
 -   Moved flows for updating baker configuration in newly added baking section.
 -   Grouped all rewards under a single checkbox in transactions filter.
+-   Transaction filters are now accessible from account list view (on transaction log tab "Filters").
+-   Account address is accessible from new "Receive" button.
+-   Various UI updates to "Accounts" page.
 
 ## 1.3.1
 
