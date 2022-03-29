@@ -16,11 +16,7 @@ import PickAccount from '~/components/PickAccount';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { createUpdateBakerRestakeEarningsTransaction } from '~/utils/transactionHelpers';
 import routes from '~/constants/routes.json';
-import {
-    useAccountInfo,
-    useTransactionCostEstimate,
-    useTransactionExpiryState,
-} from '~/utils/dataHooks';
+import { useAccountInfo, useTransactionCostEstimate } from '~/utils/dataHooks';
 import SignTransaction from '../SignTransaction';
 import UpdateBakerRestakeEarningsProposalDetails from '../proposal-details/UpdateBakerRestakeEarnings';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
@@ -28,16 +24,16 @@ import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
 import LoadingComponent from '../LoadingComponent';
 import {
-    BakerSubRoutes,
+    AccountTransactionSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
-import DatePicker from '~/components/Form/DatePicker';
+import ChooseExpiry from '../ChooseExpiry';
 import { isMultiSig } from '~/utils/accountHelpers';
 import Radios from '~/components/Form/Radios';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import { displayRestakeEarnings } from '~/utils/transactionFlows/configureBaker';
 
-import styles from '../MultisignatureAccountTransactions.module.scss';
+import styles from '../../common/MultiSignatureFlowPage.module.scss';
 
 interface PageProps {
     exchangeRate: Fraction;
@@ -70,11 +66,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
         account?.signatureThreshold
     );
 
-    const [
-        expiryTime,
-        setExpiryTime,
-        expiryTimeError,
-    ] = useTransactionExpiryState();
+    const [expiryTime, setExpiryTime] = useState<Date>();
 
     const onCreateTransaction = async () => {
         if (account === undefined) {
@@ -135,7 +127,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                             className={styles.stretchColumn}
                         >
                             <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
+                                <div className="flexChildFill">
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
@@ -160,13 +152,15 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${BakerSubRoutes.restake}`}>
+                    <Route
+                        path={`${path}/${AccountTransactionSubRoutes.restake}`}
+                    >
                         <Columns.Column
                             header="Restake earnings"
                             className={styles.stretchColumn}
                         >
                             <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
+                                <div className="flexChildFill">
                                     {account !== undefined ? (
                                         <RestakeEarnings
                                             enable={restakeEarnings}
@@ -181,7 +175,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                                     onClick={() => {
                                         dispatch(
                                             push(
-                                                `${url}/${BakerSubRoutes.expiry}`
+                                                `${url}/${AccountTransactionSubRoutes.expiry}`
                                             )
                                         );
                                     }}
@@ -192,62 +186,35 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                         </Columns.Column>
                     </Route>
 
-                    <Route path={`${path}/${BakerSubRoutes.expiry}`}>
+                    <Route
+                        path={`${path}/${AccountTransactionSubRoutes.expiry}`}
+                    >
                         <Columns.Column
                             header="Transaction expiry time"
                             className={styles.stretchColumn}
                         >
-                            <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
-                                    <p className="mT0">
-                                        Choose the expiry date for the
-                                        transaction.
-                                    </p>
-                                    <DatePicker
-                                        className="body2 mV40"
-                                        label="Transaction expiry time"
-                                        name="expiry"
-                                        isInvalid={
-                                            expiryTimeError !== undefined
-                                        }
-                                        error={expiryTimeError}
-                                        value={expiryTime}
-                                        onChange={setExpiryTime}
-                                        minDate={new Date()}
-                                    />
-                                    <p className="mB0">
-                                        Committing the transaction after this
-                                        date, will be rejected.
-                                    </p>
-                                </div>
-                                <Button
-                                    className="mT40"
-                                    disabled={
-                                        expiryTime === undefined ||
-                                        expiryTimeError !== undefined
-                                    }
-                                    onClick={() =>
-                                        onCreateTransaction()
-                                            .then(() =>
-                                                dispatch(
-                                                    push(
-                                                        `${url}/${BakerSubRoutes.sign}`
-                                                    )
+                            <ChooseExpiry
+                                buttonText="Continue"
+                                onClick={(expiry) => {
+                                    setExpiryTime(expiry);
+                                    onCreateTransaction()
+                                        .then(() =>
+                                            dispatch(
+                                                push(
+                                                    `${url}/${AccountTransactionSubRoutes.sign}`
                                                 )
                                             )
-                                            .catch(() =>
-                                                setError(
-                                                    errorMessages.unableToReachNode
-                                                )
+                                        )
+                                        .catch(() =>
+                                            setError(
+                                                errorMessages.unableToReachNode
                                             )
-                                    }
-                                >
-                                    Continue
-                                </Button>
-                            </div>
+                                        );
+                                }}
+                            />
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${BakerSubRoutes.sign}`}>
+                    <Route path={`${path}/${AccountTransactionSubRoutes.sign}`}>
                         <Columns.Column
                             header="Signature and hardware wallet"
                             className={styles.stretchColumn}

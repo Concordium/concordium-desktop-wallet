@@ -37,7 +37,7 @@ import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
 import LoadingComponent from '../LoadingComponent';
 import {
-    BakerSubRoutes,
+    AccountTransactionSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
 import { ensureChainData, ChainData } from '~/utils/withChainData';
@@ -46,7 +46,7 @@ import { isMultiSig } from '~/utils/accountHelpers';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import { ccdToMicroCcd, microCcdToCcd } from '~/utils/ccd';
 
-import styles from '../MultisignatureAccountTransactions.module.scss';
+import styles from '../../common/MultiSignatureFlowPage.module.scss';
 
 function toMicroUnitsSafe(str: string | undefined) {
     if (str === undefined) {
@@ -146,7 +146,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                             className={styles.stretchColumn}
                         >
                             <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
+                                <div className="flexChildFill">
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
@@ -188,13 +188,15 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${BakerSubRoutes.stake}`}>
+                    <Route
+                        path={`${path}/${AccountTransactionSubRoutes.stake}`}
+                    >
                         <Columns.Column
                             header="New staked amount"
                             className={styles.stretchColumn}
                         >
                             <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
+                                <div className="flexChildFill">
                                     {account !== undefined ? (
                                         <PickNewStake
                                             account={account}
@@ -211,7 +213,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                                     onClick={() => {
                                         dispatch(
                                             push(
-                                                `${url}/${BakerSubRoutes.expiry}`
+                                                `${url}/${AccountTransactionSubRoutes.expiry}`
                                             )
                                         );
                                     }}
@@ -221,13 +223,15 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${BakerSubRoutes.expiry}`}>
+                    <Route
+                        path={`${path}/${AccountTransactionSubRoutes.expiry}`}
+                    >
                         <Columns.Column
                             header="Transaction expiry time"
                             className={styles.stretchColumn}
                         >
                             <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
+                                <div className="flexChildFill">
                                     <p className="mT0">
                                         Choose the expiry date for the
                                         transaction.
@@ -260,7 +264,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                                             .then(() =>
                                                 dispatch(
                                                     push(
-                                                        `${url}/${BakerSubRoutes.sign}`
+                                                        `${url}/${AccountTransactionSubRoutes.sign}`
                                                     )
                                                 )
                                             )
@@ -276,7 +280,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${BakerSubRoutes.sign}`}>
+                    <Route path={`${path}/${AccountTransactionSubRoutes.sign}`}>
                         <Columns.Column
                             header="Signature and hardware wallet"
                             className={styles.stretchColumn}

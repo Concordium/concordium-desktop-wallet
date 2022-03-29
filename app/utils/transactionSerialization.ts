@@ -23,6 +23,7 @@ import {
     SimpleTransferWithMemoPayload,
     ScheduledTransferWithMemoPayload,
     EncryptedTransferWithMemoPayload,
+    RegisterDataPayload,
     ConfigureBakerPayload,
     ConfigureDelegationPayload,
     DelegationTarget,
@@ -49,8 +50,8 @@ import { encodeAsCBOR } from './cborHelper';
 import { isDefined } from './basicHelpers';
 import { orUndefined } from './functionHelpers';
 
-function serializeMemo(memo: string) {
-    const encoded = encodeAsCBOR(memo);
+function serializeAsCbor(dataBlob: string) {
+    const encoded = encodeAsCBOR(dataBlob);
     const length = encodeWord16(encoded.length);
     return Buffer.concat([length, encoded]);
 }
@@ -67,7 +68,7 @@ function serializeSimpleTransferWithMemo(
 ) {
     const kind = putInt8(TransactionKind.Simple_transfer_with_memo);
     const address = base58ToBuffer(payload.toAddress);
-    const memo = serializeMemo(payload.memo);
+    const memo = serializeAsCbor(payload.memo);
     const amount = encodeWord64(BigInt(payload.amount));
     return Buffer.concat([kind, address, memo, amount]);
 }
@@ -101,7 +102,7 @@ function serializeTransferWithScheduleWithMemo(
 ) {
     const kind = putInt8(TransactionKind.Transfer_with_schedule_and_memo);
     const address = base58ToBuffer(payload.toAddress);
-    const memo = serializeMemo(payload.memo);
+    const memo = serializeAsCbor(payload.memo);
     const scheduleLength = putInt8(payload.schedule.length);
 
     return Buffer.concat(
@@ -250,11 +251,18 @@ function serializeEncryptedTransferWithMemo(
     return Buffer.concat([
         putInt8(TransactionKind.Encrypted_transfer_with_memo),
         serializedAddress,
-        serializeMemo(payload.memo),
+        serializeAsCbor(payload.memo),
         remainingEncryptedAmount,
         transferAmount,
         encodeWord64(BigInt(payload.index)),
         proof,
+    ]);
+}
+
+export function serializeRegisterData(payload: RegisterDataPayload) {
+    return Buffer.concat([
+        putInt8(TransactionKind.Register_data),
+        serializeAsCbor(payload.data),
     ]);
 }
 
@@ -523,6 +531,8 @@ export function serializeTransferPayload(
             return serializeUpdateBakerRestakeEarnings(
                 payload as UpdateBakerRestakeEarningsPayload
             );
+        case TransactionKind.Register_data:
+            return serializeRegisterData(payload as RegisterDataPayload);
         case TransactionKind.Configure_baker:
             return serializeConfigureBaker(payload as ConfigureBakerPayload);
         case TransactionKind.Configure_delegation:
