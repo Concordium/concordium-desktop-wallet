@@ -29,6 +29,7 @@ export const energyConstants = {
     RemoveBaker: 300n,
     UpdateBakerStake: 300n,
     UpdateBakerRestakeEarnings: 300n,
+    RegisterData: 300n,
     ConfigureBaker: 300n,
     ConfigureBakerWithKeys: 4050n,
     ConfigureDelegation: 300n,
@@ -145,6 +146,8 @@ function getEnergyCostOfType(transactionKind: TransactionKindId) {
             return energyConstants.UpdateBakerStake;
         case TransactionKindId.Update_baker_restake_earnings:
             return energyConstants.UpdateBakerRestakeEarnings;
+        case TransactionKindId.Register_data:
+            return energyConstants.RegisterData;
         case TransactionKindId.Configure_delegation:
             return energyConstants.ConfigureDelegation;
         default:
@@ -346,9 +349,10 @@ export function getTransactionKindCost(
     memo?: string,
     payloadSize: number = getPayloadSizeEstimate(transactionKind)
 ): Fraction {
+    const memoSize = memo ? 2 + getEncodedSize(memo) : 0;
     const energy = getTransactionKindEnergy(
         transactionKind,
-        payloadSize + getEncodedSize(memo),
+        payloadSize + memoSize,
         signatureAmount
     );
     return energyToCost(energy, energyToMicroGtu);

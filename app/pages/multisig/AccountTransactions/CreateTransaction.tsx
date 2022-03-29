@@ -1,28 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { ccdToMicroCcd } from '~/utils/ccd';
+import React, { useMemo } from 'react';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import {
     Account,
-    AddressBookEntry,
     AccountTransaction,
-    Schedule,
     TransactionKindId,
     Fraction,
 } from '~/utils/types';
+import { CreateTransactionInput } from '~/utils/transactionTypes';
 import { ensureNonce } from '~/components/Transfers/withNonce';
 import Loading from '~/cross-app-components/Loading';
 import SignTransaction from './SignTransaction';
 
-interface Props {
+interface Props extends Partial<CreateTransactionInput> {
     transactionKind: TransactionKindId;
     account: Account;
-    recipient: AddressBookEntry;
     estimatedFee?: Fraction;
-    amount: string;
-    memo?: string;
-    schedule?: Schedule;
-    nonce: bigint;
-    expiryTime: Date;
 }
 
 function transformToMemoKind(
@@ -51,49 +43,21 @@ function transformToMemoKind(
 function CreateTransaction({
     transactionKind,
     account,
-    recipient,
-    amount,
-    memo,
-    schedule,
     estimatedFee,
-    nonce,
-    expiryTime,
+    ...createTransactionInput
 }: Props) {
-    const [transaction, setTransaction] = useState<
-        AccountTransaction | undefined
-    >();
-
-    useEffect(() => {
+    const transaction: AccountTransaction = useMemo(() => {
         const handler = findAccountTransactionHandler(
-            transformToMemoKind(transactionKind, memo)
+            transformToMemoKind(transactionKind, createTransactionInput.memo)
         );
         const t = handler.createTransaction({
+            ...createTransactionInput,
             sender: account.address,
-            amount: ccdToMicroCcd(amount),
-            recipient: recipient.address,
             signatureAmount: account.signatureThreshold,
-            memo,
-            expiryTime,
-            schedule,
-            nonce,
         });
-        setTransaction({ ...t, estimatedFee });
-    }, [
-        setTransaction,
-        account,
-        amount,
-        recipient,
-        memo,
-        schedule,
-        transactionKind,
-        estimatedFee,
-        nonce,
-        expiryTime,
-    ]);
-
-    if (!transaction) {
-        return null; // TODO: show loading;
-    }
+        return { ...t, estimatedFee };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return <SignTransaction transaction={transaction} account={account} />;
 }

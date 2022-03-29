@@ -83,6 +83,20 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     Update credentials
                 </ButtonNavLink>
             )}
+            {accountHasDeployedCredentials && (
+                <ButtonNavLink
+                    className="mB20:notLast flex width100"
+                    to={{
+                        pathname: createTransferWithAccountPathName(
+                            TransactionKindId.Register_data
+                        ),
+                        state: { account },
+                    }}
+                    disabled={!accountInfo}
+                >
+                    Register data
+                </ButtonNavLink>
+            )}
             {accountHasDeployedCredentials && !isDelegating && !isBaker && (
                 <>
                     <ButtonNavLink

@@ -50,6 +50,7 @@ import { parse } from '../JSONHelper';
 import ScheduledTransferWithMemoHandler from './ScheduledTransferWithMemoHandler';
 import EncryptedTransferWithMemoHandler from './EncryptedTransferWithMemoHandler';
 import SimpleTransferWithMemoHandler from './SimpleTransferWithMemoHandler';
+import RegisterDataHandler from './RegisterDataHandler';
 import TimeParametersHandler from './TimeParameterHandler';
 import CooldownParametersHandler from './CooldownParametersHandler';
 import PoolParametersHandler from './PoolParametersHandlers';
@@ -127,6 +128,8 @@ export function findAccountTransactionHandler(
             return new AccountHandlerTypeMiddleware(
                 new TransferToPublicHandler()
             );
+        case TransactionKindId.Register_data:
+            return new AccountHandlerTypeMiddleware(new RegisterDataHandler());
         case TransactionKindId.Configure_baker:
             return new AccountHandlerTypeMiddleware(
                 new StakingHandler('Configure baker', instanceOfConfigureBaker)

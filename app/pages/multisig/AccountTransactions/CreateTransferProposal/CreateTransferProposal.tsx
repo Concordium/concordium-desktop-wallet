@@ -193,9 +193,9 @@ function CreateTransferProposal({
         return (
             <CreateTransaction
                 transactionKind={transactionKind}
-                recipient={recipient}
-                amount={amount}
                 account={account}
+                amount={ccdToMicroCcd(amount)}
+                recipient={recipient.address}
                 schedule={schedule}
                 memo={memo}
                 estimatedFee={estimatedFee}

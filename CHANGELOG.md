@@ -4,6 +4,7 @@
 
 ### Added
 
+-   Added support for the register data transaction.
 -   Allow users to verify address on Ledger device.
 -   Allow users to choose CCD or microCCD as the unit used in account report.
 -   Dedicated spaces to baking/delegating in accounts section.

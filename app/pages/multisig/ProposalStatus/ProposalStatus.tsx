@@ -7,6 +7,7 @@ import {
     instanceOfUpdateInstruction,
     instanceOfUpdateAccountCredentials,
     MultiSignatureTransaction,
+    instanceOfRegisterData,
     instanceOfAddBaker,
     instanceOfRemoveBaker,
     instanceOfUpdateBakerKeys,
@@ -24,6 +25,7 @@ import UpdateBakerKeysProposalStatus from './UpdateBakerKeysStatus';
 import RemoveBakerProposalStatus from './RemoveBakerStatus';
 import UpdateBakerStakeProposalStatus from './UpdateBakerStake';
 import UpdateBakerRestakeEarningsProposalStatus from './UpdateBakerRestakeEarnings';
+import RegisterDataStatus from './RegisterDataStatus';
 import { parse } from '~/utils/JSONHelper';
 import ConfigureBakerProposalStatus from './ConfigureBakerStatus';
 import ConfigureDelegationProposalStatus from './ConfigureDelegationStatus';
@@ -78,6 +80,16 @@ export default function ProposalStatus({
     if (instanceOfAddBaker(parsed)) {
         return (
             <AddBakerProposalStatus
+                {...proposalStatusProps}
+                transaction={parsed}
+                status={status}
+            />
+        );
+    }
+
+    if (instanceOfRegisterData(parsed)) {
+        return (
+            <RegisterDataStatus
                 {...proposalStatusProps}
                 transaction={parsed}
                 status={status}

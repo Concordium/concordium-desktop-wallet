@@ -37,7 +37,7 @@ import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
 import LoadingComponent from '../LoadingComponent';
 import {
-    BakerSubRoutes,
+    AccountTransactionSubRoutes,
     getLocationAfterAccounts,
 } from '~/utils/accountRouterHelpers';
 import DatePicker from '~/components/Form/DatePicker';
@@ -45,7 +45,7 @@ import ExportBakerKeys from '../ExportBakerKeys';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 
-import styles from '../MultisignatureAccountTransactions.module.scss';
+import styles from '../../common/MultiSignatureFlowPage.module.scss';
 
 interface PageProps {
     exchangeRate: Fraction;
@@ -193,7 +193,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                             className={styles.stretchColumn}
                         >
                             <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
+                                <div className="flexChildFill">
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
@@ -218,13 +218,15 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${BakerSubRoutes.expiry}`}>
+                    <Route
+                        path={`${path}/${AccountTransactionSubRoutes.expiry}`}
+                    >
                         <Columns.Column
                             header="Transaction expiry time"
                             className={styles.stretchColumn}
                         >
                             <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
+                                <div className="flexChildFill">
                                     <p className="mT0">
                                         Choose the expiry date for the
                                         transaction.
@@ -256,7 +258,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                                         onGenerateKeys();
                                         dispatch(
                                             push(
-                                                `${url}/${BakerSubRoutes.keys}`
+                                                `${url}/${AccountTransactionSubRoutes.keys}`
                                             )
                                         );
                                     }}
@@ -266,7 +268,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${BakerSubRoutes.keys}`}>
+                    <Route path={`${path}/${AccountTransactionSubRoutes.keys}`}>
                         <Columns.Column
                             header="Baker keys"
                             className={styles.stretchColumn}
@@ -280,7 +282,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                                         .then(() =>
                                             dispatch(
                                                 push(
-                                                    `${url}/${BakerSubRoutes.sign}`
+                                                    `${url}/${AccountTransactionSubRoutes.sign}`
                                                 )
                                             )
                                         )
@@ -293,7 +295,7 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                             />
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${BakerSubRoutes.sign}`}>
+                    <Route path={`${path}/${AccountTransactionSubRoutes.sign}`}>
                         <Columns.Column header="Signature and hardware wallet">
                             <SignTransactionColumn
                                 signingFunction={signingFunction}

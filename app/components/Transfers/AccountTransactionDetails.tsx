@@ -15,6 +15,7 @@ import {
     instanceOfUpdateBakerKeys,
     instanceOfUpdateBakerStake,
     instanceOfUpdateBakerRestakeEarnings,
+    instanceOfRegisterData,
     AddressBookEntry,
     instanceOfConfigureBaker,
     instanceOfConfigureDelegation,
@@ -30,6 +31,7 @@ import DisplayRemoveBaker from './DisplayRemoveBaker';
 import DisplayAccountCredentialsUpdate from '../DisplayAccountCredentialUpdate';
 import DisplayUpdateBakerStake from './DisplayUpdateBakerStake';
 import DisplayUpdateBakerRestakeEarnings from './DisplayUpdateBakerRestakeEarnings';
+import DisplayRegisterData from './DisplayRegisterData';
 import DisplayConfigureBaker from './DisplayConfigureBaker';
 import DisplayConfigureDelegation from './DisplayConfigureDelegation';
 
@@ -93,6 +95,9 @@ export default function AccountTransactionDetails({ transaction }: Props) {
                 memo={transaction.payload.memo}
             />
         );
+    }
+    if (instanceOfRegisterData(transaction)) {
+        return <DisplayRegisterData transaction={transaction} />;
     }
     if (instanceOfScheduledTransfer(transaction)) {
         return (

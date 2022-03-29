@@ -335,6 +335,10 @@ export type UpdateBakerRestakeEarningsPayload = {
     restakeEarnings: boolean;
 };
 
+export type RegisterDataPayload = {
+    data: string;
+};
+
 export interface BakerKeysWithProofs {
     signatureVerifyKey: Hex;
     signatureKeyProof: Hex;
@@ -375,6 +379,7 @@ export type TransactionPayload =
     | RemoveBakerPayload
     | UpdateBakerStakePayload
     | UpdateBakerRestakeEarningsPayload
+    | RegisterDataPayload
     | ConfigureBakerPayload
     | ConfigureDelegationPayload;
 
@@ -414,6 +419,7 @@ export type UpdateBakerKeys = AccountTransaction<UpdateBakerKeysPayload>;
 export type RemoveBaker = AccountTransaction<RemoveBakerPayload>;
 export type UpdateBakerStake = AccountTransaction<UpdateBakerStakePayload>;
 export type UpdateBakerRestakeEarnings = AccountTransaction<UpdateBakerRestakeEarningsPayload>;
+export type RegisterData = AccountTransaction<RegisterDataPayload>;
 export type ConfigureBaker = AccountTransaction<ConfigureBakerPayload>;
 export type ConfigureDelegation = AccountTransaction<ConfigureDelegationPayload>;
 
@@ -932,6 +938,12 @@ export function instanceOfUpdateAccountCredentials(
     return object.transactionKind === TransactionKindId.Update_credentials;
 }
 
+export function instanceOfRegisterData(
+    object: AccountTransaction<TransactionPayload>
+): object is RegisterData {
+    return object.transactionKind === TransactionKindId.Register_data;
+}
+
 export function instanceOfAddBaker(
     object: AccountTransaction<TransactionPayload>
 ): object is AddBaker {
@@ -1347,6 +1359,7 @@ export interface TransactionDetails {
     type: TransactionKindString;
     outcome: string;
     memo?: Hex;
+    registeredData?: Hex;
 }
 
 export interface TransactionOrigin {
