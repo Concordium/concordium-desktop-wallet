@@ -150,6 +150,11 @@ const accountTransactionTypes: TypeTuple[] = [
     ],
     [
         TransactionTypes.AccountTransaction,
+        TransactionKind.Register_data,
+        'Register Data',
+    ],
+    [
+        TransactionTypes.AccountTransaction,
         TransactionKind.Add_baker,
         'Add baker',
         not(hasDelegationProtocol),

@@ -3,6 +3,7 @@ import { Redirect, useParams } from 'react-router';
 import { TransactionKindId } from '~/utils/types';
 import CreateTransferProposal from './CreateTransferProposal';
 
+import RegisterData from './RegisterData';
 import UpdateCredentialPage from './UpdateAccountCredentials/UpdateCredentialsPage';
 import AddBaker from './OldBakerFlows/AddBaker';
 import UpdateBakerKeys from './OldBakerFlows/UpdateBakerKeys';
@@ -24,6 +25,8 @@ function AccountTransactionRoutes(): JSX.Element {
         case TransactionKindId.Simple_transfer:
         case TransactionKindId.Transfer_with_schedule:
             return <CreateTransferProposal transactionKind={transactionKind} />;
+        case TransactionKindId.Register_data:
+            return <RegisterData />;
         case TransactionKindId.Add_baker:
             return <AddBaker />;
         case TransactionKindId.Update_baker_keys:

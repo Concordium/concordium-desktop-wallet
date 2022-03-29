@@ -30,6 +30,7 @@ import {
     AccountInfo,
     AddBaker,
     AddBakerPayload,
+    RegisterData,
     RemoveBaker,
     UpdateBakerKeysPayload,
     UpdateBakerKeys,
@@ -107,7 +108,7 @@ function createAccountTransaction<T extends TransactionPayload>({
 }
 
 /**
- *  Constructs a, simple transfer, transaction object,
+ *  Constructs a simple transfer transaction object,
  * Given the fromAddress, toAddress and the amount.
  */
 export function createSimpleTransferTransaction(
@@ -134,7 +135,7 @@ export function createSimpleTransferTransaction(
 }
 
 /**
- *  Constructs a, simple transfer, transaction object,
+ *  Constructs a simple transfer with memo transaction object,
  * Given the fromAddress, toAddress and the amount.
  */
 export function createSimpleTransferWithMemoTransaction(
@@ -152,6 +153,30 @@ export function createSimpleTransferWithMemoTransaction(
         memo,
     };
     const transactionKind = TransactionKindId.Simple_transfer_with_memo;
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind,
+        payload,
+        signatureAmount,
+        nonce,
+    });
+}
+
+/**
+ *  Constructs a register data transaction object.
+ */
+export function createRegisterDataTransaction(
+    fromAddress: string,
+    nonce: bigint,
+    data: string,
+    signatureAmount = 1,
+    expiry = getDefaultExpiry()
+): RegisterData {
+    const payload = {
+        data,
+    };
+    const transactionKind = TransactionKindId.Register_data;
     return createAccountTransaction({
         fromAddress,
         expiry,
@@ -663,8 +688,8 @@ export function validateBakerStake(
     return undefined;
 }
 
-export function validateMemo(memo: string): string | undefined {
-    const asNumber = Number(memo);
+export function validateData(data: string, name = 'Data'): string | undefined {
+    const asNumber = Number(data);
     if (
         Number.isInteger(asNumber) &&
         (asNumber > Number.MAX_SAFE_INTEGER ||
@@ -672,14 +697,18 @@ export function validateMemo(memo: string): string | undefined {
     ) {
         return `Numbers greater than ${Number.MAX_SAFE_INTEGER} or smaller than ${Number.MIN_SAFE_INTEGER} are not supported`;
     }
-    if (getEncodedSize(memo) > externalConstants.maxMemoSize) {
-        return `Memo is too large, encoded size must be at most ${externalConstants.maxMemoSize} bytes`;
+    if (getEncodedSize(data) > externalConstants.maxMemoSize) {
+        return `${name} is too large, encoded size must be at most ${externalConstants.maxMemoSize} bytes`;
     }
     // Check that the memo only contains ascii characters
-    if (isASCII(memo)) {
-        return 'Memo contains non-ascii characters';
+    if (isASCII(data)) {
+        return `${name} contains non-ascii characters`;
     }
     return undefined;
+}
+
+export function validateMemo(memo: string): string | undefined {
+    return validateData(memo, 'Memo');
 }
 
 export function isTransferKind(kind: TransactionKindString) {
