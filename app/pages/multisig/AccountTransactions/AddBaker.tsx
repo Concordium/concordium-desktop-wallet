@@ -29,12 +29,7 @@ import {
     displayPoolOpen,
     displayRestakeEarnings,
 } from '~/utils/transactionFlows/configureBaker';
-import {
-    ConfigureBaker,
-    ExtendableProps,
-    Fraction,
-    OpenStatus,
-} from '~/utils/types';
+import { ConfigureBaker, ExtendableProps, Fraction } from '~/utils/types';
 import MultiSigAccountTransactionFlow, {
     MultiSigAccountTransactionFlowLoading,
     RequiredValues,
@@ -220,7 +215,7 @@ export default withDeps(
                     />
                 )}
             >
-                {({ openForDelegation, account }) => ({
+                {({ account }) => ({
                     stake: {
                         title: 'Stake settings',
                         render: (initial, onNext, formValues) =>
@@ -265,22 +260,19 @@ export default withDeps(
                                 toRoot
                             ),
                     },
-                    metadataUrl:
-                        openForDelegation !== OpenStatus.ClosedForAll
-                            ? {
-                                  title: 'Metadata URL',
-                                  render: (initial, onNext) =>
-                                      account ? (
-                                          <MetadataUrlPage
-                                              initial={initial}
-                                              onNext={onNext}
-                                              account={account}
-                                          />
-                                      ) : (
-                                          toRoot
-                                      ),
-                              }
-                            : undefined,
+                    metadataUrl: {
+                        title: 'Metadata URL',
+                        render: (initial, onNext) =>
+                            account ? (
+                                <MetadataUrlPage
+                                    initial={initial}
+                                    onNext={onNext}
+                                    account={account}
+                                />
+                            ) : (
+                                toRoot
+                            ),
+                    },
                     keys: {
                         title: 'Generated keys',
                         render: (initial, onNext) =>

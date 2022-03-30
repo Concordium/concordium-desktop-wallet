@@ -12,7 +12,6 @@ import {
     ExtendableProps,
     MakeRequired,
     NotOptional,
-    OpenStatus,
 } from '~/utils/types';
 import withChainData from '~/utils/withChainData';
 import AccountTransactionFlow, {
@@ -115,7 +114,7 @@ export default withDeps(
                 validate={validate}
                 multisigRoute={routes.MULTISIGTRANSACTIONS_ADD_BAKER}
             >
-                {({ openForDelegation }) => ({
+                {{
                     stake: {
                         render: (initial, onNext, formValues) => (
                             <AddBakerStakePage
@@ -149,19 +148,16 @@ export default withDeps(
                         ),
                         title: 'Pool settings',
                     },
-                    metadataUrl:
-                        openForDelegation !== OpenStatus.ClosedForAll
-                            ? {
-                                  render: (initial, onNext) => (
-                                      <MetadataUrlPage
-                                          initial={initial}
-                                          onNext={onNext}
-                                          account={account}
-                                      />
-                                  ),
-                                  title: 'Pool settings',
-                              }
-                            : undefined,
+                    metadataUrl: {
+                        render: (initial, onNext) => (
+                            <MetadataUrlPage
+                                initial={initial}
+                                onNext={onNext}
+                                account={account}
+                            />
+                        ),
+                        title: 'Pool settings',
+                    },
                     keys: {
                         render: (initial, onNext) => (
                             <KeysPage
@@ -172,7 +168,7 @@ export default withDeps(
                         ),
                         title: 'Generated keys',
                     },
-                })}
+                }}
             </AccountTransactionFlow>
         );
     })

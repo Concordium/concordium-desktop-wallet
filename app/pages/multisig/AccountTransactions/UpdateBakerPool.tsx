@@ -14,7 +14,6 @@ import {
     ConfigureBaker,
     ExtendableProps,
     Fraction,
-    OpenStatus,
 } from '~/utils/types';
 import MultiSigAccountTransactionFlow, {
     MultiSigAccountTransactionFlowLoading,
@@ -211,7 +210,7 @@ export default withDeps(
                     )}
                     validate={validate}
                 >
-                    {({ openForDelegation, account }) => ({
+                    {({ account }) => ({
                         openForDelegation: {
                             title: 'Pool open status',
                             render: (initial, onNext) =>
@@ -225,25 +224,20 @@ export default withDeps(
                                     toRoot
                                 ),
                         },
-                        commissions:
-                            openForDelegation !== OpenStatus.ClosedForAll
-                                ? {
-                                      title: 'Commission rates',
-                                      render: (initial, onNext) =>
-                                          account ? (
-                                              <CommissionsPage
-                                                  initial={initial}
-                                                  onNext={onNext}
-                                                  chainParameters={
-                                                      chainParameters
-                                                  }
-                                                  account={account}
-                                              />
-                                          ) : (
-                                              toRoot
-                                          ),
-                                  }
-                                : undefined,
+                        commissions: {
+                            title: 'Commission rates',
+                            render: (initial, onNext) =>
+                                account ? (
+                                    <CommissionsPage
+                                        initial={initial}
+                                        onNext={onNext}
+                                        chainParameters={chainParameters}
+                                        account={account}
+                                    />
+                                ) : (
+                                    toRoot
+                                ),
+                        },
                         metadataUrl: {
                             title: 'Metadata URL',
                             render: (initial, onNext) =>
