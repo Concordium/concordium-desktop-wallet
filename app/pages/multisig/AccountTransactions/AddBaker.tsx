@@ -95,7 +95,7 @@ const DisplayValues = ({
                 }
             />
             <PlainDetail
-                title="Pool delegation status"
+                title="Pool status"
                 value={
                     openForDelegation !== undefined
                         ? displayPoolOpen(openForDelegation)

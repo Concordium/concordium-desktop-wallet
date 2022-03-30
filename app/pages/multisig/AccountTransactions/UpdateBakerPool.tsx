@@ -79,7 +79,7 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
             />
             {showField((v) => v.openForDelegation) && (
                 <PlainDetail
-                    title="Pool delegation status"
+                    title="Pool status"
                     value={
                         changes.openForDelegation !== undefined
                             ? displayPoolOpen(changes.openForDelegation)
