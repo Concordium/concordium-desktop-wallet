@@ -92,6 +92,7 @@ export default withDeps(function RemoveBaker({ exchangeRate }: Props) {
         >
             {({ account }) => ({
                 confirm: {
+                    title: 'Cooldown period',
                     render: (_, onNext) =>
                         isDefined(account) ? (
                             <RemoveBakerPage
@@ -101,7 +102,6 @@ export default withDeps(function RemoveBaker({ exchangeRate }: Props) {
                         ) : (
                             <Redirect to={matchedPath} />
                         ),
-                    title: 'Cooldown period',
                 },
             })}
         </MultiSigAccountTransactionFlow>

@@ -45,7 +45,7 @@ const MetadataUrlPage = ({
             className="flexColumn flexChildFill"
         >
             <div className="flexChildFill">
-                <p>
+                <p className="mT0">
                     You can choose to add a URL with metadata about your baker.
                     Leave it blank if you don&apos;t have any.
                 </p>

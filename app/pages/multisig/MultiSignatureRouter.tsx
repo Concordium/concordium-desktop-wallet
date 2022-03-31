@@ -44,7 +44,11 @@ export default function MultiSignatureRoutes(): JSX.Element {
                 component={UpdateBakerKeys}
             />
             <Route
-                path={routes.MULTISIGTRANSACTIONS_CONFIGURE_DELEGATION}
+                path={routes.MULTISIGTRANSACTIONS_ADD_DELEGATION}
+                component={ConfigureDelegation}
+            />
+            <Route
+                path={routes.MULTISIGTRANSACTIONS_UPDATE_DELEGATION}
                 component={ConfigureDelegation}
             />
             <Route

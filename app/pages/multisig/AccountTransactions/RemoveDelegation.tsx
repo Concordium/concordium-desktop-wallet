@@ -98,6 +98,7 @@ export default withDeps(function RemoveDelegation({ exchangeRate }: Props) {
         >
             {({ account }) => ({
                 confirm: {
+                    title: 'Cooldown period',
                     render: (_, onNext) =>
                         isDefined(account) ? (
                             <RemoveDelegationPage
@@ -107,7 +108,6 @@ export default withDeps(function RemoveDelegation({ exchangeRate }: Props) {
                         ) : (
                             <Redirect to={matchedPath} />
                         ),
-                    title: 'Cooldown period',
                 },
             })}
         </MultiSigAccountTransactionFlow>

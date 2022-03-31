@@ -20,7 +20,6 @@ import {
 import {
     ConfigureDelegationFlowDependencies,
     ConfigureDelegationFlowState,
-    configureDelegationTitle,
     convertToConfigureDelegationTransaction,
     displayDelegationTarget,
     displayRedelegate,
@@ -35,6 +34,8 @@ import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { ValidateValues } from '~/components/MultiStepForm';
 
 import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
+import { updateDelegationTitle } from '~/utils/transactionFlows/updateDelegation';
+import { addDelegationTitle } from '~/utils/transactionFlows/addDelegation';
 
 interface DisplayProps
     extends Partial<RequiredValues & ConfigureDelegationFlowState> {
@@ -98,25 +99,35 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
     );
 };
 
-type Props = ConfigureDelegationFlowDependencies;
+type Props = ConfigureDelegationFlowDependencies & {
+    isUpdate?: boolean;
+};
 type UnsafeProps = Partial<Props>;
+
+const getTitle = (isUpdate: boolean) =>
+    isUpdate ? updateDelegationTitle : addDelegationTitle;
 
 const hasNecessaryProps = (props: UnsafeProps): props is Props => {
     return [props.exchangeRate].every(isDefined);
 };
 
 const withDeps = (component: ComponentType<Props>) =>
-    withExchangeRate(
-        ensureProps(
+    withExchangeRate((p: UnsafeProps) => {
+        const C = ensureProps(
             component,
             hasNecessaryProps,
             <MultiSigAccountTransactionFlowLoading
-                title={configureDelegationTitle}
+                title={getTitle(p.isUpdate ?? false)}
             />
-        )
-    );
+        );
 
-export default withDeps(function ConfigureDelegation({ exchangeRate }: Props) {
+        return <C {...p} />;
+    });
+
+export default withDeps(function ConfigureDelegation({
+    exchangeRate,
+    isUpdate = false,
+}: Props) {
     const { path: matchedPath } = useRouteMatch();
     const accountsInfo = useSelector(accountsInfoSelector);
     const [showError, setShowError] = useState(false);
@@ -166,7 +177,7 @@ export default withDeps(function ConfigureDelegation({ exchangeRate }: Props) {
                 ConfigureDelegationFlowState,
                 ConfigureBaker
             >
-                title={configureDelegationTitle}
+                title={getTitle(isUpdate)}
                 convert={convert}
                 preview={(v) => (
                     <DisplayValues {...v} exchangeRate={exchangeRate} />
@@ -176,6 +187,7 @@ export default withDeps(function ConfigureDelegation({ exchangeRate }: Props) {
             >
                 {({ account }) => ({
                     target: {
+                        title: 'Delegation target',
                         render: (initial, onNext) =>
                             isDefined(account) ? (
                                 <DelegationTargetPage
@@ -186,9 +198,9 @@ export default withDeps(function ConfigureDelegation({ exchangeRate }: Props) {
                             ) : (
                                 <Redirect to={matchedPath} />
                             ),
-                        title: 'Delegation target',
                     },
                     delegate: {
+                        title: 'Stake settings',
                         render: (initial, onNext, formValues) =>
                             isDefined(account) ? (
                                 <DelegationAmountPage
@@ -204,7 +216,6 @@ export default withDeps(function ConfigureDelegation({ exchangeRate }: Props) {
                             ) : (
                                 <Redirect to={matchedPath} />
                             ),
-                        title: 'Delegation settings',
                     },
                 })}
             </MultiSigAccountTransactionFlow>

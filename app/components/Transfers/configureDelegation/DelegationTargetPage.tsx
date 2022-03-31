@@ -72,7 +72,7 @@ export default function DelegationTargetPage({
             formMethods={form}
         >
             <div className="flexChildFill">
-                <p className="mV30">
+                <p className="mB30 mT0">
                     First you must choose the target you want to delegate to.
                 </p>
                 <div className="mT50">

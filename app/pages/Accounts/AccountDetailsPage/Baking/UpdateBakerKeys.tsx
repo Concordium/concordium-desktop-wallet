@@ -60,6 +60,7 @@ export default withDeps(function UpdateBakerKeys(props: Props) {
         >
             {{
                 keys: {
+                    title: 'Generated keys',
                     render: (initial, onNext) => (
                         <KeysPage
                             account={account}
@@ -67,7 +68,6 @@ export default withDeps(function UpdateBakerKeys(props: Props) {
                             onNext={onNext}
                         />
                     ),
-                    title: 'Generated keys',
                 },
             }}
         </AccountTransactionFlow>

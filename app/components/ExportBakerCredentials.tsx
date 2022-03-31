@@ -60,7 +60,7 @@ export default function ExportBakerCredentials({
                     <Loading inline text="Generating baker keys" />
                 ) : (
                     <>
-                        <p>
+                        <p className="mT0">
                             Your baker keys have been generated. Before you can
                             continue, you must export and save them. The keys
                             will have to placed with the baker node.

@@ -116,6 +116,7 @@ export default withDeps(
             >
                 {{
                     stake: {
+                        title: 'Stake settings',
                         render: (initial, onNext, formValues) => (
                             <AddBakerStakePage
                                 account={account}
@@ -128,6 +129,7 @@ export default withDeps(
                         ),
                     },
                     openForDelegation: {
+                        title: 'Pool status',
                         render: (initial, onNext) => (
                             <DelegationStatusPage
                                 initial={initial}
@@ -135,9 +137,9 @@ export default withDeps(
                                 account={account}
                             />
                         ),
-                        title: 'Pool settings',
                     },
                     commissions: {
+                        title: 'Commission rates',
                         render: (initial, onNext) => (
                             <CommissionsPage
                                 initial={initial}
@@ -146,9 +148,9 @@ export default withDeps(
                                 account={account}
                             />
                         ),
-                        title: 'Pool settings',
                     },
                     metadataUrl: {
+                        title: 'Metadata URL',
                         render: (initial, onNext) => (
                             <MetadataUrlPage
                                 initial={initial}
@@ -156,9 +158,9 @@ export default withDeps(
                                 account={account}
                             />
                         ),
-                        title: 'Pool settings',
                     },
                     keys: {
+                        title: 'Generated keys',
                         render: (initial, onNext) => (
                             <KeysPage
                                 account={account}
@@ -166,7 +168,6 @@ export default withDeps(
                                 onNext={onNext}
                             />
                         ),
-                        title: 'Generated keys',
                     },
                 }}
             </AccountTransactionFlow>

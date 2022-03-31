@@ -212,7 +212,7 @@ export default withDeps(
                 >
                     {({ account }) => ({
                         openForDelegation: {
-                            title: 'Pool open status',
+                            title: 'Pool status',
                             render: (initial, onNext) =>
                                 account ? (
                                     <DelegationStatusPage
