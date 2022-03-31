@@ -111,6 +111,7 @@ const getTitle = (isUpdate: boolean) =>
 const hasNecessaryProps = (props: UnsafeProps): props is Props => {
     return [props.exchangeRate].every(isDefined);
 };
+
 const withDeps = (component: ComponentType<Props>) =>
     withExchangeRate(
         ensureProps(
