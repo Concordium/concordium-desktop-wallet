@@ -38,7 +38,7 @@ export default function DelegationTargetPage({
     initial,
 }: Props) {
     const { target: existing } = getExistingDelegationValues(accountInfo) ?? {};
-    const defaultValue = initial ?? existing;
+    const defaultValue = initial !== undefined ? initial : existing;
     const defaultValues: FormState = {
         toSpecificPool: typeof defaultValue === 'string',
         poolId: defaultValue ?? '',
