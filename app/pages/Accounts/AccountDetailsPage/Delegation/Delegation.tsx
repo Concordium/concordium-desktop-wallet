@@ -4,7 +4,8 @@ import React from 'react';
 import { Redirect, Route, Switch, useLocation } from 'react-router';
 import { Account } from '~/utils/types';
 import routes from '~/constants/routes.json';
-import ConfigureDelegation from './ConfigureDelegation';
+import AddDelegation from './AddDelegation';
+import UpdateDelegation from './UpdateDelegation';
 import RemoveDelegation from './RemoveDelegation';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import StakingDetails from '../StakingDetails';
@@ -51,16 +52,10 @@ export default function Delegation({ account, accountInfo }: Props) {
     return (
         <Switch>
             <Route path={routes.ACCOUNTS_ADD_DELEGATION}>
-                <ConfigureDelegation
-                    account={account}
-                    accountInfo={accountInfo}
-                />
+                <AddDelegation account={account} accountInfo={accountInfo} />
             </Route>
             <Route path={routes.ACCOUNTS_UPDATE_DELEGATION}>
-                <ConfigureDelegation
-                    account={account}
-                    accountInfo={accountInfo}
-                />
+                <UpdateDelegation account={account} accountInfo={accountInfo} />
             </Route>
             <Route path={routes.ACCOUNTS_REMOVE_DELEGATION}>
                 <RemoveDelegation account={account} accountInfo={accountInfo} />

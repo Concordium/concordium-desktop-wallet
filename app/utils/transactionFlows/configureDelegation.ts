@@ -35,6 +35,8 @@ export interface ConfigureDelegationFlowState {
     delegate?: DelegateSettings;
 }
 
+export const configureDelegationTitle = 'Configure delegation';
+
 export const getExistingDelegationValues = (
     accountInfo: AccountInfo
 ): NotOptional<ConfigureDelegationFlowState> | undefined => {

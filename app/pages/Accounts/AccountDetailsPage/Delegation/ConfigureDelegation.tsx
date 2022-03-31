@@ -16,16 +16,17 @@ import AccountTransactionFlow, {
 import {
     ConfigureDelegationFlowDependencies,
     ConfigureDelegationFlowState,
+    configureDelegationTitle,
     convertToConfigureDelegationTransaction,
 } from '~/utils/transactionFlows/configureDelegation';
+import { updateDelegationTitle } from '~/utils/transactionFlows/updateDelegation';
+import { addDelegationTitle } from '~/utils/transactionFlows/addDelegation';
 import { ensureProps } from '~/utils/componentHelpers';
 import routes from '~/constants/routes.json';
 import DelegationTargetPage from '~/components/Transfers/configureDelegation/DelegationTargetPage';
 import DelegationAmountPage from '~/components/Transfers/configureDelegation/DelegationAmountPage';
 import { ValidateValues } from '~/components/MultiStepForm';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
-import { updateDelegationTitle } from '~/utils/transactionFlows/updateDelegation';
-import { addDelegationTitle } from '~/utils/transactionFlows/addDelegation';
 
 interface Props
     extends ConfigureDelegationFlowDependencies,
@@ -45,17 +46,15 @@ const getTitle = (isUpdate: boolean) =>
 
 const withDeps = (component: ComponentType<Props>) =>
     withNonce(
-        withExchangeRate((p: UnsafeProps) => {
-            const C = ensureProps(
+        withExchangeRate(
+            ensureProps(
                 component,
                 hasNecessaryProps,
                 <AccountTransactionFlowLoading
-                    title={getTitle(p.isUpdate ?? false)}
+                    title={configureDelegationTitle}
                 />
-            );
-
-            return <C {...p} />;
-        })
+            )
+        )
     );
 
 function ConfigureDelegation(props: Props) {

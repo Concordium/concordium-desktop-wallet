@@ -20,6 +20,7 @@ import {
 import {
     ConfigureDelegationFlowDependencies,
     ConfigureDelegationFlowState,
+    configureDelegationTitle,
     convertToConfigureDelegationTransaction,
     displayDelegationTarget,
     displayRedelegate,
@@ -27,6 +28,8 @@ import {
     getEstimatedConfigureDelegationFee,
     getExistingDelegationValues,
 } from '~/utils/transactionFlows/configureDelegation';
+import { updateDelegationTitle } from '~/utils/transactionFlows/updateDelegation';
+import { addDelegationTitle } from '~/utils/transactionFlows/addDelegation';
 import DelegationTargetPage from '~/components/Transfers/configureDelegation/DelegationTargetPage';
 import DelegationAmountPage from '~/components/Transfers/configureDelegation/DelegationAmountPage';
 import { shouldShowField } from './utils';
@@ -34,8 +37,6 @@ import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { ValidateValues } from '~/components/MultiStepForm';
 
 import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
-import { updateDelegationTitle } from '~/utils/transactionFlows/updateDelegation';
-import { addDelegationTitle } from '~/utils/transactionFlows/addDelegation';
 
 interface DisplayProps
     extends Partial<RequiredValues & ConfigureDelegationFlowState> {
@@ -110,19 +111,16 @@ const getTitle = (isUpdate: boolean) =>
 const hasNecessaryProps = (props: UnsafeProps): props is Props => {
     return [props.exchangeRate].every(isDefined);
 };
-
 const withDeps = (component: ComponentType<Props>) =>
-    withExchangeRate((p: UnsafeProps) => {
-        const C = ensureProps(
+    withExchangeRate(
+        ensureProps(
             component,
             hasNecessaryProps,
             <MultiSigAccountTransactionFlowLoading
-                title={getTitle(p.isUpdate ?? false)}
+                title={configureDelegationTitle}
             />
-        );
-
-        return <C {...p} />;
-    });
+        )
+    );
 
 export default withDeps(function ConfigureDelegation({
     exchangeRate,
