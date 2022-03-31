@@ -21,7 +21,7 @@ function Actions({ isDelegating }: ActionsProps) {
                 className="mB20:notLast flex width100"
                 to={routes.ACCOUNTS_UPDATE_DELEGATION}
             >
-                Update current delegation
+                Update delegation
             </ButtonNavLink>
             {isDelegating && (
                 <ButtonNavLink
