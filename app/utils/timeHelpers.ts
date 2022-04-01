@@ -1,5 +1,12 @@
-import { ConsensusStatus, StakePendingChange } from '@concordium/node-sdk';
+import {
+    ChainParameters,
+    ConsensusStatus,
+    RewardStatus,
+    StakePendingChange,
+} from '@concordium/node-sdk';
 import { isStakePendingChangeV1 } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { isRewardStatusV1 } from '@concordium/node-sdk/lib/src/rewardStatusHelpers';
+import { isChainParametersV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import { ensureNumberLength } from './basicHelpers';
 import { TimeStampUnit, YearMonth, YearMonthDate } from './types';
 
@@ -267,29 +274,71 @@ export const isDateEqual = (
     return stripTime(left).getTime() === stripTime(right).getTime();
 };
 
+/**
+ * Gets time of the payday after a given time.
+ *
+ * @param time the time for which the succeeding payday is returned
+ * @param nextPayday the next payday in relation to current time
+ * @param rewardPeriodLengthMS the length of a payday in milliseconds
+ */
+export const getSucceedingPayday = (
+    time: Date,
+    nextPayday: Date,
+    rewardPeriodLengthMS: bigint
+): Date => {
+    if (time.getTime() < nextPayday.getTime()) {
+        return nextPayday;
+    }
+
+    const pd = new Date(nextPayday.getTime() + Number(rewardPeriodLengthMS));
+    return getSucceedingPayday(time, pd, rewardPeriodLengthMS);
+};
+
 export function dateFromStakePendingChange(
     spc: StakePendingChange,
-    status: ConsensusStatus
+    cs: ConsensusStatus,
+    rs: RewardStatus,
+    cp: ChainParameters
 ): Date;
 export function dateFromStakePendingChange(
     spc: StakePendingChange,
-    status: ConsensusStatus | undefined
+    cs: ConsensusStatus | undefined,
+    rs: RewardStatus | undefined,
+    cp: ChainParameters | undefined
 ): Date | undefined;
 export function dateFromStakePendingChange(
     spc: StakePendingChange,
-    status: ConsensusStatus | undefined
+    cs: ConsensusStatus | undefined,
+    rs: RewardStatus | undefined,
+    cp: ChainParameters | undefined
 ): Date | undefined {
-    if (isStakePendingChangeV1(spc)) {
-        return spc.effectiveTime;
-    }
-
-    if (status === undefined) {
+    if (cs === undefined) {
         return undefined;
     }
 
-    return epochDate(
-        Number(spc.epoch),
-        status.epochDuration,
-        new Date(status.currentEraGenesisTime)
+    if (!isStakePendingChangeV1(spc)) {
+        return epochDate(
+            Number(spc.epoch),
+            cs.epochDuration,
+            new Date(cs.currentEraGenesisTime)
+        );
+    }
+
+    if (rs === undefined || cp === undefined) {
+        return undefined;
+    }
+
+    if (!isRewardStatusV1(rs) || !isChainParametersV1(cp)) {
+        throw new Error(
+            'Not possible to calculate date due to mismatch between reward status, chain parameters, and pending change versions.'
+        );
+    }
+
+    const rewardPeriodLengthMS = cs.epochDuration * cp.rewardPeriodLength;
+
+    return getSucceedingPayday(
+        spc.effectiveTime,
+        rs.nextPaydayTime,
+        rewardPeriodLengthMS
     );
 }
