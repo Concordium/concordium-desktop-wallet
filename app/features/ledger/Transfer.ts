@@ -25,6 +25,13 @@ import {
     instanceOfSimpleTransferWithMemo,
     instanceOfScheduledTransferWithMemo,
     instanceOfEncryptedTransferWithMemo,
+    instanceOfRegisterData,
+    RegisterData,
+    ConfigureBaker,
+    ConfigureDelegation,
+    instanceOfConfigureBaker,
+    instanceOfConfigureDelegation,
+    ConfigureBakerPayload,
 } from '~/utils/types';
 import {
     serializeTransactionHeader,
@@ -38,14 +45,21 @@ import {
     serializeBakerKeyProofs,
     serializeUpdateBakerStake,
     serializeUpdateBakerRestakeEarnings,
+    serializeRegisterData,
+    serializeConfigureBaker,
+    serializeConfigureDelegation,
+    serializeConfigureBakerPayload,
+    getSerializedMetadataUrlWithLength,
+    getSerializedConfigureBakerBitmap,
 } from '~/utils/transactionSerialization';
 import pathAsBuffer from './Path';
 import {
     encodeWord16,
     encodeWord64,
     base58ToBuffer,
+    putHexString,
 } from '../../utils/serializationHelpers';
-import { chunkBuffer } from '~/utils/basicHelpers';
+import { chunkBuffer, isDefined } from '~/utils/basicHelpers';
 import { encodeAsCBOR } from '~/utils/cborHelper';
 import {
     signEncryptedTransfer,
@@ -65,6 +79,9 @@ const INS_REMOVE_BAKER = 0x14;
 const INS_UPDATE_BAKER_STAKE = 0x15;
 const INS_UPDATE_BAKER_RESTAKE_EARNINGS = 0x16;
 const INS_SIMPLE_TRANSFER_WITH_MEMO = 0x32;
+const INS_REGISTER_DATA = 0x35;
+const INS_CONFIGURE_DELEGATION = 0x17;
+const INS_CONFIGURE_BAKER = 0x18;
 
 async function signSimpleTransfer(
     transport: Transport,
@@ -248,7 +265,7 @@ async function signTransferToPublic(
         );
     }
     if (!response) {
-        throw new Error('Unexpected missing response from ledger;');
+        throw new Error('Unexpected missing response from Ledger');
     }
     return response.slice(0, 64);
 }
@@ -433,6 +450,187 @@ async function signUpdateBakerRestakeEarnings(
     return response.slice(0, 64);
 }
 
+async function signRegisterData(
+    transport: Transport,
+    path: number[],
+    transaction: RegisterData
+): Promise<Buffer> {
+    const payload = serializeRegisterData(transaction.payload);
+
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+
+    const data = encodeAsCBOR(transaction.payload.data);
+
+    const cdata = Buffer.concat([
+        pathAsBuffer(path),
+        header,
+        Buffer.from(Uint8Array.of(TransactionKindId.Register_data)),
+        encodeWord16(data.length),
+    ]);
+
+    let p1 = 0x00;
+    const p2 = 0x00;
+
+    await transport.send(0xe0, INS_REGISTER_DATA, p1, p2, cdata);
+
+    p1 = 0x01;
+
+    const chunks = chunkBuffer(data, 255);
+    let response;
+    for (const chunk of chunks) {
+        response = await transport.send(
+            0xe0,
+            INS_REGISTER_DATA,
+            p1,
+            p2,
+            Buffer.from(chunk)
+        );
+    }
+
+    if (!response) {
+        throw new Error('Unexpected missing response from Ledger');
+    }
+
+    return response.slice(0, 64);
+}
+
+async function signConfigureBaker(
+    transport: Transport,
+    path: number[],
+    transaction: ConfigureBaker
+): Promise<Buffer> {
+    let p1 = 0x00;
+    const p2 = 0x00;
+    let response: Buffer;
+
+    const send = (cdata: Buffer | undefined) =>
+        transport.send(0xe0, INS_CONFIGURE_BAKER, p1, p2, cdata);
+
+    const payload = serializeConfigureBaker(transaction.payload);
+
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+
+    const bitmap = getSerializedConfigureBakerBitmap(transaction.payload);
+
+    const meta = Buffer.concat([
+        pathAsBuffer(path),
+        header,
+        Buffer.from(Uint8Array.of(TransactionKindId.Configure_baker)),
+        bitmap,
+    ]);
+
+    response = await send(meta);
+
+    const {
+        metadataUrl,
+        stake,
+        restakeEarnings,
+        openForDelegation,
+        keys,
+        ...commissions
+    } = transaction.payload;
+
+    const dataPayload: ConfigureBakerPayload = {
+        stake,
+        restakeEarnings,
+        openForDelegation,
+    };
+
+    if (Object.values(dataPayload).some(isDefined) || keys !== undefined) {
+        p1 = 0x01;
+        let data = serializeConfigureBakerPayload(dataPayload);
+
+        if (keys !== undefined) {
+            data = Buffer.concat([
+                data,
+                putHexString(keys.electionVerifyKey),
+                putHexString(keys.electionKeyProof),
+                putHexString(keys.signatureVerifyKey),
+                putHexString(keys.signatureKeyProof),
+            ]);
+        }
+
+        response = await send(data);
+    }
+
+    if (keys !== undefined) {
+        p1 = 0x02;
+        const aggKey = Buffer.concat([
+            putHexString(keys.aggregationVerifyKey),
+            putHexString(keys.aggregationKeyProof),
+        ]);
+        response = await send(aggKey);
+    }
+
+    if (metadataUrl !== undefined) {
+        const {
+            data: urlBuffer,
+            length: urlLength,
+        } = getSerializedMetadataUrlWithLength(metadataUrl);
+
+        p1 = 0x03;
+        response = await send(urlLength);
+
+        p1 = 0x04;
+        const chunks = chunkBuffer(urlBuffer, 255);
+
+        for (let i = 0; i < chunks.length; i += 1) {
+            response = await send(Buffer.from(chunks[i]));
+        }
+    }
+
+    if (Object.values(commissions).some(isDefined)) {
+        p1 = 0x05;
+        const comms = serializeConfigureBakerPayload(commissions);
+        response = await send(comms);
+    }
+
+    return response.slice(0, 64);
+}
+
+async function signConfigureDelegation(
+    transport: Transport,
+    path: number[],
+    transaction: ConfigureDelegation
+): Promise<Buffer> {
+    const payload = serializeConfigureDelegation(transaction.payload);
+
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+
+    const cdata = Buffer.concat([pathAsBuffer(path), header, payload]);
+
+    const p1 = 0x00;
+    const p2 = 0x00;
+
+    const response = await transport.send(
+        0xe0,
+        INS_CONFIGURE_DELEGATION,
+        p1,
+        p2,
+        cdata
+    );
+
+    return response.slice(0, 64);
+}
+
 export default async function signTransfer(
     transport: Transport,
     path: number[],
@@ -476,6 +674,15 @@ export default async function signTransfer(
     }
     if (instanceOfUpdateBakerRestakeEarnings(transaction)) {
         return signUpdateBakerRestakeEarnings(transport, path, transaction);
+    }
+    if (instanceOfRegisterData(transaction)) {
+        return signRegisterData(transport, path, transaction);
+    }
+    if (instanceOfConfigureBaker(transaction)) {
+        return signConfigureBaker(transport, path, transaction);
+    }
+    if (instanceOfConfigureDelegation(transaction)) {
+        return signConfigureDelegation(transport, path, transaction);
     }
     throw new Error(
         `The received transaction was not a supported transaction type`

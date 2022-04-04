@@ -3,6 +3,7 @@ import {
     ReleaseSchedule,
     TransactionSummary,
 } from '@concordium/node-sdk/lib/src/types';
+import { Validate } from 'react-hook-form';
 import {
     dateFromTimeStamp,
     getDefaultExpiry,
@@ -29,6 +30,7 @@ import {
     AccountInfo,
     AddBaker,
     AddBakerPayload,
+    RegisterData,
     RemoveBaker,
     UpdateBakerKeysPayload,
     UpdateBakerKeys,
@@ -40,6 +42,10 @@ import {
     SimpleTransferWithMemo,
     TransactionStatus,
     SchedulePoint,
+    ConfigureBakerPayload,
+    ConfigureBaker,
+    ConfigureDelegationPayload,
+    ConfigureDelegation,
 } from './types';
 import {
     getTransactionEnergyCost,
@@ -47,7 +53,7 @@ import {
     getUpdateAccountCredentialEnergy,
     getPayloadSizeEstimate,
 } from './transactionCosts';
-import { toMicroUnits, isValidGTUString, displayAsGTU } from './gtu';
+import { ccdToMicroCcd, isValidCcdString, displayAsCcd } from './ccd';
 import { getEncodedSize } from './cborHelper';
 import externalConstants from '~/constants/externalConstants.json';
 import { isASCII } from './basicHelpers';
@@ -102,7 +108,7 @@ function createAccountTransaction<T extends TransactionPayload>({
 }
 
 /**
- *  Constructs a, simple transfer, transaction object,
+ *  Constructs a simple transfer transaction object,
  * Given the fromAddress, toAddress and the amount.
  */
 export function createSimpleTransferTransaction(
@@ -129,7 +135,7 @@ export function createSimpleTransferTransaction(
 }
 
 /**
- *  Constructs a, simple transfer, transaction object,
+ *  Constructs a simple transfer with memo transaction object,
  * Given the fromAddress, toAddress and the amount.
  */
 export function createSimpleTransferWithMemoTransaction(
@@ -147,6 +153,30 @@ export function createSimpleTransferWithMemoTransaction(
         memo,
     };
     const transactionKind = TransactionKindId.Simple_transfer_with_memo;
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind,
+        payload,
+        signatureAmount,
+        nonce,
+    });
+}
+
+/**
+ *  Constructs a register data transaction object.
+ */
+export function createRegisterDataTransaction(
+    fromAddress: string,
+    nonce: bigint,
+    data: string,
+    signatureAmount = 1,
+    expiry = getDefaultExpiry()
+): RegisterData {
+    const payload = {
+        data,
+    };
+    const transactionKind = TransactionKindId.Register_data;
     return createAccountTransaction({
         fromAddress,
         expiry,
@@ -465,6 +495,40 @@ export function createUpdateBakerRestakeEarningsTransaction(
     });
 }
 
+export function createConfigureBakerTransaction(
+    fromAddress: string,
+    payload: ConfigureBakerPayload,
+    nonce: bigint,
+    signatureAmount = 1,
+    expiry = getDefaultExpiry()
+): ConfigureBaker {
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Configure_baker,
+        nonce,
+        payload,
+        signatureAmount,
+    });
+}
+
+export function createConfigureDelegationTransaction(
+    fromAddress: string,
+    payload: ConfigureDelegationPayload,
+    nonce: bigint,
+    signatureAmount = 1,
+    expiry = getDefaultExpiry()
+): ConfigureDelegation {
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Configure_delegation,
+        nonce,
+        payload,
+        signatureAmount,
+    });
+}
+
 export function getScheduledTransferAmount(
     transaction: ScheduledTransfer
 ): bigint {
@@ -520,10 +584,10 @@ export function validateShieldedAmount(
     accountInfo: AccountInfo | undefined,
     estimatedFee: bigint | undefined
 ): string | undefined {
-    if (!isValidGTUString(amountToValidate)) {
+    if (!isValidCcdString(amountToValidate)) {
         return 'Value is not a valid CCD amount';
     }
-    const amountToValidateMicroGTU = toMicroUnits(amountToValidate);
+    const amountToValidateMicroGTU = ccdToMicroCcd(amountToValidate);
     if (
         accountInfo &&
         getAmountAtDisposal(accountInfo) < (estimatedFee || 0n)
@@ -547,10 +611,10 @@ export function validateTransferAmount(
     accountInfo: AccountInfo | undefined,
     estimatedFee: bigint | undefined
 ): string | undefined {
-    if (!isValidGTUString(amountToValidate)) {
+    if (!isValidCcdString(amountToValidate)) {
         return 'Value is not a valid CCD amount';
     }
-    const amountToValidateMicroGTU = toMicroUnits(amountToValidate);
+    const amountToValidateMicroGTU = ccdToMicroCcd(amountToValidate);
     if (
         accountInfo &&
         getAmountAtDisposal(accountInfo) <
@@ -577,20 +641,42 @@ export function validateFee(
     return undefined;
 }
 
+export const validateDelegateAmount = (
+    accountInfo: AccountInfo,
+    estimatedFee: bigint,
+    max?: bigint
+): Validate => (value: string) => {
+    if (!isValidCcdString(value)) {
+        return 'Value is not a valid CCD amount';
+    }
+
+    const amount = ccdToMicroCcd(value);
+
+    if (max !== undefined && amount > max) {
+        return `Cannot delegate more than (${displayAsCcd(max)})`;
+    }
+
+    if (BigInt(accountInfo.accountAmount) < amount + estimatedFee) {
+        return 'Insufficient funds';
+    }
+
+    return true;
+};
+
 export function validateBakerStake(
     bakerStakeThreshold: bigint | undefined,
     amountToValidate: string,
     accountInfo: AccountInfo | undefined,
     estimatedFee: bigint | undefined
 ): string | undefined {
-    if (!isValidGTUString(amountToValidate)) {
+    if (!isValidCcdString(amountToValidate)) {
         return 'Value is not a valid CCD amount';
     }
-    const amount = toMicroUnits(amountToValidate);
+    const amount = ccdToMicroCcd(amountToValidate);
     if (bakerStakeThreshold && bakerStakeThreshold > amount) {
-        return `Stake is below the threshold (${displayAsGTU(
+        return `Stake is below the threshold (${displayAsCcd(
             bakerStakeThreshold
-        )}) for baking `;
+        )}) for baking`;
     }
     if (
         accountInfo &&
@@ -602,8 +688,8 @@ export function validateBakerStake(
     return undefined;
 }
 
-export function validateMemo(memo: string): string | undefined {
-    const asNumber = Number(memo);
+export function validateData(data: string, name = 'Data'): string | undefined {
+    const asNumber = Number(data);
     if (
         Number.isInteger(asNumber) &&
         (asNumber > Number.MAX_SAFE_INTEGER ||
@@ -611,14 +697,18 @@ export function validateMemo(memo: string): string | undefined {
     ) {
         return `Numbers greater than ${Number.MAX_SAFE_INTEGER} or smaller than ${Number.MIN_SAFE_INTEGER} are not supported`;
     }
-    if (getEncodedSize(memo) > externalConstants.maxMemoSize) {
-        return `Memo is too large, encoded size must be at most ${externalConstants.maxMemoSize} bytes`;
+    if (getEncodedSize(data) > externalConstants.maxMemoSize) {
+        return `${name} is too large, encoded size must be at most ${externalConstants.maxMemoSize} bytes`;
     }
     // Check that the memo only contains ascii characters
-    if (isASCII(memo)) {
-        return 'Memo contains non-ascii characters';
+    if (isASCII(data)) {
+        return `${name} contains non-ascii characters`;
     }
     return undefined;
+}
+
+export function validateMemo(memo: string): string | undefined {
+    return validateData(memo, 'Memo');
 }
 
 export function isTransferKind(kind: TransactionKindString) {
@@ -642,6 +732,7 @@ export function isRewardKind(kind: TransactionKindString) {
         case TransactionKindString.BakingReward:
         case TransactionKindString.BlockReward:
         case TransactionKindString.FinalizationReward:
+        case TransactionKindString.StakingReward:
             return true;
         default:
             return false;

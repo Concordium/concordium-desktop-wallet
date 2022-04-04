@@ -47,12 +47,10 @@ export async function getUpdateInstructionTransactionHash(
  * Given a transaction, return the digest, which does not contain the signature
  * And can be used to create the signature
  */
-export default async function getTransactionSignDigest(
-    transaction: Transaction
-) {
+export default function getTransactionSignDigest(transaction: Transaction) {
     if (instanceOfUpdateInstruction(transaction)) {
         const handler = findUpdateInstructionHandler(transaction.type);
-        const updateHash = await hashSha256(
+        const updateHash = hashSha256(
             serializeUpdateInstructionHeaderAndPayload(
                 transaction,
                 handler.serializePayload(transaction)
@@ -60,21 +58,19 @@ export default async function getTransactionSignDigest(
         );
         return updateHash.toString('hex');
     }
-    const accountTransactionHash = await getAccountTransactionSignDigest(
-        transaction
-    );
+    const accountTransactionHash = getAccountTransactionSignDigest(transaction);
     return accountTransactionHash.toString('hex');
 }
 
 /**
  * Given a transaction, return the transaction hash, which is the hash, that contains the signature.
  */
-export async function getTransactionHash(transaction: Transaction) {
+export function getTransactionHash(transaction: Transaction) {
     if (instanceOfUpdateInstruction(transaction)) {
         return getUpdateInstructionTransactionHash(transaction);
     }
     if (instanceOfAccountTransactionWithSignature(transaction)) {
-        const accountTransactionHash = await getAccountTransactionHash(
+        const accountTransactionHash = getAccountTransactionHash(
             transaction,
             transaction.signatures
         );

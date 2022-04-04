@@ -23,6 +23,12 @@ import {
     SimpleTransferWithMemoPayload,
     ScheduledTransferWithMemoPayload,
     EncryptedTransferWithMemoPayload,
+    RegisterDataPayload,
+    ConfigureBakerPayload,
+    ConfigureDelegationPayload,
+    DelegationTarget,
+    NotOptional,
+    BakerKeysWithProofs,
 } from './types';
 import {
     encodeWord32,
@@ -38,11 +44,14 @@ import {
     serializeCredentialDeploymentInformation,
     serializeBoolean,
     encodeWord16,
+    getSerializedTextWithLength,
 } from './serializationHelpers';
 import { encodeAsCBOR } from './cborHelper';
+import { isDefined } from './basicHelpers';
+import { orUndefined } from './functionHelpers';
 
-function serializeMemo(memo: string) {
-    const encoded = encodeAsCBOR(memo);
+function serializeAsCbor(dataBlob: string) {
+    const encoded = encodeAsCBOR(dataBlob);
     const length = encodeWord16(encoded.length);
     return Buffer.concat([length, encoded]);
 }
@@ -59,7 +68,7 @@ function serializeSimpleTransferWithMemo(
 ) {
     const kind = putInt8(TransactionKind.Simple_transfer_with_memo);
     const address = base58ToBuffer(payload.toAddress);
-    const memo = serializeMemo(payload.memo);
+    const memo = serializeAsCbor(payload.memo);
     const amount = encodeWord64(BigInt(payload.amount));
     return Buffer.concat([kind, address, memo, amount]);
 }
@@ -93,7 +102,7 @@ function serializeTransferWithScheduleWithMemo(
 ) {
     const kind = putInt8(TransactionKind.Transfer_with_schedule_and_memo);
     const address = base58ToBuffer(payload.toAddress);
-    const memo = serializeMemo(payload.memo);
+    const memo = serializeAsCbor(payload.memo);
     const scheduleLength = putInt8(payload.schedule.length);
 
     return Buffer.concat(
@@ -242,11 +251,18 @@ function serializeEncryptedTransferWithMemo(
     return Buffer.concat([
         putInt8(TransactionKind.Encrypted_transfer_with_memo),
         serializedAddress,
-        serializeMemo(payload.memo),
+        serializeAsCbor(payload.memo),
         remainingEncryptedAmount,
         transferAmount,
         encodeWord64(BigInt(payload.index)),
         proof,
+    ]);
+}
+
+export function serializeRegisterData(payload: RegisterDataPayload) {
+    return Buffer.concat([
+        putInt8(TransactionKind.Register_data),
+        serializeAsCbor(payload.data),
     ]);
 }
 
@@ -331,6 +347,136 @@ export function serializeUpdateBakerRestakeEarnings(
     ]);
 }
 
+/**
+ * Makes a bitmap for transactions with optional payload fields, where each bit indicates whether a value is included or not.
+ *
+ * @param payload the payload to generate the bitmap for
+ * @param fieldOrder the order the payload fields are serialized in. The order is represented in the bitmap from right to left, i.e index 0 of the order translates to first bit.
+ *
+ * @example
+ * getPayloadBitmap<{test?: string; test2?: string}>({test2: 'yes'}, ['test', 'test2']) // returns 2 (00000010 as bits of UInt8)
+ * getPayloadBitmap<{test?: string; test2?: string; test3?: number}>({test: 'yes', test3: 100}, ['test', 'test2', 'test3']) // returns 5 (00000101 as bits of UInt8)
+ */
+function getPayloadBitmap<T>(payload: T, fieldOrder: Array<keyof T>) {
+    return fieldOrder
+        .map((k) => payload[k])
+        .reduceRight(
+            // eslint-disable-next-line no-bitwise
+            (acc, cur) => (acc << 1) | Number(cur !== undefined),
+            0
+        );
+}
+
+/**
+ * Makes a type with keys from Object and values being functions that take values with types of respective original values, returning a Buffer or undefined.
+ */
+type SerializationSpec<T> = NotOptional<
+    { [P in keyof T]: (v: T[P]) => Buffer | undefined }
+>;
+
+/**
+ * Given a specification describing how to serialize the fields of a payload of type T, this function produces a function
+ * that serializes payloads of type T, returning a buffer of the serialized fields by order of occurance in serialization spec.
+ */
+const serializeFromSpec = <T>(spec: SerializationSpec<T>) => (payload: T) => {
+    const buffers = Object.keys(spec)
+        .map((k) => {
+            const v = payload[k as keyof T];
+            const f = spec[k as keyof typeof spec] as (
+                x: typeof v
+            ) => Buffer | undefined;
+            return f(v);
+        })
+        .filter(isDefined);
+
+    return Buffer.concat(buffers);
+};
+
+const serializeVerifyKeys = serializeFromSpec<BakerKeysWithProofs>({
+    electionVerifyKey: putHexString,
+    electionKeyProof: putHexString,
+    signatureVerifyKey: putHexString,
+    signatureKeyProof: putHexString,
+    aggregationVerifyKey: putHexString,
+    aggregationKeyProof: putHexString,
+});
+
+export const getSerializedMetadataUrlWithLength = (url: string) =>
+    getSerializedTextWithLength(url, encodeWord16);
+
+const serializeUrl = (url: string) => {
+    const { data, length } = getSerializedMetadataUrlWithLength(url);
+    return Buffer.concat([length, data]);
+};
+
+const configureBakerSerializationSpec: SerializationSpec<ConfigureBakerPayload> = {
+    stake: orUndefined(encodeWord64),
+    restakeEarnings: orUndefined(serializeBoolean),
+    openForDelegation: orUndefined(putInt8),
+    keys: orUndefined(serializeVerifyKeys),
+    metadataUrl: orUndefined(serializeUrl),
+    transactionFeeCommission: orUndefined(encodeWord32),
+    bakingRewardCommission: orUndefined(encodeWord32),
+    finalizationRewardCommission: orUndefined(encodeWord32),
+};
+
+export const getSerializedConfigureBakerBitmap = (
+    payload: ConfigureBakerPayload
+) =>
+    encodeWord16(
+        getPayloadBitmap(
+            payload,
+            Object.keys(configureBakerSerializationSpec) as Array<
+                keyof ConfigureBakerPayload
+            >
+        )
+    );
+
+export const serializeConfigureBakerPayload = serializeFromSpec<ConfigureBakerPayload>(
+    configureBakerSerializationSpec
+);
+
+export function serializeConfigureBaker(payload: ConfigureBakerPayload) {
+    const type = putInt8(TransactionKind.Configure_baker);
+    const bitmap = getSerializedConfigureBakerBitmap(payload);
+    const sPayload = serializeConfigureBakerPayload(payload);
+
+    return Buffer.concat([type, bitmap, sPayload]);
+}
+
+const serializeDelegationTarget = (t: DelegationTarget) =>
+    t === null ? putInt8(0) : Buffer.concat([putInt8(1), encodeWord64(t)]);
+
+const configureDelegationSerializationSpec: SerializationSpec<ConfigureDelegationPayload> = {
+    stake: orUndefined(encodeWord64),
+    restakeEarnings: orUndefined(serializeBoolean),
+    delegationTarget: orUndefined(serializeDelegationTarget),
+};
+
+export const getSerializedConfigureDelegationBitmap = (
+    payload: ConfigureDelegationPayload
+) =>
+    encodeWord16(
+        getPayloadBitmap(
+            payload,
+            Object.keys(configureDelegationSerializationSpec) as Array<
+                keyof ConfigureDelegationPayload
+            >
+        )
+    );
+
+export function serializeConfigureDelegation(
+    payload: ConfigureDelegationPayload
+) {
+    const type = putInt8(TransactionKind.Configure_delegation);
+    const bitmap = getSerializedConfigureDelegationBitmap(payload);
+    const sPayload = serializeFromSpec(configureDelegationSerializationSpec)(
+        payload
+    );
+
+    return Buffer.concat([type, bitmap, sPayload]);
+}
+
 export function serializeTransferPayload(
     kind: TransactionKind,
     payload: TransactionPayload
@@ -384,6 +530,14 @@ export function serializeTransferPayload(
         case TransactionKind.Update_baker_restake_earnings:
             return serializeUpdateBakerRestakeEarnings(
                 payload as UpdateBakerRestakeEarningsPayload
+            );
+        case TransactionKind.Register_data:
+            return serializeRegisterData(payload as RegisterDataPayload);
+        case TransactionKind.Configure_baker:
+            return serializeConfigureBaker(payload as ConfigureBakerPayload);
+        case TransactionKind.Configure_delegation:
+            return serializeConfigureDelegation(
+                payload as ConfigureDelegationPayload
             );
         default:
             throw new Error('Unsupported transaction kind');
@@ -448,10 +602,10 @@ export function serializeTransaction(
  * Returns the transactionHash, which includes the signature, and is used as the
  * submissionId on chain.
  */
-export async function getAccountTransactionHash(
+export function getAccountTransactionHash(
     transaction: AccountTransaction,
     signature: TransactionAccountSignature
-): Promise<Buffer> {
+): Buffer {
     const serialized = serializeUnversionedTransaction(transaction, signature);
     return hashSha256(serialized);
 }
@@ -459,7 +613,7 @@ export async function getAccountTransactionHash(
 /**
  * Returns the "digest to be signed"", which is the hash that is signed.
  */
-export async function getAccountTransactionSignDigest(
+export function getAccountTransactionSignDigest(
     transaction: AccountTransaction
 ) {
     const payload = serializeTransferPayload(

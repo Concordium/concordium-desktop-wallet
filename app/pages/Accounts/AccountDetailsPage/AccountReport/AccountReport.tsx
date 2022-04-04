@@ -28,9 +28,11 @@ import TransactionFilters, {
 import DecryptModal, { DecryptModalInput } from './DecryptModal';
 import MessageModal from '~/components/MessageModal';
 import Columns from '~/components/Columns';
+import Radios from '~/components/Form/Radios';
 
 import styles from './AccountReport.module.scss';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
+import { getCcdSymbol } from '~/utils/ccd';
 import { globalSelector } from '~/features/GlobalSlice';
 import decryptTransactions from '~/utils/decryptTransactions';
 
@@ -45,6 +47,12 @@ interface Props {
     location: LocationDescriptorObject<State>;
 }
 
+// unit options for the amounts. the value corresponds to convertToCCD variable.
+export const unitOptions = [
+    { label: getCcdSymbol(), value: true },
+    { label: `micro${getCcdSymbol()}`, value: false },
+];
+
 /**
  * Components to make account reports.
  * Allows the user to enable filters and to choose accounts.
@@ -56,6 +64,9 @@ export default function AccountReport({ location }: Props) {
             'Global must be available before we can make the account report'
         );
     }
+
+    // Default to CCD
+    const [unit, setUnit] = useState(true);
 
     const [showError, setShowError] = useState<ModalErrorInput>({
         show: false,
@@ -176,7 +187,8 @@ export default function AccountReport({ location }: Props) {
                         filters,
                         global,
                         prfKeyMap,
-                        decryptTransactions
+                        decryptTransactions,
+                        unit
                     );
                 } else {
                     await window.accountReport.single(
@@ -185,7 +197,8 @@ export default function AccountReport({ location }: Props) {
                         filters,
                         global,
                         prfKeyMap,
-                        decryptTransactions
+                        decryptTransactions,
+                        unit
                     );
                 }
                 setMakingReport(false);
@@ -200,7 +213,7 @@ export default function AccountReport({ location }: Props) {
                 return Promise.resolve();
             }
         },
-        [accounts, global]
+        [accounts, global, unit]
     );
 
     // add account to the list of chosen accounts, and exit adding mode.
@@ -256,6 +269,13 @@ export default function AccountReport({ location }: Props) {
                             <Columns.Column header="Time period & filters">
                                 <div className={styles.wrapper}>
                                     <TransactionFilters ref={filtersRef} />
+                                    <Radios
+                                        label="Unit for amounts"
+                                        className={styles.unitRadio}
+                                        options={unitOptions}
+                                        value={unit}
+                                        onChange={setUnit}
+                                    />
                                 </div>
                             </Columns.Column>
                             <Columns.Column header="Accounts to include">

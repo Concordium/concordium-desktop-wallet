@@ -1,7 +1,7 @@
 import React from 'react';
 import Loading from '~/cross-app-components/Loading';
 import { FoundationAccount } from '~/utils/types';
-import withChainData, { ChainData } from '../../common/withChainData';
+import withChainData, { ChainData } from '~/utils/withChainData';
 import DisplayAddress from '~/components/DisplayAddress';
 import { getCurrentValue } from './util';
 

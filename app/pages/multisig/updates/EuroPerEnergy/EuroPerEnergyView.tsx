@@ -4,7 +4,7 @@ import { BlockSummary } from '~/node/NodeApiTypes';
 import { ExchangeRate } from '~/utils/types';
 import { RelativeRateField } from '../../common/RelativeRateField';
 import { fromExchangeRate } from '../../common/RelativeRateField/util';
-import withChainData, { ChainData } from '../../common/withChainData';
+import withChainData, { ChainData } from '~/utils/withChainData';
 import { commonFieldProps, getCurrentValue } from './util';
 
 interface Props extends ChainData {

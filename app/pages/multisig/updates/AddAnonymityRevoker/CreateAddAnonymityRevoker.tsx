@@ -7,7 +7,7 @@ import { useAnonymityRevokers } from '~/utils/dataHooks';
 import {
     lengthRule,
     validateHex,
-    mustBeANumber,
+    mustBeAnInteger,
     requiredMessage,
     pasteHere,
     enterHere,
@@ -88,7 +88,7 @@ export default function CreateAddAnonymityRevoker({
                 rules={{
                     required: requiredMessage(fieldDisplays.arIdentity),
                     validate: {
-                        mustBeANumber,
+                        mustBeAnInteger,
                         arIdentityMustBeUnique,
                     },
                 }}

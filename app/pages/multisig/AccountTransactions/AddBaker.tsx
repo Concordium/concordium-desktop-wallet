@@ -1,376 +1,301 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+/* eslint-disable react/display-name */
+import React, { ComponentType, useCallback } from 'react';
+import { Redirect } from 'react-router';
+import { useSelector } from 'react-redux';
+import type { BlockSummaryV1, ChainParametersV1 } from '@concordium/node-sdk';
+import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import {
-    Route,
-    Switch,
-    useRouteMatch,
-    useLocation,
-    Redirect,
-} from 'react-router';
-import { push } from 'connected-react-router';
-import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
-import Columns from '~/components/Columns';
-import Button from '~/cross-app-components/Button';
-import { BlockSummary } from '~/node/NodeApiTypes';
+    isBakerAccount,
+    isDelegatorAccount,
+} from '@concordium/node-sdk/lib/src/accountHelpers';
+import CommissionsPage from '~/components/Transfers/configureBaker/CommissionsPage';
+import DelegationStatusPage from '~/components/Transfers/configureBaker/DelegationStatusPage';
+import KeysPage from '~/components/Transfers/configureBaker/KeysPage';
+import MetadataUrlPage from '~/components/Transfers/configureBaker/MetadataUrlPage';
+import AddBakerStakePage from '~/components/Transfers/configureBaker/AddBakerStakePage';
+import DisplayBakerCommission from '~/components/Transfers/DisplayBakerCommission';
+import DisplayPublicKey from '~/components/Transfers/DisplayPublicKey';
 import {
-    Account,
-    TransactionKindId,
-    AccountTransaction,
-    AddBakerPayload,
+    AddBakerFlowState,
+    convertToAddBakerTransaction,
+    getEstimatedAddBakerFee,
+    getSanitizedAddBakerValues,
+    addBakerTitle,
+    validateAddBakerValues,
+} from '~/utils/transactionFlows/addBaker';
+import {
+    ConfigureBakerFlowDependencies,
+    getDefaultCommissions,
+    displayPoolOpen,
+    displayRestakeEarnings,
+} from '~/utils/transactionFlows/configureBaker';
+import {
+    ConfigureBaker,
+    ExtendableProps,
     Fraction,
+    OpenStatus,
 } from '~/utils/types';
-import PickAccount from '~/components/PickAccount';
-import { toMicroUnits } from '~/utils/gtu';
-import SimpleErrorModal from '~/components/SimpleErrorModal';
-import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
-import SignTransactionColumn from '../SignTransactionProposal/SignTransaction';
-import errorMessages from '~/constants/errorMessages.json';
-import { ensureChainData, ChainData } from '../common/withChainData';
-import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
-import { getNextAccountNonce } from '~/node/nodeRequests';
-
-import { createAddBakerTransaction } from '~/utils/transactionHelpers';
-import { selectedProposalRoute } from '~/utils/routerHelper';
+import MultiSigAccountTransactionFlow, {
+    MultiSigAccountTransactionFlowLoading,
+    RequiredValues,
+} from './MultiSigAccountTransactionFlow';
+import { AmountDetail, PlainDetail } from './proposal-details/shared';
 import routes from '~/constants/routes.json';
-import {
-    useTransactionCostEstimate,
-    useTransactionExpiryState,
-} from '~/utils/dataHooks';
-import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import {
-    signUsingLedger,
-    createMultisignatureTransaction,
-} from './SignTransaction';
-import { addProposal } from '~/features/MultiSignatureSlice';
-import AddBakerProposalDetails from './proposal-details/AddBakerProposalDetails';
-import LoadingComponent from './LoadingComponent';
-import {
-    BakerSubRoutes,
-    getLocationAfterAccounts,
-} from '~/utils/accountRouterHelpers';
-import AddBakerDetailsForm from '~/components/AddBakerDetailsForm';
-import ExportBakerKeys from './ExportBakerKeys';
-import DatePicker from '~/components/Form/DatePicker';
-import { isMultiSig } from '~/utils/accountHelpers';
-import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
+import withExchangeRate from '~/components/Transfers/withExchangeRate';
+import withChainData from '~/utils/withChainData';
+import { ensureProps } from '~/utils/componentHelpers';
+import { isDefined } from '~/utils/basicHelpers';
+import { accountsInfoSelector } from '~/features/AccountSlice';
+import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
+import DisplayMetadataUrl from '~/components/Transfers/DisplayMetadataUrl';
 
-import styles from './MultisignatureAccountTransactions.module.scss';
+import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
 
-interface PageProps extends ChainData {
+interface DisplayProps extends Partial<AddBakerFlowState & RequiredValues> {
     exchangeRate: Fraction;
-    blockSummary: BlockSummary;
+    chainParameters: ChainParametersV1;
 }
 
-interface State {
-    account?: Account;
-}
-
-function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
-    const dispatch = useDispatch();
-
-    const { state } = useLocation<State>();
-
-    const { path, url } = useRouteMatch();
-    const [account, setAccount] = useState<Account | undefined>(state?.account);
-    const [stake, setStake] = useState<string>();
-    const [restakeEnabled, setRestakeEnabled] = useState(true);
-    const [error, setError] = useState<string>();
-    const [bakerKeys, setBakerKeys] = useState<BakerKeys>();
-    const [transaction, setTransaction] = useState<
-        AccountTransaction<AddBakerPayload>
-    >();
-    const minimumThresholdForBaking = BigInt(
-        blockSummary.updates.chainParameters.minimumThresholdForBaking
-    );
-    const [
-        expiryTime,
-        setExpiryTime,
-        expiryTimeError,
-    ] = useTransactionExpiryState();
-
-    const estimatedFee = useTransactionCostEstimate(
-        TransactionKindId.Add_baker,
-        exchangeRate,
-        account?.signatureThreshold
+const DisplayValues = ({
+    account,
+    exchangeRate,
+    chainParameters,
+    ...values
+}: DisplayProps) => {
+    const sanitized = getSanitizedAddBakerValues(
+        values,
+        getDefaultCommissions(chainParameters)
     );
 
-    const handler = findAccountTransactionHandler(TransactionKindId.Add_baker);
+    const {
+        stake,
+        openForDelegation,
+        commissions,
+        metadataUrl,
+        keys,
+    } = sanitized;
 
-    const onGenerateKeys = () => {
-        if (account === undefined) {
-            setError('An account is needed to generate baker keys');
-            return;
-        }
-        generateBakerKeys(account.address, 'ADD')
-            .then((keys) => setBakerKeys(keys))
-            .catch(() => setError('Failed generating baker keys'));
-    };
-
-    const onCreateTransaction = async () => {
-        if (bakerKeys === undefined) {
-            setError('Baker keys are needed to make transaction');
-            return;
-        }
-        if (account === undefined) {
-            setError('Account is needed to make transaction');
-            return;
-        }
-        if (expiryTime === undefined) {
-            setError('Expiry time is needed to make transaction');
-            return;
-        }
-        if (stake === undefined) {
-            setError('Baker stake is needed to make transaction');
-            return;
-        }
-
-        const payload: AddBakerPayload = {
-            electionVerifyKey: bakerKeys.electionPublic,
-            signatureVerifyKey: bakerKeys.signaturePublic,
-            aggregationVerifyKey: bakerKeys.aggregationPublic,
-            proofElection: bakerKeys.proofElection,
-            proofSignature: bakerKeys.proofSignature,
-            proofAggregation: bakerKeys.proofAggregation,
-            bakingStake: toMicroUnits(stake),
-            restakeEarnings: restakeEnabled,
-        };
-        const accountNonce = await getNextAccountNonce(account.address);
-        setTransaction(
-            createAddBakerTransaction(
-                account.address,
-                payload,
-                accountNonce.nonce,
-                account.signatureThreshold,
-                expiryTime
-            )
-        );
-    };
-
-    /** Creates the transaction, and if the ledger parameter is provided, also
-     *  adds a signature on the transaction.
-     */
-    const signingFunction = async (ledger?: ConcordiumLedgerClient) => {
-        if (!global) {
-            throw new Error(errorMessages.missingGlobal);
-        }
-        if (!account) {
-            throw new Error('Unexpected missing account');
-        }
-        if (transaction === undefined) {
-            throw new Error('unexpected missing transaction');
-        }
-        if (bakerKeys === undefined) {
-            throw new Error('unexpected missing bakerKeys');
-        }
-
-        let signatures = {};
-        if (ledger) {
-            signatures = await signUsingLedger(ledger, transaction, account);
-        }
-        const proposal = await createMultisignatureTransaction(
-            transaction,
-            signatures,
-            account.signatureThreshold
-        );
-
-        if (proposal.id === undefined) {
-            throw new Error('unexpected undefined proposal id');
-        }
-
-        // Set the current proposal in the state to the one that was just generated.
-        dispatch(addProposal(proposal));
-        dispatch(push(selectedProposalRoute(proposal.id)));
-    };
+    const estimatedFee =
+        account !== undefined
+            ? getEstimatedAddBakerFee(
+                  exchangeRate,
+                  sanitized,
+                  account.signatureThreshold
+              )
+            : undefined;
 
     return (
-        <MultiSignatureLayout pageTitle={handler.title} delegateScroll>
-            <SimpleErrorModal
-                show={Boolean(error)}
-                header="Unable to perform transfer"
-                content={error}
-                onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
+        <>
+            <DisplayEstimatedFee
+                className={displayTransferStyles.fee}
+                estimatedFee={estimatedFee}
             />
-            <Columns
-                divider
-                columnScroll
-                className={styles.subtractContainerPadding}
-                columnClassName={styles.column}
-            >
-                <Columns.Column header="Transaction details">
-                    <div className={styles.columnContent}>
-                        <AddBakerProposalDetails
-                            account={account}
-                            stake={stake}
-                            estimatedFee={estimatedFee}
-                            restakeEarnings={restakeEnabled}
-                            expiryTime={expiryTime}
-                            bakerVerifyKeys={
-                                bakerKeys === undefined
-                                    ? undefined
-                                    : {
-                                          electionVerifyKey:
-                                              bakerKeys.electionPublic,
-                                          signatureVerifyKey:
-                                              bakerKeys.signaturePublic,
-                                          aggregationVerifyKey:
-                                              bakerKeys.aggregationPublic,
-                                      }
-                            }
-                        />
-                    </div>
-                </Columns.Column>
-                <Switch>
-                    <Route exact path={path}>
-                        <Columns.Column
-                            header="Accounts"
-                            className={styles.stretchColumn}
-                        >
-                            <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
-                                    <PickAccount
-                                        setAccount={setAccount}
-                                        chosenAccount={account}
-                                        filter={(a, info) =>
-                                            info?.accountBaker === undefined &&
-                                            isMultiSig(a)
-                                        }
-                                        onAccountClicked={() =>
-                                            dispatch(
-                                                push(
-                                                    getLocationAfterAccounts(
-                                                        url,
-                                                        TransactionKindId.Add_baker
-                                                    )
-                                                )
-                                            )
-                                        }
-                                        messageWhenEmpty="There are no accounts that require multiple signatures, which can become bakers"
-                                    />
-                                </div>
-                            </div>
-                        </Columns.Column>
-                    </Route>
-
-                    <Route path={`${path}/${BakerSubRoutes.stake}`}>
-                        {!account ? (
-                            <Redirect to={path} />
-                        ) : (
-                            <Columns.Column
-                                header="Stake"
-                                className={styles.stretchColumn}
-                            >
-                                <AddBakerDetailsForm
-                                    className={styles.columnContent}
-                                    minimumStake={minimumThresholdForBaking}
-                                    showAccountCard
-                                    account={account}
-                                    estimatedFee={estimatedFee}
-                                    onSubmit={(values) => {
-                                        setStake(values.stake);
-                                        setRestakeEnabled(values.restake);
-                                        dispatch(
-                                            push(
-                                                `${url}/${BakerSubRoutes.expiry}`
-                                            )
-                                        );
-                                    }}
-                                />
-                            </Columns.Column>
-                        )}
-                    </Route>
-
-                    <Route path={`${path}/${BakerSubRoutes.expiry}`}>
-                        <Columns.Column
-                            header="Transaction expiry time"
-                            className={styles.stretchColumn}
-                        >
-                            <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
-                                    <p className="mT0">
-                                        Choose the expiry date for the
-                                        transaction.
-                                    </p>
-                                    <DatePicker
-                                        className="body2 mV40"
-                                        label="Transaction expiry time"
-                                        name="expiry"
-                                        isInvalid={
-                                            expiryTimeError !== undefined
-                                        }
-                                        error={expiryTimeError}
-                                        value={expiryTime}
-                                        onChange={setExpiryTime}
-                                        minDate={new Date()}
-                                    />
-                                    <p className="mB0">
-                                        Committing the transaction after this
-                                        date, will be rejected.
-                                    </p>
-                                </div>
-                                <Button
-                                    className="mT40"
-                                    disabled={
-                                        expiryTime === undefined ||
-                                        expiryTimeError !== undefined
-                                    }
-                                    onClick={() => {
-                                        onGenerateKeys();
-                                        dispatch(
-                                            push(
-                                                `${url}/${BakerSubRoutes.keys}`
-                                            )
-                                        );
-                                    }}
-                                >
-                                    Generate keys
-                                </Button>
-                            </div>
-                        </Columns.Column>
-                    </Route>
-
-                    <Route path={`${path}/${BakerSubRoutes.keys}`}>
-                        <Columns.Column
-                            header="Baker keys"
-                            className={styles.stretchColumn}
-                        >
-                            <ExportBakerKeys
-                                className={styles.columnContent}
-                                accountAddress={account?.address}
-                                bakerKeys={bakerKeys}
-                                onContinue={() =>
-                                    onCreateTransaction()
-                                        .then(() =>
-                                            dispatch(
-                                                push(
-                                                    `${url}/${BakerSubRoutes.sign}`
-                                                )
-                                            )
-                                        )
-                                        .catch(() =>
-                                            setError(
-                                                errorMessages.unableToReachNode
-                                            )
-                                        )
-                                }
-                            />
-                        </Columns.Column>
-                    </Route>
-
-                    <Route path={`${path}/${BakerSubRoutes.sign}`}>
-                        <Columns.Column header="Signature and hardware wallet">
-                            <SignTransactionColumn
-                                signingFunction={signingFunction}
-                                onSkip={() => signingFunction()}
-                            />
-                        </Columns.Column>
-                    </Route>
-                </Switch>
-            </Columns>
-        </MultiSignatureLayout>
+            <AmountDetail title="Staked amount" value={stake?.stake} />
+            <PlainDetail
+                title="Restake earnings"
+                value={
+                    stake?.restake !== undefined
+                        ? displayRestakeEarnings(stake.restake)
+                        : undefined
+                }
+            />
+            <PlainDetail
+                title="Pool delegation status"
+                value={
+                    openForDelegation !== undefined
+                        ? displayPoolOpen(openForDelegation)
+                        : undefined
+                }
+            />
+            <DisplayBakerCommission
+                title="Transaction fee commission"
+                value={commissions?.transactionFeeCommission}
+                placeholder
+            />
+            <DisplayBakerCommission
+                title="Baking reward commission"
+                value={commissions?.bakingRewardCommission}
+                placeholder
+            />
+            <DisplayBakerCommission
+                title="Finalization reward commission"
+                value={commissions?.finalizationRewardCommission}
+                placeholder
+            />
+            <DisplayMetadataUrl metadataUrl={metadataUrl} placeholder />
+            <DisplayPublicKey
+                name="Election verify key:"
+                publicKey={keys?.electionPublic}
+                placeholder
+            />
+            <DisplayPublicKey
+                name="Signature verify key:"
+                publicKey={keys?.signaturePublic}
+                placeholder
+            />
+            <DisplayPublicKey
+                name="Aggregation verify key:"
+                publicKey={keys?.aggregationPublic}
+                placeholder
+            />
+        </>
     );
-}
+};
 
-export default ensureExchangeRate(
-    ensureChainData(AddBakerPage, LoadingComponent),
-    LoadingComponent
+const toRoot = <Redirect to={routes.MULTISIGTRANSACTIONS_ADD_BAKER} />;
+
+type Deps = ConfigureBakerFlowDependencies;
+type Props = ExtendableProps<Deps, { blockSummary: BlockSummaryV1 }>;
+type UnsafeDeps = Partial<Deps>;
+
+const hasNecessaryProps = (props: UnsafeDeps): props is Deps =>
+    [props.exchangeRate, props.blockSummary].every(isDefined);
+
+const withDeps = (component: ComponentType<Deps>) =>
+    withExchangeRate(
+        withChainData(
+            ensureProps(
+                component,
+                hasNecessaryProps,
+                <MultiSigAccountTransactionFlowLoading title={addBakerTitle} />
+            )
+        )
+    );
+
+const ensureDelegationProtocol = (c: ComponentType<Props>) =>
+    ensureProps<Props, Deps>(
+        c,
+        (p): p is Props => isBlockSummaryV1(p.blockSummary),
+        toRoot
+    );
+
+export default withDeps(
+    ensureDelegationProtocol(function AddBaker({
+        exchangeRate,
+        blockSummary,
+    }: Props) {
+        const accountsInfo = useSelector(accountsInfoSelector);
+        const cp = blockSummary.updates.chainParameters;
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        const convert = useCallback(
+            (
+                { account, ...values }: RequiredValues & AddBakerFlowState,
+                nonce: bigint
+            ) =>
+                convertToAddBakerTransaction(
+                    getDefaultCommissions(cp),
+                    account,
+                    nonce,
+                    exchangeRate
+                )(values, values.expiry),
+            [exchangeRate, cp]
+        );
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        const validate = useCallback(
+            ({ account, ...values }: RequiredValues & AddBakerFlowState) =>
+                validateAddBakerValues(
+                    blockSummary,
+                    account,
+                    accountsInfo[account.address],
+                    exchangeRate
+                )(values),
+            [blockSummary, exchangeRate, accountsInfo]
+        );
+
+        return (
+            <MultiSigAccountTransactionFlow<AddBakerFlowState, ConfigureBaker>
+                title={addBakerTitle}
+                convert={convert}
+                validate={validate}
+                accountFilter={(_, i) =>
+                    isDefined(i) && !isBakerAccount(i) && !isDelegatorAccount(i)
+                }
+                preview={(v) => (
+                    <DisplayValues
+                        {...v}
+                        exchangeRate={exchangeRate}
+                        chainParameters={cp}
+                    />
+                )}
+            >
+                {({ openForDelegation, account }) => ({
+                    stake: {
+                        title: 'Stake settings',
+                        render: (initial, onNext, formValues) =>
+                            account ? (
+                                <AddBakerStakePage
+                                    account={account}
+                                    exchangeRate={exchangeRate}
+                                    blockSummary={blockSummary}
+                                    initial={initial}
+                                    onNext={onNext}
+                                    formValues={formValues}
+                                    isMultiSig
+                                />
+                            ) : (
+                                toRoot
+                            ),
+                    },
+                    openForDelegation: {
+                        title: 'Pool open status',
+                        render: (initial, onNext) =>
+                            account ? (
+                                <DelegationStatusPage
+                                    initial={initial}
+                                    onNext={onNext}
+                                    account={account}
+                                />
+                            ) : (
+                                toRoot
+                            ),
+                    },
+                    commissions: {
+                        title: 'Commission rates',
+                        render: (initial, onNext) =>
+                            account ? (
+                                <CommissionsPage
+                                    initial={initial}
+                                    onNext={onNext}
+                                    chainParameters={cp}
+                                    account={account}
+                                />
+                            ) : (
+                                toRoot
+                            ),
+                    },
+                    metadataUrl:
+                        openForDelegation !== OpenStatus.ClosedForAll
+                            ? {
+                                  title: 'Metadata URL',
+                                  render: (initial, onNext) =>
+                                      account ? (
+                                          <MetadataUrlPage
+                                              initial={initial}
+                                              onNext={onNext}
+                                              account={account}
+                                          />
+                                      ) : (
+                                          toRoot
+                                      ),
+                              }
+                            : undefined,
+                    keys: {
+                        title: 'Generated keys',
+                        render: (initial, onNext) =>
+                            account ? (
+                                <KeysPage
+                                    account={account}
+                                    initial={initial}
+                                    onNext={onNext}
+                                />
+                            ) : (
+                                toRoot
+                            ),
+                    },
+                })}
+            </MultiSigAccountTransactionFlow>
+        );
+    })
 );

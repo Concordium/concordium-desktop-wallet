@@ -1,0 +1,51 @@
+@import '../common';
+
+$logHeightMax: calc(
+    100vh - #{$page-header-height} - 2 * #{$page-gutter} - #{$tabbed-card-header-height} -
+        2px
+);
+
+.root {
+    padding-bottom: 1px;
+}
+
+.scroll {
+    composes: fillCardPadding;
+    position: relative;
+    max-height: $logHeightMax;
+    overflow: overlay;
+
+    &Infinite {
+        max-height: none;
+        height: $logHeightMax;
+    }
+}
+
+.bar {
+    composes: thickBlueSeparator;
+    position: sticky;
+    top: 0;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    from {
+        transform: rotate(-359deg);
+    }
+}
+
+.transactionsHeader {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.syncIcon {
+    position: absolute;
+    right: -25px;
+    transform-origin: center;
+    animation: spin 1s linear;
+    animation-iteration-count: infinite;
+}

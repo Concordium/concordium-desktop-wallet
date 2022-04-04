@@ -17,5 +17,5 @@ export const lengthRule: (
     message: `${name} must be ${desiredLength} characters`,
 });
 
-export const mustBeANumber: Validate = (v) =>
-    onlyDigitsNoLeadingZeroes(v) || 'Must be a valid number';
+export const mustBeAnInteger: Validate = (v) =>
+    onlyDigitsNoLeadingZeroes(v) || 'Must be a valid integer';

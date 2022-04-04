@@ -1,7 +1,8 @@
+import clsx from 'clsx';
 import React, { useCallback } from 'react';
 import { useFormContext, Validate } from 'react-hook-form';
 import { collapseFraction } from '~/utils/basicHelpers';
-import { getGTUSymbol } from '~/utils/gtu';
+import { getCcdSymbol } from '~/utils/ccd';
 import { useUpdateEffect } from '~/utils/hooks';
 import { validateBakerStake } from '~/utils/transactionHelpers';
 import { AccountInfo, Fraction } from '~/utils/types';
@@ -12,10 +13,13 @@ import Label from './Label';
 interface Props {
     header: string;
     initial?: string;
+    /** existing value in CCD. */
+    existing?: string;
     minimumStake: bigint;
     fieldName: string;
     accountInfo: AccountInfo | undefined;
     estimatedFee: Fraction | undefined;
+    hasPendingChange?: boolean;
 }
 
 export default function PickBakerStakeAmount({
@@ -25,7 +29,9 @@ export default function PickBakerStakeAmount({
     accountInfo,
     estimatedFee,
     initial,
-}: Props) {
+    existing,
+    hasPendingChange,
+}: Props): JSX.Element {
     const form = useFormContext<{ [key: string]: string }>();
     const validStakeAmount: Validate = useCallback(
         (value: string) =>
@@ -55,10 +61,19 @@ export default function PickBakerStakeAmount({
 
     return (
         <div className="mV30">
+            {existing && (
+                <div className="body3 mono mB10">
+                    Current stake: {getCcdSymbol()}
+                    {existing}
+                </div>
+            )}
             <Label>{header}</Label>
             <div className="h1 mV5">
-                {getGTUSymbol()}
+                <span className={clsx(hasPendingChange && 'textFaded')}>
+                    {getCcdSymbol()}
+                </span>
                 <Form.GtuInput
+                    disabled={hasPendingChange}
                     defaultValue={initial}
                     name={fieldName}
                     autoFocus

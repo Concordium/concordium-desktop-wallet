@@ -4,10 +4,11 @@ import { findAccountTransactionHandler } from '~/utils/transactionHandlers/Handl
 import { createProposalRoute } from '~/utils/routerHelper';
 import routes from '~/constants/routes.json';
 
-export enum BakerSubRoutes {
+export enum AccountTransactionSubRoutes {
     keys,
     stake,
     restake,
+    data,
     expiry,
     sign,
 }
@@ -31,14 +32,15 @@ export function getLocationAfterAccounts(
 ) {
     switch (transactionKind) {
         case TransactionKindId.Add_baker:
-            return `${url}/${BakerSubRoutes.stake}`;
+        case TransactionKindId.Update_baker_stake:
+            return `${url}/${AccountTransactionSubRoutes.stake}`;
         case TransactionKindId.Remove_baker:
         case TransactionKindId.Update_baker_keys:
-            return `${url}/${BakerSubRoutes.expiry}`;
-        case TransactionKindId.Update_baker_stake:
-            return `${url}/${BakerSubRoutes.stake}`;
+            return `${url}/${AccountTransactionSubRoutes.expiry}`;
         case TransactionKindId.Update_baker_restake_earnings:
-            return `${url}/${BakerSubRoutes.restake}`;
+            return `${url}/${AccountTransactionSubRoutes.restake}`;
+        case TransactionKindId.Register_data:
+            return `${url}/${AccountTransactionSubRoutes.data}`;
         default:
             throw new Error('unknown transactionKind');
     }
@@ -47,7 +49,10 @@ export function getLocationAfterAccounts(
 export function createTransferWithAccountPathName(
     transactionKind: TransactionKindId
 ) {
-    if (isBakerTransaction(transactionKind)) {
+    if (
+        isBakerTransaction(transactionKind) ||
+        transactionKind === TransactionKindId.Register_data
+    ) {
         return getLocationAfterAccounts(
             createProposalRoute(
                 TransactionTypes.AccountTransaction,

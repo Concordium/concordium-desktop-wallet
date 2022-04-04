@@ -26,6 +26,9 @@ import {
     AddIdentityProvider,
     AddAnonymityRevoker,
     BlsKeyTypes,
+    TimeParameters,
+    CooldownParameters,
+    PoolParameters,
 } from '~/utils/types';
 import { LedgerCommands } from '~/preload/preloadTypes';
 
@@ -137,11 +140,13 @@ export default function exposedMethods(
         signMintDistribution: (
             transaction: UpdateInstruction<MintDistribution>,
             serializedPayload: Buffer,
+            version: number,
             keypath: number[]
         ) => {
             return getLedgerClient().signMintDistribution(
                 transaction,
                 serializedPayload,
+                version,
                 keypath
             );
         },
@@ -228,13 +233,48 @@ export default function exposedMethods(
             transaction: UpdateInstruction<AuthorizationKeysUpdate>,
             serializedPayload: Buffer,
             keypath: number[],
-            INS: number
+            INS: number,
+            version: number
         ) => {
             return getLedgerClient().signAuthorizationKeysUpdate(
                 transaction,
                 serializedPayload,
                 keypath,
-                INS
+                INS,
+                version
+            );
+        },
+        signTimeParameters: (
+            transaction: UpdateInstruction<TimeParameters>,
+            serializedPayload: Buffer,
+            keypath: number[]
+        ) => {
+            return getLedgerClient().signTimeParameters(
+                transaction,
+                serializedPayload,
+                keypath
+            );
+        },
+        signCooldownParameters: (
+            transaction: UpdateInstruction<CooldownParameters>,
+            serializedPayload: Buffer,
+            keypath: number[]
+        ) => {
+            return getLedgerClient().signCooldownParameters(
+                transaction,
+                serializedPayload,
+                keypath
+            );
+        },
+        signPoolParameters: (
+            transaction: UpdateInstruction<PoolParameters>,
+            serializedPayload: Buffer,
+            keypath: number[]
+        ) => {
+            return getLedgerClient().signPoolParameters(
+                transaction,
+                serializedPayload,
+                keypath
             );
         },
         getAppAndVersion: () => getLedgerClient().getAppAndVersion(),

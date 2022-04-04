@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import React, { ElementType, PropsWithChildren } from 'react';
 
 import { PolymorphicComponentProps } from '~/utils/types';
+import Loading from '../Loading';
 
 import styles from './Button.module.scss';
 
@@ -22,6 +23,7 @@ interface Props {
     negative?: boolean;
     icon?: JSX.Element;
     disabled?: boolean;
+    loading?: boolean;
 }
 
 export type ButtonProps<
@@ -38,6 +40,7 @@ export default function Button<TAs extends ElementType = 'button'>({
     inverted = false,
     clear = false,
     negative = false,
+    loading = false,
     icon,
     className,
     as,
@@ -58,9 +61,19 @@ export default function Button<TAs extends ElementType = 'button'>({
           );
 
     return (
-        <Component type="button" className={classNames} {...props}>
-            {icon && <span className={styles.icon}>{icon}</span>}
-            {children}
+        <Component
+            type="button"
+            disabled={loading}
+            className={classNames}
+            {...props}
+        >
+            {loading || (
+                <>
+                    {icon && <span className={styles.icon}>{icon}</span>}
+                    {children}
+                </>
+            )}
+            {loading && <Loading inline className={styles.loading} />}
         </Component>
     );
 }

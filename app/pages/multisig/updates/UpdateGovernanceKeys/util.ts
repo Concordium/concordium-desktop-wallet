@@ -1,3 +1,4 @@
+import { isAuthorizationsV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import { Authorization, Authorizations } from '../../../../node/NodeApiTypes';
 import {
     AccessStructure,
@@ -199,6 +200,10 @@ export function getAccessStructureTitle(
             return 'Add anonymity revoker';
         case AccessStructureEnum.addIdentityProvider:
             return 'Add identity provider';
+        case AccessStructureEnum.cooldownParameters:
+            return 'Cooldown parameters';
+        case AccessStructureEnum.timeParameters:
+            return 'Time parameters';
         default:
             throw new Error(
                 `Unknown access structure type: ${accessStructureType}`
@@ -281,6 +286,21 @@ export function mapCurrentAuthorizationsToUpdate(
             AccessStructureEnum.addIdentityProvider
         ),
     ];
+
+    if (isAuthorizationsV1(authorizations)) {
+        accessStructures.push(
+            mapAuthorizationToAccessStructure(
+                authorizations.cooldownParameters,
+                AccessStructureEnum.cooldownParameters
+            )
+        );
+        accessStructures.push(
+            mapAuthorizationToAccessStructure(
+                authorizations.timeParameters,
+                AccessStructureEnum.timeParameters
+            )
+        );
+    }
 
     const update: AuthorizationKeysUpdate = {
         keyUpdateType: type,

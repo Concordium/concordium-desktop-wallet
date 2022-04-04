@@ -1,4 +1,4 @@
-import { ExchangeRate } from './types';
+import { ExchangeRate, Fraction } from './types';
 
 const getGCD = (a: bigint, b: bigint): bigint => (b ? getGCD(b, a % b) : a);
 
@@ -19,10 +19,14 @@ export function reduceFraction(
     return [numerator / gcd, denominator / gcd];
 }
 
-export const getReducedExchangeRate = ({
+export const getReducedFraction = ({
     numerator,
     denominator,
-}: ExchangeRate): ExchangeRate => {
+}: Fraction): Fraction => {
     const [rn, rd] = reduceFraction(numerator, denominator);
     return { numerator: rn, denominator: rd };
 };
+
+export const getReducedExchangeRate: (
+    er: ExchangeRate
+) => ExchangeRate = getReducedFraction;

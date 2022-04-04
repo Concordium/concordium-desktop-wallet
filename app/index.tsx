@@ -3,6 +3,9 @@ import { render } from 'react-dom';
 import { AppContainer as ReactHotAppContainer } from 'react-hot-loader';
 import { push } from 'connected-react-router';
 import { UpdateInfo } from 'electron-updater';
+
+import './styles/libs.global.scss';
+
 import Root from './shell/Root';
 import { history, configuredStore } from './store/store';
 import { init as initMisc } from './features/MiscSlice';

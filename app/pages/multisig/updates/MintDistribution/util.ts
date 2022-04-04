@@ -1,8 +1,4 @@
-import {
-    BlockSummary,
-    ConsensusStatus,
-    MintDistributionNode,
-} from '~/node/NodeApiTypes';
+import { ConsensusStatus, MintDistributionNode } from '~/node/NodeApiTypes';
 import updateConstants from '~/constants/updateConstants.json';
 import { RewardDistributionValue } from '../../common/RewardDistribution';
 
@@ -11,9 +7,6 @@ export const rewardDistributionLabels: [string, string, string] = [
     'Finalization account reward',
     'Foundation',
 ];
-
-export const getCurrentValue = (blockSummary: BlockSummary) =>
-    blockSummary.updates.chainParameters.rewardParameters.mintDistribution;
 
 export const toRewardDistributionValue = ({
     bakingReward,

@@ -1,10 +1,9 @@
 import { getNumberParts } from './numberStringHelpers';
 import { MintRate } from './types';
 
-// eslint-disable-next-line import/prefer-default-export
-export const parseMintPerSlot = (mintPerSlot: string): MintRate | undefined => {
+export const parseMintRate = (mintRate: string): MintRate | undefined => {
     const { whole, fractions = '', exponent: e = '0' } = getNumberParts(
-        mintPerSlot
+        mintRate
     );
 
     const mantissa = parseInt(`${whole + fractions}`, 10);
@@ -15,4 +14,8 @@ export const parseMintPerSlot = (mintPerSlot: string): MintRate | undefined => {
     }
 
     return { mantissa, exponent };
+};
+
+export const stringifyMintRate = (mintRate: MintRate): string => {
+    return `${mintRate.mantissa}e-${mintRate.exponent}`;
 };

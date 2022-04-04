@@ -5,7 +5,7 @@ import {
     TimeConstants,
     secondsSinceUnixEpoch,
 } from '~/utils/timeHelpers';
-import { ChainData } from '../common/withChainData';
+import { ChainData } from '~/utils/withChainData';
 import { UpdateType, MultiSignatureTransaction } from '~/utils/types';
 import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import styles from './MultiSignatureCreateProposal.module.scss';
@@ -21,7 +21,7 @@ interface Props extends Required<ChainData> {
     defaults: FieldValues;
     type: UpdateType;
     onFinish: (
-        proposal: Partial<MultiSignatureTransaction>,
+        proposal: Omit<MultiSignatureTransaction, 'id'> | undefined,
         defaults: FieldValues
     ) => void;
 }

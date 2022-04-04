@@ -79,7 +79,7 @@ which is only recompiled with a full restart.
 ## Targeting specific network
 
 To build the application for a specific network you must supply the `TARGET_NET` variable. The value
-has to be one of `stagenet`, `testnet` or `mainnet`, otherwise the build will fail. If `TARGET_NET` is not
+has to be one of `stagenet`, `testnet`, `protonet`, or `mainnet`, otherwise the build will fail. If `TARGET_NET` is not
 set the build will be for `mainnet`. Note that the `TARGET_NET` will be appended to the filenames for
 `stagenet` and `testnet`.
 
