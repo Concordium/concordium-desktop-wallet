@@ -25,6 +25,9 @@ function getWalletProxy() {
     if (targetNet === Net.Testnet) {
         return urls.walletProxyTestnet;
     }
+    if (targetNet === Net.Protonet) {
+        return urls.walletProxyProtonet;
+    }
     if (targetNet === Net.Stagenet) {
         return urls.walletProxyStagenet;
     }
