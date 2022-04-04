@@ -9,20 +9,24 @@ import {
     transactionsSelector,
 } from '~/features/TransactionSlice';
 import { TransferTransaction } from '~/utils/types';
-import TransactionList from '../../TransactionList';
-import TransactionView from '../../TransactionView';
+import TransactionList from '../TransactionList';
+import TransactionView from '../TransactionView';
 import TransactionLogFilters from '../TransactionLogFilters';
+import TransactionsHeader from '../TransactionsHeader';
 
 import styles from './TransactionLog.module.scss';
-import TransactionsHeader from '../../TransactionsHeader';
 
 interface Props {
     abortRef: React.MutableRefObject<
         ((reason?: string | undefined) => void) | undefined
     >;
+    /**
+     * Only show latest N transactions. Setting this disables inifinite scrolling.
+     */
+    limitLatest?: number;
 }
 
-export default function TransactionLog({ abortRef }: Props) {
+export default function TransactionLog({ abortRef, limitLatest }: Props) {
     const transactions = useSelector(transactionsSelector);
     const hasMoreTransactions = useSelector(hasMoreTransactionsSelector);
     const [chosenTransaction, setChosenTransaction] = useState<
@@ -30,9 +34,10 @@ export default function TransactionLog({ abortRef }: Props) {
     >();
     const infinite = useMemo(
         () =>
-            transactions.length >= transactionLogPageSize ||
-            hasMoreTransactions,
-        [transactions.length, hasMoreTransactions]
+            limitLatest === undefined &&
+            (transactions.length >= transactionLogPageSize ||
+                hasMoreTransactions),
+        [transactions.length, hasMoreTransactions, limitLatest]
     );
     const [showingLog, setShowingLog] = useState(true);
 
@@ -61,7 +66,11 @@ export default function TransactionLog({ abortRef }: Props) {
                         <TransactionList
                             infinite={infinite}
                             abortRef={abortRef}
-                            transactions={transactions}
+                            transactions={
+                                limitLatest
+                                    ? transactions.slice(0, limitLatest)
+                                    : transactions
+                            }
                             onTransactionClick={setChosenTransaction}
                         />
                     </div>

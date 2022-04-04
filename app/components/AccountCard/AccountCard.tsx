@@ -6,6 +6,7 @@ import PendingImage from '@resources/svg/pending-arrows.svg';
 import RejectedImage from '@resources/svg/warning.svg';
 import ShieldImage from '@resources/svg/shield.svg';
 import BakerImage from '@resources/svg/baker.svg';
+import DelegationImage from '@resources/svg/delegation.svg';
 import ReadonlyImage from '@resources/svg/read-only.svg';
 import LedgerImage from '@resources/svg/ledger.svg';
 import InfoImage from '@resources/svg/info.svg';
@@ -37,7 +38,8 @@ interface ViewProps extends ClassName {
     accountStatus?: AccountStatus;
     connected?: boolean;
     multiSig?: boolean;
-    isStaking?: boolean;
+    isBaking?: boolean;
+    isDelegating?: boolean;
     hasEncryptedFunds?: boolean;
     hasDeployedCredentials?: boolean;
     shielded?: bigint;
@@ -135,7 +137,8 @@ export function AccountCardView({
     onClick,
     accountName,
     initialAccount = false,
-    isStaking = false,
+    isBaking = false,
+    isDelegating = false,
     accountStatus,
     hasDeployedCredentials = false,
     connected = false,
@@ -186,10 +189,16 @@ export function AccountCardView({
                                 className={styles.statusImage}
                             />
                         )}
-                        {isStaking && (
+                        {isBaking && (
                             <BakerImage
                                 width="20"
                                 className={styles.bakerImage}
+                            />
+                        )}
+                        {isDelegating && (
+                            <DelegationImage
+                                width="20"
+                                className={styles.delegationImage}
                             />
                         )}
                         {accountStatus === AccountStatus.Confirmed &&
@@ -294,9 +303,9 @@ export default function AccountCard({
     const shielded = account.totalDecrypted
         ? BigInt(account.totalDecrypted)
         : 0n;
-    const hasStakedBalance =
-        accountInfo !== undefined &&
-        (isBakerAccount(accountInfo) || isDelegatorAccount(accountInfo));
+    const isBaking = accountInfo !== undefined && isBakerAccount(accountInfo);
+    const isDelegating =
+        accountInfo !== undefined && isDelegatorAccount(accountInfo);
     const { total: unShielded, staked, atDisposal } = getPublicAccountAmounts(
         accountInfo
     );
@@ -315,7 +324,8 @@ export default function AccountCard({
             accountStatus={account.status}
             multiSig={accountInfo && isMultiCred(accountInfo)}
             identityName={account.identityName}
-            isStaking={hasStakedBalance}
+            isBaking={isBaking}
+            isDelegating={isDelegating}
             initialAccount={isInitialAccount(account)}
         />
     );

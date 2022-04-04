@@ -86,11 +86,22 @@ $border-radius: 10px;
     height: $font-size-body3;
 }
 
+.delegationImage,
 .bakerImage {
     margin-left: 10px;
-    margin-top: -10px;
     height: auto;
     flex: 0 0 20px;
+}
+
+.bakerImage {
+    margin-top: -10px;
+}
+
+.delegationImage {
+    path,
+    ellipse {
+        fill: $color-off-black;
+    }
 }
 
 .statusImage {

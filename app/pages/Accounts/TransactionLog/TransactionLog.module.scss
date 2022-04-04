@@ -1,4 +1,4 @@
-@import '../../common';
+@import '../common';
 
 $logHeightMax: calc(
     100vh - #{$page-header-height} - 2 * #{$page-gutter} - #{$tabbed-card-header-height} -

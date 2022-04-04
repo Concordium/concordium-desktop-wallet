@@ -3,7 +3,7 @@ import {
     isBakerAccount,
     isDelegatorAccount,
 } from '@concordium/node-sdk/lib/src/accountHelpers';
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, Route } from 'react-router';
 import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
@@ -12,26 +12,22 @@ import {
     chosenAccountInfoSelector,
 } from '~/features/AccountSlice';
 import routes from '~/constants/routes.json';
-import { viewingShieldedSelector } from '~/features/TransactionSlice';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
 import { RootState } from '~/store/store';
 import { useProtocolVersion } from '~/utils/dataHooks';
 import { hasDelegationProtocol } from '~/utils/protocolVersion';
-import AccountBalanceView from '../AccountBalanceView';
 import AccountPageLayout from '../AccountPageLayout';
 import AccountViewActions from '../AccountViewActions';
 import BasicTransferRoutes from '../BasicTransferRoutes';
-import ShowAccountAddress from '../ShowAccountAddress';
 import ShowReleaseSchedule from './ShowReleaseSchedule';
 import ScheduleTransfer from './ScheduleTransfer';
 import CredentialInformation from './CredentialInformation';
 import MoreActions from './MoreActions';
 import BuildSchedule from './BuildSchedule';
-import TransactionLog from './TransactionLog';
-import DecryptComponent from '../DecryptComponent';
 import withAccountSync from '../withAccountSync';
 import Delegation from './Delegation';
 import Baking from './Baking/Baking';
+import AccountCarousel from './AccountCarousel';
 
 const { Master, Detail } = MasterDetailPageLayout;
 const ToAccounts = () => <Redirect to={routes.ACCOUNTS} />;
@@ -46,17 +42,9 @@ export default withAccountSync(function DetailsPage() {
         (s: RootState) => s.accounts.accountChanged
     );
     const pv = useProtocolVersion(true);
-    const viewingShielded = useSelector(viewingShieldedSelector);
     const hasCredentials = useSelector(
         account ? accountHasDeployedCredentialsSelector(account) : () => false
     );
-    const abortRef = useRef<((reason?: string) => void) | undefined>(undefined);
-    useEffect(() => {
-        const { current } = abortRef;
-        return () => {
-            current?.();
-        };
-    }, [account?.address]);
 
     const isBaker = accountInfo !== undefined && isBakerAccount(accountInfo);
     const isDelegating =
@@ -70,7 +58,7 @@ export default withAccountSync(function DetailsPage() {
     return (
         <AccountPageLayout>
             <Master>
-                <AccountBalanceView />
+                <AccountCarousel />
                 <AccountViewActions
                     account={account}
                     accountInfo={accountInfo}
@@ -85,9 +73,6 @@ export default withAccountSync(function DetailsPage() {
                             accountChanged ? ToCreateScheduled : BuildSchedule
                         }
                     />
-                    <Route path={routes.ACCOUNTS_ADDRESS}>
-                        <ShowAccountAddress account={account} asCard />
-                    </Route>
                     <Route path={routes.ACCOUNTS_INSPECTRELEASESCHEDULE}>
                         <ShowReleaseSchedule accountInfo={accountInfo} />
                     </Route>
@@ -124,13 +109,6 @@ export default withAccountSync(function DetailsPage() {
                             />
                         ) : (
                             <ToAccounts />
-                        )}
-                    </Route>
-                    <Route path={routes.ACCOUNTS}>
-                        {viewingShielded && !account.allDecrypted ? (
-                            <DecryptComponent account={account} />
-                        ) : (
-                            <TransactionLog abortRef={abortRef} />
                         )}
                     </Route>
                 </BasicTransferRoutes>
