@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { getFormattedDateString, subtractHours } from '~/utils/timeHelpers';
+import { getFormattedDateString } from '~/utils/timeHelpers';
 import styles from './DisplayTransactionExpiryTime.module.scss';
 
 type Props = {
@@ -21,13 +21,6 @@ export default function DisplayTransactionExpiryTime({
                     getFormattedDateString(expiryTime)
                 )}
             </p>
-            {expiryTime === undefined ? null : (
-                <p className={styles.note}>
-                    A transaction can only be submitted within 2 hours of its
-                    expiry <br /> (
-                    {getFormattedDateString(subtractHours(2, expiryTime))})
-                </p>
-            )}
         </>
     );
 }
