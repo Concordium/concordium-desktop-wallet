@@ -27,7 +27,7 @@ export default function AddBakerProposalStatus({
             headerLeft={senderName ?? transaction.sender}
             headerRight="Register data"
             status={status}
-            title="Register Data"
+            title="Register data"
         >
             <span className="textFaded">
                 {data.substring(0, shownLength)}
