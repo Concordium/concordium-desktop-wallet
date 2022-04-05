@@ -4,7 +4,8 @@ import React from 'react';
 import { Redirect, Route, Switch, useLocation } from 'react-router';
 import { Account } from '~/utils/types';
 import routes from '~/constants/routes.json';
-import ConfigureDelegation from './ConfigureDelegation';
+import AddDelegation from './AddDelegation';
+import UpdateDelegation from './UpdateDelegation';
 import RemoveDelegation from './RemoveDelegation';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import StakingDetails from '../StakingDetails';
@@ -18,9 +19,9 @@ function Actions({ isDelegating }: ActionsProps) {
         <>
             <ButtonNavLink
                 className="mB20:notLast flex width100"
-                to={routes.ACCOUNTS_CONFIGURE_DELEGATION}
+                to={routes.ACCOUNTS_UPDATE_DELEGATION}
             >
-                Update current delegation
+                Update delegation
             </ButtonNavLink>
             {isDelegating && (
                 <ButtonNavLink
@@ -44,21 +45,17 @@ export default function Delegation({ account, accountInfo }: Props) {
     const isDelegating = isDelegatorAccount(accountInfo);
     const { pathname } = useLocation();
 
-    if (
-        !pathname.startsWith(routes.ACCOUNTS_CONFIGURE_DELEGATION) &&
-        !isDelegating
-    ) {
+    if (!pathname.startsWith(routes.ACCOUNTS_ADD_DELEGATION) && !isDelegating) {
         return <Redirect to={routes.ACCOUNTS} />;
     }
 
     return (
         <Switch>
-            <Route path={routes.ACCOUNTS_CONFIGURE_DELEGATION}>
-                <ConfigureDelegation
-                    account={account}
-                    accountInfo={accountInfo}
-                    firstPageBack={isDelegating}
-                />
+            <Route path={routes.ACCOUNTS_ADD_DELEGATION}>
+                <AddDelegation account={account} accountInfo={accountInfo} />
+            </Route>
+            <Route path={routes.ACCOUNTS_UPDATE_DELEGATION}>
+                <UpdateDelegation account={account} accountInfo={accountInfo} />
             </Route>
             <Route path={routes.ACCOUNTS_REMOVE_DELEGATION}>
                 <RemoveDelegation account={account} accountInfo={accountInfo} />

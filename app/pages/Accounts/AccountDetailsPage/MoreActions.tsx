@@ -104,15 +104,15 @@ export default function MoreActions({ account, accountInfo }: Props) {
                         to={routes.ACCOUNTS_ADD_BAKER}
                         disabled={!accountInfo}
                     >
-                        Register baker
+                        Register as a baker
                     </ButtonNavLink>
                     {isDelegationPV && (
                         <ButtonNavLink
                             className="mB20:notLast flex width100"
-                            to={routes.ACCOUNTS_CONFIGURE_DELEGATION}
+                            to={routes.ACCOUNTS_ADD_DELEGATION}
                             disabled={!accountInfo}
                         >
-                            Setup delegation
+                            Delegate to a pool
                         </ButtonNavLink>
                     )}
                 </>

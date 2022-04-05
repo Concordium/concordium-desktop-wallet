@@ -49,7 +49,6 @@ export default function GenerateBakerKeys({
                         onContinue(keys);
                     }
                 }}
-                className="mT30"
                 buttonClassName={styles.continue}
                 hasExported={isDefined(initialKeys)}
             />

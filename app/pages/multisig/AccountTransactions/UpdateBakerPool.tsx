@@ -14,7 +14,6 @@ import {
     ConfigureBaker,
     ExtendableProps,
     Fraction,
-    OpenStatus,
 } from '~/utils/types';
 import MultiSigAccountTransactionFlow, {
     MultiSigAccountTransactionFlowLoading,
@@ -80,7 +79,7 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
             />
             {showField((v) => v.openForDelegation) && (
                 <PlainDetail
-                    title="Pool delegation status"
+                    title="Pool status"
                     value={
                         changes.openForDelegation !== undefined
                             ? displayPoolOpen(changes.openForDelegation)
@@ -211,9 +210,9 @@ export default withDeps(
                     )}
                     validate={validate}
                 >
-                    {({ openForDelegation, account }) => ({
+                    {({ account }) => ({
                         openForDelegation: {
-                            title: 'Pool open status',
+                            title: 'Pool status',
                             render: (initial, onNext) =>
                                 account ? (
                                     <DelegationStatusPage
@@ -225,25 +224,20 @@ export default withDeps(
                                     toRoot
                                 ),
                         },
-                        commissions:
-                            openForDelegation !== OpenStatus.ClosedForAll
-                                ? {
-                                      title: 'Commission rates',
-                                      render: (initial, onNext) =>
-                                          account ? (
-                                              <CommissionsPage
-                                                  initial={initial}
-                                                  onNext={onNext}
-                                                  chainParameters={
-                                                      chainParameters
-                                                  }
-                                                  account={account}
-                                              />
-                                          ) : (
-                                              toRoot
-                                          ),
-                                  }
-                                : undefined,
+                        commissions: {
+                            title: 'Commission rates',
+                            render: (initial, onNext) =>
+                                account ? (
+                                    <CommissionsPage
+                                        initial={initial}
+                                        onNext={onNext}
+                                        chainParameters={chainParameters}
+                                        account={account}
+                                    />
+                                ) : (
+                                    toRoot
+                                ),
+                        },
                         metadataUrl: {
                             title: 'Metadata URL',
                             render: (initial, onNext) =>

@@ -54,7 +54,7 @@ export default function DisplayConfigureBaker({ transaction }: Props) {
             )}
             {payload.openForDelegation !== undefined && (
                 <>
-                    <h5 className={styles.title}>Pool delegation status:</h5>
+                    <h5 className={styles.title}>Pool status:</h5>
                     <p className={styles.amount}>
                         {displayPoolOpen(payload.openForDelegation)}
                     </p>

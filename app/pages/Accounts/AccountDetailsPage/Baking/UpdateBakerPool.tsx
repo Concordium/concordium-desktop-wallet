@@ -12,7 +12,6 @@ import {
     ExtendableProps,
     MakeRequired,
     NotOptional,
-    OpenStatus,
 } from '~/utils/types';
 import AccountTransactionFlow, {
     AccountTransactionFlowLoading,
@@ -125,8 +124,9 @@ export default withDeps(
                     firstPageBack
                     validate={validate}
                 >
-                    {({ openForDelegation }) => ({
+                    {{
                         openForDelegation: {
+                            title: 'Pool status',
                             render: (initial, onNext) => (
                                 <DelegationStatusPage
                                     initial={initial}
@@ -134,23 +134,20 @@ export default withDeps(
                                     account={account}
                                 />
                             ),
-                            title: 'Pool settings',
                         },
-                        commissions:
-                            openForDelegation !== OpenStatus.ClosedForAll
-                                ? {
-                                      render: (initial, onNext) => (
-                                          <CommissionsPage
-                                              initial={initial}
-                                              onNext={onNext}
-                                              chainParameters={chainParameters}
-                                              account={account}
-                                          />
-                                      ),
-                                      title: 'Pool settings',
-                                  }
-                                : undefined,
+                        commissions: {
+                            title: 'Commission rates',
+                            render: (initial, onNext) => (
+                                <CommissionsPage
+                                    initial={initial}
+                                    onNext={onNext}
+                                    chainParameters={chainParameters}
+                                    account={account}
+                                />
+                            ),
+                        },
                         metadataUrl: {
+                            title: 'Metadata URL',
                             render: (initial, onNext) => (
                                 <MetadataUrlPage
                                     initial={initial}
@@ -158,9 +155,8 @@ export default withDeps(
                                     account={account}
                                 />
                             ),
-                            title: 'Pool settings',
                         },
-                    })}
+                    }}
                 </AccountTransactionFlow>
             </>
         );

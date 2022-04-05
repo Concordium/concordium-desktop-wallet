@@ -19,6 +19,8 @@ import {
     configureDelegationTitle,
     convertToConfigureDelegationTransaction,
 } from '~/utils/transactionFlows/configureDelegation';
+import { updateDelegationTitle } from '~/utils/transactionFlows/updateDelegation';
+import { addDelegationTitle } from '~/utils/transactionFlows/addDelegation';
 import { ensureProps } from '~/utils/componentHelpers';
 import routes from '~/constants/routes.json';
 import DelegationTargetPage from '~/components/Transfers/configureDelegation/DelegationTargetPage';
@@ -30,7 +32,7 @@ interface Props
     extends ConfigureDelegationFlowDependencies,
         NotOptional<AccountAndNonce> {
     accountInfo: AccountInfo;
-    firstPageBack?: boolean;
+    isUpdate?: boolean;
 }
 
 type UnsafeProps = MakeRequired<Partial<Props>, 'account' | 'accountInfo'>;
@@ -38,6 +40,9 @@ type UnsafeProps = MakeRequired<Partial<Props>, 'account' | 'accountInfo'>;
 const hasNecessaryProps = (props: UnsafeProps): props is Props => {
     return [props.exchangeRate, props.nonce].every(isDefined);
 };
+
+const getTitle = (isUpdate: boolean) =>
+    isUpdate ? updateDelegationTitle : addDelegationTitle;
 
 const withDeps = (component: ComponentType<Props>) =>
     withNonce(
@@ -58,10 +63,14 @@ function ConfigureDelegation(props: Props) {
         account,
         exchangeRate,
         accountInfo,
-        firstPageBack = false,
+        isUpdate = false,
     } = props;
     const { path: matchedRoute } = useRouteMatch();
     const [showError, setShowError] = useState(false);
+
+    const multisigRoute = isUpdate
+        ? routes.MULTISIGTRANSACTIONS_UPDATE_DELEGATION
+        : routes.MULTISIGTRANSACTIONS_ADD_DELEGATION;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const convert = useCallback(
@@ -99,14 +108,15 @@ function ConfigureDelegation(props: Props) {
                 ConfigureDelegationFlowState,
                 ConfigureDelegation
             >
-                title={configureDelegationTitle}
+                title={getTitle(isUpdate)}
                 convert={convert}
-                multisigRoute={routes.MULTISIGTRANSACTIONS_CONFIGURE_DELEGATION}
-                firstPageBack={firstPageBack}
+                multisigRoute={multisigRoute}
+                firstPageBack={isUpdate}
                 validate={validate}
             >
                 {{
                     target: {
+                        title: 'Delegation target',
                         render: (initial, onNext) => (
                             <DelegationTargetPage
                                 onNext={onNext}
@@ -116,6 +126,7 @@ function ConfigureDelegation(props: Props) {
                         ),
                     },
                     delegate: {
+                        title: 'Stake settings',
                         render: (initial, onNext, formValues) => (
                             <DelegationAmountPage
                                 account={account}

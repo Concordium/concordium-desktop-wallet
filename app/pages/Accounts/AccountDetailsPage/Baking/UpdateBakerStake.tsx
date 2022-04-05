@@ -98,6 +98,7 @@ export default withDeps(function UpdateBakerStake(props: Props) {
             >
                 {{
                     stake: {
+                        title: 'Stake settings',
                         render: (initial, onNext, formValues) => (
                             <UpdateBakerStakePage
                                 account={account}
