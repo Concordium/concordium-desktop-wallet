@@ -10,7 +10,7 @@ import {
     getThreshold,
     typeToDisplay,
 } from '~/utils/updates/HigherLevelKeysHelpers';
-import withChainData, { ChainData } from '../../common/withChainData';
+import withChainData, { ChainData } from '~/utils/withChainData';
 import { generateStatusLabel } from './KeyUpdateEntry';
 import styles from './HigherLevelKeysView.module.scss';
 

@@ -66,12 +66,12 @@ export default function getTransactionSignDigest(transaction: Transaction) {
 /**
  * Given a transaction, return the transaction hash, which is the hash, that contains the signature.
  */
-export async function getTransactionHash(transaction: Transaction) {
+export function getTransactionHash(transaction: Transaction) {
     if (instanceOfUpdateInstruction(transaction)) {
         return getUpdateInstructionTransactionHash(transaction);
     }
     if (instanceOfAccountTransactionWithSignature(transaction)) {
-        const accountTransactionHash = await getAccountTransactionHash(
+        const accountTransactionHash = getAccountTransactionHash(
             transaction,
             transaction.signatures
         );

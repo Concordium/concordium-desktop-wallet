@@ -41,7 +41,7 @@ export default class AddAnonymityRevokerHandler
         }: AddAnonymityRevokerFields,
         effectiveTime: bigint,
         expiryTime: bigint
-    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+    ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         if (!blockSummary) {
             return undefined;
         }

@@ -1,6 +1,6 @@
 import React from 'react';
 import Loading from '~/cross-app-components/Loading';
-import withChainData, { ChainData } from '../../common/withChainData';
+import withChainData, { ChainData } from '~/utils/withChainData';
 import ElectionDifficultyInput from './ElectionDifficultyInput';
 import { electionDifficultyResolution } from './util';
 

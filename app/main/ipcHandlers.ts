@@ -192,4 +192,8 @@ export default function initializeIpcHandlers(
     ipcMain.handle(ipcCommands.openFileDialog, (_event, opts) => {
         return dialog.showOpenDialog(opts);
     });
+
+    ipcMain.handle(ipcCommands.messageBox, async (_event, opts) => {
+        return dialog.showMessageBox(mainWindow, opts);
+    });
 }

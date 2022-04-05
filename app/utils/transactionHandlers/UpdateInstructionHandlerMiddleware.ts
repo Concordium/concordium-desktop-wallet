@@ -57,7 +57,7 @@ export default class UpdateInstructionHandlerTypeMiddleware<T>
         fields: any,
         effectiveTime: bigint,
         expiryTime: bigint
-    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+    ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         return this.base.createTransaction(
             blockSummary,
             fields,

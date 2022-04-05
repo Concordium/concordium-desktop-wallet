@@ -1,6 +1,6 @@
 import React, { forwardRef, useState } from 'react';
 import clsx from 'clsx';
-import { toMicroUnits } from '~/utils/gtu';
+import { ccdToMicroCcd } from '~/utils/ccd';
 import { Schedule } from '~/utils/types';
 import RegularInterval from '~/components/BuildSchedule/BuildRegularInterval';
 import ExplicitSchedule from '~/components/BuildSchedule/BuildExplicitSchedule';
@@ -11,7 +11,6 @@ import {
 import Radios from '~/components/Form/Radios';
 
 import accountStyles from '~/pages/Accounts/AccountDetailsPage/BuildSchedule/BuildSchedule.module.scss';
-import styles from './MultisignatureAccountTransactions.module.scss';
 
 interface Props {
     submitSchedule: (
@@ -38,7 +37,7 @@ const BuildSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
             <div
                 className={clsx(
                     accountStyles.buildSchedule,
-                    styles.buildSchedule
+                    'flexColumn flexChildFill'
                 )}
             >
                 <Radios
@@ -54,7 +53,7 @@ const BuildSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
                     defaults={defaults}
                     submitSchedule={submitSchedule}
                     setScheduleLength={setScheduleLength}
-                    amount={toMicroUnits(amount)}
+                    amount={ccdToMicroCcd(amount)}
                     ref={ref}
                 />
             </div>

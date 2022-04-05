@@ -1,6 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
-import { displayAsGTU } from '~/utils/gtu';
+import { displayAsCcd } from '~/utils/ccd';
 import { Fraction } from '~/utils/types';
 import { collapseFraction } from '~/utils/basicHelpers';
 
@@ -19,7 +19,7 @@ export default function DisplayEstimatedFee({
 }: Props) {
     let fee;
     if (estimatedFee) {
-        fee = displayAsGTU(collapseFraction(estimatedFee));
+        fee = displayAsCcd(collapseFraction(estimatedFee));
     } else {
         fee = 'To be determined';
     }

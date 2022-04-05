@@ -25,6 +25,9 @@ function getWalletProxy() {
     if (targetNet === Net.Testnet) {
         return urls.walletProxyTestnet;
     }
+    if (targetNet === Net.Protonet) {
+        return urls.walletProxyProtonet;
+    }
     if (targetNet === Net.Stagenet) {
         return urls.walletProxyStagenet;
     }
@@ -110,7 +113,16 @@ async function getTransactions(
     }
 
     const response = await walletProxy.get(proxyPath, {
-        transformResponse: (res) => parse(intToString(res, 'id')),
+        transformResponse: (res) => {
+            try {
+                return parse(intToString(res, 'id'));
+            } catch (e) {
+                throw new Error(
+                    `Unable to parse response from wallet proxy: ${res}`
+                );
+                // TODO: log the error and response?
+            }
+        },
     });
 
     const {

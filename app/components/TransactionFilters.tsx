@@ -20,24 +20,37 @@ import {
     pastDate,
 } from '~/components/Form/util/validation';
 import { useUpdateEffect } from '~/utils/hooks';
+import { hasDelegationProtocol } from '~/utils/protocolVersion';
 
-interface FilterForm
-    extends Pick<
-        TransactionFilter,
-        | TransactionKindString.Transfer
-        | TransactionKindString.TransferWithSchedule
-        | TransactionKindString.TransferToEncrypted
-        | TransactionKindString.TransferToPublic
-        | TransactionKindString.EncryptedAmountTransfer
-        | TransactionKindString.FinalizationReward
-        | TransactionKindString.BakingReward
-        | TransactionKindString.BlockReward
-        | TransactionKindString.UpdateCredentials
-    > {
+/**
+ * Single type filters, that, when applied, toggle showing of that transaction type.
+ */
+type CheckableFilters = Pick<
+    TransactionFilter,
+    | TransactionKindString.TransferToEncrypted
+    | TransactionKindString.TransferToPublic
+    | TransactionKindString.UpdateCredentials
+    | TransactionKindString.ConfigureDelegation
+>;
+
+interface DateFilters {
     toDate: Date | null | undefined;
     fromDate: Date | null | undefined;
-    bakerTransactions: boolean;
 }
+
+/**
+ * Grouped type filters, that, when applied, toggle showing of transactions of that type, and similar types included in the group of "GroupedField".
+ */
+type GroupedFilters = Pick<
+    TransactionFilter,
+    | TransactionKindString.Transfer
+    | TransactionKindString.TransferWithSchedule
+    | TransactionKindString.EncryptedAmountTransfer
+    | TransactionKindString.StakingReward
+    | TransactionKindString.ConfigureBaker
+>;
+
+type FilterForm = CheckableFilters & DateFilters & GroupedFilters;
 
 const fieldNames: NotOptional<EqualRecord<FilterForm>> = {
     toDate: 'toDate',
@@ -51,20 +64,34 @@ const fieldNames: NotOptional<EqualRecord<FilterForm>> = {
         TransactionKindString.TransferToPublic,
     [TransactionKindString.EncryptedAmountTransfer]:
         TransactionKindString.EncryptedAmountTransfer,
-    [TransactionKindString.FinalizationReward]:
-        TransactionKindString.FinalizationReward,
-    [TransactionKindString.BakingReward]: TransactionKindString.BakingReward,
-    [TransactionKindString.BlockReward]: TransactionKindString.BlockReward,
+    [TransactionKindString.StakingReward]: TransactionKindString.StakingReward,
     [TransactionKindString.UpdateCredentials]:
         TransactionKindString.UpdateCredentials,
-    bakerTransactions: 'bakerTransactions',
+    [TransactionKindString.ConfigureBaker]:
+        TransactionKindString.ConfigureBaker,
+    [TransactionKindString.ConfigureDelegation]:
+        TransactionKindString.ConfigureDelegation,
 };
 
-const transactionFilters: {
-    field: keyof FilterForm;
-    group?: TransactionKindString[];
+interface CheckableField<F> {
+    field: F;
     display: string;
-}[] = [
+    pvFilter?: (pv: bigint) => boolean;
+}
+
+/**
+ * Filter object represented by a single transaction type.
+ */
+type SingleField = CheckableField<keyof CheckableFilters>;
+
+/**
+ * Filter object represented by multiple transaction types.
+ */
+interface GroupedField extends CheckableField<keyof GroupedFilters> {
+    group: TransactionKindString[];
+}
+
+const transactionTypeFilters: (SingleField | GroupedField)[] = [
     {
         field: TransactionKindString.Transfer,
         group: [
@@ -98,31 +125,35 @@ const transactionFilters: {
         display: 'Shielded transfers',
     },
     {
-        field: TransactionKindString.FinalizationReward,
-        display: 'Finalization rewards',
-    },
-    {
-        field: TransactionKindString.BakingReward,
-        display: 'Baker rewards',
-    },
-    {
-        field: TransactionKindString.BlockReward,
-        display: 'Block rewards',
+        field: TransactionKindString.StakingReward,
+        display: 'Staking rewards',
+        group: [
+            TransactionKindString.BakingReward,
+            TransactionKindString.BlockReward,
+            TransactionKindString.FinalizationReward,
+            TransactionKindString.StakingReward,
+        ],
     },
     {
         field: TransactionKindString.UpdateCredentials,
         display: 'Update account credentials',
     },
     {
-        field: 'bakerTransactions',
+        field: TransactionKindString.ConfigureBaker,
         group: [
             TransactionKindString.AddBaker,
             TransactionKindString.RemoveBaker,
             TransactionKindString.UpdateBakerKeys,
             TransactionKindString.UpdateBakerRestakeEarnings,
             TransactionKindString.UpdateBakerStake,
+            TransactionKindString.ConfigureBaker,
         ],
-        display: 'Baker transactions',
+        display: 'Configure baker',
+    },
+    {
+        field: TransactionKindString.ConfigureDelegation,
+        display: 'Configure delegation',
+        pvFilter: hasDelegationProtocol,
     },
 ];
 
@@ -191,9 +222,6 @@ const TransactionFilters = forwardRef<
             ),
             toDate: toDate ? new Date(toDate) : null,
             fromDate: fromDate ? new Date(fromDate) : null,
-            bakerTransactions: booleanFilters.includes(
-                TransactionKindString.AddBaker
-            ),
         }),
         [fromDate, toDate, booleanFilters]
     );
@@ -218,9 +246,10 @@ const TransactionFilters = forwardRef<
                     };
                 }
 
-                const filterGroup = transactionFilters.find(
+                const filter = transactionTypeFilters.find(
                     (t) => t.field === k
-                )?.group;
+                ) as GroupedField | undefined;
+                const filterGroup = filter?.group;
 
                 if (!filterGroup) {
                     return { ...acc, [k]: v as boolean };
@@ -298,7 +327,7 @@ const TransactionFilters = forwardRef<
                     maxDate={new Date()}
                 />
                 <div className="m40 mB10 flexColumn">
-                    {transactionFilters.map(({ field, display }) => (
+                    {transactionTypeFilters.map(({ field, display }) => (
                         <Form.Checkbox
                             name={field}
                             size="large"

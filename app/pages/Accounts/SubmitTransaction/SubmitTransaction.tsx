@@ -4,7 +4,6 @@ import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect } from 'react-router';
 import type { Buffer } from 'buffer/';
-import clsx from 'clsx';
 import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
 import { parse } from '~/utils/JSONHelper';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
@@ -50,16 +49,15 @@ import SimpleErrorModal from '~/components/SimpleErrorModal';
 import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 import { insert } from '~/database/DecryptedAmountsDao';
 import { getKeyExportType } from '~/utils/identityHelpers';
+import { FinalPageLocationState } from '~/components/Transfers/FinalPage';
 
 import styles from './SubmitTransaction.module.scss';
 
 export interface SubmitTransactionLocationState<
-    CancelledState = Record<string, unknown>,
-    ConfirmedState = Record<string, unknown>
+    ConfirmedState = FinalPageLocationState
 > {
     transaction: string;
     account: Account;
-    cancelled: LocationDescriptorObject<CancelledState>;
     confirmed: LocationDescriptorObject<ConfirmedState>;
 }
 
@@ -167,12 +165,7 @@ export default function SubmitTransaction({ location }: Props) {
         return <Redirect to={routes.ACCOUNTS} />;
     }
 
-    const {
-        account,
-        transaction: transactionJSON,
-        cancelled,
-        confirmed,
-    } = location.state;
+    const { account, transaction: transactionJSON, confirmed } = location.state;
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const identity = useSelector(specificIdentitySelector(account.identityId));
@@ -309,8 +302,7 @@ export default function SubmitTransaction({ location }: Props) {
                 </h1>
             </PageLayout.Header>
             <PageLayout.Container
-                closeRoute={cancelled}
-                backRoute={cancelled}
+                closeRoute={routes.ACCOUNTS}
                 padding="vertical"
             >
                 <SimpleErrorModal
@@ -342,7 +334,7 @@ export default function SubmitTransaction({ location }: Props) {
                         }
                         className={styles.summary}
                     >
-                        <div className={clsx(styles.summaryContent, 'pT40')}>
+                        <div className={styles.summaryContent}>
                             <TransactionDetails transaction={transaction} />
                         </div>
                     </Card>

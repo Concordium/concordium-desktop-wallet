@@ -17,6 +17,8 @@ import {
     instanceOfRemoveBaker,
     instanceOfUpdateBakerStake,
     instanceOfUpdateBakerRestakeEarnings,
+    instanceOfConfigureBaker,
+    instanceOfConfigureDelegation,
 } from '~/utils/types';
 import BakerStakeThresholdHandler from './BakerStakeThresholdHandler';
 import ElectionDifficultyHandler from './ElectionDifficultyHandler';
@@ -45,8 +47,13 @@ import ScheduledTransferWithMemoHandler from './ScheduledTransferWithMemoHandler
 import EncryptedTransferWithMemoHandler from './EncryptedTransferWithMemoHandler';
 import SimpleTransferWithMemoHandler from './SimpleTransferWithMemoHandler';
 import EncryptedTransferHandler from './EncryptedTransferHandler';
-import BakerHandler from './BakerHandler';
+import StakingHandler from './StakingHandler';
 import { parse } from '../JSONHelper';
+
+import RegisterDataHandler from './RegisterDataHandler';
+import TimeParametersHandler from './TimeParameterHandler';
+import CooldownParametersHandler from './CooldownParametersHandler';
+import PoolParametersHandler from './PoolParametersHandlers';
 import { throwLoggedError } from '../basicHelpers';
 
 export function findAccountTransactionHandler(
@@ -71,26 +78,29 @@ export function findAccountTransactionHandler(
             );
         case TransactionKindId.Add_baker:
             return new AccountHandlerTypeMiddleware(
-                new BakerHandler('Add baker', instanceOfAddBaker)
+                new StakingHandler('Add baker', instanceOfAddBaker)
             );
         case TransactionKindId.Update_baker_keys:
             return new AccountHandlerTypeMiddleware(
-                new BakerHandler('Update baker keys', instanceOfUpdateBakerKeys)
+                new StakingHandler(
+                    'Update baker keys',
+                    instanceOfUpdateBakerKeys
+                )
             );
         case TransactionKindId.Remove_baker:
             return new AccountHandlerTypeMiddleware(
-                new BakerHandler('Remove baker', instanceOfRemoveBaker)
+                new StakingHandler('Remove baker', instanceOfRemoveBaker)
             );
         case TransactionKindId.Update_baker_stake:
             return new AccountHandlerTypeMiddleware(
-                new BakerHandler(
+                new StakingHandler(
                     'Update baker stake',
                     instanceOfUpdateBakerStake
                 )
             );
         case TransactionKindId.Update_baker_restake_earnings:
             return new AccountHandlerTypeMiddleware(
-                new BakerHandler(
+                new StakingHandler(
                     'Update baker restake earnings',
                     instanceOfUpdateBakerRestakeEarnings
                 )
@@ -118,6 +128,19 @@ export function findAccountTransactionHandler(
         case TransactionKindId.Transfer_to_public:
             return new AccountHandlerTypeMiddleware(
                 new TransferToPublicHandler()
+            );
+        case TransactionKindId.Register_data:
+            return new AccountHandlerTypeMiddleware(new RegisterDataHandler());
+        case TransactionKindId.Configure_baker:
+            return new AccountHandlerTypeMiddleware(
+                new StakingHandler('Configure baker', instanceOfConfigureBaker)
+            );
+        case TransactionKindId.Configure_delegation:
+            return new AccountHandlerTypeMiddleware(
+                new StakingHandler(
+                    'Configure delegation',
+                    instanceOfConfigureDelegation
+                )
             );
         default:
             return throwLoggedError(
@@ -151,6 +174,7 @@ export function findUpdateInstructionHandler(
                 new FoundationAccountHandler()
             );
         case UpdateType.UpdateMintDistribution:
+        case UpdateType.UpdateMintDistributionV1:
             return new UpdateInstructionHandlerTypeMiddleware(
                 new MintDistributionHandler()
             );
@@ -197,6 +221,18 @@ export function findUpdateInstructionHandler(
         case UpdateType.AddAnonymityRevoker:
             return new UpdateInstructionHandlerTypeMiddleware(
                 new AddAnonymityRevokerHandler()
+            );
+        case UpdateType.TimeParameters:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new TimeParametersHandler()
+            );
+        case UpdateType.CooldownParameters:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new CooldownParametersHandler()
+            );
+        case UpdateType.PoolParameters:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new PoolParametersHandler()
             );
         default:
             return throwLoggedError(`Unsupported transaction type: ${type}`);

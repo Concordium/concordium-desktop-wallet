@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { push } from 'connected-react-router';
+import { push, replace } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { stringify, parse } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
 import { Account, AddressBookEntry, Schedule } from '~/utils/types';
-import { displayAsGTU, microGtuToGtu } from '~/utils/gtu';
+import { displayAsCcd, microCcdToCcd } from '~/utils/ccd';
 import { collapseFraction } from '~/utils/basicHelpers';
 import {
     createScheduledTransferWithMemoTransaction,
@@ -91,7 +91,7 @@ export default function BuildSchedule({ location }: Props) {
             atDisposal < BigInt(amount) + collapseFraction(estimatedFee)
         ) {
             setAmountError(
-                `Insufficient funds: ${displayAsGTU(atDisposal)} at disposal.`
+                `Insufficient funds: ${displayAsCcd(atDisposal)} at disposal.`
             );
         } else {
             setAmountError(undefined);
@@ -123,6 +123,18 @@ export default function BuildSchedule({ location }: Props) {
             }
             transaction.estimatedFee = estimatedFee;
             const transactionJSON = stringify(transaction);
+
+            dispatch(
+                replace(routes.ACCOUNTS_SCHEDULED_TRANSFER, {
+                    account,
+                    amount,
+                    defaults: recoverState,
+                    recipient,
+                    nonce,
+                    memo,
+                    exchangeRate,
+                })
+            );
             dispatch(
                 push({
                     pathname: routes.SUBMITTRANSFER,
@@ -133,18 +145,6 @@ export default function BuildSchedule({ location }: Props) {
                                 transaction: transactionJSON,
                                 account,
                                 recipient,
-                            },
-                        },
-                        cancelled: {
-                            pathname: routes.ACCOUNTS_SCHEDULED_TRANSFER,
-                            state: {
-                                account,
-                                amount,
-                                defaults: recoverState,
-                                recipient,
-                                nonce,
-                                memo,
-                                exchangeRate,
                             },
                         },
                         transaction: transactionJSON,
@@ -168,7 +168,7 @@ export default function BuildSchedule({ location }: Props) {
                     push({
                         pathname: routes.ACCOUNTS_CREATESCHEDULEDTRANSFER,
                         state: {
-                            amount: microGtuToGtu(amount),
+                            amount: microCcdToCcd(amount),
                             recipient,
                             memo,
                         },
@@ -177,10 +177,10 @@ export default function BuildSchedule({ location }: Props) {
             }
         >
             <div className={styles.buildScheduleCommon}>
-                <h3 className={styles.title}> Send CCD with a schedule </h3>
+                <h3 className={styles.title}>Send CCD with a schedule</h3>
                 <div className="body3">
                     <h2 className="m0">
-                        {displayAsGTU(amount)} to {recipient.name}
+                        {displayAsCcd(amount)} to {recipient.name}
                     </h2>
                     <DisplayEstimatedFee estimatedFee={estimatedFee} />
                     <ErrorMessage>{amountError}</ErrorMessage>

@@ -2,10 +2,13 @@ export enum Net {
     Mainnet,
     Stagenet,
     Testnet,
+    Protonet,
 }
 
 export function getTargetNet() {
     switch (process.env.TARGET_NET) {
+        case 'protonet':
+            return Net.Protonet;
         case 'testnet':
             return Net.Testnet;
         case 'stagenet':
@@ -30,6 +33,8 @@ export function displayTargetNet(net: Net) {
             return 'Stagenet';
         case Net.Testnet:
             return 'Testnet';
+        case Net.Protonet:
+            return 'Protonet';
         default:
             throw new Error(`An invalid net was provided: ${net}`);
     }

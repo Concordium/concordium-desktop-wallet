@@ -16,10 +16,11 @@ import CopyButton from '../../components/CopyButton';
 import VerifyAddress from './VerifyAddress';
 
 import styles from './Accounts.module.scss';
+import CloseButton from '~/cross-app-components/CloseButton';
 
 interface Props extends ClassName {
     account: Account;
-    asCard?: boolean;
+    disableClose?: boolean;
 }
 
 /**
@@ -28,10 +29,9 @@ interface Props extends ClassName {
 export default function ShowAccountAddress({
     className,
     account,
-    asCard = false,
+    disableClose = false,
 }: Props) {
     const dispatch = useDispatch();
-    const Component = asCard ? Card : 'div';
 
     const display = (
         <>
@@ -52,21 +52,26 @@ export default function ShowAccountAddress({
     );
 
     return (
-        <Component
+        <Card
             className={clsx(
                 'pH50 pT30',
                 styles.showAddressContainer,
                 className
             )}
         >
+            {disableClose || (
+                <CloseButton
+                    className={styles.showAddressCloseButton}
+                    onClick={() => dispatch(push(routes.ACCOUNTS))}
+                />
+            )}
             <IconButton
                 className={styles.expandButton}
                 onClick={() => dispatch(push(routes.SHOWADDRESS))}
             >
                 <ExpandIcon height="22" />
             </IconButton>
-
             <VerifyAddress account={account} display={display} />
-        </Component>
+        </Card>
     );
 }

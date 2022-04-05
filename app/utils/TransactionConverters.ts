@@ -26,11 +26,26 @@ import {
     instanceOfUpdateBakerStake,
     instanceOfUpdateBakerKeys,
     instanceOfUpdateBakerRestakeEarnings,
+    instanceOfConfigureBaker,
+    instanceOfConfigureDelegation,
 } from './types';
 import { getScheduledTransferAmount } from './transactionHelpers';
 import { collapseFraction, abs } from './basicHelpers';
 import { stringify } from './JSONHelper';
 import { decodeCBOR } from './cborHelper';
+
+function getDataBlob(raw: string) {
+    // The dataBlob from the proxy is a "hex-encoded byte array".
+    try {
+        const dataBlob = decodeCBOR(raw);
+        if (typeof dataBlob === 'object') {
+            return JSON.stringify(dataBlob);
+        }
+        return dataBlob.toString();
+    } catch {
+        return raw;
+    }
+}
 
 /*
  * Converts the given transaction into the structure, which is used in the database.
@@ -108,19 +123,11 @@ export function convertIncomingTransaction(
         ? TransactionStatus.Finalized
         : TransactionStatus.Failed;
 
-    let memo;
+    let dataBlob;
     if (transaction.details.memo) {
-        // The memo from the proxy is a "hex-encoded byte array".
-        try {
-            memo = decodeCBOR(transaction.details.memo);
-            if (typeof memo === 'object') {
-                memo = JSON.stringify(memo);
-            } else {
-                memo = memo.toString();
-            }
-        } catch {
-            memo = transaction.details.memo;
-        }
+        dataBlob = getDataBlob(transaction.details.memo);
+    } else if (transaction.details.registeredData) {
+        dataBlob = getDataBlob(transaction.details.registeredData);
     }
 
     return {
@@ -137,7 +144,7 @@ export function convertIncomingTransaction(
         toAddress,
         rejectReason: transaction.details.rawRejectReason?.tag,
         status,
-        memo,
+        memo: dataBlob,
     };
 }
 
@@ -349,6 +356,12 @@ export async function convertAccountTransaction(
     } else if (instanceOfUpdateBakerRestakeEarnings(transaction)) {
         typeSpecific = getBaseTransaction(
             TransactionKindString.UpdateBakerRestakeEarnings
+        );
+    } else if (instanceOfConfigureBaker(transaction)) {
+        typeSpecific = getBaseTransaction(TransactionKindString.ConfigureBaker);
+    } else if (instanceOfConfigureDelegation(transaction)) {
+        typeSpecific = getBaseTransaction(
+            TransactionKindString.ConfigureDelegation
         );
     } else {
         throw new Error('unsupported transaction type - please implement');

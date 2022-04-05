@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { push } from 'connected-react-router';
+import { push, replace } from 'connected-react-router';
 import { stringify } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
 import {
@@ -9,7 +9,7 @@ import {
     TransactionKindId,
     Fraction,
 } from '~/utils/types';
-import { toMicroUnits } from '~/utils/gtu';
+import { ccdToMicroCcd } from '~/utils/ccd';
 import { createEncryptedTransferTransaction } from '~/utils/transactionHelpers';
 import ExternalTransfer from '~/components/Transfers/ExternalTransfer';
 import { multiplyFraction } from '~/utils/basicHelpers';
@@ -43,7 +43,7 @@ function EncryptedTransfer({
 
             const transaction = await createEncryptedTransferTransaction(
                 account.address,
-                toMicroUnits(amount),
+                ccdToMicroCcd(amount),
                 recipient.address,
                 nonce,
                 memo
@@ -54,6 +54,13 @@ function EncryptedTransfer({
             );
 
             dispatch(
+                replace(routes.ACCOUNTS_ENCRYPTEDTRANSFER, {
+                    amount,
+                    memo,
+                    recipient,
+                })
+            );
+            dispatch(
                 push({
                     pathname: routes.SUBMITTRANSFER,
                     state: {
@@ -61,14 +68,6 @@ function EncryptedTransfer({
                             pathname: routes.ACCOUNTS_FINAL_PAGE,
                             state: {
                                 transaction: stringify(transaction),
-                                recipient,
-                            },
-                        },
-                        cancelled: {
-                            pathname: routes.ACCOUNTS_ENCRYPTEDTRANSFER,
-                            state: {
-                                amount,
-                                memo,
                                 recipient,
                             },
                         },

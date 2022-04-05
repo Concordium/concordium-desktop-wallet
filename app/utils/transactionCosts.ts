@@ -1,6 +1,8 @@
 import {
     AccountTransaction,
+    ConfigureBaker,
     Fraction,
+    instanceOfConfigureBaker,
     instanceOfScheduledTransfer,
     instanceOfScheduledTransferWithMemo,
     TransactionKindId,
@@ -27,6 +29,10 @@ export const energyConstants = {
     RemoveBaker: 300n,
     UpdateBakerStake: 300n,
     UpdateBakerRestakeEarnings: 300n,
+    RegisterData: 300n,
+    ConfigureBaker: 300n,
+    ConfigureBakerWithKeys: 4050n,
+    ConfigureDelegation: 300n,
 };
 
 /**
@@ -44,6 +50,15 @@ export const payloadSizeEstimate = {
     RemoveBaker: 1, // TransactionKind (Word8)
     UpdateBakerStake: 1 + 8, // TransactionKind (Word8) + staked amount (8 bytes)
     UpdateBakerRestakeEarnings: 1 + 1, // TransactionKind (Word8) + restake earnings (1 byte)
+    /**
+     * TransactionKind (1 byte) + bitmap (2 bytes) + staked amount (8 bytes) + restake earnings (1 byte)
+     * + open for delegation settings (1 byte) + metadata url (0 bytes, optional but max 2048 + 16 bytes) + 3 * commission rate (32 bytes)
+     * + keys (160 bytes) + proofs (192 bytes)
+     */
+    ConfigureBakerFull: 1 + 2 + 8 + 1 + 1 + 3 * 32 + 0 + 160 + 192,
+    ConfigureBakerStake: 1 + 2 + 8 + 1, // TransactionKind (1 byte) + bitmap (2 bytes) + staked amount (8 bytes) + restake earnings (1 byte)
+    ConfigureBakerKeys: 1 + 2 + 160 + 192, // TransactionKind (1 byte) + bitmap (2 bytes) + keys (160 bytes) + proofs (192 bytes)
+    ConfigureDelegationFull: 1 + 2 + 8 + 1 + 9, // TransactionKind (1 byte) + bitmap (2 bytes) + delegated amount (8 bytes) + restake earnings (1 byte) + delegation target (9 bytes)
 };
 
 /**
@@ -131,6 +146,10 @@ function getEnergyCostOfType(transactionKind: TransactionKindId) {
             return energyConstants.UpdateBakerStake;
         case TransactionKindId.Update_baker_restake_earnings:
             return energyConstants.UpdateBakerRestakeEarnings;
+        case TransactionKindId.Register_data:
+            return energyConstants.RegisterData;
+        case TransactionKindId.Configure_delegation:
+            return energyConstants.ConfigureDelegation;
         default:
             throw new Error(`Unsupported transaction type: ${transactionKind}`);
     }
@@ -175,6 +194,12 @@ function getScheduledTransferEnergy(
     );
 }
 
+function getConfigureBakerEnergyCost({ payload }: ConfigureBaker) {
+    return payload.keys !== undefined
+        ? energyConstants.ConfigureBakerWithKeys
+        : energyConstants.ConfigureBaker;
+}
+
 /**
  *  Given the signatureAmount and a transaction returns
  * the energy cost of the transaction.
@@ -195,6 +220,8 @@ export function getTransactionEnergyCost(
         transactionTypeCost =
             energyConstants.ScheduledTransferPerRelease *
             BigInt(transaction.payload.schedule.length);
+    } else if (instanceOfConfigureBaker(transaction)) {
+        transactionTypeCost = getConfigureBakerEnergyCost(transaction);
     } else {
         transactionTypeCost = getEnergyCostOfType(transaction.transactionKind);
     }
@@ -253,6 +280,65 @@ function energyToCost(energy: bigint, exchangeRate: Fraction): Fraction {
     };
 }
 
+export function getConfigureBakerCost(
+    energyToMicroGtu: Fraction,
+    payloadSize: number,
+    withKeys: boolean,
+    signatureAmount = 1
+) {
+    const energy = calculateCost(
+        BigInt(signatureAmount),
+        BigInt(payloadSize),
+        withKeys
+            ? energyConstants.ConfigureBakerWithKeys
+            : energyConstants.ConfigureBaker
+    );
+
+    return energyToCost(energy, energyToMicroGtu);
+}
+
+export function getConfigureBakerKeysCost(
+    energyToMicroGtu: Fraction,
+    signatureAmount = 1,
+    payloadSize = payloadSizeEstimate.ConfigureBakerKeys
+) {
+    const energy = calculateCost(
+        BigInt(signatureAmount),
+        BigInt(payloadSize),
+        energyConstants.ConfigureBakerWithKeys
+    );
+
+    return energyToCost(energy, energyToMicroGtu);
+}
+
+export function getConfigureBakerStakeCost(
+    energyToMicroGtu: Fraction,
+    signatureAmount = 1,
+    payloadSize = payloadSizeEstimate.ConfigureBakerStake
+) {
+    const energy = calculateCost(
+        BigInt(signatureAmount),
+        BigInt(payloadSize),
+        energyConstants.ConfigureBaker
+    );
+
+    return energyToCost(energy, energyToMicroGtu);
+}
+
+export function getConfigureBakerFullCost(
+    energyToMicroGtu: Fraction,
+    signatureAmount = 1,
+    payloadSize = payloadSizeEstimate.ConfigureBakerFull
+) {
+    const energy = calculateCost(
+        BigInt(signatureAmount),
+        BigInt(payloadSize),
+        energyConstants.ConfigureBakerWithKeys
+    );
+
+    return energyToCost(energy, energyToMicroGtu);
+}
+
 /**
  *  Given the signatureAmount and payloadSize, returns the estimated MicroCCD cost of the transaction type.
  */
@@ -263,9 +349,10 @@ export function getTransactionKindCost(
     memo?: string,
     payloadSize: number = getPayloadSizeEstimate(transactionKind)
 ): Fraction {
+    const memoSize = memo ? 2 + getEncodedSize(memo) : 0;
     const energy = getTransactionKindEnergy(
         transactionKind,
-        payloadSize + getEncodedSize(memo),
+        payloadSize + memoSize,
         signatureAmount
     );
     return energyToCost(energy, energyToMicroGtu);
