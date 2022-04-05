@@ -88,8 +88,7 @@ export async function init(dispatch: Dispatch) {
 
         dispatch(setConsensusStatus(cs));
     } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error('Could initialize chain data state:', e); // TODO add proper logging instead
+        window.log.error('Could initialize chain data state:', e);
     }
 }
 
