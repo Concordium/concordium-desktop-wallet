@@ -81,7 +81,7 @@ const SelectAccountPage = ({
             chosenAccount={initial}
             onAccountClicked={(a) => onNext(a)}
             filter={extendedFilter}
-            messageWhenEmpty="No elligable accounts requiring multiple signatures"
+            messageWhenEmpty="No eligible accounts requiring multiple signatures"
             isDisabled={disabled}
         />
     );
@@ -127,7 +127,7 @@ interface Props<F extends Record<string, unknown>, T extends AccountTransaction>
      */
     title: string;
     /**
-     * Function to filter elligable accounts for transaction.
+     * Function to filter eligible accounts for transaction.
      */
     accountFilter?(account: Account, info?: AccountInfo): boolean;
     /**

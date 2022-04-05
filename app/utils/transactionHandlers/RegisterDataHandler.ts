@@ -7,7 +7,7 @@ import { createRegisterDataTransaction } from '../transactionHelpers';
 import { instanceOfRegisterData, RegisterData } from '../types';
 import TransferHandler from './TransferHandler';
 
-const TYPE = 'Register Data';
+const TYPE = 'Register data';
 
 type TransactionType = RegisterData;
 

@@ -42,7 +42,6 @@ import { HandleSignatureFiles, getSignatures } from './util';
 import ProposalViewStatusText from './ProposalViewStatusText';
 import TransactionHashView from '~/components/TransactionHash';
 import { TransactionExportType } from '~/utils/transactionTypes';
-import FormSubmissionWindowButton from './FormSubmissionWindowButton';
 
 import styles from './ProposalView.module.scss';
 
@@ -273,9 +272,9 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                         I understand this is the final
                                         submission and cannot be reverted
                                     </Form.Checkbox>
-                                    <FormSubmissionWindowButton
-                                        transaction={transaction}
-                                    />
+                                    <Form.Submit>
+                                        Submit transaction to chain
+                                    </Form.Submit>
                                 </div>
                             )}
                         </div>

@@ -2,6 +2,7 @@
     "walletProxyMainnet": "https://wallet-proxy.mainnet.concordium.software/",
     "walletProxyStagenet": "https://wallet-proxy.stagenet.concordium.com/",
     "walletProxyTestnet": "https://wallet-proxy.testnet.concordium.com/",
+    "walletProxyProtonet": "https://wallet-proxy.protonet.concordium.com/",
     "licenseNotices": "https://developer.concordium.software/en/mainnet/net/resources/dw-licenses.html",
     "supportForum": "https://support.concordium.software"
 }
