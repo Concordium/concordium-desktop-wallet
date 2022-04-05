@@ -286,12 +286,16 @@ export const getSucceedingPayday = (
     nextPayday: Date,
     rewardPeriodLengthMS: bigint
 ): Date => {
-    if (time.getTime() < nextPayday.getTime()) {
+    const timeMS = time.getTime();
+    const npdMS = nextPayday.getTime();
+    const rplMS = Number(rewardPeriodLengthMS);
+
+    if (timeMS < npdMS) {
         return nextPayday;
     }
 
-    const pd = new Date(nextPayday.getTime() + Number(rewardPeriodLengthMS));
-    return getSucceedingPayday(time, pd, rewardPeriodLengthMS);
+    const periods = Math.ceil((timeMS - npdMS) / rplMS);
+    return new Date(npdMS + periods * rplMS);
 };
 
 export function dateFromStakePendingChange(
