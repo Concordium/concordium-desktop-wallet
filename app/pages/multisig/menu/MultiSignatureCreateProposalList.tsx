@@ -151,7 +151,7 @@ const accountTransactionTypes: TypeTuple[] = [
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Register_data,
-        'Register Data',
+        'Register data',
     ],
     [
         TransactionTypes.AccountTransaction,
