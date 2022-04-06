@@ -31,10 +31,10 @@ import {
     accountsInfoSelector,
 } from '~/features/AccountSlice';
 import { shouldShowField } from './utils';
-
-import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
 import { ValidateValues } from '~/components/MultiStepForm';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
+
+import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
 
 interface DisplayProps
     extends Partial<RequiredValues & UpdateBakerStakeFlowState> {
@@ -165,6 +165,7 @@ export default withDeps(function UpdateBakerStake({
             >
                 {({ account }) => ({
                     stake: {
+                        title: 'Stake settings',
                         render: (initial, onNext, formValues) =>
                             isDefined(account) ? (
                                 <UpdateBakerStakePage
@@ -178,7 +179,6 @@ export default withDeps(function UpdateBakerStake({
                             ) : (
                                 <Redirect to={matchedPath} />
                             ),
-                        title: 'Stake settings',
                     },
                 })}
             </MultiSigAccountTransactionFlow>

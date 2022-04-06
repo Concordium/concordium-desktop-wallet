@@ -58,10 +58,10 @@ export default function BakerStakeSettings({
             <div className="flexChildFill">
                 {showCooldown || (
                     <p className="mT0">
-                        To add a baker you must choose an amount to stake on the
-                        account. The staked amount will be part of the balance,
-                        but while staked the amount is unavailable for
-                        transactions.
+                        To register as a baker, you must choose an amount to
+                        stake on the account. The staked amount will be part of
+                        the balance, but while staked the amount is unavailable
+                        for transactions.
                     </p>
                 )}
                 {showCooldown && pendingChange === undefined && (

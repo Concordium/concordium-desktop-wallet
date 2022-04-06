@@ -203,7 +203,7 @@ const configureBakerLinks = (
             className={styles.link}
             to={routes.MULTISIGTRANSACTIONS_ADD_BAKER}
         >
-            Register baker
+            Register as a baker
         </ButtonNavLink>
         <ButtonNavLink
             className={styles.link}
@@ -236,9 +236,15 @@ const configureDelegationLinks = (
     <>
         <ButtonNavLink
             className={styles.link}
-            to={routes.MULTISIGTRANSACTIONS_CONFIGURE_DELEGATION}
+            to={routes.MULTISIGTRANSACTIONS_ADD_DELEGATION}
         >
-            Configure delegation
+            Delegate to a pool
+        </ButtonNavLink>
+        <ButtonNavLink
+            className={styles.link}
+            to={routes.MULTISIGTRANSACTIONS_UPDATE_DELEGATION}
+        >
+            Update delegation
         </ButtonNavLink>
         <ButtonNavLink
             className={styles.link}

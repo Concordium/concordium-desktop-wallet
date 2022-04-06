@@ -35,9 +35,10 @@ try {
         })
     );
 
-    window.autoUpdate.onUpdateAvailable((_, info: UpdateInfo) => {
-        store.dispatch(triggerUpdateNotification(info.version));
-    });
+    window.autoUpdate.onUpdateAvailable(
+        (_, info: UpdateInfo, automatic: boolean) =>
+            triggerUpdateNotification(store.dispatch, info.version, automatic)
+    );
 
     const AppContainer = ReactHotAppContainer;
 

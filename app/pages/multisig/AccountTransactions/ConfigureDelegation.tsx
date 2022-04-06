@@ -28,6 +28,8 @@ import {
     getEstimatedConfigureDelegationFee,
     getExistingDelegationValues,
 } from '~/utils/transactionFlows/configureDelegation';
+import { updateDelegationTitle } from '~/utils/transactionFlows/updateDelegation';
+import { addDelegationTitle } from '~/utils/transactionFlows/addDelegation';
 import DelegationTargetPage from '~/components/Transfers/configureDelegation/DelegationTargetPage';
 import DelegationAmountPage from '~/components/Transfers/configureDelegation/DelegationAmountPage';
 import { shouldShowField } from './utils';
@@ -98,8 +100,13 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
     );
 };
 
-type Props = ConfigureDelegationFlowDependencies;
+type Props = ConfigureDelegationFlowDependencies & {
+    isUpdate?: boolean;
+};
 type UnsafeProps = Partial<Props>;
+
+const getTitle = (isUpdate: boolean) =>
+    isUpdate ? updateDelegationTitle : addDelegationTitle;
 
 const hasNecessaryProps = (props: UnsafeProps): props is Props => {
     return [props.exchangeRate].every(isDefined);
@@ -116,7 +123,10 @@ const withDeps = (component: ComponentType<Props>) =>
         )
     );
 
-export default withDeps(function ConfigureDelegation({ exchangeRate }: Props) {
+export default withDeps(function ConfigureDelegation({
+    exchangeRate,
+    isUpdate = false,
+}: Props) {
     const { path: matchedPath } = useRouteMatch();
     const accountsInfo = useSelector(accountsInfoSelector);
     const [showError, setShowError] = useState(false);
@@ -166,7 +176,7 @@ export default withDeps(function ConfigureDelegation({ exchangeRate }: Props) {
                 ConfigureDelegationFlowState,
                 ConfigureBaker
             >
-                title={configureDelegationTitle}
+                title={getTitle(isUpdate)}
                 convert={convert}
                 preview={(v) => (
                     <DisplayValues {...v} exchangeRate={exchangeRate} />
@@ -176,6 +186,7 @@ export default withDeps(function ConfigureDelegation({ exchangeRate }: Props) {
             >
                 {({ account }) => ({
                     target: {
+                        title: 'Delegation target',
                         render: (initial, onNext) =>
                             isDefined(account) ? (
                                 <DelegationTargetPage
@@ -186,9 +197,9 @@ export default withDeps(function ConfigureDelegation({ exchangeRate }: Props) {
                             ) : (
                                 <Redirect to={matchedPath} />
                             ),
-                        title: 'Delegation target',
                     },
                     delegate: {
+                        title: 'Stake settings',
                         render: (initial, onNext, formValues) =>
                             isDefined(account) ? (
                                 <DelegationAmountPage
@@ -204,7 +215,6 @@ export default withDeps(function ConfigureDelegation({ exchangeRate }: Props) {
                             ) : (
                                 <Redirect to={matchedPath} />
                             ),
-                        title: 'Delegation settings',
                     },
                 })}
             </MultiSigAccountTransactionFlow>

@@ -102,6 +102,7 @@ export default withDeps(function UpdateBakerKeys({ exchangeRate }: Props) {
         >
             {({ account }) => ({
                 keys: {
+                    title: 'Generated keys',
                     render: (initial, onNext) =>
                         isDefined(account) ? (
                             <KeysPage
@@ -112,7 +113,6 @@ export default withDeps(function UpdateBakerKeys({ exchangeRate }: Props) {
                         ) : (
                             <Redirect to={matchedPath} />
                         ),
-                    title: 'Generated keys',
                 },
             })}
         </MultiSigAccountTransactionFlow>

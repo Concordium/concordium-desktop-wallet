@@ -38,7 +38,7 @@ export default function DelegationTargetPage({
     initial,
 }: Props) {
     const { target: existing } = getExistingDelegationValues(accountInfo) ?? {};
-    const defaultValue = initial ?? existing;
+    const defaultValue = initial !== undefined ? initial : existing;
     const defaultValues: FormState = {
         toSpecificPool: typeof defaultValue === 'string',
         poolId: defaultValue ?? '',
@@ -72,7 +72,7 @@ export default function DelegationTargetPage({
             formMethods={form}
         >
             <div className="flexChildFill">
-                <p className="mV30">
+                <p className="mB30 mT0">
                     First you must choose the target you want to delegate to.
                 </p>
                 <div className="mT50">

@@ -138,9 +138,9 @@ export default function CommissionsPage({
             className="flexColumn flexChildFill"
         >
             <div className="flexChildFill">
-                <p className="mB30">
-                    When you open your baker as a pool, you have to set
-                    commission rates. You can do so below:
+                <p className="mB30 mT0">
+                    When you open your baker as a pool, you earn commissions of
+                    stake delegated to your pool from other accounts:
                 </p>
                 <CommissionField
                     label="Transaction fee commissions"

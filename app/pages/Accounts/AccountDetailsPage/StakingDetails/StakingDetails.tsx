@@ -9,7 +9,7 @@ import RegisteredIcon from '@resources/svg/logo-checkmark.svg';
 import Label from '~/components/Label';
 import Card from '~/cross-app-components/Card';
 import { displayAsCcd } from '~/utils/ccd';
-import { useConsensusStatus } from '~/utils/dataHooks';
+import { useLastFinalizedBlockSummary } from '~/utils/dataHooks';
 import { toFixed } from '~/utils/numberStringHelpers';
 import { hasDelegationProtocol } from '~/utils/protocolVersion';
 import {
@@ -24,6 +24,9 @@ import {
     displayDelegationTarget,
     displayRedelegate,
 } from '~/utils/transactionFlows/configureDelegation';
+import { useAsyncMemo } from '~/utils/hooks';
+import { noOp } from '~/utils/basicHelpers';
+import { getRewardStatus } from '~/node/nodeRequests';
 
 import styles from './StakingDetails.module.scss';
 
@@ -155,12 +158,26 @@ type Props = PropsWithChildren<{
 }>;
 
 export default function StakingDetails({ details }: Props) {
-    const cs = useConsensusStatus(true);
+    const { consensusStatus: cs, lastFinalizedBlockSummary: bs } =
+        useLastFinalizedBlockSummary() ?? {};
+    const rs = useAsyncMemo(
+        async () =>
+            cs !== undefined
+                ? getRewardStatus(cs.lastFinalizedBlock)
+                : undefined,
+        noOp,
+        [cs]
+    );
     const text = isBakerDetails(details) ? bakerText : delegatorText;
 
     const pendingChangeDate =
         details.pendingChange !== undefined
-            ? dateFromStakePendingChange(details.pendingChange, cs)
+            ? dateFromStakePendingChange(
+                  details.pendingChange,
+                  cs,
+                  rs,
+                  bs?.updates.chainParameters
+              )
             : undefined;
 
     return (
