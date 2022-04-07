@@ -83,6 +83,7 @@ export default function MintRateInput({
                 onFocus={() => setAnnualFocused(true)}
                 onBlur={() => setAnnualFocused(false)}
                 disabled={disabled}
+                customFormatter={(v) => (v ? Number(v).toString() : '')}
             />{' '}
             ≈ (1 +{' '}
             <InlineNumber
