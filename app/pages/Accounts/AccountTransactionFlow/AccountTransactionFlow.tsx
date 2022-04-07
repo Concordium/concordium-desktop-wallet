@@ -123,7 +123,9 @@ export default function AccountTransactionFlow<
     };
 
     if (isMultiSig(account)) {
-        return <Redirect to={multisigRoute} />;
+        return (
+            <Redirect to={{ pathname: multisigRoute, state: { account } }} />
+        );
     }
 
     return (
