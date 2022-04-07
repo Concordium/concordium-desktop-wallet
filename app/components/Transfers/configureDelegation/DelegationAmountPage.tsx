@@ -86,7 +86,7 @@ function PickDelegateAmount({
                 <span className={clsx(hasPendingChange && 'textFaded')}>
                     {getCcdSymbol()}
                 </span>
-                <Form.GtuInput
+                <Form.CcdInput
                     name={fieldNames.amount}
                     disabled={hasPendingChange}
                     autoFocus

@@ -117,7 +117,7 @@ export default function PickAmount({
             <Form formMethods={form} onSubmit={handleSubmit}>
                 <div className={styles.amountInputWrapper}>
                     {getCcdSymbol()}
-                    <Form.GtuInput
+                    <Form.CcdInput
                         name={fieldNames.amount}
                         defaultValue={defaultAmount}
                         rules={{

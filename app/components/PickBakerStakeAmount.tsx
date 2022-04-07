@@ -72,7 +72,7 @@ export default function PickBakerStakeAmount({
                 <span className={clsx(hasPendingChange && 'textFaded')}>
                     {getCcdSymbol()}
                 </span>
-                <Form.GtuInput
+                <Form.CcdInput
                     disabled={hasPendingChange}
                     defaultValue={initial}
                     name={fieldName}
