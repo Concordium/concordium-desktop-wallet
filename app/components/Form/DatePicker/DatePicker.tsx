@@ -1,6 +1,6 @@
 /* eslint-disable import/no-duplicates */
 import clsx from 'clsx';
-import React from 'react';
+import React, { useCallback } from 'react';
 import ReactDatePicker, { ReactDatePickerProps } from 'react-datepicker';
 import enGB from 'date-fns/locale/en-GB';
 import { setHours, setMinutes } from 'date-fns';
@@ -9,6 +9,7 @@ import { ClassName } from '~/utils/types';
 import { CommonInputProps } from '../common';
 import ErrorMessage from '../ErrorMessage';
 import { isDateEqual } from '~/utils/timeHelpers';
+import { noOp } from '~/utils/basicHelpers';
 
 import styles from './DatePicker.module.scss';
 
@@ -41,7 +42,7 @@ interface Props
 export default function DatePicker({
     value,
     onChange,
-    onBlur,
+    onBlur = noOp,
     label,
     placeholder = 'YYYY-MM-DD at HH:MM:SS',
     isInvalid,
@@ -57,12 +58,20 @@ export default function DatePicker({
         : setHours(setMinutes(new Date(), 59), 23),
     ...props
 }: Props) {
+    const handleChange: typeof onChange = useCallback(
+        (v) => {
+            onChange(v);
+            onBlur();
+        },
+        [onChange, onBlur]
+    );
+
     return (
         <div className={clsx(styles.root, className)}>
             {label && <Label className="mB5">{label}</Label>}
             <ReactDatePicker
                 selected={value}
-                onChange={onChange}
+                onChange={handleChange}
                 onBlur={onBlur}
                 showTimeSelect
                 timeCaption="Time"

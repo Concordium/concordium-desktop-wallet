@@ -130,7 +130,7 @@ function MultiSignatureCreateProposal({
                     render={() => (
                         <MultiSignatureLayout
                             pageTitle={handler.title}
-                            delegateScroll
+                            delegateScroll={isKeyUpdate}
                         >
                             <BuildComponent
                                 type={type}
