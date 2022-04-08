@@ -18,6 +18,10 @@
         rgba(196, 196, 196, 0) 73.55%
     );
     border-radius: 10px 0 0 10px;
+
+    &:disabled {
+        opacity: 0;
+    }
 }
 
 .prev {
