@@ -7,6 +7,7 @@ import {
     app,
     MenuItem,
 } from 'electron';
+import exportLogs from './exportLogs';
 import urls from '~/constants/urls.json';
 import ipcRendererCommands from '~/constants/ipcRendererCommands.json';
 import routes from '~/constants/routes.json';
@@ -50,6 +51,11 @@ export function createMenu(window: BrowserWindow) {
         {
             role: 'help',
             submenu: [
+                {
+                    label: 'Export logs',
+                    click: exportLogs,
+                },
+                { type: 'separator' },
                 {
                     label: 'Terms and conditions',
                     click: () => {

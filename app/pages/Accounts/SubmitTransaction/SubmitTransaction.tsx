@@ -237,7 +237,16 @@ export default function SubmitTransaction({ location }: Props) {
             signatureStructured
         );
         const transactionHash = transactionHashBuffer.toString('hex');
-        const response = await sendTransaction(serializedTransaction);
+        let response;
+        try {
+            response = await sendTransaction(serializedTransaction);
+        } catch (e) {
+            window.log.error(
+                `Sending transaction of type ${transaction.transactionKind}, failed`,
+                { error: e }
+            );
+            throw e;
+        }
 
         if (response) {
             try {
@@ -274,6 +283,7 @@ export default function SubmitTransaction({ location }: Props) {
                 dispatch(push(confirmedWithHash));
             }
         } else {
+            window.log.warn('Sent transaction was rejected by the node');
             setRejected(true);
         }
     }

@@ -10,29 +10,48 @@ import Root from './shell/Root';
 import { history, configuredStore } from './store/store';
 import { init as initMisc } from './features/MiscSlice';
 import { triggerUpdateNotification } from './features/NotificationSlice';
+import ErrorBoundary from '~/components/ErrorBoundary';
 
 import './styles/app.global.scss';
 
-const store = configuredStore();
+try {
+    const store = configuredStore();
 
-initMisc(store.dispatch);
-window.addListener.openRoute((_, route: string) => {
-    store.dispatch(push(route));
-});
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, no-console
-window.addListener.logFromMain((_, ...args: any[]) => console.log(...args));
+    window.autoUpdate.onError((_, errorMessage: string, error: Error) =>
+        window.log.error(errorMessage, { error })
+    );
 
-window.autoUpdate.onUpdateAvailable((_, info: UpdateInfo, automatic: boolean) =>
-    triggerUpdateNotification(store.dispatch, info.version, automatic)
-);
+    initMisc(store.dispatch);
+    window.addListener.openRoute((_, route: string) => {
+        window.log.info(`Routed to${route}`);
+        store.dispatch(push(route));
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-console
+    window.addListener.logFromMain((_, ...args: any[]) => console.log(...args));
 
-const AppContainer = ReactHotAppContainer;
+    window.addEventListener('unhandledrejection', (promiseRejectionEvent) =>
+        window.log.error('Uncaught rejection: ', {
+            error: promiseRejectionEvent.reason.toString(),
+        })
+    );
 
-document.addEventListener('DOMContentLoaded', () =>
-    render(
-        <AppContainer>
-            <Root store={store} history={history} />
-        </AppContainer>,
-        document.getElementById('root')
-    )
-);
+    window.autoUpdate.onUpdateAvailable(
+        (_, info: UpdateInfo, automatic: boolean) =>
+            triggerUpdateNotification(store.dispatch, info.version, automatic)
+    );
+
+    const AppContainer = ReactHotAppContainer;
+
+    document.addEventListener('DOMContentLoaded', () =>
+        render(
+            <AppContainer>
+                <ErrorBoundary>
+                    <Root store={store} history={history} />
+                </ErrorBoundary>
+            </AppContainer>,
+            document.getElementById('root')
+        )
+    );
+} catch (error) {
+    window.log.error('Error thrown in index.tsx', { error });
+}

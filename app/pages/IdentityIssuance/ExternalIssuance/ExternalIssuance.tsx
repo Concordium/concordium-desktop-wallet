@@ -90,6 +90,8 @@ async function generateIdentity(
             idObjectRequest
         );
 
+        window.log.info(`Identity Object Request successful.`);
+
         // Open a browser view at the received location. The user will be using the
         // browser view to perform the identity creation process at the identity provider.
         // The identity provider will, at the end of the process, return an HTTP 302 Found
@@ -105,7 +107,10 @@ async function generateIdentity(
         if (providerResult.status === ViewResponseStatus.Error) {
             throw new Error(providerResult.error);
         }
+
         identityObjectLocation = providerResult.result;
+
+        window.log.info(`Identity Object Location determined.`);
 
         // TODO This code still has an issue if the application fails before
         // inserting the pending identity and account, as the identity might exist
@@ -140,9 +145,13 @@ async function generateIdentity(
             identity,
             initialAccount
         );
+
+        window.log.info('Saved identity object.');
+
         loadIdentities(dispatch);
         loadAccounts(dispatch);
     } catch (e) {
+        window.log.error('Failed to create identity', { error: e });
         window.view.removeView();
         onError(`Failed to create identity due to ${e}`);
         return { status: IdentityRequestStatus.Failed };
@@ -153,7 +162,12 @@ async function generateIdentity(
         identityId,
         accountName,
         identityObjectLocation
-    ).catch(() => onError(`Failed to confirm identity`));
+    ).catch((e) => {
+        window.log.error(e, {
+            message: ' caused confirmation of Identity to fail.',
+        });
+        onError(`Failed to confirm identity`);
+    });
     return { identityId, status: IdentityRequestStatus.Success };
 }
 
@@ -244,7 +258,7 @@ export default function ExternalIssuance({
                 );
                 return true;
             })
-            .catch(() => {});
+            .catch(window.log.warn);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 

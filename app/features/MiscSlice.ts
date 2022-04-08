@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Dispatch } from 'redux';
-import { noOp } from '~/utils/basicHelpers';
 import { hasAcceptedTerms, storeTerms } from '~/utils/termsHelpers';
 import { NodeConnectionStatus } from '~/utils/types';
 
@@ -52,8 +51,8 @@ export async function acceptTerms(dispatch: Dispatch) {
     try {
         await storeTerms();
         dispatch(setTermsAccepted(true));
-    } catch {
-        noOp();
+    } catch (e) {
+        window.log.error('Accepting terms failed', { error: e });
     }
 }
 

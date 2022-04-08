@@ -204,6 +204,7 @@ export default function AccountReport({ location }: Props) {
                 setMakingReport(false);
                 return true;
             } catch (e) {
+                window.log.error('Account report failed', { error: e });
                 setMakingReport(false);
                 setShowError({
                     show: true,

@@ -47,10 +47,12 @@ export default function CreateAddAnonymityRevoker({
     const anonymityRevokers = useAnonymityRevokers();
     const arIdentityMustBeUnique = useCallback<Validate>(
         (v) =>
-            !anonymityRevokers
-                .map((revoker) => revoker.arIdentity.toString())
-                .includes(v) ||
-            `This ${fieldDisplays.arIdentity} is already in use`,
+            anonymityRevokers
+                ? !anonymityRevokers
+                      .map((revoker) => revoker.arIdentity.toString())
+                      .includes(v) ||
+                  `This ${fieldDisplays.arIdentity} is already in use`
+                : 'Anonymity revokers have not been loaded yet',
         [anonymityRevokers]
     );
 

@@ -16,6 +16,7 @@ export default function DeleteIdentity({ identity }: DeleteAddressProps) {
     const [open, setOpen] = useState(false);
 
     function remove(): void {
+        window.log.info(`Removing failed identity ${identity.id}`);
         removeIdentityAndInitialAccount(dispatch, identity.id);
         setOpen(false);
     }

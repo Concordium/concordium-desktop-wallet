@@ -4,6 +4,7 @@
 
 ### Added
 
+-   Added logging, which can be exported from the application menu.
 -   Added support for the register data transaction.
 -   Allow users to verify address on Ledger device.
 -   Allow users to choose CCD or microCCD as the unit used in account report.

@@ -33,6 +33,7 @@ import { serializeTransaction } from '~/utils/transactionSerialization';
 import { attachKeyIndex } from '~/utils/updates/AuthorizationHelper';
 import withChainData, { ChainData } from '~/utils/withChainData';
 import TransactionHashView from '~/components/TransactionHash';
+import { throwLoggedError } from '~/utils/basicHelpers';
 
 import styles from './SubmittedProposal.module.scss';
 
@@ -158,18 +159,24 @@ const SubmittedProposalView = withChainData<Props>(
                     return;
                 }
             } else {
-                throw new Error(`Unexpected Transaction type: ${transaction}`);
+                throwLoggedError(`Unexpected Transaction type: ${transaction}`);
             }
             const submitted = await sendTransaction(payload);
             const modifiedProposal: MultiSignatureTransaction = {
                 ...proposal,
             };
             if (submitted) {
+                window.log.info(
+                    `Successfully Sent Proposal. Id: ${proposal.id}`
+                );
                 modifiedProposal.status =
                     MultiSignatureTransactionStatus.Submitted;
                 updateCurrentProposal(dispatch, modifiedProposal);
                 getMultiSignatureTransactionStatus(modifiedProposal, dispatch);
             } else {
+                window.log.warn(
+                    `Sent Proposal was rejected by node. Id: ${proposal.id}`
+                );
                 modifiedProposal.status =
                     MultiSignatureTransactionStatus.Failed;
                 updateCurrentProposal(dispatch, modifiedProposal);

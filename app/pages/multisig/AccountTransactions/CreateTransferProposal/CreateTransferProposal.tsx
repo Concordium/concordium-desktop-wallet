@@ -35,7 +35,7 @@ import {
     accountInfoSelector,
 } from '~/features/AccountSlice';
 import { validateMemo } from '~/utils/transactionHelpers';
-import { collapseFraction } from '~/utils/basicHelpers';
+import { collapseFraction, throwLoggedError } from '~/utils/basicHelpers';
 import { ccdToMicroCcd, displayAsCcd } from '~/utils/ccd';
 import { useAsyncMemo } from '~/utils/hooks';
 import { nodeSupportsMemo } from '~/node/nodeHelpers';
@@ -62,7 +62,7 @@ function subTitle(currentLocation: string) {
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE:
             return 'Setup the release schedule';
         default:
-            throw new Error('unknown location');
+            return throwLoggedError('unknown location');
     }
 }
 
@@ -186,7 +186,7 @@ function CreateTransferProposal({
 
     function renderSignTransaction() {
         if (!account || !recipient || !expiryTime || !amount) {
-            throw new Error(
+            throwLoggedError(
                 'Unexpected missing account, amount, recipient and/or expiry time'
             );
         }
@@ -206,7 +206,7 @@ function CreateTransferProposal({
 
     function renderBuildSchedule() {
         if (!account || !recipient || !amount) {
-            throw new Error(
+            throwLoggedError(
                 'Unexpected missing account, amount and/or recipient'
             );
         }

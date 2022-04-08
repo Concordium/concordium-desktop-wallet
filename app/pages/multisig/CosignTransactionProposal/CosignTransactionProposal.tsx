@@ -142,11 +142,13 @@ function CosignTransactionProposal({
                     TransactionExportType.Signature
                 ),
             });
-        } catch (err) {
+            window.log.info('Exported transaction');
+        } catch (error) {
+            window.log.error('Failed exporting transaction', { error });
             setShowError({
                 show: true,
                 header: 'Signature was not saved ',
-                content: `An error was encountered while attempting to saving the signature: ${err.message}`,
+                content: `An error was encountered while attempting to saving the signature: ${error.message}`,
             });
         }
     }

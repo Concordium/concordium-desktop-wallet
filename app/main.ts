@@ -125,6 +125,13 @@ const createWindow = async () => {
             mainWindow.focus();
         }
 
+        if (
+            process.env.NODE_ENV === 'production' &&
+            process.env.TARGET_NET === 'mainnet'
+        ) {
+            initAutoUpdate(mainWindow);
+        }
+
         mainWindow.webContents.send(ipcRendererCommands.didFinishLoad);
     });
 
@@ -161,13 +168,6 @@ const createWindow = async () => {
     addContextMenu(mainWindow);
 
     initializeIpcHandlers(mainWindow, printWindow, browserView);
-
-    if (
-        process.env.NODE_ENV === 'production' &&
-        process.env.TARGET_NET === 'mainnet'
-    ) {
-        initAutoUpdate(mainWindow);
-    }
 };
 
 app.on('window-all-closed', () => {

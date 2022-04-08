@@ -8,6 +8,7 @@ import { Setting, SettingTypeEnum } from '~/utils/types';
 import ConnectionSettingElement from '~/components/ConnectionSettingElement';
 import BooleanSetting from './BooleanSettingElement';
 import PasswordSettingElement from './PasswordSettingElement';
+import { throwLoggedError } from '~/utils/basicHelpers';
 
 import styles from './Settings.module.scss';
 
@@ -46,7 +47,7 @@ export default function SettingsView() {
                     childSetting.name
                 );
                 if (!settingDisplayText) {
-                    throw new Error(
+                    throwLoggedError(
                         'A setting without a display text was encountered.'
                     );
                 }

@@ -46,7 +46,7 @@ import { hasPendingTransactions } from '~/database/TransactionDao';
 import { accountSimpleView, defaultAccount } from '~/database/PreferencesDao';
 import { stringify, parse } from '~/utils/JSONHelper';
 import { getCredId } from '~/utils/credentialHelper';
-import { mapRecordValues } from '~/utils/basicHelpers';
+import { throwLoggedError, mapRecordValues } from '~/utils/basicHelpers';
 import {
     getAccountInfo,
     getAccountInfoOfCredential,
@@ -463,7 +463,7 @@ export async function loadAccountInfos(
         const accountInfo = await getAccountInfo(account.address, blockHash);
         if (!accountInfo) {
             throw new Error(
-                'A confirmed account does not exist on the connected node. Please check that your node is up to date with the blockchain.'
+                `A confirmed account (${account.name}) does not exist on the connected node. Please check that your node is up to date with the blockchain. Account Address: ${account.address}`
             );
         }
         map[account.address] = accountInfo;
@@ -477,7 +477,7 @@ export async function loadAccountInfos(
             blockHash
         );
         if (!accountInfo) {
-            throw new Error(
+            throwLoggedError(
                 `Genesis account '${account.name}' not found on chain. Associated credId: ${account.address}`
             );
         }
@@ -565,8 +565,10 @@ export async function confirmAccount(
     transactionId: string
 ) {
     const response = await getStatus(transactionId);
+
     switch (response.status) {
         case TransactionStatus.Rejected:
+            window.log.warn('account creation was rejected.');
             await updateAccount(accountAddress, {
                 status: AccountStatus.Rejected,
             });
@@ -586,7 +588,9 @@ export async function confirmAccount(
             });
             break;
         default:
-            throw new Error('Unexpected status was returned by the poller!');
+            throwLoggedError(
+                `Unexpected status was returned by the poller: ${response.status}`
+            );
     }
     return loadAccounts(dispatch);
 }
@@ -602,7 +606,9 @@ export async function decryptAccountBalance(
     dispatch: Dispatch
 ) {
     if (!account.incomingAmounts) {
-        throw new Error('Unexpected missing field!');
+        throwLoggedError(
+            'Unexpected missing incoming amounts when decrypting!'
+        );
     }
     const encryptedAmounts = JSON.parse(account.incomingAmounts);
     encryptedAmounts.push(account.selfAmounts);

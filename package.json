@@ -265,7 +265,6 @@
     "crypto-browserify": "^3.12.0",
     "electron": "12.0.12",
     "electron-debug": "^3.1.0",
-    "electron-log": "^4.2.4",
     "electron-updater": "^4.3.9",
     "framer-motion": "^3.7.0",
     "history": "^4.7.2",
@@ -297,7 +296,8 @@
     "serialize-error": "^8.1.0",
     "source-map-support": "^0.5.19",
     "stream-browserify": "^3.0.0",
-    "use-react-screenshot": "^1.0.2"
+    "use-react-screenshot": "^1.0.2",
+    "winston": "^3.3.3"
   },
   "devEngines": {
     "node": ">=14.x",

@@ -7,6 +7,7 @@ import {
     dialog,
     BrowserView,
     Rectangle,
+    SaveDialogOptions,
 } from 'electron';
 import { PrintErrorTypes } from '~/utils/types';
 import ipcCommands from '~/constants/ipcCommands.json';
@@ -55,20 +56,27 @@ async function httpsGet(
         urlGet = `${urlString}?${searchParams.toString()}`;
     }
 
-    const response = await axios.get(urlGet, {
-        cancelToken: source.token,
-        maxRedirects: 0,
-        // We also want to accept a 302 redirect, as that is used by the
-        // identity provider flow
-        validateStatus: (status: number) => status >= 200 && status <= 302,
-    });
-    clearTimeout(timeout);
+    try {
+        const response = await axios.get(urlGet, {
+            cancelToken: source.token,
+            maxRedirects: 0,
+            // We also want to accept a 302 redirect, as that is used by the
+            // identity provider flow
+            validateStatus: (status: number) => status >= 200 && status <= 302,
+        });
 
-    return JSON.stringify({
-        data: response.data,
-        headers: response.headers,
-        status: response.status,
-    });
+        return JSON.stringify({
+            data: response.data,
+            headers: response.headers,
+            status: response.status,
+        });
+    } catch (e) {
+        return JSON.stringify({
+            error: e,
+        });
+    } finally {
+        clearTimeout(timeout);
+    }
 }
 
 const redirectUri = 'ConcordiumRedirectToken';
@@ -125,18 +133,24 @@ function createExternalView(
     });
 }
 
+export function getUserDataPath() {
+    return app.getPath('userData');
+}
+
+export function saveFileDialog(opts: SaveDialogOptions) {
+    return dialog.showSaveDialog(opts);
+}
+
 export default function initializeIpcHandlers(
     mainWindow: BrowserWindow,
     printWindow: BrowserWindow,
     browserView: BrowserView
 ) {
     // Returns the path to userdata.
-    ipcMain.handle(ipcCommands.getUserDataPath, async () => {
-        return app.getPath('userData');
-    });
+    ipcMain.handle(ipcCommands.getUserDataPath, getUserDataPath);
 
     // Prints the given body.
-    ipcMain.handle(ipcCommands.print, async (_event, body) => {
+    ipcMain.handle(ipcCommands.print, (_event, body) => {
         return print(body, printWindow);
     });
 
@@ -171,11 +185,11 @@ export default function initializeIpcHandlers(
     );
 
     // Provides access to save file dialog from renderer processes.
-    ipcMain.handle(ipcCommands.saveFileDialog, async (_event, opts) => {
-        return dialog.showSaveDialog(opts);
+    ipcMain.handle(ipcCommands.saveFileDialog, (_event, opts) => {
+        return saveFileDialog(opts);
     });
 
-    ipcMain.handle(ipcCommands.openFileDialog, async (_event, opts) => {
+    ipcMain.handle(ipcCommands.openFileDialog, (_event, opts) => {
         return dialog.showOpenDialog(opts);
     });
 

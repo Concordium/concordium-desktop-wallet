@@ -19,6 +19,7 @@ import {
     MessageBoxOptions,
     MessageBoxReturnValue,
 } from 'electron';
+import { Logger } from 'winston';
 import {
     Account,
     Identity,
@@ -402,6 +403,21 @@ export type Database = {
     decyptedAmounts: DecryptedAmountsMethods;
 };
 
+export type LogExtra = {
+    message?: string;
+    error?: Error;
+};
+
+export type PutLog = (
+    ...inputs: [string] | [string, LogExtra] | [Error]
+) => Logger;
+
+export type LoggingMethods = {
+    info: PutLog;
+    warn: PutLog;
+    error: PutLog;
+};
+
 export interface AutoUpdateMethods {
     onUpdateAvailable: PutListenerWithUnsub;
     onUpdateDownloaded: PutListenerWithUnsub;
@@ -458,6 +474,7 @@ export interface WindowFunctions {
     files: FileMethods;
     http: HttpMethods;
     view: BrowserViewMethods;
+    log: LoggingMethods;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     printElement: (body: string) => any;
     writeImageToClipboard: (dataUrl: string) => void;

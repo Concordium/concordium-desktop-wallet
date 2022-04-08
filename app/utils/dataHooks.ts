@@ -42,9 +42,7 @@ import {
 export function useAccountName(address: string) {
     const [name, setName] = useState<string | undefined>();
     useEffect(() => {
-        lookupName(address)
-            .then(setName)
-            .catch(() => {}); // lookupName will only reject if there is a problem with the database. In that case we ignore the error and just display the address only.
+        lookupName(address).then(setName).catch(window.log.error); // lookupName will only reject if there is a problem with the database. In that case we ignore the error and just display the address only.
     }, [address]);
     return name;
 }
@@ -55,7 +53,7 @@ export function useAccount(address: string) {
     useEffect(() => {
         getAccount(address)
             .then((a) => setAccount(a ?? null))
-            .catch(() => {});
+            .catch(window.log.error);
     }, [address]);
     return account;
 }
@@ -67,7 +65,7 @@ export function useAccountInfo(address?: string) {
         if (address) {
             getAccountInfoOfAddress(address)
                 .then(setAccountInfo)
-                .catch(() => {});
+                .catch(window.log.error);
         } else {
             setAccountInfo(undefined);
         }
@@ -114,7 +112,11 @@ export function useLastFinalizedBlockSummary() {
  * @param staleWhileRevalidate If true, returns stale response from store while fetching update.
  */
 export function useConsensusStatus(staleWhileRevalidate = false) {
-    const cs = useAsyncMemo<ConsensusStatus>(getConsensusStatus, noOp, []);
+    const cs = useAsyncMemo<ConsensusStatus>(
+        getConsensusStatus,
+        window.log.error,
+        []
+    );
     const stale = useSelector(consensusStatusSelector);
     const dispatch = useDispatch();
 
@@ -129,24 +131,18 @@ export function useConsensusStatus(staleWhileRevalidate = false) {
 
 /** Hook for fetching identity providers */
 export function useIdentityProviders() {
-    const [providers, setProviders] = useState<IpInfo[]>([]);
-    useEffect(() => {
-        fetchLastFinalizedIdentityProviders()
-            .then(setProviders)
-            .catch(() => {});
-    }, []);
-    return providers;
+    return useAsyncMemo<IpInfo[]>(
+        fetchLastFinalizedIdentityProviders,
+        window.log.error
+    );
 }
 
 /** Hook for fetching anonymity revokers */
 export function useAnonymityRevokers() {
-    const [revokers, setRevokers] = useState<ArInfo[]>([]);
-    useEffect(() => {
-        fetchLastFinalizedAnonymityRevokers()
-            .then(setRevokers)
-            .catch(() => {});
-    }, []);
-    return revokers;
+    return useAsyncMemo<ArInfo[]>(
+        fetchLastFinalizedAnonymityRevokers,
+        window.log.error
+    );
 }
 
 /** Hook for fetching staked amount for a given account address, Returns undefined while loading and 0 if account is not a baker */

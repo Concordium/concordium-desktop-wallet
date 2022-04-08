@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import AccountCard from '~/components/AccountCard';
 import { Account, AccountInfo, Fraction } from '~/utils/types';
 import { validateTransferAmount } from '~/utils/transactionHelpers';
-import { collapseFraction } from '~/utils/basicHelpers';
+import { collapseFraction, throwLoggedError } from '~/utils/basicHelpers';
 import { getCcdSymbol } from '~/utils/ccd';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import { useAccountInfo } from '~/utils/dataHooks';
@@ -39,7 +39,7 @@ export default function PickAmount({
     validateAmount = validateTransferAmount,
 }: Props): JSX.Element {
     if (!account) {
-        throw new Error('Unexpected missing account');
+        throwLoggedError('Unexpected missing account');
     }
 
     const accountInfo = useAccountInfo(account.address);

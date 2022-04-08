@@ -43,17 +43,18 @@ import UpdateLevel2KeysUsingRootKeysHandler from './UpdateLevel2KeysWithRootKeys
 import UpdateLevel2KeysUsingLevel1KeysHandler from './UpdateLevel2KeysWithLevel1KeysHandler';
 import AddIdentityProviderHandler from './AddIdentityProviderHandler';
 import AddAnonymityRevokerHandler from './AddAnonymityRevokerHandler';
-
-import EncryptedTransferHandler from './EncryptedTransferHandler';
-import StakingHandler from './StakingHandler';
-import { parse } from '../JSONHelper';
 import ScheduledTransferWithMemoHandler from './ScheduledTransferWithMemoHandler';
 import EncryptedTransferWithMemoHandler from './EncryptedTransferWithMemoHandler';
 import SimpleTransferWithMemoHandler from './SimpleTransferWithMemoHandler';
+import EncryptedTransferHandler from './EncryptedTransferHandler';
+import StakingHandler from './StakingHandler';
+import { parse } from '../JSONHelper';
+
 import RegisterDataHandler from './RegisterDataHandler';
 import TimeParametersHandler from './TimeParameterHandler';
 import CooldownParametersHandler from './CooldownParametersHandler';
 import PoolParametersHandler from './PoolParametersHandlers';
+import { throwLoggedError } from '../basicHelpers';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -142,7 +143,9 @@ export function findAccountTransactionHandler(
                 )
             );
         default:
-            throw new Error(`Unsupported transaction type: ${transactionKind}`);
+            return throwLoggedError(
+                `Unsupported transaction type: ${transactionKind}`
+            );
     }
 }
 
@@ -232,7 +235,7 @@ export function findUpdateInstructionHandler(
                 new PoolParametersHandler()
             );
         default:
-            throw new Error(`Unsupported transaction type: ${type}`);
+            return throwLoggedError(`Unsupported transaction type: ${type}`);
     }
 }
 
@@ -247,7 +250,7 @@ export function createUpdateInstructionHandler(
     state: TransactionInput | undefined
 ) {
     if (!state) {
-        throw new Error(
+        throwLoggedError(
             'No transaction handler was found. An invalid transaction has been received.'
         );
     }
@@ -258,5 +261,5 @@ export function createUpdateInstructionHandler(
     if (type === 'UpdateInstruction') {
         return findUpdateInstructionHandler(transactionObject.type);
     }
-    throw new Error('Account transaction support not yet implemented.');
+    return throwLoggedError('Account transaction support not yet implemented.');
 }

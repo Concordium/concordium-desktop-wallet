@@ -25,6 +25,7 @@ import initializeDatabasePreferencesMethods from './database/preferencesDao';
 import initializeDatabaseSettingsMethods from './database/settingsDao';
 import initializeDatabaseTransactionsMethods from './database/transactionsDao';
 import initializeDatabaseWalletMethods from './database/walletDao';
+import initializeLoggingMethods from './logging';
 import initializeDatabaseDecryptedAmountMethods from './database/decryptedAmountsDao';
 import autoUpdateMethods from './autoUpdate';
 import accountReportMethods from './accountReport';
@@ -56,6 +57,7 @@ const Exposed: EqualRecord<WindowFunctions> = {
     openUrl: 'openUrl',
     removeAllListeners: 'removeAllListeners',
     view: 'view',
+    log: 'log',
     autoUpdate: 'autoUpdate',
     accountReport: 'accountReport',
     platform: 'platform',
@@ -136,6 +138,8 @@ contextBridge.exposeInMainWorld(Exposed.http, initializeHttpMethods);
 contextBridge.exposeInMainWorld(Exposed.messageBox, (opts: MessageBoxOptions) =>
     ipcRenderer.invoke(ipcCommands.messageBox, opts)
 );
+
+contextBridge.exposeInMainWorld(Exposed.log, initializeLoggingMethods);
 
 // Gather all database relevant functions in the same subdomain
 const databaseMethods: Database = {

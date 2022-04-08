@@ -85,6 +85,7 @@ async function performImport(
             addMessage
         );
     } catch (e) {
+        window.log.error('Import of wallet failed', { error: e });
         throw new Error(
             'The imported data is not compatible with existing data.'
         );
@@ -98,6 +99,7 @@ async function performImport(
             addAddressBookMessage
         );
     } catch (e) {
+        window.log.error('Import of Address book failed', { error: e });
         throw new Error(
             'The imported address book is not compatible with existing address book.'
         );
@@ -110,6 +112,8 @@ async function performImport(
             existingData.externalCredentials
         );
     }
+
+    window.log.info('Succesfully imported backup.');
 
     await loadIdentities(dispatch);
     await loadAccounts(dispatch);

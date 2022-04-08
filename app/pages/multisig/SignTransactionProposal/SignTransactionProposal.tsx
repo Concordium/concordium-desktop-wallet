@@ -107,6 +107,8 @@ function SignTransactionProposalView({ proposal, blockSummary }: Props) {
         const entryId = (await insert(updatedProposal))[0];
         updatedProposal.id = entryId;
 
+        window.log.info('created update instruction proposal');
+
         // Set the current proposal in the state to the one that was just generated.
         dispatch(addProposal(updatedProposal));
 

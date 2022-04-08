@@ -89,8 +89,14 @@ export default function IdentityIssuanceChooseProvider({
     useEffect(() => {
         getIdentityProviders()
             .then((loadedProviders) => setProviders(loadedProviders))
-            .catch(() => onError('Unable to load identity providers'));
-    }, [dispatch, onError]);
+            .catch((e) => {
+                window.log.warn(
+                    `Unable to load identity providers due to ${e.message}`
+                );
+                onError('Unable to load identity providers');
+            });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // This is run in an effect, to prevent navigation if the component is unmounted
     useEffect(() => {
@@ -147,6 +153,7 @@ export default function IdentityIssuanceChooseProvider({
                         ledger,
                         IPDetails
                     );
+                    window.log.info('Created Identity Object Request.');
 
                     setNextLocationState({
                         ...idObj,

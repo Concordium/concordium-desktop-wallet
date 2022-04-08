@@ -43,7 +43,7 @@ import {
 // eslint-disable-next-line import/no-cycle
 import { chosenAccountSelector, updateAllDecrypted } from './AccountSlice';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
-import { isDefined, noOp } from '~/utils/basicHelpers';
+import { isDefined, noOp, throwLoggedError } from '~/utils/basicHelpers';
 import { GetTransactionsOutput } from '~/preload/preloadTypes';
 import { findEntries } from '~/database/DecryptedAmountsDao';
 import { getActiveBooleanFilters } from '~/utils/accountHelpers';
@@ -620,7 +620,7 @@ export async function confirmTransaction(
         status = TransactionStatus.Failed;
         const rejectReasonContent = event.result.rejectReason;
         if (!rejectReasonContent) {
-            throw new Error('Missing rejection reason in transaction event');
+            throwLoggedError('Missing rejection reason in transaction event');
         }
 
         rejectReason =

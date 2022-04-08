@@ -16,6 +16,7 @@ import {
 import { hashSha256 } from './serializationHelpers';
 import { fetchLastFinalizedBlockSummary } from '~/node/nodeHelpers';
 import { attachKeyIndex } from '~/utils/updates/AuthorizationHelper';
+import { throwLoggedError } from './basicHelpers';
 
 /**
  * Given an update instruction, return the transaction hash.
@@ -76,7 +77,7 @@ export function getTransactionHash(transaction: Transaction) {
         );
         return accountTransactionHash.toString('hex');
     }
-    throw new Error(
+    return throwLoggedError(
         'Unable to get hash for a transaction that is not an update instruction or an account transaction with a signature'
     );
 }
