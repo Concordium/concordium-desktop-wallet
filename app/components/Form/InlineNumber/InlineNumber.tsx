@@ -2,7 +2,6 @@
 import clsx from 'clsx';
 import React, {
     InputHTMLAttributes,
-    MouseEventHandler,
     FocusEventHandler,
     useCallback,
     useEffect,
@@ -176,16 +175,6 @@ export default function InlineNumber({
         isInvalid,
     ]);
 
-    const handleClick: MouseEventHandler<HTMLInputElement> = useCallback(
-        (e) => {
-            if (clearOnFocus && e.currentTarget.value === formattedFallback) {
-                setInnerValue('');
-                e.currentTarget.style.width = '6px';
-            }
-        },
-        [formattedFallback, clearOnFocus]
-    );
-
     const handleFocus: FocusEventHandler<HTMLInputElement> = useCallback(
         (e) => {
             setIsFocused(true);
@@ -224,7 +213,6 @@ export default function InlineNumber({
             onChange={(e) => setInnerValue(e.target.value)}
             onBlur={handleBlur}
             onFocus={handleFocus}
-            onClick={handleClick}
             ref={ref}
             {...inputProps}
             style={{ width: 5 }} // To prevent initial UI jitter.
