@@ -106,7 +106,7 @@ export default function MintRateInput({
                 {paydaysPerYear.toLocaleString()}
             </span>{' '}
             - 1
-            {mantissa && exponent && (
+            {Boolean(mantissa) && Boolean(exponent) && (
                 <div className={styles.description}>
                     Chain value: {mantissa} · 10
                     <span className={styles.exponent}>-{exponent}</span>
