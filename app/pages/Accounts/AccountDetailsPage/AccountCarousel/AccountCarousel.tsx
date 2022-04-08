@@ -18,25 +18,23 @@ export default function AccountCarousel() {
 
     return (
         <div className={styles.root}>
-            {canChangeAccount && (
-                <Button
-                    className={styles.prev}
-                    clear
-                    onClick={() => dispatch(previousConfirmedAccount())}
-                >
-                    <ArrowIcon className={styles.icon} />
-                </Button>
-            )}
+            <Button
+                className={styles.prev}
+                clear
+                onClick={() => dispatch(previousConfirmedAccount())}
+                disabled={!canChangeAccount}
+            >
+                <ArrowIcon className={styles.icon} />
+            </Button>
             <AccountBalanceView />
-            {canChangeAccount && (
-                <Button
-                    className={styles.next}
-                    clear
-                    onClick={() => dispatch(nextConfirmedAccount())}
-                >
-                    <ArrowIcon className={styles.icon} />
-                </Button>
-            )}
+            <Button
+                className={styles.next}
+                clear
+                onClick={() => dispatch(nextConfirmedAccount())}
+                disabled={!canChangeAccount}
+            >
+                <ArrowIcon className={styles.icon} />
+            </Button>
         </div>
     );
 }
