@@ -122,6 +122,7 @@ export default function BuildProposal({
                                     ),
                                 },
                             }}
+                            minDate={new Date()}
                             maxDate={effective}
                         />
                     </>
