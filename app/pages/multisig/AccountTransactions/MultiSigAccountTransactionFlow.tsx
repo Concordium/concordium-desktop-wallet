@@ -313,18 +313,25 @@ export default function MultiSigAccountTransactionFlow<
                                 >
                                     {
                                         {
-                                            account: {
-                                                render: (initial, onNext) => (
-                                                    <SelectAccountPage
-                                                        filter={accountFilter}
-                                                        disabled={
-                                                            accountDisabled
-                                                        }
-                                                        initial={initial}
-                                                        onNext={onNext}
-                                                    />
-                                                ),
-                                            },
+                                            account: state?.account
+                                                ? undefined
+                                                : {
+                                                      render: (
+                                                          initial,
+                                                          onNext
+                                                      ) => (
+                                                          <SelectAccountPage
+                                                              filter={
+                                                                  accountFilter
+                                                              }
+                                                              disabled={
+                                                                  accountDisabled
+                                                              }
+                                                              initial={initial}
+                                                              onNext={onNext}
+                                                          />
+                                                      ),
+                                                  },
                                             ...(flowChildren as FormChildren<F>),
                                             expiry: {
                                                 render: (initial, onNext) => (
