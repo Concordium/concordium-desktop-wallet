@@ -119,7 +119,7 @@ export default withDeps(
                     title={updateBakerPoolTitle}
                     convert={convert}
                     multisigRoute={
-                        routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_STAKE
+                        routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_POOL
                     }
                     firstPageBack
                     validate={validate}
