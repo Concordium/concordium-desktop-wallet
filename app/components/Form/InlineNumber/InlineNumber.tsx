@@ -2,7 +2,7 @@
 import clsx from 'clsx';
 import React, {
     InputHTMLAttributes,
-    MouseEventHandler,
+    FocusEventHandler,
     useCallback,
     useEffect,
     useLayoutEffect,
@@ -75,7 +75,7 @@ export interface InlineNumberProps
     /**
      * If set, clears input when user clicks the field. Defaults to false.
      */
-    clearOnClick?: boolean;
+    clearOnFocus?: boolean;
     customFormatter?(v?: string): string;
     onChange?(v?: string): void;
     /**
@@ -86,7 +86,7 @@ export interface InlineNumberProps
 }
 
 /**
- * Number input that aligns with surrouding content in an inline fashion. Is also available as sub-component on \<Form /\>
+ * Number input that aligns with surrounding content in an inline fashion. Is also available as sub-component on \<Form /\>
  *
  * @example
  * I would like to submit the transaction in <InlineNumber value={value} onChange={setValue} /> releases.
@@ -105,7 +105,7 @@ export default function InlineNumber({
     className,
     isInvalid = false,
     trimLeadingZeros = false,
-    clearOnClick = false,
+    clearOnFocus = false,
     ...inputProps
 }: InlineNumberProps): JSX.Element {
     const format = useMemo(() => {
@@ -175,20 +175,17 @@ export default function InlineNumber({
         isInvalid,
     ]);
 
-    const handleClick: MouseEventHandler<HTMLInputElement> = useCallback(
+    const handleFocus: FocusEventHandler<HTMLInputElement> = useCallback(
         (e) => {
-            if (clearOnClick && e.currentTarget.value === formattedFallback) {
+            setIsFocused(true);
+            if (clearOnFocus && e.currentTarget.value === formattedFallback) {
                 setInnerValue('');
                 e.currentTarget.style.width = '6px';
             }
+            onFocus();
         },
-        [formattedFallback, clearOnClick]
+        [onFocus, formattedFallback, clearOnFocus]
     );
-
-    const handleFocus = useCallback(() => {
-        setIsFocused(true);
-        onFocus();
-    }, [onFocus]);
 
     useEffect(() => {
         onChange(innerValue);
@@ -216,7 +213,6 @@ export default function InlineNumber({
             onChange={(e) => setInnerValue(e.target.value)}
             onBlur={handleBlur}
             onFocus={handleFocus}
-            onClick={handleClick}
             ref={ref}
             {...inputProps}
             style={{ width: 5 }} // To prevent initial UI jitter.

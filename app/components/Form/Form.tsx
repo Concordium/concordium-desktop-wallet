@@ -21,7 +21,7 @@ import Submit from './Submit';
 import FileInput from './FileInput';
 import { FileInputProps, FileInputValue } from './FileInput/FileInput';
 import InlineNumber, { InlineNumberProps } from './InlineNumber';
-import GtuInput, { GtuInputProps } from './GtuInput';
+import CcdInput, { CcdInputProps } from './CcdInput';
 import InlineInput, { InlineInputProps } from './InlineInput';
 import DatePicker from './DatePicker';
 import Radios, { RadiosProps } from './Radios';
@@ -112,8 +112,8 @@ Form.InlineNumber = connectWithFormControlled<string, InlineNumberProps>(
 );
 (Form.InlineNumber as FC).displayName = 'Form.InlineNumber';
 
-Form.GtuInput = connectWithFormControlled<string, GtuInputProps>(GtuInput);
-(Form.GtuInput as FC).displayName = 'Form.GtuInput';
+Form.CcdInput = connectWithFormControlled<string, CcdInputProps>(CcdInput);
+(Form.CcdInput as FC).displayName = 'Form.GtuInput';
 
 Form.InlineInput = connectWithFormControlled<string, InlineInputProps>(
     InlineInput

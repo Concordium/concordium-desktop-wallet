@@ -1,7 +1,7 @@
 import React from 'react';
 import InlineNumber, { InlineNumberProps } from './InlineNumber';
 
-export type GtuInputProps = Omit<
+export type CcdInputProps = Omit<
     InlineNumberProps,
     | 'ensureDigits'
     | 'allowFractions'
@@ -9,17 +9,17 @@ export type GtuInputProps = Omit<
     | 'fallbackOnInvalid'
     | 'trimLeadingZeros'
     | 'customFormatter'
-    | 'clearOnClick'
+    | 'clearOnFocus'
 >;
 
-export default function GtuInput(props: GtuInputProps): JSX.Element {
+export default function CcdInput(props: CcdInputProps): JSX.Element {
     return (
         <InlineNumber
             {...props}
             ensureDigits={2}
             allowFractions
             trimLeadingZeros
-            clearOnClick
+            clearOnFocus
         />
     );
 }

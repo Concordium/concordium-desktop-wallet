@@ -7,7 +7,7 @@ import { collapseFraction, throwLoggedError } from '~/utils/basicHelpers';
 import { getCcdSymbol } from '~/utils/ccd';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import { useAccountInfo } from '~/utils/dataHooks';
-import GtuInput from '~/components/Form/GtuInput';
+import CcdInput from '~/components/Form/CcdInput';
 import Label from '~/components/Label';
 
 import styles from './PickAmount.module.scss';
@@ -44,21 +44,31 @@ export default function PickAmount({
 
     const accountInfo = useAccountInfo(account.address);
     const [error, setError] = useState<string>();
+    const [validation, setValidation] = useState<string>();
     const [state, setState] = useState<string | undefined>(amount);
 
     const onChange = useCallback(
         (newState: string) => {
             setState(newState);
-            const validation = validateAmount(
+            const newValidation = validateAmount(
                 newState,
                 accountInfo,
                 estimatedFee && collapseFraction(estimatedFee)
             );
-            setError(validation);
-            setAmount(validation === undefined ? newState : undefined);
+            setValidation(newValidation);
+            setAmount(newValidation === undefined ? newState : undefined);
+            if (!newValidation) {
+                // if the value is valid, remove error instantly, instead of onBlur
+                setError(undefined);
+            }
         },
         [accountInfo, estimatedFee, setAmount, validateAmount]
     );
+
+    const onBlur = useCallback(() => {
+        // Update error displays onBlur
+        setError(validation);
+    }, [validation]);
 
     return (
         <div className="flexColumn">
@@ -73,9 +83,10 @@ export default function PickAmount({
                 <Label className="mB5">Amount:</Label>
                 <div className={clsx(styles.inputWrapper)}>
                     {getCcdSymbol()}
-                    <GtuInput
+                    <CcdInput
                         value={state}
                         onChange={onChange}
+                        onBlur={onBlur}
                         isInvalid={Boolean(error)}
                         autoFocus
                     />
