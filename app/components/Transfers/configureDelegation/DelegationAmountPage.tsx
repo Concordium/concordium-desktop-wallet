@@ -92,7 +92,6 @@ function PickDelegateAmount({
                     autoFocus
                     rules={{
                         required: 'Please specify amount to delegate',
-                        min: { value: 0, message: 'Value cannot be negative' },
                         validate: validDelegateAmount,
                     }}
                 />

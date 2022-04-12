@@ -652,6 +652,10 @@ export const validateDelegateAmount = (
 
     const amount = ccdToMicroCcd(value);
 
+    if (amount === 0n) {
+        return `Delegated amount must be positive`;
+    }
+
     if (max !== undefined && amount > max) {
         return `Cannot delegate more than (${displayAsCcd(max)})`;
     }
