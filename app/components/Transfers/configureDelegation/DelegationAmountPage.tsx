@@ -24,7 +24,7 @@ import { validateDelegateAmount } from '~/utils/transactionHelpers';
 import { Account, AccountInfo, EqualRecord, Fraction } from '~/utils/types';
 import StakePendingChange from '~/components/StakePendingChange';
 import Loading from '~/cross-app-components/Loading';
-import { getPoolInfoLatest } from '~/node/nodeHelpers';
+import { getPoolStatusLatest } from '~/node/nodeHelpers';
 import { getCcdSymbol } from '~/utils/ccd';
 
 import styles from './DelegationPage.module.scss';
@@ -123,7 +123,7 @@ export default function DelegationAmountPage({
 }: Props) {
     const cooldownUntil = useCalcDelegatorCooldownUntil();
     const poolInfo = useAsyncMemo(
-        () => getPoolInfoLatest(target != null ? BigInt(target) : undefined),
+        () => getPoolStatusLatest(target != null ? BigInt(target) : undefined),
         noOp,
         [target]
     );

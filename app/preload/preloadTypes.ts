@@ -119,7 +119,7 @@ export type GRPC = {
     // We return a Uint8Array here, because PeerListResponse must be manually serialized/deserialized.
     getPeerList: (includeBootstrappers: boolean) => Promise<Uint8Array>;
     getRewardStatus: (blockHash: string) => Promise<RewardStatus | undefined>;
-    getPoolInfo: (
+    getPoolStatus: (
         blockHash: string,
         bakerId?: BakerId
     ) => Promise<PoolStatus | undefined>;

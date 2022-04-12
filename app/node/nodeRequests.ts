@@ -67,10 +67,10 @@ export const getRewardStatus = throwIfUndefined(
     (blockHash) => `Unable to load reward status, on block: ${blockHash}`
 );
 
-export const getPoolInfo = throwIfUndefined(
-    window.grpc.getPoolInfo,
+export const getPoolStatus = throwIfUndefined(
+    window.grpc.getPoolStatus,
     (blockHash, target) =>
-        `Unable to get pool info for ${
+        `Unable to get pool status for ${
             target === undefined ? 'L-pool' : target
         }, on block: ${blockHash}`
 );
