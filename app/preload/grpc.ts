@@ -102,7 +102,7 @@ const exposedMethods: GRPC = {
         return getConsensusStatusAndCryptographicParameters(address, port);
     },
     getRewardStatus: (blockHash: string) => client.getRewardStatus(blockHash),
-    getPoolInfo: (blockHash: string, bakerId?: BakerId) =>
+    getPoolStatus: (blockHash: string, bakerId?: BakerId) =>
         client.getPoolStatus(blockHash, bakerId),
 };
 
