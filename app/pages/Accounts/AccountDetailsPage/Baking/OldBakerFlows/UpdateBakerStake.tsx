@@ -14,10 +14,7 @@ import {
     chosenAccountSelector,
 } from '~/features/AccountSlice';
 import { ChainData, ensureChainData } from '~/utils/withChainData';
-import {
-    useCalcBakerStakeCooldownUntil,
-    useTransactionCostEstimate,
-} from '~/utils/dataHooks';
+import { useTransactionCostEstimate } from '~/utils/dataHooks';
 import { stringify } from '~/utils/JSONHelper';
 import { createUpdateBakerStakeTransaction } from '~/utils/transactionHelpers';
 import {
@@ -29,7 +26,6 @@ import {
 import { SubmitTransactionLocationState } from '../../../SubmitTransaction/SubmitTransaction';
 import { multiplyFraction } from '~/utils/basicHelpers';
 import StakePendingChange from '~/components/StakePendingChange';
-import { getFormattedDateString } from '~/utils/timeHelpers';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
 import ensureExchangeRateAndNonce, {
@@ -66,7 +62,6 @@ const UpdateBakerStakeForm = ensureExchangeRateAndNonce(
             exchangeRate,
             account?.signatureThreshold
         );
-        const cooldownUntil = useCalcBakerStakeCooldownUntil();
 
         const submit = useCallback(
             ({ stake }: FormModel) => {
@@ -153,16 +148,6 @@ const UpdateBakerStakeForm = ensureExchangeRateAndNonce(
                     Enter your new desired amount to stake. If you raise the
                     stake it will take effect after two epochs, and if you lower
                     the stake it will take effect after the grace period.
-                    {cooldownUntil && (
-                        <>
-                            <br />
-                            <br />
-                            This grace period will last until
-                            <div className="bodyEmphasized  mV10">
-                                {getFormattedDateString(cooldownUntil)}
-                            </div>
-                        </>
-                    )}
                 </div>
                 <PickBakerStakeAmount
                     header="New stake:"
