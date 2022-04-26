@@ -7,7 +7,6 @@ import CopyButton from '~/components/CopyButton';
 import PageLayout from '~/components/PageLayout';
 import routes from '~/constants/routes.json';
 import IconButton from '~/cross-app-components/IconButton';
-import AccountPageHeader from './AccountPageHeader';
 import DisplayAddress, {
     AddressDisplayFormat,
 } from '~/components/DisplayAddress';
@@ -47,7 +46,7 @@ export default function ShowAccountAddress() {
     return (
         <PageLayout>
             <PageLayout.Header>
-                <AccountPageHeader />
+                <h1>Accounts</h1>
             </PageLayout.Header>
             <PageLayout.Container
                 disableBack
