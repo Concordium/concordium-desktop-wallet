@@ -62,7 +62,6 @@ function UpdateBakerStakePage({
             buttonClassName={styles.continue}
             showAccountCard={isMultiSig}
             existingValues={existing}
-            showCooldown
         />
     );
 }
