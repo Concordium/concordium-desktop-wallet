@@ -60,7 +60,7 @@ function ShieldedInfo({
 const getDelegationTargetId = (dt: DelegationTarget) =>
     dt.delegateType === DelegationTargetType.Baker
         ? `baker ${dt.bakerId}`
-        : 'L-pool';
+        : 'passive delegation';
 
 interface PublicInfoProps {
     accountInfo: AccountInfo | undefined;

@@ -201,8 +201,10 @@ export default function DelegationAmountPage({
             <div className="flexChildFill">
                 {existing !== undefined || (
                     <p className="mT0">
-                        This transaction will delegate an amount of CCD to an
-                        active baker. You must choose the amount to delegate, if
+                        {target != null
+                            ? 'This transaction will delegate an amount of CCD to an active baker'
+                            : 'This transaction will stake an amount of CCD using passive delegation'}
+                        . You must choose the amount to delegate, and whether
                         you want to add rewards to the delegated amount.
                     </p>
                 )}

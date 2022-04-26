@@ -26,12 +26,12 @@ export default withChainData(function PoolParametersView({
     }
 
     const newPoolParameters = {
-        finalizationCommissionLPool:
-            poolParameters.lPoolCommissions.finalizationRewardCommission,
-        bakingCommissionLPool:
-            poolParameters.lPoolCommissions.bakingRewardCommission,
-        transactionCommissionLPool:
-            poolParameters.lPoolCommissions.transactionFeeCommission,
+        passiveFinalizationCommission:
+            poolParameters.passiveCommissions.finalizationRewardCommission,
+        passiveBakingCommission:
+            poolParameters.passiveCommissions.bakingRewardCommission,
+        passiveTransactionCommission:
+            poolParameters.passiveCommissions.transactionFeeCommission,
         finalizationCommissionRange:
             poolParameters.commissionBounds.finalizationRewardCommission,
         bakingCommissionRange:

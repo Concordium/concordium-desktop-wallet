@@ -180,14 +180,14 @@ export const displayDelegationTarget = (
     if (
         target === null ||
         (target as DelegationTarget)?.delegateType ===
-            DelegationTargetType.LPool
+            DelegationTargetType.PassiveDelegation
     ) {
-        return 'L-pool';
+        return 'Passive delegation';
     }
 
     const id = (target as DelegationTargetBaker).bakerId ?? target;
 
-    return id.toString();
+    return `Baker id ${id.toString()}`;
 };
 
 export const displayRedelegate = (value: boolean) => (value ? 'Yes' : 'No');

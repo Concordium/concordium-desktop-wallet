@@ -1255,7 +1255,7 @@ export interface CommissionRanges {
 }
 
 export interface PoolParameters {
-    lPoolCommissions: CommissionRates;
+    passiveCommissions: CommissionRates;
     commissionBounds: CommissionRanges;
     minimumEquityCapital: Word64;
     capitalBound: RewardFraction;

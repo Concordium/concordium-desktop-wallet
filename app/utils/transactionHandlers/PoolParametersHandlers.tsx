@@ -34,9 +34,9 @@ export default class PoolParametersHandler
     async createTransaction(
         blockSummary: BlockSummary,
         {
-            finalizationCommissionLPool,
-            bakingCommissionLPool,
-            transactionCommissionLPool,
+            passiveFinalizationCommission,
+            passiveBakingCommission,
+            passiveTransactionCommission,
             finalizationCommissionRange,
             bakingCommissionRange,
             transactionCommissionRange,
@@ -63,10 +63,10 @@ export default class PoolParametersHandler
         });
 
         const poolParameters: PoolParameters = {
-            lPoolCommissions: {
-                transactionFeeCommission: transactionCommissionLPool,
-                bakingRewardCommission: bakingCommissionLPool,
-                finalizationRewardCommission: finalizationCommissionLPool,
+            passiveCommissions: {
+                transactionFeeCommission: passiveTransactionCommission,
+                bakingRewardCommission: passiveBakingCommission,
+                finalizationRewardCommission: passiveFinalizationCommission,
             },
             commissionBounds: {
                 transactionFeeCommission: transactionCommissionRange,

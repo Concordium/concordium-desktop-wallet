@@ -26,7 +26,7 @@ export default async function signPoolParameters(
     const serializedHeader = serializeUpdateHeader(updateHeaderWithPayloadSize);
     const serializedUpdateType = serializeUpdateType(transaction.type);
     const serializedlPoolCommissions = serializeCommisionRates(
-        transaction.payload.lPoolCommissions
+        transaction.payload.passiveCommissions
     );
 
     // Send initial packet of data
