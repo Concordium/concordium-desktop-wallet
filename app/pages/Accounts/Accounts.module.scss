@@ -90,3 +90,15 @@
     top: calc(50% - 17px);
     height: 34px;
 }
+
+.displayAddressQRBig {
+    height: calc(min(512px, 70%));
+    width: calc(min(512px, 70%));
+    margin-bottom: 50px;
+}
+
+.displayAddressQRSmall {
+    height: 200px;
+    width: 200px;
+    margin: 20px;
+}

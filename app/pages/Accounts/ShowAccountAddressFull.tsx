@@ -1,6 +1,5 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import QRCode from 'qrcode.react';
 import ShrinkIcon from '@resources/svg/shrink.svg';
 import { push } from 'connected-react-router';
 import { chosenAccountSelector } from '~/features/AccountSlice';
@@ -13,6 +12,7 @@ import DisplayAddress, {
     AddressDisplayFormat,
 } from '~/components/DisplayAddress';
 import VerifyAddress from './VerifyAddress';
+import DisplayAsQR from '~/components/DisplayAsQR';
 
 import styles from './Accounts.module.scss';
 
@@ -29,7 +29,10 @@ export default function ShowAccountAddress() {
 
     const display = (
         <>
-            <QRCode className="mB50" size={512} value={account.address} />
+            <DisplayAsQR
+                className={styles.displayAddressQRBig}
+                value={account.address}
+            />
             <div className="flex alignCenter mBauto">
                 <DisplayAddress
                     className="body2 mL20"
