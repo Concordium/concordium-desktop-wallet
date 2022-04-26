@@ -10,7 +10,9 @@ import { Provider } from 'react-redux';
 import createRootReducer from './rootReducer';
 /* eslint-enable import/no-cycle */
 
-export const history = createBrowserHistory();
+export const history = createBrowserHistory({
+    basename: window.location.pathname,
+});
 const rootReducer = createRootReducer(history);
 export type RootState = ReturnType<typeof rootReducer>;
 
