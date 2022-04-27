@@ -1,6 +1,5 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import QRCode from 'qrcode.react';
 import ShrinkIcon from '@resources/svg/shrink.svg';
 import { push } from 'connected-react-router';
 import { chosenAccountSelector } from '~/features/AccountSlice';
@@ -8,11 +7,11 @@ import CopyButton from '~/components/CopyButton';
 import PageLayout from '~/components/PageLayout';
 import routes from '~/constants/routes.json';
 import IconButton from '~/cross-app-components/IconButton';
-import AccountPageHeader from './AccountPageHeader';
 import DisplayAddress, {
     AddressDisplayFormat,
 } from '~/components/DisplayAddress';
 import VerifyAddress from './VerifyAddress';
+import DisplayAsQR from '~/components/DisplayAsQR';
 
 import styles from './Accounts.module.scss';
 
@@ -29,7 +28,10 @@ export default function ShowAccountAddress() {
 
     const display = (
         <>
-            <QRCode className="mB50" size={512} value={account.address} />
+            <DisplayAsQR
+                className={styles.displayAddressQRBig}
+                value={account.address}
+            />
             <div className="flex alignCenter mBauto">
                 <DisplayAddress
                     className="body2 mL20"
@@ -44,7 +46,7 @@ export default function ShowAccountAddress() {
     return (
         <PageLayout>
             <PageLayout.Header>
-                <AccountPageHeader />
+                <h1>Accounts</h1>
             </PageLayout.Header>
             <PageLayout.Container
                 disableBack
