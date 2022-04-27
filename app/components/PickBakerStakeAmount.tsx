@@ -3,7 +3,9 @@ import React, { useCallback } from 'react';
 import { useFormContext, Validate } from 'react-hook-form';
 import { collapseFraction } from '~/utils/basicHelpers';
 import { getCcdSymbol } from '~/utils/ccd';
+import { useCalcBakerStakeCooldownUntil } from '~/utils/dataHooks';
 import { useUpdateEffect } from '~/utils/hooks';
+import { getFormattedDateString } from '~/utils/timeHelpers';
 import { validateBakerStake } from '~/utils/transactionHelpers';
 import { AccountInfo, Fraction } from '~/utils/types';
 import Form from './Form';
@@ -33,6 +35,8 @@ export default function PickBakerStakeAmount({
     hasPendingChange,
 }: Props): JSX.Element {
     const form = useFormContext<{ [key: string]: string }>();
+    const cooldownUntil = useCalcBakerStakeCooldownUntil();
+    const stake = form.watch(fieldName) ?? initial;
     const validStakeAmount: Validate = useCallback(
         (value: string) =>
             validateBakerStake(
@@ -58,6 +62,10 @@ export default function PickBakerStakeAmount({
     }
 
     const { errors } = form;
+    const showCooldown =
+        existing !== undefined &&
+        errors[fieldName] === undefined &&
+        stake < existing;
 
     return (
         <div className="mV30">
@@ -69,7 +77,11 @@ export default function PickBakerStakeAmount({
             )}
             <Label>{header}</Label>
             <div className="h1 mV5">
-                <span className={clsx(hasPendingChange && 'textFaded')}>
+                <span
+                    className={clsx(
+                        hasPendingChange ? 'textFaded' : 'textBlue'
+                    )}
+                >
                     {getCcdSymbol()}
                 </span>
                 <Form.CcdInput
@@ -84,6 +96,14 @@ export default function PickBakerStakeAmount({
                 />
             </div>
             <ErrorMessage>{errors[fieldName]?.message}</ErrorMessage>
+            {cooldownUntil && showCooldown && (
+                <div className="textFaded">
+                    Will take effect at
+                    <span className="block bodyEmphasized mT5">
+                        {getFormattedDateString(cooldownUntil)}
+                    </span>
+                </div>
+            )}
         </div>
     );
 }

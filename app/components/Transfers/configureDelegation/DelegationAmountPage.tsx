@@ -3,6 +3,7 @@ import { useForm, useFormContext, Validate } from 'react-hook-form';
 import { Redirect } from 'react-router';
 import clsx from 'clsx';
 import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { PoolStatusType } from '@concordium/node-sdk/lib/src/types';
 import { BakerPoolStatus } from '@concordium/node-sdk';
 import AccountCard from '~/components/AccountCard';
 import Form from '~/components/Form';
@@ -25,7 +26,8 @@ import { Account, AccountInfo, EqualRecord, Fraction } from '~/utils/types';
 import StakePendingChange from '~/components/StakePendingChange';
 import Loading from '~/cross-app-components/Loading';
 import { getPoolStatusLatest } from '~/node/nodeHelpers';
-import { getCcdSymbol } from '~/utils/ccd';
+import { displayAsCcd, getCcdSymbol } from '~/utils/ccd';
+import SidedRow from '~/components/SidedRow';
 
 import styles from './DelegationPage.module.scss';
 
@@ -51,8 +53,12 @@ function PickDelegateAmount({
     max,
     hasPendingChange,
 }: PickDelegateAmountProps) {
+    const cooldownUntil = useCalcDelegatorCooldownUntil();
     const form = useFormContext<SubState>();
     const { errors } = form;
+    const amount = form.watch(fieldNames.amount);
+    const showCooldown =
+        existing !== undefined && form.formState.isValid && amount < existing;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const validDelegateAmount: Validate = useCallback(
@@ -83,7 +89,11 @@ function PickDelegateAmount({
             )}
             <Label>Amount</Label>
             <div className="h1 mV5">
-                <span className={clsx(hasPendingChange && 'textFaded')}>
+                <span
+                    className={clsx(
+                        hasPendingChange ? 'textFaded' : 'textBlue'
+                    )}
+                >
                     {getCcdSymbol()}
                 </span>
                 <Form.CcdInput
@@ -97,6 +107,14 @@ function PickDelegateAmount({
                 />
             </div>
             <ErrorMessage>{errors.amount?.message}</ErrorMessage>
+            {cooldownUntil && showCooldown && (
+                <div className="textFaded">
+                    Will take effect at
+                    <span className="block bodyEmphasized mT5">
+                        {getFormattedDateString(cooldownUntil)}
+                    </span>
+                </div>
+            )}
         </div>
     );
 }
@@ -120,7 +138,6 @@ export default function DelegationAmountPage({
     exchangeRate,
     baseRoute,
 }: Props) {
-    const cooldownUntil = useCalcDelegatorCooldownUntil();
     const poolInfo = useAsyncMemo(
         () => getPoolStatusLatest(target != null ? BigInt(target) : undefined),
         noOp,
@@ -197,26 +214,32 @@ export default function DelegationAmountPage({
                         the stake it will take effect after two epochs, and if
                         you lower the stake it will take effect after the grace
                         period.
-                        {cooldownUntil && (
-                            <>
-                                <br />
-                                <br />
-                                This grace period will last until
-                                <span className="block bodyEmphasized mV10">
-                                    {getFormattedDateString(cooldownUntil)}
-                                </span>
-                            </>
-                        )}
                     </p>
                 )}
                 {pendingChange !== undefined && (
-                    <div className="mV10 body2">
+                    <div className="mB10 body2">
                         Cannot update delegated amount at this time:
                         <div className="bodyEmphasized textError mV10">
                             <StakePendingChange pending={pendingChange} />
                         </div>
                         It will be possible to proceed after this time has
                         passed.
+                    </div>
+                )}
+                {poolInfo.poolType === PoolStatusType.BakerPool && (
+                    <div className="body2 mV30">
+                        <Label className="mB5">Target pool status</Label>
+                        <SidedRow
+                            left="Current pool:"
+                            right={`${displayAsCcd(poolInfo.delegatedCapital)}`}
+                        />
+                        <SidedRow
+                            className="mT5"
+                            left="Pool limit:"
+                            right={`${displayAsCcd(
+                                poolInfo.delegatedCapitalCap
+                            )}`}
+                        />
                     </div>
                 )}
                 {showAccountCard && (
