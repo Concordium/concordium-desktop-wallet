@@ -59,7 +59,7 @@ function ShieldedInfo({
 
 const getDelegationTargetId = (dt: DelegationTarget) =>
     dt.delegateType === DelegationTargetType.Baker
-        ? `baker ${dt.bakerId}`
+        ? `baker pool ${dt.bakerId}`
         : 'L-pool';
 
 interface PublicInfoProps {
@@ -100,7 +100,7 @@ function PublicInfo({ accountInfo }: PublicInfoProps) {
                             {accountBaker !== undefined &&
                                 `Stake with baker ${accountBaker.bakerId}`}
                             {accountDelegation !== undefined &&
-                                `Delegation with ${getDelegationTargetId(
+                                `Delegation to ${getDelegationTargetId(
                                     accountDelegation.delegationTarget
                                 )}`}
                         </Label>
