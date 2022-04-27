@@ -100,7 +100,7 @@ function PublicInfo({ accountInfo }: PublicInfoProps) {
                             {accountBaker !== undefined &&
                                 `Stake with baker ${accountBaker.bakerId}`}
                             {accountDelegation !== undefined &&
-                                `Delegating to ${getDelegationTargetId(
+                                `Delegation to ${getDelegationTargetId(
                                     accountDelegation.delegationTarget
                                 )}`}
                         </Label>
