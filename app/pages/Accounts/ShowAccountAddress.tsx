@@ -1,6 +1,5 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import QRCode from 'qrcode.react';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
 import ExpandIcon from '@resources/svg/expand.svg';
@@ -11,9 +10,10 @@ import DisplayAddress, {
     AddressDisplayFormat,
 } from '~/components/DisplayAddress';
 
-import { Account, ClassName } from '../../utils/types';
-import CopyButton from '../../components/CopyButton';
+import { Account, ClassName } from '~/utils/types';
+import CopyButton from '~/components/CopyButton';
 import VerifyAddress from './VerifyAddress';
+import DisplayAsQR from '~/components/DisplayAsQR';
 
 import styles from './Accounts.module.scss';
 import CloseButton from '~/cross-app-components/CloseButton';
@@ -35,7 +35,10 @@ export default function ShowAccountAddress({
 
     const display = (
         <>
-            <QRCode className="m20" value={account.address} size={200} />
+            <DisplayAsQR
+                className={styles.displayAddressQRSmall}
+                value={account.address}
+            />
             <div className={styles.displayAddress}>
                 <DisplayAddress
                     className="mH40"
