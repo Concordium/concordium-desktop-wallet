@@ -334,3 +334,45 @@ export function useProtocolVersion(
 ): bigint | undefined {
     return useConsensusStatus(staleWhileRevalidate)?.protocolVersion;
 }
+
+export function useCalcBakerUpdate() {
+    const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
+    const rs = useAsyncMemo(
+        async () => {
+            if (lastFinalizedBlockSummary === undefined) {
+                return undefined;
+            }
+
+            return getRewardStatus(
+                lastFinalizedBlockSummary.consensusStatus.lastFinalizedBlock
+            );
+        },
+        noOp,
+        [lastFinalizedBlockSummary]
+    );
+    const now = useCurrentTime(60000);
+
+    if (
+        lastFinalizedBlockSummary === undefined ||
+        lastFinalizedBlockSummary.lastFinalizedBlockSummary === undefined ||
+        lastFinalizedBlockSummary.consensusStatus === undefined ||
+        rs === undefined
+    ) {
+        return undefined;
+    }
+
+    const {
+        lastFinalizedBlockSummary: bs,
+        consensusStatus: cs,
+    } = lastFinalizedBlockSummary;
+
+    if (isBlockSummaryV1(bs)) {
+        if (!isRewardStatusV1(rs)) {
+            throw new Error('Block summary and reward status do not match.'); // Should not happen, as this indicates rs and bs are queried with different blocks.
+        }
+
+        return getV1Cooldown(0, bs, cs, rs.nextPaydayTime, now);
+    }
+
+    return getV0Cooldown(0, cs, now);
+}
