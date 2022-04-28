@@ -55,7 +55,7 @@ export default class PoolParametersHandler
             blockSummary.updates.updateQueues.poolParameters.nextSequenceNumber;
         const {
             threshold,
-        } = blockSummary.updates.keys.level2Keys.bakerStakeThreshold;
+        } = blockSummary.updates.keys.level2Keys.poolParameters;
 
         const reducedLeverageBound = getReducedFraction({
             denominator: BigInt(leverageBound.denominator),
@@ -109,7 +109,7 @@ export default class PoolParametersHandler
     }
 
     getAuthorization(authorizations: Authorizations) {
-        return authorizations.bakerStakeThreshold;
+        return authorizations.poolParameters;
     }
 
     update = UpdatePoolParameters;

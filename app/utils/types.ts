@@ -1304,7 +1304,7 @@ export enum AccessStructureEnum {
     mintDistribution,
     transactionFeeDistribution,
     gasRewards,
-    bakerStakeThreshold,
+    poolParameters,
     addAnonymityRevoker,
     addIdentityProvider,
     cooldownParameters,
