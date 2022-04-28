@@ -13,7 +13,7 @@ import { MultiStepFormPageProps } from '~/components/MultiStepForm';
 import { collapseFraction, noOp } from '~/utils/basicHelpers';
 import {
     useCalcDelegatorCooldownUntil,
-    useCalcBakerUpdate,
+    useStakeIncreaseUntil,
 } from '~/utils/dataHooks';
 import { useAsyncMemo, useUpdateEffect } from '~/utils/hooks';
 import { getFormattedDateString } from '~/utils/timeHelpers';
@@ -56,7 +56,7 @@ function PickDelegateAmount({
     max,
     hasPendingChange,
 }: PickDelegateAmountProps) {
-    const increaseEffectiveTime = useCalcBakerUpdate();
+    const increaseEffectiveTime = useStakeIncreaseUntil();
     const cooldownUntil = useCalcDelegatorCooldownUntil();
     const form = useFormContext<SubState>();
     const { errors } = form;

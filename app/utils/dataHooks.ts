@@ -12,7 +12,6 @@ import {
     fetchLastFinalizedBlockSummary,
     getAccountInfoOfAddress,
     fetchLastFinalizedAnonymityRevokers,
-    getRewardStatusLatest,
 } from '../node/nodeHelpers';
 import { useCurrentTime, useAsyncMemo } from './hooks';
 import {
@@ -233,11 +232,22 @@ function getV1Cooldown(
     return epochDate(cooldownEnd, cs.epochDuration, genesisTime);
 }
 
-/** Hook for calculating the date of the delegation cooldown ending, will result in undefined while loading */
-export function useCalcDelegatorCooldownUntil() {
+/** Helper to get reward status, block summary and consensus status */
+function useRewardBlockAndConsensusStatus() {
     const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
-    const rs = useAsyncMemo(getRewardStatusLatest);
-    const now = useCurrentTime(60000);
+    const rs = useAsyncMemo(
+        async () => {
+            if (lastFinalizedBlockSummary === undefined) {
+                return undefined;
+            }
+
+            return getRewardStatus(
+                lastFinalizedBlockSummary.consensusStatus.lastFinalizedBlock
+            );
+        },
+        noOp,
+        [lastFinalizedBlockSummary]
+    );
 
     if (
         lastFinalizedBlockSummary === undefined ||
@@ -252,6 +262,19 @@ export function useCalcDelegatorCooldownUntil() {
         lastFinalizedBlockSummary: bs,
         consensusStatus: cs,
     } = lastFinalizedBlockSummary;
+    return { rs, bs, cs };
+}
+
+/** Hook for calculating the date of the delegation cooldown ending, will result in undefined while loading */
+export function useCalcDelegatorCooldownUntil() {
+    const status = useRewardBlockAndConsensusStatus();
+    const now = useCurrentTime(60000);
+
+    if (!status) {
+        return undefined;
+    }
+
+    const { bs, cs, rs } = status;
 
     if (isBlockSummaryV1(bs)) {
         if (!isRewardStatusV1(rs)) {
@@ -273,35 +296,14 @@ export function useCalcDelegatorCooldownUntil() {
 
 /** Hook for calculating the date of the baking stake cooldown ending, will result in undefined while loading */
 export function useCalcBakerStakeCooldownUntil() {
-    const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
-    const rs = useAsyncMemo(
-        async () => {
-            if (lastFinalizedBlockSummary === undefined) {
-                return undefined;
-            }
-
-            return getRewardStatus(
-                lastFinalizedBlockSummary.consensusStatus.lastFinalizedBlock
-            );
-        },
-        noOp,
-        [lastFinalizedBlockSummary]
-    );
+    const status = useRewardBlockAndConsensusStatus();
     const now = useCurrentTime(60000);
 
-    if (
-        lastFinalizedBlockSummary === undefined ||
-        lastFinalizedBlockSummary.lastFinalizedBlockSummary === undefined ||
-        lastFinalizedBlockSummary.consensusStatus === undefined ||
-        rs === undefined
-    ) {
+    if (!status) {
         return undefined;
     }
 
-    const {
-        lastFinalizedBlockSummary: bs,
-        consensusStatus: cs,
-    } = lastFinalizedBlockSummary;
+    const { bs, cs, rs } = status;
 
     if (isBlockSummaryV1(bs)) {
         if (!isRewardStatusV1(rs)) {
@@ -324,47 +326,16 @@ export function useCalcBakerStakeCooldownUntil() {
     );
 }
 
-/**
- * Hook for getting chain protocol version
- *
- * @param staleWhileRevalidate If true, returns stale response from store while fetching update.
- */
-export function useProtocolVersion(
-    staleWhileRevalidate = false
-): bigint | undefined {
-    return useConsensusStatus(staleWhileRevalidate)?.protocolVersion;
-}
-
-export function useCalcBakerUpdate() {
-    const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
-    const rs = useAsyncMemo(
-        async () => {
-            if (lastFinalizedBlockSummary === undefined) {
-                return undefined;
-            }
-
-            return getRewardStatus(
-                lastFinalizedBlockSummary.consensusStatus.lastFinalizedBlock
-            );
-        },
-        noOp,
-        [lastFinalizedBlockSummary]
-    );
+/** Hook for calculating when a stake increase will take effect, will result in undefined while loading */
+export function useStakeIncreaseUntil() {
+    const status = useRewardBlockAndConsensusStatus();
     const now = useCurrentTime(60000);
 
-    if (
-        lastFinalizedBlockSummary === undefined ||
-        lastFinalizedBlockSummary.lastFinalizedBlockSummary === undefined ||
-        lastFinalizedBlockSummary.consensusStatus === undefined ||
-        rs === undefined
-    ) {
+    if (!status) {
         return undefined;
     }
 
-    const {
-        lastFinalizedBlockSummary: bs,
-        consensusStatus: cs,
-    } = lastFinalizedBlockSummary;
+    const { bs, cs, rs } = status;
 
     if (isBlockSummaryV1(bs)) {
         if (!isRewardStatusV1(rs)) {
@@ -375,4 +346,15 @@ export function useCalcBakerUpdate() {
     }
 
     return getV0Cooldown(0, cs, now);
+}
+
+/**
+ * Hook for getting chain protocol version
+ *
+ * @param staleWhileRevalidate If true, returns stale response from store while fetching update.
+ */
+export function useProtocolVersion(
+    staleWhileRevalidate = false
+): bigint | undefined {
+    return useConsensusStatus(staleWhileRevalidate)?.protocolVersion;
 }

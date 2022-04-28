@@ -5,7 +5,7 @@ import { collapseFraction } from '~/utils/basicHelpers';
 import { getCcdSymbol } from '~/utils/ccd';
 import {
     useCalcBakerStakeCooldownUntil,
-    useCalcBakerUpdate,
+    useStakeIncreaseUntil,
 } from '~/utils/dataHooks';
 import { useUpdateEffect } from '~/utils/hooks';
 import { getFormattedDateString } from '~/utils/timeHelpers';
@@ -38,7 +38,7 @@ export default function PickBakerStakeAmount({
     hasPendingChange,
 }: Props): JSX.Element {
     const form = useFormContext<{ [key: string]: string }>();
-    const increaseEffectiveTime = useCalcBakerUpdate();
+    const increaseEffectiveTime = useStakeIncreaseUntil();
     const cooldownUntil = useCalcBakerStakeCooldownUntil();
     const stake = form.watch(fieldName) ?? initial;
     const validStakeAmount: Validate = useCallback(
