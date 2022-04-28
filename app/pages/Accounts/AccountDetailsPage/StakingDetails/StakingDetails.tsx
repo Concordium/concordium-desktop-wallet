@@ -111,7 +111,7 @@ function DelegatorValues({ details }: ValuesProps<AccountDelegationDetails>) {
                 value={displayAsCcd(details.stakedAmount)}
             />
             <Value
-                title="Target pool"
+                title="Target"
                 value={displayDelegationTarget(details.delegationTarget)}
             />
             <Value

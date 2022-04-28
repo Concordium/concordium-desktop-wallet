@@ -14,9 +14,9 @@ interface PoolParametersShowProps {
 
 export default function ShowPoolParameters({
     poolParameters: {
-        finalizationCommissionLPool,
-        bakingCommissionLPool,
-        transactionCommissionLPool,
+        passiveFinalizationCommission,
+        passiveBakingCommission,
+        passiveTransactionCommission,
         finalizationCommissionRange,
         bakingCommissionRange,
         transactionCommissionRange,
@@ -32,18 +32,18 @@ export default function ShowPoolParameters({
             <div>
                 <h5>L Pool commissions</h5>
                 <RewardFractionField
-                    label={fieldDisplays.transactionCommissionLPool}
-                    value={transactionCommissionLPool}
+                    label={fieldDisplays.passiveTransactionCommission}
+                    value={passiveTransactionCommission}
                     disabled
                 />
                 <RewardFractionField
-                    label={fieldDisplays.bakingCommissionLPool}
-                    value={bakingCommissionLPool}
+                    label={fieldDisplays.passiveBakingCommission}
+                    value={passiveBakingCommission}
                     disabled
                 />
                 <RewardFractionField
-                    label={fieldDisplays.finalizationCommissionLPool}
-                    value={finalizationCommissionLPool}
+                    label={fieldDisplays.passiveFinalizationCommission}
+                    value={passiveFinalizationCommission}
                     disabled
                 />
                 <CommissionRangeField
