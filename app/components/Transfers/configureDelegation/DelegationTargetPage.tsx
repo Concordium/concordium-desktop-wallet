@@ -4,6 +4,7 @@ import {
     OpenStatusText,
     PoolStatusType,
 } from '@concordium/node-sdk/lib/src/types';
+import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import Form from '~/components/Form';
 import { validBigInt } from '~/components/Form/util/validation';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
@@ -61,11 +62,20 @@ export default function DelegationTargetPage({
             const poolStatus = await getPoolStatusLatest(bakerId); // Throws if response is undefined.
 
             // TODO Fix getPoolStatusLatest type so the type checker knows poolStatus is BakerPoolStatus here
-            if (
-                poolStatus.poolType === PoolStatusType.BakerPool &&
-                poolStatus.poolInfo.openStatus !== OpenStatusText.OpenForAll
-            ) {
+            if (poolStatus.poolType !== PoolStatusType.BakerPool) {
+                return true;
+            }
+
+            if (poolStatus.poolInfo.openStatus !== OpenStatusText.OpenForAll) {
                 return 'Targeted baker does not allow new delegators';
+            }
+
+            if (
+                isDelegatorAccount(accountInfo) &&
+                poolStatus.delegatedCapitalCap - poolStatus.delegatedCapital <
+                    accountInfo.accountDelegation.stakedAmount
+            ) {
+                return "Your current stake would violate the targeted baker's cap";
             }
 
             return true;
