@@ -3,7 +3,10 @@ import React, { useCallback } from 'react';
 import { useFormContext, Validate } from 'react-hook-form';
 import { collapseFraction } from '~/utils/basicHelpers';
 import { getCcdSymbol } from '~/utils/ccd';
-import { useCalcBakerStakeCooldownUntil } from '~/utils/dataHooks';
+import {
+    useCalcBakerStakeCooldownUntil,
+    useCalcBakerUpdate,
+} from '~/utils/dataHooks';
 import { useUpdateEffect } from '~/utils/hooks';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import { validateBakerStake } from '~/utils/transactionHelpers';
@@ -35,6 +38,7 @@ export default function PickBakerStakeAmount({
     hasPendingChange,
 }: Props): JSX.Element {
     const form = useFormContext<{ [key: string]: string }>();
+    const increaseEffectiveTime = useCalcBakerUpdate();
     const cooldownUntil = useCalcBakerStakeCooldownUntil();
     const stake = form.watch(fieldName) ?? initial;
     const validStakeAmount: Validate = useCallback(
@@ -62,10 +66,7 @@ export default function PickBakerStakeAmount({
     }
 
     const { errors } = form;
-    const showCooldown =
-        existing !== undefined &&
-        errors[fieldName] === undefined &&
-        stake < existing;
+    const showCooldown = errors[fieldName] === undefined;
 
     return (
         <div className="mV30">
@@ -96,14 +97,28 @@ export default function PickBakerStakeAmount({
                 />
             </div>
             <ErrorMessage>{errors[fieldName]?.message}</ErrorMessage>
-            {cooldownUntil && showCooldown && (
-                <div className="textFaded">
-                    Will take effect at
-                    <span className="block bodyEmphasized mT5">
-                        {getFormattedDateString(cooldownUntil)}
-                    </span>
-                </div>
-            )}
+            {cooldownUntil &&
+                showCooldown &&
+                existing !== undefined &&
+                stake < existing && (
+                    <div className="textFaded">
+                        Will take effect at
+                        <span className="block bodyEmphasized mT5">
+                            {getFormattedDateString(cooldownUntil)}
+                        </span>
+                    </div>
+                )}
+            {increaseEffectiveTime &&
+                showCooldown &&
+                existing !== undefined &&
+                stake > existing && (
+                    <div className="textFaded">
+                        Will take effect at
+                        <span className="block bodyEmphasized mT5">
+                            {getFormattedDateString(increaseEffectiveTime)}
+                        </span>
+                    </div>
+                )}
         </div>
     );
 }

@@ -228,7 +228,7 @@ export default function DelegationAmountPage({
                     <p className="mT0">
                         Enter your new desired amount to delegate. If you raise
                         the stake it will take effect at the next payday, and if
-                        you lower the stake it will take effect after the grace
+                        you lower the stake it will take effect after a grace
                         period.
                     </p>
                 )}

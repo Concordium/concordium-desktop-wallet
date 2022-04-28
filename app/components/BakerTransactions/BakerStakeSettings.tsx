@@ -61,9 +61,9 @@ export default function BakerStakeSettings({
                     pendingChange === undefined && (
                         <p className="mT0">
                             Enter your new desired amount to stake. If you raise
-                            the stake it will take effect after two epochs, and
-                            if you lower the stake it will take effect after the
-                            grace period.
+                            the stake it will take effect at the next payday,
+                            and if you lower the stake it will take effect after
+                            a grace period.
                         </p>
                     )}
                 {pendingChange !== undefined && (
