@@ -133,10 +133,10 @@ export default function DelegationTargetPage({
                     />
                 ) : (
                     <p className="mB20">
-                        Passive delegation divides the staked tokens shared
-                        between all baker pools proportionally to their size,
-                        and has a higher commission rate than delegating to a
-                        single baker.
+                        Passive delegation divides the staked tokens between all
+                        baker pools proportionally to their size, and has a
+                        higher commission rate than delegating to a single
+                        baker.
                     </p>
                 )}
             </div>
