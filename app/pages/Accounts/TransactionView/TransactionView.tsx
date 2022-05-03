@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useSelector } from 'react-redux';
+import BackArrow from '@resources/svg/back-arrow.svg';
 import TransactionListElement from '../TransactionList/TransactionListElement';
 import {
     TransferTransactionWithNames,
@@ -12,8 +13,10 @@ import SidedRow from '~/components/SidedRow';
 import CopyButton from '~/components/CopyButton';
 import { rejectReasonToDisplayText } from '~/utils/node/RejectReasonHelper';
 import { transactionsSelector } from '~/features/TransactionSlice';
-import styles from './TransactionView.module.scss';
 import CloseButton from '~/cross-app-components/CloseButton';
+import IconButton from '~/cross-app-components/IconButton';
+
+import styles from './TransactionView.module.scss';
 
 interface Props {
     transaction: TransferTransactionWithNames;
@@ -49,6 +52,47 @@ function CopiableListElement({
             }
             right={<CopyButton className={styles.copyButton} value={value} />}
         />
+    );
+}
+
+interface TransactionEventsProps {
+    events?: string[];
+}
+
+function TransactionEvents({ events }: TransactionEventsProps) {
+    const [open, setOpen] = useState(false);
+
+    if (!events || events.length === 0) {
+        return null;
+    }
+
+    return (
+        <div className={clsx(styles.listElement, 'flexColumn')}>
+            <div className="flex justifySpaceBetween">
+                <p className={styles.copiableListElementTitle}>Events</p>
+                <IconButton
+                    type="button"
+                    title="close"
+                    className={
+                        open
+                            ? styles.eventsButtonClosed
+                            : styles.eventsButtonOpen
+                    }
+                    onClick={() => setOpen(!open)}
+                >
+                    <BackArrow width="20" />
+                </IconButton>
+            </div>
+            {open ? (
+                events.map((event: string) => (
+                    <p key={event} className={styles.event}>
+                        {event}
+                    </p>
+                ))
+            ) : (
+                <p className={styles.eventsTextClosed}>{events[0]}</p>
+            )}
+        </div>
     );
 }
 
@@ -123,6 +167,7 @@ function TransactionView({ transaction, onClose, setTransaction }: Props) {
                 title="Block hash"
                 value={transaction.blockHash || 'Awaiting finalization'}
             />
+            <TransactionEvents events={transaction.events} />
         </div>
     );
 }

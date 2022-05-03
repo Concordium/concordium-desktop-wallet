@@ -144,6 +144,7 @@ export function convertIncomingTransaction(
         toAddress,
         rejectReason: transaction.details.rawRejectReason?.tag,
         status,
+        events: transaction.details.events,
         memo: dataBlob,
     };
 }
