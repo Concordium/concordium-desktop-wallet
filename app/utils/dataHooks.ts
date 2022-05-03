@@ -326,7 +326,10 @@ export function useCalcBakerStakeCooldownUntil() {
     );
 }
 
-/** Hook for calculating when a stake increase will take effect, will result in undefined while loading */
+/**
+ * Hook for calculating when a stake increase will take effect, will result in undefined while loading
+ * Note that this hook will throw an error if used with a node running protocol version lower than 4.
+ */
 export function useStakeIncreaseUntil() {
     const status = useRewardBlockAndConsensusStatus();
     const now = useCurrentTime(60000);
@@ -337,15 +340,13 @@ export function useStakeIncreaseUntil() {
 
     const { bs, cs, rs } = status;
 
-    if (isBlockSummaryV1(bs)) {
-        if (!isRewardStatusV1(rs)) {
-            throw new Error('Block summary and reward status do not match.'); // Should not happen, as this indicates rs and bs are queried with different blocks.
-        }
-
-        return getV1Cooldown(0, bs, cs, rs.nextPaydayTime, now);
+    if (!isBlockSummaryV1(bs) || !isRewardStatusV1(rs)) {
+        throw new Error(
+            'Block summary or reward status unexpectedly have version 0.'
+        );
     }
 
-    return getV0Cooldown(0, cs, now);
+    return getV1Cooldown(0, bs, cs, rs.nextPaydayTime, now);
 }
 
 /**
