@@ -68,19 +68,17 @@
 
 .eventsButtonOpen,
 .eventsButtonClosed {
-    padding: 0;
+    position: absolute;
+    right: 14px;
+    padding-right: 0;
 }
 
 .eventsButtonOpen {
-    svg {
-        transform: rotate(90deg);
-    }
+    transform: rotate(-90deg);
 }
 
 .eventsButtonClosed {
-    svg {
-        transform: rotate(-90deg);
-    }
+    transform: rotate(90deg);
 }
 
 .eventsTextClosed,
