@@ -5,6 +5,7 @@ export enum NotificationLevel {
     Error = 'error',
     ManualUpdate = 'manual-update',
     AutoUpdate = 'auto-update',
+    ClosingBakerPool = 'closing-baker-pool',
 }
 
 let nextId = 0;
@@ -18,16 +19,27 @@ interface UpdateNotification extends NotificationBase {
     version: string;
 }
 
+export interface ClosingBakerNotification extends NotificationBase {
+    level: NotificationLevel.ClosingBakerPool;
+    accountName: string;
+}
+
 export interface Notification extends NotificationBase {
     level: Exclude<
         NotificationLevel,
-        NotificationLevel.ManualUpdate | NotificationLevel.AutoUpdate
+        | NotificationLevel.ManualUpdate
+        | NotificationLevel.AutoUpdate
+        | NotificationLevel.ClosingBakerPool
     >;
     message: string;
 }
 
 interface NotificationSliceState {
-    notifications: (UpdateNotification | Notification)[];
+    notifications: (
+        | UpdateNotification
+        | Notification
+        | ClosingBakerNotification
+    )[];
 }
 
 const { actions, reducer } = createSlice({
@@ -38,7 +50,9 @@ const { actions, reducer } = createSlice({
     reducers: {
         pushNotification(
             state,
-            action: PayloadAction<Notification | UpdateNotification>
+            action: PayloadAction<
+                Notification | UpdateNotification | ClosingBakerNotification
+            >
         ) {
             state.notifications.push({ ...action.payload });
         },
@@ -69,6 +83,20 @@ export function triggerUpdateNotification(
         })
     );
 
+    nextId += 1;
+}
+
+export function triggerClosingBakerPoolNotification(
+    dispatch: Dispatch,
+    accountName: string
+) {
+    dispatch(
+        actions.pushNotification({
+            level: NotificationLevel.ClosingBakerPool,
+            id: nextId,
+            accountName,
+        })
+    );
     nextId += 1;
 }
 
