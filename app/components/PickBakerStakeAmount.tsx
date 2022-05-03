@@ -1,16 +1,30 @@
 import clsx from 'clsx';
 import React, { useCallback } from 'react';
 import { useFormContext, Validate } from 'react-hook-form';
-import { collapseFraction } from '~/utils/basicHelpers';
-import { getCcdSymbol } from '~/utils/ccd';
-import { useCalcBakerStakeCooldownUntil } from '~/utils/dataHooks';
-import { useUpdateEffect } from '~/utils/hooks';
+import { PoolStatusType } from '@concordium/node-sdk/lib/src/types';
+import { isRewardStatusV1 } from '@concordium/node-sdk/lib/src/rewardStatusHelpers';
+import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { collapseFraction, noOp } from '~/utils/basicHelpers';
+import {
+    getCcdSymbol,
+    ccdToMicroCcd,
+    isValidCcdString,
+    displayAsCcd,
+} from '~/utils/ccd';
+import {
+    useCalcBakerStakeCooldownUntil,
+    useCapitalBound,
+} from '~/utils/dataHooks';
+import { useUpdateEffect, useAsyncMemo } from '~/utils/hooks';
 import { getFormattedDateString } from '~/utils/timeHelpers';
+
 import { validateBakerStake } from '~/utils/transactionHelpers';
 import { AccountInfo, Fraction } from '~/utils/types';
 import Form from './Form';
 import ErrorMessage from './Form/ErrorMessage';
 import Label from './Label';
+import updateConstants from '~/constants/updateConstants.json';
+import { getRewardStatusLatest, getPoolStatusLatest } from '~/node/nodeHelpers';
 
 interface Props {
     header: string;
@@ -22,6 +36,58 @@ interface Props {
     accountInfo: AccountInfo | undefined;
     estimatedFee: Fraction | undefined;
     hasPendingChange?: boolean;
+}
+
+/**
+ * Check whether the proposed stake will cause the account to breach the capital bound.
+ */
+function useCapitalBoundCheck(
+    accountInfo: AccountInfo | undefined,
+    stake: string
+): { showWarning: true; limitAfterUpdate: bigint } | { showWarning: false } {
+    const rewardStatus = useAsyncMemo(getRewardStatusLatest);
+    const poolStatus = useAsyncMemo(
+        async () => {
+            if (accountInfo) {
+                const status = await getPoolStatusLatest(
+                    accountInfo.accountIndex
+                );
+                if (status.poolType === PoolStatusType.BakerPool) {
+                    return status;
+                }
+            }
+            return Promise.resolve(undefined);
+        },
+        noOp,
+        [accountInfo?.accountIndex]
+    );
+    const capitalBound = useCapitalBound();
+
+    if (
+        !capitalBound ||
+        !isValidCcdString(stake) ||
+        !rewardStatus ||
+        !isRewardStatusV1(rewardStatus) ||
+        !poolStatus
+    ) {
+        return { showWarning: false };
+    }
+    const newStake = ccdToMicroCcd(stake);
+    const currentStake =
+        accountInfo && isBakerAccount(accountInfo)
+            ? accountInfo.accountBaker.stakedAmount
+            : 0n;
+    const newTotalStake =
+        rewardStatus.totalStakedCapital - currentStake + newStake;
+    const limitAfterUpdate =
+        (newTotalStake *
+            BigInt(capitalBound * updateConstants.rewardFractionResolution)) /
+            BigInt(updateConstants.rewardFractionResolution) -
+        poolStatus.delegatedCapital;
+    if (limitAfterUpdate < newStake) {
+        return { showWarning: true, limitAfterUpdate };
+    }
+    return { showWarning: false };
 }
 
 export default function PickBakerStakeAmount({
@@ -37,6 +103,7 @@ export default function PickBakerStakeAmount({
     const form = useFormContext<{ [key: string]: string }>();
     const cooldownUntil = useCalcBakerStakeCooldownUntil();
     const stake = form.watch(fieldName) ?? initial;
+    const capitalBoundCheck = useCapitalBoundCheck(accountInfo, stake);
     const validStakeAmount: Validate = useCallback(
         (value: string) =>
             validateBakerStake(
@@ -101,6 +168,16 @@ export default function PickBakerStakeAmount({
                     Will take effect at
                     <span className="block bodyEmphasized mT5">
                         {getFormattedDateString(cooldownUntil)}
+                    </span>
+                </div>
+            )}
+            {capitalBoundCheck.showWarning && (
+                <div className="textFaded">
+                    Chosen stake exceeds the capital bound, meaning that your
+                    stake over the bound will not yield any returns. Estimated
+                    bound:
+                    <span className="block bodyEmphasized mT5">
+                        {displayAsCcd(capitalBoundCheck.limitAfterUpdate)}
                     </span>
                 </div>
             )}
