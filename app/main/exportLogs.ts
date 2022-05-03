@@ -5,7 +5,7 @@ import logConstants from '~/constants/logConstants.json';
 export default async function exportLogs(): Promise<boolean> {
     const dialogResult = await saveFileDialog({
         title: 'Export logs',
-        defaultPath: fileName,
+        defaultPath: logConstants.fileName,
     });
     const location = dialogResult.filePath;
     if (!location) {
@@ -15,12 +15,15 @@ export default async function exportLogs(): Promise<boolean> {
     const userDataPath = getUserDataPath();
     const extraFileLocation = `${userDataPath}/${logConstants.extraFileName}`;
     // We only add the first extra log file. This should be rewritten to append multiple.
-    if (fs.accessSync(extraFileLocation)) {
+    try {
+        fs.accessSync(extraFileLocation);
         try {
             fs.copyFileSync(extraFileLocation, location);
         } catch {
             return false;
         }
+    } catch {
+        // If we don't have access to the extra file, accessSync will throw an error.
     }
 
     try {
