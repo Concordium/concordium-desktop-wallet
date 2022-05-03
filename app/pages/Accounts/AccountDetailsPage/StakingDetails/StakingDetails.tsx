@@ -16,6 +16,7 @@ import { useLastFinalizedBlockSummary } from '~/utils/dataHooks';
 import { toFixed } from '~/utils/numberStringHelpers';
 import { hasDelegationProtocol } from '~/utils/protocolVersion';
 import {
+    dateFromBakerPoolPendingChange,
     dateFromStakePendingChange,
     getFormattedDateString,
 } from '~/utils/timeHelpers';
@@ -209,6 +210,18 @@ export default function StakingDetails({ details }: Props) {
               )
             : undefined;
 
+    const pendingClosingBakerDate =
+        poolStatus !== undefined &&
+        poolStatus.bakerStakePendingChange.pendingChangeType ===
+            BakerPoolPendingChangeType.RemovePool
+            ? dateFromBakerPoolPendingChange(
+                  poolStatus.bakerStakePendingChange,
+                  cs,
+                  rs,
+                  bs?.updates.chainParameters
+              )
+            : undefined;
+
     return (
         <Card className={styles.root} dark>
             <header className={styles.header}>
@@ -248,27 +261,22 @@ export default function StakingDetails({ details }: Props) {
                         )}
                     </div>
                 )}
-            {poolStatus !== undefined &&
-                poolStatus.bakerStakePendingChange.pendingChangeType ===
-                    BakerPoolPendingChangeType.RemovePool && (
-                    <div className={styles.pending}>
-                        <div className="textWhite mB20">
-                            The following changes will take effect on
-                            <br />
-                            {getFormattedDateString(
-                                poolStatus.bakerStakePendingChange.effectiveTime
-                            )}
-                        </div>
-                        <span className="mB20">
-                            Your target pool is closing soon. If you do not
-                            actively change the target pool, then your account
-                            will keep earning rewards as a passive delegator
-                            after your target pool has closed. You can, however,
-                            already change your target pool now, if you would
-                            rather do that.
-                        </span>
+            {pendingClosingBakerDate !== undefined && (
+                <div className={styles.pending}>
+                    <div className="textWhite mB20">
+                        The following changes will take effect on
+                        <br />
+                        {getFormattedDateString(pendingClosingBakerDate)}
                     </div>
-                )}
+                    <span className="mB20">
+                        Your target pool is closing soon. If you do not actively
+                        change the target pool, then your account will keep
+                        earning rewards as a passive delegator after your target
+                        pool has closed. You can, however, already change your
+                        target pool now, if you would rather do that.
+                    </span>
+                </div>
+            )}
         </Card>
     );
 }
