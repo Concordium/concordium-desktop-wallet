@@ -9,12 +9,13 @@ import {
 import { loadIdentities } from '~/features/IdentitySlice';
 import { loadProposals } from '~/features/MultiSignatureSlice';
 import { findSetting, updateSettings } from '~/features/SettingsSlice';
-import listenForIdentityStatus from './IdentityStatusPoller';
-import startClient from '../node/nodeConnector';
-import { Dispatch } from './types';
-import settingKeys from '../constants/settingKeys.json';
+import listenForIdentityStatus from '../IdentityStatusPoller';
+import startClient from '../../node/nodeConnector';
+import { Dispatch } from '../types';
+import settingKeys from '../../constants/settingKeys.json';
 import { unlock } from '~/features/MiscSlice';
-import { throwLoggedError } from './basicHelpers';
+import { throwLoggedError } from '../basicHelpers';
+import checkForClosingBakerPools from './closingBakerPoolChecker';
 
 /**
  * Loads settings from the database into the store.
@@ -35,7 +36,8 @@ async function loadSettingsIntoStore(dispatch: Dispatch) {
 /**
  * Initializes the application by loading data from the database into the
  * state.
- * Also starts listening for the status of identities.
+ * Also starts listening for the status of identities and ensures notifications
+ * are created for accounts delegating to a closing baker pool.
  */
 export default async function initApplication(dispatch: Dispatch) {
     await loadSettingsIntoStore(dispatch);
@@ -52,4 +54,9 @@ export default async function initApplication(dispatch: Dispatch) {
 
     dispatch(unlock());
     listenForIdentityStatus(dispatch);
+    checkForClosingBakerPools(dispatch).catch((e) =>
+        window.log.error('Error while checking for closing baker pools', {
+            error: e,
+        })
+    );
 }

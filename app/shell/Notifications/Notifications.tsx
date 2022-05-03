@@ -12,6 +12,7 @@ import {
 import { RootState } from '~/store/store';
 
 import styles from './Notifications.module.scss';
+import ClosingBakerPoolNotification from '~/components/ClosingBakerPoolNotification';
 
 export default function Notifications() {
     const { notifications } = useSelector((s: RootState) => s.notification);
@@ -43,6 +44,14 @@ export default function Notifications() {
                                     key={n.id}
                                     onClose={() => handleClose(n.id)}
                                     version={n.version}
+                                />
+                            );
+                        case NotificationLevel.ClosingBakerPool:
+                            return (
+                                <ClosingBakerPoolNotification
+                                    key={n.id}
+                                    onClose={() => handleClose(n.id)}
+                                    accountName={n.accountName}
                                 />
                             );
                         default:

@@ -4,7 +4,7 @@ import { SubmitHandler, useForm, Validate } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import Form from '~/components/Form';
 import PageLayout from '~/components/PageLayout';
-import initApplication from '~/utils/initialize';
+import initApplication from '~/utils/init/initialize';
 import { passwordValidators } from '~/utils/passwordHelpers';
 import routes from '~/constants/routes.json';
 import homeStyles from '../Home.module.scss';
