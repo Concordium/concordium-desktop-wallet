@@ -52,7 +52,7 @@ export async function acceptTerms(dispatch: Dispatch) {
         await storeTerms();
         dispatch(setTermsAccepted(true));
     } catch (e) {
-        window.log.error('Accepting terms failed', { error: e });
+        window.log.error(e, 'Accepting terms failed');
     }
 }
 

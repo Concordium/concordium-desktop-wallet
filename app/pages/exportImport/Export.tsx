@@ -79,7 +79,7 @@ export default function Export() {
                 setOpenConfirmationModal(true);
             }
         } catch (error) {
-            window.log.error('Export failed', { error });
+            window.log.error(error, 'Export failed');
             setModalMessage(
                 'Export was unsuccessful, We were unable to save to file.'
             );
