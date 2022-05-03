@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { FieldValues, useForm } from 'react-hook-form';
 import Card from '~/cross-app-components/Card';
-import initApplication from '~/utils/initialize';
+import initApplication from '~/utils/init/initialize';
 import routes from '~/constants/routes.json';
 import Form from '~/components/Form';
 import { useUpdateEffect } from '~/utils/hooks';

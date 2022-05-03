@@ -2,7 +2,10 @@ import {
     AccountBakerDetails,
     AccountBakerDetailsV1,
     AccountDelegationDetails,
-} from '@concordium/node-sdk';
+    BakerPoolPendingChangeType,
+    DelegationTargetType,
+    PoolStatusType,
+} from '@concordium/node-sdk/lib/src/types';
 import { isReduceStakePendingChange } from '@concordium/node-sdk/lib/src/accountHelpers';
 import React, { PropsWithChildren } from 'react';
 import RegisteredIcon from '@resources/svg/logo-checkmark.svg';
@@ -13,6 +16,7 @@ import { useLastFinalizedBlockSummary } from '~/utils/dataHooks';
 import { toFixed } from '~/utils/numberStringHelpers';
 import { hasDelegationProtocol } from '~/utils/protocolVersion';
 import {
+    dateFromBakerPoolPendingChange,
     dateFromStakePendingChange,
     getFormattedDateString,
 } from '~/utils/timeHelpers';
@@ -26,7 +30,7 @@ import {
 } from '~/utils/transactionFlows/configureDelegation';
 import { useAsyncMemo } from '~/utils/hooks';
 import { noOp } from '~/utils/basicHelpers';
-import { getRewardStatus } from '~/node/nodeRequests';
+import { getPoolStatus, getRewardStatus } from '~/node/nodeRequests';
 
 import styles from './StakingDetails.module.scss';
 
@@ -168,12 +172,50 @@ export default function StakingDetails({ details }: Props) {
         noOp,
         [cs]
     );
+
+    const poolStatus = useAsyncMemo(
+        async () => {
+            if (
+                cs !== undefined &&
+                isDelegationDetails(details) &&
+                details.delegationTarget.delegateType ===
+                    DelegationTargetType.Baker
+            ) {
+                const status = await getPoolStatus(
+                    cs.lastFinalizedBlock,
+                    details.delegationTarget.bakerId
+                );
+                // TODO: When getPoolStatus is better typed this is not necessary anymore.
+                if (status.poolType === PoolStatusType.BakerPool) {
+                    return status;
+                }
+                // This line should never be reached, and can be cleaned up when getPoolStatus has better types.
+                return undefined;
+            }
+            return undefined;
+        },
+        noOp,
+        [cs]
+    );
+
     const text = isBakerDetails(details) ? bakerText : delegatorText;
 
     const pendingChangeDate =
         details.pendingChange !== undefined
             ? dateFromStakePendingChange(
                   details.pendingChange,
+                  cs,
+                  rs,
+                  bs?.updates.chainParameters
+              )
+            : undefined;
+
+    const pendingClosingBakerDate =
+        poolStatus !== undefined &&
+        poolStatus.bakerStakePendingChange.pendingChangeType ===
+            BakerPoolPendingChangeType.RemovePool
+            ? dateFromBakerPoolPendingChange(
+                  poolStatus.bakerStakePendingChange,
                   cs,
                   rs,
                   bs?.updates.chainParameters
@@ -219,6 +261,22 @@ export default function StakingDetails({ details }: Props) {
                         )}
                     </div>
                 )}
+            {pendingClosingBakerDate !== undefined && (
+                <div className={styles.pending}>
+                    <div className="textWhite mB20">
+                        The following changes will take effect on
+                        <br />
+                        {getFormattedDateString(pendingClosingBakerDate)}
+                    </div>
+                    <span className="mB20">
+                        Your target pool is closing soon. If you do not actively
+                        change the target pool, then your account will keep
+                        earning rewards as a passive delegator after your target
+                        pool has closed. You can, however, already change your
+                        target pool now, if you would rather do that.
+                    </span>
+                </div>
+            )}
         </Card>
     );
 }
