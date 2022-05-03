@@ -467,7 +467,7 @@ export function serializeEquityBounds(poolParameters: PoolParameters) {
  */
 export function serializePoolParameters(poolParameters: PoolParameters) {
     return Buffer.concat([
-        serializeCommisionRates(poolParameters.lPoolCommissions),
+        serializeCommisionRates(poolParameters.passiveCommissions),
         serializeCommisionRanges(poolParameters.commissionBounds),
         serializeEquityBounds(poolParameters),
     ]);

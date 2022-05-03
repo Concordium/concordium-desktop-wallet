@@ -50,7 +50,7 @@ export default class BakerStakeThresholdHandler
                 .nextSequenceNumber;
         const {
             threshold,
-        } = blockSummary.updates.keys.level2Keys.bakerStakeThreshold;
+        } = blockSummary.updates.keys.level2Keys.poolParameters;
 
         return createUpdateMultiSignatureTransaction(
             { threshold: BigInt(bakerStakeThreshold) },
@@ -87,7 +87,7 @@ export default class BakerStakeThresholdHandler
     }
 
     getAuthorization(authorizations: Authorizations) {
-        return authorizations.bakerStakeThreshold;
+        return authorizations.poolParameters;
     }
 
     update = UpdateBakerStakeThreshold;

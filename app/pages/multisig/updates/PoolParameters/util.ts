@@ -3,9 +3,9 @@ import { CommissionRange, Fraction } from '~/utils/types';
 import updateConstants from '~/constants/updateConstants.json';
 
 export interface UpdatePoolParametersFields {
-    finalizationCommissionLPool: number;
-    bakingCommissionLPool: number;
-    transactionCommissionLPool: number;
+    passiveFinalizationCommission: number;
+    passiveBakingCommission: number;
+    passiveTransactionCommission: number;
     finalizationCommissionRange: CommissionRange;
     bakingCommissionRange: CommissionRange;
     transactionCommissionRange: CommissionRange;
@@ -15,9 +15,9 @@ export interface UpdatePoolParametersFields {
 }
 
 export const fieldDisplays = {
-    finalizationCommissionLPool: 'Finalization commission L-pool',
-    bakingCommissionLPool: 'baking commission L-pool',
-    transactionCommissionLPool: 'Transaction commission L-pool',
+    passiveFinalizationCommission: 'Passive finalization commission',
+    passiveBakingCommission: 'Passive baking commission',
+    passiveTransactionCommission: 'Passive transaction commission',
     finalizationCommissionRange: 'Finalization commission range',
     bakingCommissionRange: 'Baking commission range',
     transactionCommissionRange: 'Transaction commission range',
@@ -38,12 +38,12 @@ function toRewardFractionRange(range: CommissionRange): CommissionRange {
 
 export function convertRewardFractions(pp: PoolParametersV1): PoolParametersV1 {
     return {
-        finalizationCommissionLPool: toRewardFraction(
-            pp.finalizationCommissionLPool
+        passiveFinalizationCommission: toRewardFraction(
+            pp.passiveFinalizationCommission
         ),
-        bakingCommissionLPool: toRewardFraction(pp.bakingCommissionLPool),
-        transactionCommissionLPool: toRewardFraction(
-            pp.transactionCommissionLPool
+        passiveBakingCommission: toRewardFraction(pp.passiveBakingCommission),
+        passiveTransactionCommission: toRewardFraction(
+            pp.passiveTransactionCommission
         ),
         finalizationCommissionRange: toRewardFractionRange(
             pp.finalizationCommissionRange

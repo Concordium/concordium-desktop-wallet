@@ -71,7 +71,7 @@ export const getPoolStatus = throwIfUndefined(
     window.grpc.getPoolStatus,
     (blockHash, target) =>
         `Unable to get pool status for ${
-            target === undefined ? 'L-pool' : target
+            target === undefined ? 'passive delegation' : target
         }, on block: ${blockHash}`
 );
 

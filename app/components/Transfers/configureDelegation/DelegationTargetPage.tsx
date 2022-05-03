@@ -95,23 +95,24 @@ export default function DelegationTargetPage({
         >
             <div className="flexChildFill">
                 <p className="mB30 mT0">
-                    First you must choose the target you want to delegate to.
+                    Please choose to delegate to a specific baker pool or
+                    passive delegation.
                 </p>
                 <div className="mT50">
                     {existing !== undefined && (
                         <div className="body3 mono mB10">
-                            Current target: {existing ?? 'L-pool'}
+                            Current target: {existing ?? 'passive delegation'}
                         </div>
                     )}
                     <Form.Radios
                         name={fieldNames.toSpecificPool}
                         options={[
-                            { label: 'Delegate to baker', value: true },
-                            { label: 'Delegate to L-pool', value: false },
+                            { label: 'Delegate to pool', value: true },
+                            { label: 'Passive delegation ', value: false },
                         ]}
                     />
                 </div>
-                {toSpecificPoolValue && (
+                {toSpecificPoolValue ? (
                     <Form.Input
                         name={fieldNames.poolId}
                         className="mT30 body2"
@@ -130,6 +131,13 @@ export default function DelegationTargetPage({
                             },
                         }}
                     />
+                ) : (
+                    <p className="mB20">
+                        Passive delegation divides the staked tokens between all
+                        baker pools proportionally to their size, and has a
+                        higher commission rate than delegating to a single
+                        baker.
+                    </p>
                 )}
             </div>
             <Form.Submit className={styles.continue}>Continue</Form.Submit>
