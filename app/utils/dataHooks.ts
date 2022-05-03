@@ -31,7 +31,7 @@ import {
     IpInfo,
     ArInfo,
 } from './types';
-import { noOp } from './basicHelpers';
+import { noOp, throwLoggedError } from './basicHelpers';
 import {
     consensusStatusSelector,
     setConsensusStatus,
@@ -278,7 +278,7 @@ export function useCalcDelegatorCooldownUntil() {
 
     if (isBlockSummaryV1(bs)) {
         if (!isRewardStatusV1(rs)) {
-            throw new Error('Block summary and reward status do not match.'); // Should not happen, as this indicates rs and bs are queried with different blocks.
+            throwLoggedError('Block summary and reward status do not match.'); // Should not happen, as this indicates rs and bs are queried with different blocks.
         }
 
         return getV1Cooldown(
@@ -289,7 +289,7 @@ export function useCalcDelegatorCooldownUntil() {
             now
         );
     }
-    throw new Error(
+    return throwLoggedError(
         'Delegation cooldown not available for current protocol version.'
     );
 }
@@ -307,7 +307,7 @@ export function useCalcBakerStakeCooldownUntil() {
 
     if (isBlockSummaryV1(bs)) {
         if (!isRewardStatusV1(rs)) {
-            throw new Error('Block summary and reward status do not match.'); // Should not happen, as this indicates rs and bs are queried with different blocks.
+            throwLoggedError('Block summary and reward status do not match.'); // Should not happen, as this indicates rs and bs are queried with different blocks.
         }
 
         return getV1Cooldown(
@@ -341,7 +341,7 @@ export function useStakeIncreaseUntil() {
     const { bs, cs, rs } = status;
 
     if (!isBlockSummaryV1(bs) || !isRewardStatusV1(rs)) {
-        throw new Error(
+        throwLoggedError(
             'Block summary or reward status unexpectedly have version 0.'
         );
     }
