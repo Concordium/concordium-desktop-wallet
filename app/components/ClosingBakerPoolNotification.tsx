@@ -25,7 +25,9 @@ export default function ClosingBakerPoolNotification({
             <div className="flex alignCenter">
                 The target pool of the following account will close soon.
             </div>
-            <div className="flex alignCenter mT10">{accountName}</div>
+            <div className="flex alignCenter mT10">
+                <b>{accountName}</b>
+            </div>
             <div className="inlineFlexColumn mT20">
                 <Button className="mT10" size="tiny" onClick={onClose}>
                     Remind me
