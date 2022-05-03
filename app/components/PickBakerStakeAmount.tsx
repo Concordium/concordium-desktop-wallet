@@ -1,9 +1,10 @@
 import clsx from 'clsx';
 import React, { useCallback } from 'react';
 import { useFormContext, Validate } from 'react-hook-form';
+import { PoolStatusType } from '@concordium/node-sdk/lib/src/types';
 import { isRewardStatusV1 } from '@concordium/node-sdk/lib/src/rewardStatusHelpers';
 import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
-import { collapseFraction } from '~/utils/basicHelpers';
+import { collapseFraction, noOp } from '~/utils/basicHelpers';
 import {
     getCcdSymbol,
     ccdToMicroCcd,
@@ -16,13 +17,14 @@ import {
 } from '~/utils/dataHooks';
 import { useUpdateEffect, useAsyncMemo } from '~/utils/hooks';
 import { getFormattedDateString } from '~/utils/timeHelpers';
+
 import { validateBakerStake } from '~/utils/transactionHelpers';
 import { AccountInfo, Fraction } from '~/utils/types';
 import Form from './Form';
 import ErrorMessage from './Form/ErrorMessage';
 import Label from './Label';
 import updateConstants from '~/constants/updateConstants.json';
-import { getRewardStatusLatest } from '~/node/nodeHelpers';
+import { getRewardStatusLatest, getPoolStatusLatest } from '~/node/nodeHelpers';
 
 interface Props {
     header: string;
@@ -44,13 +46,29 @@ function useCapitalBoundCheck(
     stake: string
 ): { showWarning: true; limitAfterUpdate: bigint } | { showWarning: false } {
     const rewardStatus = useAsyncMemo(getRewardStatusLatest);
+    const poolStatus = useAsyncMemo(
+        async () => {
+            if (accountInfo) {
+                const status = await getPoolStatusLatest(
+                    accountInfo.accountIndex
+                );
+                if (status.poolType === PoolStatusType.BakerPool) {
+                    return status;
+                }
+            }
+            return Promise.resolve(undefined);
+        },
+        noOp,
+        [accountInfo?.accountIndex]
+    );
     const capitalBound = useCapitalBound();
 
     if (
         !capitalBound ||
         !isValidCcdString(stake) ||
         !rewardStatus ||
-        !isRewardStatusV1(rewardStatus)
+        !isRewardStatusV1(rewardStatus) ||
+        !poolStatus
     ) {
         return { showWarning: false };
     }
@@ -64,7 +82,8 @@ function useCapitalBoundCheck(
     const limitAfterUpdate =
         (newTotalStake *
             BigInt(capitalBound * updateConstants.rewardFractionResolution)) /
-        BigInt(updateConstants.rewardFractionResolution);
+            BigInt(updateConstants.rewardFractionResolution) -
+        poolStatus.delegatedCapital;
     if (limitAfterUpdate < newStake) {
         return { showWarning: true, limitAfterUpdate };
     }
