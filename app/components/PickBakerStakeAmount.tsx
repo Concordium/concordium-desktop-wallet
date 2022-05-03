@@ -42,7 +42,7 @@ interface Props {
 function useCapitalBoundCheck(
     accountInfo: AccountInfo | undefined,
     stake: string
-) {
+): { showWarning: true; limitAfterUpdate: bigint } | { showWarning: false } {
     const rewardStatus = useAsyncMemo(getRewardStatusLatest);
     const capitalBound = useCapitalBound();
 
@@ -52,7 +52,7 @@ function useCapitalBoundCheck(
         !rewardStatus ||
         !isRewardStatusV1(rewardStatus)
     ) {
-        return { showWarning: false, limitAfterUpdate: 0n };
+        return { showWarning: false };
     }
     const newStake = ccdToMicroCcd(stake);
     const currentStake =
@@ -65,7 +65,10 @@ function useCapitalBoundCheck(
         (newTotalStake *
             BigInt(capitalBound * updateConstants.rewardFractionResolution)) /
         BigInt(updateConstants.rewardFractionResolution);
-    return { showWarning: limitAfterUpdate < newStake, limitAfterUpdate };
+    if (limitAfterUpdate < newStake) {
+        return { showWarning: true, limitAfterUpdate };
+    }
+    return { showWarning: false };
 }
 
 export default function PickBakerStakeAmount({
@@ -81,10 +84,7 @@ export default function PickBakerStakeAmount({
     const form = useFormContext<{ [key: string]: string }>();
     const cooldownUntil = useCalcBakerStakeCooldownUntil();
     const stake = form.watch(fieldName) ?? initial;
-    const { showWarning, limitAfterUpdate } = useCapitalBoundCheck(
-        accountInfo,
-        stake
-    );
+    const capitalBoundCheck = useCapitalBoundCheck(accountInfo, stake);
     const validStakeAmount: Validate = useCallback(
         (value: string) =>
             validateBakerStake(
@@ -152,13 +152,13 @@ export default function PickBakerStakeAmount({
                     </span>
                 </div>
             )}
-            {limitAfterUpdate && showWarning && (
+            {capitalBoundCheck.showWarning && (
                 <div className="textFaded">
                     Chosen stake exceeds the capital bound, meaning that your
                     stake over the bound will not yield any returns. Estimated
                     bound:
                     <span className="block bodyEmphasized mT5">
-                        {displayAsCcd(limitAfterUpdate)}
+                        {displayAsCcd(capitalBoundCheck.limitAfterUpdate)}
                     </span>
                 </div>
             )}

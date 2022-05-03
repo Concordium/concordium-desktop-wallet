@@ -166,7 +166,7 @@ export function useChainParameters() {
 
 /**
  * Hook for fetching the current capital bound.
- * returns undefined when loading, or if the protocol version is too low, and don't give a capital bound.
+ * @returns undefined while loading, or if the node is running a protocol version prior to the introduction of the capital bound
  */
 export function useCapitalBound() {
     const chainParameters = useChainParameters();
