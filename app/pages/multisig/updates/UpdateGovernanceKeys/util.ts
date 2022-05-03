@@ -50,8 +50,8 @@ export function getCurrentThresholds(
         authorizations.paramGASRewards.threshold
     );
     currentThresholds.set(
-        AccessStructureEnum.bakerStakeThreshold,
-        authorizations.bakerStakeThreshold.threshold
+        AccessStructureEnum.poolParameters,
+        authorizations.poolParameters.threshold
     );
     currentThresholds.set(
         AccessStructureEnum.addAnonymityRevoker,
@@ -61,6 +61,16 @@ export function getCurrentThresholds(
         AccessStructureEnum.addIdentityProvider,
         authorizations.addIdentityProvider.threshold
     );
+    if (isAuthorizationsV1(authorizations)) {
+        currentThresholds.set(
+            AccessStructureEnum.cooldownParameters,
+            authorizations.cooldownParameters.threshold
+        );
+        currentThresholds.set(
+            AccessStructureEnum.timeParameters,
+            authorizations.timeParameters.threshold
+        );
+    }
     return currentThresholds;
 }
 
@@ -194,8 +204,8 @@ export function getAccessStructureTitle(
             return 'Transaction fee distribution';
         case AccessStructureEnum.gasRewards:
             return 'GAS rewards';
-        case AccessStructureEnum.bakerStakeThreshold:
-            return 'Baker stake threshold';
+        case AccessStructureEnum.poolParameters:
+            return 'Pool parameters';
         case AccessStructureEnum.addAnonymityRevoker:
             return 'Add anonymity revoker';
         case AccessStructureEnum.addIdentityProvider:
@@ -274,8 +284,8 @@ export function mapCurrentAuthorizationsToUpdate(
             AccessStructureEnum.gasRewards
         ),
         mapAuthorizationToAccessStructure(
-            authorizations.bakerStakeThreshold,
-            AccessStructureEnum.bakerStakeThreshold
+            authorizations.poolParameters,
+            AccessStructureEnum.poolParameters
         ),
         mapAuthorizationToAccessStructure(
             authorizations.addAnonymityRevoker,

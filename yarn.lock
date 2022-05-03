@@ -2020,10 +2020,10 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@concordium/node-sdk@^0.8.0-alpha.0":
-  version "0.8.0-alpha.0"
-  resolved "https://registry.yarnpkg.com/@concordium/node-sdk/-/node-sdk-0.8.0-alpha.0.tgz#bc6effea9fffeea01e64c0b564538886d6959266"
-  integrity sha512-ISJTib0Cd2k9+HieXuLXFcpbz/ZA8iXgzbk/i4wp9jMj9EuF8C85Zkfed56e4v4lb4UWB/HR3feG5WcOhrJxrw==
+"@concordium/node-sdk@^0.8.0-alpha.3":
+  version "0.8.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/@concordium/node-sdk/-/node-sdk-0.8.0-alpha.3.tgz#ef4da5292534147e0bc37cc782019a4447661e7d"
+  integrity sha512-QR9uJIAUj1ow66HgBWFxPHsVmb109BL6ULQu9tvUHYTY8crUPOcj6T6JWEds6RUB3LULz/95IknCVhM4C9Bt+g==
   dependencies:
     "@grpc/grpc-js" "^1.3.4"
     bs58check "^2.1.2"

@@ -112,7 +112,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
                             to={routes.ACCOUNTS_ADD_DELEGATION}
                             disabled={!accountInfo}
                         >
-                            Delegate to a pool
+                            Register as a delegator
                         </ButtonNavLink>
                     )}
                 </>

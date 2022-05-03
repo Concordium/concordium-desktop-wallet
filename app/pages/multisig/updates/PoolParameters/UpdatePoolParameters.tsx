@@ -28,9 +28,9 @@ import ErrorMessage from '~/components/Form/ErrorMessage';
 import PoolParametersShow from './PoolParametersShow';
 
 export const fieldNames: EqualRecord<UpdatePoolParametersFields> = {
-    finalizationCommissionLPool: 'finalizationCommissionLPool',
-    bakingCommissionLPool: 'bakingCommissionLPool',
-    transactionCommissionLPool: 'transactionCommissionLPool',
+    passiveFinalizationCommission: 'passiveFinalizationCommission',
+    passiveBakingCommission: 'passiveBakingCommission',
+    passiveTransactionCommission: 'passiveTransactionCommission',
     finalizationCommissionRange: 'finalizationCommissionRange',
     bakingCommissionRange: 'bakingCommissionRange',
     transactionCommissionRange: 'transactionCommissionRange',
@@ -94,9 +94,9 @@ export default function UpdatePoolParameters({
         blockSummary.updates.chainParameters
     );
     const {
-        finalizationCommissionLPool,
-        bakingCommissionLPool,
-        transactionCommissionLPool,
+        passiveFinalizationCommission,
+        passiveBakingCommission,
+        passiveTransactionCommission,
         finalizationCommissionRange,
         bakingCommissionRange,
         transactionCommissionRange,
@@ -130,36 +130,36 @@ export default function UpdatePoolParameters({
                 <div>
                     <h5>L Pool commissions</h5>
                     <FractionFieldForm
-                        label={fieldDisplays.transactionCommissionLPool}
-                        name={fieldNames.transactionCommissionLPool}
+                        label={fieldDisplays.passiveTransactionCommission}
+                        name={fieldNames.passiveTransactionCommission}
                         defaultValue={
-                            defaults.transactionCommissionLPool ||
-                            transactionCommissionLPool.toString()
+                            defaults.passiveTransactionCommission ||
+                            passiveTransactionCommission.toString()
                         }
                         rules={validationRules(
-                            fieldDisplays.transactionCommissionLPool
+                            fieldDisplays.passiveTransactionCommission
                         )}
                     />
                     <FractionFieldForm
-                        label={fieldDisplays.bakingCommissionLPool}
-                        name={fieldNames.bakingCommissionLPool}
+                        label={fieldDisplays.passiveBakingCommission}
+                        name={fieldNames.passiveBakingCommission}
                         defaultValue={
-                            defaults.bakingCommissionLPool ||
-                            bakingCommissionLPool.toString()
+                            defaults.passiveBakingCommission ||
+                            passiveBakingCommission.toString()
                         }
                         rules={validationRules(
-                            fieldDisplays.bakingCommissionLPool
+                            fieldDisplays.passiveBakingCommission
                         )}
                     />
                     <FractionFieldForm
-                        label={fieldDisplays.finalizationCommissionLPool}
-                        name={fieldNames.finalizationCommissionLPool}
+                        label={fieldDisplays.passiveFinalizationCommission}
+                        name={fieldNames.passiveFinalizationCommission}
                         defaultValue={
-                            defaults.finalizationCommissionLPool ||
-                            finalizationCommissionLPool.toString()
+                            defaults.passiveFinalizationCommission ||
+                            passiveFinalizationCommission.toString()
                         }
                         rules={validationRules(
-                            fieldDisplays.finalizationCommissionLPool
+                            fieldDisplays.passiveFinalizationCommission
                         )}
                     />
                     <FormCommissionRangeField
