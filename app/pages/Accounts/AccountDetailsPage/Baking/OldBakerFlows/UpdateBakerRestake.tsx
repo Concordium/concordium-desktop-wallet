@@ -98,7 +98,9 @@ export default ensureExchangeRateAndNonce(function UpdateBakerRestake({
                 className={styles.backButton}
                 onClick={() => dispatch(goBack())}
             />
-            <h3 className="bodyEmphasized">Update baker restake earnings</h3>
+            <h3 className="bodyEmphasized mT0">
+                Update baker restake earnings
+            </h3>
             <p className="mV30">Choose to restake earnings or not, below.</p>
             <Form<FormModel> onSubmit={submit}>
                 <PickBakerRestake

@@ -128,7 +128,8 @@ const AddBaker = ensureExchangeRateAndNonce(
                 <Switch>
                     <Route path={routes.ACCOUNTS_EXPORT_BAKER_KEYS}>
                         {bakerData ? (
-                            <Card className="textCenter pB40 pT0">
+                            <Card className="textCenter pB40">
+                                <h3 className="mT0 bodyEmphasized">{header}</h3>
                                 <GenerateBakerKeys
                                     onContinue={next}
                                     keyVariant="ADD"
