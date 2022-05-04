@@ -1,9 +1,11 @@
 import {
+    BakerPoolPendingChangeReduceBakerCapital,
+    BakerPoolPendingChangeRemovePool,
     ChainParameters,
     ConsensusStatus,
     RewardStatus,
     StakePendingChange,
-} from '@concordium/node-sdk';
+} from '@concordium/node-sdk/lib/src/types';
 import { isStakePendingChangeV1 } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { isRewardStatusV1 } from '@concordium/node-sdk/lib/src/rewardStatusHelpers';
 import { isChainParametersV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
@@ -298,6 +300,47 @@ export const getSucceedingPayday = (
     return new Date(npdMS + periods * rplMS);
 };
 
+function dateFromPendingChangeEffectiveTime(
+    effectiveTime: Date,
+    cs: ConsensusStatus | undefined,
+    rs: RewardStatus | undefined,
+    cp: ChainParameters | undefined
+): Date | undefined {
+    if (cs === undefined || rs === undefined || cp === undefined) {
+        return undefined;
+    }
+
+    if (!isRewardStatusV1(rs) || !isChainParametersV1(cp)) {
+        throw new Error(
+            'Not possible to calculate date due to mismatch between reward status, chain parameters, and pending change versions.'
+        );
+    }
+
+    const rewardPeriodLengthMS = cs.epochDuration * cp.rewardPeriodLength;
+
+    return getSucceedingPayday(
+        effectiveTime,
+        rs.nextPaydayTime,
+        rewardPeriodLengthMS
+    );
+}
+
+export function dateFromBakerPoolPendingChange(
+    bakerPoolPendingChange:
+        | BakerPoolPendingChangeReduceBakerCapital
+        | BakerPoolPendingChangeRemovePool,
+    cs: ConsensusStatus | undefined,
+    rs: RewardStatus | undefined,
+    cp: ChainParameters | undefined
+): Date | undefined {
+    return dateFromPendingChangeEffectiveTime(
+        bakerPoolPendingChange.effectiveTime,
+        cs,
+        rs,
+        cp
+    );
+}
+
 export function dateFromStakePendingChange(
     spc: StakePendingChange,
     cs: ConsensusStatus,
@@ -328,21 +371,5 @@ export function dateFromStakePendingChange(
         );
     }
 
-    if (rs === undefined || cp === undefined) {
-        return undefined;
-    }
-
-    if (!isRewardStatusV1(rs) || !isChainParametersV1(cp)) {
-        throw new Error(
-            'Not possible to calculate date due to mismatch between reward status, chain parameters, and pending change versions.'
-        );
-    }
-
-    const rewardPeriodLengthMS = cs.epochDuration * cp.rewardPeriodLength;
-
-    return getSucceedingPayday(
-        spc.effectiveTime,
-        rs.nextPaydayTime,
-        rewardPeriodLengthMS
-    );
+    return dateFromPendingChangeEffectiveTime(spc.effectiveTime, cs, rs, cp);
 }

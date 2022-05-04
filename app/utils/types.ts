@@ -605,6 +605,7 @@ export interface TransferTransaction {
     rejectReason?: RejectReason | string;
     decryptedAmount?: string;
     memo?: string;
+    events?: string[];
 }
 
 export interface TransferTransactionWithNames extends TransferTransaction {

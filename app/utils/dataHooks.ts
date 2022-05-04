@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import {
+    isBlockSummaryV1,
+    isChainParametersV1,
+} from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import { isRewardStatusV1 } from '@concordium/node-sdk/lib/src/rewardStatusHelpers';
 import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { BlockSummaryV1 } from '@concordium/node-sdk';
@@ -158,6 +161,18 @@ export function useChainParameters() {
     const lastFinalizedBlock = useLastFinalizedBlockSummary();
     return lastFinalizedBlock?.lastFinalizedBlockSummary?.updates
         .chainParameters;
+}
+
+/**
+ * Hook for fetching the current capital bound.
+ * @returns undefined while loading, or if the node is running a protocol version prior to the introduction of the capital bound
+ */
+export function useCapitalBound() {
+    const chainParameters = useChainParameters();
+    if (!chainParameters || !isChainParametersV1(chainParameters)) {
+        return undefined;
+    }
+    return chainParameters.capitalBound;
 }
 
 /** Hook for creating transaction exiry state and error */
