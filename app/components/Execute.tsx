@@ -35,7 +35,7 @@ export default function Execute<T>({
             const result = await execution();
             onSuccess(result);
         } catch (error) {
-            window.log.error('Executor encountered error', { error });
+            window.log.error(error, 'Executor encountered error');
             setOpen(true);
         }
     };

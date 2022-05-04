@@ -242,8 +242,8 @@ export default function SubmitTransaction({ location }: Props) {
             response = await sendTransaction(serializedTransaction);
         } catch (e) {
             window.log.error(
-                `Sending transaction of type ${transaction.transactionKind}, failed`,
-                { error: e }
+                e,
+                `Sending transaction of type ${transaction.transactionKind}, failed`
             );
             throw e;
         }

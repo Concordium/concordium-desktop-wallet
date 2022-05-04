@@ -19,10 +19,9 @@ const LogLevels = {
 const logger = winston.createLogger({
     levels: LogLevels,
     format: winston.format.combine(
-        winston.format.json(),
-        winston.format.errors({ stack: true }),
         winston.format.timestamp(),
-        winston.format.prettyPrint()
+        winston.format.errors(),
+        winston.format.json()
     ),
     transports: [],
 });
@@ -58,7 +57,9 @@ ipcRenderer
  */
 function log(f: LeveledLogMethod, ...args: Parameters<PutLog>) {
     const first = args[0];
-    return typeof first === 'string' ? f(first, args[1]) : f(first);
+    return args.length === 2
+        ? f(first.toString(), { message: args[1] })
+        : f(first);
 }
 
 const methods: LoggingMethods = {

@@ -122,7 +122,7 @@ export default function AccountCreationGenerate({
         getNextCredentialNumber(identity.id)
             .then(setCredentialNumber)
             .catch((e) => {
-                window.log.error(e, { message: ' Call to Database Failed.' });
+                window.log.error(e, 'Call to Database Failed.');
                 onError('Unable to read from database');
             });
     }, [identity.id]);
@@ -180,9 +180,7 @@ export default function AccountCreationGenerate({
                         })
                     );
                 } catch (e) {
-                    window.log.error(e, {
-                        message: ' caused creation of Account to fail.',
-                    });
+                    window.log.error(e, ' caused creation of Account to fail.');
                     onError(`Unable to create account due to ${e}`);
                 }
             };
