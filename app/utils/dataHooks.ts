@@ -357,13 +357,17 @@ export function useStakeIncreaseUntil() {
 
     const { bs, cs, rs } = status;
 
-    if (!isBlockSummaryV1(bs) || !isRewardStatusV1(rs)) {
-        throwLoggedError(
-            'Block summary or reward status unexpectedly did not have version 1.'
-        );
+    if (isBlockSummaryV1(bs)) {
+        if (!isRewardStatusV1(rs)) {
+            // Should not happen, as this indicates rs and bs were queried for with different blocks.
+            throwLoggedError('Block summary and reward status do not match.');
+        }
+
+        return getV1Cooldown(0, bs, cs, rs.nextPaydayTime, now);
     }
 
-    return getV1Cooldown(0, bs, cs, rs.nextPaydayTime, now);
+    // In V0, stake increase takes effect after 2 epochs
+    return getV0Cooldown(2, cs, now);
 }
 
 /**
