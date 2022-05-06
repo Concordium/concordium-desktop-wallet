@@ -177,7 +177,7 @@ export default function UpdateBakerStake(
                 className={styles.backButton}
                 onClick={() => dispatch(goBack())}
             />
-            <h3 className="bodyEmphasized">Update baker stake</h3>
+            <h3 className="bodyEmphasized mT0">Update baker stake</h3>
             <UpdateBakerStakeForm {...props} />
         </Card>
     );
