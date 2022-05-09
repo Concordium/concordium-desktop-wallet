@@ -14,6 +14,7 @@
 -   Support for chain updates added in protocol version 4 (Cooldown, Pool and Time parameters).
 -   Support for chain updates that are changed in protocol version 4 (Mint distribution and level2 key updates).
 -   Support for new reward types introduced with delegation in transaction list and account export.
+-   Display transaction events when a single transaction is selected (Transaction view).
 
 ### Changed
 

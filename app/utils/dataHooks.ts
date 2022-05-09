@@ -15,7 +15,6 @@ import {
     fetchLastFinalizedBlockSummary,
     getAccountInfoOfAddress,
     fetchLastFinalizedAnonymityRevokers,
-    getRewardStatusLatest,
 } from '../node/nodeHelpers';
 import { useCurrentTime, useAsyncMemo } from './hooks';
 import {
@@ -35,7 +34,7 @@ import {
     IpInfo,
     ArInfo,
 } from './types';
-import { noOp } from './basicHelpers';
+import { noOp, throwLoggedError } from './basicHelpers';
 import {
     consensusStatusSelector,
     setConsensusStatus,
@@ -248,46 +247,8 @@ function getV1Cooldown(
     return epochDate(cooldownEnd, cs.epochDuration, genesisTime);
 }
 
-/** Hook for calculating the date of the delegation cooldown ending, will result in undefined while loading */
-export function useCalcDelegatorCooldownUntil() {
-    const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
-    const rs = useAsyncMemo(getRewardStatusLatest);
-    const now = useCurrentTime(60000);
-
-    if (
-        lastFinalizedBlockSummary === undefined ||
-        lastFinalizedBlockSummary.lastFinalizedBlockSummary === undefined ||
-        lastFinalizedBlockSummary.consensusStatus === undefined ||
-        rs === undefined
-    ) {
-        return undefined;
-    }
-
-    const {
-        lastFinalizedBlockSummary: bs,
-        consensusStatus: cs,
-    } = lastFinalizedBlockSummary;
-
-    if (isBlockSummaryV1(bs)) {
-        if (!isRewardStatusV1(rs)) {
-            throw new Error('Block summary and reward status do not match.'); // Should not happen, as this indicates rs and bs are queried with different blocks.
-        }
-
-        return getV1Cooldown(
-            Number(bs.updates.chainParameters.delegatorCooldown),
-            bs,
-            cs,
-            rs.nextPaydayTime,
-            now
-        );
-    }
-    throw new Error(
-        'Delegation cooldown not available for current protocol version.'
-    );
-}
-
-/** Hook for calculating the date of the baking stake cooldown ending, will result in undefined while loading */
-export function useCalcBakerStakeCooldownUntil() {
+/** Helper to get reward status, block summary and consensus status */
+function useRewardBlockAndConsensusStatus() {
     const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
     const rs = useAsyncMemo(
         async () => {
@@ -302,7 +263,6 @@ export function useCalcBakerStakeCooldownUntil() {
         noOp,
         [lastFinalizedBlockSummary]
     );
-    const now = useCurrentTime(60000);
 
     if (
         lastFinalizedBlockSummary === undefined ||
@@ -317,10 +277,54 @@ export function useCalcBakerStakeCooldownUntil() {
         lastFinalizedBlockSummary: bs,
         consensusStatus: cs,
     } = lastFinalizedBlockSummary;
+    return { rs, bs, cs };
+}
+
+/** Hook for calculating the date of the delegation cooldown ending, will result in undefined while loading */
+export function useCalcDelegatorCooldownUntil() {
+    const status = useRewardBlockAndConsensusStatus();
+    const now = useCurrentTime(60000);
+
+    if (!status) {
+        return undefined;
+    }
+
+    const { bs, cs, rs } = status;
 
     if (isBlockSummaryV1(bs)) {
         if (!isRewardStatusV1(rs)) {
-            throw new Error('Block summary and reward status do not match.'); // Should not happen, as this indicates rs and bs are queried with different blocks.
+            // Should not happen, as this indicates rs and bs were queried for with different blocks.
+            throwLoggedError('Block summary and reward status do not match.');
+        }
+
+        return getV1Cooldown(
+            Number(bs.updates.chainParameters.delegatorCooldown),
+            bs,
+            cs,
+            rs.nextPaydayTime,
+            now
+        );
+    }
+    return throwLoggedError(
+        'Delegation cooldown not available for current protocol version.'
+    );
+}
+
+/** Hook for calculating the date of the baking stake cooldown ending, will result in undefined while loading */
+export function useCalcBakerStakeCooldownUntil() {
+    const status = useRewardBlockAndConsensusStatus();
+    const now = useCurrentTime(60000);
+
+    if (!status) {
+        return undefined;
+    }
+
+    const { bs, cs, rs } = status;
+
+    if (isBlockSummaryV1(bs)) {
+        if (!isRewardStatusV1(rs)) {
+            // Should not happen, as this indicates rs and bs were queried for with different blocks.
+            throwLoggedError('Block summary and reward status do not match.');
         }
 
         return getV1Cooldown(
@@ -337,6 +341,33 @@ export function useCalcBakerStakeCooldownUntil() {
         cs,
         now
     );
+}
+
+/**
+ * Hook for calculating when a stake increase will take effect, will result in undefined while loading
+ * Note that this hook will throw an error if used with a node running protocol version lower than 4.
+ */
+export function useStakeIncreaseUntil() {
+    const status = useRewardBlockAndConsensusStatus();
+    const now = useCurrentTime(60000);
+
+    if (!status) {
+        return undefined;
+    }
+
+    const { bs, cs, rs } = status;
+
+    if (isBlockSummaryV1(bs)) {
+        if (!isRewardStatusV1(rs)) {
+            // Should not happen, as this indicates rs and bs were queried for with different blocks.
+            throwLoggedError('Block summary and reward status do not match.');
+        }
+
+        return getV1Cooldown(0, bs, cs, rs.nextPaydayTime, now);
+    }
+
+    // In V0, stake increase takes effect after 2 epochs
+    return getV0Cooldown(2, cs, now);
 }
 
 /**

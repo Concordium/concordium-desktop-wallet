@@ -11,7 +11,10 @@ import ErrorMessage from '~/components/Form/ErrorMessage';
 import Label from '~/components/Label';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
 import { collapseFraction, noOp } from '~/utils/basicHelpers';
-import { useCalcDelegatorCooldownUntil } from '~/utils/dataHooks';
+import {
+    useCalcDelegatorCooldownUntil,
+    useStakeIncreaseUntil,
+} from '~/utils/dataHooks';
 import { useAsyncMemo, useUpdateEffect } from '~/utils/hooks';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import {
@@ -53,12 +56,11 @@ function PickDelegateAmount({
     max,
     hasPendingChange,
 }: PickDelegateAmountProps) {
+    const increaseEffectiveTime = useStakeIncreaseUntil();
     const cooldownUntil = useCalcDelegatorCooldownUntil();
     const form = useFormContext<SubState>();
     const { errors } = form;
     const amount = form.watch(fieldNames.amount);
-    const showCooldown =
-        existing !== undefined && form.formState.isValid && amount < existing;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const validDelegateAmount: Validate = useCallback(
@@ -107,14 +109,28 @@ function PickDelegateAmount({
                 />
             </div>
             <ErrorMessage>{errors.amount?.message}</ErrorMessage>
-            {cooldownUntil && showCooldown && (
-                <div className="textFaded">
-                    Will take effect at
-                    <span className="block bodyEmphasized mT5">
-                        {getFormattedDateString(cooldownUntil)}
-                    </span>
-                </div>
-            )}
+            {existing !== undefined &&
+                form.formState.isValid &&
+                cooldownUntil &&
+                amount < existing && (
+                    <div className="textFaded">
+                        Will take effect at
+                        <span className="block bodyEmphasized mT5">
+                            {getFormattedDateString(cooldownUntil)}
+                        </span>
+                    </div>
+                )}
+            {existing !== undefined &&
+                form.formState.isValid &&
+                increaseEffectiveTime &&
+                amount > existing && (
+                    <div className="textFaded">
+                        Will take effect at
+                        <span className="block bodyEmphasized mT5">
+                            {getFormattedDateString(increaseEffectiveTime)}
+                        </span>
+                    </div>
+                )}
         </div>
     );
 }
@@ -211,8 +227,8 @@ export default function DelegationAmountPage({
                 {existing !== undefined && pendingChange === undefined && (
                     <p className="mT0">
                         Enter your new desired amount to delegate. If you raise
-                        the stake it will take effect after two epochs, and if
-                        you lower the stake it will take effect after the grace
+                        the stake it will take effect at the next payday, and if
+                        you lower the stake it will take effect after a grace
                         period.
                     </p>
                 )}

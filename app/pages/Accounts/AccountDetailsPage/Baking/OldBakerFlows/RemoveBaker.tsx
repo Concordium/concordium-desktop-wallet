@@ -87,7 +87,7 @@ export default ensureExchangeRateAndNonce(function RemoveBaker({
                 className={styles.backButton}
                 onClick={() => dispatch(goBack())}
             />
-            <h3 className="bodyEmphasized">Remove baker</h3>
+            <h3 className="bodyEmphasized mT0">Remove baker</h3>
             {pendingChange ? (
                 <p className="mT30 mB0">
                     Cannot remove baker at this time:

@@ -14,6 +14,7 @@ import {
 import {
     useCalcBakerStakeCooldownUntil,
     useCapitalBound,
+    useStakeIncreaseUntil,
 } from '~/utils/dataHooks';
 import { useUpdateEffect, useAsyncMemo } from '~/utils/hooks';
 import { getFormattedDateString } from '~/utils/timeHelpers';
@@ -67,8 +68,7 @@ function useCapitalBoundCheck(
         !capitalBound ||
         !isValidCcdString(stake) ||
         !rewardStatus ||
-        !isRewardStatusV1(rewardStatus) ||
-        !poolStatus
+        !isRewardStatusV1(rewardStatus)
     ) {
         return { showWarning: false };
     }
@@ -83,7 +83,7 @@ function useCapitalBoundCheck(
         (newTotalStake *
             BigInt(capitalBound * updateConstants.rewardFractionResolution)) /
             BigInt(updateConstants.rewardFractionResolution) -
-        poolStatus.delegatedCapital;
+        (poolStatus?.delegatedCapital || 0n);
     if (limitAfterUpdate < newStake) {
         return { showWarning: true, limitAfterUpdate };
     }
@@ -101,6 +101,7 @@ export default function PickBakerStakeAmount({
     hasPendingChange,
 }: Props): JSX.Element {
     const form = useFormContext<{ [key: string]: string }>();
+    const increaseEffectiveTime = useStakeIncreaseUntil();
     const cooldownUntil = useCalcBakerStakeCooldownUntil();
     const stake = form.watch(fieldName) ?? initial;
     const capitalBoundCheck = useCapitalBoundCheck(accountInfo, stake);
@@ -129,10 +130,7 @@ export default function PickBakerStakeAmount({
     }
 
     const { errors } = form;
-    const showCooldown =
-        existing !== undefined &&
-        errors[fieldName] === undefined &&
-        stake < existing;
+    const showCooldown = errors[fieldName] === undefined;
 
     return (
         <div className="mV30">
@@ -163,14 +161,28 @@ export default function PickBakerStakeAmount({
                 />
             </div>
             <ErrorMessage>{errors[fieldName]?.message}</ErrorMessage>
-            {cooldownUntil && showCooldown && (
-                <div className="textFaded">
-                    Will take effect at
-                    <span className="block bodyEmphasized mT5">
-                        {getFormattedDateString(cooldownUntil)}
-                    </span>
-                </div>
-            )}
+            {cooldownUntil &&
+                showCooldown &&
+                existing !== undefined &&
+                stake < existing && (
+                    <div className="textFaded">
+                        Will take effect at
+                        <span className="block bodyEmphasized mT5">
+                            {getFormattedDateString(cooldownUntil)}
+                        </span>
+                    </div>
+                )}
+            {increaseEffectiveTime &&
+                showCooldown &&
+                existing !== undefined &&
+                stake > existing && (
+                    <div className="textFaded">
+                        Will take effect at
+                        <span className="block bodyEmphasized mT5">
+                            {getFormattedDateString(increaseEffectiveTime)}
+                        </span>
+                    </div>
+                )}
             {capitalBoundCheck.showWarning && (
                 <div className="textFaded">
                     Chosen stake exceeds the capital bound, meaning that your
