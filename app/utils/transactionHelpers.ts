@@ -705,7 +705,7 @@ export function validateData(data: string, name = 'Data'): string | undefined {
         return `${name} is too large, encoded size must be at most ${externalConstants.maxMemoSize} bytes`;
     }
     // Check that the memo only contains ascii characters
-    if (isASCII(data)) {
+    if (!isASCII(data)) {
         return `${name} contains non-ascii characters`;
     }
     return undefined;
