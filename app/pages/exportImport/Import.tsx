@@ -32,7 +32,11 @@ export default function Import() {
     const [passwordModalOpen, setPasswordModalOpen] = useState(false);
 
     function fail(message: string, error?: Error) {
-        window.log.error(message, { error });
+        if (error) {
+            window.log.error(error, message);
+        } else {
+            window.log.error(message);
+        }
         setErrorMessage(message);
         setMessageModalOpen(true);
         setPasswordModalOpen(false);

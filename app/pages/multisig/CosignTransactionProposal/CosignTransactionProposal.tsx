@@ -144,7 +144,7 @@ function CosignTransactionProposal({
             });
             window.log.info('Exported transaction');
         } catch (error) {
-            window.log.error('Failed exporting transaction', { error });
+            window.log.error(error, 'Failed exporting transaction');
             setShowError({
                 show: true,
                 header: 'Signature was not saved ',

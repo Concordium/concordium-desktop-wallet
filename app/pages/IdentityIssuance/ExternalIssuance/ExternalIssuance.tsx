@@ -151,7 +151,7 @@ async function generateIdentity(
         loadIdentities(dispatch);
         loadAccounts(dispatch);
     } catch (e) {
-        window.log.error('Failed to create identity', { error: e });
+        window.log.error(e, 'Failed to create identity');
         window.view.removeView();
         onError(`Failed to create identity due to ${e}`);
         return { status: IdentityRequestStatus.Failed };
@@ -163,9 +163,7 @@ async function generateIdentity(
         accountName,
         identityObjectLocation
     ).catch((e) => {
-        window.log.error(e, {
-            message: ' caused confirmation of Identity to fail.',
-        });
+        window.log.error(e, 'Confirmation of Identity failed');
         onError(`Failed to confirm identity`);
     });
     return { identityId, status: IdentityRequestStatus.Success };

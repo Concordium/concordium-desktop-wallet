@@ -119,8 +119,8 @@ async function getTransactions(
                 return parse(intToString(res, 'id'));
             } catch (e) {
                 loggingMethods.error(
-                    'Unable to parse response from wallet proxy',
-                    res
+                    res,
+                    'Unable to parse response from wallet proxy'
                 );
                 throw new Error(
                     `Unable to parse response from wallet proxy: ${res}`
