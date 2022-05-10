@@ -36,14 +36,19 @@ export default function DisplayConfigureBaker({ transaction }: Props) {
                 label="Account:"
             />
             <DisplayFee className={styles.fee} transaction={transaction} />
-            {payload.stake !== undefined && (
-                <>
-                    <h5 className={styles.title}>Staked amount:</h5>
-                    <p className={styles.amount}>
-                        {displayAsCcd(payload.stake)}
-                    </p>
-                </>
-            )}
+            {payload.stake !== undefined &&
+                (payload.stake === 0n ? (
+                    <>
+                        <h5 className={styles.title}>Stop baking</h5>
+                    </>
+                ) : (
+                    <>
+                        <h5 className={styles.title}>Staked amount:</h5>
+                        <p className={styles.amount}>
+                            {displayAsCcd(payload.stake)}
+                        </p>
+                    </>
+                ))}
             {payload.restakeEarnings !== undefined && (
                 <>
                     <h5 className={styles.title}>Restake earnings:</h5>
