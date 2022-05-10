@@ -126,10 +126,10 @@ export default function DelegationTargetPage({
                     />
                 ) : (
                     <p className="mB20">
-                        Passive delegation divides the staked tokens between all
-                        baker pools proportionally to their size, and has a
-                        higher commission rate than delegating to a single
-                        baker.
+                        Passive delegation is an alternative to delegation to a
+                        specific baker pool that has lower rewards. With passive
+                        delegation you do not have to worry about the uptime or
+                        quality of a baker node.
                     </p>
                 )}
             </div>
