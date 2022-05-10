@@ -161,7 +161,7 @@ export function max(first: bigint, second: bigint) {
 
 export function isASCII(value: string) {
     // eslint-disable-next-line no-control-regex
-    return /[^\u0000-\u007f]/.test(value);
+    return !/[^\u0000-\u007f]/.test(value);
 }
 
 /**
