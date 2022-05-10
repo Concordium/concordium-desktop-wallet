@@ -1,56 +1,6 @@
-/**
- * An enum containing all the possible reject reasons that can be
- * received from a node as a response to a transaction submission.
- *
- * This should be kept in sync with the list of reject reasons
- * found here: https://github.com/Concordium/concordium-base/blob/main/haskell-src/Concordium/Types/Execution.hs
- *
- * The 'Unknown' rejection is a local rejection reason, and not shared
- * with the node.
- */
-export enum RejectReason {
-    ModuleNotWF = 'ModuleNotWF',
-    ModuleHashAlreadyExists = 'ModuleHashAlreadyExists',
-    InvalidAccountReference = 'InvalidAccountReference',
-    InvalidInitMethod = 'InvalidInitMethod',
-    InvalidReceiveMethod = 'InvalidReceiveMethod',
-    InvalidModuleReference = 'InvalidModuleReference',
-    InvalidContractAddress = 'InvalidContractAddress',
-    RuntimeFailure = 'RuntimeFailure',
-    AmountTooLarge = 'AmountTooLarge',
-    SerializationFailure = 'SerializationFailure',
-    OutOfEnergy = 'OutOfEnergy',
-    RejectedInit = 'RejectedInit',
-    RejectedReceive = 'RejectedReceive',
-    NonExistentRewardAccount = 'NonExistentRewardAccount',
-    InvalidProof = 'InvalidProof',
-    AlreadyABaker = 'AlreadyABaker',
-    NotABaker = 'NotABaker',
-    InsufficientBalanceForBakerStake = 'InsufficientBalanceForBakerStake',
-    StakeUnderMinimumThresholdForBaking = 'StakeUnderMinimumThresholdForBaking',
-    BakerInCooldown = 'BakerInCooldown',
-    DuplicateAggregationKey = 'DuplicateAggregationKey',
-    NonExistentCredentialID = 'NonExistentCredentialID',
-    KeyIndexAlreadyInUse = 'KeyIndexAlreadyInUse',
-    InvalidAccountThreshold = 'InvalidAccountThreshold',
-    InvalidCredentialKeySignThreshold = 'InvalidCredentialKeySignThreshold',
-    InvalidEncryptedAmountTransferProof = 'InvalidEncryptedAmountTransferProof',
-    InvalidTransferToPublicProof = 'InvalidTransferToPublicProof',
-    EncryptedAmountSelfTransfer = 'EncryptedAmountSelfTransfer',
-    InvalidIndexOnEncryptedTransfer = 'InvalidIndexOnEncryptedTransfer',
-    ZeroScheduledAmount = 'ZeroScheduledAmount',
-    NonIncreasingSchedule = 'NonIncreasingSchedule',
-    FirstScheduledReleaseExpired = 'FirstScheduledReleaseExpired',
-    ScheduledSelfTransfer = 'ScheduledSelfTransfer',
-    InvalidCredentials = 'InvalidCredentials',
-    DuplicateCredIDs = 'DuplicateCredIDs',
-    NonExistentCredIDs = 'NonExistentCredIDs',
-    RemoveFirstCredential = 'RemoveFirstCredential',
-    CredentialHolderDidNotSign = 'CredentialHolderDidNotSign',
-    NotAllowedMultipleCredentials = 'NotAllowedMultipleCredentials',
-    NotAllowedToReceiveEncrypted = 'NotAllowedToReceiveEncrypted',
-    NotAllowedToHandleEncrypted = 'NotAllowedToHandleEncrypted',
-}
+import { RejectReasonTag as RejectReason } from '@concordium/node-sdk/lib/src/types';
+
+export { RejectReason };
 
 /**
  * Translates a reject reason to its corresponding display text that can be
@@ -154,6 +104,34 @@ export function rejectReasonToDisplayText(
             return 'Account is not allowed to receive encrypted transfers because it has multiple credentials';
         case RejectReason.NotAllowedToHandleEncrypted:
             return 'Account is not allowed to handle encrypted transfers because it has multiple credentials';
+        case RejectReason.MissingBakerAddParameters:
+            return 'Missing parameters to add new baker';
+        case RejectReason.FinalizationRewardCommissionNotInRange:
+            return 'Finalization reward commission was not within the allowed range';
+        case RejectReason.BakingRewardCommissionNotInRange:
+            return 'Baking reward commission was not within the allowed range';
+        case RejectReason.TransactionFeeCommissionNotInRange:
+            return 'Transaction fee commission was not within the allowed range';
+        case RejectReason.AlreadyADelegator:
+            return 'The account is already a delegator';
+        case RejectReason.InsufficientBalanceForDelegationStake:
+            return 'The balance on the account is insufficient to cover the desired stake';
+        case RejectReason.MissingDelegationAddParameters:
+            return 'Missing parameters to add new delegator';
+        case RejectReason.InsufficientDelegationStake:
+            return 'Not allowed to add delegator with 0 stake';
+        case RejectReason.DelegatorInCooldown:
+            return 'The change could not be made because the delegator is in cooldown';
+        case RejectReason.NotADelegator:
+            return 'Account is not a delegator';
+        case RejectReason.DelegationTargetNotABaker:
+            return 'Delegation target is not a baker';
+        case RejectReason.StakeOverMaximumThresholdForPool:
+            return "Baking pool's total capital would become too large";
+        case RejectReason.PoolWouldBecomeOverDelegated:
+            return 'Fraction of delegated capital to baking pool would become too large';
+        case RejectReason.PoolClosed:
+            return 'Pool is not open for delegation';
         default:
             return 'Unknown rejection reason';
     }
