@@ -9,6 +9,7 @@ import {
     MetadataUrl,
 } from '~/utils/transactionFlows/configureBaker';
 import { Account, EqualRecord } from '~/utils/types';
+import { isASCII } from '~/utils/basicHelpers';
 
 import styles from './ConfigureBakerPage.module.scss';
 
@@ -17,6 +18,9 @@ const validateSerializedLength: Validate = (v: string) =>
     v === undefined ||
     new TextEncoder().encode(v).length < MAX_SERIALIZED_URL_LENGTH ||
     `The URL exceeds the maximum length of ${MAX_SERIALIZED_URL_LENGTH} (serialized into UTF-8)`;
+
+const validateASCII: Validate = (v: string) =>
+    v === undefined || isASCII(v) || 'Url contains non-ascii characters';
 
 interface MetadataUrlPageForm {
     url: MetadataUrl;
@@ -65,7 +69,10 @@ const MetadataUrlPage = ({
                         className="body2"
                         placeholder="Enter metadata URL"
                         rules={{
-                            validate: validateSerializedLength,
+                            validate: {
+                                length: validateSerializedLength,
+                                isACII: validateASCII,
+                            },
                         }}
                     />
                 </div>
