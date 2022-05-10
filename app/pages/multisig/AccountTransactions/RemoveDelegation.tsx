@@ -8,7 +8,7 @@ import MultiSigAccountTransactionFlow, {
     MultiSigAccountTransactionFlowLoading,
     RequiredValues,
 } from './MultiSigAccountTransactionFlow';
-import { AmountDetail } from './proposal-details/shared';
+import { TitleDetail } from './proposal-details/shared';
 import withExchangeRate from '~/components/Transfers/withExchangeRate';
 import { ensureProps } from '~/utils/componentHelpers';
 import { isDefined } from '~/utils/basicHelpers';
@@ -45,7 +45,7 @@ const DisplayValues = ({ account, exchangeRate }: DisplayProps) => {
                 className={displayTransferStyles.fee}
                 estimatedFee={estimatedFee}
             />
-            <AmountDetail title="Delegated amount" value="0" />
+            <TitleDetail title="Stop delegation" />
         </>
     );
 };

@@ -86,3 +86,7 @@ export function EnabledDetail({
 }: DetailProps<boolean>) {
     return <PlainDetail title={title} value={value} format={format} />;
 }
+
+export function TitleDetail({ title, first = false }: DetailProps<never>) {
+    return <p className={clsx(styles.title, first && 'mT0')}>{title}</p>;
+}
