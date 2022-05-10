@@ -1,9 +1,6 @@
 import React from 'react';
 import { useForm, Validate } from 'react-hook-form';
-import {
-    OpenStatusText,
-    PoolStatusType,
-} from '@concordium/node-sdk/lib/src/types';
+import { OpenStatusText } from '@concordium/node-sdk/lib/src/types';
 import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import Form from '~/components/Form';
 import { validBigInt } from '~/components/Form/util/validation';
@@ -59,12 +56,8 @@ export default function DelegationTargetPage({
 
         try {
             const bakerId = BigInt(value);
-            const poolStatus = await getPoolStatusLatest(bakerId); // Throws if response is undefined.
-
-            // TODO Fix getPoolStatusLatest type so the type checker knows poolStatus is BakerPoolStatus here
-            if (poolStatus.poolType !== PoolStatusType.BakerPool) {
-                return true;
-            }
+            // Throws if response is undefined.
+            const poolStatus = await getPoolStatusLatest(bakerId);
 
             if (poolStatus.poolInfo.openStatus !== OpenStatusText.OpenForAll) {
                 return 'Targeted baker does not allow new delegators';

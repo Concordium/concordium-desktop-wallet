@@ -72,7 +72,7 @@ export const applyLastBlockHash = <A extends any[], R>(
 export const getRewardStatusLatest = applyLastBlockHash(getRewardStatus);
 
 /**
- * Gets pool status for baker ID, or for passive delegation if parameter is left undefined.
+ * Gets pool status for baker ID.
  *
  * @throws if no baker is found with supplied baker ID or if invalid block hash given.
  */
