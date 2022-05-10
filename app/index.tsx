@@ -18,7 +18,7 @@ try {
     const store = configuredStore();
 
     window.autoUpdate.onError((_, errorMessage: string, error: Error) =>
-        window.log.error(errorMessage, { error })
+        window.log.error(error, errorMessage)
     );
 
     initMisc(store.dispatch);
@@ -30,9 +30,9 @@ try {
     window.addListener.logFromMain((_, ...args: any[]) => console.log(...args));
 
     window.addEventListener('unhandledrejection', (promiseRejectionEvent) =>
-        window.log.error('Uncaught rejection: ', {
-            error: promiseRejectionEvent.reason.toString(),
-        })
+        window.log.error(
+            `Uncaught rejection: ${promiseRejectionEvent.reason.toString()}`
+        )
     );
 
     window.autoUpdate.onUpdateAvailable(
@@ -53,5 +53,5 @@ try {
         )
     );
 } catch (error) {
-    window.log.error('Error thrown in index.tsx', { error });
+    window.log.error(error, 'Error thrown in index.tsx');
 }

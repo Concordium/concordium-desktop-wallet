@@ -85,7 +85,7 @@ async function performImport(
             addMessage
         );
     } catch (e) {
-        window.log.error('Import of wallet failed', { error: e });
+        window.log.error(e, 'Import of wallet failed');
         throw new Error(
             'The imported data is not compatible with existing data.'
         );
@@ -99,7 +99,7 @@ async function performImport(
             addAddressBookMessage
         );
     } catch (e) {
-        window.log.error('Import of Address book failed', { error: e });
+        window.log.error(e, 'Import of Address book failed');
         throw new Error(
             'The imported address book is not compatible with existing address book.'
         );

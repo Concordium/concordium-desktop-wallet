@@ -31,7 +31,7 @@ export default function CopyButton({
             setCopied(true);
             onClick?.();
         } catch (e) {
-            window.log.warn('Copy button OnClick failed', e);
+            window.log.warn(e, 'Copy button OnClick failed');
         }
     }
 

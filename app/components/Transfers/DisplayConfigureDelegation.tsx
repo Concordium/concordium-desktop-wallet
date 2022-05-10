@@ -41,14 +41,20 @@ export default function DisplayConfigureDelegation({ transaction }: Props) {
                     </p>
                 </>
             )}
-            {payload.stake !== undefined && (
-                <>
-                    <h5 className={styles.title}>Delegated amount:</h5>
-                    <p className={styles.amount}>
-                        {displayAsCcd(payload.stake)}
-                    </p>
-                </>
-            )}
+
+            {payload.stake !== undefined &&
+                (payload.stake === 0n ? (
+                    <>
+                        <h5 className={styles.title}>Stop delegation</h5>
+                    </>
+                ) : (
+                    <>
+                        <h5 className={styles.title}>Delegated amount:</h5>
+                        <p className={styles.amount}>
+                            {displayAsCcd(payload.stake)}
+                        </p>
+                    </>
+                ))}
             {payload.restakeEarnings !== undefined && (
                 <>
                     <h5 className={styles.title}>Redelegate earnings:</h5>

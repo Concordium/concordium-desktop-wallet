@@ -403,13 +403,8 @@ export type Database = {
     decyptedAmounts: DecryptedAmountsMethods;
 };
 
-export type LogExtra = {
-    message?: string;
-    error?: Error;
-};
-
 export type PutLog = (
-    ...inputs: [string] | [string, LogExtra] | [Error]
+    ...inputs: [string] | [Error, string] | [Error]
 ) => Logger;
 
 export type LoggingMethods = {
