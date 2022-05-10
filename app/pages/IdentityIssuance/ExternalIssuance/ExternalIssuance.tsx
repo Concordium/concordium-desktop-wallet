@@ -163,7 +163,7 @@ async function generateIdentity(
         accountName,
         identityObjectLocation
     ).catch((e) => {
-        window.log.error(e, ' caused confirmation of Identity to fail.');
+        window.log.error(e, 'Confirmation of Identity failed');
         onError(`Failed to confirm identity`);
     });
     return { identityId, status: IdentityRequestStatus.Success };

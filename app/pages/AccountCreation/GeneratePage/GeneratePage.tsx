@@ -180,7 +180,7 @@ export default function AccountCreationGenerate({
                         })
                     );
                 } catch (e) {
-                    window.log.error(e, ' caused creation of Account to fail.');
+                    window.log.error(e, 'Account creation failed');
                     onError(`Unable to create account due to ${e}`);
                 }
             };

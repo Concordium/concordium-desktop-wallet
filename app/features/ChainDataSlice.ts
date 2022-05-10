@@ -88,7 +88,7 @@ export async function init(dispatch: Dispatch) {
 
         dispatch(setConsensusStatus(cs));
     } catch (e) {
-        window.log.error(e, 'Could initialize chain data state:');
+        window.log.error(e, 'Could not initialize chain data state');
     }
 }
 
