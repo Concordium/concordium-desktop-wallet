@@ -1,11 +1,11 @@
 import {
     AccountInfo,
     BakerId,
+    BakerPoolStatus,
     BlockSummary,
     ConsensusStatus,
     CryptographicParameters,
     NextAccountNonce,
-    PoolStatus,
     RewardStatus,
     TransactionStatus,
     Versioned,
@@ -121,8 +121,8 @@ export type GRPC = {
     getRewardStatus: (blockHash: string) => Promise<RewardStatus | undefined>;
     getPoolStatus: (
         blockHash: string,
-        bakerId?: BakerId
-    ) => Promise<PoolStatus | undefined>;
+        bakerId: BakerId
+    ) => Promise<BakerPoolStatus | undefined>;
 };
 
 export type FileMethods = {

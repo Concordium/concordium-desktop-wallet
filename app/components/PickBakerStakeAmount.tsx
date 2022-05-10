@@ -1,7 +1,6 @@
 import clsx from 'clsx';
 import React, { useCallback } from 'react';
 import { useFormContext, Validate } from 'react-hook-form';
-import { PoolStatusType } from '@concordium/node-sdk/lib/src/types';
 import { isRewardStatusV1 } from '@concordium/node-sdk/lib/src/rewardStatusHelpers';
 import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { collapseFraction, noOp } from '~/utils/basicHelpers';
@@ -53,9 +52,7 @@ function useCapitalBoundCheck(
                 const status = await getPoolStatusLatest(
                     accountInfo.accountIndex
                 );
-                if (status.poolType === PoolStatusType.BakerPool) {
-                    return status;
-                }
+                return status;
             }
             return Promise.resolve(undefined);
         },

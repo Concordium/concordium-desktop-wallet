@@ -3,7 +3,6 @@ import { useForm, useFormContext, Validate } from 'react-hook-form';
 import { Redirect } from 'react-router';
 import clsx from 'clsx';
 import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
-import { PoolStatusType } from '@concordium/node-sdk/lib/src/types';
 import { BakerPoolStatus } from '@concordium/node-sdk';
 import AccountCard from '~/components/AccountCard';
 import Form from '~/components/Form';
@@ -155,7 +154,10 @@ export default function DelegationAmountPage({
     baseRoute,
 }: Props) {
     const poolInfo = useAsyncMemo(
-        () => getPoolStatusLatest(target != null ? BigInt(target) : undefined),
+        () =>
+            target != null
+                ? getPoolStatusLatest(BigInt(target))
+                : Promise.resolve(undefined),
         noOp,
         [target]
     );
@@ -242,22 +244,18 @@ export default function DelegationAmountPage({
                         passed.
                     </div>
                 )}
-                {poolInfo.poolType === PoolStatusType.BakerPool && (
-                    <div className="body2 mV30">
-                        <Label className="mB5">Target pool status</Label>
-                        <SidedRow
-                            left="Current pool:"
-                            right={`${displayAsCcd(poolInfo.delegatedCapital)}`}
-                        />
-                        <SidedRow
-                            className="mT5"
-                            left="Pool limit:"
-                            right={`${displayAsCcd(
-                                poolInfo.delegatedCapitalCap
-                            )}`}
-                        />
-                    </div>
-                )}
+                <div className="body2 mV30">
+                    <Label className="mB5">Target pool status</Label>
+                    <SidedRow
+                        left="Current pool:"
+                        right={`${displayAsCcd(poolInfo.delegatedCapital)}`}
+                    />
+                    <SidedRow
+                        className="mT5"
+                        left="Pool limit:"
+                        right={`${displayAsCcd(poolInfo.delegatedCapitalCap)}`}
+                    />
+                </div>
                 {showAccountCard && (
                     <AccountCard account={account} accountInfo={accountInfo} />
                 )}

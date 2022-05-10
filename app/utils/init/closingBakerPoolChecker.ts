@@ -2,7 +2,6 @@ import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers'
 import {
     BakerPoolPendingChangeType,
     DelegationTargetType,
-    PoolStatusType,
 } from '@concordium/node-sdk/lib/src/types';
 import { Account, AccountStatus, Dispatch } from '../types';
 import { findAccounts } from '~/database/AccountDao';
@@ -28,16 +27,11 @@ async function findAccountsDelegatingToClosingBakerPools() {
         ) {
             const { bakerId } = accountInfo.accountDelegation.delegationTarget;
             const poolStatus = await getPoolStatusLatest(bakerId);
-
-            // TODO: This is always true (we checked that the account is delegating to a baker),
-            // but our typing is not good enough here, so we need yet another guard.
-            if (poolStatus.poolType === PoolStatusType.BakerPool) {
-                if (
-                    poolStatus.bakerStakePendingChange.pendingChangeType ===
-                    BakerPoolPendingChangeType.RemovePool
-                ) {
-                    accountsDelegatingToClosingPool.push(account);
-                }
+            if (
+                poolStatus.bakerStakePendingChange.pendingChangeType ===
+                BakerPoolPendingChangeType.RemovePool
+            ) {
+                accountsDelegatingToClosingPool.push(account);
             }
         }
     }

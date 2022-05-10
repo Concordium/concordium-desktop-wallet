@@ -4,7 +4,6 @@ import {
     AccountDelegationDetails,
     BakerPoolPendingChangeType,
     DelegationTargetType,
-    PoolStatusType,
 } from '@concordium/node-sdk/lib/src/types';
 import { isReduceStakePendingChange } from '@concordium/node-sdk/lib/src/accountHelpers';
 import React, { PropsWithChildren } from 'react';
@@ -185,12 +184,7 @@ export default function StakingDetails({ details }: Props) {
                     cs.lastFinalizedBlock,
                     details.delegationTarget.bakerId
                 );
-                // TODO: When getPoolStatus is better typed this is not necessary anymore.
-                if (status.poolType === PoolStatusType.BakerPool) {
-                    return status;
-                }
-                // This line should never be reached, and can be cleaned up when getPoolStatus has better types.
-                return undefined;
+                return status;
             }
             return undefined;
         },
