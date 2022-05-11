@@ -1,5 +1,5 @@
 import React from 'react';
-import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import { MintDistribution } from '~/utils/types';
 import Loading from '~/cross-app-components/Loading';
 import withChainData, { ChainData } from '~/utils/withChainData';
@@ -31,7 +31,7 @@ export default withChainData(function MintDistributionView({
     if (!consensusStatus || !blockSummary) {
         return <Loading />;
     }
-    if (isBlockSummaryV1(blockSummary) && mintDistribution.version === 0) {
+    if (!isBlockSummaryV0(blockSummary) && mintDistribution.version === 0) {
         throw new Error(
             'Viewing mint distribution update version 0, which is outdated.'
         );
@@ -54,7 +54,7 @@ export default withChainData(function MintDistributionView({
         <>
             <div>
                 <Label className="mB5">Current mint distribution:</Label>
-                {isBlockSummaryV1(blockSummary) || (
+                {!isBlockSummaryV0(blockSummary) || (
                     <MintRateInput
                         value={blockSummary.updates.chainParameters.rewardParameters.mintDistribution.mintPerSlot.toString()}
                         paydaysPerYear={slotsPerYear}

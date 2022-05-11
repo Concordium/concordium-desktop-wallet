@@ -3,7 +3,7 @@ import React, { ComponentType, useCallback, useState } from 'react';
 import { Redirect } from 'react-router';
 import { useSelector } from 'react-redux';
 import type { BlockSummaryV1 } from '@concordium/node-sdk';
-import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import CommissionsPage from '~/components/Transfers/configureBaker/CommissionsPage';
 import DelegationStatusPage from '~/components/Transfers/configureBaker/DelegationStatusPage';
@@ -143,7 +143,7 @@ const withDeps = (component: ComponentType<Deps>) =>
 const ensureDelegationProtocol = (c: ComponentType<Props>) =>
     ensureProps<Props, Deps>(
         c,
-        (p): p is Props => isBlockSummaryV1(p.blockSummary),
+        (p): p is Props => !isBlockSummaryV0(p.blockSummary),
         toRoot
     );
 

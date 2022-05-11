@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-    isBlockSummaryV1,
-    isChainParametersV1,
+    isBlockSummaryV0,
+    isChainParametersV0,
 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import { isRewardStatusV1 } from '@concordium/node-sdk/lib/src/rewardStatusHelpers';
 import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
@@ -169,7 +169,7 @@ export function useChainParameters() {
  */
 export function useCapitalBound() {
     const chainParameters = useChainParameters();
-    if (!chainParameters || !isChainParametersV1(chainParameters)) {
+    if (!chainParameters || isChainParametersV0(chainParameters)) {
         return undefined;
     }
     return chainParameters.capitalBound;
@@ -291,22 +291,23 @@ export function useCalcDelegatorCooldownUntil() {
 
     const { bs, cs, rs } = status;
 
-    if (isBlockSummaryV1(bs)) {
-        if (!isRewardStatusV1(rs)) {
-            // Should not happen, as this indicates rs and bs were queried for with different blocks.
-            throwLoggedError('Block summary and reward status do not match.');
-        }
-
-        return getV1Cooldown(
-            Number(bs.updates.chainParameters.delegatorCooldown),
-            bs,
-            cs,
-            rs.nextPaydayTime,
-            now
+    if (isBlockSummaryV0(bs)) {
+        throwLoggedError(
+            'Delegation cooldown not available for current protocol version.'
         );
     }
-    return throwLoggedError(
-        'Delegation cooldown not available for current protocol version.'
+
+    if (!isRewardStatusV1(rs)) {
+        // Should not happen, as this indicates rs and bs were queried for with different blocks.
+        throwLoggedError('Block summary and reward status do not match.');
+    }
+
+    return getV1Cooldown(
+        Number(bs.updates.chainParameters.delegatorCooldown),
+        bs,
+        cs,
+        rs.nextPaydayTime,
+        now
     );
 }
 
@@ -321,24 +322,24 @@ export function useCalcBakerStakeCooldownUntil() {
 
     const { bs, cs, rs } = status;
 
-    if (isBlockSummaryV1(bs)) {
-        if (!isRewardStatusV1(rs)) {
-            // Should not happen, as this indicates rs and bs were queried for with different blocks.
-            throwLoggedError('Block summary and reward status do not match.');
-        }
-
-        return getV1Cooldown(
-            Number(bs.updates.chainParameters.poolOwnerCooldown),
-            bs,
+    if (isBlockSummaryV0(bs)) {
+        return getV0Cooldown(
+            Number(bs.updates.chainParameters.bakerCooldownEpochs),
             cs,
-            rs.nextPaydayTime,
             now
         );
     }
 
-    return getV0Cooldown(
-        Number(bs.updates.chainParameters.bakerCooldownEpochs),
+    if (!isRewardStatusV1(rs)) {
+        // Should not happen, as this indicates rs and bs were queried for with different blocks.
+        throwLoggedError('Block summary and reward status do not match.');
+    }
+
+    return getV1Cooldown(
+        Number(bs.updates.chainParameters.poolOwnerCooldown),
+        bs,
         cs,
+        rs.nextPaydayTime,
         now
     );
 }
@@ -357,17 +358,17 @@ export function useStakeIncreaseUntil() {
 
     const { bs, cs, rs } = status;
 
-    if (isBlockSummaryV1(bs)) {
-        if (!isRewardStatusV1(rs)) {
-            // Should not happen, as this indicates rs and bs were queried for with different blocks.
-            throwLoggedError('Block summary and reward status do not match.');
-        }
-
-        return getV1Cooldown(0, bs, cs, rs.nextPaydayTime, now);
+    if (isBlockSummaryV0(bs)) {
+        // In V0, stake increase takes effect after 2 epochs
+        return getV0Cooldown(2, cs, now);
     }
 
-    // In V0, stake increase takes effect after 2 epochs
-    return getV0Cooldown(2, cs, now);
+    if (!isRewardStatusV1(rs)) {
+        // Should not happen, as this indicates rs and bs were queried for with different blocks.
+        throwLoggedError('Block summary and reward status do not match.');
+    }
+
+    return getV1Cooldown(0, bs, cs, rs.nextPaydayTime, now);
 }
 
 /**

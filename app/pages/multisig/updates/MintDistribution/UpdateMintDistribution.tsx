@@ -1,6 +1,6 @@
 import React from 'react';
 import { Validate } from 'react-hook-form';
-import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 
@@ -52,7 +52,7 @@ export default function UpdateMintDistribution({
     let mintPerSlot: number | undefined;
     const rewardDistribution =
         blockSummary.updates.chainParameters.rewardParameters.mintDistribution;
-    if (!isBlockSummaryV1(blockSummary)) {
+    if (isBlockSummaryV0(blockSummary)) {
         mintPerSlot =
             blockSummary.updates.chainParameters.rewardParameters
                 .mintDistribution.mintPerSlot;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import {
     RegisterOptions,
     useFormContext,
@@ -86,7 +86,7 @@ export default function UpdatePoolParameters({
     defaults,
     blockSummary,
 }: UpdateProps): JSX.Element | null {
-    if (!isBlockSummaryV1(blockSummary)) {
+    if (isBlockSummaryV0(blockSummary)) {
         throw new Error('Connected node used outdated blockSummary format');
     }
 
