@@ -2020,14 +2020,15 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@concordium/node-sdk@^0.8.0-alpha.3":
-  version "0.8.0-alpha.3"
-  resolved "https://registry.yarnpkg.com/@concordium/node-sdk/-/node-sdk-0.8.0-alpha.3.tgz#ef4da5292534147e0bc37cc782019a4447661e7d"
-  integrity sha512-QR9uJIAUj1ow66HgBWFxPHsVmb109BL6ULQu9tvUHYTY8crUPOcj6T6JWEds6RUB3LULz/95IknCVhM4C9Bt+g==
+"@concordium/node-sdk@^1.0.0-alpha.0":
+  version "1.0.0-alpha.0"
+  resolved "https://registry.yarnpkg.com/@concordium/node-sdk/-/node-sdk-1.0.0-alpha.0.tgz#1cec171daa9410734f2eabf502a7abb1cbd0c2b6"
+  integrity sha512-K+9N0MrK7vOpy/LKTggMv0SnwTawwWB7AwCaLWnnUzuXKTZJNK3BC+v9m0iptcQV/YYtnH4XqzQGAmN+Qww8Zw==
   dependencies:
     "@grpc/grpc-js" "^1.3.4"
     bs58check "^2.1.2"
     buffer "^6.0.3"
+    google-protobuf "^3.20.1"
     hash.js "^1.1.7"
 
 "@dabh/diagnostics@^2.0.2":
@@ -10414,6 +10415,11 @@ google-protobuf@3.12.4:
   version "3.12.4"
   resolved "https://registry.yarnpkg.com/google-protobuf/-/google-protobuf-3.12.4.tgz#fd89b7e5052cdb35a80f9b455612851d542a5c9f"
   integrity sha512-ItTn8YepDQMHEMHloUPH+FDaTPiHTnbsMvP50aXfbI65IK3AA5+wXlHSygJH8xz+h1g4gu7V+CK5X1/SaGITsA==
+
+google-protobuf@^3.20.1:
+  version "3.20.1"
+  resolved "https://registry.yarnpkg.com/google-protobuf/-/google-protobuf-3.20.1.tgz#1b255c2b59bcda7c399df46c65206aa3c7a0ce8b"
+  integrity sha512-XMf1+O32FjYIV3CYu6Tuh5PNbfNEU5Xu22X+Xkdb/DUexFlCzhvv7d5Iirm4AOwn8lv4al1YvIhzGrg2j9Zfzw==
 
 got@^11.7.0:
   version "11.8.2"
