@@ -310,7 +310,6 @@ function dateFromPendingChangeEffectiveTime(
         return undefined;
     }
 
-    // TODO: Handle V2 rewardStatus if it is added
     if (!isRewardStatusV1(rs) || isChainParametersV0(cp)) {
         throw new Error(
             'Not possible to calculate date due to mismatch between reward status, chain parameters, and pending change versions.'

@@ -297,7 +297,6 @@ export function useCalcDelegatorCooldownUntil() {
         );
     }
 
-    // TODO: Handle V2 rewardStatus if it is added
     if (!isRewardStatusV1(rs)) {
         // Should not happen, as this indicates rs and bs were queried for with different blocks.
         throwLoggedError('Block summary and reward status do not match.');
@@ -331,7 +330,6 @@ export function useCalcBakerStakeCooldownUntil() {
         );
     }
 
-    // TODO: Handle V2 rewardStatus if it is added
     if (!isRewardStatusV1(rs)) {
         // Should not happen, as this indicates rs and bs were queried for with different blocks.
         throwLoggedError('Block summary and reward status do not match.');
@@ -365,7 +363,6 @@ export function useStakeIncreaseUntil() {
         return getV0Cooldown(2, cs, now);
     }
 
-    // TODO: Handle V2 rewardStatus if it is added
     if (!isRewardStatusV1(rs)) {
         // Should not happen, as this indicates rs and bs were queried for with different blocks.
         throwLoggedError('Block summary and reward status do not match.');

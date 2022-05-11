@@ -92,7 +92,6 @@ export default class TimeParametersHandler
     }
 
     getAuthorization(authorizations: Authorizations) {
-        // TODO: Handle V2 authorizations if they are added
         if (!isAuthorizationsV1(authorizations)) {
             throw new Error('Connected node used outdated blockSummary format');
         }
