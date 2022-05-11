@@ -1,5 +1,5 @@
 import React from 'react';
-import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import { TimeParameters } from '~/utils/types';
 import Loading from '~/cross-app-components/Loading';
 import withChainData, { ChainData } from '~/utils/withChainData';
@@ -23,7 +23,7 @@ export default withChainData(function TimeParametersView({
     if (!consensusStatus || !blockSummary) {
         return <Loading inline />;
     }
-    if (!isBlockSummaryV1(blockSummary)) {
+    if (isBlockSummaryV0(blockSummary)) {
         throw new Error('Connected node used outdated blockSummary format');
     }
 

@@ -6,9 +6,9 @@ import {
     RewardStatus,
     StakePendingChange,
 } from '@concordium/node-sdk/lib/src/types';
-import { isStakePendingChangeV1 } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { isStakePendingChangeV0 } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { isRewardStatusV1 } from '@concordium/node-sdk/lib/src/rewardStatusHelpers';
-import { isChainParametersV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isChainParametersV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import { ensureNumberLength } from './basicHelpers';
 import { TimeStampUnit, YearMonth, YearMonthDate } from './types';
 
@@ -310,7 +310,8 @@ function dateFromPendingChangeEffectiveTime(
         return undefined;
     }
 
-    if (!isRewardStatusV1(rs) || !isChainParametersV1(cp)) {
+    // TODO: Handle V2 rewardStatus if it is added
+    if (!isRewardStatusV1(rs) || isChainParametersV0(cp)) {
         throw new Error(
             'Not possible to calculate date due to mismatch between reward status, chain parameters, and pending change versions.'
         );
@@ -363,7 +364,7 @@ export function dateFromStakePendingChange(
         return undefined;
     }
 
-    if (!isStakePendingChangeV1(spc)) {
+    if (isStakePendingChangeV0(spc)) {
         return epochDate(
             Number(spc.epoch),
             cs.epochDuration,

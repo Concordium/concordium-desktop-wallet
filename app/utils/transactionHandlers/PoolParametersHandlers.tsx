@@ -1,5 +1,5 @@
 import React from 'react';
-import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
 import PoolParametersView from '~/pages/multisig/updates/PoolParameters/PoolParametersView';
@@ -47,8 +47,12 @@ export default class PoolParametersHandler
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!blockSummary || !isBlockSummaryV1(blockSummary)) {
+        if (!blockSummary) {
             return undefined;
+        }
+
+        if (isBlockSummaryV0(blockSummary)) {
+            throw new Error('Update incompatible with chain protocol version');
         }
 
         const sequenceNumber =

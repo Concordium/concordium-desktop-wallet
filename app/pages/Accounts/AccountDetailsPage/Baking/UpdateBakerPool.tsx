@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
 import type { BlockSummaryV1 } from '@concordium/node-sdk';
-import { isBlockSummaryV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import React, { ComponentType, useCallback, useState } from 'react';
 import { Redirect } from 'react-router';
 import withExchangeRate from '~/components/Transfers/withExchangeRate';
@@ -63,7 +63,7 @@ const withDeps = (component: ComponentType<Deps>) =>
 const ensureDelegationProtocol = (c: ComponentType<Props>) =>
     ensureProps<Props, Deps>(
         c,
-        (p): p is Props => isBlockSummaryV1(p.blockSummary),
+        (p): p is Props => !isBlockSummaryV0(p.blockSummary),
         <Redirect to={routes.ACCOUNTS} />
     );
 

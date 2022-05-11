@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-    isBlockSummaryV1,
+    isBlockSummaryV0,
     isAuthorizationsV1,
 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
@@ -42,12 +42,12 @@ export default class TimeParametersHandler
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         const parsedMintRate = parseMintRate(mintPerPayday);
-        if (
-            !blockSummary ||
-            !parsedMintRate ||
-            !isBlockSummaryV1(blockSummary)
-        ) {
+        if (!blockSummary || !parsedMintRate) {
             return undefined;
+        }
+
+        if (isBlockSummaryV0(blockSummary)) {
+            throw new Error('Update incompatible with chain protocol version');
         }
 
         const sequenceNumber =
@@ -92,6 +92,7 @@ export default class TimeParametersHandler
     }
 
     getAuthorization(authorizations: Authorizations) {
+        // TODO: Handle V2 authorizations if they are added
         if (!isAuthorizationsV1(authorizations)) {
             throw new Error('Connected node used outdated blockSummary format');
         }
