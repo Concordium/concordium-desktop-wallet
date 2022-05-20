@@ -238,7 +238,7 @@ const configureDelegationLinks = (
             className={styles.link}
             to={routes.MULTISIGTRANSACTIONS_ADD_DELEGATION}
         >
-            Delegate to a pool
+            Register as a delegator
         </ButtonNavLink>
         <ButtonNavLink
             className={styles.link}
