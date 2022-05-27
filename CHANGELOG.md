@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.1
+
+### Fixed
+
+-   Fixed an issue that made it impossible to create a transaction to do passive delegation.
+
 ## 1.4.0
 
 ### Added
