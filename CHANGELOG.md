@@ -2,6 +2,10 @@
 
 ## 1.4.1
 
+### Added
+
+-   Link to delegation documentation, when choosing delegation target.
+
 ### Fixed
 
 -   Fixed an issue that made it impossible to create a transaction to do passive delegation.
