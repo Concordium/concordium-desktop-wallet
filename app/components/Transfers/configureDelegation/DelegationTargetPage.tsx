@@ -3,6 +3,7 @@ import { useForm, Validate } from 'react-hook-form';
 import { OpenStatusText } from '@concordium/node-sdk/lib/src/types';
 import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import Form from '~/components/Form';
+import ExternalLink from '~/components/ExternalLink';
 import { validBigInt } from '~/components/Form/util/validation';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
 import { getPoolStatusLatest } from '~/node/nodeHelpers';
@@ -11,6 +12,7 @@ import {
     getExistingDelegationValues,
 } from '~/utils/transactionFlows/configureDelegation';
 import { AccountInfo, EqualRecord, NotOptional } from '~/utils/types';
+import urls from '~/constants/urls.json';
 
 import styles from './DelegationPage.module.scss';
 
@@ -106,32 +108,44 @@ export default function DelegationTargetPage({
                     />
                 </div>
                 {toSpecificPoolValue ? (
-                    <Form.Input
-                        name={fieldNames.poolId}
-                        className="mT30 body2"
-                        placeholder="Enter baker ID"
-                        rules={{
-                            required: 'Baker ID must be specified',
-                            min: {
-                                value: 0,
-                                message: "Baker ID's cannot be negative",
-                            },
-                            validate: {
-                                wholeNumber: validBigInt(
-                                    "Baker ID's are positive whole numbers"
-                                ),
-                                validateBakerId,
-                            },
-                        }}
-                    />
+                    <>
+                        <Form.Input
+                            name={fieldNames.poolId}
+                            className="mT30 body2"
+                            placeholder="Enter baker ID"
+                            rules={{
+                                required: 'Baker ID must be specified',
+                                min: {
+                                    value: 0,
+                                    message: "Baker ID's cannot be negative",
+                                },
+                                validate: {
+                                    wholeNumber: validBigInt(
+                                        "Baker ID's are positive whole numbers"
+                                    ),
+                                    validateBakerId,
+                                },
+                            }}
+                        />
+                        <p className="mB30">
+                            If you don&apos;t already know what baker pool you
+                            want to delegate an amount to, you can read more
+                            about finding one here:
+                        </p>
+                    </>
                 ) : (
                     <p className="mB20">
                         Passive delegation is an alternative to delegation to a
                         specific baker pool that has lower rewards. With passive
                         delegation you do not have to worry about the uptime or
-                        quality of a baker node.
+                        quality of a baker node. For more info you can visit:
                     </p>
                 )}
+                <p className="mV0">
+                    <ExternalLink href={urls.delegationDocumention}>
+                        developer.concordium.software
+                    </ExternalLink>
+                </p>
             </div>
             <Form.Submit className={styles.continue}>Continue</Form.Submit>
         </Form>
