@@ -4,5 +4,6 @@
     "walletProxyTestnet": "https://wallet-proxy.testnet.concordium.com/",
     "walletProxyProtonet": "https://wallet-proxy.protonet.concordium.com/",
     "licenseNotices": "https://developer.concordium.software/en/mainnet/net/resources/dw-licenses.html",
-    "supportForum": "https://support.concordium.software"
+    "supportForum": "https://support.concordium.software",
+    "delegationDocumention": "https://developer.concordium.software/en/mainnet/net/concepts/concepts-delegation.html"
 }
