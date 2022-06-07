@@ -5,6 +5,7 @@
 ### Fixed
 
 -   Fixed an issue that made it impossible to create a transaction to do passive delegation.
+-   Fixed issue that caused the wallet to crash when inspecting identities with missing date attributes, again.
 
 ## 1.4.0
 
@@ -36,6 +37,7 @@
 
 ### Fixed
 
+-   Fixed issue that caused the wallet to crash when inspecting identities with missing date attributes.
 -   Fixed identity issuance with dts.
 
 ## 1.3.0

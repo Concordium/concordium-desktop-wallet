@@ -79,6 +79,14 @@ const parseDocType = (docType: DocumentType) => {
     }
 };
 
+const parseDate = (date: string) => {
+    try {
+        return formatDate(date);
+    } catch {
+        return 'N/A';
+    }
+};
+
 export function formatAttributeValue(
     key: AttributeKeyName,
     value: ChosenAttributes[typeof key]
@@ -88,7 +96,7 @@ export function formatAttributeValue(key: string, value: string): string {
         case 'idDocExpiresAt':
         case 'idDocIssuedAt':
         case 'dob':
-            return formatDate(value);
+            return parseDate(value);
         case 'sex':
             return parseGender(parseInt(value, 10));
         case 'idDocType':

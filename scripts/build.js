@@ -7,6 +7,7 @@ const fs = require('fs');
 const builder = require('electron-builder');
 
 const targetNet = process.env.TARGET_NET;
+const skipSigning = process.env.SIGNING === 'skip';
 
 let name;
 let productName;
@@ -28,6 +29,11 @@ builder.build({
             productName,
         },
         appId,
+        win: {
+            certificateSubjectName: skipSigning
+                ? undefined
+                : 'Concordium Software ApS',
+        },
     },
     publish: 'never',
 });
