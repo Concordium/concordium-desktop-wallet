@@ -22,6 +22,7 @@ import {
 import {
     displayPoolOpen,
     displayRestakeEarnings,
+    isPoolClosedForAll,
 } from '~/utils/transactionFlows/configureBaker';
 import {
     displayDelegationTarget,
@@ -79,27 +80,37 @@ function BakerValues({ details, isDelegationProtocol }: BakerValuesProps) {
                                 .openStatus
                         )}
                     />
-                    <Value
-                        title="Transaction fee commission"
-                        value={formatCommission(
-                            (details as AccountBakerDetailsV1).bakerPoolInfo
-                                .commissionRates.transactionCommission
-                        )}
-                    />
-                    <Value
-                        title="Baking reward commission"
-                        value={formatCommission(
-                            (details as AccountBakerDetailsV1).bakerPoolInfo
-                                .commissionRates.bakingCommission
-                        )}
-                    />
-                    <Value
-                        title="Finalization reward commission"
-                        value={formatCommission(
-                            (details as AccountBakerDetailsV1).bakerPoolInfo
-                                .commissionRates.finalizationCommission
-                        )}
-                    />
+                    {!isPoolClosedForAll(
+                        (details as AccountBakerDetailsV1).bakerPoolInfo
+                            .openStatus
+                    ) && (
+                        <>
+                            <Value
+                                title="Transaction fee commission"
+                                value={formatCommission(
+                                    (details as AccountBakerDetailsV1)
+                                        .bakerPoolInfo.commissionRates
+                                        .transactionCommission
+                                )}
+                            />
+                            <Value
+                                title="Baking reward commission"
+                                value={formatCommission(
+                                    (details as AccountBakerDetailsV1)
+                                        .bakerPoolInfo.commissionRates
+                                        .bakingCommission
+                                )}
+                            />
+                            <Value
+                                title="Finalization reward commission"
+                                value={formatCommission(
+                                    (details as AccountBakerDetailsV1)
+                                        .bakerPoolInfo.commissionRates
+                                        .finalizationCommission
+                                )}
+                            />
+                        </>
+                    )}
                 </>
             )}
         </>
