@@ -9,7 +9,8 @@ export default async function signUpdateTransaction(
     ins: number,
     path: number[],
     transaction: UpdateInstruction<UpdateInstructionPayload>,
-    serializedPayload: Buffer
+    serializedPayload: Buffer,
+    p2 = 0x00
 ): Promise<Buffer> {
     const data = Buffer.concat([
         pathAsBuffer(path),
@@ -20,7 +21,6 @@ export default async function signUpdateTransaction(
     ]);
 
     const p1 = 0x00;
-    const p2 = 0x00;
 
     const response = await transport.send(0xe0, ins, p1, p2, data);
     const signature = response.slice(0, 64);

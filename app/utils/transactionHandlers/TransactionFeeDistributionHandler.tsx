@@ -18,7 +18,7 @@ import {
 import { serializeTransactionFeeDistribution } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Update Transaction Fee Distribution';
+const TYPE = 'Update transaction fee distribution';
 
 type TransactionType = UpdateInstruction<TransactionFeeDistribution>;
 
@@ -35,7 +35,7 @@ export default class TransactionFeeDistributionHandler
         { rewardDistribution }: UpdateTransactionFeeDistributionFields,
         effectiveTime: bigint,
         expiryTime: bigint
-    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+    ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         if (!blockSummary) {
             return undefined;
         }

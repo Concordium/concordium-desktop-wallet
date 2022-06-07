@@ -1,6 +1,6 @@
 import React, { PropsWithChildren } from 'react';
 import { configureStore, getDefaultMiddleware, Action } from '@reduxjs/toolkit';
-import { createHashHistory } from 'history';
+import { createBrowserHistory } from 'history';
 import { routerMiddleware } from 'connected-react-router';
 import { createLogger } from 'redux-logger';
 import { ThunkAction } from 'redux-thunk';
@@ -10,7 +10,9 @@ import { Provider } from 'react-redux';
 import createRootReducer from './rootReducer';
 /* eslint-enable import/no-cycle */
 
-export const history = createHashHistory();
+export const history = createBrowserHistory({
+    basename: window.location.pathname,
+});
 const rootReducer = createRootReducer(history);
 export type RootState = ReturnType<typeof rootReducer>;
 

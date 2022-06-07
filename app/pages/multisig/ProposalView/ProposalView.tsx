@@ -42,7 +42,6 @@ import { HandleSignatureFiles, getSignatures } from './util';
 import ProposalViewStatusText from './ProposalViewStatusText';
 import TransactionHashView from '~/components/TransactionHash';
 import { TransactionExportType } from '~/utils/transactionTypes';
-import FormSubmissionWindowButton from './FormSubmissionWindowButton';
 
 import styles from './ProposalView.module.scss';
 
@@ -115,11 +114,10 @@ function ProposalView({ proposal }: ProposalViewProps) {
         transactionSignDigest,
         setTransactionSignDigest,
     ] = useState<string>();
-    useEffect(() => {
-        getTransactionSignDigest(transaction)
-            .then((digest) => setTransactionSignDigest(digest))
-            .catch(() => {});
-    }, [transaction]);
+    useEffect(
+        () => setTransactionSignDigest(getTransactionSignDigest(transaction)),
+        [transaction]
+    );
 
     function submitTransaction() {
         dispatch(
@@ -149,7 +147,6 @@ function ProposalView({ proposal }: ProposalViewProps) {
         <MultiSignatureLayout
             pageTitle={handler.title}
             print={handler.print(transaction, proposal.status, image)}
-            stepTitle={`Transaction Proposal - ${handler.type}`}
             disableBack={isAccountTransaction}
             closeRoute={CLOSE_ROUTE}
             delegateScroll
@@ -175,7 +172,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
                 className={styles.subtractContainerPadding}
             >
                 <Columns divider columnScroll columnClassName={styles.column}>
-                    <Columns.Column header="Transaction Details">
+                    <Columns.Column header="Transaction details">
                         <div className={styles.columnContent}>
                             <TransactionDetails transaction={transaction} />
                             <ExpiredTransactionView
@@ -220,7 +217,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
                         </div>
                     </Columns.Column>
                     <Columns.Column
-                        header="Security & Submission Details"
+                        header="Security & submission details"
                         className={styles.stretchColumn}
                     >
                         <div className={styles.columnContent}>
@@ -275,9 +272,9 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                         I understand this is the final
                                         submission and cannot be reverted
                                     </Form.Checkbox>
-                                    <FormSubmissionWindowButton
-                                        transaction={transaction}
-                                    />
+                                    <Form.Submit>
+                                        Submit transaction to chain
+                                    </Form.Submit>
                                 </div>
                             )}
                         </div>

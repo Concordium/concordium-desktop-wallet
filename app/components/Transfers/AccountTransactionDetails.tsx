@@ -15,7 +15,10 @@ import {
     instanceOfUpdateBakerKeys,
     instanceOfUpdateBakerStake,
     instanceOfUpdateBakerRestakeEarnings,
+    instanceOfRegisterData,
     AddressBookEntry,
+    instanceOfConfigureBaker,
+    instanceOfConfigureDelegation,
 } from '../../utils/types';
 import { lookupAddressBookEntry, lookupName } from '~/utils/addressBookHelpers';
 import DisplayScheduleTransfer from './DisplayScheduledTransferDetails';
@@ -28,6 +31,9 @@ import DisplayRemoveBaker from './DisplayRemoveBaker';
 import DisplayAccountCredentialsUpdate from '../DisplayAccountCredentialUpdate';
 import DisplayUpdateBakerStake from './DisplayUpdateBakerStake';
 import DisplayUpdateBakerRestakeEarnings from './DisplayUpdateBakerRestakeEarnings';
+import DisplayRegisterData from './DisplayRegisterData';
+import DisplayConfigureBaker from './DisplayConfigureBaker';
+import DisplayConfigureDelegation from './DisplayConfigureDelegation';
 
 interface Props {
     transaction: AccountTransaction;
@@ -90,6 +96,9 @@ export default function AccountTransactionDetails({ transaction }: Props) {
             />
         );
     }
+    if (instanceOfRegisterData(transaction)) {
+        return <DisplayRegisterData transaction={transaction} />;
+    }
     if (instanceOfScheduledTransfer(transaction)) {
         return (
             <DisplayScheduleTransfer
@@ -123,6 +132,12 @@ export default function AccountTransactionDetails({ transaction }: Props) {
     }
     if (instanceOfRemoveBaker(transaction)) {
         return <DisplayRemoveBaker transaction={transaction} />;
+    }
+    if (instanceOfConfigureBaker(transaction)) {
+        return <DisplayConfigureBaker transaction={transaction} />;
+    }
+    if (instanceOfConfigureDelegation(transaction)) {
+        return <DisplayConfigureDelegation transaction={transaction} />;
     }
     if (
         instanceOfTransferToEncrypted(transaction) ||

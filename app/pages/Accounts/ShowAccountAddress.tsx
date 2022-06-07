@@ -1,23 +1,26 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import QRCode from 'qrcode.react';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
-
 import ExpandIcon from '@resources/svg/expand.svg';
 import Card from '~/cross-app-components/Card';
 import routes from '~/constants/routes.json';
 import IconButton from '~/cross-app-components/IconButton';
-import DisplayAddress from '~/components/DisplayAddress';
+import DisplayAddress, {
+    AddressDisplayFormat,
+} from '~/components/DisplayAddress';
 
-import { Account, ClassName } from '../../utils/types';
-import CopyButton from '../../components/CopyButton';
+import { Account, ClassName } from '~/utils/types';
+import CopyButton from '~/components/CopyButton';
+import VerifyAddress from './VerifyAddress';
+import DisplayAsQR from '~/components/DisplayAsQR';
 
 import styles from './Accounts.module.scss';
+import CloseButton from '~/cross-app-components/CloseButton';
 
 interface Props extends ClassName {
     account: Account;
-    asCard?: boolean;
+    disableClose?: boolean;
 }
 
 /**
@@ -26,35 +29,52 @@ interface Props extends ClassName {
 export default function ShowAccountAddress({
     className,
     account,
-    asCard = false,
+    disableClose = false,
 }: Props) {
     const dispatch = useDispatch();
-    const Component = asCard ? Card : 'div';
+
+    const display = (
+        <>
+            <DisplayAsQR
+                className={styles.displayAddressQRSmall}
+                value={account.address}
+            />
+            <div className={styles.displayAddress}>
+                <DisplayAddress
+                    className="mH40"
+                    lineClassName="body3"
+                    address={account.address}
+                    format={AddressDisplayFormat.DoubleLine}
+                />
+                <CopyButton
+                    className={styles.displayAddressCopy}
+                    value={account.address}
+                />
+            </div>
+        </>
+    );
 
     return (
-        <Component
+        <Card
             className={clsx(
                 'pH50 pT30',
                 styles.showAddressContainer,
                 className
             )}
         >
+            {disableClose || (
+                <CloseButton
+                    className={styles.showAddressCloseButton}
+                    onClick={() => dispatch(push(routes.ACCOUNTS))}
+                />
+            )}
             <IconButton
                 className={styles.expandButton}
                 onClick={() => dispatch(push(routes.SHOWADDRESS))}
             >
                 <ExpandIcon height="22" />
             </IconButton>
-            <QRCode className="m20" value={account.address} size={200} />
-            <div className="flex">
-                <DisplayAddress
-                    outerClassName="mL20"
-                    lineClassName="body3"
-                    lineLength={25}
-                    address={account.address}
-                />
-                <CopyButton className="mL20" value={account.address} />
-            </div>
-        </Component>
+            <VerifyAddress account={account} display={display} />
+        </Card>
     );
 }

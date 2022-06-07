@@ -1,14 +1,6 @@
 import { ipcRenderer } from 'electron';
-import {
-    updateAvailable,
-    updateDownloaded,
-    updateVerified,
-    updateError,
-} from '~/constants/ipcRendererCommands.json';
-import {
-    triggerAppUpdate,
-    quitAndInstallUpdate,
-} from '~/constants/ipcCommands.json';
+import ipcRendererCommands from '~/constants/ipcRendererCommands.json';
+import ipcCommands from '~/constants/ipcCommands.json';
 import { Listener, AutoUpdateMethods } from './preloadTypes';
 
 const createListener = (channel: string) => (func: Listener) => {
@@ -16,13 +8,16 @@ const createListener = (channel: string) => (func: Listener) => {
     return () => ipcRenderer.off(channel, func);
 };
 
-const onUpdateAvailable = createListener(updateAvailable);
-const onUpdateDownloaded = createListener(updateDownloaded);
-const onVerificationSuccess = createListener(updateVerified);
-const onError = createListener(updateError);
+const onUpdateAvailable = createListener(ipcRendererCommands.updateAvailable);
+const onUpdateDownloaded = createListener(ipcRendererCommands.updateDownloaded);
+const onVerificationSuccess = createListener(
+    ipcRendererCommands.updateVerified
+);
+const onError = createListener(ipcRendererCommands.updateError);
 
-const triggerUpdate = () => ipcRenderer.invoke(triggerAppUpdate);
-const quitAndInstall = () => ipcRenderer.invoke(quitAndInstallUpdate);
+const triggerUpdate = () => ipcRenderer.invoke(ipcCommands.triggerAppUpdate);
+const quitAndInstall = () =>
+    ipcRenderer.invoke(ipcCommands.quitAndInstallUpdate);
 
 const exposedMethods: AutoUpdateMethods = {
     onUpdateAvailable,

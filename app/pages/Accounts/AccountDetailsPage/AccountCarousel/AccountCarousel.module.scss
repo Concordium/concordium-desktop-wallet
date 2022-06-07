@@ -1,0 +1,49 @@
+@import 'config/bundle';
+
+.root {
+    display: grid;
+    grid-template-columns: 60px auto 60px;
+    grid-gap: 15px;
+    margin-left: -75px;
+    margin-right: -75px;
+}
+
+.prev,
+.next {
+    height: $account-balance-height;
+    width: 60px;
+    background: linear-gradient(
+        90deg,
+        rgba(50, 93, 118, 0.38) 0%,
+        rgba(196, 196, 196, 0) 73.55%
+    );
+    border-radius: 10px 0 0 10px;
+
+    &:disabled {
+        opacity: 0;
+    }
+}
+
+.prev {
+    transform: rotate(180deg);
+}
+
+.icon {
+    width: 15px;
+    margin-right: 25px;
+    transform: rotate(180deg);
+    transition: transform $anim-easing $anim-timing;
+
+    path {
+        transition: fill $anim-easing $anim-timing;
+        fill: rgba($color-pale-blue, 0.7);
+    }
+
+    :where(.prev, .next):where(:hover, :focus) & {
+        transform: rotate(180deg) translateX(-3px);
+
+        path {
+            fill: $color-pale-blue;
+        }
+    }
+}

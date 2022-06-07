@@ -1,3 +1,14 @@
+import {
+    BakerPoolPendingChangeReduceBakerCapital,
+    BakerPoolPendingChangeRemovePool,
+    ChainParameters,
+    ConsensusStatus,
+    RewardStatus,
+    StakePendingChange,
+} from '@concordium/node-sdk/lib/src/types';
+import { isStakePendingChangeV0 } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { isRewardStatusV1 } from '@concordium/node-sdk/lib/src/rewardStatusHelpers';
+import { isChainParametersV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import { ensureNumberLength } from './basicHelpers';
 import { TimeStampUnit, YearMonth, YearMonthDate } from './types';
 
@@ -264,3 +275,101 @@ export const isDateEqual = (
 
     return stripTime(left).getTime() === stripTime(right).getTime();
 };
+
+/**
+ * Gets time of the payday after a given time.
+ *
+ * @param time the time for which the succeeding payday is returned
+ * @param nextPayday the next payday in relation to current time
+ * @param rewardPeriodLengthMS the length of a payday in milliseconds
+ */
+export const getSucceedingPayday = (
+    time: Date,
+    nextPayday: Date,
+    rewardPeriodLengthMS: bigint
+): Date => {
+    const timeMS = time.getTime();
+    const npdMS = nextPayday.getTime();
+    const rplMS = Number(rewardPeriodLengthMS);
+
+    if (timeMS < npdMS) {
+        return nextPayday;
+    }
+
+    const periods = Math.ceil((timeMS - npdMS) / rplMS);
+    return new Date(npdMS + periods * rplMS);
+};
+
+function dateFromPendingChangeEffectiveTime(
+    effectiveTime: Date,
+    cs: ConsensusStatus | undefined,
+    rs: RewardStatus | undefined,
+    cp: ChainParameters | undefined
+): Date | undefined {
+    if (cs === undefined || rs === undefined || cp === undefined) {
+        return undefined;
+    }
+
+    if (!isRewardStatusV1(rs) || isChainParametersV0(cp)) {
+        throw new Error(
+            'Not possible to calculate date due to mismatch between reward status, chain parameters, and pending change versions.'
+        );
+    }
+
+    const rewardPeriodLengthMS = cs.epochDuration * cp.rewardPeriodLength;
+
+    return getSucceedingPayday(
+        effectiveTime,
+        rs.nextPaydayTime,
+        rewardPeriodLengthMS
+    );
+}
+
+export function dateFromBakerPoolPendingChange(
+    bakerPoolPendingChange:
+        | BakerPoolPendingChangeReduceBakerCapital
+        | BakerPoolPendingChangeRemovePool,
+    cs: ConsensusStatus | undefined,
+    rs: RewardStatus | undefined,
+    cp: ChainParameters | undefined
+): Date | undefined {
+    return dateFromPendingChangeEffectiveTime(
+        bakerPoolPendingChange.effectiveTime,
+        cs,
+        rs,
+        cp
+    );
+}
+
+export function dateFromStakePendingChange(
+    spc: StakePendingChange,
+    cs: ConsensusStatus,
+    rs: RewardStatus,
+    cp: ChainParameters
+): Date;
+export function dateFromStakePendingChange(
+    spc: StakePendingChange,
+    cs: ConsensusStatus | undefined,
+    rs: RewardStatus | undefined,
+    cp: ChainParameters | undefined
+): Date | undefined;
+export function dateFromStakePendingChange(
+    spc: StakePendingChange,
+    cs: ConsensusStatus | undefined,
+    rs: RewardStatus | undefined,
+    cp: ChainParameters | undefined
+): Date | undefined {
+    if (cs === undefined) {
+        return undefined;
+    }
+
+    if (isStakePendingChangeV0(spc)) {
+        return epochDate(
+            Number(spc.epoch),
+            cs.epochDuration,
+            new Date(cs.currentEraGenesisTime)
+        );
+    }
+
+    return dateFromPendingChangeEffectiveTime(spc.effectiveTime, cs, rs, cp);
+}

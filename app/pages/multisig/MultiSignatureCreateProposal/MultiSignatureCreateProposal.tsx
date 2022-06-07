@@ -17,7 +17,7 @@ import { proposalsSelector } from '~/features/MultiSignatureSlice';
 import { getUpdateQueueTypes } from '~/utils/UpdateInstructionHelper';
 import { parse } from '~/utils/JSONHelper';
 
-import { ensureChainData, ChainData } from '../common/withChainData';
+import { ensureChainData, ChainData } from '~/utils/withChainData';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 import SignTransactionProposal from '../SignTransactionProposal';
 import BuildProposal from './BuildProposal';
@@ -56,7 +56,7 @@ function MultiSignatureCreateProposal({
     >({});
 
     const [proposal, setProposal] = useState<
-        Partial<MultiSignatureTransaction>
+        Omit<MultiSignatureTransaction, 'id'>
     >();
     const dispatch = useDispatch();
 
@@ -82,7 +82,7 @@ function MultiSignatureCreateProposal({
     }
 
     function handleProposal(
-        newProposal: Partial<MultiSignatureTransaction>,
+        newProposal: Omit<MultiSignatureTransaction, 'id'> | undefined,
         newDefaults: FieldValues
     ) {
         setDefaults(newDefaults);
@@ -121,7 +121,7 @@ function MultiSignatureCreateProposal({
                     path={routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION}
                     render={() => (
                         <SignTransactionProposal
-                            proposal={proposal as MultiSignatureTransaction}
+                            proposal={proposal}
                             blockSummary={blockSummary}
                         />
                     )}
@@ -130,8 +130,7 @@ function MultiSignatureCreateProposal({
                     render={() => (
                         <MultiSignatureLayout
                             pageTitle={handler.title}
-                            stepTitle={`Transaction Proposal - ${handler.type}`}
-                            delegateScroll
+                            delegateScroll={isKeyUpdate}
                         >
                             <BuildComponent
                                 type={type}
@@ -150,10 +149,7 @@ function MultiSignatureCreateProposal({
 
 function LoadingComponent() {
     return (
-        <MultiSignatureLayout
-            pageTitle="Create Multisignature Proposal"
-            stepTitle="Transaction Proposal - loading"
-        >
+        <MultiSignatureLayout pageTitle="Create multisignature proposal">
             <Loading text="Fetching information from the node" />
         </MultiSignatureLayout>
     );

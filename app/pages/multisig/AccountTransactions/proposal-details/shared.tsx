@@ -1,9 +1,10 @@
 import clsx from 'clsx';
 import React, { ReactNode } from 'react';
-import { getGTUSymbol } from '~/utils/gtu';
+import { getCcdSymbol } from '~/utils/ccd';
 import { AddressBookEntry, Account } from '~/utils/types';
-import styles from './ProposalDetails.module.scss';
 import DisplayAddress from '~/components/DisplayAddress';
+
+import styles from './ProposalDetails.module.scss';
 
 const placeholder = <p className={styles.placeholder}>To be determined</p>;
 
@@ -14,17 +15,15 @@ export const formatNote = (text: ReactNode) => (
 
 const formatAccount = (account: Account | AddressBookEntry) => (
     <>
-        {formatValue(account.name)}
-        <DisplayAddress
-            outerClassName={styles.note}
-            lineClassName="body4 textFaded"
-            address={account.address}
-        />
-        {'note' in account && formatNote(account.note)}
+        <div className="mB10">
+            {formatValue(account.name)}
+            {'note' in account && formatNote(account.note)}
+        </div>
+        <DisplayAddress className={styles.address} address={account.address} />
     </>
 );
 const formatAmount = (amount: string) =>
-    formatValue(`${getGTUSymbol()} ${amount}`);
+    formatValue(`${getCcdSymbol()}${amount}`);
 const formatEnabled = (enable: boolean) => formatValue(enable ? 'Yes' : 'No');
 
 export type DetailsProps = {
@@ -86,4 +85,8 @@ export function EnabledDetail({
     format = formatEnabled,
 }: DetailProps<boolean>) {
     return <PlainDetail title={title} value={value} format={format} />;
+}
+
+export function TitleDetail({ title, first = false }: DetailProps<never>) {
+    return <p className={clsx(styles.title, first && 'mT0')}>{title}</p>;
 }

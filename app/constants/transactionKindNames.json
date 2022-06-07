@@ -20,5 +20,8 @@
     "blockReward": "Block reward",
     "finalizationReward": "Finalization reward",
     "updateCredentials": "Credentials update",
-    "registerData": "Data registration"
+    "registerData": "Data registration",
+    "configureBaker": "Configure baker",
+    "configureDelegation": "Configure delegation",
+    "paydayAccountReward": "Reward payout"
 }

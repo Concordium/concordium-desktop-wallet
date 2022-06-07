@@ -1,6 +1,5 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import QRCode from 'qrcode.react';
 import ShrinkIcon from '@resources/svg/shrink.svg';
 import { push } from 'connected-react-router';
 import { chosenAccountSelector } from '~/features/AccountSlice';
@@ -8,8 +7,11 @@ import CopyButton from '~/components/CopyButton';
 import PageLayout from '~/components/PageLayout';
 import routes from '~/constants/routes.json';
 import IconButton from '~/cross-app-components/IconButton';
-import AccountPageHeader from './AccountPageHeader';
-import DisplayAddress from '~/components/DisplayAddress';
+import DisplayAddress, {
+    AddressDisplayFormat,
+} from '~/components/DisplayAddress';
+import VerifyAddress from './VerifyAddress';
+import DisplayAsQR from '~/components/DisplayAsQR';
 
 import styles from './Accounts.module.scss';
 
@@ -24,10 +26,27 @@ export default function ShowAccountAddress() {
         return null;
     }
 
+    const display = (
+        <>
+            <DisplayAsQR
+                className={styles.displayAddressQRBig}
+                value={account.address}
+            />
+            <div className="flex alignCenter mBauto">
+                <DisplayAddress
+                    className="body2 mL20"
+                    address={account.address}
+                    format={AddressDisplayFormat.DoubleLine}
+                />
+                <CopyButton className="mL20" value={account.address} />
+            </div>
+        </>
+    );
+
     return (
         <PageLayout>
             <PageLayout.Header>
-                <AccountPageHeader />
+                <h1>Accounts</h1>
             </PageLayout.Header>
             <PageLayout.Container
                 disableBack
@@ -42,15 +61,11 @@ export default function ShowAccountAddress() {
                 </IconButton>
 
                 <h2 className="m0 mBauto">{account.name}</h2>
-                <QRCode className="mB50" size={512} value={account.address} />
-                <div className="flex alignCenter mBauto">
-                    <DisplayAddress
-                        outerClassName="body2 mL20"
-                        lineLength={25}
-                        address={account.address}
-                    />
-                    <CopyButton className="mL20" value={account.address} />
-                </div>
+                <VerifyAddress
+                    account={account}
+                    className="mBauto mTauto"
+                    display={display}
+                />
             </PageLayout.Container>
         </PageLayout>
     );

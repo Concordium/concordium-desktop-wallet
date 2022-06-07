@@ -19,17 +19,22 @@ import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
 import { chooseFileDestination } from '~/utils/FileHelper';
-import DisplayAddress from '~/components/DisplayAddress';
+import DisplayAddress, {
+    AddressDisplayFormat,
+} from '~/components/DisplayAddress';
 import TransactionFilters, {
     TransactionFiltersRef,
 } from '~/components/TransactionFilters';
 import DecryptModal, { DecryptModalInput } from './DecryptModal';
 import MessageModal from '~/components/MessageModal';
 import Columns from '~/components/Columns';
+import Radios from '~/components/Form/Radios';
 
 import styles from './AccountReport.module.scss';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
+import { getCcdSymbol } from '~/utils/ccd';
 import { globalSelector } from '~/features/GlobalSlice';
+import decryptTransactions from '~/utils/decryptTransactions';
 
 const decryptMessage = (name: string) =>
     `'${name}' has encrypted funds. To create a complete account report, we need to decrypt them. Otherwise this account will be skipped.`;
@@ -42,6 +47,12 @@ interface Props {
     location: LocationDescriptorObject<State>;
 }
 
+// unit options for the amounts. the value corresponds to convertToCCD variable.
+export const unitOptions = [
+    { label: getCcdSymbol(), value: true },
+    { label: `micro${getCcdSymbol()}`, value: false },
+];
+
 /**
  * Components to make account reports.
  * Allows the user to enable filters and to choose accounts.
@@ -53,6 +64,9 @@ export default function AccountReport({ location }: Props) {
             'Global must be available before we can make the account report'
         );
     }
+
+    // Default to CCD
+    const [unit, setUnit] = useState(true);
 
     const [showError, setShowError] = useState<ModalErrorInput>({
         show: false,
@@ -138,7 +152,7 @@ export default function AccountReport({ location }: Props) {
                 if (accounts.length > 1) {
                     setShowError({
                         show: true,
-                        header: 'Account Report was not saved.',
+                        header: 'Account report was not saved.',
                         content: 'All chosen accounts have encrypted funds.',
                     });
                 }
@@ -149,12 +163,12 @@ export default function AccountReport({ location }: Props) {
 
             const opts = multipleAccounts
                 ? {
-                      title: 'Save Account Reports',
+                      title: 'Save account reports',
                       defaultPath: 'reports.zip',
                       filters: [{ name: 'zip', extensions: ['zip'] }],
                   }
                 : {
-                      title: 'Save Account Report',
+                      title: 'Save account report',
                       defaultPath: `${accountsToReport[0].name}.csv`,
                       filters: [{ name: 'csv', extensions: ['csv'] }],
                   };
@@ -172,7 +186,9 @@ export default function AccountReport({ location }: Props) {
                         accountsToReport,
                         filters,
                         global,
-                        prfKeyMap
+                        prfKeyMap,
+                        decryptTransactions,
+                        unit
                     );
                 } else {
                     await window.accountReport.single(
@@ -180,22 +196,25 @@ export default function AccountReport({ location }: Props) {
                         accountsToReport[0],
                         filters,
                         global,
-                        prfKeyMap
+                        prfKeyMap,
+                        decryptTransactions,
+                        unit
                     );
                 }
                 setMakingReport(false);
                 return true;
             } catch (e) {
+                window.log.error(e, 'Account report failed');
                 setMakingReport(false);
                 setShowError({
                     show: true,
-                    header: 'Account Report was not saved.',
+                    header: 'Account report was not saved.',
                     content: `Encountered error: ${e.message}`,
                 });
                 return Promise.resolve();
             }
         },
-        [accounts, global]
+        [accounts, global, unit]
     );
 
     // add account to the list of chosen accounts, and exit adding mode.
@@ -221,7 +240,7 @@ export default function AccountReport({ location }: Props) {
             />
             <MessageModal
                 open={makingReport}
-                title={`Generating Report${accounts.length > 1 ? 's' : ''}`}
+                title={`Generating report${accounts.length > 1 ? 's' : ''}`}
                 buttonText="Abort"
                 onClose={() => window.accountReport.abort()}
                 disableClose
@@ -235,7 +254,7 @@ export default function AccountReport({ location }: Props) {
                     className="flexColumn"
                     closeRoute={routes.ACCOUNTS}
                 >
-                    <h2 className={styles.header}>Make Account Report</h2>
+                    <h2 className={styles.header}>Make account report</h2>
                     <div
                         className={clsx(
                             'pT10 flexColumn flexChildFill',
@@ -248,9 +267,16 @@ export default function AccountReport({ location }: Props) {
                             className={styles.heightFull}
                             columnClassName={styles.heightFull}
                         >
-                            <Columns.Column header="Time Period & Filters">
+                            <Columns.Column header="Time period & filters">
                                 <div className={styles.wrapper}>
                                     <TransactionFilters ref={filtersRef} />
+                                    <Radios
+                                        label="Unit for amounts"
+                                        className={styles.unitRadio}
+                                        options={unitOptions}
+                                        value={unit}
+                                        onChange={setUnit}
+                                    />
                                 </div>
                             </Columns.Column>
                             <Columns.Column header="Accounts to include">
@@ -306,10 +332,12 @@ export default function AccountReport({ location }: Props) {
                                                     <div>
                                                         <p>{account.name}</p>
                                                         <DisplayAddress
-                                                            outerClassName={
+                                                            className={
                                                                 styles.address
                                                             }
-                                                            lineLength={25}
+                                                            format={
+                                                                AddressDisplayFormat.DoubleLine
+                                                            }
                                                             address={
                                                                 account.address
                                                             }
@@ -340,7 +368,7 @@ export default function AccountReport({ location }: Props) {
                                                 )
                                             }
                                         >
-                                            Make Account Report
+                                            Make account report
                                         </Button>
                                     </div>
                                 )}

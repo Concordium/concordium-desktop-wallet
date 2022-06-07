@@ -140,7 +140,7 @@ export default function CredentialInformation({ account, accountInfo }: Props) {
                         />
                         <SidedRow
                             className={styles.listElementRow}
-                            left="Date of Creation:"
+                            left="Date of creation:"
                             right={formatDate(c.policy.createdAt)}
                         />
                         <SidedRow

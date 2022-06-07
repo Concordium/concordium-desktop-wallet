@@ -56,7 +56,7 @@ export default function FailedIdentityModal({ identity }: Props) {
             open={modalOpen}
             actions={[
                 {
-                    label: 'Try Again',
+                    label: 'Try again',
                     location: {
                         pathname: routes.IDENTITYISSUANCE,
                         state: {
@@ -68,6 +68,9 @@ export default function FailedIdentityModal({ identity }: Props) {
                 { label: 'Later' },
             ]}
             postAction={async () => {
+                window.log.info(
+                    `User has been warned of failed identity ${identity.id}`
+                );
                 await updateIdentity(identity.id, {
                     status: IdentityStatus.RejectedAndWarned,
                 });

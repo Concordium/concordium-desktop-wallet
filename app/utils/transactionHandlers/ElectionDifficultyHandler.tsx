@@ -20,7 +20,7 @@ import {
 import { serializeElectionDifficulty } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Update Election Difficulty';
+const TYPE = 'Update election difficulty';
 
 type TransactionType = UpdateInstruction<ElectionDifficulty>;
 
@@ -37,7 +37,7 @@ export default class ElectionDifficultyHandler
         { electionDifficulty }: ElectionDifficultyField,
         effectiveTime: bigint,
         expiryTime: bigint
-    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+    ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         if (!blockSummary) {
             return undefined;
         }

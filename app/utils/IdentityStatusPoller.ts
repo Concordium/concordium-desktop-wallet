@@ -18,6 +18,7 @@ import {
 } from '../database/IdentityDao';
 import { loadCredentials } from '~/features/CredentialSlice';
 import { loadAddressBook } from '~/features/AddressBookSlice';
+import { throwLoggedError } from './basicHelpers';
 
 /**
  * Poll the identity provider for an identity until the identity and initial account either
@@ -38,6 +39,9 @@ export async function confirmIdentityAndInitialAccount(
     // The identity provider failed the identity creation request. Clean up the
     // identity and account in the database and refresh the state.
     if (idObjectResponse.error) {
+        window.log.info(
+            `Identity Issuance failed, reason: ${idObjectResponse.error.message}`
+        );
         await rejectIdentityAndInitialAccount(
             identityId,
             idObjectResponse.error.message
@@ -68,6 +72,7 @@ export async function confirmIdentityAndInitialAccount(
         readOnly: true,
     };
 
+    window.log.info(`Identity Issuance Successful`);
     await confirmIdentity(
         identityId,
         JSON.stringify(token.identityObject),
@@ -95,7 +100,7 @@ export async function resumeIdentityStatusPolling(
     const { name: identityName, codeUri: location, id } = identity;
     const initialAccount = await findInitialAccount(identity);
     if (!initialAccount) {
-        throw new Error('Unexpected missing initial account.');
+        throwLoggedError(`Unexpected missing initial account.`);
     }
     const { name: accountName } = initialAccount;
     return confirmIdentityAndInitialAccount(

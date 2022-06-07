@@ -9,6 +9,10 @@
     transition: box-shadow $anim-easing $anim-timing;
 }
 
+.dark {
+    background-color: $color-off-black;
+}
+
 .header {
     margin: 0 -20px;
     border-bottom: 1px solid $color-grey;

@@ -161,7 +161,7 @@ export function max(first: bigint, second: bigint) {
 
 export function isASCII(value: string) {
     // eslint-disable-next-line no-control-regex
-    return /[^\u0000-\u007f]/.test(value);
+    return !/[^\u0000-\u007f]/.test(value);
 }
 
 /**
@@ -174,6 +174,12 @@ export function pipe<A extends any[], B, C>(
     b: (arg: B) => C
 ): (...args: A) => C {
     return (...args) => b(a(...args));
+}
+
+export function throwLoggedError(message: string): never {
+    const error = new Error(message);
+    window.log.error(error);
+    throw error;
 }
 
 /**

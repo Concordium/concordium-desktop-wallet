@@ -17,7 +17,7 @@ import { UpdateInstructionHandler } from '../transactionTypes';
 import UpdateLevel1KeysWithRootKeys from '~/pages/multisig/updates/UpdateGovernanceKeys/UpdateLevel1KeysWithRootKeys';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Update Level 1 Governance Keys using root keys';
+const TYPE = 'Update level 1 governance keys using root keys';
 
 type TransactionType = UpdateInstruction<HigherLevelKeyUpdate>;
 
@@ -34,7 +34,7 @@ export default class UpdateLevel1KeysUsingRootKeysHandler
         higherLevelKeyUpdate: HigherLevelKeyUpdate,
         effectiveTime: bigint,
         expiryTime: bigint
-    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+    ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         if (!blockSummary) {
             return undefined;
         }

@@ -76,6 +76,10 @@ h6,
     font-size: $font-size-body4;
 }
 
+.body5 {
+    font-size: $font-size-body5;
+}
+
 .bodyLight {
     font-weight: $font-weight-light;
 }
@@ -115,6 +119,18 @@ b {
     color: $color-error;
 }
 
+.textWhite {
+    color: $color-off-white;
+}
+
+.textBlue {
+    color: $color-pale-blue;
+}
+
 .textNoWrap {
     white-space: nowrap;
+}
+
+.textBreakAll {
+    word-break: break-all;
 }

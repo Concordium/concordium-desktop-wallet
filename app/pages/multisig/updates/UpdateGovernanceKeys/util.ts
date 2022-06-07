@@ -1,3 +1,4 @@
+import { isAuthorizationsV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import { Authorization, Authorizations } from '../../../../node/NodeApiTypes';
 import {
     AccessStructure,
@@ -49,8 +50,8 @@ export function getCurrentThresholds(
         authorizations.paramGASRewards.threshold
     );
     currentThresholds.set(
-        AccessStructureEnum.bakerStakeThreshold,
-        authorizations.bakerStakeThreshold.threshold
+        AccessStructureEnum.poolParameters,
+        authorizations.poolParameters.threshold
     );
     currentThresholds.set(
         AccessStructureEnum.addAnonymityRevoker,
@@ -60,6 +61,16 @@ export function getCurrentThresholds(
         AccessStructureEnum.addIdentityProvider,
         authorizations.addIdentityProvider.threshold
     );
+    if (isAuthorizationsV1(authorizations)) {
+        currentThresholds.set(
+            AccessStructureEnum.cooldownParameters,
+            authorizations.cooldownParameters.threshold
+        );
+        currentThresholds.set(
+            AccessStructureEnum.timeParameters,
+            authorizations.timeParameters.threshold
+        );
+    }
     return currentThresholds;
 }
 
@@ -184,7 +195,7 @@ export function getAccessStructureTitle(
         case AccessStructureEnum.euroPerEnergy:
             return 'Euro per energy';
         case AccessStructureEnum.microGtuPerEuro:
-            return 'Micro CCD per Euro';
+            return 'Micro CCD per euro';
         case AccessStructureEnum.foundationAccount:
             return 'Foundation account';
         case AccessStructureEnum.mintDistribution:
@@ -193,12 +204,16 @@ export function getAccessStructureTitle(
             return 'Transaction fee distribution';
         case AccessStructureEnum.gasRewards:
             return 'GAS rewards';
-        case AccessStructureEnum.bakerStakeThreshold:
-            return 'Baker stake threshold';
+        case AccessStructureEnum.poolParameters:
+            return 'Pool parameters';
         case AccessStructureEnum.addAnonymityRevoker:
             return 'Add anonymity revoker';
         case AccessStructureEnum.addIdentityProvider:
             return 'Add identity provider';
+        case AccessStructureEnum.cooldownParameters:
+            return 'Cooldown parameters';
+        case AccessStructureEnum.timeParameters:
+            return 'Time parameters';
         default:
             throw new Error(
                 `Unknown access structure type: ${accessStructureType}`
@@ -269,8 +284,8 @@ export function mapCurrentAuthorizationsToUpdate(
             AccessStructureEnum.gasRewards
         ),
         mapAuthorizationToAccessStructure(
-            authorizations.bakerStakeThreshold,
-            AccessStructureEnum.bakerStakeThreshold
+            authorizations.poolParameters,
+            AccessStructureEnum.poolParameters
         ),
         mapAuthorizationToAccessStructure(
             authorizations.addAnonymityRevoker,
@@ -281,6 +296,21 @@ export function mapCurrentAuthorizationsToUpdate(
             AccessStructureEnum.addIdentityProvider
         ),
     ];
+
+    if (isAuthorizationsV1(authorizations)) {
+        accessStructures.push(
+            mapAuthorizationToAccessStructure(
+                authorizations.cooldownParameters,
+                AccessStructureEnum.cooldownParameters
+            )
+        );
+        accessStructures.push(
+            mapAuthorizationToAccessStructure(
+                authorizations.timeParameters,
+                AccessStructureEnum.timeParameters
+            )
+        );
+    }
 
     const update: AuthorizationKeysUpdate = {
         keyUpdateType: type,

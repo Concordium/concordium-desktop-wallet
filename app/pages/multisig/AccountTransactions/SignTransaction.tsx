@@ -116,6 +116,7 @@ export default function SignTransaction({
         }
 
         if (!account) {
+            window.log.error('Unexpected missing account');
             throw new Error('Unexpected missing account');
         }
         let signatures = {};
@@ -134,8 +135,11 @@ export default function SignTransaction({
         );
 
         if (proposal.id === undefined) {
+            window.log.error('Unexpected missing account');
             throw new Error('unexpected missing proposal id');
         }
+
+        window.log.info('Successfully created account transaction proposal.');
 
         // Set the current proposal in the state to the one that was just generated.
         dispatch(addProposal(proposal));

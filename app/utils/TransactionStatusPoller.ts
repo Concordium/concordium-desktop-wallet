@@ -32,6 +32,7 @@ import {
     insertExternalCredentials,
     removeExternalCredentials,
 } from '~/features/CredentialSlice';
+import { throwLoggedError } from './basicHelpers';
 
 /**
  * Given an UpdateAccountCredentials transaction, update the local state
@@ -63,7 +64,9 @@ function ShieldedTransferConsequence(
     transaction: TransferTransaction
 ) {
     if (!transaction.encrypted) {
-        throw new Error('Unexpected missing encrypted information');
+        throwLoggedError(
+            `Unexpected missing encrypted information. Hash: ${transaction.transactionHash}`
+        );
     }
     const { newSelfEncryptedAmount, remainingDecryptedAmount } = parse(
         transaction.encrypted
@@ -127,7 +130,9 @@ export async function getMultiSignatureTransactionStatus(
             break;
         }
         default:
-            throw new Error('Unexpected status was returned by the poller!');
+            throwLoggedError(
+                `Unexpected status was returned by the poller! Status: ${response.status}`
+            );
     }
 
     // Update the proposal and reload state from the database.
@@ -163,7 +168,9 @@ export async function monitorTransactionStatus(
             break;
         }
         default:
-            throw new Error('Unexpected status was returned by the poller!');
+            throwLoggedError(
+                `Unexpected status was returned by the poller! Status: ${response.status}`
+            );
     }
     updateAccountInfoOfAddress(fromAddress, dispatch);
 }

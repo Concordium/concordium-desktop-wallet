@@ -96,13 +96,13 @@ enum Locations {
 const subtitle = (currentLocation: Locations) => {
     switch (currentLocation) {
         case Locations.Name:
-            return 'Choose Account Name';
+            return 'Choose account name';
         case Locations.Context:
-            return 'Input Context file';
+            return 'Input context file';
         case Locations.Create:
             return 'Export keys from ledger';
         case Locations.Confirm:
-            return 'Confirm Details';
+            return 'Confirm details';
         default:
             throw new Error('unknown location');
     }
@@ -189,18 +189,18 @@ function ConfirmAndExport({
                     className={styles.printButton}
                     onPrint={() => setHavePrinted(true)}
                 >
-                    <h1>Genesis Account</h1>
-                    <h3>Account Name</h3>
+                    <h1>Genesis account</h1>
+                    <h3>Account name</h3>
                     <p>{accountName}</p>
-                    <h3>Credential Id</h3>
+                    <h3>Credential ID</h3>
                     <p>{credentialContent.credId}</p>
                     <h3>Public key</h3>
                     <p>{publicKey.verifyKey}</p>
                     <img src={image} alt="" />
                 </PrintButton>
-                <h3>Account Name:</h3>
+                <h3>Account name:</h3>
                 <p>{accountName}</p>
-                <h3>Credential Id: </h3>
+                <h3>Credential ID: </h3>
                 <p>{credentialContent.credId}</p>
                 <h3>Public key: </h3>
                 <p>{publicKey.verifyKey}</p>
@@ -300,7 +300,7 @@ export default function GenesisAccount(): JSX.Element {
     return (
         <PageLayout>
             <PageLayout.Header>
-                <h1>New Account | Genesis Account</h1>
+                <h1>New account | Genesis account</h1>
             </PageLayout.Header>
             <PageLayout.Container className="flexColumn">
                 <h2 className="pT30">{subtitle(currentLocation)}</h2>

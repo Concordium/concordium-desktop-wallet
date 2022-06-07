@@ -1,21 +1,21 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import { autoUpdater, UpdateInfo } from 'electron-updater';
-import log from 'electron-log';
+import ipcRendererCommands from '~/constants/ipcRendererCommands.json';
+import ipcCommands from '~/constants/ipcCommands.json';
 
-import {
+import packageJson from '../../../package.json';
+import appPackageJson from '../../package.json';
+import { getVerificationFunctions, RealUpdateInfo } from './verify';
+
+const {
     updateAvailable,
     updateDownloaded,
     updateVerified,
     updateError,
-} from '~/constants/ipcRendererCommands.json';
-import {
-    triggerAppUpdate,
-    quitAndInstallUpdate,
-} from '~/constants/ipcCommands.json';
-
-import { version } from '../../package.json';
-import { build } from '../../../package.json';
-import { getVerificationFunctions, RealUpdateInfo } from './verify';
+} = ipcRendererCommands;
+const { triggerAppUpdate, quitAndInstallUpdate } = ipcCommands;
+const { build } = packageJson;
+const { version } = appPackageJson;
 
 const updateServer = 'https://update.electronjs.org';
 const updateFeed = `${updateServer}/${build.publish.owner}/${build.publish.repo}/${process.platform}-${process.arch}/${version}/`;
@@ -25,9 +25,6 @@ autoUpdater.setFeedURL({
     url: updateFeed,
 });
 
-log.transports.file.level = 'info';
-
-autoUpdater.logger = log;
 autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = false;
 
@@ -44,22 +41,35 @@ const handleUpdateDownloaded = (mainWindow: BrowserWindow) => async (
         await Promise.all([verifyChecksum(), verifySignature()]);
         mainWindow.webContents.send(updateVerified);
     } catch (e) {
-        log.error('Could not update application due to:', e);
-        mainWindow.webContents.send(updateError, 'Could not apply update.');
+        mainWindow.webContents.send(updateError, 'Could not apply update.', e);
     }
 };
 
 export default function initAutoUpdate(mainWindow: BrowserWindow) {
-    autoUpdater.on('update-available', (info) =>
-        mainWindow.webContents.send(updateAvailable, info)
-    );
-    autoUpdater.on('error', () =>
-        mainWindow.webContents.send(updateError, 'Could not download update.')
-    );
-    autoUpdater.on('update-downloaded', handleUpdateDownloaded(mainWindow));
+    const canAutoUpdate =
+        process.platform === 'win32' ||
+        process.platform === 'darwin' ||
+        process.env.APPIMAGE;
 
-    ipcMain.handle(triggerAppUpdate, () => autoUpdater.downloadUpdate());
-    ipcMain.handle(quitAndInstallUpdate, () => autoUpdater.quitAndInstall());
+    autoUpdater.on('update-available', (info) =>
+        mainWindow.webContents.send(updateAvailable, info, canAutoUpdate)
+    );
+
+    if (canAutoUpdate) {
+        autoUpdater.on('error', (e) =>
+            mainWindow.webContents.send(
+                updateError,
+                'Could not download update.',
+                e
+            )
+        );
+        autoUpdater.on('update-downloaded', handleUpdateDownloaded(mainWindow));
+
+        ipcMain.handle(triggerAppUpdate, () => autoUpdater.downloadUpdate());
+        ipcMain.handle(quitAndInstallUpdate, () =>
+            autoUpdater.quitAndInstall()
+        );
+    }
 
     autoUpdater.checkForUpdates();
 }

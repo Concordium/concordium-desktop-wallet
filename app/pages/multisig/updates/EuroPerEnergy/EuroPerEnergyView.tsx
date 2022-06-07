@@ -4,7 +4,7 @@ import { BlockSummary } from '~/node/NodeApiTypes';
 import { ExchangeRate } from '~/utils/types';
 import { RelativeRateField } from '../../common/RelativeRateField';
 import { fromExchangeRate } from '../../common/RelativeRateField/util';
-import withChainData, { ChainData } from '../../common/withChainData';
+import withChainData, { ChainData } from '~/utils/withChainData';
 import { commonFieldProps, getCurrentValue } from './util';
 
 interface Props extends ChainData {
@@ -24,9 +24,9 @@ export default withChainData(function EuroPerEnergyView({
         return (
             <RelativeRateField
                 {...commonFieldProps}
-                label="Current euro per energy"
+                label="Current euro per energy:"
                 value={fromExchangeRate(currentValue)}
-                disabled
+                display
             />
         );
     }
@@ -40,9 +40,9 @@ export default withChainData(function EuroPerEnergyView({
             )}
             <RelativeRateField
                 {...commonFieldProps}
-                label="New euro per energy rate"
+                label="New euro per energy rate:"
                 value={fromExchangeRate(exchangeRate)}
-                disabled
+                display
             />
         </>
     );

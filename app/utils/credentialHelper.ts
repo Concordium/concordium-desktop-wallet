@@ -18,6 +18,15 @@ import {
     CommitmentsRandomness,
 } from './types';
 
+export async function hasFirstCredential(
+    accountAddress: string
+): Promise<boolean> {
+    const credentialsOfAccount = await getCredentialsOfAccount(accountAddress);
+    return credentialsOfAccount.some(
+        (credential) => credential.credentialIndex === 0
+    );
+}
+
 /**
  * Finds the unique, deployed, credential with the given account address and walletId.
  *

@@ -85,6 +85,7 @@ async function performImport(
             addMessage
         );
     } catch (e) {
+        window.log.error(e, 'Import of wallet failed');
         throw new Error(
             'The imported data is not compatible with existing data.'
         );
@@ -98,6 +99,7 @@ async function performImport(
             addAddressBookMessage
         );
     } catch (e) {
+        window.log.error(e, 'Import of Address book failed');
         throw new Error(
             'The imported address book is not compatible with existing address book.'
         );
@@ -110,6 +112,8 @@ async function performImport(
             existingData.externalCredentials
         );
     }
+
+    window.log.info('Succesfully imported backup.');
 
     await loadIdentities(dispatch);
     await loadAccounts(dispatch);
@@ -246,7 +250,7 @@ export default function PerformImport({ location }: Props) {
             />
             <PageLayout>
                 <PageLayout.Header>
-                    <h1>Export and Import</h1>
+                    <h1>Export/Import</h1>
                 </PageLayout.Header>
                 <PageLayout.Container disableBack>
                     <Columns divider columnScroll>

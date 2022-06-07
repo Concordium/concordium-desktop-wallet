@@ -48,16 +48,16 @@ import PrintButton from '~/components/PrintButton';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 import { insert } from '~/database/DecryptedAmountsDao';
+import { getKeyExportType } from '~/utils/identityHelpers';
+import { FinalPageLocationState } from '~/components/Transfers/FinalPage';
 
 import styles from './SubmitTransaction.module.scss';
 
 export interface SubmitTransactionLocationState<
-    CancelledState = Record<string, unknown>,
-    ConfirmedState = Record<string, unknown>
+    ConfirmedState = FinalPageLocationState
 > {
     transaction: string;
     account: Account;
-    cancelled: LocationDescriptorObject<CancelledState>;
     confirmed: LocationDescriptorObject<ConfirmedState>;
 }
 
@@ -77,7 +77,8 @@ async function attachCompletedPayload(
     const getPrfKey = async () => {
         setMessage('Please accept decrypt on device');
         const prfKeySeed = await ledger.getPrfKeyDecrypt(
-            credential.identityNumber
+            credential.identityNumber,
+            getKeyExportType(identityVersion)
         );
         setMessage('Please wait');
         return prfKeySeed.toString('hex');
@@ -164,12 +165,7 @@ export default function SubmitTransaction({ location }: Props) {
         return <Redirect to={routes.ACCOUNTS} />;
     }
 
-    const {
-        account,
-        transaction: transactionJSON,
-        cancelled,
-        confirmed,
-    } = location.state;
+    const { account, transaction: transactionJSON, confirmed } = location.state;
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const identity = useSelector(specificIdentitySelector(account.identityId));
@@ -241,7 +237,16 @@ export default function SubmitTransaction({ location }: Props) {
             signatureStructured
         );
         const transactionHash = transactionHashBuffer.toString('hex');
-        const response = await sendTransaction(serializedTransaction);
+        let response;
+        try {
+            response = await sendTransaction(serializedTransaction);
+        } catch (e) {
+            window.log.error(
+                e,
+                `Sending transaction of type ${transaction.transactionKind}, failed`
+            );
+            throw e;
+        }
 
         if (response) {
             try {
@@ -278,6 +283,7 @@ export default function SubmitTransaction({ location }: Props) {
                 dispatch(push(confirmedWithHash));
             }
         } else {
+            window.log.warn('Sent transaction was rejected by the node');
             setRejected(true);
         }
     }
@@ -290,11 +296,13 @@ export default function SubmitTransaction({ location }: Props) {
     return (
         <PageLayout>
             <PageLayout.Header>
-                <h1>Accounts | Submit Transaction</h1>
+                <h1>
+                    <span className="pageTitlePrefix">Submit transaction</span>
+                    {handler.type}
+                </h1>
             </PageLayout.Header>
             <PageLayout.Container
-                closeRoute={cancelled}
-                backRoute={cancelled}
+                closeRoute={routes.ACCOUNTS}
                 padding="vertical"
             >
                 <SimpleErrorModal
@@ -326,7 +334,7 @@ export default function SubmitTransaction({ location }: Props) {
                         }
                         className={styles.summary}
                     >
-                        <div className="mT40">
+                        <div className={styles.summaryContent}>
                             <TransactionDetails transaction={transaction} />
                         </div>
                     </Card>

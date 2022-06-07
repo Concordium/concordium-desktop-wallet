@@ -1,16 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
 import {
     getDefaultExpiry,
     TimeConstants,
     secondsSinceUnixEpoch,
 } from '~/utils/timeHelpers';
-import { ChainData } from '../common/withChainData';
+import { ChainData } from '~/utils/withChainData';
 import { UpdateType, MultiSignatureTransaction } from '~/utils/types';
 import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
-import styles from './MultiSignatureCreateProposal.module.scss';
 import Form from '~/components/Form';
 import { futureDate, maxDate } from '~/components/Form/util/validation';
+
+import styles from './MultiSignatureCreateProposal.module.scss';
 
 export interface MultiSignatureCreateProposalForm {
     effectiveTime: Date;
@@ -21,7 +22,7 @@ interface Props extends Required<ChainData> {
     defaults: FieldValues;
     type: UpdateType;
     onFinish: (
-        proposal: Partial<MultiSignatureTransaction>,
+        proposal: Omit<MultiSignatureTransaction, 'id'> | undefined,
         defaults: FieldValues
     ) => void;
 }
@@ -33,12 +34,22 @@ export default function BuildProposal({
     onFinish,
     defaults,
 }: Props) {
+    const defaultEffective =
+        defaults.effectiveTime ||
+        new Date(getDefaultExpiry().getTime() + 5 * TimeConstants.Minute);
     const handler = findUpdateInstructionHandler(type);
     const form = useForm<FieldValues & MultiSignatureCreateProposalForm>({
         mode: 'onTouched',
     });
-    const { effectiveTime: effective } = form.watch(['effectiveTime']);
+    const { effectiveTime: effective = defaultEffective } = form.watch([
+        'effectiveTime',
+    ]);
     const UpdateComponent = handler.update;
+
+    useEffect(() => {
+        form.trigger('expiryTime');
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [effective]);
 
     async function handleProposalSubmit(
         fields: FieldValues & MultiSignatureCreateProposalForm
@@ -82,14 +93,8 @@ export default function BuildProposal({
                         <Form.DatePicker
                             className="body2 mV40"
                             name="effectiveTime"
-                            label="Effective Time"
-                            defaultValue={
-                                defaults.effectiveTime ||
-                                new Date(
-                                    getDefaultExpiry().getTime() +
-                                        5 * TimeConstants.Minute
-                                )
-                            }
+                            label="Effective time"
+                            defaultValue={defaultEffective}
                             rules={{
                                 required: 'Effective time is required',
                                 validate: futureDate(
@@ -101,27 +106,24 @@ export default function BuildProposal({
                         <Form.DatePicker
                             className="body2 mV40"
                             name="expiryTime"
-                            label="Transaction Expiry Time"
+                            label="Transaction expiry time"
                             defaultValue={
                                 defaults.expiryTime || getDefaultExpiry()
                             }
                             rules={{
                                 required: 'Transaction expiry time is required',
                                 validate: {
-                                    ...(effective !== undefined
-                                        ? {
-                                              beforeEffective: maxDate(
-                                                  effective,
-                                                  'Transaction expiry time must be before the effective time'
-                                              ),
-                                          }
-                                        : undefined),
+                                    beforeEffective: maxDate(
+                                        effective,
+                                        'Transaction expiry time must be before the effective time'
+                                    ),
                                     future: futureDate(
                                         'Transaction expiry time must be in the future'
                                     ),
                                 },
                             }}
-                            maxDate={effective ?? new Date()}
+                            minDate={new Date()}
+                            maxDate={effective}
                         />
                     </>
                 </div>

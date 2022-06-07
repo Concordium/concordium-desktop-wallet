@@ -18,7 +18,7 @@ import {
 import { serializeAddIdentityProvider } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Add Identity Provider';
+const TYPE = 'Add identity provider';
 
 type TransactionType = UpdateInstruction<AddIdentityProvider>;
 
@@ -42,7 +42,7 @@ export default class AddIdentityProviderHandler
         }: AddIdentityProviderFields,
         effectiveTime: bigint,
         expiryTime: bigint
-    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+    ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         if (!blockSummary) {
             return undefined;
         }

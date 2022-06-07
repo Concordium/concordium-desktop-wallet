@@ -4,13 +4,14 @@ import { Story, Meta } from '@storybook/react/types-6-0';
 import Form, { FormProps } from '../Form';
 import { futureDate } from '../util/validation';
 import { maxFileSizeKb } from '../FileInput/validation';
-import { getGTUSymbol } from '~/utils/gtu';
+import { getCcdSymbol } from '~/utils/ccd';
 
 export const {
     Checkbox,
     Input,
     Submit,
     Switch,
+    Radios,
     TextArea,
     File,
     InlineNumber,
@@ -34,6 +35,7 @@ export const subcomponents: Meta['subcomponents'] = {
     'Form.TextArea': TextArea,
     'Form.Checkbox': Checkbox,
     'Form.Switch': Switch,
+    'Form.Radios': Radios,
     'Form.InlineNumber': InlineNumber,
     'Form.File': File,
     'Form.DatePicker': DatePicker,
@@ -93,7 +95,7 @@ export const ValidationTemplate: Story<FormProps> = (args) => (
             }}
         />
         <div>
-            Please send {getGTUSymbol()}
+            Please send {getCcdSymbol()}
             <Form.InlineNumber
                 name="gtuAmount"
                 rules={{ required: true, min: 0 }}
@@ -106,6 +108,15 @@ export const ValidationTemplate: Story<FormProps> = (args) => (
         >
             Agree to terms
         </Form.Checkbox>
+        <Form.Radios
+            name="radio"
+            options={[
+                { value: 'first', label: 'First' },
+                { value: 'second', label: 'Second' },
+                { value: 'third', label: 'Third' },
+            ]}
+            rules={{ required: 'You must select an option' }}
+        />
         <Form.Submit>Submit</Form.Submit>
     </Form>
 );
@@ -128,9 +139,17 @@ export const AllFieldsTemplate: Story<FormProps> = (args) => (
         >
             Agree to terms
         </Form.Checkbox>
+        <Form.Radios
+            name="radio"
+            options={[
+                { value: 'first', label: 'First' },
+                { value: 'second', label: 'Second' },
+                { value: 'third', label: 'Third' },
+            ]}
+        />
         <Form.Switch name="setting">Enable setting</Form.Switch>
         <div>
-            Please send {getGTUSymbol()}
+            Please send {getCcdSymbol()}
             <Form.InlineNumber name="gtuAmount" /> to John.
         </div>
         <Form.Submit>Submit</Form.Submit>

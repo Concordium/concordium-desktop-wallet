@@ -11,6 +11,8 @@ import {
     getAnonymityRevokers,
     getPeerList,
     getTransactionStatus,
+    getPoolStatus,
+    getRewardStatus,
 } from './nodeRequests';
 import { PeerElement } from '../proto/concordium_p2p_rpc_pb';
 import {
@@ -53,15 +55,36 @@ export async function fetchLastFinalizedBlockSummary() {
     };
 }
 
-export async function fetchLastFinalizedIdentityProviders() {
-    const blockHash = await getlastFinalizedBlockHash();
-    return getIdentityProviders(blockHash);
-}
+/**
+ * Takes a function expecting a blockHash as the first argument, and returns a new function with the hash of the last block applied to it.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const applyLastBlockHash = <A extends any[], R>(
+    fun: (hash: string, ...args: A) => Promise<R>
+): ((...args: A) => Promise<R>) => async (...args) =>
+    fun(await getlastFinalizedBlockHash(), ...args);
 
-export async function fetchLastFinalizedAnonymityRevokers() {
-    const blockHash = await getlastFinalizedBlockHash();
-    return getAnonymityRevokers(blockHash);
-}
+/**
+ * Gets reward status object from newest block.
+ *
+ * @throws if invalid block hash is given.
+ */
+export const getRewardStatusLatest = applyLastBlockHash(getRewardStatus);
+
+/**
+ * Gets pool status for baker ID.
+ *
+ * @throws if no baker is found with supplied baker ID or if invalid block hash given.
+ */
+export const getPoolStatusLatest = applyLastBlockHash(getPoolStatus);
+
+export const fetchLastFinalizedIdentityProviders = applyLastBlockHash(
+    getIdentityProviders
+);
+
+export const fetchLastFinalizedAnonymityRevokers = applyLastBlockHash(
+    getAnonymityRevokers
+);
 
 export async function fetchGlobal(specificBlockHash?: string): Promise<Global> {
     let blockHash = specificBlockHash;

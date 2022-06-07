@@ -1,9 +1,10 @@
 import React from 'react';
 import clsx from 'clsx';
-import styles from './DisplayEstimatedFee.module.scss';
-import { displayAsGTU } from '~/utils/gtu';
+import { displayAsCcd } from '~/utils/ccd';
 import { Fraction } from '~/utils/types';
 import { collapseFraction } from '~/utils/basicHelpers';
+
+import styles from './DisplayEstimatedFee.module.scss';
 
 interface Props {
     estimatedFee: Fraction | undefined;
@@ -18,9 +19,13 @@ export default function DisplayEstimatedFee({
 }: Props) {
     let fee;
     if (estimatedFee) {
-        fee = displayAsGTU(collapseFraction(estimatedFee));
+        fee = displayAsCcd(collapseFraction(estimatedFee));
     } else {
         fee = 'To be determined';
     }
-    return <p className={clsx(styles.root, className)}>Estimated fee: {fee}</p>;
+    return (
+        <p className={clsx(styles.root, 'mono', className)}>
+            Estimated fee: {fee}
+        </p>
+    );
 }

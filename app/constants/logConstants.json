@@ -1,0 +1,6 @@
+{
+    "fileName": "info.log",
+    "extraFileName": "info1.log",
+    "maxsize": 50000000,
+    "maxFiles": 2
+}

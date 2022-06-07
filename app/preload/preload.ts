@@ -1,16 +1,12 @@
-import { ipcRenderer, contextBridge, Rectangle } from 'electron';
+import {
+    ipcRenderer,
+    contextBridge,
+    Rectangle,
+    MessageBoxOptions,
+} from 'electron';
 import EventEmitter from 'events';
-import {
-    openRoute,
-    readyToShow,
-    didFinishLoad,
-    logFromMain,
-} from '~/constants/ipcRendererCommands.json';
-import {
-    onAwaitVerificationKey,
-    onVerificationKeysConfirmed,
-    listenChannel,
-} from '~/constants/ledgerIpcCommands.json';
+import ipcRendererCommands from '~/constants/ipcRendererCommands.json';
+import ledgerIpcCommands from '~/constants/ledgerIpcCommands.json';
 import initializeGrpcMethods from './grpc';
 import initializeClipboardMethods from './clipboard';
 import initializeFilesMethods from './files';
@@ -29,6 +25,7 @@ import initializeDatabasePreferencesMethods from './database/preferencesDao';
 import initializeDatabaseSettingsMethods from './database/settingsDao';
 import initializeDatabaseTransactionsMethods from './database/transactionsDao';
 import initializeDatabaseWalletMethods from './database/walletDao';
+import initializeLoggingMethods from './logging';
 import initializeDatabaseDecryptedAmountMethods from './database/decryptedAmountsDao';
 import autoUpdateMethods from './autoUpdate';
 import accountReportMethods from './accountReport';
@@ -60,34 +57,44 @@ const Exposed: EqualRecord<WindowFunctions> = {
     openUrl: 'openUrl',
     removeAllListeners: 'removeAllListeners',
     view: 'view',
+    log: 'log',
     autoUpdate: 'autoUpdate',
     accountReport: 'accountReport',
     platform: 'platform',
+    messageBox: 'messageBox',
 };
 
 const eventEmitter = new EventEmitter();
 
 const listenImpl: Listen = {
-    openRoute: (func) => ipcRenderer.on(openRoute, func),
-    readyToShow: (func) => ipcRenderer.on(readyToShow, func),
-    didFinishLoad: (func) => ipcRenderer.on(didFinishLoad, func),
-    ledgerChannel: (func) => eventEmitter.on(listenChannel, func),
-    logFromMain: (func) => ipcRenderer.on(logFromMain, func),
+    openRoute: (func) => ipcRenderer.on(ipcRendererCommands.openRoute, func),
+    readyToShow: (func) =>
+        ipcRenderer.on(ipcRendererCommands.readyToShow, func),
+    didFinishLoad: (func) =>
+        ipcRenderer.on(ipcRendererCommands.didFinishLoad, func),
+    ledgerChannel: (func) =>
+        eventEmitter.on(ledgerIpcCommands.listenChannel, func),
+    logFromMain: (func) =>
+        ipcRenderer.on(ipcRendererCommands.logFromMain, func),
 };
 
 const removeListener: Listen = {
-    openRoute: (func) => ipcRenderer.off(openRoute, func),
-    readyToShow: (func) => ipcRenderer.off(readyToShow, func),
-    didFinishLoad: (func) => ipcRenderer.off(didFinishLoad, func),
-    ledgerChannel: (func) => eventEmitter.off(listenChannel, func),
-    logFromMain: (func) => ipcRenderer.off(logFromMain, func),
+    openRoute: (func) => ipcRenderer.off(ipcRendererCommands.openRoute, func),
+    readyToShow: (func) =>
+        ipcRenderer.off(ipcRendererCommands.readyToShow, func),
+    didFinishLoad: (func) =>
+        ipcRenderer.off(ipcRendererCommands.didFinishLoad, func),
+    ledgerChannel: (func) =>
+        eventEmitter.off(ledgerIpcCommands.listenChannel, func),
+    logFromMain: (func) =>
+        ipcRenderer.off(ipcRendererCommands.logFromMain, func),
 };
 
 const onceImpl: Once = {
     onAwaitVerificationKey: (func) =>
-        eventEmitter.once(onAwaitVerificationKey, func),
+        eventEmitter.once(ledgerIpcCommands.onAwaitVerificationKey, func),
     onVerificationKeysConfirmed: (func) =>
-        eventEmitter.once(onVerificationKeysConfirmed, func),
+        eventEmitter.once(ledgerIpcCommands.onVerificationKeysConfirmed, func),
 };
 
 const browserViewImpl: BrowserViewMethods = {
@@ -128,6 +135,11 @@ contextBridge.exposeInMainWorld(
     initializeLedgerMethods(eventEmitter)
 );
 contextBridge.exposeInMainWorld(Exposed.http, initializeHttpMethods);
+contextBridge.exposeInMainWorld(Exposed.messageBox, (opts: MessageBoxOptions) =>
+    ipcRenderer.invoke(ipcCommands.messageBox, opts)
+);
+
+contextBridge.exposeInMainWorld(Exposed.log, initializeLoggingMethods);
 
 // Gather all database relevant functions in the same subdomain
 const databaseMethods: Database = {

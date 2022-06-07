@@ -9,7 +9,7 @@ import { useIdentityProviders } from '~/utils/dataHooks';
 import {
     lengthRule,
     validateHex,
-    mustBeANumber,
+    mustBeAnInteger,
     requiredMessage,
     pasteHere,
     enterHere,
@@ -36,9 +36,9 @@ export const fieldDisplays = {
     name: 'Name',
     url: 'URL',
     description: 'Description',
-    ipIdentity: 'Identity Provider',
-    ipVerifyKey: 'Verify Key',
-    ipCdiVerifyKey: 'CDI Verify Key:',
+    ipIdentity: 'Identity provider',
+    ipVerifyKey: 'Verify key',
+    ipCdiVerifyKey: 'CDI verify key',
 };
 
 const cdiKeyLength = 64;
@@ -53,10 +53,12 @@ export default function CreateAddIdentityProvider({
     const identityProviders = useIdentityProviders();
     const ipIdentityMustBeUnique = useCallback<Validate>(
         (v) =>
-            !identityProviders
-                .map((provider) => provider.ipIdentity.toString())
-                .includes(v) ||
-            `This ${fieldDisplays.ipIdentity} is already in use`,
+            identityProviders
+                ? !identityProviders
+                      .map((provider) => provider.ipIdentity.toString())
+                      .includes(v) ||
+                  `This ${fieldDisplays.ipIdentity} is already in use`
+                : 'Identity providers have not been loaded yet',
         [identityProviders]
     );
 
@@ -65,7 +67,7 @@ export default function CreateAddIdentityProvider({
     return (
         <>
             <Form.TextArea
-                className="body1"
+                className="body2"
                 name={fieldNames.name}
                 label={fieldDisplays.name}
                 defaultValue={defaults.name || undefined}
@@ -73,7 +75,7 @@ export default function CreateAddIdentityProvider({
                 rules={{ required: requiredMessage(fieldDisplays.name) }}
             />
             <Form.Input
-                className="body1"
+                className="body2"
                 name={fieldNames.url}
                 defaultValue={defaults.url || undefined}
                 label={fieldDisplays.url}
@@ -81,14 +83,14 @@ export default function CreateAddIdentityProvider({
                 rules={{ required: requiredMessage(fieldDisplays.url) }}
             />
             <Form.TextArea
-                className="body1"
+                className="body2"
                 name={fieldNames.description}
                 defaultValue={defaults.description || undefined}
                 label={fieldDisplays.description}
                 placeholder={enterHere(fieldDisplays.description)}
             />
             <Form.Input
-                className="body1"
+                className="body2"
                 name={fieldNames.ipIdentity}
                 defaultValue={defaults.ipIdentity || undefined}
                 label={fieldDisplays.ipIdentity}
@@ -96,7 +98,7 @@ export default function CreateAddIdentityProvider({
                 rules={{
                     required: requiredMessage(fieldDisplays.ipIdentity),
                     validate: {
-                        mustBeANumber,
+                        mustBeAnInteger,
                         ipIdentityMustBeUnique,
                     },
                 }}
@@ -126,13 +128,13 @@ export default function CreateAddIdentityProvider({
                 }}
             />
             {ipVerifyKeyHash && (
-                <div className="body1">
+                <div className="body2">
                     <h5 className="mB0">{fieldDisplays.ipVerifyKey} Hash</h5>
                     {ipVerifyKeyHash}
                 </div>
             )}
             <Form.TextArea
-                className="body1"
+                className="body2"
                 name={fieldNames.ipCdiVerifyKey}
                 defaultValue={defaults.ipCdiVerifyKey || undefined}
                 label={fieldDisplays.ipCdiVerifyKey}

@@ -19,7 +19,7 @@ import {
 import { serializeExchangeRate } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Update Micro CCD Per Euro';
+const TYPE = 'Update micro CCD per euro';
 
 type TransactionType = UpdateInstruction<ExchangeRate>;
 
@@ -36,7 +36,7 @@ export default class MicroGtuPerEuroHandler
         { microGtuPerEuroRate }: UpdateMicroGtuPerEuroRateFields,
         effectiveTime: bigint,
         expiryTime: bigint
-    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+    ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         if (!blockSummary) {
             return undefined;
         }

@@ -5,7 +5,7 @@ import DoubleCheckmarkIcon from '@resources/svg/double-grey-checkmark.svg';
 import CheckmarkIcon from '@resources/svg/grey-checkmark.svg';
 import Warning from '@resources/svg/warning.svg';
 import { dateFromTimeStamp, parseTime } from '~/utils/timeHelpers';
-import { displayAsGTU } from '~/utils/gtu';
+import { displayAsCcd } from '~/utils/ccd';
 
 import {
     TransferTransaction,
@@ -86,8 +86,8 @@ function getName(
 
 function buildOutgoingAmountStrings(subtotal: bigint, fee: bigint) {
     return {
-        amount: `${displayAsGTU(-(subtotal + fee))}`,
-        amountFormula: `${displayAsGTU(BigInt(subtotal))} + ${displayAsGTU(
+        amount: `${displayAsCcd(-(subtotal + fee))}`,
+        amountFormula: `${displayAsCcd(BigInt(subtotal))} + ${displayAsCcd(
             fee
         )} Fee`,
     };
@@ -95,15 +95,15 @@ function buildOutgoingAmountStrings(subtotal: bigint, fee: bigint) {
 
 function buildCostString(fee: bigint) {
     return {
-        amount: `${displayAsGTU(-fee)}`,
-        amountFormula: `${displayAsGTU(fee)} Fee`,
+        amount: `${displayAsCcd(-fee)}`,
+        amountFormula: `${displayAsCcd(fee)} Fee`,
     };
 }
 
 function buildCostFreeAmountString(amount: bigint, flipSign = false) {
     const displayAmount = flipSign ? -amount : amount;
     return {
-        amount: `${displayAsGTU(displayAmount)}`,
+        amount: `${displayAsCcd(displayAmount)}`,
         amountFormula: '',
     };
 }
@@ -153,7 +153,7 @@ function parseAmount(transaction: TransferTransaction, isOutgoing: boolean) {
                 ].includes(transaction.transactionKind)
             ) {
                 return {
-                    amount: `${displayAsGTU(-cost)}`,
+                    amount: `${displayAsCcd(-cost)}`,
                     amountFormula: `Shielded transaction fee`,
                 };
             }
@@ -223,6 +223,9 @@ function statusSymbol(status: TransactionStatus) {
     }
 }
 
+/**
+ * Displays the memo, either partially or fully or message if absent.
+ */
 function showMemo(
     memo: string | undefined,
     showFullMemo: boolean,
@@ -239,7 +242,7 @@ function showMemo(
     ) {
         // If we are fully showing the memo, and the type is one that has a memo version, but there is no memo:
         return (
-            <i className="body4 m0 textFaded">
+            <i className="body5 m0 textFaded">
                 The transaction contains no memo
             </i>
         );
@@ -250,7 +253,7 @@ function showMemo(
     return (
         <pre
             className={clsx(
-                'body4 m0 textFaded',
+                'body5 m0 textFaded',
                 showFullMemo && styles.fullMemo,
                 showFullMemo || styles.lineClamp
             )}
@@ -347,7 +350,7 @@ function TransactionListElement({
                 }
             />
             <SidedRow
-                className="body4 textFaded"
+                className="body5 textFaded"
                 left={
                     <>
                         {time} {statusSymbol(transaction.status)}

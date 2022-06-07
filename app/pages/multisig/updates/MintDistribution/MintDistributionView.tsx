@@ -1,9 +1,9 @@
 import React from 'react';
+import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import { MintDistribution } from '~/utils/types';
 import Loading from '~/cross-app-components/Loading';
-import withChainData, { ChainData } from '../../common/withChainData';
+import withChainData, { ChainData } from '~/utils/withChainData';
 import {
-    getCurrentValue,
     getSlotsPerYear,
     rewardDistributionLabels,
     toRewardDistributionValue,
@@ -12,7 +12,9 @@ import {
     RewardDistribution,
     RewardDistributionValue,
 } from '../../common/RewardDistribution';
-import MintRateInput from './MintRateInput';
+import MintRateInput from '../common/MintRateInput';
+import Label from '~/components/Label';
+import { stringifyMintRate } from '~/utils/mintDistributionHelpers';
 
 interface Props extends ChainData {
     mintDistribution: MintDistribution;
@@ -29,22 +31,20 @@ export default withChainData(function MintDistributionView({
     if (!consensusStatus || !blockSummary) {
         return <Loading />;
     }
+    if (!isBlockSummaryV0(blockSummary) && mintDistribution.version === 0) {
+        throw new Error(
+            'Viewing mint distribution update version 0, which is outdated.'
+        );
+    }
+
     const slotsPerYear = getSlotsPerYear(consensusStatus);
 
-    const {
-        mintPerSlot: currentMintPerSlot,
-        ...currentRewardDistribution
-    } = getCurrentValue(blockSummary);
     const currentDistribitionRatio: RewardDistributionValue = toRewardDistributionValue(
-        currentRewardDistribution
+        blockSummary.updates.chainParameters.rewardParameters.mintDistribution
     );
 
-    const {
-        mintPerSlot: newMintRate,
-        bakingReward,
-        finalizationReward,
-    } = mintDistribution;
-    const newMintPerSlot = `${newMintRate.mantissa}e-${newMintRate.exponent}`;
+    const { bakingReward, finalizationReward } = mintDistribution;
+    // TODO: const newMintPerSlot = `${newMintRate.mantissa}e-${newMintRate.exponent}`;
     const newDistribitionRatio: RewardDistributionValue = {
         first: bakingReward,
         second: finalizationReward,
@@ -53,13 +53,15 @@ export default withChainData(function MintDistributionView({
     return (
         <>
             <div>
-                <h5>Current Mint Distribution</h5>
-                <MintRateInput
-                    value={currentMintPerSlot.toString()}
-                    slotsPerYear={slotsPerYear}
-                    disabled
-                    className="mB20"
-                />
+                <Label className="mB5">Current mint distribution:</Label>
+                {!isBlockSummaryV0(blockSummary) || (
+                    <MintRateInput
+                        value={blockSummary.updates.chainParameters.rewardParameters.mintDistribution.mintPerSlot.toString()}
+                        paydaysPerYear={slotsPerYear}
+                        disabled
+                        className="mB20"
+                    />
+                )}
                 <RewardDistribution
                     labels={rewardDistributionLabels}
                     value={currentDistribitionRatio}
@@ -67,13 +69,15 @@ export default withChainData(function MintDistributionView({
                 />
             </div>
             <div>
-                <h5>New Mint Distribution</h5>
-                <MintRateInput
-                    value={newMintPerSlot.toString()}
-                    slotsPerYear={slotsPerYear}
-                    disabled
-                    className="mB20"
-                />
+                <Label className="mB5">New mint distribution:</Label>
+                {mintDistribution.version === 0 && (
+                    <MintRateInput
+                        value={stringifyMintRate(mintDistribution.mintPerSlot)}
+                        paydaysPerYear={slotsPerYear}
+                        disabled
+                        className="mB20"
+                    />
+                )}
                 <RewardDistribution
                     labels={rewardDistributionLabels}
                     value={newDistribitionRatio}

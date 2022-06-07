@@ -1,3 +1,11 @@
 svg:where(:not([fill])) {
     fill: $color-off-black;
 }
+
+.svgBlue {
+    &,
+    path,
+    rect {
+        fill: $color-pale-blue;
+    }
+}

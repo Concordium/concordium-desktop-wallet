@@ -13,6 +13,8 @@ import { AccountForm, CredentialBlob, fieldNames } from '../types';
 import { CreationKeys } from '~/utils/types';
 import errorMessages from '~/constants/errorMessages.json';
 import SimpleLedgerWithCreationKeys from '~/components/ledger/SimpleLedgerWithCreationKeys';
+import { throwLoggedError } from '~/utils/basicHelpers';
+import { getKeyExportType } from '~/utils/identityHelpers';
 
 import generalStyles from '../GenerateCredential.module.scss';
 import splitViewStyles from '../SplitViewRouter/SplitViewRouter.module.scss';
@@ -49,13 +51,16 @@ export default function SignCredential({ onSigned }: Props): JSX.Element {
     const [credentialNumber, setCredentialNumber] = useState<number>();
     useEffect(() => {
         if (identity?.id === undefined) {
-            throw new Error(
+            throwLoggedError(
                 'An identity has to be supplied. This is an internal error.'
             );
         }
         getNextCredentialNumber(identity.id)
             .then(setCredentialNumber)
             .catch(() => {
+                window.log.error(
+                    'getNextCredentialNumber call to database failed'
+                );
                 throw new Error('Unable to read from database.');
             });
     }, [identity?.id]);
@@ -68,46 +73,45 @@ export default function SignCredential({ onSigned }: Props): JSX.Element {
             ) => {
                 setMessage('Please wait');
                 if (!credentialNumber) {
-                    throw new Error(
+                    throwLoggedError(
                         'The credentialNumber has to be supplied. This is an internal error.'
                     );
-                }
-                if (!identity) {
-                    throw new Error(
+                } else if (!identity) {
+                    throwLoggedError(
                         'An identity has to be supplied. This is an internal error.'
                     );
                 } else if (!address) {
-                    throw new Error(
+                    throwLoggedError(
                         'An account adress has to be supplied. This is an internal error.'
                     );
                 } else if (!global) {
-                    throw new Error(errorMessages.missingGlobal);
+                    throwLoggedError(errorMessages.missingGlobal);
+                } else {
+                    const {
+                        info: credential,
+                        randomness,
+                    } = await createCredentialInfo(
+                        identity,
+                        credentialNumber,
+                        keys,
+                        global,
+                        chosenAttributes as string[],
+                        setMessage,
+                        ledger,
+                        address
+                    );
+                    const blob: CredentialBlob = {
+                        credential,
+                        randomness,
+                        address,
+                        credentialNumber,
+                        identityId: identity.id,
+                    };
+                    onChange(blob);
+                    onBlur();
+                    setMessage('Credential generated succesfully!');
+                    onSigned();
                 }
-
-                const {
-                    info: credential,
-                    randomness,
-                } = await createCredentialInfo(
-                    identity,
-                    credentialNumber,
-                    keys,
-                    global,
-                    chosenAttributes as string[],
-                    setMessage,
-                    ledger,
-                    address
-                );
-                const blob: CredentialBlob = {
-                    credential,
-                    randomness,
-                    address,
-                    credentialNumber,
-                    identityId: identity.id,
-                };
-                onChange(blob);
-                onBlur();
-                setMessage('Credential generated succesfully!');
-                onSigned();
             };
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -140,6 +144,7 @@ export default function SignCredential({ onSigned }: Props): JSX.Element {
             ledgerCallback={sign}
             credentialNumber={credentialNumber}
             preCallback={checkWallet}
+            exportType={getKeyExportType(identity.version)}
         />
     );
 }

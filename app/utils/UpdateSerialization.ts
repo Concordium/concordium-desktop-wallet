@@ -28,6 +28,12 @@ import {
     AddAnonymityRevoker,
     AddIdentityProvider,
     SerializedTextWithLength,
+    TimeParameters,
+    CooldownParameters,
+    PoolParameters,
+    CommissionRates,
+    CommissionRanges,
+    AuthorizationKeysUpdateType,
 } from './types';
 
 /**
@@ -51,6 +57,11 @@ export enum OnChainUpdateType {
     AddAnonymityRevoker = 12,
     // eslint-disable-next-line no-shadow
     AddIdentityProvider = 13,
+    // eslint-disable-next-line no-shadow
+    UpdateCooldownParameters = 14,
+    UpdatePoolParameters = 15,
+    UpdateTimeParameters = 16,
+    UpdateMintDistributionV1 = 17,
 }
 
 /**
@@ -99,6 +110,26 @@ function serializeAccessStructure(accessStructure: AccessStructure) {
 }
 
 /**
+ * Takes an AuthorizationKeysUpdateType and gives the value it should be serialized as.
+ */
+export function convertAuthorizationKeyUpdateType(
+    type: AuthorizationKeysUpdateType
+): number {
+    switch (type) {
+        case AuthorizationKeysUpdateType.Level1V0:
+            return 1;
+        case AuthorizationKeysUpdateType.Level1V1:
+            return 2;
+        case AuthorizationKeysUpdateType.RootV0:
+            return 2;
+        case AuthorizationKeysUpdateType.RootV1:
+            return 3;
+        default:
+            throw new Error('Unknown authorization key update type');
+    }
+}
+
+/**
  * Serializes an AuthorizationKeysUpdate to the byte format
  * expected by the chain.
  */
@@ -107,7 +138,9 @@ export function serializeAuthorizationKeysUpdate(
 ) {
     const serializedAuthorizationKeysUpdate = Buffer.alloc(3);
     serializedAuthorizationKeysUpdate.writeInt8(
-        authorizationKeysUpdate.keyUpdateType,
+        convertAuthorizationKeyUpdateType(
+            authorizationKeysUpdate.keyUpdateType
+        ),
         0
     );
     serializedAuthorizationKeysUpdate.writeUInt16BE(
@@ -234,22 +267,16 @@ export function serializeFoundationAccount(
  * Serializes a MintDistribution to bytes.
  */
 export function serializeMintDistribution(mintDistribution: MintDistribution) {
-    const serializedMintDistribution = Buffer.alloc(13);
-    serializedMintDistribution.writeUInt32BE(
-        mintDistribution.mintPerSlot.mantissa,
-        0
-    );
-    serializedMintDistribution.writeInt8(
-        mintDistribution.mintPerSlot.exponent,
-        4
-    );
-    serializedMintDistribution.writeUInt32BE(mintDistribution.bakingReward, 5);
-    serializedMintDistribution.writeUInt32BE(
-        mintDistribution.finalizationReward,
-        9
-    );
-
-    return serializedMintDistribution;
+    const serializedRewards = Buffer.alloc(8);
+    serializedRewards.writeUInt32BE(mintDistribution.bakingReward, 0);
+    serializedRewards.writeUInt32BE(mintDistribution.finalizationReward, 4);
+    if (mintDistribution.version === 0) {
+        const serializedMint = Buffer.alloc(5);
+        serializedMint.writeUInt32BE(mintDistribution.mintPerSlot.mantissa, 0);
+        serializedMint.writeInt8(mintDistribution.mintPerSlot.exponent, 4);
+        return Buffer.concat([serializedMint, serializedRewards]);
+    }
+    return serializedRewards;
 }
 
 /**
@@ -353,6 +380,100 @@ export function serializeAddAnonymityRevoker(
 }
 
 /**
+ * Serializes time parameters to bytes.
+ */
+export function serializeTimeParameters(timeParameters: TimeParameters) {
+    const serializedRewardPeriod = encodeWord64(
+        BigInt(timeParameters.rewardPeriodLength)
+    );
+    const serializedMintRate = Buffer.alloc(5);
+    serializedMintRate.writeUInt32BE(
+        timeParameters.mintRatePerPayday.mantissa,
+        0
+    );
+    serializedMintRate.writeInt8(timeParameters.mintRatePerPayday.exponent, 4);
+    return Buffer.concat([serializedRewardPeriod, serializedMintRate]);
+}
+
+/**
+ * Serializes cooldown parameters to bytes.
+ */
+export function serializeCooldownParameters(
+    cooldownParameters: CooldownParameters
+) {
+    const serializedPoolOwnerCooldown = encodeWord64(
+        BigInt(cooldownParameters.poolOwnerCooldown)
+    );
+    const serializedDelegatorCooldown = encodeWord64(
+        BigInt(cooldownParameters.delegatorCooldown)
+    );
+    return Buffer.concat([
+        serializedPoolOwnerCooldown,
+        serializedDelegatorCooldown,
+    ]);
+}
+
+export function serializeCommisionRates(commisionRates: CommissionRates) {
+    const serializedRates = Buffer.alloc(12);
+    serializedRates.writeUInt32BE(
+        commisionRates.finalizationRewardCommission,
+        0
+    );
+    serializedRates.writeUInt32BE(commisionRates.bakingRewardCommission, 4);
+    serializedRates.writeUInt32BE(commisionRates.transactionFeeCommission, 8);
+    return serializedRates;
+}
+
+export function serializeCommisionRanges(commisionRates: CommissionRanges) {
+    const serializedRanges = Buffer.alloc(24);
+    serializedRanges.writeUInt32BE(
+        commisionRates.finalizationRewardCommission.min,
+        0
+    );
+    serializedRanges.writeUInt32BE(
+        commisionRates.finalizationRewardCommission.max,
+        4
+    );
+    serializedRanges.writeUInt32BE(
+        commisionRates.bakingRewardCommission.min,
+        8
+    );
+    serializedRanges.writeUInt32BE(
+        commisionRates.bakingRewardCommission.max,
+        12
+    );
+    serializedRanges.writeUInt32BE(
+        commisionRates.transactionFeeCommission.min,
+        16
+    );
+    serializedRanges.writeUInt32BE(
+        commisionRates.transactionFeeCommission.max,
+        20
+    );
+    return serializedRanges;
+}
+
+export function serializeEquityBounds(poolParameters: PoolParameters) {
+    return Buffer.concat([
+        encodeWord64(BigInt(poolParameters.minimumEquityCapital)),
+        encodeWord32(poolParameters.capitalBound),
+        encodeWord64(BigInt(poolParameters.leverageBound.numerator)),
+        encodeWord64(BigInt(poolParameters.leverageBound.denominator)),
+    ]);
+}
+
+/**
+ * Serializes pool parameters to bytes.
+ */
+export function serializePoolParameters(poolParameters: PoolParameters) {
+    return Buffer.concat([
+        serializeCommisionRates(poolParameters.passiveCommissions),
+        serializeCommisionRanges(poolParameters.commissionBounds),
+        serializeEquityBounds(poolParameters),
+    ]);
+}
+
+/**
  * Serializes an UpdateHeader to exactly 28 bytes. See the interface
  * UpdateHeader for comments regarding the byte allocation for each field.
  */
@@ -447,6 +568,14 @@ function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
             return OnChainUpdateType.AddIdentityProvider;
         case UpdateType.AddAnonymityRevoker:
             return OnChainUpdateType.AddAnonymityRevoker;
+        case UpdateType.CooldownParameters:
+            return OnChainUpdateType.UpdateCooldownParameters;
+        case UpdateType.PoolParameters:
+            return OnChainUpdateType.UpdatePoolParameters;
+        case UpdateType.TimeParameters:
+            return OnChainUpdateType.UpdateTimeParameters;
+        case UpdateType.UpdateMintDistributionV1:
+            return OnChainUpdateType.UpdateMintDistributionV1;
         default:
             throw new Error(`An invalid update type was given: ${type}`);
     }

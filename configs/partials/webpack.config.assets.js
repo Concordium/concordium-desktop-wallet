@@ -61,7 +61,14 @@ module.exports.config = {
             {
                 test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
                 include: pathToSvgAssets,
-                use: ['@svgr/webpack'],
+                use: [
+                    {
+                        loader: '@svgr/webpack',
+                        options: {
+                            svgoConfig: { plugins: [{ mergePaths: false }] },
+                        },
+                    },
+                ],
             },
             // Common Image Formats
             {

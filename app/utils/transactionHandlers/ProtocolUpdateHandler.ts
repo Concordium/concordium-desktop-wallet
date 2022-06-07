@@ -18,7 +18,7 @@ import {
 import { serializeProtocolUpdate } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Update Chain Protocol';
+const TYPE = 'Update chain protocol';
 
 type TransactionType = UpdateInstruction<ProtocolUpdate>;
 
@@ -35,7 +35,7 @@ export default class ProtocolUpdateHandler
         { specificationAuxiliaryData: files, ...fields }: UpdateProtocolFields,
         effectiveTime: bigint,
         expiryTime: bigint
-    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+    ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         if (!blockSummary) {
             return undefined;
         }

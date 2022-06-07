@@ -13,6 +13,7 @@ import {
     CreateTransactionInput,
     TransactionExportType,
 } from '../transactionTypes';
+import { throwLoggedError } from '../basicHelpers';
 
 export default abstract class TransferHandler<
     TransactionType extends AccountTransaction
@@ -29,7 +30,7 @@ export default abstract class TransferHandler<
         if (this.instanceOf(transaction)) {
             return transaction;
         }
-        throw Error('Invalid transaction type was given as input.');
+        return throwLoggedError('Invalid transaction type was given as input.');
     }
 
     serializePayload(transaction: TransactionType) {
@@ -82,5 +83,5 @@ export default abstract class TransferHandler<
             .replace(/\s/g, '-')}_${exportType}.json`;
     }
 
-    title = `Account Transaction | ${this.type}`;
+    title = `Account transaction | ${this.type}`;
 }

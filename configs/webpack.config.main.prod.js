@@ -15,8 +15,15 @@ const { fromRoot } = require('./helpers/pathHelpers');
 CheckNodeEnv('production');
 DeleteSourceMaps();
 
+const devtoolsConfig =
+    process.env.DEBUG_PROD === 'true'
+        ? {
+              devtool: 'source-map',
+          }
+        : {};
+
 module.exports = merge(baseConfig, {
-    devtool: process.env.DEBUG_PROD === 'true' ? 'source-map' : 'none',
+    ...devtoolsConfig,
 
     mode: 'production',
 

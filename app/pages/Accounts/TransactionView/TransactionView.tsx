@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useSelector } from 'react-redux';
+import BackArrow from '@resources/svg/back-arrow.svg';
 import TransactionListElement from '../TransactionList/TransactionListElement';
 import {
     TransferTransactionWithNames,
@@ -12,8 +13,10 @@ import SidedRow from '~/components/SidedRow';
 import CopyButton from '~/components/CopyButton';
 import { rejectReasonToDisplayText } from '~/utils/node/RejectReasonHelper';
 import { transactionsSelector } from '~/features/TransactionSlice';
-import styles from './TransactionView.module.scss';
 import CloseButton from '~/cross-app-components/CloseButton';
+import IconButton from '~/cross-app-components/IconButton';
+
+import styles from './TransactionView.module.scss';
 
 interface Props {
     transaction: TransferTransactionWithNames;
@@ -42,13 +45,54 @@ function CopiableListElement({
                 <div className={styles.copiableListElementLeftSide}>
                     <p className={styles.copiableListElementTitle}>{title}</p>
                     {'\n'}
-                    <p className="body4 m0 mT5">
+                    <p className="body5 m0 mT5">
                         {value} {note ? `(${note})` : undefined}
                     </p>
                 </div>
             }
             right={<CopyButton className={styles.copyButton} value={value} />}
         />
+    );
+}
+
+interface TransactionEventsProps {
+    events?: string[];
+}
+
+function TransactionEvents({ events }: TransactionEventsProps) {
+    const [open, setOpen] = useState(false);
+
+    if (!events || events.length === 0) {
+        return null;
+    }
+
+    return (
+        <div className={clsx(styles.listElement, 'flexColumn')}>
+            <div className="flex justifySpaceBetween">
+                <p className={styles.copiableListElementTitle}>Events</p>
+                <IconButton
+                    type="button"
+                    title="close"
+                    className={
+                        open
+                            ? styles.eventsButtonClosed
+                            : styles.eventsButtonOpen
+                    }
+                    onClick={() => setOpen(!open)}
+                >
+                    <BackArrow width="20" />
+                </IconButton>
+            </div>
+            {open ? (
+                events.map((event: string) => (
+                    <p key={event} className={styles.event}>
+                        {event}
+                    </p>
+                ))
+            ) : (
+                <p className={styles.eventsTextClosed}>{events[0]}</p>
+            )}
+        </div>
     );
 }
 
@@ -74,12 +118,20 @@ function TransactionView({ transaction, onClose, setTransaction }: Props) {
 
     useEffect(() => {
         if (transaction) {
-            const upToDateChosenTransaction = transactions.find(
-                (t) => t.transactionHash === transaction.transactionHash
-            );
+            let upToDateChosenTransaction;
+            if (transaction.transactionHash) {
+                upToDateChosenTransaction = transactions.find(
+                    (t) => t.transactionHash === transaction.transactionHash
+                );
+            } else {
+                upToDateChosenTransaction = transactions.find(
+                    (t) => t.id === transaction.id
+                );
+            }
             setTransaction(upToDateChosenTransaction);
         }
-    }, [transactions, transaction, setTransaction]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [transactions]);
 
     return (
         <div className={styles.root}>
@@ -95,26 +147,27 @@ function TransactionView({ transaction, onClose, setTransaction }: Props) {
             {displayRejectReason(transaction)}
             {!!transaction.fromAddress && (
                 <CopiableListElement
-                    title="From Address:"
+                    title="From address:"
                     value={`${transaction.fromAddress}`}
                     note={transaction.fromName}
                 />
             )}
             {transaction.toAddress ? (
                 <CopiableListElement
-                    title="To Address:"
+                    title="To address:"
                     value={`${transaction.toAddress}`}
                     note={transaction.toName}
                 />
             ) : null}
             <CopiableListElement
-                title="Transaction Hash"
-                value={transaction.transactionHash || 'No Transaction.'}
+                title="Transaction hash"
+                value={transaction.transactionHash || 'No transaction.'}
             />
             <CopiableListElement
-                title="Block Hash"
+                title="Block hash"
                 value={transaction.blockHash || 'Awaiting finalization'}
             />
+            <TransactionEvents events={transaction.events} />
         </div>
     );
 }

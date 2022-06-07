@@ -1,13 +1,19 @@
 import React from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
-import ButtonGroup from './ButtonGroup';
+import { useFormContext } from 'react-hook-form';
+import { displayRestakeEarnings } from '~/utils/transactionFlows/configureBaker';
+import Form from './Form';
 
 interface Props {
     fieldName: string;
     initial?: boolean;
+    existing?: boolean;
 }
 
-export default function PickBakerRestake({ fieldName, initial = true }: Props) {
+export default function PickBakerRestake({
+    fieldName,
+    initial = true,
+    existing,
+}: Props) {
     const form = useFormContext();
 
     if (!form) {
@@ -15,32 +21,26 @@ export default function PickBakerRestake({ fieldName, initial = true }: Props) {
     }
 
     return (
-        <Controller
-            name={fieldName}
-            // eslint-disable-next-line react/jsx-boolean-value
-            defaultValue={initial}
-            control={form.control}
-            render={(f) => (
-                <ButtonGroup
-                    title="Enable restake earnings"
-                    name="restake"
-                    buttons={[
-                        {
-                            label: 'Yes, restake',
-                            value: true,
-                        },
-                        {
-                            label: 'No, don’t restake',
-                            value: false,
-                        },
-                    ]}
-                    isSelected={({ value }) => value === f.value}
-                    onClick={({ value }) => {
-                        f.onChange(value);
-                        f.onBlur();
-                    }}
-                />
+        <>
+            {existing !== undefined && (
+                <div className="body3 mono mB10">
+                    Current option: {displayRestakeEarnings(existing)}
+                </div>
             )}
-        />
+            <Form.Radios
+                name={fieldName}
+                defaultValue={initial}
+                options={[
+                    {
+                        label: 'Yes, restake',
+                        value: true,
+                    },
+                    {
+                        label: "No, don't restake",
+                        value: false,
+                    },
+                ]}
+            />
+        </>
     );
 }

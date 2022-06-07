@@ -3,11 +3,11 @@ import { useRouteMatch } from 'react-router';
 import { UpdateBakerStake } from '~/utils/types';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import { useAccountName } from '~/utils/dataHooks';
-import { displayAsGTU } from '~/utils/gtu';
+import { displayAsCcd } from '~/utils/ccd';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
-import DisplayAddress from '../DisplayAddress';
 import routes from '~/constants/routes.json';
+import { DisplayFromAccount } from './DisplayAccount';
 
 import styles from './transferDetails.module.scss';
 
@@ -24,15 +24,13 @@ export default function DisplayUpdateBakerStake({ transaction }: Props) {
 
     return (
         <>
-            <p className={styles.title}>From Account:</p>
-            <p className={styles.name}>{senderName}</p>
-            <DisplayAddress
+            <DisplayFromAccount
+                name={senderName}
                 address={transaction.sender}
-                lineClassName={styles.address}
             />
             <p className={styles.title}>New staked amount:</p>
             <p className={styles.amount}>
-                {displayAsGTU(transaction.payload.stake)}
+                {displayAsCcd(transaction.payload.stake)}
             </p>
             <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
             {Boolean(isSingleSig) || (

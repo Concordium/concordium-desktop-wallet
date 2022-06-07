@@ -30,8 +30,8 @@ export default function CopyButton({
             await navigator.clipboard.writeText(value);
             setCopied(true);
             onClick?.();
-        } catch {
-            // TODO Error notification.
+        } catch (e) {
+            window.log.warn(e, 'Copy button OnClick failed');
         }
     }
 

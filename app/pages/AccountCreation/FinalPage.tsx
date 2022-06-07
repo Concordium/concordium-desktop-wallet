@@ -28,6 +28,7 @@ export default function AccountCreationFinal({
     const account = accounts.find((acc) => acc.address === address);
 
     if (account === undefined) {
+        window.log.warn(`Account Creation final page account was undefined`);
         return <Redirect to={routes.ACCOUNTS} />;
     }
 

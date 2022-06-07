@@ -8,7 +8,7 @@ import { Account, AccountInfo, AccountStatus } from '~/utils/types';
 import { stringify } from '~/utils/JSONHelper';
 
 import AccountBalanceViewComponent from './AccountBalanceView';
-import { microGTUPerGTU } from '~/utils/gtu';
+import { microCcdPerCcd } from '~/utils/ccd';
 
 export default {
     title: 'Account Page/Account Balance View',
@@ -27,6 +27,7 @@ const Template: Story<{ account: Account; accountInfo: AccountInfo }> = ({
             '234': stringify(accountInfo),
         },
         chosenAccountAddress: account.address,
+        accountChanged: true,
         defaultAccount: account.address,
     };
 
@@ -53,9 +54,9 @@ const account: Account = {
 const accountInfo: AccountInfo = {
     accountNonce: 1n,
     accountCredentials: [{} as any],
-    accountAmount: 1000n * microGTUPerGTU,
+    accountAmount: 1000n * microCcdPerCcd,
     accountReleaseSchedule: {
-        total: 100n * microGTUPerGTU,
+        total: 100n * microCcdPerCcd,
         schedule: [],
     },
     accountIndex: 0n,
@@ -86,7 +87,7 @@ Baker.args = {
         ...accountInfo,
         accountBaker: {
             bakerId: 123,
-            stakedAmount: `${400n * microGTUPerGTU}`,
+            stakedAmount: `${400n * microCcdPerCcd}`,
         } as any,
     },
 };

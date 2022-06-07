@@ -2,13 +2,13 @@ import React from 'react';
 import { Account, BakerVerifyKeys, Fraction } from '~/utils/types';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import { AccountDetail, Details, PlainDetail } from './shared';
-import PublicKey from '../../common/PublicKey/PublicKey';
 import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
+import DisplayPublicKey from '~/components/Transfers/DisplayPublicKey';
 
 interface Props {
     account?: Account;
     estimatedFee?: Fraction;
-    bakerVerifyKeys?: BakerVerifyKeys;
+    bakerVerifyKeys: BakerVerifyKeys | undefined;
     expiryTime?: Date;
 }
 
@@ -23,26 +23,24 @@ export default function UpdateBakerKeysProposalDetails({
             <AccountDetail title="Account" value={account} first />
             <DisplayEstimatedFee estimatedFee={estimatedFee} />
             <DisplayTransactionExpiryTime expiryTime={expiryTime} />
-            <PlainDetail
-                title="Public keys"
-                value={bakerVerifyKeys}
-                format={(bakerKeys) => (
-                    <>
-                        <PublicKey
-                            name="Election verify key"
-                            publicKey={bakerKeys.electionVerifyKey}
-                        />
-                        <PublicKey
-                            name="Signature verify key"
-                            publicKey={bakerKeys.signatureVerifyKey}
-                        />
-                        <PublicKey
-                            name="Aggregation verify key"
-                            publicKey={bakerKeys.aggregationVerifyKey}
-                        />
-                    </>
-                )}
-            />
+            {bakerVerifyKeys ? (
+                <>
+                    <DisplayPublicKey
+                        name="Election verify key"
+                        publicKey={bakerVerifyKeys.electionVerifyKey}
+                    />
+                    <DisplayPublicKey
+                        name="Signature verify key"
+                        publicKey={bakerVerifyKeys.signatureVerifyKey}
+                    />
+                    <DisplayPublicKey
+                        name="Aggregation verify key"
+                        publicKey={bakerVerifyKeys.aggregationVerifyKey}
+                    />
+                </>
+            ) : (
+                <PlainDetail title="Public keys" />
+            )}
         </Details>
     );
 }

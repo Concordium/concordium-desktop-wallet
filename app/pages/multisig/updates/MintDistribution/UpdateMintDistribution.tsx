@@ -1,7 +1,6 @@
 import React from 'react';
-// import { Validate } from 'react-hook-form';
-
 import { Validate } from 'react-hook-form';
+import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 
@@ -10,16 +9,14 @@ import {
     FormRewardDistribution,
     RewardDistribution,
 } from '../../common/RewardDistribution';
-import MintRateInput, {
-    FormMintRateInput,
-} from './MintRateInput/MintRateInput';
+import MintRateInput, { FormMintRateInput } from '../common/MintRateInput';
 import {
-    getCurrentValue,
     getSlotsPerYear,
     rewardDistributionLabels,
     toRewardDistributionValue,
 } from './util';
-import { parseMintPerSlot } from '~/utils/mintDistributionHelpers';
+import { parseMintRate } from '~/utils/mintDistributionHelpers';
+import Label from '~/components/Label';
 
 export interface UpdateMintDistributionFields {
     mintPerSlot: string;
@@ -32,7 +29,7 @@ const fieldNames: EqualRecord<UpdateMintDistributionFields> = {
 };
 
 const canParseMintPerSlot: Validate = (value?: string) =>
-    (value !== undefined && parseMintPerSlot(value) !== undefined) ||
+    (value !== undefined && parseMintRate(value) !== undefined) ||
     'Invalid mint per slot value';
 
 const isValidNumber = (parseFun: (v: string) => number): Validate => (
@@ -51,9 +48,15 @@ export default function UpdateMintDistribution({
     blockSummary,
     consensusStatus,
 }: UpdateProps): JSX.Element | null {
-    const { mintPerSlot, ...rewardDistribution } = getCurrentValue(
-        blockSummary
-    );
+    // Use the mintPerSlot as an indicator of whether to use v0 (which has mintPerSlot) or v1 (which doesn't)
+    let mintPerSlot: number | undefined;
+    const rewardDistribution =
+        blockSummary.updates.chainParameters.rewardParameters.mintDistribution;
+    if (isBlockSummaryV0(blockSummary)) {
+        mintPerSlot =
+            blockSummary.updates.chainParameters.rewardParameters
+                .mintDistribution.mintPerSlot;
+    }
     const slotsPerYear = getSlotsPerYear(consensusStatus);
     const currentDistribitionRatio: RewardDistributionValue = toRewardDistributionValue(
         rewardDistribution
@@ -62,13 +65,15 @@ export default function UpdateMintDistribution({
     return (
         <>
             <div>
-                <h5>Current Mint Distribution</h5>
-                <MintRateInput
-                    value={mintPerSlot.toString()}
-                    slotsPerYear={slotsPerYear}
-                    disabled
-                    className="mB20"
-                />
+                <Label className="mB5">Current mint distribution</Label>
+                {mintPerSlot !== undefined && (
+                    <MintRateInput
+                        value={mintPerSlot.toString()}
+                        paydaysPerYear={slotsPerYear}
+                        disabled
+                        className="mB20"
+                    />
+                )}
                 <RewardDistribution
                     labels={rewardDistributionLabels}
                     value={currentDistribitionRatio}
@@ -76,30 +81,33 @@ export default function UpdateMintDistribution({
                 />
             </div>
             <div>
-                <h5>New Mint Distribution</h5>
-                <FormMintRateInput
-                    name={fieldNames.mintPerSlot}
-                    defaultValue={
-                        defaults.mintPerSlot || mintPerSlot.toString()
-                    }
-                    slotsPerYear={slotsPerYear}
-                    className="mB20"
-                    rules={{
-                        required: 'Mint per slot value is required',
-                        min: {
-                            value: 0,
-                            message: "Mint per slot value can't be negative",
-                        },
-                        max: {
-                            value: MINT_PER_SLOT_MAX,
-                            message: `Mint per slot cannot exceed ${MINT_PER_SLOT_MAX}`,
-                        },
-                        validate: {
-                            isValidFloat,
-                            canParseMintPerSlot,
-                        },
-                    }}
-                />
+                <Label className="mB5">New mint distribution</Label>
+                {mintPerSlot !== undefined && (
+                    <FormMintRateInput
+                        name={fieldNames.mintPerSlot}
+                        defaultValue={
+                            defaults.mintPerSlot || mintPerSlot.toString()
+                        }
+                        paydaysPerYear={slotsPerYear}
+                        className="mB20"
+                        rules={{
+                            required: 'Mint per slot value is required',
+                            min: {
+                                value: 0,
+                                message:
+                                    "Mint per slot value can't be negative",
+                            },
+                            max: {
+                                value: MINT_PER_SLOT_MAX,
+                                message: `Mint per slot cannot exceed ${MINT_PER_SLOT_MAX}`,
+                            },
+                            validate: {
+                                isValidFloat,
+                                canParseMintPerSlot,
+                            },
+                        }}
+                    />
+                )}
                 <FormRewardDistribution
                     name={fieldNames.rewardDistribution}
                     defaultValue={

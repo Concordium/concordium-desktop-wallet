@@ -10,6 +10,7 @@ import {
     IdentityTokenContainer,
     ErrorIdentityTokenContainer,
 } from './id/types';
+import { throwLoggedError } from './basicHelpers';
 
 /**
  * Performs a HTTP get request using IPC to the main thread.
@@ -84,12 +85,12 @@ export async function performIdObjectRequest(
     try {
         response = await httpGet(url, parameters);
     } catch (e) {
-        throw new Error(`Unable to perform Id Object Request: ${e}`);
+        throwLoggedError(`Unable to perform Id Object Request: ${e}`);
     }
     if (response.status === 302) {
         const { location } = response.headers;
         if (!location) {
-            throw new Error('Missing location from redirect response');
+            throwLoggedError('Missing location from redirect response');
         }
         if (location[0] === '/') {
             const urlObject = new URL(url);
@@ -97,7 +98,7 @@ export async function performIdObjectRequest(
         }
         return location;
     }
-    throw new Error(
+    return throwLoggedError(
         `The identity provider did not return a 302 Redirect as expected: ${response.data}`
     );
 }

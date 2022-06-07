@@ -17,7 +17,11 @@ import {
     Hex,
     AddIdentityProvider,
     AddAnonymityRevoker,
-    PrivateKeySeeds,
+    PrivateKeys,
+    BlsKeyTypes,
+    TimeParameters,
+    CooldownParameters,
+    PoolParameters,
 } from '~/utils/types';
 import { pipe } from '~/utils/basicHelpers';
 
@@ -39,9 +43,13 @@ export default class ConcordiumLedgerClient {
 
     getSignedPublicKey = window.ledger.getSignedPublicKey;
 
-    async getPrivateKeySeeds(identity: number): Promise<PrivateKeySeeds> {
-        const result: PrivateKeySeeds = await window.ledger.getPrivateKeySeeds(
-            identity
+    async getPrivateKeys(
+        identity: number,
+        keyType: BlsKeyTypes
+    ): Promise<PrivateKeys> {
+        const result: PrivateKeys = await window.ledger.getPrivateKeys(
+            identity,
+            keyType
         );
         return {
             prfKey: Buffer.from(result.prfKey),
@@ -52,6 +60,8 @@ export default class ConcordiumLedgerClient {
     getPrfKeyDecrypt = pipe(window.ledger.getPrfKeyDecrypt, toBuffer);
 
     getPrfKeyRecovery = pipe(window.ledger.getPrfKeyRecovery, toBuffer);
+
+    verifyAddress = window.ledger.verifyAddress;
 
     signPublicInformationForIp = pipe(
         window.ledger.signPublicInformationForIp,
@@ -158,12 +168,14 @@ export default class ConcordiumLedgerClient {
     signMintDistribution(
         transaction: UpdateInstruction<MintDistribution>,
         serializedPayload: Buffer,
+        version: number,
         path: number[]
     ): Promise<Buffer> {
         return toBuffer(
             window.ledger.signMintDistribution(
                 transaction,
                 serializedPayload,
+                version,
                 path
             )
         );
@@ -269,14 +281,58 @@ export default class ConcordiumLedgerClient {
         transaction: UpdateInstruction<AuthorizationKeysUpdate>,
         serializedPayload: Buffer,
         path: number[],
-        INS: number
+        INS: number,
+        version: number
     ): Promise<Buffer> {
         return toBuffer(
             window.ledger.signAuthorizationKeysUpdate(
                 transaction,
                 serializedPayload,
                 path,
-                INS
+                INS,
+                version
+            )
+        );
+    }
+
+    signTimeParameters(
+        transaction: UpdateInstruction<TimeParameters>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return toBuffer(
+            window.ledger.signTimeParameters(
+                transaction,
+                serializedPayload,
+                path
+            )
+        );
+    }
+
+    signCooldownParameters(
+        transaction: UpdateInstruction<CooldownParameters>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return toBuffer(
+            window.ledger.signCooldownParameters(
+                transaction,
+                serializedPayload,
+                path
+            )
+        );
+    }
+
+    signPoolParameters(
+        transaction: UpdateInstruction<PoolParameters>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return toBuffer(
+            window.ledger.signPoolParameters(
+                transaction,
+                serializedPayload,
+                path
             )
         );
     }

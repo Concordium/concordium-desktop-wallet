@@ -18,7 +18,7 @@ import {
 import { serializeFoundationAccount } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Update Foundation Account';
+const TYPE = 'Update foundation account';
 
 type TransactionType = UpdateInstruction<FoundationAccount>;
 
@@ -35,7 +35,7 @@ export default class FoundationAccountHandler
         { foundationAccount }: UpdateFoundationAccountFields,
         effectiveTime: bigint,
         expiryTime: bigint
-    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+    ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         if (!blockSummary) {
             return undefined;
         }

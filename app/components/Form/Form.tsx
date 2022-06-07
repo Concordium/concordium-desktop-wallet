@@ -1,5 +1,6 @@
 import React, { FC, FormHTMLAttributes, PropsWithChildren } from 'react';
 import {
+    DefaultValues,
     FieldValues,
     FormProvider,
     SubmitHandler,
@@ -20,9 +21,11 @@ import Submit from './Submit';
 import FileInput from './FileInput';
 import { FileInputProps, FileInputValue } from './FileInput/FileInput';
 import InlineNumber, { InlineNumberProps } from './InlineNumber';
-import GtuInput, { GtuInputProps } from './GtuInput';
+import CcdInput, { CcdInputProps } from './CcdInput';
 import InlineInput, { InlineInputProps } from './InlineInput';
 import DatePicker from './DatePicker';
+import Radios, { RadiosProps } from './Radios';
+import Slider from './Slider';
 
 export type FormProps<TFormValues extends FieldValues = FieldValues> = Omit<
     FormHTMLAttributes<HTMLFormElement>,
@@ -30,6 +33,7 @@ export type FormProps<TFormValues extends FieldValues = FieldValues> = Omit<
 > & {
     formMethods?: UseFormMethods<TFormValues>;
     onSubmit: SubmitHandler<TFormValues>;
+    defaultValues?: DefaultValues<TFormValues>;
 };
 
 /**
@@ -64,10 +68,12 @@ function Form<TFormValues extends FieldValues = FieldValues>({
     children,
     formMethods,
     onSubmit,
+    defaultValues,
     ...formProps
 }: PropsWithChildren<FormProps<TFormValues>>): JSX.Element {
     const methods = useForm<TFormValues>({
         mode: 'onTouched',
+        defaultValues,
     });
 
     const { handleSubmit } = formMethods ?? methods;
@@ -93,6 +99,9 @@ Form.Checkbox = connectWithFormUncontrolled(Checkbox);
 Form.Switch = connectWithFormUncontrolled(Switch);
 (Form.Switch as FC).displayName = 'Form.Switch';
 
+Form.Radios = connectWithFormControlled<unknown, RadiosProps>(Radios);
+(Form.Radios as FC).displayName = 'Form.Radios';
+
 Form.File = connectWithFormControlled<FileInputValue, FileInputProps>(
     FileInput
 );
@@ -103,8 +112,8 @@ Form.InlineNumber = connectWithFormControlled<string, InlineNumberProps>(
 );
 (Form.InlineNumber as FC).displayName = 'Form.InlineNumber';
 
-Form.GtuInput = connectWithFormControlled<string, GtuInputProps>(GtuInput);
-(Form.GtuInput as FC).displayName = 'Form.GtuInput';
+Form.CcdInput = connectWithFormControlled<string, CcdInputProps>(CcdInput);
+(Form.CcdInput as FC).displayName = 'Form.GtuInput';
 
 Form.InlineInput = connectWithFormControlled<string, InlineInputProps>(
     InlineInput
@@ -115,6 +124,9 @@ Form.DatePicker = connectWithFormControlled<Date, PropsOf<typeof DatePicker>>(
     DatePicker
 );
 (Form.DatePicker as FC).displayName = 'Form.DatePicker';
+
+Form.Slider = connectWithFormControlled<number, PropsOf<typeof Slider>>(Slider);
+(Form.Slider as FC).displayName = 'Form.Slider';
 
 Form.Submit = Submit;
 (Form.Submit as FC).displayName = 'Form.Submit';

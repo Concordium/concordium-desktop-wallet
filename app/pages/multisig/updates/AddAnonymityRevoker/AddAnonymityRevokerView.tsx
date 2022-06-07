@@ -15,25 +15,37 @@ export default function AddAnonymityRevokerView({
 }: Props) {
     return (
         <>
-            <div className="body1">
-                <h5 className="mB0">{fieldDisplays.name}</h5>
-                {addAnonymityRevoker.arDescription.name}
+            <div>
+                <h5 className="mB5">{fieldDisplays.name}:</h5>
+                <span className="mono body3">
+                    {addAnonymityRevoker.arDescription.name}
+                </span>
             </div>
-            <div className="body1">
-                <h5 className="mB0">{fieldDisplays.url}</h5>
-                {addAnonymityRevoker.arDescription.url}
+            <div>
+                <h5 className="mB5">{fieldDisplays.url}:</h5>
+                <span className="mono body3">
+                    {addAnonymityRevoker.arDescription.url}
+                </span>
             </div>
-            <div className="body1">
-                <h5 className="mB0">{fieldDisplays.description}</h5>
-                {addAnonymityRevoker.arDescription.description}
+            <div>
+                <h5 className="mB5">{fieldDisplays.description}:</h5>
+                <span className="mono body3">
+                    {addAnonymityRevoker.arDescription.description}
+                </span>
             </div>
-            <div className="body1">
-                <h5 className="mB0">{fieldDisplays.arIdentity}</h5>
-                {addAnonymityRevoker.arIdentity}
+            <div>
+                <h5 className="mB5">{fieldDisplays.arIdentity}:</h5>
+                <span className="mono body3">
+                    {addAnonymityRevoker.arIdentity}
+                </span>
             </div>
-            <div className="body1">
-                <h5 className="mB0">{fieldDisplays.arPublicKey}</h5>
-                <PublicKeyDetails publicKey={addAnonymityRevoker.arPublicKey} />
+            <div>
+                <h5 className="mB5">{fieldDisplays.arPublicKey}:</h5>
+                <span className="mono body3">
+                    <PublicKeyDetails
+                        publicKey={addAnonymityRevoker.arPublicKey}
+                    />
+                </span>
             </div>
         </>
     );

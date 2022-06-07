@@ -9,7 +9,7 @@ import Sidebar, { SidebarLink } from '~/cross-app-components/Sidebar';
 import routes from '~/constants/routes.json';
 import pkg from '~/package.json';
 import { RootState } from '~/store/store';
-import { getGTUSymbol } from '~/utils/gtu';
+import { getCcdSymbol } from '~/utils/ccd';
 
 import Status from '../Status';
 
@@ -19,7 +19,7 @@ const links: SidebarLink[] = [
     {
         route: routes.ACCOUNTS,
         title: 'Accounts',
-        icon: <div className={styles.ccdIcon}>{getGTUSymbol()}</div>,
+        icon: <div className={styles.ccdIcon}>{getCcdSymbol()}</div>,
     },
     {
         route: routes.IDENTITIES,
@@ -28,7 +28,7 @@ const links: SidebarLink[] = [
     },
     {
         route: routes.ADDRESSBOOK,
-        title: 'Address Book',
+        title: 'Address book',
         icon: <IdentityIcon height="25" />,
     },
     {
@@ -38,7 +38,7 @@ const links: SidebarLink[] = [
     },
     {
         route: routes.MULTISIGTRANSACTIONS,
-        title: 'Multi Signature Transactions',
+        title: 'Multi signature transactions',
         icon: <MultiSigIcon height="32" />,
     },
     {

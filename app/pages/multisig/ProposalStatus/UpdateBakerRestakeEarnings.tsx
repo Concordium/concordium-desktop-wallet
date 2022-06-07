@@ -1,4 +1,3 @@
-/* eslint-disable promise/catch-or-return */
 import React from 'react';
 import { useAccountName } from '~/utils/dataHooks';
 import {
@@ -26,9 +25,9 @@ export default function UpdateBakerRestakeEarningsProposalStatus({
         <ProposalStatusView
             {...proposalStatusViewProps}
             headerLeft={senderName ?? transaction.sender}
-            headerRight="Update Baker Restake Earnings"
+            headerRight="Update baker restake earnings"
             status={status}
-            title="Update Baker Restake Earnings"
+            title="Update baker restake earnings"
         >
             <span className="textFaded">
                 Account: {senderName ? `${senderName} ` : ''} (

@@ -1,0 +1,70 @@
+@import 'config/bundle';
+
+.root {
+    display: block;
+    text-align: center;
+}
+
+.slider {
+    height: 30px;
+    padding: 0;
+    z-index: 0;
+
+    :global(.rc-slider-rail) {
+        background-color: transparent;
+        border: 1px solid $color-light-grey;
+        height: 100%;
+        z-index: 1;
+
+        .invalid & {
+            border-color: $color-error;
+            border-width: 2px;
+        }
+    }
+
+    :global(.rc-slider-track) {
+        background-color: $color-pale-blue;
+        height: 100%;
+    }
+
+    :global(.rc-slider-handle) {
+        top: 50%;
+        border-color: $color-light-grey;
+        margin-top: -7px;
+        z-index: 2;
+
+        &:hover,
+        &:active {
+            border-color: $color-pale-green;
+        }
+
+        .invalid & {
+            &,
+            &:hover,
+            &:active {
+                border-color: $color-error;
+            }
+        }
+    }
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 50px auto 50px;
+    grid-gap: 10px;
+    align-items: center;
+    justify-items: center;
+}
+
+.inputWrapper {
+    grid-column-start: 2;
+    border-bottom: 1px solid $color-text;
+    width: 100%;
+    max-width: 200px;
+    font-size: $font-size-body2;
+
+    .invalid & {
+        color: $color-error;
+        border-color: $color-error;
+    }
+}

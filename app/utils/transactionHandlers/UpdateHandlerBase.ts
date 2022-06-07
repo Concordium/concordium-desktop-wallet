@@ -1,5 +1,6 @@
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { Authorization, Authorizations } from '~/node/NodeApiTypes';
+import { throwLoggedError } from '../basicHelpers';
 import {
     TransactionExportType,
     UpdateInstructionHandler,
@@ -31,7 +32,7 @@ export default class UpdateHandlerBase<
         if (this.instanceOf(transaction)) {
             return transaction;
         }
-        throw Error('Invalid transaction type was given as input.');
+        return throwLoggedError('Invalid transaction type was given as input.');
     }
 
     getFileNameForExport(
@@ -45,7 +46,7 @@ export default class UpdateHandlerBase<
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     getAuthorization(_: Authorizations): Authorization {
-        throw new Error(
+        return throwLoggedError(
             'If this method was invoked, then it happened due to an implementation error.'
         );
     }
@@ -54,5 +55,5 @@ export default class UpdateHandlerBase<
         return undefined;
     }
 
-    title = `Foundation Transaction | ${this.type}`;
+    title = `Foundation transaction | ${this.type}`;
 }

@@ -14,6 +14,7 @@ import {
     UpdateInstructionSignature,
     TransactionAccountSignature,
     MultiSignatureTransactionStatus,
+    MakeRequired,
 } from '~/utils/types';
 import {
     TransactionExportType,
@@ -33,15 +34,15 @@ import { isExpired } from '~/utils/transactionHelpers';
 import TransactionExpirationDetails from '~/components/TransactionExpirationDetails';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import getTransactionSignDigest from '~/utils/transactionHash';
-
 import ExpiredTransactionView from '../ExpiredTransactionView';
 import MultiSignatureLayout from '../MultiSignatureLayout';
-import styles from './CosignTransactionProposal.module.scss';
 import { signUpdateInstruction, signAccountTransaction } from './util';
 import saveFile from '~/utils/FileHelper';
 import Button from '~/cross-app-components/Button';
 import { LedgerCallback } from '~/components/ledger/util';
 import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
+
+import styles from './CosignTransactionProposal.module.scss';
 
 interface CosignTransactionProposalForm {
     transactionDetailsMatch: boolean;
@@ -55,8 +56,10 @@ const fieldNames: EqualRecord<CosignTransactionProposalForm> = {
     signDigestMatch: 'signDigestMatch',
 };
 
+type UnsafeCosignLocation = LocationDescriptorObject<TransactionInput>;
+
 interface CosignTransactionProposalProps {
-    location: LocationDescriptorObject<TransactionInput>;
+    location: MakeRequired<UnsafeCosignLocation, 'state'>;
 }
 
 /**
@@ -76,7 +79,7 @@ function CosignTransactionProposal({
 
     const dispatch = useDispatch();
 
-    const { transaction } = location.state as TransactionInput;
+    const { transaction } = location.state;
     const [transactionObject] = useState(parse(transaction));
 
     const [transactionHandler] = useState(() => findHandler(transactionObject));
@@ -85,11 +88,13 @@ function CosignTransactionProposal({
         transactionSignDigest,
         setTransactionSignDigest,
     ] = useState<string>();
-    useEffect(() => {
-        getTransactionSignDigest(transactionObject)
-            .then((digest) => setTransactionSignDigest(digest))
-            .catch(() => {});
-    }, [transactionObject]);
+    useEffect(
+        () =>
+            setTransactionSignDigest(
+                getTransactionSignDigest(transactionObject)
+            ),
+        [transactionObject]
+    );
 
     const signingFunction: LedgerCallback = async (
         ledger: ConcordiumLedgerClient,
@@ -137,11 +142,13 @@ function CosignTransactionProposal({
                     TransactionExportType.Signature
                 ),
             });
-        } catch (err) {
+            window.log.info('Exported transaction');
+        } catch (error) {
+            window.log.error(error, 'Failed exporting transaction');
             setShowError({
                 show: true,
                 header: 'Signature was not saved ',
-                content: `An error was encountered while attempting to saving the signature: ${err.message}`,
+                content: `An error was encountered while attempting to saving the signature: ${error.message}`,
             });
         }
     }
@@ -169,7 +176,7 @@ function CosignTransactionProposal({
                         : MultiSignatureTransactionStatus.Open,
                     image
                 )}
-                stepTitle={`Transaction signing confirmation - ${transactionHandler.type}`}
+                stepTitle="Transaction signing confirmation"
                 delegateScroll
             >
                 <Ledger ledgerCallback={signingFunction}>
@@ -183,7 +190,7 @@ function CosignTransactionProposal({
                                 columnClassName={styles.column}
                                 columnScroll
                             >
-                                <Columns.Column header="Security & Submission Details">
+                                <Columns.Column header="Security & submission details">
                                     <div className={styles.columnContent}>
                                         <TransactionSignDigestView
                                             transactionSignDigest={
@@ -204,7 +211,7 @@ function CosignTransactionProposal({
                                         )}
                                     </div>
                                 </Columns.Column>
-                                <Columns.Column header="Transaction Details">
+                                <Columns.Column header="Transaction details">
                                     <div className={styles.columnContent}>
                                         <TransactionDetails
                                             transaction={transactionObject}
@@ -219,7 +226,7 @@ function CosignTransactionProposal({
                                     </div>
                                 </Columns.Column>
                                 <Columns.Column
-                                    header="Signature and Hardware Wallet"
+                                    header="Signature and hardware wallet"
                                     className={styles.stretchColumn}
                                 >
                                     <div className={styles.columnContent}>
@@ -274,7 +281,7 @@ function CosignTransactionProposal({
                                                         exportSignedTransaction
                                                     }
                                                 >
-                                                    Export Signature
+                                                    Export signature
                                                 </Button>
                                             ) : (
                                                 <Form.Submit
@@ -284,7 +291,7 @@ function CosignTransactionProposal({
                                                         isTransactionExpired
                                                     }
                                                 >
-                                                    Sign Proposal
+                                                    Sign proposal
                                                 </Form.Submit>
                                             )}
                                         </div>
@@ -299,8 +306,11 @@ function CosignTransactionProposal({
     );
 }
 
-export default ensureProps(
+export default ensureProps<
+    CosignTransactionProposalProps,
+    { location: UnsafeCosignLocation }
+>(
     CosignTransactionProposal,
-    (p) => !!p.location.state,
+    (p): p is CosignTransactionProposalProps => !!p.location.state,
     <Redirect to={routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION} />
 );

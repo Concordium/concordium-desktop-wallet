@@ -1,6 +1,6 @@
 import React from 'react';
 import Loading from '~/cross-app-components/Loading';
-import withChainData, { ChainData } from '../../common/withChainData';
+import withChainData, { ChainData } from '~/utils/withChainData';
 import ElectionDifficultyInput from './ElectionDifficultyInput';
 import { electionDifficultyResolution } from './util';
 
@@ -27,14 +27,14 @@ export default withChainData(function ElectionDifficultyView({
     return (
         <>
             <ElectionDifficultyInput
-                label="Current election difficulty"
-                disabled
+                label="Current election difficulty:"
+                display
                 value={currentElectionDifficulty}
                 timePerSlot={slotDuration}
             />
             <ElectionDifficultyInput
-                label="New election difficulty"
-                readOnly
+                label="New election difficulty:"
+                display
                 value={electionDifficulty / electionDifficultyResolution}
                 timePerSlot={slotDuration}
             />

@@ -1,5 +1,37 @@
 # Changelog
 
+## 1.4.1
+
+### Fixed
+
+-   Fixed an issue that made it impossible to create a transaction to do passive delegation.
+
+## 1.4.0
+
+### Added
+
+-   Added logging, which can be exported from the application menu.
+-   Added support for the register data transaction.
+-   Allow users to verify address on Ledger device.
+-   Allow users to choose CCD or microCCD as the unit used in account report.
+-   Dedicated spaces to baking/delegating in accounts section.
+-   New flows for configuring account as baker, which will be effective when the node is updated to protocol version 4.
+-   Flows for configuring delegation of stake for accounts, which will be effective when the node is updated to protocol version 4.
+-   Support for chain updates added in protocol version 4 (Cooldown, Pool and Time parameters).
+-   Support for chain updates that are changed in protocol version 4 (Mint distribution and level2 key updates).
+-   Support for new reward types introduced with delegation in transaction list and account export.
+-   Display transaction events when a single transaction is selected (Transaction view).
+
+### Changed
+
+-   Flows for pre-delegation baker transactions will be unavailable when protocol version 4 is activated on the node.
+-   Updated account views to include delegated stake.
+-   Moved flows for updating baker configuration in newly added baking section.
+-   Grouped all rewards under a single checkbox in transactions filter.
+-   Transaction filters are now accessible from account list view (on transaction log tab "Filters").
+-   Account address is accessible from new "Receive" button.
+-   Various UI updates to "Accounts" page.
+
 ## 1.3.1
 
 ### Fixed
@@ -13,7 +45,7 @@
 
 -   Added a GTU drop option for testnet and stagenet.
 -   In the case of a failed identity, the error details received from the identity provider are now displayed to the user.
--   UI flows for baker transactions for singler signer accounts.
+-   UI flows for baker transactions for single signer accounts.
 
 ### Changed
 

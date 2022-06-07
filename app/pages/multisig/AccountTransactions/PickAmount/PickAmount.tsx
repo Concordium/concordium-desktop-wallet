@@ -3,11 +3,12 @@ import clsx from 'clsx';
 import AccountCard from '~/components/AccountCard';
 import { Account, AccountInfo, Fraction } from '~/utils/types';
 import { validateTransferAmount } from '~/utils/transactionHelpers';
-import { collapseFraction } from '~/utils/basicHelpers';
-import { getGTUSymbol } from '~/utils/gtu';
+import { collapseFraction, throwLoggedError } from '~/utils/basicHelpers';
+import { getCcdSymbol } from '~/utils/ccd';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import { useAccountInfo } from '~/utils/dataHooks';
-import GtuInput from '~/components/Form/GtuInput';
+import CcdInput from '~/components/Form/CcdInput';
+import Label from '~/components/Label';
 
 import styles from './PickAmount.module.scss';
 
@@ -15,6 +16,8 @@ interface Props {
     account: Account | undefined;
     estimatedFee?: Fraction;
     amount: string | undefined;
+    /** show an existing value above input (in CCD), to indicate a change from an existing value */
+    existing?: string;
     setAmount: (amount: string | undefined) => void;
     validateAmount?: (
         amountToValidate: string,
@@ -32,42 +35,62 @@ export default function PickAmount({
     setAmount,
     amount,
     estimatedFee,
+    existing,
     validateAmount = validateTransferAmount,
 }: Props): JSX.Element {
     if (!account) {
-        throw new Error('Unexpected missing account');
+        throwLoggedError('Unexpected missing account');
     }
 
     const accountInfo = useAccountInfo(account.address);
     const [error, setError] = useState<string>();
+    const [validation, setValidation] = useState<string>();
     const [state, setState] = useState<string | undefined>(amount);
 
     const onChange = useCallback(
         (newState: string) => {
             setState(newState);
-            const validation = validateAmount(
+            const newValidation = validateAmount(
                 newState,
                 accountInfo,
                 estimatedFee && collapseFraction(estimatedFee)
             );
-            setError(validation);
-            setAmount(validation === undefined ? newState : undefined);
+            setValidation(newValidation);
+            setAmount(newValidation === undefined ? newState : undefined);
+            if (!newValidation) {
+                // if the value is valid, remove error instantly, instead of onBlur
+                setError(undefined);
+            }
         },
         [accountInfo, estimatedFee, setAmount, validateAmount]
     );
 
+    const onBlur = useCallback(() => {
+        // Update error displays onBlur
+        setError(validation);
+    }, [validation]);
+
     return (
         <div className="flexColumn">
             <AccountCard account={account} accountInfo={accountInfo} />
-            <h5 className="mB0">Amount:</h5>
-            <div className={clsx(styles.inputWrapper)}>
-                {getGTUSymbol()}{' '}
-                <GtuInput
-                    value={state}
-                    onChange={onChange}
-                    isInvalid={Boolean(error)}
-                    autoFocus
-                />
+            <div className="mT30">
+                {existing && (
+                    <div className="body3 mono mB10">
+                        Current stake: {getCcdSymbol()}
+                        {existing}
+                    </div>
+                )}
+                <Label className="mB5">Amount:</Label>
+                <div className={clsx(styles.inputWrapper)}>
+                    {getCcdSymbol()}
+                    <CcdInput
+                        value={state}
+                        onChange={onChange}
+                        onBlur={onBlur}
+                        isInvalid={Boolean(error)}
+                        autoFocus
+                    />
+                </div>
             </div>
             <ErrorMessage>{error}</ErrorMessage>
         </div>

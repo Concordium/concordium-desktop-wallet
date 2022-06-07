@@ -16,6 +16,7 @@ import {
 } from '~/utils/types';
 import { secondsSinceUnixEpoch } from '~/utils/timeHelpers';
 import { getActiveBooleanFilters } from '~/utils/accountHelpers';
+import loggingMethods from './logging';
 
 function getWalletProxy() {
     const targetNet = getTargetNet();
@@ -24,6 +25,9 @@ function getWalletProxy() {
     }
     if (targetNet === Net.Testnet) {
         return urls.walletProxyTestnet;
+    }
+    if (targetNet === Net.Protonet) {
+        return urls.walletProxyProtonet;
     }
     if (targetNet === Net.Stagenet) {
         return urls.walletProxyStagenet;
@@ -110,7 +114,19 @@ async function getTransactions(
     }
 
     const response = await walletProxy.get(proxyPath, {
-        transformResponse: (res) => parse(intToString(res, 'id')),
+        transformResponse: (res) => {
+            try {
+                return parse(intToString(res, 'id'));
+            } catch (e) {
+                loggingMethods.error(
+                    res,
+                    'Unable to parse response from wallet proxy'
+                );
+                throw new Error(
+                    `Unable to parse response from wallet proxy: ${res}`
+                );
+            }
+        },
     });
 
     const {

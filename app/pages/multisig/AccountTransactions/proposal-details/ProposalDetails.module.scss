@@ -6,7 +6,7 @@
 
 .title {
     display: block;
-    margin-bottom: 0;
+    margin-bottom: 5px;
     font-size: $font-size-body3;
     font-weight: $font-weight-bold;
 
@@ -17,7 +17,8 @@
 
 .value,
 .placeholder {
-    font-size: $font-size-body2;
+    font-family: $font-family-mono;
+    font-size: $font-size-body3;
     margin: 0;
 }
 
@@ -26,8 +27,9 @@
     composes: textFaded from global;
 }
 
-.note {
+.note,
+.address {
+    font-family: $font-family-mono;
     font-size: $font-size-body4;
-    margin-top: 5px;
-    margin-bottom: 0;
+    margin: 0;
 }

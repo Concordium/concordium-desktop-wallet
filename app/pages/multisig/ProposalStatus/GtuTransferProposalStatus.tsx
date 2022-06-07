@@ -1,6 +1,6 @@
 /* eslint-disable promise/catch-or-return */
 import React, { useEffect, useState } from 'react';
-import { displayAsGTU } from '~/utils/gtu';
+import { displayAsCcd } from '~/utils/ccd';
 
 import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
 import { lookupName } from '~/utils/addressBookHelpers';
@@ -30,12 +30,12 @@ function getSpecifics(
     ) {
         return {
             amount: BigInt(transaction.payload.amount),
-            title: 'CCD Transfer',
+            title: 'CCD transfer',
         };
     }
     return {
         amount: getScheduledTransferAmount(transaction as ScheduledTransfer),
-        title: 'CCD Transfer with a Schedule',
+        title: 'CCD transfer with a schedule',
     };
 }
 
@@ -67,12 +67,12 @@ export default function GtuTransferProposalStatus({
         <ProposalStatusView
             {...proposalStatusViewProps}
             headerLeft={senderName || transaction.sender}
-            headerRight="CCD Transfer"
+            headerRight="CCD transfer"
             status={status}
             title={title}
         >
             <span className="textFaded">
-                {displayAsGTU(amount)} to{' '}
+                {displayAsCcd(amount)} to{' '}
                 {receiverName ? `${receiverName} ` : ''}(
                 {transaction.payload.toAddress.substr(0, 8)}...)
             </span>

@@ -9,6 +9,7 @@ import {
     PublicInformationForIp,
     CreationKeys,
     Global,
+    BlsKeyTypes,
 } from '~/utils/types';
 import Card from '~/cross-app-components/Card';
 import { globalSelector } from '~/features/GlobalSlice';
@@ -41,7 +42,7 @@ const IPDetails = (info: PublicInformationForIp) => (
             />
         </div>
         <p>
-            <b>Signature Threshold:</b> {info.publicKeys.threshold}
+            <b>Signature threshold:</b> {info.publicKeys.threshold}
         </p>
     </div>
 );
@@ -88,8 +89,14 @@ export default function IdentityIssuanceChooseProvider({
     useEffect(() => {
         getIdentityProviders()
             .then((loadedProviders) => setProviders(loadedProviders))
-            .catch(() => onError('Unable to load identity providers'));
-    }, [dispatch, onError]);
+            .catch((e) => {
+                window.log.warn(
+                    `Unable to load identity providers due to ${e.message}`
+                );
+                onError('Unable to load identity providers');
+            });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // This is run in an effect, to prevent navigation if the component is unmounted
     useEffect(() => {
@@ -146,6 +153,7 @@ export default function IdentityIssuanceChooseProvider({
                         ledger,
                         IPDetails
                     );
+                    window.log.info('Created Identity Object Request.');
 
                     setNextLocationState({
                         ...idObj,
@@ -220,6 +228,7 @@ export default function IdentityIssuanceChooseProvider({
                     ledgerCallback={withLedger}
                     preCallback={getIdentityNumber}
                     disabled={!provider}
+                    exportType={BlsKeyTypes.Seed}
                 />
             </div>
         </>

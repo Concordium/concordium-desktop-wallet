@@ -35,8 +35,8 @@ import {
     accountInfoSelector,
 } from '~/features/AccountSlice';
 import { validateMemo } from '~/utils/transactionHelpers';
-import { collapseFraction } from '~/utils/basicHelpers';
-import { toMicroUnits, displayAsGTU } from '~/utils/gtu';
+import { collapseFraction, throwLoggedError } from '~/utils/basicHelpers';
+import { ccdToMicroCcd, displayAsCcd } from '~/utils/ccd';
 import { useAsyncMemo } from '~/utils/hooks';
 import { nodeSupportsMemo } from '~/node/nodeHelpers';
 import { stringify } from '~/utils/JSONHelper';
@@ -58,11 +58,11 @@ function subTitle(currentLocation: string) {
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY:
             return 'Select transaction expiry time';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
-            return 'Signature and Hardware Wallet';
+            return 'Signature and hardware wallet';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE:
             return 'Setup the release schedule';
         default:
-            throw new Error('unknown location');
+            return throwLoggedError('unknown location');
     }
 }
 
@@ -151,10 +151,10 @@ function CreateTransferProposal({
         if (
             estimatedFee &&
             amount &&
-            atDisposal < toMicroUnits(amount) + collapseFraction(estimatedFee)
+            atDisposal < ccdToMicroCcd(amount) + collapseFraction(estimatedFee)
         ) {
             setAmountError(
-                `Insufficient funds: ${displayAsGTU(atDisposal)} at disposal.`
+                `Insufficient funds: ${displayAsCcd(atDisposal)} at disposal.`
             );
         } else {
             setAmountError(undefined);
@@ -186,16 +186,16 @@ function CreateTransferProposal({
 
     function renderSignTransaction() {
         if (!account || !recipient || !expiryTime || !amount) {
-            throw new Error(
+            throwLoggedError(
                 'Unexpected missing account, amount, recipient and/or expiry time'
             );
         }
         return (
             <CreateTransaction
                 transactionKind={transactionKind}
-                recipient={recipient}
-                amount={amount}
                 account={account}
+                amount={ccdToMicroCcd(amount)}
+                recipient={recipient.address}
                 schedule={schedule}
                 memo={memo}
                 estimatedFee={estimatedFee}
@@ -206,7 +206,7 @@ function CreateTransferProposal({
 
     function renderBuildSchedule() {
         if (!account || !recipient || !amount) {
-            throw new Error(
+            throwLoggedError(
                 'Unexpected missing account, amount and/or recipient'
             );
         }
@@ -228,11 +228,7 @@ function CreateTransferProposal({
     }
 
     return (
-        <MultiSignatureLayout
-            pageTitle={handler.title}
-            stepTitle={`Transaction Proposal - ${handler.type}`}
-            delegateScroll
-        >
+        <MultiSignatureLayout pageTitle={handler.title} delegateScroll>
             <div className={styles.subtractContainerPadding}>
                 <Columns divider columnScroll columnClassName={styles.column}>
                     <Columns.Column
@@ -240,7 +236,7 @@ function CreateTransferProposal({
                             styles.transactionDetailsColumn,
                             styles.stretchColumn
                         )}
-                        header="Transaction Details"
+                        header="Transaction details"
                     >
                         <div className={styles.columnContent}>
                             <TransactionProposalDetails
@@ -389,7 +385,9 @@ function CreateTransferProposal({
                                         setAccount={setAccount}
                                         chosenAccount={account}
                                         filter={isMultiSig}
-                                        onAccountClicked={continueAction}
+                                        onAccountClicked={() =>
+                                            continueAction()
+                                        }
                                         messageWhenEmpty="There are no accounts that require multiple signatures"
                                     />
                                 </div>

@@ -10,6 +10,7 @@ import {
     RecoveredIdentity,
     RejectedIdentity,
     IdentityVersion,
+    BlsKeyTypes,
 } from './types';
 
 // Version that current identities are created with.
@@ -163,4 +164,15 @@ export function isRejectedIdentity(
         identity.status === IdentityStatus.Rejected ||
         identity.status === IdentityStatus.RejectedAndWarned
     );
+}
+
+/**
+ * Given an IdentityVersion, returns which Bls Key type should be requested from the ledger.
+ * Version 0 should request seeds (because the ledger does not implement the incorrect key generation algorithm) and version 1 should request actual Bls keys.
+ */
+export function getKeyExportType(version: IdentityVersion): BlsKeyTypes {
+    if (version === 0) {
+        return BlsKeyTypes.Seed;
+    }
+    return BlsKeyTypes.Key;
 }

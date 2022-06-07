@@ -1,13 +1,13 @@
 import React from 'react';
 import { RegisterOptions, useFormContext, Validate } from 'react-hook-form';
 import { EqualRecord, GasRewards } from '~/utils/types';
-import { rewardFractionResolution } from '~/constants/updateConstants.json';
+import updateConstants from '~/constants/updateConstants.json';
 import {
-    FormGasRewardFractionField,
-    GasRewardFractionField,
-    GasRewardFractionFieldProps,
-    gasRewardFractionFieldResolution,
-} from './GasRewardFractionField';
+    FormRewardFractionField,
+    RewardFractionField,
+    RewardFractionFieldProps,
+    rewardFractionFieldResolution,
+} from '../common/RewardFractionField';
 import { isDefined } from '~/utils/basicHelpers';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import { isValidBigInt } from '~/utils/numberStringHelpers';
@@ -23,20 +23,20 @@ const fieldNames: EqualRecord<UpdateGasRewardsFields> = {
 
 const labels: { [P in keyof UpdateGasRewardsFields]: string } = {
     baker: 'Baker:',
-    finalizationProof: 'Finalization Proof:',
-    accountCreation: 'Account Creation:',
-    chainUpdate: 'Chain Update:',
+    finalizationProof: 'Finalization proof:',
+    accountCreation: 'Account creation:',
+    chainUpdate: 'Chain update:',
 };
 
 const convertsToInteger: Validate = (v: number) =>
     isValidBigInt(v) ||
-    `Value must be divisible by ${1 / gasRewardFractionFieldResolution}`;
+    `Value must be divisible by ${1 / rewardFractionFieldResolution}`;
 
 const validationRules: RegisterOptions = {
     required: 'Value is required',
     min: { value: 0, message: 'Value can not be negative' },
     max: {
-        value: rewardFractionResolution,
+        value: updateConstants.rewardFractionResolution,
         message: 'Value can not be above 100',
     },
     validate: {
@@ -48,13 +48,15 @@ interface GasRewardsFormProps {
     gasRewards: GasRewards;
     disabled?: boolean;
     readOnly?: boolean;
+    display?: boolean;
     title: string;
 }
 
 export default function GasRewardsForm({
     gasRewards,
     disabled = false,
-    readOnly = false,
+    display = false,
+    readOnly = display,
     title,
 }: GasRewardsFormProps): JSX.Element {
     const fields = Object.keys(fieldNames) as Array<keyof GasRewards>;
@@ -71,7 +73,7 @@ export default function GasRewardsForm({
                 const value = gasRewards[field];
 
                 const common: Pick<
-                    GasRewardFractionFieldProps,
+                    RewardFractionFieldProps,
                     'className' | 'label'
                 > & { key: string } = {
                     label,
@@ -80,14 +82,15 @@ export default function GasRewardsForm({
                 };
 
                 return disabled || readOnly ? (
-                    <GasRewardFractionField
+                    <RewardFractionField
                         {...common}
                         value={value}
                         disabled={disabled}
                         readOnly={readOnly}
+                        display={display}
                     />
                 ) : (
-                    <FormGasRewardFractionField
+                    <FormRewardFractionField
                         {...common}
                         name={field}
                         defaultValue={value}

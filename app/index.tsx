@@ -1,34 +1,57 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { render } from 'react-dom';
 import { AppContainer as ReactHotAppContainer } from 'react-hot-loader';
 import { push } from 'connected-react-router';
 import { UpdateInfo } from 'electron-updater';
+
+import './styles/libs.global.scss';
+
 import Root from './shell/Root';
 import { history, configuredStore } from './store/store';
 import { init as initMisc } from './features/MiscSlice';
 import { triggerUpdateNotification } from './features/NotificationSlice';
+import ErrorBoundary from '~/components/ErrorBoundary';
 
 import './styles/app.global.scss';
 
-const store = configuredStore();
+try {
+    const store = configuredStore();
 
-initMisc(store.dispatch);
-window.addListener.openRoute((_, route: string) => {
-    store.dispatch(push(route));
-});
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, no-console
-window.addListener.logFromMain((_, ...args: any[]) => console.log(...args));
+    window.autoUpdate.onError((_, errorMessage: string, error: Error) =>
+        window.log.error(error, errorMessage)
+    );
 
-window.autoUpdate.onUpdateAvailable((_, info: UpdateInfo) => {
-    store.dispatch(triggerUpdateNotification(info.version));
-});
-const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
+    initMisc(store.dispatch);
+    window.addListener.openRoute((_, route: string) => {
+        window.log.info(`Routed to${route}`);
+        store.dispatch(push(route));
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-console
+    window.addListener.logFromMain((_, ...args: any[]) => console.log(...args));
 
-document.addEventListener('DOMContentLoaded', () =>
-    render(
-        <AppContainer>
-            <Root store={store} history={history} />
-        </AppContainer>,
-        document.getElementById('root')
-    )
-);
+    window.addEventListener('unhandledrejection', (promiseRejectionEvent) =>
+        window.log.error(
+            `Uncaught rejection: ${promiseRejectionEvent.reason.toString()}`
+        )
+    );
+
+    window.autoUpdate.onUpdateAvailable(
+        (_, info: UpdateInfo, automatic: boolean) =>
+            triggerUpdateNotification(store.dispatch, info.version, automatic)
+    );
+
+    const AppContainer = ReactHotAppContainer;
+
+    document.addEventListener('DOMContentLoaded', () =>
+        render(
+            <AppContainer>
+                <ErrorBoundary>
+                    <Root store={store} history={history} />
+                </ErrorBoundary>
+            </AppContainer>,
+            document.getElementById('root')
+        )
+    );
+} catch (error) {
+    window.log.error(error, 'Error thrown in index.tsx');
+}

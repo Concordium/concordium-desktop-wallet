@@ -8,6 +8,14 @@ import MultiSignatureCreateProposal from './MultiSignatureCreateProposal';
 import SubmittedProposal from './SubmittedProposal';
 import ExportKeyView from './ExportKeyView/ExportKeyView';
 import CreateAccountTransactionView from './AccountTransactions/CreateAccountTransactionView';
+import AddBaker from './AccountTransactions/AddBaker';
+import RemoveBaker from './AccountTransactions/RemoveBaker';
+import UpdateBakerStake from './AccountTransactions/UpdateBakerStake';
+import UpdateBakerPool from './AccountTransactions/UpdateBakerPool';
+import UpdateBakerKeys from './AccountTransactions/UpdateBakerKeys';
+import AddDelegation from './AccountTransactions/AddDelegation';
+import UpdateDelegation from './AccountTransactions/UpdateDelegation';
+import RemoveDelegation from './AccountTransactions/RemoveDelegation';
 
 export default function MultiSignatureRoutes(): JSX.Element {
     return (
@@ -15,6 +23,38 @@ export default function MultiSignatureRoutes(): JSX.Element {
             <Route
                 path={routes.MULTISIGTRANSACTIONS_SUBMITTED_TRANSACTION}
                 component={SubmittedProposal}
+            />
+            <Route
+                path={routes.MULTISIGTRANSACTIONS_ADD_BAKER}
+                component={AddBaker}
+            />
+            <Route
+                path={routes.MULTISIGTRANSACTIONS_REMOVE_BAKER}
+                component={RemoveBaker}
+            />
+            <Route
+                path={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_STAKE}
+                component={UpdateBakerStake}
+            />
+            <Route
+                path={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_POOL}
+                component={UpdateBakerPool}
+            />
+            <Route
+                path={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_KEYS}
+                component={UpdateBakerKeys}
+            />
+            <Route
+                path={routes.MULTISIGTRANSACTIONS_ADD_DELEGATION}
+                component={AddDelegation}
+            />
+            <Route
+                path={routes.MULTISIGTRANSACTIONS_UPDATE_DELEGATION}
+                component={UpdateDelegation}
+            />
+            <Route
+                path={routes.MULTISIGTRANSACTIONS_REMOVE_DELEGATION}
+                component={RemoveDelegation}
             />
             <Route
                 path={routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION}

@@ -2,6 +2,7 @@ import {
     AccountAddress,
     CredentialRegistrationId,
     ConcordiumNodeClient,
+    BakerId,
 } from '@concordium/node-sdk';
 import { credentials, Metadata } from '@grpc/grpc-js';
 import SendTransactionClient from '~/node/ConcordiumNodeClient';
@@ -100,6 +101,9 @@ const exposedMethods: GRPC = {
     nodeConsensusAndGlobal: async (address: string, port: string) => {
         return getConsensusStatusAndCryptographicParameters(address, port);
     },
+    getRewardStatus: (blockHash: string) => client.getRewardStatus(blockHash),
+    getPoolStatus: (blockHash: string, bakerId: BakerId) =>
+        client.getPoolStatus(blockHash, bakerId),
 };
 
 export default exposedMethods;

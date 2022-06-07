@@ -1,4 +1,5 @@
 import React from 'react';
+import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import BakerStakeThresholdView from '~/pages/multisig/updates/BakerStakeThreshold/BakerStakeThresholdView';
 import UpdateBakerStakeThreshold, {
     UpdateBakerStakeThresholdFields,
@@ -18,7 +19,7 @@ import {
 import { serializeBakerStakeThreshold } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Update Baker Stake Threshold';
+const TYPE = 'Update baker stake threshold';
 
 type TransactionType = UpdateInstruction<BakerStakeThreshold>;
 
@@ -35,9 +36,13 @@ export default class BakerStakeThresholdHandler
         { threshold: bakerStakeThreshold }: UpdateBakerStakeThresholdFields,
         effectiveTime: bigint,
         expiryTime: bigint
-    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+    ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         if (!blockSummary) {
             return undefined;
+        }
+
+        if (!isBlockSummaryV0(blockSummary)) {
+            throw new Error('Update incompatible with chain protocol version');
         }
 
         const sequenceNumber =
@@ -45,7 +50,7 @@ export default class BakerStakeThresholdHandler
                 .nextSequenceNumber;
         const {
             threshold,
-        } = blockSummary.updates.keys.level2Keys.bakerStakeThreshold;
+        } = blockSummary.updates.keys.level2Keys.poolParameters;
 
         return createUpdateMultiSignatureTransaction(
             { threshold: BigInt(bakerStakeThreshold) },
@@ -82,7 +87,7 @@ export default class BakerStakeThresholdHandler
     }
 
     getAuthorization(authorizations: Authorizations) {
-        return authorizations.bakerStakeThreshold;
+        return authorizations.poolParameters;
     }
 
     update = UpdateBakerStakeThreshold;

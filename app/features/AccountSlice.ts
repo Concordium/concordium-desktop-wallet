@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { LOCATION_CHANGE } from 'connected-react-router';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
 // eslint-disable-next-line import/no-cycle
@@ -45,7 +46,7 @@ import { hasPendingTransactions } from '~/database/TransactionDao';
 import { accountSimpleView, defaultAccount } from '~/database/PreferencesDao';
 import { stringify, parse } from '~/utils/JSONHelper';
 import { getCredId } from '~/utils/credentialHelper';
-import { mapRecordValues } from '~/utils/basicHelpers';
+import { throwLoggedError, mapRecordValues } from '~/utils/basicHelpers';
 import {
     getAccountInfo,
     getAccountInfoOfCredential,
@@ -56,6 +57,7 @@ export interface AccountState {
     accounts: Account[];
     accountsInfo: Record<string, string>;
     chosenAccountAddress: string;
+    accountChanged: boolean;
     defaultAccount: string | undefined;
 }
 
@@ -69,6 +71,14 @@ function getValidAccountsIndices(accounts: Account[]): AccountByIndexTuple[] {
         )
         .filter(([, acc]) => acc.status === AccountStatus.Confirmed);
 }
+
+const setChosenAccountAddress = (state: AccountState, address: string) => {
+    if (state.chosenAccountAddress !== address) {
+        state.accountChanged = true;
+    }
+
+    state.chosenAccountAddress = address;
+};
 
 const setConfirmedAccount = (next: boolean) => (state: AccountState) => {
     const chosenIndex = state.accounts.findIndex(
@@ -84,10 +94,13 @@ const setConfirmedAccount = (next: boolean) => (state: AccountState) => {
         ? ([i]: AccountByIndexTuple) => i > chosenIndex
         : ([i]: AccountByIndexTuple) => i < chosenIndex;
 
-    state.chosenAccountAddress =
+    const nextChosenAccountAddress =
         confirmedAccountsIndices.find(firstValid)?.[1].address ??
-        confirmedAccountsIndices[0]?.[1].address ??
-        state.chosenAccountAddress;
+        confirmedAccountsIndices[0]?.[1].address;
+
+    if (nextChosenAccountAddress) {
+        setChosenAccountAddress(state, nextChosenAccountAddress);
+    }
 };
 
 const initialState: AccountState = {
@@ -95,6 +108,7 @@ const initialState: AccountState = {
     accounts: [],
     accountsInfo: {},
     chosenAccountAddress: '',
+    accountChanged: true,
     defaultAccount: undefined,
 };
 
@@ -108,14 +122,16 @@ const accountsSlice = createSlice({
         nextConfirmedAccount: setConfirmedAccount(true),
         previousConfirmedAccount: setConfirmedAccount(false),
         chooseAccount: (state, input: PayloadAction<string>) => {
-            state.chosenAccountAddress = input.payload;
+            setChosenAccountAddress(state, input.payload);
         },
         updateAccounts: (state, input) => {
             state.accounts = input.payload;
 
             if (!state.chosenAccountAddress) {
-                state.chosenAccountAddress =
-                    state.defaultAccount || state.accounts[0]?.address || '';
+                setChosenAccountAddress(
+                    state,
+                    state.defaultAccount || state.accounts[0]?.address || ''
+                );
             }
         },
         setAccountInfos: (
@@ -128,7 +144,7 @@ const accountsSlice = createSlice({
             state.defaultAccount = input.payload;
 
             if (input.payload) {
-                state.chosenAccountAddress = input.payload;
+                setChosenAccountAddress(state, input.payload);
             }
         },
         addToAccountInfos: (
@@ -156,6 +172,11 @@ const accountsSlice = createSlice({
                 };
             }
         },
+    },
+    extraReducers(builder) {
+        builder.addCase(LOCATION_CHANGE, (state) => {
+            state.accountChanged = false;
+        });
     },
 });
 
@@ -197,7 +218,9 @@ export const chosenAccountInfoSelector = (
         ]
     );
 
-export const accountInfoSelector = (account?: Account) => (state: RootState) =>
+export const accountInfoSelector = (account?: Account) => (
+    state: RootState
+): AccountInfo | undefined =>
     parse(state.accounts.accountsInfo?.[account?.address ?? '']);
 
 export const defaultAccountSelector = (state: RootState) =>
@@ -440,7 +463,7 @@ export async function loadAccountInfos(
         const accountInfo = await getAccountInfo(account.address, blockHash);
         if (!accountInfo) {
             throw new Error(
-                'A confirmed account does not exist on the connected node. Please check that your node is up to date with the blockchain.'
+                `A confirmed account (${account.name}) does not exist on the connected node. Please check that your node is up to date with the blockchain. Account Address: ${account.address}`
             );
         }
         map[account.address] = accountInfo;
@@ -454,8 +477,8 @@ export async function loadAccountInfos(
             blockHash
         );
         if (!accountInfo) {
-            throw new Error(
-                `Genesis Account '${account.name}' not found on chain. Associated credId: ${account.address}`
+            throwLoggedError(
+                `Genesis account '${account.name}' not found on chain. Associated credId: ${account.address}`
             );
         }
         const address = await initializeGenesisAccount(
@@ -488,10 +511,16 @@ export async function updateAccountInfoOfAddress(
  * Updates the given account's accountInfo, in the state, and check if there is updates to the account.
  * If given an address of an account that doesn't exist on chain, this throws an error.
  */
-export async function updateAccountInfo(account: Account, dispatch: Dispatch) {
+export async function updateAccountInfo(
+    account: Account,
+    currentInfo: AccountInfo | undefined,
+    dispatch: Dispatch
+) {
     const accountInfo = await getAccountInfoOfAddress(account.address);
-    await updateAccountFromAccountInfo(dispatch, account, accountInfo);
-    return updateAccountInfoEntry(dispatch, account.address, accountInfo);
+    if (stringify(accountInfo) !== stringify(currentInfo)) {
+        await updateAccountFromAccountInfo(dispatch, account, accountInfo);
+        updateAccountInfoEntry(dispatch, account.address, accountInfo);
+    }
 }
 
 // Add an account with pending status..
@@ -536,8 +565,10 @@ export async function confirmAccount(
     transactionId: string
 ) {
     const response = await getStatus(transactionId);
+
     switch (response.status) {
         case TransactionStatus.Rejected:
+            window.log.warn('account creation was rejected.');
             await updateAccount(accountAddress, {
                 status: AccountStatus.Rejected,
             });
@@ -557,7 +588,9 @@ export async function confirmAccount(
             });
             break;
         default:
-            throw new Error('Unexpected status was returned by the poller!');
+            throwLoggedError(
+                `Unexpected status was returned by the poller: ${response.status}`
+            );
     }
     return loadAccounts(dispatch);
 }
@@ -573,7 +606,9 @@ export async function decryptAccountBalance(
     dispatch: Dispatch
 ) {
     if (!account.incomingAmounts) {
-        throw new Error('Unexpected missing field!');
+        throwLoggedError(
+            'Unexpected missing incoming amounts when decrypting!'
+        );
     }
     const encryptedAmounts = JSON.parse(account.incomingAmounts);
     encryptedAmounts.push(account.selfAmounts);

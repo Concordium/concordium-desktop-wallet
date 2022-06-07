@@ -7,7 +7,7 @@ import { useAnonymityRevokers } from '~/utils/dataHooks';
 import {
     lengthRule,
     validateHex,
-    mustBeANumber,
+    mustBeAnInteger,
     requiredMessage,
     pasteHere,
     enterHere,
@@ -31,7 +31,7 @@ export const fieldDisplays = {
     name: 'Name',
     url: 'URL',
     description: 'Description',
-    arIdentity: 'Anonymity Revoker',
+    arIdentity: 'Anonymity revoker',
     arPublicKey: 'Public key',
 };
 
@@ -47,17 +47,19 @@ export default function CreateAddAnonymityRevoker({
     const anonymityRevokers = useAnonymityRevokers();
     const arIdentityMustBeUnique = useCallback<Validate>(
         (v) =>
-            !anonymityRevokers
-                .map((revoker) => revoker.arIdentity.toString())
-                .includes(v) ||
-            `This ${fieldDisplays.arIdentity} is already in use`,
+            anonymityRevokers
+                ? !anonymityRevokers
+                      .map((revoker) => revoker.arIdentity.toString())
+                      .includes(v) ||
+                  `This ${fieldDisplays.arIdentity} is already in use`
+                : 'Anonymity revokers have not been loaded yet',
         [anonymityRevokers]
     );
 
     return (
         <>
             <Form.TextArea
-                className="body1"
+                className="body2"
                 name={fieldNames.name}
                 label={fieldDisplays.name}
                 defaultValue={defaults.name || undefined}
@@ -65,7 +67,7 @@ export default function CreateAddAnonymityRevoker({
                 rules={{ required: requiredMessage(fieldDisplays.name) }}
             />
             <Form.Input
-                className="body1"
+                className="body2"
                 name={fieldNames.url}
                 defaultValue={defaults.url || undefined}
                 label={fieldDisplays.url}
@@ -73,14 +75,14 @@ export default function CreateAddAnonymityRevoker({
                 rules={{ required: requiredMessage(fieldDisplays.url) }}
             />
             <Form.TextArea
-                className="body1"
+                className="body2"
                 name={fieldNames.description}
                 defaultValue={defaults.description || undefined}
                 label={fieldDisplays.description}
                 placeholder={enterHere(fieldDisplays.description)}
             />
             <Form.Input
-                className="body1"
+                className="body2"
                 name={fieldNames.arIdentity}
                 defaultValue={defaults.arIdentity || undefined}
                 label={fieldDisplays.arIdentity}
@@ -88,13 +90,13 @@ export default function CreateAddAnonymityRevoker({
                 rules={{
                     required: requiredMessage(fieldDisplays.arIdentity),
                     validate: {
-                        mustBeANumber,
+                        mustBeAnInteger,
                         arIdentityMustBeUnique,
                     },
                 }}
             />
             <Form.TextArea
-                className="body1"
+                className="body2"
                 name={fieldNames.arPublicKey}
                 defaultValue={defaults.arPublicKey || undefined}
                 label={fieldDisplays.arPublicKey}

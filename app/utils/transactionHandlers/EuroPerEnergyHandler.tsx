@@ -19,7 +19,7 @@ import {
 import { serializeExchangeRate } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Update Euro Per Energy';
+const TYPE = 'Update euro per energy';
 
 type TransactionType = UpdateInstruction<ExchangeRate>;
 
@@ -36,7 +36,7 @@ export default class EuroPerEnergyHandler
         { euroPerEnergyRate }: UpdateEuroPerEnergyFields,
         effectiveTime: bigint,
         expiryTime: bigint
-    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+    ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         if (!blockSummary) {
             return undefined;
         }

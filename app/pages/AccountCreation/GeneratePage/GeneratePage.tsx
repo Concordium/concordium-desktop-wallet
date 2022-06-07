@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
 import routes from '~/constants/routes.json';
+
 import { createCredentialDetails } from '~/utils/rustInterface';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import {
@@ -33,6 +34,8 @@ import errorMessages from '~/constants/errorMessages.json';
 import { AccountCardView } from '~/components/AccountCard/AccountCard';
 import SimpleLedgerWithCreationKeys from '~/components/ledger/SimpleLedgerWithCreationKeys';
 import pairWallet from '~/utils/WalletPairing';
+import { throwLoggedError } from '~/utils/basicHelpers';
+import { getKeyExportType } from '~/utils/identityHelpers';
 
 import generalStyles from '../AccountCreation.module.scss';
 import styles from './GeneratePage.module.scss';
@@ -72,12 +75,12 @@ export default function AccountCreationGenerate({
             }
         } catch (e) {
             removeFailed(dispatch, accountAddress);
-            throw new Error(
+            throwLoggedError(
                 'We were unable to deploy the credential, because the node could not be reached.'
             );
         }
         removeFailed(dispatch, accountAddress);
-        throw new Error(
+        throwLoggedError(
             'We were unable to deploy the credential, due to the node rejecting the transaction.'
         );
     }
@@ -118,7 +121,10 @@ export default function AccountCreationGenerate({
     useEffect(() => {
         getNextCredentialNumber(identity.id)
             .then(setCredentialNumber)
-            .catch(() => onError('Unable to read from database'));
+            .catch((e) => {
+                window.log.error(e, 'Call to Database Failed.');
+                onError('Unable to read from database');
+            });
     }, [identity.id]);
 
     const createAccount = useCallback(
@@ -129,9 +135,10 @@ export default function AccountCreationGenerate({
             ) => {
                 setMessage('Please wait');
                 if (!credentialNumber) {
-                    onError(
-                        'Missing credentialNumber, which is required. This is an internal error.'
-                    );
+                    const errorMessage =
+                        'Missing credentialNumber, which is required. This is an internal error.';
+                    window.log.error(errorMessage);
+                    onError(errorMessage);
                     return;
                 }
 
@@ -160,6 +167,7 @@ export default function AccountCreationGenerate({
                         randomness
                     );
                     await sendCredential(credentialDeploymentDetails);
+                    window.log.info(`Sent credential deployment to node`);
                     confirmAccount(
                         dispatch,
                         credentialDeploymentDetails.accountAddress,
@@ -172,6 +180,7 @@ export default function AccountCreationGenerate({
                         })
                     );
                 } catch (e) {
+                    window.log.error(e, 'Account creation failed');
                     onError(`Unable to create account due to ${e}`);
                 }
             };
@@ -231,6 +240,7 @@ export default function AccountCreationGenerate({
                         ledgerCallback={createAccount}
                         credentialNumber={credentialNumber}
                         preCallback={checkWallet}
+                        exportType={getKeyExportType(identity.version)}
                         compareButtonClassName="mT50"
                     />
                 </Columns.Column>

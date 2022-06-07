@@ -8,6 +8,7 @@ import {
     MultiSignatureTransaction,
     UpdateType,
     AuthorizationKeysUpdate,
+    getAuthorizationKeysUpdateVersion,
     isUpdateLevel2KeysWithLevel1Keys,
 } from '../types';
 import { serializeAuthorizationKeysUpdate } from '../UpdateSerialization';
@@ -17,7 +18,7 @@ import { removeRemovedKeys } from '~/pages/multisig/updates/UpdateGovernanceKeys
 import UpdateLevel2KeysWithLevel1Keys from '~/pages/multisig/updates/UpdateGovernanceKeys/UpdateLevel2KeysWithLevel1Keys';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Update Level 2 Governance Keys using level 1 keys';
+const TYPE = 'Update level 2 governance keys using level 1 keys';
 
 type TransactionType = UpdateInstruction<AuthorizationKeysUpdate>;
 
@@ -34,7 +35,7 @@ export default class UpdateLevel2KeysUsingLevel1KeysHandler
         authorizationKeysUpdate: AuthorizationKeysUpdate,
         effectiveTime: bigint,
         expiryTime: bigint
-    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+    ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         if (!blockSummary) {
             return undefined;
         }
@@ -77,7 +78,8 @@ export default class UpdateLevel2KeysUsingLevel1KeysHandler
             transactionWithoutRemoved,
             this.serializePayload(transaction),
             path,
-            0x2b
+            0x2b,
+            getAuthorizationKeysUpdateVersion(transaction.payload.keyUpdateType)
         );
     }
 

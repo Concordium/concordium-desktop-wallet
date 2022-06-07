@@ -12,6 +12,7 @@ import {
     Transaction,
     TransactionPayload,
 } from '~/utils/types';
+import { throwLoggedError } from '../basicHelpers';
 
 export default class AccountHandlerTypeMiddleware<T extends AccountTransaction>
     implements
@@ -39,7 +40,7 @@ export default class AccountHandlerTypeMiddleware<T extends AccountTransaction>
         if (instanceOfAccountTransaction(transaction)) {
             return transaction;
         }
-        throw Error('Invalid transaction type was given as input.');
+        return throwLoggedError('Invalid transaction type was given as input.');
     }
 
     getFileNameForExport(

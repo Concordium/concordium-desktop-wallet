@@ -77,7 +77,7 @@ jobs:
               run: yarn build-proto
 
             - name: Build
-              run: yarn build
+              run: yarn build-ci
 
             - name: Save build artifacts in cache
               uses: actions/cache@v2

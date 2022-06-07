@@ -31,7 +31,12 @@ export default function Import() {
     const [messageModalOpen, setMessageModalOpen] = useState(false);
     const [passwordModalOpen, setPasswordModalOpen] = useState(false);
 
-    function fail(message: string) {
+    function fail(message: string, error?: Error) {
+        if (error) {
+            window.log.error(error, message);
+        } else {
+            window.log.error(message);
+        }
         setErrorMessage(message);
         setMessageModalOpen(true);
         setPasswordModalOpen(false);
@@ -49,14 +54,14 @@ export default function Import() {
         try {
             decryptedData = decrypt(encryptedData, password);
         } catch (e) {
-            fail('Unable to decrypt file');
+            fail('Unable to decrypt file', e);
             return;
         }
         let data;
         try {
             data = JSON.parse(decryptedData);
         } catch (e) {
-            fail('Unable to parse decrypted data!');
+            fail('Unable to parse decrypted data!', e);
             return;
         }
         if (data.type === mobileWalletExportType) {
@@ -86,7 +91,7 @@ export default function Import() {
             try {
                 parsedEncryptedData = JSON.parse(rawData.toString('utf-8'));
             } catch (e) {
-                fail('This file is not a valid Export File!');
+                fail('This file is not a valid Export File!', e);
                 return;
             }
             const validation = validateEncryptedStructure(parsedEncryptedData);

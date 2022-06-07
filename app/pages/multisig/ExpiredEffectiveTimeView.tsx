@@ -21,7 +21,7 @@ export default function ExpiredTransactionView({
         isExpired(transaction)
     ) {
         return (
-            <div className="textError mT10">
+            <div className="textError mT10 mono body4">
                 The effective time has been exceeded
             </div>
         );

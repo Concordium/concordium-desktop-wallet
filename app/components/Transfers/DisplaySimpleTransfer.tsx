@@ -1,13 +1,13 @@
 import React from 'react';
 import { useRouteMatch } from 'react-router';
 import { AddressBookEntry, SimpleTransfer } from '~/utils/types';
-import { displayAsGTU } from '~/utils/gtu';
+import { displayAsCcd } from '~/utils/ccd';
 import routes from '~/constants/routes.json';
 import DisplayFee from '~/components/DisplayFee';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import DisplayMemo from './DisplayMemo';
-import DisplayAddress from '../DisplayAddress';
+import { DisplayFromAccount, DisplayToAccount } from './DisplayAccount';
 
 import styles from './transferDetails.module.scss';
 
@@ -31,22 +31,15 @@ export default function DisplaySimpleTransfer({
     const singleSigTransfer = useRouteMatch(routes.SUBMITTRANSFER);
     return (
         <>
-            <h5 className={styles.title}>From Account:</h5>
-            <p className={styles.name}>{fromName}</p>
-            <DisplayAddress
-                address={transaction.sender}
-                lineClassName={styles.address}
-            />
-            <h5 className={styles.title}>To Account:</h5>
-            <p className={styles.name}>{to?.name}</p>
-            <DisplayAddress
+            <DisplayFromAccount name={fromName} address={transaction.sender} />
+            <DisplayToAccount
+                name={to?.name}
+                note={to?.note}
                 address={transaction.payload.toAddress}
-                lineClassName={styles.address}
             />
-            {to?.note && <p className={styles.note}>Note: {to?.note}</p>}
             <h5 className={styles.title}>Amount:</h5>
             <p className={styles.amount}>
-                {displayAsGTU(transaction.payload.amount)}
+                {displayAsCcd(transaction.payload.amount)}
             </p>
             <DisplayFee className={styles.fee} transaction={transaction} />
             <DisplayMemo memo={memo} />

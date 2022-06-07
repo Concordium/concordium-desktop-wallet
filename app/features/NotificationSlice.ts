@@ -3,7 +3,9 @@ import { createSlice, Dispatch, PayloadAction } from '@reduxjs/toolkit';
 export enum NotificationLevel {
     Info = 'info',
     Error = 'error',
-    Update = 'update',
+    ManualUpdate = 'manual-update',
+    AutoUpdate = 'auto-update',
+    ClosingBakerPool = 'closing-baker-pool',
 }
 
 let nextId = 0;
@@ -13,17 +15,31 @@ interface NotificationBase {
 }
 
 interface UpdateNotification extends NotificationBase {
-    level: NotificationLevel.Update;
+    level: NotificationLevel.ManualUpdate | NotificationLevel.AutoUpdate;
     version: string;
 }
 
+export interface ClosingBakerNotification extends NotificationBase {
+    level: NotificationLevel.ClosingBakerPool;
+    accountName: string;
+}
+
 export interface Notification extends NotificationBase {
-    level: Exclude<NotificationLevel, NotificationLevel.Update>;
+    level: Exclude<
+        NotificationLevel,
+        | NotificationLevel.ManualUpdate
+        | NotificationLevel.AutoUpdate
+        | NotificationLevel.ClosingBakerPool
+    >;
     message: string;
 }
 
 interface NotificationSliceState {
-    notifications: (UpdateNotification | Notification)[];
+    notifications: (
+        | UpdateNotification
+        | Notification
+        | ClosingBakerNotification
+    )[];
 }
 
 const { actions, reducer } = createSlice({
@@ -32,17 +48,13 @@ const { actions, reducer } = createSlice({
         notifications: [],
     } as NotificationSliceState,
     reducers: {
-        pushNotification(state, action: PayloadAction<Notification>) {
+        pushNotification(
+            state,
+            action: PayloadAction<
+                Notification | UpdateNotification | ClosingBakerNotification
+            >
+        ) {
             state.notifications.push({ ...action.payload });
-        },
-        triggerUpdateNotification(state, action: PayloadAction<string>) {
-            state.notifications.push({
-                level: NotificationLevel.Update,
-                id: nextId,
-                version: action.payload,
-            });
-
-            nextId += 1;
         },
         removeNotification(state, action: PayloadAction<number>) {
             state.notifications = state.notifications.filter(
@@ -54,7 +66,39 @@ const { actions, reducer } = createSlice({
 
 export default reducer;
 
-export const { triggerUpdateNotification, removeNotification } = actions;
+export const { removeNotification } = actions;
+
+export function triggerUpdateNotification(
+    dispatch: Dispatch,
+    version: string,
+    auto: boolean
+) {
+    dispatch(
+        actions.pushNotification({
+            level: auto
+                ? NotificationLevel.AutoUpdate
+                : NotificationLevel.ManualUpdate,
+            id: nextId,
+            version,
+        })
+    );
+
+    nextId += 1;
+}
+
+export function triggerClosingBakerPoolNotification(
+    dispatch: Dispatch,
+    accountName: string
+) {
+    dispatch(
+        actions.pushNotification({
+            level: NotificationLevel.ClosingBakerPool,
+            id: nextId,
+            accountName,
+        })
+    );
+    nextId += 1;
+}
 
 /**
  * Display notifications of different types.

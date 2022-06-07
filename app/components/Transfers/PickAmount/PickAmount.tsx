@@ -11,7 +11,7 @@ import {
     Fraction,
     EqualRecord,
 } from '~/utils/types';
-import { getGTUSymbol } from '~/utils/gtu';
+import { getCcdSymbol } from '~/utils/ccd';
 import AddressBookEntryButton from '~/components/AddressBookEntryButton';
 import Button from '~/cross-app-components/Button';
 import Form from '~/components/Form';
@@ -116,12 +116,12 @@ export default function PickAmount({
             <h3 className={transferStyles.header}>{header}</h3>
             <Form formMethods={form} onSubmit={handleSubmit}>
                 <div className={styles.amountInputWrapper}>
-                    {getGTUSymbol()}
-                    <Form.GtuInput
+                    {getCcdSymbol()}
+                    <Form.CcdInput
                         name={fieldNames.amount}
                         defaultValue={defaultAmount}
                         rules={{
-                            required: 'Amount Required',
+                            required: 'Amount required',
                             validate,
                         }}
                     />
@@ -156,7 +156,7 @@ export default function PickAmount({
                             <Form.Checkbox
                                 name={fieldNames.recipient}
                                 rules={{
-                                    required: 'Recipient Required',
+                                    required: 'Recipient required',
                                 }}
                                 checked={Boolean(recipient?.address)}
                                 readOnly
@@ -172,7 +172,7 @@ export default function PickAmount({
                                 );
                             }}
                             title={
-                                recipient ? recipient.name : 'Select Recipient'
+                                recipient ? recipient.name : 'Select recipient'
                             }
                             comment={recipient?.note}
                         />

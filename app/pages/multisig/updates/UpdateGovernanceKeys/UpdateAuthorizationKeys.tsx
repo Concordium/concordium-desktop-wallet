@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Route, Switch, useRouteMatch } from 'react-router';
 import { FieldValues } from 'react-hook-form';
 import Columns from '~/components/Columns/Columns';
-import { BlockSummary, Key } from '~/node/NodeApiTypes';
+import { BlockSummary, Key, ConsensusStatus } from '~/node/NodeApiTypes';
 import {
     AccessStructure,
     AccessStructureEnum,
@@ -15,8 +15,6 @@ import {
     VerifyKey,
 } from '~/utils/types';
 import PublicKeyDetails from '~/components/ledger/PublicKeyDetails';
-import styles from '../../common/MultiSignatureFlowPage.module.scss';
-import localStyles from './UpdateAuthorizationKeys.module.scss';
 import { KeyUpdateEntry } from './KeyUpdateEntry';
 import {
     mapCurrentAuthorizationsToUpdate,
@@ -33,9 +31,24 @@ import KeySetSize from './KeySetSize';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import SetExpiryAndEffectiveTime from './SetExpiryAndEffectiveTime';
 
+import styles from '../../common/MultiSignatureFlowPage.module.scss';
+import localStyles from './UpdateAuthorizationKeys.module.scss';
+
+function getKeyUpdateType(protocolVersion: bigint, type: UpdateType) {
+    if (type === UpdateType.UpdateLevel2KeysUsingRootKeys) {
+        return protocolVersion > 3
+            ? AuthorizationKeysUpdateType.RootV1
+            : AuthorizationKeysUpdateType.RootV0;
+    }
+    return protocolVersion > 3
+        ? AuthorizationKeysUpdateType.Level1V1
+        : AuthorizationKeysUpdateType.Level1V0;
+}
+
 interface Props {
     defaults: FieldValues;
     blockSummary: BlockSummary;
+    consensusStatus: ConsensusStatus;
     type: UpdateType;
     handleKeySubmit(
         effectiveTime: Date,
@@ -47,6 +60,7 @@ interface Props {
 export default function UpdateAuthorizationKeys({
     defaults,
     blockSummary,
+    consensusStatus,
     type,
     handleKeySubmit,
 }: Props) {
@@ -60,10 +74,10 @@ export default function UpdateAuthorizationKeys({
 
     const [error, setError] = useState<string>();
 
-    const keyUpdateType: AuthorizationKeysUpdateType =
-        UpdateType.UpdateLevel2KeysUsingRootKeys === type
-            ? AuthorizationKeysUpdateType.Root
-            : AuthorizationKeysUpdateType.Level1;
+    const keyUpdateType = getKeyUpdateType(
+        consensusStatus.protocolVersion,
+        type
+    );
     const currentKeys = blockSummary.updates.keys.level2Keys.keys;
     const currentKeySetSize = currentKeys.length;
     const currentAuthorizations = blockSummary.updates.keys.level2Keys;
@@ -261,12 +275,16 @@ export default function UpdateAuthorizationKeys({
     ) {
         return (
             <div key={accessStructure.type}>
-                <h2>{getAccessStructureTitle(accessStructure.type)}</h2>
-                <h3>
+                <h5 className="mB5">
+                    {getAccessStructureTitle(accessStructure.type)}
+                </h5>
+                <div className="mono">
                     Current threshold:{' '}
-                    {currentThresholds.get(accessStructure.type)}
-                </h3>
-                <h3>New threshold: {accessStructure.threshold}</h3>
+                    <b>{currentThresholds.get(accessStructure.type)}</b>
+                </div>
+                <div className="mono">
+                    New threshold: <b>{accessStructure.threshold}</b>
+                </div>
                 <ul>
                     {accessStructure.publicKeyIndicies.map((publicKeyIndex) => {
                         const matchingKey = keys.find(
@@ -313,18 +331,23 @@ export default function UpdateAuthorizationKeys({
                 onClick={() => setError(undefined)}
                 header="Error"
             />
-            <Columns divider columnScroll columnClassName={styles.column}>
-                <Columns.Column header="Transaction Details">
+            <Columns
+                divider
+                columnScroll
+                className={styles.subtractContainerPadding}
+                columnClassName={styles.column}
+            >
+                <Columns.Column header="Transaction details">
                     <div className={styles.columnContent}>
-                        <h2>Level 2 keys and their indices</h2>
-                        <p>
+                        <h5 className="mB5">Level 2 keys and their indices</h5>
+                        <div className="mono">
                             Current size of level 2 key set:{' '}
                             <b>{currentKeySetSize}</b>
-                        </p>
-                        <p>
+                        </div>
+                        <div className="mono">
                             New size of level 2 key set:{' '}
                             <b>{newLevel2Keys.keys.length}</b>
-                        </p>
+                        </div>
                         <ul>
                             {removeRemovedKeys(newLevel2Keys).keys.map(
                                 (key, index) => {

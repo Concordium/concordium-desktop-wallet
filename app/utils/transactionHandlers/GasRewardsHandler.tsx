@@ -18,7 +18,7 @@ import {
 import { serializeGasRewards } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Update Gas Rewards';
+const TYPE = 'Update GAS rewards';
 
 type TransactionType = UpdateInstruction<GasRewards>;
 
@@ -35,7 +35,7 @@ export default class GasRewardsHandler
         gasRewards: UpdateGasRewardsFields,
         effectiveTime: bigint,
         expiryTime: bigint
-    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+    ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         if (!blockSummary) {
             return undefined;
         }

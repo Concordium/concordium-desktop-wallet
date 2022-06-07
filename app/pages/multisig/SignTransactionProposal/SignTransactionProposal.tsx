@@ -6,6 +6,7 @@ import routes from '~/constants/routes.json';
 import { BlockSummary } from '~/node/NodeApiTypes';
 import {
     AccountTransaction,
+    MakeOptional,
     MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
@@ -33,7 +34,7 @@ import MultiSignatureLayout from '../MultiSignatureLayout';
 import { parse, stringify } from '~/utils/JSONHelper';
 
 interface Props {
-    proposal: MultiSignatureTransaction;
+    proposal: Omit<MultiSignatureTransaction, 'id'>;
     blockSummary: BlockSummary;
 }
 
@@ -97,7 +98,7 @@ function SignTransactionProposalView({ proposal, blockSummary }: Props) {
 
         updateInstruction.signatures = signatures;
 
-        const updatedProposal = {
+        const updatedProposal: MakeOptional<MultiSignatureTransaction, 'id'> = {
             ...proposal,
             transaction: stringify(updateInstruction),
         };
@@ -105,6 +106,8 @@ function SignTransactionProposalView({ proposal, blockSummary }: Props) {
         // Save to database and use the assigned id to update the local object.
         const entryId = (await insert(updatedProposal))[0];
         updatedProposal.id = entryId;
+
+        window.log.info('created update instruction proposal');
 
         // Set the current proposal in the state to the one that was just generated.
         dispatch(addProposal(updatedProposal));
@@ -124,7 +127,7 @@ function SignTransactionProposalView({ proposal, blockSummary }: Props) {
     return (
         <MultiSignatureLayout
             pageTitle={transactionHandler.title}
-            stepTitle={`Transaction signing confirmation - ${transactionHandler.type}`}
+            stepTitle="Transaction signing confirmation"
             delegateScroll
         >
             <Columns
@@ -133,7 +136,7 @@ function SignTransactionProposalView({ proposal, blockSummary }: Props) {
                 columnClassName={styles.column}
                 columnScroll
             >
-                <Columns.Column header="Transaction Details">
+                <Columns.Column header="Transaction details">
                     <section className={styles.detailsColumnContent}>
                         <TransactionDetails transaction={transactionObject} />
                         <ExpiredTransactionView
@@ -142,7 +145,7 @@ function SignTransactionProposalView({ proposal, blockSummary }: Props) {
                     </section>
                 </Columns.Column>
                 <Columns.Column
-                    header="Signature and Hardware Wallet"
+                    header="Signature and hardware wallet"
                     className={styles.stretchColumn}
                 >
                     <SignTransaction
@@ -157,7 +160,7 @@ function SignTransactionProposalView({ proposal, blockSummary }: Props) {
 
 const SignTransactionProposal = ensureProps(
     SignTransactionProposalView,
-    ({ proposal }) => !!proposal,
+    (p: MakeOptional<Props, 'proposal'>): p is Props => !!p.proposal,
     <Redirect to={routes.MULTISIGTRANSACTIONS} />
 );
 

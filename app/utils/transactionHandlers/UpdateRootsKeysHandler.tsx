@@ -17,7 +17,7 @@ import { removeRemovedKeys } from '../updates/HigherLevelKeysHelpers';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Update Root Governance Keys';
+const TYPE = 'Update root governance keys';
 
 type TransactionType = UpdateInstruction<HigherLevelKeyUpdate>;
 
@@ -34,7 +34,7 @@ export default class UpdateRootKeysHandler
         higherLevelKeyUpdate: HigherLevelKeyUpdate,
         effectiveTime: bigint,
         expiryTime: bigint
-    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+    ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         if (!blockSummary) {
             return undefined;
         }

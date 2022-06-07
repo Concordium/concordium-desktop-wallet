@@ -21,7 +21,7 @@ import CopiableIdenticon from '~/components/CopiableIdenticon/CopiableIdenticon'
 import { getKeyDisplay } from '../menu/ExportKeyList';
 import styles from './ExportKeyView.module.scss';
 import Ledger from '~/components/ledger/Ledger';
-import { asyncNoOp } from '~/utils/basicHelpers';
+import { asyncNoOp, throwLoggedError } from '~/utils/basicHelpers';
 import Card from '~/cross-app-components/Card';
 import PrintButton from '~/components/PrintButton';
 import PrintFormat from './ExportKeyPrintFormat';
@@ -60,7 +60,7 @@ export default function ExportKeyView(): JSX.Element {
                 path = getGovernanceLevel2Path();
                 break;
             default:
-                throw new Error(
+                throwLoggedError(
                     `An unsupported keyType was received: ${keyType}`
                 );
         }
@@ -198,7 +198,7 @@ export default function ExportKeyView(): JSX.Element {
     return (
         <PageLayout>
             <PageLayout.Header>
-                <h1>Multi Signature Transactions</h1>
+                <h1>Multi signature transactions</h1>
             </PageLayout.Header>
             <PageLayout.Container className={styles.container} padding="both">
                 <h2>Export your {getKeyDisplay(keyType)}</h2>
