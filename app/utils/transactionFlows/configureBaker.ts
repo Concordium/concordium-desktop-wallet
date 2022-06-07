@@ -303,6 +303,12 @@ export function getEstimatedConfigureBakerFee(
     );
 }
 
+export const isPoolClosedForAll = (status: OpenStatus | OpenStatusText) => {
+    const parsed =
+        typeof status === 'number' ? status : openStatusEnumFromText(status);
+    return parsed === OpenStatus.ClosedForAll;
+};
+
 export const displayPoolOpen = (status: OpenStatus | OpenStatusText) => {
     const parsed =
         typeof status === 'number' ? status : openStatusEnumFromText(status);
