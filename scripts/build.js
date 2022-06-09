@@ -7,7 +7,9 @@ const fs = require('fs');
 const builder = require('electron-builder');
 
 const targetNet = process.env.TARGET_NET;
-const skipSigning = process.env.SIGNING.includes('skip');
+const skipSigning = process.env.SIGNING
+    ? process.env.SIGNING.trim() === 'skip'
+    : false;
 
 let name;
 let productName;
