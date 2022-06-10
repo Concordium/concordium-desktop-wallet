@@ -128,7 +128,7 @@ export default function UpdatePoolParameters({
             <section>
                 <h3>New pool parameters</h3>
                 <div>
-                    <h5>L Pool commissions</h5>
+                    <h5>Passive delegation commissions</h5>
                     <FractionFieldForm
                         label={fieldDisplays.passiveTransactionCommission}
                         name={fieldNames.passiveTransactionCommission}
