@@ -30,7 +30,7 @@ export default function ShowPoolParameters({
         <section>
             <h3>{title}</h3>
             <div>
-                <h5>L Pool commissions</h5>
+                <h5>Passive delegation commissions</h5>
                 <RewardFractionField
                     label={fieldDisplays.passiveTransactionCommission}
                     value={passiveTransactionCommission}
