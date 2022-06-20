@@ -141,7 +141,29 @@ export function saveFileDialog(opts: SaveDialogOptions) {
     return dialog.showSaveDialog(opts);
 }
 
-export default function initializeIpcHandlers(
+/**
+ * Removes all ipcMain handlers registered by 'initializeIpcHandler'.
+ */
+export function removeAllIpcHandlers() {
+    ipcMain.removeHandler(ipcCommands.getUserDataPath);
+    ipcMain.removeHandler(ipcCommands.print);
+    ipcMain.removeHandler(ipcCommands.openUrl);
+    ipcMain.removeHandler(ipcCommands.httpsGet);
+    ipcMain.removeHandler(ipcCommands.createView);
+    ipcMain.removeHandler(ipcCommands.removeView);
+    ipcMain.removeHandler(ipcCommands.resizeView);
+    ipcMain.removeHandler(ipcCommands.saveFileDialog);
+    ipcMain.removeHandler(ipcCommands.openFileDialog);
+    ipcMain.removeHandler(ipcCommands.messageBox);
+}
+
+/**
+ * Initializes ipcMain handlers.
+ *
+ * If adding a new handler to this method, then ensure that 'removeAllIpcHandlers'
+ * above is updated to keep in sync with this method.
+ */
+export function initializeIpcHandlers(
     mainWindow: BrowserWindow,
     printWindow: BrowserWindow,
     browserView: BrowserView
