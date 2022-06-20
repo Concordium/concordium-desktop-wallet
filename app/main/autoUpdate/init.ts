@@ -45,7 +45,26 @@ const handleUpdateDownloaded = (mainWindow: BrowserWindow) => async (
     }
 };
 
-export default function initAutoUpdate(mainWindow: BrowserWindow) {
+/**
+ * Removes all ipcMain handlers and auto update listeners added by
+ * 'initAutoUpdate'.
+ */
+export function removeAutoUpdateHandlersAndListeners() {
+    autoUpdater.removeAllListeners('update-available');
+    autoUpdater.removeAllListeners('error');
+    autoUpdater.removeAllListeners('update-downloaded');
+    ipcMain.removeHandler(triggerAppUpdate);
+    ipcMain.removeHandler(quitAndInstallUpdate);
+}
+
+/**
+ * Initializes the auto update functionality by setting up handlers
+ * and auto update listeners.
+ *
+ * If adding a new handler to this method, then ensure that 'removeAutoUpdateHandlersAndListeners'
+ * above is updated to keep in sync with this method.
+ */
+export function initAutoUpdate(mainWindow: BrowserWindow) {
     const canAutoUpdate =
         process.platform === 'win32' ||
         process.platform === 'darwin' ||

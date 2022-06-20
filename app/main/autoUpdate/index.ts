@@ -1,1 +1,1 @@
-export { default } from './init';
+export { initAutoUpdate, removeAutoUpdateHandlersAndListeners } from './init';

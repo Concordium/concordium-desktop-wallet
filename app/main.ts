@@ -13,8 +13,14 @@ import path from 'path';
 import { app, BrowserView, BrowserWindow, shell } from 'electron';
 import ipcRendererCommands from './constants/ipcRendererCommands.json';
 import { createMenu, addContextMenu } from './main/menu';
-import initializeIpcHandlers from './main/ipcHandlers';
-import initAutoUpdate from './main/autoUpdate';
+import {
+    initializeIpcHandlers,
+    removeAllIpcHandlers,
+} from './main/ipcHandlers';
+import {
+    initAutoUpdate,
+    removeAutoUpdateHandlersAndListeners,
+} from './main/autoUpdate';
 
 let mainWindow: BrowserWindow | null = null;
 let printWindow: BrowserWindow | null = null;
@@ -170,15 +176,21 @@ const createWindow = async () => {
     initializeIpcHandlers(mainWindow, printWindow, browserView);
 };
 
+const isMac = process.platform === 'darwin';
+
 app.on('window-all-closed', () => {
-    // Respect the OSX convention of having the application in memory even
-    // after all windows have been closed
-    if (process.platform !== 'darwin') {
+    // Respect the macOS convention of having the application in memory even
+    // after all windows have been closed.
+    if (!isMac) {
         app.quit();
+    } else {
+        // On macOS we have to clear all ipc handlers when all windows are closed,
+        // as we need to spawn new handlers that are connected to the newly created
+        // windows to avoid referencing destroyed objects.
+        removeAllIpcHandlers();
+        removeAutoUpdateHandlersAndListeners();
     }
 });
-
-const isMac = process.platform === 'darwin';
 
 if (process.env.E2E_BUILD === 'true') {
     // eslint-disable-next-line promise/catch-or-return

@@ -6,6 +6,13 @@
 
 -   Support for Ledger Nano S Plus devices.
 
+## 1.4.2
+
+### Fixed
+
+-   Fixed an issue on macOS where an error popup would show after closing the main application window and opening it again.
+-   Fixed an issue on macOS where identity creation was not possible after closing the main application window and opening it again.
+
 ## 1.4.1
 
 ### Added
