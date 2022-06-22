@@ -59,6 +59,13 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
         asyncWebAssembly: true,
     },
 
+    resolve: {
+        fallback: {
+            crypto: require.resolve('crypto-browserify'),
+            stream: require.resolve('stream-browserify'),
+        },
+    },
+
     plugins: [
         new webpack.EnvironmentPlugin({
             NODE_ENV: 'production',
@@ -72,6 +79,7 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
         }),
         new webpack.ProvidePlugin({
             process: 'process/browser',
+            Buffer: ['buffer/', 'Buffer'],
         }),
     ],
 });

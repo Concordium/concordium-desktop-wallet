@@ -43,6 +43,13 @@ module.exports = merge(baseConfig, {
         libraryTarget: 'var',
     },
 
+    resolve: {
+        fallback: {
+            crypto: require.resolve('crypto-browserify'),
+            stream: require.resolve('stream-browserify'),
+        },
+    },
+
     plugins: [
         new webpack.DllPlugin({
             path: path.join(dist, '[name].json'),
@@ -61,7 +68,9 @@ module.exports = merge(baseConfig, {
         new webpack.EnvironmentPlugin({
             NODE_ENV: 'development',
         }),
-
+        new webpack.ProvidePlugin({
+            Buffer: ['buffer/', 'Buffer'],
+        }),
         new webpack.LoaderOptionsPlugin({
             debug: true,
             options: {
