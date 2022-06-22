@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.0
+
+### Added
+
+-   Support for Ledger Nano S Plus devices.
+
 ## 1.4.2
 
 ### Fixed
