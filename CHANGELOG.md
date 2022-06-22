@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.3
+
+### Fixed
+
+-   Fixed an issue on macOS that prevented automatic updates from installing after successfully being downloaded and verified.
+
 ## 1.4.2
 
 ### Fixed
