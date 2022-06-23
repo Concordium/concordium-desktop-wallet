@@ -5,6 +5,10 @@ import { push, replace } from 'connected-react-router';
 import clsx from 'clsx';
 import PlusIcon from '@resources/svg/plus.svg';
 import {
+    ccdToMicroCcd,
+    displayAsCcd,
+} from 'wallet-common-helpers/lib/utils/ccd';
+import {
     Account,
     TransactionKindId,
     AddressBookEntry,
@@ -36,7 +40,6 @@ import {
 } from '~/features/AccountSlice';
 import { validateMemo } from '~/utils/transactionHelpers';
 import { collapseFraction, throwLoggedError } from '~/utils/basicHelpers';
-import { ccdToMicroCcd, displayAsCcd } from '~/utils/ccd';
 import { useAsyncMemo } from '~/utils/hooks';
 import { nodeSupportsMemo } from '~/node/nodeHelpers';
 import { stringify } from '~/utils/JSONHelper';

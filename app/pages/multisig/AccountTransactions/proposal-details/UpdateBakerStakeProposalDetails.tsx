@@ -1,9 +1,12 @@
 import React from 'react';
+import {
+    displayAsCcd,
+    microCcdToCcd,
+} from 'wallet-common-helpers/lib/utils/ccd';
 import { Account, Amount, Fraction } from '~/utils/types';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import { AccountDetail, AmountDetail, Details, formatNote } from './shared';
 import { useStakedAmount } from '~/utils/dataHooks';
-import { displayAsCcd, microCcdToCcd } from '~/utils/ccd';
 import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 
 interface Props {

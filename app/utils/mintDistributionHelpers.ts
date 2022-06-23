@@ -1,4 +1,4 @@
-import { getNumberParts } from './numberStringHelpers';
+import { getNumberParts } from 'wallet-common-helpers/lib/utils/numberStringHelpers';
 import { MintRate } from './types';
 
 export const parseMintRate = (mintRate: string): MintRate | undefined => {

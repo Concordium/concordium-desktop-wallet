@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import { getCcdSymbol } from 'wallet-common-helpers/lib/utils/ccd';
 import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
@@ -11,7 +12,6 @@ import {
     Fraction,
     EqualRecord,
 } from '~/utils/types';
-import { getCcdSymbol } from '~/utils/ccd';
 import AddressBookEntryButton from '~/components/AddressBookEntryButton';
 import Button from '~/cross-app-components/Button';
 import Form from '~/components/Form';

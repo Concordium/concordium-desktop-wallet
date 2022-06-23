@@ -1,6 +1,6 @@
 import React from 'react';
+import { toFixed } from 'wallet-common-helpers/lib/utils/numberStringHelpers';
 import { isDefined } from '~/utils/basicHelpers';
-import { toFixed } from '~/utils/numberStringHelpers';
 import { fractionResolutionToPercentage } from '~/utils/rewardFractionHelpers';
 
 import styles from './transferDetails.module.scss';

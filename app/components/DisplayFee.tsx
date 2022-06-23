@@ -1,7 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
+import { displayAsCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import { AccountTransaction } from '~/utils/types';
-import { displayAsCcd } from '~/utils/ccd';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 interface Props {

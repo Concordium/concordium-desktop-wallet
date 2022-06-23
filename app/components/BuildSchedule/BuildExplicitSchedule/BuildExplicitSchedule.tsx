@@ -8,13 +8,13 @@ import React, {
 import { useForm, Validate } from 'react-hook-form';
 import PlusIcon from '@resources/svg/plus.svg';
 import CloseIcon from '@resources/svg/cross.svg';
-import { EqualRecord, Schedule } from '~/utils/types';
 import {
     displayAsCcd,
     getCcdSymbol,
     isValidCcdString,
     ccdToMicroCcd,
-} from '~/utils/ccd';
+} from 'wallet-common-helpers/lib/utils/ccd';
+import { EqualRecord, Schedule } from '~/utils/types';
 import { getDefaultScheduledStartTime } from '~/utils/timeHelpers';
 import { toReleaseSchedule } from '~/utils/transactionHelpers';
 import Form from '../../Form';

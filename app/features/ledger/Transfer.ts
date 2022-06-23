@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer/';
+import { encodeAsCBOR } from 'wallet-common-helpers/lib/utils/cborHelper';
 import { Transport } from './Transport';
 import {
     SimpleTransferWithMemo,
@@ -60,7 +61,6 @@ import {
     putHexString,
 } from '../../utils/serializationHelpers';
 import { chunkBuffer, isDefined } from '~/utils/basicHelpers';
-import { encodeAsCBOR } from '~/utils/cborHelper';
 import {
     signEncryptedTransfer,
     signEncryptedTransferWithMemo,

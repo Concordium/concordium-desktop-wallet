@@ -5,6 +5,12 @@ import {
 } from '@concordium/node-sdk/lib/src/types';
 import { Validate } from 'react-hook-form';
 import {
+    ccdToMicroCcd,
+    isValidCcdString,
+    displayAsCcd,
+} from 'wallet-common-helpers/lib/utils/ccd';
+import { getEncodedSize } from 'wallet-common-helpers/lib/utils/cborHelper';
+import {
     dateFromTimeStamp,
     getDefaultExpiry,
     getNow,
@@ -53,8 +59,6 @@ import {
     getUpdateAccountCredentialEnergy,
     getPayloadSizeEstimate,
 } from './transactionCosts';
-import { ccdToMicroCcd, isValidCcdString, displayAsCcd } from './ccd';
-import { getEncodedSize } from './cborHelper';
 import externalConstants from '~/constants/externalConstants.json';
 import { isASCII } from './basicHelpers';
 import { getAmountAtDisposal } from './accountHelpers';

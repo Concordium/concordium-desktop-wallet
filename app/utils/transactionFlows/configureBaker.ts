@@ -1,9 +1,12 @@
 import type { AccountInfo, ChainParametersV1 } from '@concordium/node-sdk';
 import { isBakerAccountV1 } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { OpenStatus, OpenStatusText } from '@concordium/node-sdk/lib/src/types';
+import {
+    ccdToMicroCcd,
+    microCcdToCcd,
+} from 'wallet-common-helpers/lib/utils/ccd';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { isDefined, multiplyFraction } from '../basicHelpers';
-import { ccdToMicroCcd, microCcdToCcd } from '../ccd';
 import { not } from '../functionHelpers';
 import { fractionResolution } from '../rewardFractionHelpers';
 import { BakerKeys } from '../rustInterface';

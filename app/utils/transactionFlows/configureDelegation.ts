@@ -5,9 +5,12 @@ import {
     DelegationTargetBaker,
     DelegationTargetType,
 } from '@concordium/node-sdk/lib/src/types';
+import {
+    ccdToMicroCcd,
+    microCcdToCcd,
+} from 'wallet-common-helpers/lib/utils/ccd';
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { isDefined, multiplyFraction } from '../basicHelpers';
-import { ccdToMicroCcd, microCcdToCcd } from '../ccd';
 import { not } from '../functionHelpers';
 import { getTransactionKindCost } from '../transactionCosts';
 import { createConfigureDelegationTransaction } from '../transactionHelpers';

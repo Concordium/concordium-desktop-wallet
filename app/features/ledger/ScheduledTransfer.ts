@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer/';
+import { encodeAsCBOR } from 'wallet-common-helpers/lib/utils/cborHelper';
 import { Transport } from './Transport';
 import {
     Schedule,
@@ -14,7 +15,6 @@ import {
 import pathAsBuffer from './Path';
 import { chunkArray } from '~/utils/basicHelpers';
 import { encodeWord16 } from '~/utils/serializationHelpers';
-import { encodeAsCBOR } from '~/utils/cborHelper';
 import sendMemo from './Memo';
 
 const INS_TRANSFER_WITH_SCHEDULE = 0x03;

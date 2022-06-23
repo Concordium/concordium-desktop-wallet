@@ -1,6 +1,6 @@
+import { getCcdSymbol } from 'wallet-common-helpers/lib/utils/ccd';
 import { BlockSummary } from '~/node/NodeApiTypes';
 import { ExchangeRate } from '~/utils/types';
-import { getCcdSymbol } from '~/utils/ccd';
 import { RelativeRateFieldProps } from '../../common/RelativeRateField';
 
 export const getCurrentValue = (blockSummary: BlockSummary): ExchangeRate =>

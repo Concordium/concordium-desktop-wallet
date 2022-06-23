@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import RcSlider from 'rc-slider';
 import clsx from 'clsx';
+import { toFixed } from 'wallet-common-helpers/lib/utils/numberStringHelpers';
 import { CommonInputProps } from '../common';
 import InlineNumber from '../InlineNumber';
 import { isDefined, noOp, valueNoOp } from '~/utils/basicHelpers';
 import Label from '~/components/Label';
 import { ClassName } from '~/utils/types';
-import { toFixed } from '~/utils/numberStringHelpers';
 
 import styles from './Slider.module.scss';
 

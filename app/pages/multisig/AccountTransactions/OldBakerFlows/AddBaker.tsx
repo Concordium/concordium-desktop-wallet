@@ -10,6 +10,7 @@ import {
 } from 'react-router';
 import { push } from 'connected-react-router';
 import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { ccdToMicroCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import MultiSignatureLayout from '../../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
@@ -54,7 +55,6 @@ import DatePicker from '~/components/Form/DatePicker';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import BakerStakeSettings from '~/components/BakerTransactions/BakerStakeSettings';
-import { ccdToMicroCcd } from '~/utils/ccd';
 
 import styles from '../../common/MultiSignatureFlowPage.module.scss';
 

@@ -1,5 +1,5 @@
 import { Validate } from 'react-hook-form';
-import { isValidBigInt } from '~/utils/numberStringHelpers';
+import { isValidBigInt } from 'wallet-common-helpers/lib/utils/numberStringHelpers';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const allowOptional = (validator: Validate): Validate => (v: any) =>

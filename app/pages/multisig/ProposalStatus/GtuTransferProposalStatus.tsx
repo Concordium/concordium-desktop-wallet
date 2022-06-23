@@ -1,6 +1,6 @@
 /* eslint-disable promise/catch-or-return */
 import React, { useEffect, useState } from 'react';
-import { displayAsCcd } from '~/utils/ccd';
+import { displayAsCcd } from 'wallet-common-helpers/lib/utils/ccd';
 
 import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
 import { lookupName } from '~/utils/addressBookHelpers';

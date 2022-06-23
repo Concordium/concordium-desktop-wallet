@@ -1,7 +1,7 @@
 import React, { PropsWithChildren } from 'react';
+import { microCcdPerCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import { AccountState } from '~/features/AccountSlice';
 import { StoreWrapper } from '~/store/store';
-import { microCcdPerCcd } from '~/utils/ccd';
 import {
     PropsOf,
     Account,

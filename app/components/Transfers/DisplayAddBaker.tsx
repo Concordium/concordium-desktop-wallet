@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRouteMatch } from 'react-router';
+import { displayAsCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import { AddBaker } from '~/utils/types';
-import { displayAsCcd } from '~/utils/ccd';
 import DisplayFee from '~/components/DisplayFee';
 import { useAccountName } from '~/utils/dataHooks';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';

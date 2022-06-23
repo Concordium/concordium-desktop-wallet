@@ -2,10 +2,13 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { push, replace } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
+import {
+    displayAsCcd,
+    microCcdToCcd,
+} from 'wallet-common-helpers/lib/utils/ccd';
 import { stringify, parse } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
 import { Account, AddressBookEntry, Schedule } from '~/utils/types';
-import { displayAsCcd, microCcdToCcd } from '~/utils/ccd';
 import { collapseFraction } from '~/utils/basicHelpers';
 import {
     createScheduledTransferWithMemoTransaction,

@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import React, { ReactNode } from 'react';
-import { getCcdSymbol } from '~/utils/ccd';
+import { getCcdSymbol } from 'wallet-common-helpers/lib/utils/ccd';
 import { AddressBookEntry, Account } from '~/utils/types';
 import DisplayAddress from '~/components/DisplayAddress';
 

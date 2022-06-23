@@ -1,10 +1,10 @@
 import React from 'react';
 import { Story, Meta } from '@storybook/react/types-6-0';
 
+import { getCcdSymbol } from 'wallet-common-helpers/lib/utils/ccd';
 import Form, { FormProps } from '../Form';
 import { futureDate } from '../util/validation';
 import { maxFileSizeKb } from '../FileInput/validation';
-import { getCcdSymbol } from '~/utils/ccd';
 
 export const {
     Checkbox,

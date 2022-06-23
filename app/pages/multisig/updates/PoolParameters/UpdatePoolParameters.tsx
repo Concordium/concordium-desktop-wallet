@@ -6,6 +6,7 @@ import {
     Validate,
     FieldError,
 } from 'react-hook-form';
+import { isValidBigInt } from 'wallet-common-helpers/lib/utils/numberStringHelpers';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import Form from '~/components/Form';
@@ -22,7 +23,6 @@ import {
     convertRewardFractions,
     UpdatePoolParametersFields,
 } from './util';
-import { isValidBigInt } from '~/utils/numberStringHelpers';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 
 import PoolParametersShow from './PoolParametersShow';

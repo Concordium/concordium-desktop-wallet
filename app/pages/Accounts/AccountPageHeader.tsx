@@ -1,12 +1,12 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import ShieldImage from '@resources/svg/shield.svg';
+import { displayAsCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import {
     confirmedAccountsSelector,
     accountsInfoSelector,
 } from '~/features/AccountSlice';
 import { Account, AccountInfo } from '~/utils/types';
-import { displayAsCcd } from '~/utils/ccd';
 import { sumToBigInt } from '~/utils/basicHelpers';
 import { getPublicAccountAmounts } from '~/utils/accountHelpers';
 

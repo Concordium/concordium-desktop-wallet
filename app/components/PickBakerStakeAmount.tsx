@@ -3,13 +3,13 @@ import React, { useCallback } from 'react';
 import { useFormContext, Validate } from 'react-hook-form';
 import { isRewardStatusV1 } from '@concordium/node-sdk/lib/src/rewardStatusHelpers';
 import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
-import { collapseFraction, noOp } from '~/utils/basicHelpers';
 import {
     getCcdSymbol,
     ccdToMicroCcd,
     isValidCcdString,
     displayAsCcd,
-} from '~/utils/ccd';
+} from 'wallet-common-helpers/lib/utils/ccd';
+import { collapseFraction, noOp } from '~/utils/basicHelpers';
 import {
     useCalcBakerStakeCooldownUntil,
     useCapitalBound,

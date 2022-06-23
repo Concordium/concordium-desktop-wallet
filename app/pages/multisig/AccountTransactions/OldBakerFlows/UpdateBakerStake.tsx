@@ -4,6 +4,10 @@ import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
 import { BlockSummaryV0 } from '@concordium/node-sdk';
 import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import {
+    ccdToMicroCcd,
+    microCcdToCcd,
+} from 'wallet-common-helpers/lib/utils/ccd';
 import MultiSignatureLayout from '../../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
@@ -44,7 +48,6 @@ import { ensureChainData, ChainData } from '~/utils/withChainData';
 import DatePicker from '~/components/Form/DatePicker';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
-import { ccdToMicroCcd, microCcdToCcd } from '~/utils/ccd';
 
 import styles from '../../common/MultiSignatureFlowPage.module.scss';
 

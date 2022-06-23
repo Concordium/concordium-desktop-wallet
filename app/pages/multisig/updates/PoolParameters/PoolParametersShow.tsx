@@ -1,10 +1,10 @@
 import React from 'react';
 import type { PoolParametersV1 } from '@concordium/node-sdk';
+import { displayAsCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import { CommissionRangeField } from './CommissionRangeField';
 import { RewardFractionField } from '../common/RewardFractionField/RewardFractionField';
 import { RelativeRateField } from '../../common/RelativeRateField';
 import { fieldDisplays } from './util';
-import { displayAsCcd } from '~/utils/ccd';
 import Label from '~/components/Label';
 
 interface PoolParametersShowProps {

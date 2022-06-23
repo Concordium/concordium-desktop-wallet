@@ -2020,6 +2020,18 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
+"@concordium/common-sdk@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@concordium/common-sdk/-/common-sdk-1.0.1.tgz#3193ee08025a29479bb1da7ca6d2e5a2cf675056"
+  integrity sha512-ZargiAzmGskHikNd0dvGFNGs9c+bZR4tZtRT3mJ+nhARXLBlwgceLT4F46cScQG54KEC6+8ektsk6oU10CNQIA==
+  dependencies:
+    "@concordium/rust-bindings" "0.1.1"
+    bs58check "^2.1.2"
+    buffer "^6.0.3"
+    hash.js "^1.1.7"
+    json-bigint "^1.0.0"
+    uuid "^8.3.2"
+
 "@concordium/node-sdk@^1.0.0-alpha.0":
   version "1.0.0-alpha.0"
   resolved "https://registry.yarnpkg.com/@concordium/node-sdk/-/node-sdk-1.0.0-alpha.0.tgz#1cec171daa9410734f2eabf502a7abb1cbd0c2b6"
@@ -2030,6 +2042,11 @@
     buffer "^6.0.3"
     google-protobuf "^3.20.1"
     hash.js "^1.1.7"
+
+"@concordium/rust-bindings@0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@concordium/rust-bindings/-/rust-bindings-0.1.1.tgz#37fe66232195930873d5181db95f250cfb7fb1bd"
+  integrity sha512-gy/F5kLmnUEPqZ64Ner5V3rFVTGQ/lKD7plYTbLqcd8XSZJaAvvyxL/H1VYrEk4r1sOo2g0xk/trdhtJXoERLg==
 
 "@dabh/diagnostics@^2.0.2":
   version "2.0.2"
@@ -5818,6 +5835,11 @@ big.js@^5.2.2:
   version "5.2.2"
   resolved "https://registry.yarnpkg.com/big.js/-/big.js-5.2.2.tgz#65f0af382f578bcdc742bd9c281e9cb2d7768328"
   integrity sha512-vyL2OymJxmarO8gxMr0mhChsO9QGwhynfuu4+MHTAW6czfq9humCB7rKpUjDd9YUiDPU4mzpyupFSvOClAwbmQ==
+
+bignumber.js@^9.0.0:
+  version "9.0.2"
+  resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-9.0.2.tgz#71c6c6bed38de64e24a65ebe16cfcf23ae693673"
+  integrity sha512-GAcQvbpsM0pUb0zw1EI0KhQEZ+lRwR5fYaAp3vPOYuP7aDvGy6cVN6XHLauvF8SOga2y0dcLcjt3iQDTSEliyw==
 
 bin-v8-flags-filter@^1.1.2:
   version "1.2.0"
@@ -10162,6 +10184,13 @@ getpass@^0.1.1:
   dependencies:
     assert-plus "^1.0.0"
 
+git@^0.1.5:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/git/-/git-0.1.5.tgz#9ef62df93f851c27542143bf52d1c68b1017ca15"
+  integrity sha512-N+bfOrXyKMU/fQtCj6D/U9MQOEN0DAA8TLHSLdUQRSWBOkeRvsjJHdrdkvcq05xO7GSDKWc3nDEGoTZ4DfCCSg==
+  dependencies:
+    mime "1.2.9"
+
 github-slugger@^1.0.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/github-slugger/-/github-slugger-1.3.0.tgz#9bd0a95c5efdfc46005e82a906ef8e2a059124c9"
@@ -12542,6 +12571,13 @@ jsesc@~0.5.0:
   resolved "https://registry.yarnpkg.com/jsesc/-/jsesc-0.5.0.tgz#e7dee66e35d6fc16f710fe91d5cf69f70f08911d"
   integrity sha1-597mbjXW/Bb3EP6R1c9p9w8IkR0=
 
+json-bigint@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/json-bigint/-/json-bigint-1.0.0.tgz#ae547823ac0cad8398667f8cd9ef4730f5b01ff1"
+  integrity sha512-SiPv/8VpZuWbvLSMtTDU8hEfrZWg/mH/nV/b4o0CYbSxu1UIQPLdwKOCIyLQX+VIPO5vrLX3i8qtqFyhdPSUSQ==
+  dependencies:
+    bignumber.js "^9.0.0"
+
 json-buffer@3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/json-buffer/-/json-buffer-3.0.0.tgz#5b1f397afc75d677bde8bcfc0e47e1f9a3d9a898"
@@ -13609,6 +13645,11 @@ mime-types@^2.1.31:
   integrity sha512-6cP692WwGIs9XXdOO4++N+7qjqv0rqxxVvJ3VHPh/Sc9mVZcQP+ZGhkKiTvWMQRr2tbHkJP/Yn7Y0npb3ZBs4A==
   dependencies:
     mime-db "1.51.0"
+
+mime@1.2.9:
+  version "1.2.9"
+  resolved "https://registry.yarnpkg.com/mime/-/mime-1.2.9.tgz#009cd40867bd35de521b3b966f04e2f8d4d13d09"
+  integrity sha512-WiLgbHTIq5AYUvU/Luli4mZ1bUcHpGNHyCsbl+KPMg4zt+XUDpQehWjuBjdLaEvDTinvKj/FgfQt3fPoT7j08g==
 
 mime@1.6.0:
   version "1.6.0"
@@ -19563,7 +19604,7 @@ uuid@^3.3.2, uuid@^3.4.0:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.4.0.tgz#b23e4358afa8a202fe7a100af1f5f883f02007ee"
   integrity sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
 
-uuid@^8.3.0:
+uuid@^8.3.0, uuid@^8.3.2:
   version "8.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
@@ -19657,6 +19698,18 @@ walker@^1.0.7, walker@~1.0.5:
   integrity sha1-L3+bj9ENZ3JisYqITijRlhjgKPs=
   dependencies:
     makeerror "1.0.x"
+
+"wallet-common-helpers@git+ssh://git@github.com:Concordium/wallet-common-helpers.git#46405920304bc1837e74acad36fcd5a14a96115d":
+  version "1.5.0"
+  resolved "git+ssh://git@github.com:Concordium/wallet-common-helpers.git#46405920304bc1837e74acad36fcd5a14a96115d"
+  dependencies:
+    "@concordium/common-sdk" "^1.0.1"
+    bs58check "^2.1.2"
+    buffer "^6.0.3"
+    cbor "^8.0.0"
+    clsx "^1.1.1"
+    regenerator-runtime "^0.13.5"
+    typescript "4"
 
 warning-symbol@^0.1.0:
   version "0.1.0"

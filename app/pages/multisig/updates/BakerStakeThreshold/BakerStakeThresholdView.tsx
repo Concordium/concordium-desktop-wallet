@@ -1,9 +1,9 @@
 import React from 'react';
+import { displayAsCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import Loading from '~/cross-app-components/Loading';
 import { BlockSummary } from '~/node/NodeApiTypes';
 import { BakerStakeThreshold } from '~/utils/types';
 import withChainData, { ChainData } from '~/utils/withChainData';
-import { displayAsCcd } from '~/utils/ccd';
 import Label from '~/components/Label';
 import { getMinimumStakeForBaking } from '~/utils/blockSummaryHelpers';
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRouteMatch } from 'react-router';
+import { displayAsCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import { AddressBookEntry, SimpleTransfer } from '~/utils/types';
-import { displayAsCcd } from '~/utils/ccd';
 import routes from '~/constants/routes.json';
 import DisplayFee from '~/components/DisplayFee';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';

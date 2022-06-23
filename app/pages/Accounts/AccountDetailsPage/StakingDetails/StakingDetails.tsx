@@ -8,11 +8,11 @@ import {
 import { isReduceStakePendingChange } from '@concordium/node-sdk/lib/src/accountHelpers';
 import React, { PropsWithChildren } from 'react';
 import RegisteredIcon from '@resources/svg/logo-checkmark.svg';
+import { displayAsCcd } from 'wallet-common-helpers/lib/utils/ccd';
+import { toFixed } from 'wallet-common-helpers/lib/utils/numberStringHelpers';
 import Label from '~/components/Label';
 import Card from '~/cross-app-components/Card';
-import { displayAsCcd } from '~/utils/ccd';
 import { useLastFinalizedBlockSummary } from '~/utils/dataHooks';
-import { toFixed } from '~/utils/numberStringHelpers';
 import { hasDelegationProtocol } from '~/utils/protocolVersion';
 import {
     dateFromBakerPoolPendingChange,

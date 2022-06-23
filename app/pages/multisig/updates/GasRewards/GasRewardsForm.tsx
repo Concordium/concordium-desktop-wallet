@@ -1,5 +1,6 @@
 import React from 'react';
 import { RegisterOptions, useFormContext, Validate } from 'react-hook-form';
+import { isValidBigInt } from 'wallet-common-helpers/lib/utils/numberStringHelpers';
 import { EqualRecord, GasRewards } from '~/utils/types';
 import updateConstants from '~/constants/updateConstants.json';
 import {
@@ -10,7 +11,6 @@ import {
 } from '../common/RewardFractionField';
 import { isDefined } from '~/utils/basicHelpers';
 import ErrorMessage from '~/components/Form/ErrorMessage';
-import { isValidBigInt } from '~/utils/numberStringHelpers';
 
 export type UpdateGasRewardsFields = GasRewards;
 

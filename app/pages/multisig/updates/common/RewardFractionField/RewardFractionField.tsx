@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import clsx from 'clsx';
+import { getPowerOf10 } from 'wallet-common-helpers/lib/utils/numberStringHelpers';
 import { connectWithFormControlled } from '~/components/Form/common/connectWithForm';
 import { ClassName, RewardFraction } from '~/utils/types';
 import {
@@ -10,7 +11,6 @@ import {
 import { useUpdateEffect } from '~/utils/hooks';
 import { noOp } from '~/utils/basicHelpers';
 import InlineNumber from '~/components/Form/InlineNumber';
-import { getPowerOf10 } from '~/utils/numberStringHelpers';
 
 import styles from './RewardFractionField.module.scss';
 import { InlineNumberProps } from '~/components/Form/InlineNumber/InlineNumber';

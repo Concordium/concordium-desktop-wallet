@@ -2,6 +2,11 @@ import fs from 'fs';
 import archiver from 'archiver';
 import { PassThrough, Writable } from 'stream';
 import {
+    formatCcdString,
+    microCcdToCcd,
+    getCcdSymbol,
+} from 'wallet-common-helpers/lib/utils/ccd';
+import {
     Account,
     TransferTransaction,
     TransactionKindString,
@@ -27,7 +32,6 @@ import httpMethods from './http';
 import decryptAmountsDao from './database/decryptedAmountsDao';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
 import isSuccessfulEncryptedTransaction from '~/utils/decryptHelpers';
-import { formatCcdString, microCcdToCcd, getCcdSymbol } from '~/utils/ccd';
 
 async function enrichWithDecryptedAmounts(
     credentialNumber: number,

@@ -1,6 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
-import { displayAsCcd } from '~/utils/ccd';
+import { displayAsCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import { Fraction } from '~/utils/types';
 import { collapseFraction } from '~/utils/basicHelpers';
 

@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer/';
+import { encodeAsCBOR } from 'wallet-common-helpers/lib/utils/cborHelper';
 import {
     AccountTransaction,
     TransactionKindId as TransactionKind,
@@ -46,7 +47,6 @@ import {
     encodeWord16,
     getSerializedTextWithLength,
 } from './serializationHelpers';
-import { encodeAsCBOR } from './cborHelper';
 import { isDefined } from './basicHelpers';
 import { orUndefined } from './functionHelpers';
 

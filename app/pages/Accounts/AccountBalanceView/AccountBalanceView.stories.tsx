@@ -2,13 +2,13 @@
 import React from 'react';
 import { Meta, Story } from '@storybook/react/types-6-0';
 
+import { microCcdPerCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import { AccountState } from '~/features/AccountSlice';
 import { StoreWrapper } from '~/store/store';
 import { Account, AccountInfo, AccountStatus } from '~/utils/types';
 import { stringify } from '~/utils/JSONHelper';
 
 import AccountBalanceViewComponent from './AccountBalanceView';
-import { microCcdPerCcd } from '~/utils/ccd';
 
 export default {
     title: 'Account Page/Account Balance View',

@@ -3,13 +3,16 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
+import {
+    getCcdSymbol,
+    microCcdToCcd,
+} from 'wallet-common-helpers/lib/utils/ccd';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import Button from '~/cross-app-components/Button';
 import { insertTransactions } from '~/database/TransactionDao';
 import { chosenAccountSelector } from '~/features/AccountSlice';
 import { reloadTransactions } from '~/features/TransactionSlice';
 import { displayTargetNet, getTargetNet } from '~/utils/ConfigHelper';
-import { getCcdSymbol, microCcdToCcd } from '~/utils/ccd';
 import { gtuDrop } from '~/utils/httpRequests';
 import { secondsSinceUnixEpoch } from '~/utils/timeHelpers';
 import { monitorTransactionStatus } from '~/utils/TransactionStatusPoller';

@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer/';
+import { encodeAsCBOR } from 'wallet-common-helpers/lib/utils/cborHelper';
 import { Transport } from './Transport';
-import { encodeAsCBOR } from '~/utils/cborHelper';
 import { chunkBuffer } from '~/utils/basicHelpers';
 
 type Memo = string;

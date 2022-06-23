@@ -1,9 +1,9 @@
 import React from 'react';
 import { useRouteMatch } from 'react-router';
+import { displayAsCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import { UpdateBakerStake } from '~/utils/types';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import { useAccountName } from '~/utils/dataHooks';
-import { displayAsCcd } from '~/utils/ccd';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import routes from '~/constants/routes.json';

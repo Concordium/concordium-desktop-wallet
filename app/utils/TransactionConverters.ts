@@ -1,3 +1,4 @@
+import { decodeCBOR } from 'wallet-common-helpers/lib/utils/cborHelper';
 import {
     TransferTransaction,
     TransactionStatus,
@@ -32,7 +33,6 @@ import {
 import { getScheduledTransferAmount } from './transactionHelpers';
 import { collapseFraction, abs } from './basicHelpers';
 import { stringify } from './JSONHelper';
-import { decodeCBOR } from './cborHelper';
 
 function getDataBlob(raw: string) {
     // The dataBlob from the proxy is a "hex-encoded byte array".

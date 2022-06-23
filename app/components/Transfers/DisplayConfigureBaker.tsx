@@ -1,5 +1,6 @@
 import React from 'react';
 import { useRouteMatch } from 'react-router';
+import { displayAsCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import { ConfigureBaker } from '~/utils/types';
 import DisplayFee from '~/components/DisplayFee';
 import { useAccountName } from '~/utils/dataHooks';
@@ -14,7 +15,6 @@ import {
 } from '~/utils/transactionFlows/configureBaker';
 import DisplayBakerCommission from './DisplayBakerCommission';
 import DisplayMetadataUrl from './DisplayMetadataUrl';
-import { displayAsCcd } from '~/utils/ccd';
 
 import styles from './transferDetails.module.scss';
 

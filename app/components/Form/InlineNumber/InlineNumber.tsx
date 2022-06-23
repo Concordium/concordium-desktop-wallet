@@ -10,13 +10,13 @@ import React, {
     useRef,
     useState,
 } from 'react';
-import { noOp } from '~/utils/basicHelpers';
-import { useUpdateEffect } from '~/utils/hooks';
-import { scaleFieldWidth } from '~/utils/htmlHelpers';
 import {
     formatNumberStringWithDigits,
     trimLeadingZeros as trimLeadingZerosHelper,
-} from '~/utils/numberStringHelpers';
+} from 'wallet-common-helpers/lib/utils/numberStringHelpers';
+import { noOp } from '~/utils/basicHelpers';
+import { useUpdateEffect } from '~/utils/hooks';
+import { scaleFieldWidth } from '~/utils/htmlHelpers';
 import { ClassName } from '~/utils/types';
 import { CommonFieldProps } from '../common';
 

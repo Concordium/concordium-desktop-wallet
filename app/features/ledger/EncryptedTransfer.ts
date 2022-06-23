@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer/';
+import { encodeAsCBOR } from 'wallet-common-helpers/lib/utils/cborHelper';
 import { Transport } from './Transport';
 import {
     base58ToBuffer,
@@ -16,7 +17,6 @@ import {
     EncryptedTransferWithMemo,
     EncryptedTransferWithMemoPayload,
 } from '~/utils/types';
-import { encodeAsCBOR } from '~/utils/cborHelper';
 import { chunkBuffer } from '~/utils/basicHelpers';
 import sendMemo from './Memo';
 import pathAsBuffer from './Path';

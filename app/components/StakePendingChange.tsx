@@ -1,8 +1,8 @@
 import React from 'react';
 import type { StakePendingChange as PendingChange } from '@concordium/node-sdk';
 import { isRemovalPendingChange } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { displayAsCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import { useLastFinalizedBlockSummary } from '~/utils/dataHooks';
-import { displayAsCcd } from '~/utils/ccd';
 import {
     dateFromStakePendingChange,
     getFormattedDateString,

@@ -3,6 +3,7 @@ import { LocationDescriptorObject } from 'history';
 import React, { useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router';
+import { ccdToMicroCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import ensureExchangeRateAndNonce, {
     ExchangeRateAndNonceProps,
 } from '~/components/Transfers/ensureExchangeRateAndNonce';
@@ -10,7 +11,6 @@ import routes from '~/constants/routes.json';
 import { isMultiSig } from '~/utils/accountHelpers';
 import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
 import { multiplyFraction } from '~/utils/basicHelpers';
-import { ccdToMicroCcd } from '~/utils/ccd';
 import { stringify } from '~/utils/JSONHelper';
 import { BakerKeys } from '~/utils/rustInterface';
 import { createAddBakerTransaction } from '~/utils/transactionHelpers';

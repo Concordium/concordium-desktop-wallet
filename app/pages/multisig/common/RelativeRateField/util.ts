@@ -1,6 +1,6 @@
 import { Validate } from 'react-hook-form';
 
-import { isValidBigInt } from '~/utils/numberStringHelpers';
+import { isValidBigInt } from 'wallet-common-helpers/lib/utils/numberStringHelpers';
 import { ExchangeRate } from '~/utils/types';
 
 export type RelativeRateValue = {

@@ -2,8 +2,8 @@ import React from 'react';
 import clsx from 'clsx';
 import BinIcon from '@resources/svg/bin.svg';
 import { ReleaseSchedule } from '@concordium/node-sdk/';
+import { displayAsCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import Button from '~/cross-app-components/Button';
-import { displayAsCcd } from '~/utils/ccd';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import styles from './ScheduleList.module.scss';
 

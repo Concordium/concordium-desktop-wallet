@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { microCcdToCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import BakerStakeSettings from '~/components/BakerTransactions/BakerStakeSettings';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
 import {
@@ -11,7 +12,6 @@ import {
 } from '~/utils/transactionFlows/addBaker';
 import { Account } from '~/utils/types';
 import { getMinimumStakeForBaking } from '~/utils/blockSummaryHelpers';
-import { microCcdToCcd } from '~/utils/ccd';
 
 import styles from './ConfigureBakerPage.module.scss';
 

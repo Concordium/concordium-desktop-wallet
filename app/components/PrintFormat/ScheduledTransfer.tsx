@@ -1,4 +1,5 @@
 import React from 'react';
+import { displayAsCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
 import {
     MultiSignatureTransactionStatus,
@@ -21,7 +22,6 @@ import {
     displayMemo,
 } from '~/utils/printUtility';
 import { parseTime } from '~/utils/timeHelpers';
-import { displayAsCcd } from '~/utils/ccd';
 import withNames from '~/components/Transfers/withNames';
 
 interface Props {

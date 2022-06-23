@@ -1,12 +1,12 @@
 import React from 'react';
 import { useRouteMatch } from 'react-router';
+import { displayAsCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import routes from '~/constants/routes.json';
 import {
     AddressBookEntry,
     EncryptedTransfer,
     EncryptedTransferWithMemo,
 } from '~/utils/types';
-import { displayAsCcd } from '~/utils/ccd';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';

@@ -1,6 +1,6 @@
 import React, { forwardRef, useState } from 'react';
 import clsx from 'clsx';
-import { ccdToMicroCcd } from '~/utils/ccd';
+import { ccdToMicroCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import { Schedule } from '~/utils/types';
 import RegularInterval from '~/components/BuildSchedule/BuildRegularInterval';
 import ExplicitSchedule from '~/components/BuildSchedule/BuildExplicitSchedule';

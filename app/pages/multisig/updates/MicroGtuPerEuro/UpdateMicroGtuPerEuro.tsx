@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { getCcdSymbol } from 'wallet-common-helpers/lib/utils/ccd';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import { FormRelativeRateField } from '../../common/RelativeRateField';
@@ -10,7 +11,6 @@ import {
     fromExchangeRate,
     RelativeRateValue,
 } from '../../common/RelativeRateField/util';
-import { getCcdSymbol } from '~/utils/ccd';
 
 export interface UpdateMicroGtuPerEuroRateFields {
     microGtuPerEuroRate: RelativeRateValue;

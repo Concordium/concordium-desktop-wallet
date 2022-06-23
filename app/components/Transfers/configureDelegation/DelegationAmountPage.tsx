@@ -3,6 +3,10 @@ import { useForm, useFormContext, Validate } from 'react-hook-form';
 import { Redirect } from 'react-router';
 import clsx from 'clsx';
 import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import {
+    displayAsCcd,
+    getCcdSymbol,
+} from 'wallet-common-helpers/lib/utils/ccd';
 import AccountCard from '~/components/AccountCard';
 import Form from '~/components/Form';
 import ErrorMessage from '~/components/Form/ErrorMessage';
@@ -27,7 +31,6 @@ import { Account, AccountInfo, EqualRecord, Fraction } from '~/utils/types';
 import StakePendingChange from '~/components/StakePendingChange';
 import Loading from '~/cross-app-components/Loading';
 import { getPoolStatusLatest } from '~/node/nodeHelpers';
-import { displayAsCcd, getCcdSymbol } from '~/utils/ccd';
 import SidedRow from '~/components/SidedRow';
 
 import styles from './DelegationPage.module.scss';

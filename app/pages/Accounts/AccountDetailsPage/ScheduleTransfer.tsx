@@ -2,6 +2,7 @@ import React from 'react';
 import { Redirect } from 'react-router';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
+import { ccdToMicroCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import {
     TransactionKindId,
     Account,
@@ -9,7 +10,6 @@ import {
     Fraction,
 } from '~/utils/types';
 import routes from '~/constants/routes.json';
-import { ccdToMicroCcd } from '~/utils/ccd';
 import { stringify } from '~/utils/JSONHelper';
 import ExternalTransfer from '~/components/Transfers/ExternalTransfer';
 import ensureExchangeRateAndNonce from '~/components/Transfers/ensureExchangeRateAndNonce';

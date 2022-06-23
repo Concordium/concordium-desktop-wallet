@@ -1,3 +1,4 @@
+import { getEncodedSize } from 'wallet-common-helpers/lib/utils/cborHelper';
 import {
     AccountTransaction,
     ConfigureBaker,
@@ -9,7 +10,6 @@ import {
     UpdateAccountCredentialsPayload,
 } from './types';
 import { serializeTransferPayload } from './transactionSerialization';
-import { getEncodedSize } from '~/utils/cborHelper';
 
 /**
  * These constants should be kept consistent with:

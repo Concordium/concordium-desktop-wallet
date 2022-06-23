@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import { LocationDescriptorObject } from 'history';
 import PlusIcon from '@resources/svg/plus.svg';
 import { useSelector } from 'react-redux';
+import { getCcdSymbol } from 'wallet-common-helpers/lib/utils/ccd';
 import {
     Account,
     CredentialNumberPrfKey,
@@ -32,7 +33,6 @@ import Radios from '~/components/Form/Radios';
 
 import styles from './AccountReport.module.scss';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
-import { getCcdSymbol } from '~/utils/ccd';
 import { globalSelector } from '~/features/GlobalSlice';
 import decryptTransactions from '~/utils/decryptTransactions';
 

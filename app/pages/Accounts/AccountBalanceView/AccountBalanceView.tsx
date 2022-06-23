@@ -8,10 +8,10 @@ import {
     isDelegatorAccount,
 } from '@concordium/node-sdk/lib/src/accountHelpers';
 import { DelegationTargetType } from '@concordium/node-sdk/lib/src/types';
+import { displayAsCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
 import { Account, AccountInfo } from '~/utils/types';
-import { displayAsCcd } from '~/utils/ccd';
 import {
     setViewingShieldedAndReset,
     viewingShieldedSelector,

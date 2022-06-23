@@ -1,5 +1,6 @@
 import React, { useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useForm } from 'react-hook-form';
+import { isValidBigInt } from 'wallet-common-helpers/lib/utils/numberStringHelpers';
 import { EqualRecord, Schedule } from '~/utils/types';
 import {
     createRegularIntervalSchedule,
@@ -9,7 +10,6 @@ import {
     TimeConstants,
     getDefaultScheduledStartTime,
 } from '~/utils/timeHelpers';
-import { isValidBigInt } from '~/utils/numberStringHelpers';
 import Form from '../../Form';
 import { futureDate } from '../../Form/util/validation';
 import {

@@ -14,7 +14,7 @@ import {
     isBakerAccount,
     isDelegatorAccount,
 } from '@concordium/node-sdk/lib/src/accountHelpers';
-import { displayAsCcd } from '~/utils/ccd';
+import { displayAsCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import { AccountInfo, Account, AccountStatus, ClassName } from '~/utils/types';
 import {
     isInitialAccount,

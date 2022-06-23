@@ -5,11 +5,11 @@ import IdentityIcon from '@resources/svg/identity.svg';
 import ImportExportIcon from '@resources/svg/import-export.svg';
 import MultiSigIcon from '@resources/svg/multisig.svg';
 import SettingsIcon from '@resources/svg/settings.svg';
+import { getCcdSymbol } from 'wallet-common-helpers/lib/utils/ccd';
 import Sidebar, { SidebarLink } from '~/cross-app-components/Sidebar';
 import routes from '~/constants/routes.json';
 import pkg from '~/package.json';
 import { RootState } from '~/store/store';
-import { getCcdSymbol } from '~/utils/ccd';
 
 import Status from '../Status';
 

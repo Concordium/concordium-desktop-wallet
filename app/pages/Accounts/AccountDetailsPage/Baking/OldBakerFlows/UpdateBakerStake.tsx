@@ -4,6 +4,10 @@ import { goBack, push } from 'connected-react-router';
 import { Redirect } from 'react-router';
 import { BlockSummaryV0 } from '@concordium/node-sdk';
 import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import {
+    ccdToMicroCcd,
+    microCcdToCcd,
+} from 'wallet-common-helpers/lib/utils/ccd';
 import Form from '~/components/Form';
 import PickBakerStakeAmount from '~/components/PickBakerStakeAmount';
 import Card from '~/cross-app-components/Card';
@@ -32,7 +36,6 @@ import ensureExchangeRateAndNonce, {
     ExchangeRateAndNonceProps,
 } from '~/components/Transfers/ensureExchangeRateAndNonce';
 import BackButton from '~/cross-app-components/BackButton';
-import { ccdToMicroCcd, microCcdToCcd } from '~/utils/ccd';
 
 import styles from '../../AccountDetailsPage.module.scss';
 

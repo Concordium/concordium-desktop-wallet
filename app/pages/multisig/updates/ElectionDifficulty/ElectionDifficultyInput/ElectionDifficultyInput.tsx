@@ -2,8 +2,8 @@
 import clsx from 'clsx';
 import React, { useCallback, useMemo } from 'react';
 import { useFormContext, UseFormMethods, Validate } from 'react-hook-form';
+import { toResolution } from 'wallet-common-helpers/lib/utils/numberStringHelpers';
 import ErrorMessage from '~/components/Form/ErrorMessage';
-import { toResolution } from '~/utils/numberStringHelpers';
 import { msToTimeParts } from '~/utils/timeHelpers';
 import { electionDifficultyResolution } from '../util';
 

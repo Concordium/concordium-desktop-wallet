@@ -4,8 +4,8 @@ import { useSelector } from 'react-redux';
 import DoubleCheckmarkIcon from '@resources/svg/double-grey-checkmark.svg';
 import CheckmarkIcon from '@resources/svg/grey-checkmark.svg';
 import Warning from '@resources/svg/warning.svg';
+import { displayAsCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import { dateFromTimeStamp, parseTime } from '~/utils/timeHelpers';
-import { displayAsCcd } from '~/utils/ccd';
 
 import {
     TransferTransaction,

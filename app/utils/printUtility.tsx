@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { displayAsCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import {
     MultiSignatureTransactionStatus,
     AccountTransaction,
@@ -9,7 +10,6 @@ import {
     getAccountTransactionHash,
     getAccountTransactionSignDigest,
 } from './transactionSerialization';
-import { displayAsCcd } from '~/utils/ccd';
 import { collapseFraction } from '~/utils/basicHelpers';
 import { getStatusText } from '~/pages/multisig/ProposalStatus/util';
 import { parseTime, getNow } from '~/utils/timeHelpers';

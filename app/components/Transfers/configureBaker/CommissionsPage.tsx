@@ -2,11 +2,11 @@ import { ChainParametersV1 } from '@concordium/node-sdk';
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 
+import { toFixed } from 'wallet-common-helpers/lib/utils/numberStringHelpers';
 import Form from '~/components/Form';
 import Label from '~/components/Label';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
 import { accountInfoSelector } from '~/features/AccountSlice';
-import { toFixed } from '~/utils/numberStringHelpers';
 import {
     Commissions,
     ConfigureBakerFlowState,

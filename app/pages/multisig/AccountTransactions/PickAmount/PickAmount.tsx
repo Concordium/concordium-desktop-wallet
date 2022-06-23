@@ -1,10 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import clsx from 'clsx';
+import { getCcdSymbol } from 'wallet-common-helpers/lib/utils/ccd';
 import AccountCard from '~/components/AccountCard';
 import { Account, AccountInfo, Fraction } from '~/utils/types';
 import { validateTransferAmount } from '~/utils/transactionHelpers';
 import { collapseFraction, throwLoggedError } from '~/utils/basicHelpers';
-import { getCcdSymbol } from '~/utils/ccd';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import { useAccountInfo } from '~/utils/dataHooks';
 import CcdInput from '~/components/Form/CcdInput';

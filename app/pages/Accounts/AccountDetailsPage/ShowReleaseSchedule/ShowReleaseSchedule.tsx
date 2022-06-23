@@ -1,6 +1,6 @@
 import React from 'react';
+import { displayAsCcd } from 'wallet-common-helpers/lib/utils/ccd';
 import { AccountInfo } from '~/utils/types';
-import { displayAsCcd } from '~/utils/ccd';
 import Card from '~/cross-app-components/Card';
 import ScheduleList from '~/components/ScheduleList';
 import SidedRow from '~/components/SidedRow';
