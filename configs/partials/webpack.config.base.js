@@ -66,10 +66,6 @@ module.exports = {
                 extensions,
             }),
         ],
-        fallback: {
-            crypto: require.resolve('crypto-browserify'),
-            stream: require.resolve('stream-browserify'),
-        },
     },
 
     optimization: {
@@ -86,9 +82,6 @@ module.exports = {
             DEBUG_PROD: false,
             START_MINIMIZED: false,
             E2E_BUILD: false,
-        }),
-        new webpack.ProvidePlugin({
-            Buffer: ['buffer/', 'Buffer'],
         }),
         new webpack.NormalModuleReplacementPlugin(
             /\.\.\/migrations/,
