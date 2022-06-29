@@ -36,6 +36,7 @@ export default class LedgerObserverImpl implements LedgerObserver {
     async resetTransport(mainWindow: EventEmitter) {
         await TransportNodeHid.disconnect();
         const transport = await TransportNodeHid.open();
+        transport.setAllowAutoDisconnect(false);
         this.concordiumClient = new ConcordiumLedgerClientMain(
             mainWindow,
             transport
@@ -80,6 +81,7 @@ export default class LedgerObserverImpl implements LedgerObserver {
                 if (event.type === 'add') {
                     const deviceName = event.deviceModel.productName;
                     const transport = await TransportNodeHid.open();
+                    transport.setAllowAutoDisconnect(false);
                     this.concordiumClient = new ConcordiumLedgerClientMain(
                         mainWindow,
                         transport
