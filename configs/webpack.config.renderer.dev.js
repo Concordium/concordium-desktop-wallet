@@ -72,6 +72,10 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(false), {
         alias: {
             'react-dom': '@hot-loader/react-dom',
         },
+        fallback: {
+            crypto: require.resolve('crypto-browserify'),
+            stream: require.resolve('stream-browserify'),
+        },
     },
     optimization: {
         emitOnErrors: false,
@@ -94,6 +98,7 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(false), {
         }),
         new webpack.ProvidePlugin({
             process: 'process/browser',
+            Buffer: ['buffer/', 'Buffer'],
         }),
     ],
 
