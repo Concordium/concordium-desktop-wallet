@@ -10,7 +10,7 @@ interface Props {
 }
 
 const downloadUrl =
-    'https://developer.concordium.software/en/testnet/net/installation/downloads.html#concordium-desktop-wallet';
+    'https://developer.concordium.software/en/mainnet/net/installation/downloads.html#concordium-desktop-wallet';
 
 export default function ManualUpdateNotification({ version, onClose }: Props) {
     return (
