@@ -6,5 +6,7 @@
     "licenseNotices": "https://developer.concordium.software/en/mainnet/net/resources/dw-licenses.html",
     "supportForum": "https://support.concordium.software",
     "delegationDocumention": "https://developer.concordium.software/en/mainnet/net/concepts/concepts-delegation.html",
-    "ccdScanStakingPage": "https://ccdscan.io/staking"
+    "ccdScanStakingPageMainnet": "https://ccdscan.io/staking",
+    "ccdScanStakingPageTestnet": "https://testnet.ccdscan.io/staking",
+    "desktopWalletDownloadPageMainnet": "https://developer.concordium.software/en/mainnet/net/installation/downloads.html#concordium-desktop-wallet"
 }

@@ -15,6 +15,7 @@ import { AccountInfo, EqualRecord, NotOptional } from '~/utils/types';
 import urls from '~/constants/urls.json';
 
 import styles from './DelegationPage.module.scss';
+import { getTargetNet, Net } from '~/utils/ConfigHelper';
 
 interface FormState {
     toSpecificPool: boolean;
@@ -133,9 +134,19 @@ export default function DelegationTargetPage({
                             here:
                         </p>
                         <p className="mV0">
-                            <ExternalLink href={urls.ccdScanStakingPage}>
-                                CCDScan.io/staking
-                            </ExternalLink>
+                            {getTargetNet() === Net.Mainnet ? (
+                                <ExternalLink
+                                    href={urls.ccdScanStakingPageMainnet}
+                                >
+                                    CCDScan.io/staking
+                                </ExternalLink>
+                            ) : (
+                                <ExternalLink
+                                    href={urls.ccdScanStakingPageTestnet}
+                                >
+                                    testnet.CCDScan.io/staking
+                                </ExternalLink>
+                            )}
                         </p>
                     </>
                 ) : (
