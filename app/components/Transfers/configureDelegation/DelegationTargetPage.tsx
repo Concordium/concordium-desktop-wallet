@@ -15,6 +15,7 @@ import { AccountInfo, EqualRecord, NotOptional } from '~/utils/types';
 import urls from '~/constants/urls.json';
 
 import styles from './DelegationPage.module.scss';
+import { getTargetNet, Net } from '~/utils/ConfigHelper';
 
 interface FormState {
     toSpecificPool: boolean;
@@ -128,24 +129,42 @@ export default function DelegationTargetPage({
                             }}
                         />
                         <p className="mB30">
-                            If you don&apos;t already know what baker pool you
-                            want to delegate an amount to, you can read more
-                            about finding one here:
+                            If you don&apos;t already know which baker pool you
+                            want to delegate an amount to, you can look for one
+                            here:
+                        </p>
+                        <p className="mV0">
+                            {getTargetNet() === Net.Mainnet ? (
+                                <ExternalLink
+                                    href={urls.ccdScanStakingPageMainnet}
+                                >
+                                    CCDScan.io/staking
+                                </ExternalLink>
+                            ) : (
+                                <ExternalLink
+                                    href={urls.ccdScanStakingPageTestnet}
+                                >
+                                    testnet.CCDScan.io/staking
+                                </ExternalLink>
+                            )}
                         </p>
                     </>
                 ) : (
-                    <p className="mB20">
-                        Passive delegation is an alternative to delegation to a
-                        specific baker pool that has lower rewards. With passive
-                        delegation you do not have to worry about the uptime or
-                        quality of a baker node. For more info you can visit:
-                    </p>
+                    <>
+                        <p className="mB20">
+                            Passive delegation is an alternative to delegation
+                            to a specific baker pool that has lower rewards.
+                            With passive delegation you do not have to worry
+                            about the uptime or quality of a baker node. For
+                            more info you can visit:
+                        </p>
+                        <p className="mV0">
+                            <ExternalLink href={urls.delegationDocumention}>
+                                developer.concordium.software
+                            </ExternalLink>
+                        </p>
+                    </>
                 )}
-                <p className="mV0">
-                    <ExternalLink href={urls.delegationDocumention}>
-                        developer.concordium.software
-                    </ExternalLink>
-                </p>
             </div>
             <Form.Submit className={styles.continue}>Continue</Form.Submit>
         </Form>

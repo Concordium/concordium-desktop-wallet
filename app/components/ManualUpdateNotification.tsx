@@ -3,14 +3,12 @@ import CogIcon from '@resources/svg/settings.svg';
 import Notification from './Notification';
 import { NotificationLevel } from '~/features/NotificationSlice';
 import Button from '~/cross-app-components/Button';
+import urls from '~/constants/urls.json';
 
 interface Props {
     version: string;
     onClose(): void;
 }
-
-const downloadUrl =
-    'https://developer.concordium.software/en/testnet/net/installation/downloads.html#concordium-desktop-wallet';
 
 export default function ManualUpdateNotification({ version, onClose }: Props) {
     return (
@@ -24,7 +22,12 @@ export default function ManualUpdateNotification({ version, onClose }: Props) {
                 <span className="mL5">Version {version} is available.</span>
             </div>
             <div className="inlineFlexColumn mT20">
-                <Button size="tiny" onClick={() => window.openUrl(downloadUrl)}>
+                <Button
+                    size="tiny"
+                    onClick={() =>
+                        window.openUrl(urls.desktopWalletDownloadPageMainnet)
+                    }
+                >
                     Open website
                 </Button>
                 <Button className="mT10" size="tiny" onClick={onClose}>
