@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as crypto from 'crypto';
+import { Buffer } from 'buffer/';
 import { CryptoMethods } from '~/preload/preloadTypes';
 import { throwLoggedError } from '~/utils/basicHelpers';
 import { EncryptedData } from '~/utils/types';
@@ -142,7 +143,7 @@ export function decrypt(
 function hashSha256(data: (string | Buffer | Uint8Array)[]) {
     const hash = crypto.createHash('sha256');
     data.forEach((input) => hash.update(input));
-    return hash.digest();
+    return Buffer.from(hash.digest());
 }
 
 const exposedMethods: CryptoMethods = {

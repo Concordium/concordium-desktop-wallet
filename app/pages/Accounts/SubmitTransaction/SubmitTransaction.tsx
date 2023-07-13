@@ -7,11 +7,7 @@ import type { Buffer } from 'buffer/';
 import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
 import { parse } from '~/utils/JSONHelper';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
-import { sendTransaction } from '~/node/nodeRequests';
-import {
-    serializeTransaction,
-    getAccountTransactionHash,
-} from '~/utils/transactionSerialization';
+import { sendAccountTransaction } from '~/node/nodeRequests';
 import { monitorTransactionStatus } from '~/utils/TransactionStatusPoller';
 import {
     Account,
@@ -227,28 +223,22 @@ export default function SubmitTransaction({ location }: Props) {
             signatureIndex,
             signature
         );
-        const serializedTransaction = serializeTransaction(
-            transaction,
-            signatureStructured
-        );
 
-        const transactionHashBuffer = await getAccountTransactionHash(
-            transaction,
-            signatureStructured
-        );
-        const transactionHash = transactionHashBuffer.toString('hex');
-        let response;
+        let transactionHash: string;
         try {
-            response = await sendTransaction(serializedTransaction);
+            transactionHash = await sendAccountTransaction(
+                transaction,
+                signatureStructured
+            );
         } catch (e) {
             window.log.error(
-                e,
+                e as Error,
                 `Sending transaction of type ${transaction.transactionKind}, failed`
             );
             throw e;
         }
 
-        if (response) {
+        if (transactionHash) {
             try {
                 // Save the decrypted amount for shielded transfers, so the user doesn't have to decrypt them later.
                 if (

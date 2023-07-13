@@ -648,6 +648,7 @@ export function serializeUpdateInstruction(
     ]);
 }
 
+// TODO: used?
 /**
  * Serialize an update instruction, including serialization of the signatures, so that
  * it can be submitted to a node. The serialization update instruction is is pre-fixed

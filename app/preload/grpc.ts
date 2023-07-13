@@ -2,10 +2,17 @@ import {
     createConcordiumClient,
     ConcordiumGRPCClient,
 } from '@concordium/web-sdk';
-import { BakerId } from '@concordium/common-sdk/lib/types';
+import {
+    AccountTransactionHeader,
+    AccountTransactionSignature,
+    BakerId,
+    CredentialDeploymentTransaction,
+    UpdateInstruction,
+} from '@concordium/common-sdk/lib/types';
 import { AccountAddress } from '@concordium/common-sdk/lib/types/accountAddress';
 import { CredentialRegistrationId } from '@concordium/common-sdk/lib/types/CredentialRegistrationId';
 import { streamToList } from '@concordium/common-sdk/lib/util';
+import type { Buffer } from 'buffer/';
 
 import { GRPC, ConsensusAndGlobalResult } from '~/preload/preloadTypes';
 
@@ -57,9 +64,26 @@ const exposedMethods: GRPC = {
     setLocation: async (address: string, port: string) => {
         return setClientLocation(address, port);
     },
-    sendTransaction: () => {
-        throw new Error('Unable to send transactions yet');
-    },
+    sendAccountTransaction: (
+        header: AccountTransactionHeader,
+        payload: Buffer,
+        baseEnergyCost: bigint,
+        signature: AccountTransactionSignature
+    ) =>
+        client.sendRawAccountTransaction(
+            header,
+            payload,
+            baseEnergyCost,
+            signature
+        ),
+    sendUpdateInstruction: (
+        updateInstructionTransaction: UpdateInstruction,
+        signatures: Record<number, string>
+    ) => client.sendUpdateInstruction(updateInstructionTransaction, signatures),
+    sendCredentialDeploymentTransaction: (
+        transaction: CredentialDeploymentTransaction,
+        signatures: string[]
+    ) => client.sendCredentialDeploymentTransaction(transaction, signatures),
     getCryptographicParameters: (blockHash: string) =>
         client.getCryptographicParameters(blockHash),
     getConsensusStatus: () => client.getConsensusStatus(),

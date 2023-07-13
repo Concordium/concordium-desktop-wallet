@@ -1,5 +1,6 @@
 import { ipcRenderer, OpenDialogOptions, SaveDialogOptions } from 'electron';
 import fs from 'fs';
+import type { Buffer } from 'buffer/';
 import { getDatabaseFilename } from '~/database/knexfile';
 import { FileMethods } from '~/preload/preloadTypes';
 import ipcCommands from '~/constants/ipcCommands.json';

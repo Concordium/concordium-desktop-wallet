@@ -21,15 +21,17 @@ import {
     updateCurrentProposal,
 } from '~/features/MultiSignatureSlice';
 import { getMultiSignatureTransactionStatus } from '~/utils/TransactionStatusPoller';
-import { sendTransaction, getNextAccountNonce } from '~/node/nodeRequests';
+import {
+    getNextAccountNonce,
+    sendAccountTransaction,
+    sendUpdateInstruction,
+} from '~/node/nodeRequests';
 import findHandler, {
     findUpdateInstructionHandler,
 } from '~/utils/transactionHandlers/HandlerFinder';
-import { serializeForSubmission } from '~/utils/UpdateSerialization';
 import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
-import { serializeTransaction } from '~/utils/transactionSerialization';
 import { attachKeyIndex } from '~/utils/updates/AuthorizationHelper';
 import withChainData, { ChainData } from '~/utils/withChainData';
 import TransactionHashView from '~/components/TransactionHash';
@@ -92,7 +94,7 @@ const SubmittedProposalView = withChainData<Props>(
 
         // eslint-disable-next-line no-shadow
         const init = useCallback(async (chainParameters) => {
-            let payload;
+            let submitted;
             if (instanceOfUpdateInstruction(transaction)) {
                 const updateHandler = findUpdateInstructionHandler(
                     transaction.type
@@ -111,7 +113,7 @@ const SubmittedProposalView = withChainData<Props>(
                             )
                         )
                     );
-                    payload = serializeForSubmission(
+                    submitted = await sendUpdateInstruction(
                         transaction,
                         signatures,
                         serializedPayload
@@ -130,7 +132,7 @@ const SubmittedProposalView = withChainData<Props>(
                     BigInt(nextNonce.nonce) - BigInt(transaction.nonce);
 
                 if (difference === 0n) {
-                    payload = serializeTransaction(
+                    submitted = await sendAccountTransaction(
                         transaction,
                         transaction.signatures
                     );
@@ -161,7 +163,6 @@ const SubmittedProposalView = withChainData<Props>(
             } else {
                 throwLoggedError(`Unexpected Transaction type: ${transaction}`);
             }
-            const submitted = await sendTransaction(payload);
             const modifiedProposal: MultiSignatureTransaction = {
                 ...proposal,
             };

@@ -1,6 +1,17 @@
 /**
  * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
  */
+import { isAccountTransactionType } from '@concordium/common-sdk/lib/types';
+import { TransactionExpiry } from '@concordium/common-sdk/lib/types/transactionExpiry';
+import { AccountAddress } from '@concordium/common-sdk/lib/types/accountAddress';
+import type { Buffer } from 'buffer/';
+import { serializeTransferPayload } from '~/utils/transactionSerialization';
+import {
+    AccountTransaction,
+    TransactionAccountSignature,
+    UpdateInstructionSignatureWithIndex,
+    UpdateInstruction,
+} from '~/utils/types';
 
 /**
  * Updates the location of the node endpoint;
@@ -26,11 +37,52 @@ function throwIfUndefined<T extends any[], V>(
     };
 }
 
-export function sendTransaction(
-    transactionPayload: Uint8Array,
-    networkId = 100
+export function sendAccountTransaction(
+    transaction: AccountTransaction,
+    signatures: TransactionAccountSignature
 ) {
-    return window.grpc.sendTransaction(transactionPayload, networkId);
+    const type = transaction.transactionKind as number;
+    if (!isAccountTransactionType(type)) {
+        throw Error('unreachable');
+    }
+
+    const payload = serializeTransferPayload(
+        transaction.transactionKind,
+        transaction.payload
+    );
+
+    // TODO Fix
+    const baseEnergy =
+        BigInt(transaction.energyAmount) - 100n - 60n - BigInt(payload.length);
+
+    const header = {
+        sender: new AccountAddress(transaction.sender),
+        expiry: TransactionExpiry.fromEpochSeconds(transaction.expiry),
+        nonce: BigInt(transaction.nonce),
+    };
+
+    return window.grpc.sendAccountTransaction(
+        header,
+        payload,
+        baseEnergy,
+        signatures
+    );
+}
+
+export function sendUpdateInstruction(
+    updateInstruction: UpdateInstruction,
+    signaturesWithIndices: UpdateInstructionSignatureWithIndex[],
+    serializedPayload: Buffer
+) {
+    const transaction = {
+        header: updateInstruction.header,
+        payload: serializedPayload.toString('hex'),
+    };
+    const signatures: Record<number, string> = {};
+    signaturesWithIndices.forEach(({ signature, authorizationKeyIndex }) => {
+        signatures[authorizationKeyIndex] = signature;
+    });
+    return window.grpc.sendUpdateInstruction(transaction, signatures);
 }
 
 export const getNextAccountNonce = throwIfUndefined(
@@ -61,4 +113,5 @@ export const {
     getPoolInfo,
     getPassiveDelegationInfo,
     getPeerList,
+    sendCredentialDeploymentTransaction,
 } = window.grpc;

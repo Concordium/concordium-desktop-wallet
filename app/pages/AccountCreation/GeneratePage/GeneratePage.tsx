@@ -2,19 +2,24 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
+import { mapRecord } from '@concordium/common-sdk/lib/util';
+import { getAccountAddress } from '@concordium/common-sdk/lib/credentialDeploymentTransactions';
+import { getCredentialDeploymentTransactionHash } from '@concordium/common-sdk/lib/serialization';
+import type { CredentialDeploymentTransaction } from '@concordium/node-sdk';
 import routes from '~/constants/routes.json';
 
 import { createCredentialDetails } from '~/utils/rustInterface';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import {
     ConfirmedIdentity,
-    CredentialDeploymentDetails,
     CommitmentsRandomness,
     CreationKeys,
     Dispatch,
     AttributeKeyName,
+    Policy,
+    AttributeKey,
 } from '~/utils/types';
-import { sendTransaction } from '~/node/nodeRequests';
+import { sendCredentialDeploymentTransaction } from '~/node/nodeRequests';
 import {
     addPendingAccount,
     confirmAccount,
@@ -62,14 +67,16 @@ export default function AccountCreationGenerate({
     const [modalOpen, setModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState('');
 
-    async function sendCredential({
-        credentialDeploymentInfoHex,
-        accountAddress,
-    }: CredentialDeploymentDetails) {
-        const payload = Buffer.from(credentialDeploymentInfoHex, 'hex');
-
+    async function sendCredential(
+        transaction: CredentialDeploymentTransaction,
+        accountAddress: string,
+        signatures: string[]
+    ) {
         try {
-            const response = await sendTransaction(payload);
+            const response = await sendCredentialDeploymentTransaction(
+                transaction,
+                signatures
+            );
             if (response) {
                 return;
             }
@@ -86,11 +93,10 @@ export default function AccountCreationGenerate({
     }
 
     async function saveAccount(
-        {
-            credentialDeploymentInfo,
-            accountAddress,
-            transactionId,
-        }: CredentialDeploymentDetails,
+        transactionId: string,
+        accountAddress: string,
+        credId: string,
+        policy: Policy,
         credNumber: number,
         randomness: CommitmentsRandomness
     ) {
@@ -108,7 +114,8 @@ export default function AccountCreationGenerate({
             credNumber,
             identity.id,
             0, // credentialIndex = 0 on original
-            credentialDeploymentInfo,
+            credId,
+            policy,
             randomness
         );
     }
@@ -148,8 +155,8 @@ export default function AccountCreationGenerate({
                 }
 
                 const {
-                    info: credentialDeploymentDetails,
-                    randomness,
+                    transaction,
+                    signatures,
                 } = await createCredentialDetails(
                     identity,
                     credentialNumber,
@@ -160,27 +167,45 @@ export default function AccountCreationGenerate({
                     ledger
                 );
 
+                const accountAddress = getAccountAddress(
+                    transaction.unsignedCdi.credId
+                ).address;
+                const transactionId = getCredentialDeploymentTransactionHash(
+                    transaction,
+                    signatures
+                );
+
                 try {
                     await saveAccount(
-                        credentialDeploymentDetails,
+                        transactionId,
+                        accountAddress,
+                        transaction.unsignedCdi.credId,
+                        transaction.unsignedCdi.policy,
                         credentialNumber,
-                        randomness
+                        {
+                            ...transaction.randomness,
+                            attributesRand: mapRecord(
+                                transaction.randomness.attributesRand,
+                                (x) => x,
+                                (key) => AttributeKey[key]
+                            ),
+                        }
                     );
-                    await sendCredential(credentialDeploymentDetails);
+                    await sendCredential(
+                        transaction,
+                        accountAddress,
+                        signatures
+                    );
                     window.log.info(`Sent credential deployment to node`);
-                    confirmAccount(
-                        dispatch,
-                        credentialDeploymentDetails.accountAddress,
-                        credentialDeploymentDetails.transactionId
-                    );
+                    confirmAccount(dispatch, accountAddress, transactionId);
                     dispatch(
                         push({
                             pathname: routes.ACCOUNTCREATION_FINAL,
-                            state: credentialDeploymentDetails.accountAddress,
+                            state: accountAddress,
                         })
                     );
                 } catch (e) {
-                    window.log.error(e, 'Account creation failed');
+                    window.log.error(e as Error, 'Account creation failed');
                     onError(`Unable to create account due to ${e}`);
                 }
             };

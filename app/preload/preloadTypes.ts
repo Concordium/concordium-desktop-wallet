@@ -1,15 +1,19 @@
 import {
     AccountInfo,
+    AccountTransactionHeader,
+    AccountTransactionSignature,
     BakerId,
     BakerPoolStatus,
     BlockItemStatus,
     ChainParameters,
     ConsensusStatus,
+    CredentialDeploymentTransaction,
     CryptographicParameters,
     NextAccountNonce,
     PassiveDelegationStatus,
     PeerInfo,
     RewardStatus,
+    UpdateInstruction,
 } from '@concordium/node-sdk';
 import {
     OpenDialogOptions,
@@ -21,6 +25,7 @@ import {
     MessageBoxReturnValue,
 } from 'electron';
 import { Logger } from 'winston';
+import type { Buffer } from 'buffer/';
 import {
     Account,
     Identity,
@@ -98,10 +103,20 @@ export type GRPC = {
         address: string,
         port: string
     ) => Promise<ConsensusAndGlobalResult>;
-    sendTransaction: (
-        transactionPayload: Uint8Array,
-        networkId: number
-    ) => Promise<boolean>;
+    sendAccountTransaction: (
+        header: AccountTransactionHeader,
+        payload: Buffer,
+        baseEnergyCost: bigint,
+        signature: AccountTransactionSignature
+    ) => Promise<string>;
+    sendUpdateInstruction: (
+        updateInstructionTransaction: UpdateInstruction,
+        signatures: Record<number, string>
+    ) => Promise<string>;
+    sendCredentialDeploymentTransaction: (
+        transaction: CredentialDeploymentTransaction,
+        signatures: string[]
+    ) => Promise<string>;
     getCryptographicParameters: (
         blockHash: string
     ) => Promise<CryptographicParameters>;

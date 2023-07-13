@@ -10,13 +10,13 @@ import {
 } from '~/database/CredentialDao';
 import {
     Credential,
-    CredentialDeploymentInformation,
     Account,
     AccountInfo,
     instanceOfDeployedCredential,
     AddedCredential,
     MakeOptional,
     CommitmentsRandomness,
+    Policy,
 } from '~/utils/types';
 import { createNewCredential, getCredId } from '~/utils/credentialHelper';
 import { ExternalCredential } from '~/database/types';
@@ -127,7 +127,8 @@ export async function insertNewCredential(
     credentialNumber: number,
     identityId: number,
     credentialIndex: number | undefined,
-    credential: Pick<CredentialDeploymentInformation, 'credId' | 'policy'>,
+    credId: string,
+    policy: Policy,
     randomness?: CommitmentsRandomness
 ) {
     await insertCredential(
@@ -136,8 +137,8 @@ export async function insertNewCredential(
             credentialNumber,
             identityId,
             credentialIndex,
-            credential.credId,
-            credential.policy,
+            credId,
+            policy,
             randomness
         )
     );
