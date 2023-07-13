@@ -2,7 +2,6 @@ import React from 'react';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import Form from '~/components/Form';
-import { getCurrentValue } from './util';
 import { commonAddressValidators } from '~/utils/accountHelpers';
 
 import styles from './FoundationAccount.module.scss';
@@ -17,9 +16,9 @@ const fieldNames: EqualRecord<UpdateFoundationAccountFields> = {
 
 export default function UpdateFoundationAccount({
     defaults,
-    blockSummary,
+    chainParameters,
 }: UpdateProps): JSX.Element | null {
-    const currentFoundationAccount = getCurrentValue(blockSummary);
+    const currentFoundationAccount = chainParameters.foundationAccount;
 
     return (
         <div>

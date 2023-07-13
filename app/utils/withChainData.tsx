@@ -2,15 +2,18 @@
 import { push } from 'connected-react-router';
 import React, { ComponentType, useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { BlockSummary, ConsensusStatus } from '~/node/NodeApiTypes';
-import { getConsensusStatus, getBlockSummary } from '~/node/nodeRequests';
+import { ChainParameters, ConsensusStatus } from '~/node/NodeApiTypes';
+import {
+    getConsensusStatus,
+    getBlockChainParameters,
+} from '~/node/nodeRequests';
 import routes from '~/constants/routes.json';
 import Execute from '~/components/Execute';
 import { setConsensusStatus } from '~/features/ChainDataSlice';
 
 export interface ChainData {
     consensusStatus?: ConsensusStatus;
-    blockSummary?: BlockSummary;
+    chainParameters?: ChainParameters;
 }
 
 export default function withChainData<TProps extends ChainData>(
@@ -22,12 +25,14 @@ export default function withChainData<TProps extends ChainData>(
 
         const init = useCallback(async (): Promise<ChainData> => {
             const cs: ConsensusStatus = await getConsensusStatus();
-            const bs = await getBlockSummary(cs.lastFinalizedBlock);
+            const chainParameters = await getBlockChainParameters(
+                cs.lastFinalizedBlock
+            );
 
             dispatch(setConsensusStatus(cs));
 
             return {
-                blockSummary: bs,
+                chainParameters,
                 consensusStatus: cs,
             };
         }, [dispatch]);
@@ -64,9 +69,9 @@ export function ensureChainData<TProps extends ChainData>(
     FallBack: ComponentType<any> = () => null
 ) {
     return withChainData<TProps>((props) => {
-        const { blockSummary } = props;
+        const { chainParameters } = props;
 
-        if (!blockSummary) {
+        if (!chainParameters) {
             return <FallBack />;
         }
 

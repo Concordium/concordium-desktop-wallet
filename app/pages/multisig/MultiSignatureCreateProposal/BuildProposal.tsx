@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
+import { UpdateQueues } from '@concordium/node-sdk';
 import {
     getDefaultExpiry,
     TimeConstants,
@@ -20,6 +21,7 @@ export interface MultiSignatureCreateProposalForm {
 
 interface Props extends Required<ChainData> {
     defaults: FieldValues;
+    updateQueues: UpdateQueues;
     type: UpdateType;
     onFinish: (
         proposal: Omit<MultiSignatureTransaction, 'id'> | undefined,
@@ -29,7 +31,8 @@ interface Props extends Required<ChainData> {
 
 export default function BuildProposal({
     type,
-    blockSummary,
+    chainParameters,
+    updateQueues,
     consensusStatus,
     onFinish,
     defaults,
@@ -61,7 +64,8 @@ export default function BuildProposal({
         const expiryTimeInSeconds = BigInt(secondsSinceUnixEpoch(expiryTime));
 
         const newProposal = await handler.createTransaction(
-            blockSummary,
+            chainParameters,
+            updateQueues,
             dynamicFields,
             effectiveTimeInSeconds,
             expiryTimeInSeconds
@@ -87,7 +91,7 @@ export default function BuildProposal({
                     <>
                         <UpdateComponent
                             defaults={defaults}
-                            blockSummary={blockSummary}
+                            chainParameters={chainParameters}
                             consensusStatus={consensusStatus}
                         />
                         <Form.DatePicker
@@ -127,7 +131,7 @@ export default function BuildProposal({
                         />
                     </>
                 </div>
-                <Form.Submit disabled={!blockSummary}>Continue</Form.Submit>
+                <Form.Submit disabled={!chainParameters}>Continue</Form.Submit>
             </Form>
         </>
     );

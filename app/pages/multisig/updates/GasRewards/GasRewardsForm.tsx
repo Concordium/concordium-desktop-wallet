@@ -65,6 +65,7 @@ export default function GasRewardsForm({
     const firstError = fields.map((f) => errors[f]).filter(isDefined)[0]
         ?.message;
 
+    // TODO handle when finalizationProof is not there, correctly
     return (
         <section>
             <h5>{title}</h5>
@@ -76,7 +77,7 @@ export default function GasRewardsForm({
                     RewardFractionFieldProps,
                     'className' | 'label'
                 > & { key: string } = {
-                    label,
+                    label: label || '',
                     className: 'mB10',
                     key: field,
                 };

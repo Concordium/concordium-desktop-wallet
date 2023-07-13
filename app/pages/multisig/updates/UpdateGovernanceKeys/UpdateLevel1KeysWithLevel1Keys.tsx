@@ -4,7 +4,7 @@ import { UpdateType } from '~/utils/types';
 import UpdateHigherLevelKeys from './UpdateHigherLevelKeys';
 
 export default function UpdateLevel1KeysWithLevel1Keys({
-    blockSummary,
+    chainParameters,
     handleHigherLevelKeySubmit,
     defaults,
 }: UpdateProps): JSX.Element | null {
@@ -15,7 +15,7 @@ export default function UpdateLevel1KeysWithLevel1Keys({
     return (
         <UpdateHigherLevelKeys
             defaults={defaults}
-            blockSummary={blockSummary}
+            chainParameters={chainParameters}
             type={UpdateType.UpdateLevel1KeysUsingLevel1Keys}
             handleHigherLevelKeySubmit={handleHigherLevelKeySubmit}
         />

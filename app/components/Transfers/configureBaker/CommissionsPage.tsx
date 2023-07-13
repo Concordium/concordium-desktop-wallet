@@ -1,4 +1,4 @@
-import { ChainParametersV1 } from '@concordium/node-sdk';
+import { ChainParameters, ChainParametersV0 } from '@concordium/node-sdk';
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -108,7 +108,7 @@ interface CommissionsPageProps
         'formValues'
     > {
     account: Account;
-    chainParameters: ChainParametersV1;
+    chainParameters: Exclude<ChainParameters, ChainParametersV0>;
 }
 
 export default function CommissionsPage({

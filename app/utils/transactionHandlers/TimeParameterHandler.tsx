@@ -1,8 +1,9 @@
 import React from 'react';
+import { isUpdateQueuesV0 } from '@concordium/common-sdk/lib/blockSummaryHelpers';
 import {
-    isBlockSummaryV0,
     isAuthorizationsV1,
-} from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+    isChainParametersV0,
+} from '@concordium/common-sdk/lib/versionedTypeHelpers';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
 import TimeParametersView from '~/pages/multisig/updates/TimeParameters/TimeParametersView';
@@ -11,7 +12,11 @@ import UpdateTimeParameters, {
 } from '~/pages/multisig/updates/TimeParameters/UpdateTimeParameters';
 import { parseMintRate } from '../mintDistributionHelpers';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
+import {
+    Authorizations,
+    ChainParameters,
+    UpdateQueues,
+} from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     TimeParameters,
@@ -36,25 +41,26 @@ export default class TimeParametersHandler
     }
 
     async createTransaction(
-        blockSummary: BlockSummary,
+        chainParameters: ChainParameters,
+        updateQueues: UpdateQueues,
         { mintPerPayday, rewardPeriodLength }: UpdateTimeParametersFields,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         const parsedMintRate = parseMintRate(mintPerPayday);
-        if (!blockSummary || !parsedMintRate) {
+        if (!chainParameters || !updateQueues || !parsedMintRate) {
             return undefined;
         }
 
-        if (isBlockSummaryV0(blockSummary)) {
+        if (
+            isUpdateQueuesV0(updateQueues) ||
+            isChainParametersV0(chainParameters)
+        ) {
             throw new Error('Update incompatible with chain protocol version');
         }
 
-        const sequenceNumber =
-            blockSummary.updates.updateQueues.timeParameters.nextSequenceNumber;
-        const {
-            threshold,
-        } = blockSummary.updates.keys.level2Keys.timeParameters;
+        const sequenceNumber = updateQueues.timeParameters.nextSequenceNumber;
+        const { threshold } = chainParameters.level2Keys.timeParameters;
 
         const timeParameters: TimeParameters = {
             mintRatePerPayday: parsedMintRate,

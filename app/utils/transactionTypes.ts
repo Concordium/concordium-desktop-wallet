@@ -1,10 +1,11 @@
+import { UpdateQueues } from '@concordium/node-sdk';
 import type { Buffer } from 'buffer/';
 import { FieldValues } from 'react-hook-form';
 import { AccountPathInput } from '~/features/ledger/Path';
 import {
     Authorization,
     Authorizations,
-    BlockSummary,
+    ChainParameters,
     ConsensusStatus,
 } from '../node/NodeApiTypes';
 import {
@@ -29,7 +30,7 @@ export interface TransactionInput {
  */
 export interface UpdateProps {
     defaults: FieldValues;
-    blockSummary: BlockSummary;
+    chainParameters: ChainParameters;
     consensusStatus: ConsensusStatus;
     handleHigherLevelKeySubmit?(
         effectiveTime: Date,
@@ -111,7 +112,8 @@ export interface UpdateInstructionHandler<T, S, P = UpdateInstruction>
      * if the fields are not appropiate, will return undefined
      */
     createTransaction: (
-        blockSummary: BlockSummary,
+        chainParameters: ChainParameters,
+        updateQueue: UpdateQueues,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fields: any,
         effectiveTime: bigint,

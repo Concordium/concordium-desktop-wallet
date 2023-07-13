@@ -6,7 +6,11 @@ import UpdateGasRewards, {
     UpdateGasRewardsFields,
 } from '~/pages/multisig/updates/GasRewards/UpdateGasRewards';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
+import {
+    Authorizations,
+    ChainParameters,
+    UpdateQueues,
+} from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     GasRewards,
@@ -31,20 +35,18 @@ export default class GasRewardsHandler
     }
 
     async createTransaction(
-        blockSummary: BlockSummary,
+        chainParameters: ChainParameters,
+        updateQueues: UpdateQueues,
         gasRewards: UpdateGasRewardsFields,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!blockSummary) {
+        if (!chainParameters || !updateQueues) {
             return undefined;
         }
 
-        const sequenceNumber =
-            blockSummary.updates.updateQueues.gasRewards.nextSequenceNumber;
-        const {
-            threshold,
-        } = blockSummary.updates.keys.level2Keys.paramGASRewards;
+        const sequenceNumber = updateQueues.gasRewards.nextSequenceNumber;
+        const { threshold } = chainParameters.level2Keys.paramGASRewards;
 
         return createUpdateMultiSignatureTransaction(
             gasRewards,

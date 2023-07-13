@@ -3,7 +3,6 @@ import Loading from '~/cross-app-components/Loading';
 import { FoundationAccount } from '~/utils/types';
 import withChainData, { ChainData } from '~/utils/withChainData';
 import DisplayAddress from '~/components/DisplayAddress';
-import { getCurrentValue } from './util';
 
 import styles from './FoundationAccount.module.scss';
 
@@ -16,13 +15,13 @@ interface Props extends ChainData {
  */
 export default withChainData(function FoundationAccountView({
     foundationAccount,
-    blockSummary,
+    chainParameters,
 }: Props) {
-    if (!blockSummary) {
+    if (!chainParameters) {
         return <Loading inline />;
     }
 
-    const currentFoundationAccount = getCurrentValue(blockSummary);
+    const currentFoundationAccount = chainParameters.foundationAccount;
 
     return (
         <>

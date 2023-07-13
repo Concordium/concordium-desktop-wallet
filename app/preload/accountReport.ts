@@ -129,11 +129,11 @@ function calculatePublicBalanceChange(
         TransactionKindString.TransferToPublic === transaction.transactionKind
     ) {
         return (
-            BigInt(transaction.subtotal) - BigInt(transaction.cost || 0)
+            BigInt(transaction.subtotal || 0) - BigInt(transaction.cost || 0)
         ).toString();
     }
     return (
-        -BigInt(transaction.subtotal) - BigInt(transaction.cost || 0)
+        -BigInt(transaction.subtotal || 0) - BigInt(transaction.cost || 0)
     ).toString();
 }
 
@@ -284,7 +284,7 @@ async function streamTransactions(
     stream.write('\n');
 
     const idReducer = (acc: bigint, t: TransferTransaction) =>
-        acc === 0n || BigInt(t.id) < acc ? BigInt(t.id) : acc;
+        acc === 0n || BigInt(t.id || 0) < acc ? BigInt(t.id || 0) : acc;
 
     while (hasMore) {
         if (abortController.isAborted) {

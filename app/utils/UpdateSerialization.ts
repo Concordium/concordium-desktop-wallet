@@ -351,7 +351,10 @@ export function serializeProtocolUpdate(
 export function serializeGasRewards(gasRewards: GasRewards) {
     const serializedGasRewards = Buffer.alloc(16);
     serializedGasRewards.writeUInt32BE(gasRewards.baker, 0);
-    serializedGasRewards.writeUInt32BE(gasRewards.finalizationProof, 4);
+    // TODO Make sure we handle this
+    if (gasRewards.finalizationProof) {
+        serializedGasRewards.writeUInt32BE(gasRewards.finalizationProof, 4);
+    }
     serializedGasRewards.writeUInt32BE(gasRewards.accountCreation, 8);
     serializedGasRewards.writeUInt32BE(gasRewards.chainUpdate, 12);
     return serializedGasRewards;

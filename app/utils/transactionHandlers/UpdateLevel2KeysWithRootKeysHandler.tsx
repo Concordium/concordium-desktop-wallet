@@ -2,7 +2,7 @@ import React from 'react';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceRootPath } from '../../features/ledger/Path';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { BlockSummary } from '../../node/NodeApiTypes';
+import { ChainParameters, UpdateQueues } from '../../node/NodeApiTypes';
 import {
     UpdateInstruction,
     MultiSignatureTransaction,
@@ -31,18 +31,18 @@ export default class UpdateLevel2KeysUsingRootKeysHandler
     }
 
     async createTransaction(
-        blockSummary: BlockSummary,
+        chainParameters: ChainParameters,
+        updateQueues: UpdateQueues,
         authorizationKeysUpdate: AuthorizationKeysUpdate,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!blockSummary) {
+        if (!chainParameters || !updateQueues) {
             return undefined;
         }
 
-        const sequenceNumber =
-            blockSummary.updates.updateQueues.level2Keys.nextSequenceNumber;
-        const { threshold } = blockSummary.updates.keys.rootKeys;
+        const sequenceNumber = updateQueues.level2Keys.nextSequenceNumber;
+        const { threshold } = chainParameters.rootKeys;
 
         return createUpdateMultiSignatureTransaction(
             authorizationKeysUpdate,

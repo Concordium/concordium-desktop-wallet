@@ -1,5 +1,6 @@
 import React from 'react';
 import { FieldValues } from 'react-hook-form';
+import { UpdateQueues } from '@concordium/node-sdk';
 import { ChainData } from '~/utils/withChainData';
 import {
     UpdateType,
@@ -18,6 +19,7 @@ export interface MultiSignatureCreateProposalForm {
 
 interface Props extends Required<ChainData> {
     defaults: FieldValues;
+    updateQueues: UpdateQueues;
     type: UpdateType;
     onFinish: (
         proposal: MultiSignatureTransaction | undefined,
@@ -27,7 +29,8 @@ interface Props extends Required<ChainData> {
 
 export default function BuildProposal({
     type,
-    blockSummary,
+    chainParameters,
+    updateQueues,
     consensusStatus,
     onFinish,
     defaults,
@@ -47,7 +50,7 @@ export default function BuildProposal({
             | Partial<HigherLevelKeyUpdate>
             | Partial<AuthorizationKeysUpdate>
     ) {
-        if (!blockSummary) {
+        if (!chainParameters) {
             return;
         }
         const effectiveTimeInSeconds = BigInt(
@@ -56,7 +59,8 @@ export default function BuildProposal({
 
         const expiryTimeInSeconds = BigInt(secondsSinceUnixEpoch(expiryTime));
         const newProposal = await handler.createTransaction(
-            blockSummary,
+            chainParameters,
+            updateQueues,
             keyUpdate,
             effectiveTimeInSeconds,
             expiryTimeInSeconds
@@ -71,7 +75,7 @@ export default function BuildProposal({
     return (
         <UpdateComponent
             defaults={defaults}
-            blockSummary={blockSummary}
+            chainParameters={chainParameters}
             consensusStatus={consensusStatus}
             handleHigherLevelKeySubmit={handleSubmit}
             handleAuthorizationKeySubmit={handleSubmit}

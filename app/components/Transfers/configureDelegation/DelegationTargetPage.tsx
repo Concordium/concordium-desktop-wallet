@@ -1,12 +1,11 @@
 import React from 'react';
 import { useForm, Validate } from 'react-hook-form';
-import { OpenStatusText } from '@concordium/node-sdk/lib/src/types';
-import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { OpenStatusText } from '@concordium/common-sdk/lib/types';
+import { isDelegatorAccount } from '@concordium/common-sdk/lib/accountHelpers';
 import Form from '~/components/Form';
 import ExternalLink from '~/components/ExternalLink';
 import { validBigInt } from '~/components/Form/util/validation';
 import { MultiStepFormPageProps } from '~/components/MultiStepForm';
-import { getPoolStatusLatest } from '~/node/nodeHelpers';
 import {
     ConfigureDelegationFlowState,
     getExistingDelegationValues,
@@ -16,6 +15,7 @@ import urls from '~/constants/urls.json';
 
 import styles from './DelegationPage.module.scss';
 import { getTargetNet, Net } from '~/utils/ConfigHelper';
+import { getPoolInfo } from '~/node/nodeRequests';
 
 interface FormState {
     toSpecificPool: boolean;
@@ -60,7 +60,7 @@ export default function DelegationTargetPage({
         try {
             const bakerId = BigInt(value);
             // Throws if response is undefined.
-            const poolStatus = await getPoolStatusLatest(bakerId);
+            const poolStatus = await getPoolInfo(bakerId);
 
             if (poolStatus.poolInfo.openStatus !== OpenStatusText.OpenForAll) {
                 return 'Targeted baker does not allow new delegators';

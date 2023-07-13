@@ -1,5 +1,5 @@
 import { AccountInfo, AccountInfoDelegator } from '@concordium/node-sdk';
-import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { isDelegatorAccount } from '@concordium/common-sdk/lib/accountHelpers';
 import React from 'react';
 import { Redirect, Route, Switch, useLocation } from 'react-router';
 import { Account } from '~/utils/types';

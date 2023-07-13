@@ -6,8 +6,8 @@ import type { DelegationTarget } from '@concordium/node-sdk';
 import {
     isBakerAccount,
     isDelegatorAccount,
-} from '@concordium/node-sdk/lib/src/accountHelpers';
-import { DelegationTargetType } from '@concordium/node-sdk/lib/src/types';
+} from '@concordium/common-sdk/lib/accountHelpers';
+import { DelegationTargetType } from '@concordium/common-sdk/lib/types';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
 import { Account, AccountInfo } from '~/utils/types';

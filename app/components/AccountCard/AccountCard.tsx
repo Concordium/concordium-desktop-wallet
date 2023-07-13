@@ -13,7 +13,7 @@ import InfoImage from '@resources/svg/info.svg';
 import {
     isBakerAccount,
     isDelegatorAccount,
-} from '@concordium/node-sdk/lib/src/accountHelpers';
+} from '@concordium/common-sdk/lib/accountHelpers';
 import { displayAsCcd } from '~/utils/ccd';
 import { AccountInfo, Account, AccountStatus, ClassName } from '~/utils/types';
 import {

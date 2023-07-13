@@ -1,8 +1,10 @@
 import type { Buffer } from 'buffer/';
 import {
+    BlockItemSummary,
     ReleaseSchedule,
-    TransactionSummary,
-} from '@concordium/node-sdk/lib/src/types';
+    TransactionSummaryType,
+    TransactionKindString,
+} from '@concordium/common-sdk/lib/types';
 import { Validate } from 'react-hook-form';
 import {
     dateFromTimeStamp,
@@ -38,7 +40,6 @@ import {
     UpdateBakerRestakeEarningsPayload,
     UpdateBakerStake,
     UpdateBakerRestakeEarnings,
-    TransactionKindString,
     SimpleTransferWithMemo,
     TransactionStatus,
     SchedulePoint,
@@ -571,8 +572,12 @@ export function buildTransactionAccountSignature(
     return transactionAccountSignature;
 }
 
-export function isSuccessfulTransaction(event: TransactionSummary) {
-    return event.result.outcome === 'success';
+export function isSuccessfulTransaction(summary: BlockItemSummary) {
+    if (summary.type === TransactionSummaryType.AccountTransaction) {
+        return summary.transactionType !== TransactionKindString.Failed;
+    }
+    // other block items don't fail // TODO is this completely true
+    return true;
 }
 
 export const isExpired = (transaction: Transaction) =>

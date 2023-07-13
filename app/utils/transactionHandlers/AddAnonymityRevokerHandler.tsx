@@ -6,7 +6,11 @@ import CreateAddAnonymityRevoker, {
     AddAnonymityRevokerFields,
 } from '~/pages/multisig/updates/AddAnonymityRevoker/CreateAddAnonymityRevoker';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
+import {
+    Authorizations,
+    ChainParameters,
+    UpdateQueues,
+} from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     AddAnonymityRevoker,
@@ -31,7 +35,8 @@ export default class AddAnonymityRevokerHandler
     }
 
     async createTransaction(
-        blockSummary: BlockSummary,
+        chainParameters: ChainParameters,
+        updateQueues: UpdateQueues,
         {
             name,
             url,
@@ -42,7 +47,7 @@ export default class AddAnonymityRevokerHandler
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!blockSummary) {
+        if (!chainParameters || !updateQueues) {
             return undefined;
         }
 
@@ -53,11 +58,8 @@ export default class AddAnonymityRevokerHandler
         };
 
         const sequenceNumber =
-            blockSummary.updates.updateQueues.addAnonymityRevoker
-                .nextSequenceNumber;
-        const {
-            threshold,
-        } = blockSummary.updates.keys.level2Keys.addAnonymityRevoker;
+            updateQueues.addAnonymityRevoker.nextSequenceNumber;
+        const { threshold } = chainParameters.level2Keys.addAnonymityRevoker;
 
         const payload = {
             arIdentity,

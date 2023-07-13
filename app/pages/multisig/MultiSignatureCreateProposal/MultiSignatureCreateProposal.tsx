@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useParams, Route, Switch } from 'react-router';
 import { FieldValues } from 'react-hook-form';
+import { UpdateQueues } from '@concordium/node-sdk';
 import Modal from '~/cross-app-components/Modal';
 import {
     instanceOfUpdateInstruction,
@@ -38,6 +39,10 @@ function getSigningRoute(type: UpdateType) {
     )}/sign`;
 }
 
+interface WithUpdateQueues {
+    updateQueues: UpdateQueues;
+}
+
 /**
  * Component for displaying the UI required to create a multi signature transaction
  * proposal. It dynamically loads the correct component to show wrapped in a bit of
@@ -46,9 +51,10 @@ function getSigningRoute(type: UpdateType) {
  * is used to get the threshold and sequence number required for update instructions.
  */
 function MultiSignatureCreateProposal({
-    blockSummary,
+    chainParameters,
     consensusStatus,
-}: Required<ChainData>) {
+    updateQueues,
+}: Required<ChainData> & WithUpdateQueues) {
     const proposals = useSelector(proposalsSelector);
     const [restrictionModalOpen, setRestrictionModalOpen] = useState(false);
     const [defaults, setDefaults] = useState<
@@ -122,7 +128,7 @@ function MultiSignatureCreateProposal({
                     render={() => (
                         <SignTransactionProposal
                             proposal={proposal}
-                            blockSummary={blockSummary}
+                            chainParameters={chainParameters}
                         />
                     )}
                 />
@@ -135,7 +141,8 @@ function MultiSignatureCreateProposal({
                             <BuildComponent
                                 type={type}
                                 onFinish={handleProposal}
-                                blockSummary={blockSummary}
+                                chainParameters={chainParameters}
+                                updateQueues={updateQueues}
                                 consensusStatus={consensusStatus}
                                 defaults={defaults}
                             />

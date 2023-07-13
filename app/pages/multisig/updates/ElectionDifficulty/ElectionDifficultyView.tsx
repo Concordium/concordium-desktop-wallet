@@ -1,4 +1,9 @@
 import React from 'react';
+import {
+    isChainParametersV0,
+    isChainParametersV1,
+    isConsensusStatusV0,
+} from '@concordium/common-sdk/lib/versionedTypeHelpers';
 import Loading from '~/cross-app-components/Loading';
 import withChainData, { ChainData } from '~/utils/withChainData';
 import ElectionDifficultyInput from './ElectionDifficultyInput';
@@ -14,14 +19,23 @@ interface Props extends ChainData {
 export default withChainData(function ElectionDifficultyView({
     electionDifficulty,
     consensusStatus,
-    blockSummary,
+    chainParameters,
 }: Props) {
-    if (!blockSummary || !consensusStatus) {
+    if (!chainParameters || !consensusStatus) {
         return <Loading inline />;
     }
 
-    const currentElectionDifficulty =
-        blockSummary.updates.chainParameters.electionDifficulty;
+    if (
+        (!isChainParametersV0(chainParameters) &&
+            !isChainParametersV1(chainParameters)) ||
+        !isConsensusStatusV0(consensusStatus)
+    ) {
+        throw new Error(
+            'election difficulty only available on Protocol versions < 6'
+        );
+    }
+
+    const currentElectionDifficulty = chainParameters.electionDifficulty;
     const slotDuration = Number(consensusStatus.slotDuration);
 
     return (

@@ -3,7 +3,7 @@ import React from 'react';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import { FormRelativeRateField } from '../../common/RelativeRateField';
-import { commonFieldProps, getCurrentValue } from './util';
+import { commonFieldProps } from './util';
 import {
     isPositiveNumber,
     validBigIntValues,
@@ -22,9 +22,9 @@ const fieldNames: EqualRecord<UpdateMicroGtuPerEuroRateFields> = {
 
 export default function UpdateMicroGtuPerEuroRate({
     defaults,
-    blockSummary,
+    chainParameters,
 }: UpdateProps): JSX.Element | null {
-    const exchangeRate = getCurrentValue(blockSummary);
+    const exchangeRate = chainParameters.microGTUPerEuro;
     const currentValue: RelativeRateValue = fromExchangeRate(exchangeRate);
     const { numeratorUnit, denominatorUnit } = commonFieldProps;
 

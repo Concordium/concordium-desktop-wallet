@@ -1,5 +1,5 @@
 import React from 'react';
-import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isChainParametersV0 } from '@concordium/common-sdk/lib/versionedTypeHelpers';
 import { CooldownParameters } from '~/utils/types';
 import Loading from '~/cross-app-components/Loading';
 import withChainData, { ChainData } from '~/utils/withChainData';
@@ -15,20 +15,18 @@ interface Props extends ChainData {
  */
 export default withChainData(function CooldownParametersView({
     cooldownParameters,
-    blockSummary,
+    chainParameters,
     consensusStatus,
 }: Props) {
-    if (!consensusStatus || !blockSummary) {
+    if (!consensusStatus || !chainParameters) {
         return <Loading inline />;
     }
-    if (isBlockSummaryV0(blockSummary)) {
-        throw new Error('Connected node used outdated blockSummary format');
+    if (isChainParametersV0(chainParameters)) {
+        throw new Error('Connected node used outdated chainParameters format');
     }
 
-    const currentPoolOwnerCooldown =
-        blockSummary.updates.chainParameters.poolOwnerCooldown;
-    const currentDelegatorCooldown =
-        blockSummary.updates.chainParameters.delegatorCooldown;
+    const currentPoolOwnerCooldown = chainParameters.poolOwnerCooldown;
+    const currentDelegatorCooldown = chainParameters.delegatorCooldown;
 
     const {
         poolOwnerCooldown: newPoolOwnerCooldown,

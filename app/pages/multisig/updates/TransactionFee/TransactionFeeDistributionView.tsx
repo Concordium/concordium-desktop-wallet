@@ -17,7 +17,7 @@ interface Props extends ChainData {
  */
 function SignTransactionFeeDistribution({
     transactionFeeDistribution: { baker, gasAccount },
-    blockSummary,
+    chainParameters,
 }: Props) {
     const value: RewardDistributionValue = {
         first: baker,
@@ -28,9 +28,9 @@ function SignTransactionFeeDistribution({
         <>
             <div className="mB50">
                 <h5>Current transaction fee distribution:</h5>
-                {blockSummary ? (
+                {chainParameters ? (
                     <RewardDistribution
-                        value={getCurrentValue(blockSummary)}
+                        value={getCurrentValue(chainParameters)}
                         labels={rewardDistributionLabels}
                         disabled
                     />

@@ -1,3 +1,4 @@
+import { isConsensusStatusV0 } from '@concordium/common-sdk/lib/versionedTypeHelpers';
 import { ConsensusStatus, MintDistributionNode } from '~/node/NodeApiTypes';
 import updateConstants from '~/constants/updateConstants.json';
 import { RewardDistributionValue } from '../../common/RewardDistribution';
@@ -20,7 +21,11 @@ export const toRewardDistributionValue = ({
 });
 
 export const getSlotsPerYear = (consensusStatus: ConsensusStatus): number => {
-    const slotsPerSecond = 1000 / Number(consensusStatus.slotDuration);
-    const slotsPerYear = slotsPerSecond * 60 * 60 * 24 * 365.25;
-    return slotsPerYear;
+    if (isConsensusStatusV0(consensusStatus)) {
+        const slotsPerSecond = 1000 / Number(consensusStatus.slotDuration);
+        const slotsPerYear = slotsPerSecond * 60 * 60 * 24 * 365.25;
+        return slotsPerYear;
+    }
+    // TODO how to calculate this?
+    return 1;
 };

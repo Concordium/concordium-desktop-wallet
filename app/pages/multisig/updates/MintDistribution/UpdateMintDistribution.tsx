@@ -1,6 +1,6 @@
 import React from 'react';
 import { Validate } from 'react-hook-form';
-import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isChainParametersV0 } from '@concordium/common-sdk/lib/versionedTypeHelpers';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 
@@ -45,17 +45,16 @@ const MINT_PER_SLOT_MAX = 2 ** 32 - 1; // UInt32 upper bound
  */
 export default function UpdateMintDistribution({
     defaults,
-    blockSummary,
+    chainParameters,
     consensusStatus,
 }: UpdateProps): JSX.Element | null {
     // Use the mintPerSlot as an indicator of whether to use v0 (which has mintPerSlot) or v1 (which doesn't)
     let mintPerSlot: number | undefined;
     const rewardDistribution =
-        blockSummary.updates.chainParameters.rewardParameters.mintDistribution;
-    if (isBlockSummaryV0(blockSummary)) {
+        chainParameters.rewardParameters.mintDistribution;
+    if (isChainParametersV0(chainParameters)) {
         mintPerSlot =
-            blockSummary.updates.chainParameters.rewardParameters
-                .mintDistribution.mintPerSlot;
+            chainParameters.rewardParameters.mintDistribution.mintPerSlot;
     }
     const slotsPerYear = getSlotsPerYear(consensusStatus);
     const currentDistribitionRatio: RewardDistributionValue = toRewardDistributionValue(

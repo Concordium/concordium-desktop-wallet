@@ -2,7 +2,8 @@ import { Authorizations } from '@concordium/node-sdk/';
 import { RewardFraction, VerifyKey } from '../utils/types';
 
 export {
-    BlockSummary,
+    ChainParameters,
+    UpdateQueues,
     ConsensusStatus,
     Authorizations,
 } from '@concordium/node-sdk/';

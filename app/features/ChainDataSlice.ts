@@ -1,4 +1,8 @@
-import { ConsensusStatus, KeysMatching } from '@concordium/node-sdk';
+import {
+    ConsensusStatus,
+    ConsensusStatusV0,
+    KeysMatching,
+} from '@concordium/node-sdk';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Dispatch } from 'redux';
 import { getConsensusStatus } from '~/node/nodeRequests';
@@ -6,18 +10,24 @@ import type { RootState } from '~/store/store';
 import { pipe } from '~/utils/basicHelpers';
 import { orUndefined } from '~/utils/functionHelpers';
 
-type CSDateKey = KeysMatching<ConsensusStatus, Date>;
-type CSBigIntKey = KeysMatching<ConsensusStatus, bigint>;
+// TODO test this with v0 and v1
+// TODO save concordiumBFTStatus?
+
+type CSDateKey = KeysMatching<ConsensusStatusV0, Date>;
+type CSBigIntKey = KeysMatching<ConsensusStatusV0, bigint>;
 
 type SerializableConsensusStatus = Omit<
     ConsensusStatus,
-    keyof CSDateKey | keyof CSBigIntKey
+    keyof CSDateKey | keyof CSBigIntKey | 'concordiumBFTStatus'
 > &
     { [P in keyof CSDateKey]: number } &
     { [P in keyof CSBigIntKey]: string };
 
 function toSerializableCS(cs: ConsensusStatus): SerializableConsensusStatus {
     return Object.entries(cs).reduce((acc, [key, value]) => {
+        if (key === 'concordiumBFTStatus') {
+            return acc;
+        }
         if (typeof value === 'bigint') {
             return { ...acc, [key]: value.toString() };
         }
@@ -52,7 +62,7 @@ function toOriginalCS(scs: SerializableConsensusStatus): ConsensusStatus {
             return { ...acc, [key]: new Date(value) };
         }
         return { ...acc, [key]: value };
-    }, {} as SerializableConsensusStatus);
+    }, {} as ConsensusStatus);
 }
 
 interface ChainDataState {
@@ -88,7 +98,7 @@ export async function init(dispatch: Dispatch) {
 
         dispatch(setConsensusStatus(cs));
     } catch (e) {
-        window.log.error(e, 'Could not initialize chain data state');
+        window.log.error(e as Error, 'Could not initialize chain data state');
     }
 }
 

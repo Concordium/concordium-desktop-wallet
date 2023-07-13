@@ -1,8 +1,8 @@
 import clsx from 'clsx';
 import React, { useCallback } from 'react';
 import { useFormContext, Validate } from 'react-hook-form';
-import { isRewardStatusV1 } from '@concordium/node-sdk/lib/src/rewardStatusHelpers';
-import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { isRewardStatusV1 } from '@concordium/common-sdk/lib/rewardStatusHelpers';
+import { isBakerAccount } from '@concordium/common-sdk/lib/accountHelpers';
 import { collapseFraction, noOp } from '~/utils/basicHelpers';
 import {
     getCcdSymbol,

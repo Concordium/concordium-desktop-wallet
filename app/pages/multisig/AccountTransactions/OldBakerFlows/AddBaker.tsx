@@ -1,4 +1,3 @@
-import { BlockSummaryV0 } from '@concordium/node-sdk';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import {
@@ -9,11 +8,11 @@ import {
     Redirect,
 } from 'react-router';
 import { push } from 'connected-react-router';
-import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { isBakerAccount } from '@concordium/common-sdk/lib/accountHelpers';
+import { ChainParameters } from '@concordium/node-sdk';
 import MultiSignatureLayout from '../../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
-import { BlockSummary } from '~/node/NodeApiTypes';
 import {
     Account,
     TransactionKindId,
@@ -57,17 +56,18 @@ import BakerStakeSettings from '~/components/BakerTransactions/BakerStakeSetting
 import { ccdToMicroCcd } from '~/utils/ccd';
 
 import styles from '../../common/MultiSignatureFlowPage.module.scss';
+import { getMinimumStakeForBaking } from '~/utils/blockSummaryHelpers';
 
 interface PageProps extends ChainData {
     exchangeRate: Fraction;
-    blockSummary: BlockSummary;
+    chainParameters: ChainParameters;
 }
 
 interface State {
     account?: Account;
 }
 
-function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
+function AddBakerPage({ exchangeRate, chainParameters }: PageProps) {
     const dispatch = useDispatch();
 
     const { state } = useLocation<State>();
@@ -81,10 +81,7 @@ function AddBakerPage({ exchangeRate, blockSummary }: PageProps) {
     const [transaction, setTransaction] = useState<
         AccountTransaction<AddBakerPayload>
     >();
-    const minimumThresholdForBaking = BigInt(
-        (blockSummary as BlockSummaryV0).updates.chainParameters
-            .minimumThresholdForBaking
-    );
+    const minimumThresholdForBaking = getMinimumStakeForBaking(chainParameters);
     const [
         expiryTime,
         setExpiryTime,

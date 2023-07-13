@@ -1,5 +1,9 @@
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import { Authorizations, BlockSummary } from '~/node/NodeApiTypes';
+import {
+    Authorizations,
+    ChainParameters,
+    UpdateQueues,
+} from '~/node/NodeApiTypes';
 import {
     TransactionExportType,
     UpdateComponent,
@@ -52,14 +56,16 @@ export default class UpdateInstructionHandlerTypeMiddleware<T>
     }
 
     createTransaction(
-        blockSummary: BlockSummary,
+        chainParameters: ChainParameters,
+        updateQueues: UpdateQueues,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fields: any,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         return this.base.createTransaction(
-            blockSummary,
+            chainParameters,
+            updateQueues,
             fields,
             effectiveTime,
             expiryTime

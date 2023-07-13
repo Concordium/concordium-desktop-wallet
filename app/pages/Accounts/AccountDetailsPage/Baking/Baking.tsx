@@ -1,5 +1,5 @@
 import { AccountInfo, AccountInfoBaker } from '@concordium/node-sdk';
-import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { isBakerAccount } from '@concordium/common-sdk/lib/accountHelpers';
 import React from 'react';
 import { Redirect, Route, Switch, useLocation } from 'react-router';
 import { LocationDescriptorObject } from 'history';

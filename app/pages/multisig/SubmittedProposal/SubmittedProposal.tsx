@@ -75,7 +75,7 @@ function getStatusText(status: MultiSignatureTransactionStatus): string {
  */
 
 const SubmittedProposalView = withChainData<Props>(
-    ({ proposal, blockSummary }) => {
+    ({ proposal, chainParameters }) => {
         const dispatch = useDispatch();
         const [showError, setShowError] = useState<ModalErrorInput>({
             show: false,
@@ -91,7 +91,7 @@ const SubmittedProposalView = withChainData<Props>(
         );
 
         // eslint-disable-next-line no-shadow
-        const init = useCallback(async (blockSummary) => {
+        const init = useCallback(async (chainParameters) => {
             let payload;
             if (instanceOfUpdateInstruction(transaction)) {
                 const updateHandler = findUpdateInstructionHandler(
@@ -105,7 +105,7 @@ const SubmittedProposalView = withChainData<Props>(
                         transaction.signatures.map((sig) =>
                             attachKeyIndex(
                                 sig,
-                                blockSummary,
+                                chainParameters,
                                 transaction,
                                 updateHandler
                             )
@@ -120,7 +120,7 @@ const SubmittedProposalView = withChainData<Props>(
                     setShowError({
                         show: true,
                         header: 'Unauthorized key',
-                        content: error.message,
+                        content: (error as Error).message,
                     });
                     return;
                 }
@@ -185,10 +185,10 @@ const SubmittedProposalView = withChainData<Props>(
         }, []);
 
         useEffect(() => {
-            if (blockSummary) {
-                init(blockSummary);
+            if (chainParameters) {
+                init(chainParameters);
             }
-        }, [init, blockSummary]);
+        }, [init, chainParameters]);
 
         return (
             <MultiSignatureLayout pageTitle={handler.title} disableBack>

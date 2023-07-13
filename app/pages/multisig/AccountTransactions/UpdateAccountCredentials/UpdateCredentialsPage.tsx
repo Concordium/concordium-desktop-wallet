@@ -6,7 +6,7 @@ import clsx from 'clsx';
 import {
     InitialCredentialDeploymentValues,
     CredentialDeploymentValues,
-} from '@concordium/node-sdk/lib/src/types';
+} from '@concordium/common-sdk/lib/types';
 import Button from '~/cross-app-components/Button';
 import {
     Account,

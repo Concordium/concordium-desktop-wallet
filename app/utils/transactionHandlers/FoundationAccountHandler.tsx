@@ -6,7 +6,11 @@ import UpdateFoundationAccount, {
     UpdateFoundationAccountFields,
 } from '~/pages/multisig/updates/FoundationAccount/UpdateFoundationAccount';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
+import {
+    Authorizations,
+    ChainParameters,
+    UpdateQueues,
+} from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     FoundationAccount,
@@ -31,21 +35,19 @@ export default class FoundationAccountHandler
     }
 
     async createTransaction(
-        blockSummary: BlockSummary,
+        chainParameters: ChainParameters,
+        updateQueues: UpdateQueues,
         { foundationAccount }: UpdateFoundationAccountFields,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!blockSummary) {
+        if (!chainParameters || !updateQueues) {
             return undefined;
         }
 
         const sequenceNumber =
-            blockSummary.updates.updateQueues.foundationAccount
-                .nextSequenceNumber;
-        const {
-            threshold,
-        } = blockSummary.updates.keys.level2Keys.foundationAccount;
+            updateQueues.foundationAccount.nextSequenceNumber;
+        const { threshold } = chainParameters.level2Keys.foundationAccount;
 
         return createUpdateMultiSignatureTransaction(
             { address: foundationAccount },

@@ -1,7 +1,7 @@
 import React from 'react';
 import type { StakePendingChange as PendingChange } from '@concordium/node-sdk';
-import { isRemovalPendingChange } from '@concordium/node-sdk/lib/src/accountHelpers';
-import { useLastFinalizedBlockSummary } from '~/utils/dataHooks';
+import { isRemovalPendingChange } from '@concordium/common-sdk/lib/accountHelpers';
+import { useBlockChainParameters, useConsensusStatus } from '~/utils/dataHooks';
 import { displayAsCcd } from '~/utils/ccd';
 import {
     dateFromStakePendingChange,
@@ -17,8 +17,8 @@ interface Props {
 
 /** Render a bakers pending change */
 export default function StakePendingChange({ pending }: Props) {
-    const { consensusStatus: cs, lastFinalizedBlockSummary: bs } =
-        useLastFinalizedBlockSummary() ?? {};
+    const cs = useConsensusStatus();
+    const chainParameters = useBlockChainParameters();
     const rs = useAsyncMemo(
         async () =>
             cs !== undefined
@@ -28,7 +28,7 @@ export default function StakePendingChange({ pending }: Props) {
         [cs]
     );
 
-    if (cs === undefined || rs === undefined || bs === undefined) {
+    if (cs === undefined || rs === undefined || chainParameters === undefined) {
         return null;
     }
 
@@ -36,7 +36,7 @@ export default function StakePendingChange({ pending }: Props) {
         pending,
         cs,
         rs,
-        bs.updates.chainParameters
+        chainParameters
     );
     const formattedDate = getFormattedDateString(changeAtDate);
 

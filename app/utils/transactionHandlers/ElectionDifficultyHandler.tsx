@@ -8,7 +8,11 @@ import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import ElectionDifficultyView from '../../pages/multisig/updates/ElectionDifficulty/ElectionDifficultyView';
 import UpdateElectionDifficulty from '../../pages/multisig/updates/ElectionDifficulty/UpdateElectionDifficulty';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
+import {
+    Authorizations,
+    ChainParameters,
+    UpdateQueues,
+} from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     ElectionDifficulty,
@@ -33,21 +37,19 @@ export default class ElectionDifficultyHandler
     }
 
     async createTransaction(
-        blockSummary: BlockSummary,
+        chainParameters: ChainParameters,
+        updateQueues: UpdateQueues,
         { electionDifficulty }: ElectionDifficultyField,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!blockSummary) {
+        if (!chainParameters || !updateQueues) {
             return undefined;
         }
 
         const sequenceNumber =
-            blockSummary.updates.updateQueues.electionDifficulty
-                .nextSequenceNumber;
-        const {
-            threshold,
-        } = blockSummary.updates.keys.level2Keys.electionDifficulty;
+            updateQueues.electionDifficulty.nextSequenceNumber;
+        const { threshold } = chainParameters.level2Keys.electionDifficulty;
         const parsedElectionDifficulty = toElectionDifficultyResolution(
             electionDifficulty
         );

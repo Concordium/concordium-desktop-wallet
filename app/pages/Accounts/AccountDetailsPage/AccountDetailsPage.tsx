@@ -2,7 +2,7 @@
 import {
     isBakerAccount,
     isDelegatorAccount,
-} from '@concordium/node-sdk/lib/src/accountHelpers';
+} from '@concordium/common-sdk/lib/accountHelpers';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, Route } from 'react-router';

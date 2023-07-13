@@ -1,3 +1,4 @@
+import { TransactionSummaryType } from '@concordium/common-sdk/lib/types';
 import { parse, stringify } from './JSONHelper';
 import { getAll, updateEntry } from '~/database/MultiSignatureProposalDao';
 import { loadProposals } from '~/features/MultiSignatureSlice';
@@ -104,9 +105,8 @@ export async function getMultiSignatureTransactionStatus(
             updatedProposal.status = MultiSignatureTransactionStatus.Rejected;
             break;
         case TransactionStatus.Finalized: {
-            // A finalized transaction will always have exactly one outcome.
-            const outcome = Object.values(response.outcomes)[0];
-            if (isSuccessfulTransaction(outcome)) {
+            const { outcome } = response;
+            if (isSuccessfulTransaction(outcome.summary)) {
                 if (
                     instanceOfAccountTransaction(transaction) &&
                     instanceOfUpdateAccountCredentials(transaction)
@@ -121,17 +121,20 @@ export async function getMultiSignatureTransactionStatus(
             } else {
                 updatedProposal.status = MultiSignatureTransactionStatus.Failed;
             }
-            if (instanceOfAccountTransaction(transaction)) {
+            if (
+                outcome.summary.type ===
+                TransactionSummaryType.AccountTransaction
+            ) {
                 updatedProposal.transaction = stringify({
                     ...transaction,
-                    cost: outcome.cost,
+                    cost: outcome.summary.cost,
                 });
             }
             break;
         }
         default:
             throwLoggedError(
-                `Unexpected status was returned by the poller! Status: ${response.status}`
+                `Unexpected status was returned by the poller! Status: ${response}`
             );
     }
 
@@ -156,20 +159,23 @@ export async function monitorTransactionStatus(
         case TransactionStatus.Finalized: {
             // A finalized transaction will always result in exactly one outcome,
             // which we can extract directly here.
-            const blockHash = Object.keys(response.outcomes)[0];
-            const event = Object.values(response.outcomes)[0];
+            const { blockHash } = response.outcome;
+            const event = response.outcome.summary;
+            if (event.type !== TransactionSummaryType.AccountTransaction) {
+                // TODO throw error on this weird case?
+                break;
+            }
             confirmTransaction(dispatch, transactionHash, blockHash, event);
             if (isSuccessfulTransaction(event)) {
                 if (isShieldedBalanceTransaction(transaction)) {
                     await ShieldedTransferConsequence(dispatch, transaction);
                 }
             }
-
             break;
         }
         default:
             throwLoggedError(
-                `Unexpected status was returned by the poller! Status: ${response.status}`
+                `Unexpected status was returned by the poller! Status: ${response}`
             );
     }
     updateAccountInfoOfAddress(fromAddress, dispatch);

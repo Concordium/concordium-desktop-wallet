@@ -1,9 +1,6 @@
-import { BlockSummaryV1 } from '@concordium/node-sdk';
 import { ConsensusStatus } from '~/node/NodeApiTypes';
 
-export const getCurrentValue = (blockSummary: BlockSummaryV1) =>
-    blockSummary.updates.chainParameters;
-
+// eslint-disable-next-line import/prefer-default-export
 export const getPaydaysPerYear = (
     rewardPeriodLength: bigint,
     consensusStatus: ConsensusStatus

@@ -1,11 +1,10 @@
 import React from 'react';
 import Loading from '~/cross-app-components/Loading';
-import { BlockSummary } from '~/node/NodeApiTypes';
 import { ExchangeRate } from '~/utils/types';
 import { RelativeRateField } from '../../common/RelativeRateField';
 import { fromExchangeRate } from '../../common/RelativeRateField/util';
 import withChainData, { ChainData } from '~/utils/withChainData';
-import { commonFieldProps, getCurrentValue } from './util';
+import { commonFieldProps } from './util';
 
 interface Props extends ChainData {
     exchangeRate: ExchangeRate;
@@ -16,25 +15,17 @@ interface Props extends ChainData {
  */
 export default withChainData(function MicroGtuPerEuroView({
     exchangeRate,
-    blockSummary,
+    chainParameters,
 }: Props) {
-    function renderCurrentValue(bs: BlockSummary): JSX.Element {
-        const currentValue = getCurrentValue(bs);
-
-        return (
-            <RelativeRateField
-                {...commonFieldProps}
-                label="Current micro CCD per euro rate:"
-                value={fromExchangeRate(currentValue)}
-                display
-            />
-        );
-    }
-
     return (
         <>
-            {blockSummary ? (
-                renderCurrentValue(blockSummary)
+            {chainParameters ? (
+                <RelativeRateField
+                    {...commonFieldProps}
+                    label="Current micro CCD per euro rate:"
+                    value={fromExchangeRate(chainParameters.microGTUPerEuro)}
+                    display
+                />
             ) : (
                 <Loading inline />
             )}

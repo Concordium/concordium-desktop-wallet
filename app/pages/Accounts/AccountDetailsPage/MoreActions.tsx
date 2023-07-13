@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import {
     isBakerAccount,
     isDelegatorAccount,
-} from '@concordium/node-sdk/lib/src/accountHelpers';
+} from '@concordium/common-sdk/lib/accountHelpers';
 import { Account, AccountInfo, TransactionKindId } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import ButtonNavLink from '~/components/ButtonNavLink';

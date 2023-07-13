@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { isBakerAccount } from '@concordium/common-sdk/lib/accountHelpers';
 import React, { ComponentType } from 'react';
 import { useSelector } from 'react-redux';
 import StakePendingChange from '~/components/StakePendingChange';

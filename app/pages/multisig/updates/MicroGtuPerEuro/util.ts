@@ -1,11 +1,7 @@
-import { BlockSummary } from '~/node/NodeApiTypes';
-import { ExchangeRate } from '~/utils/types';
 import { getCcdSymbol } from '~/utils/ccd';
 import { RelativeRateFieldProps } from '../../common/RelativeRateField';
 
-export const getCurrentValue = (blockSummary: BlockSummary): ExchangeRate =>
-    blockSummary.updates.chainParameters.microGTUPerEuro;
-
+// eslint-disable-next-line import/prefer-default-export
 export const commonFieldProps: Pick<
     RelativeRateFieldProps,
     'numeratorUnit' | 'denominatorUnit'

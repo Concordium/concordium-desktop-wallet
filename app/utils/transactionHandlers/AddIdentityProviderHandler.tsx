@@ -6,7 +6,11 @@ import CreateAddIdentityProvider, {
     AddIdentityProviderFields,
 } from '~/pages/multisig/updates/AddIdentityProvider/CreateAddIdentityProvider';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
+import {
+    Authorizations,
+    ChainParameters,
+    UpdateQueues,
+} from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isAddIdentityProvider,
@@ -31,7 +35,8 @@ export default class AddIdentityProviderHandler
     }
 
     async createTransaction(
-        blockSummary: BlockSummary,
+        chainParameters: ChainParameters,
+        updateQueues: UpdateQueues,
         {
             name,
             url,
@@ -43,7 +48,7 @@ export default class AddIdentityProviderHandler
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!blockSummary) {
+        if (!chainParameters || !updateQueues) {
             return undefined;
         }
 
@@ -54,11 +59,8 @@ export default class AddIdentityProviderHandler
         };
 
         const sequenceNumber =
-            blockSummary.updates.updateQueues.addIdentityProvider
-                .nextSequenceNumber;
-        const {
-            threshold,
-        } = blockSummary.updates.keys.level2Keys.addIdentityProvider;
+            updateQueues.addIdentityProvider.nextSequenceNumber;
+        const { threshold } = chainParameters.level2Keys.addIdentityProvider;
 
         const payload = {
             ipDescription,

@@ -1,3 +1,8 @@
+import {
+    isChainParametersV0,
+    isChainParametersV1,
+    isConsensusStatusV0,
+} from '@concordium/common-sdk/lib/versionedTypeHelpers';
 import React from 'react';
 import { UpdateProps } from '~/utils/transactionTypes';
 import ElectionDifficultyInput from './ElectionDifficultyInput';
@@ -7,11 +12,20 @@ import ElectionDifficultyInput from './ElectionDifficultyInput';
  */
 export default function UpdateElectionDifficulty({
     defaults,
-    blockSummary,
+    chainParameters,
     consensusStatus,
 }: UpdateProps): JSX.Element | null {
-    const currentElectionDifficulty =
-        blockSummary.updates.chainParameters.electionDifficulty;
+    if (
+        (!isChainParametersV0(chainParameters) &&
+            !isChainParametersV1(chainParameters)) ||
+        !isConsensusStatusV0(consensusStatus)
+    ) {
+        throw new Error(
+            'election difficulty only available on Protocol versions < 6'
+        );
+    }
+
+    const currentElectionDifficulty = chainParameters.electionDifficulty;
     const slotDuration = Number(consensusStatus.slotDuration);
     return (
         <div>

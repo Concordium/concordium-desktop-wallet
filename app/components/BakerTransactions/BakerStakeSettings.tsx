@@ -1,6 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
-import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { isBakerAccount } from '@concordium/common-sdk/lib/accountHelpers';
 import { useAccountInfo } from '~/utils/dataHooks';
 import { Account, ClassName, EqualRecord, Fraction } from '~/utils/types';
 import AccountCard from '../AccountCard';

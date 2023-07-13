@@ -53,7 +53,7 @@ async function getConsensusAndGlobalFromNode(address: string, port: string) {
         );
     }
     const { global, consensusStatus } = result.response;
-    return { consensusStatus, nodeGlobal: global.value };
+    return { consensusStatus, nodeGlobal: global };
 }
 
 /**

@@ -1,18 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
-import {
-    isBlockSummaryV0,
-    isChainParametersV0,
-} from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
-import { isRewardStatusV1 } from '@concordium/node-sdk/lib/src/rewardStatusHelpers';
-import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
-import { BlockSummaryV1 } from '@concordium/node-sdk';
+import { isChainParametersV0 } from '@concordium/common-sdk/lib/versionedTypeHelpers';
+import { isRewardStatusV1 } from '@concordium/common-sdk/lib/rewardStatusHelpers';
+import { isBakerAccount } from '@concordium/common-sdk/lib/accountHelpers';
+import { ChainParameters, ChainParametersV0 } from '@concordium/node-sdk';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAccount } from '~/database/AccountDao';
-import { BlockSummary, ConsensusStatus } from '~/node/NodeApiTypes';
-import { getConsensusStatus, getRewardStatus } from '~/node/nodeRequests';
+import { ConsensusStatus } from '~/node/NodeApiTypes';
+import {
+    getBlockChainParameters,
+    getConsensusStatus,
+    getRewardStatus,
+} from '~/node/nodeRequests';
 import {
     fetchLastFinalizedIdentityProviders,
-    fetchLastFinalizedBlockSummary,
     getAccountInfoOfAddress,
     fetchLastFinalizedAnonymityRevokers,
 } from '../node/nodeHelpers';
@@ -97,15 +97,10 @@ export function useTransactionCostEstimate(
 }
 
 /**
- * Hook for fetching last finalized block summary
+ * Hook for fetching block chain parameters
  */
-export function useLastFinalizedBlockSummary() {
-    const chainData = useAsyncMemo<{
-        lastFinalizedBlockSummary: BlockSummary;
-        consensusStatus: ConsensusStatus;
-    }>(fetchLastFinalizedBlockSummary, noOp, []);
-
-    return chainData;
+export function useBlockChainParameters() {
+    return useAsyncMemo(getBlockChainParameters, noOp, []);
 }
 
 /**
@@ -156,19 +151,12 @@ export function useStakedAmount(accountAddress: string): Amount | undefined {
     return BigInt(accountInfo.accountBaker.stakedAmount);
 }
 
-/** Hook for accessing chain parameters of the last finalized block */
-export function useChainParameters() {
-    const lastFinalizedBlock = useLastFinalizedBlockSummary();
-    return lastFinalizedBlock?.lastFinalizedBlockSummary?.updates
-        .chainParameters;
-}
-
 /**
  * Hook for fetching the current capital bound.
  * @returns undefined while loading, or if the node is running a protocol version prior to the introduction of the capital bound
  */
 export function useCapitalBound() {
-    const chainParameters = useChainParameters();
+    const chainParameters = useBlockChainParameters();
     if (!chainParameters || isChainParametersV0(chainParameters)) {
         return undefined;
     }
@@ -215,7 +203,7 @@ function getV0Cooldown(
 
 function getV1Cooldown(
     cooldownSeconds: number,
-    bs: BlockSummaryV1,
+    chainParameters: Exclude<ChainParameters, ChainParametersV0>,
     cs: ConsensusStatus,
     nextPaydayTime: Date,
     now: Date
@@ -223,7 +211,7 @@ function getV1Cooldown(
     const genesisTime = new Date(cs.currentEraGenesisTime);
     const ei = (t: Date) => getEpochIndexAt(t, cs.epochDuration, genesisTime);
 
-    const { rewardPeriodLength } = bs.updates.chainParameters;
+    const { rewardPeriodLength } = chainParameters;
     const nRewardPeriodLength = Number(rewardPeriodLength);
 
     const nextRewardPeriodStartIndex = ei(nextPaydayTime);
@@ -249,35 +237,15 @@ function getV1Cooldown(
 
 /** Helper to get reward status, block summary and consensus status */
 function useRewardBlockAndConsensusStatus() {
-    const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
-    const rs = useAsyncMemo(
-        async () => {
-            if (lastFinalizedBlockSummary === undefined) {
-                return undefined;
-            }
+    const cs = useConsensusStatus();
+    const parameters = useBlockChainParameters();
+    const rs = useAsyncMemo(getRewardStatus, noOp, []);
 
-            return getRewardStatus(
-                lastFinalizedBlockSummary.consensusStatus.lastFinalizedBlock
-            );
-        },
-        noOp,
-        [lastFinalizedBlockSummary]
-    );
-
-    if (
-        lastFinalizedBlockSummary === undefined ||
-        lastFinalizedBlockSummary.lastFinalizedBlockSummary === undefined ||
-        lastFinalizedBlockSummary.consensusStatus === undefined ||
-        rs === undefined
-    ) {
+    if (parameters === undefined || rs === undefined || cs === undefined) {
         return undefined;
     }
 
-    const {
-        lastFinalizedBlockSummary: bs,
-        consensusStatus: cs,
-    } = lastFinalizedBlockSummary;
-    return { rs, bs, cs };
+    return { rs, parameters, cs };
 }
 
 /** Hook for calculating the date of the delegation cooldown ending, will result in undefined while loading */
@@ -289,9 +257,9 @@ export function useCalcDelegatorCooldownUntil() {
         return undefined;
     }
 
-    const { bs, cs, rs } = status;
+    const { parameters, cs, rs } = status;
 
-    if (isBlockSummaryV0(bs)) {
+    if (isChainParametersV0(parameters)) {
         throwLoggedError(
             'Delegation cooldown not available for current protocol version.'
         );
@@ -303,8 +271,8 @@ export function useCalcDelegatorCooldownUntil() {
     }
 
     return getV1Cooldown(
-        Number(bs.updates.chainParameters.delegatorCooldown),
-        bs,
+        Number(parameters.delegatorCooldown),
+        parameters,
         cs,
         rs.nextPaydayTime,
         now
@@ -320,14 +288,10 @@ export function useCalcBakerStakeCooldownUntil() {
         return undefined;
     }
 
-    const { bs, cs, rs } = status;
+    const { parameters, cs, rs } = status;
 
-    if (isBlockSummaryV0(bs)) {
-        return getV0Cooldown(
-            Number(bs.updates.chainParameters.bakerCooldownEpochs),
-            cs,
-            now
-        );
+    if (isChainParametersV0(parameters)) {
+        return getV0Cooldown(Number(parameters.bakerCooldownEpochs), cs, now);
     }
 
     if (!isRewardStatusV1(rs)) {
@@ -336,8 +300,8 @@ export function useCalcBakerStakeCooldownUntil() {
     }
 
     return getV1Cooldown(
-        Number(bs.updates.chainParameters.poolOwnerCooldown),
-        bs,
+        Number(parameters.poolOwnerCooldown),
+        parameters,
         cs,
         rs.nextPaydayTime,
         now
@@ -356,9 +320,9 @@ export function useStakeIncreaseUntil() {
         return undefined;
     }
 
-    const { bs, cs, rs } = status;
+    const { parameters, cs, rs } = status;
 
-    if (isBlockSummaryV0(bs)) {
+    if (isChainParametersV0(parameters)) {
         // In V0, stake increase takes effect after 2 epochs
         return getV0Cooldown(2, cs, now);
     }
@@ -368,7 +332,7 @@ export function useStakeIncreaseUntil() {
         throwLoggedError('Block summary and reward status do not match.');
     }
 
-    return getV1Cooldown(0, bs, cs, rs.nextPaydayTime, now);
+    return getV1Cooldown(0, parameters, cs, rs.nextPaydayTime, now);
 }
 
 /**

@@ -1,16 +1,19 @@
-import { BlockSummary } from '~/node/NodeApiTypes';
 import { GasRewards } from '~/utils/types';
 import updateConstants from '~/constants/updateConstants.json';
 
-export const getCurrentValue = (blockSummary: BlockSummary): GasRewards =>
-    blockSummary.updates.chainParameters.rewardParameters.gASRewards;
-
+// eslint-disable-next-line import/prefer-default-export
 export function toRewardFractions(gasRewards: GasRewards): GasRewards {
     return (Object.keys(gasRewards) as Array<keyof GasRewards>).reduce(
-        (a, c) => ({
-            ...a,
-            [c]: gasRewards[c] * updateConstants.rewardFractionResolution,
-        }),
+        (a, c) => {
+            const value = gasRewards[c];
+            if (value) {
+                return {
+                    ...a,
+                    [c]: value * updateConstants.rewardFractionResolution,
+                };
+            }
+            return a;
+        },
         {} as GasRewards
     );
 }

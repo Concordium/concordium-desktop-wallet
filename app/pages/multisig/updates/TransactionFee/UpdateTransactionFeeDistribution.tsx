@@ -19,9 +19,11 @@ const fieldNames: EqualRecord<UpdateTransactionFeeDistributionFields> = {
 
 export default function UpdateTransactionFeeDistribution({
     defaults,
-    blockSummary,
+    chainParameters,
 }: UpdateProps) {
-    const currentValue: RewardDistributionValue = getCurrentValue(blockSummary);
+    const currentValue: RewardDistributionValue = getCurrentValue(
+        chainParameters
+    );
 
     return (
         <>

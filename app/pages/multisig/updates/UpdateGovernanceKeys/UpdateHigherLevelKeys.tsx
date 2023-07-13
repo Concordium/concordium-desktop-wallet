@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Route, Switch, useRouteMatch } from 'react-router';
 import { FieldValues } from 'react-hook-form';
 import Columns from '~/components/Columns';
-import { BlockSummary, KeysWithThreshold } from '~/node/NodeApiTypes';
+import { ChainParameters, KeysWithThreshold } from '~/node/NodeApiTypes';
 import routes from '~/constants/routes.json';
 import ProposeNewKey from './ProposeNewKey';
 import KeySetSize from './KeySetSize';
@@ -22,7 +22,7 @@ import styles from '../../common/MultiSignatureFlowPage.module.scss';
 
 interface Props {
     defaults: FieldValues;
-    blockSummary: BlockSummary;
+    chainParameters: ChainParameters;
     type: UpdateType;
     handleHigherLevelKeySubmit(
         effectiveTime: Date,
@@ -37,15 +37,15 @@ interface Props {
  */
 function getCurrentKeysWithThreshold(
     type: UpdateType,
-    blockSummary: BlockSummary
+    chainParameters: ChainParameters
 ): KeysWithThreshold {
     switch (type) {
         case UpdateType.UpdateRootKeys:
-            return blockSummary.updates.keys.rootKeys;
+            return chainParameters.rootKeys;
         case UpdateType.UpdateLevel1KeysUsingRootKeys:
-            return blockSummary.updates.keys.level1Keys;
+            return chainParameters.level1Keys;
         case UpdateType.UpdateLevel1KeysUsingLevel1Keys:
-            return blockSummary.updates.keys.level1Keys;
+            return chainParameters.level1Keys;
         default:
             throw new Error(
                 `An update type that was not a higher level key update was received: ${type}`
@@ -59,7 +59,7 @@ function getCurrentKeysWithThreshold(
  */
 export default function UpdateHigherLevelKeys({
     defaults,
-    blockSummary,
+    chainParameters,
     type,
     handleHigherLevelKeySubmit,
 }: Props) {
@@ -73,7 +73,7 @@ export default function UpdateHigherLevelKeys({
     // Current values on the blockchain received from the node.
     const currentKeysWithThreshold = getCurrentKeysWithThreshold(
         type,
-        blockSummary
+        chainParameters
     );
     const currentKeys = currentKeysWithThreshold.keys;
     const currentKeySetSize = currentKeys.length;

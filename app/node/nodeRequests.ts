@@ -1,5 +1,3 @@
-import { PeerListResponse } from '~/proto/concordium_p2p_rpc_pb';
-
 /**
  * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
  */
@@ -35,16 +33,6 @@ export function sendTransaction(
     return window.grpc.sendTransaction(transactionPayload, networkId);
 }
 
-export async function getPeerList(includeBootstrappers = false) {
-    return PeerListResponse.deserializeBinary(
-        await window.grpc.getPeerList(includeBootstrappers)
-    );
-}
-
-export const getBlockSummary = throwIfUndefined(
-    window.grpc.getBlockSummary,
-    (blockHash) => `Unable to load blocksummary, on block: ${blockHash}`
-);
 export const getNextAccountNonce = throwIfUndefined(
     window.grpc.getNextAccountNonce,
     (address) => `Unable to fetch next nonce on address: ${address}`
@@ -62,22 +50,15 @@ export const getIdentityProviders = throwIfUndefined(
     window.grpc.getIdentityProviders,
     (blockHash) => `Unable to load identity providers, on block: ${blockHash}`
 );
-export const getRewardStatus = throwIfUndefined(
-    window.grpc.getRewardStatus,
-    (blockHash) => `Unable to load reward status, on block: ${blockHash}`
-);
-
-export const getPoolStatus = throwIfUndefined(
-    window.grpc.getPoolStatus,
-    (blockHash, target) =>
-        `Unable to get pool status for ${
-            target === undefined ? 'passive delegation' : target
-        }, on block: ${blockHash}`
-);
 
 export const {
     getTransactionStatus,
     getConsensusStatus,
     getAccountInfo,
     getAccountInfoOfCredential,
+    getBlockChainParameters,
+    getRewardStatus,
+    getPoolInfo,
+    getPassiveDelegationInfo,
+    getPeerList,
 } = window.grpc;

@@ -2,12 +2,12 @@
 import React, { ComponentType, useCallback } from 'react';
 import { Redirect } from 'react-router';
 import { useSelector } from 'react-redux';
-import type { BlockSummaryV1, ChainParametersV1 } from '@concordium/node-sdk';
-import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { ChainParameters, ChainParametersV0 } from '@concordium/node-sdk';
+import { isChainParametersV0 } from '@concordium/common-sdk/lib/versionedTypeHelpers';
 import {
     isBakerAccount,
     isDelegatorAccount,
-} from '@concordium/node-sdk/lib/src/accountHelpers';
+} from '@concordium/common-sdk/lib/accountHelpers';
 import CommissionsPage from '~/components/Transfers/configureBaker/CommissionsPage';
 import DelegationStatusPage from '~/components/Transfers/configureBaker/DelegationStatusPage';
 import KeysPage from '~/components/Transfers/configureBaker/KeysPage';
@@ -48,7 +48,7 @@ import displayTransferStyles from '~/components/Transfers/transferDetails.module
 
 interface DisplayProps extends Partial<AddBakerFlowState & RequiredValues> {
     exchangeRate: Fraction;
-    chainParameters: ChainParametersV1;
+    chainParameters: Exclude<ChainParameters, ChainParametersV0>;
 }
 
 const DisplayValues = ({
@@ -140,11 +140,14 @@ const DisplayValues = ({
 const toRoot = <Redirect to={routes.MULTISIGTRANSACTIONS_ADD_BAKER} />;
 
 type Deps = ConfigureBakerFlowDependencies;
-type Props = ExtendableProps<Deps, { blockSummary: BlockSummaryV1 }>;
+type Props = ExtendableProps<
+    Deps,
+    { chainParameters: Exclude<ChainParameters, ChainParametersV0> }
+>;
 type UnsafeDeps = Partial<Deps>;
 
 const hasNecessaryProps = (props: UnsafeDeps): props is Deps =>
-    [props.exchangeRate, props.blockSummary].every(isDefined);
+    [props.exchangeRate, props.chainParameters].every(isDefined);
 
 const withDeps = (component: ComponentType<Deps>) =>
     withExchangeRate(
@@ -160,17 +163,16 @@ const withDeps = (component: ComponentType<Deps>) =>
 const ensureDelegationProtocol = (c: ComponentType<Props>) =>
     ensureProps<Props, Deps>(
         c,
-        (p): p is Props => !isBlockSummaryV0(p.blockSummary),
+        (p): p is Props => !isChainParametersV0(p.chainParameters),
         toRoot
     );
 
 export default withDeps(
     ensureDelegationProtocol(function AddBaker({
         exchangeRate,
-        blockSummary,
+        chainParameters,
     }: Props) {
         const accountsInfo = useSelector(accountsInfoSelector);
-        const cp = blockSummary.updates.chainParameters;
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
         const convert = useCallback(
@@ -179,24 +181,24 @@ export default withDeps(
                 nonce: bigint
             ) =>
                 convertToAddBakerTransaction(
-                    getDefaultCommissions(cp),
+                    getDefaultCommissions(chainParameters),
                     account,
                     nonce,
                     exchangeRate
                 )(values, values.expiry),
-            [exchangeRate, cp]
+            [exchangeRate, chainParameters]
         );
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
         const validate = useCallback(
             ({ account, ...values }: RequiredValues & AddBakerFlowState) =>
                 validateAddBakerValues(
-                    blockSummary,
+                    chainParameters,
                     account,
                     accountsInfo[account.address],
                     exchangeRate
                 )(values),
-            [blockSummary, exchangeRate, accountsInfo]
+            [chainParameters, exchangeRate, accountsInfo]
         );
 
         return (
@@ -211,7 +213,7 @@ export default withDeps(
                     <DisplayValues
                         {...v}
                         exchangeRate={exchangeRate}
-                        chainParameters={cp}
+                        chainParameters={chainParameters}
                     />
                 )}
             >
@@ -223,7 +225,7 @@ export default withDeps(
                                 <AddBakerStakePage
                                     account={account}
                                     exchangeRate={exchangeRate}
-                                    blockSummary={blockSummary}
+                                    chainParameters={chainParameters}
                                     initial={initial}
                                     onNext={onNext}
                                     formValues={formValues}
@@ -253,7 +255,7 @@ export default withDeps(
                                 <CommissionsPage
                                     initial={initial}
                                     onNext={onNext}
-                                    chainParameters={cp}
+                                    chainParameters={chainParameters}
                                     account={account}
                                 />
                             ) : (

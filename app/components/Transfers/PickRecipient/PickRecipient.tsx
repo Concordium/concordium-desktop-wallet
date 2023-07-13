@@ -1,8 +1,8 @@
 import React from 'react';
 import clsx from 'clsx';
 
-import { AccountAddress } from '@concordium/node-sdk/lib/src/types/accountAddress';
-import { isAlias } from '@concordium/node-sdk/lib/src/alias';
+import { AccountAddress } from '@concordium/common-sdk/lib/types/accountAddress';
+import { isAlias } from '@concordium/common-sdk/lib/alias';
 import { AddressBookEntry } from '~/utils/types';
 import AddressBookEntryButton from '~/components/AddressBookEntryButton';
 import AddressBookSearchList from '../../AddressBookSearchList';

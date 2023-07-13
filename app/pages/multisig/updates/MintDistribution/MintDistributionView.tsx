@@ -1,5 +1,5 @@
 import React from 'react';
-import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isChainParametersV0 } from '@concordium/common-sdk/lib/versionedTypeHelpers';
 import { MintDistribution } from '~/utils/types';
 import Loading from '~/cross-app-components/Loading';
 import withChainData, { ChainData } from '~/utils/withChainData';
@@ -25,13 +25,16 @@ interface Props extends ChainData {
  */
 export default withChainData(function MintDistributionView({
     mintDistribution,
-    blockSummary,
+    chainParameters,
     consensusStatus,
 }: Props) {
-    if (!consensusStatus || !blockSummary) {
+    if (!consensusStatus || !chainParameters) {
         return <Loading />;
     }
-    if (!isBlockSummaryV0(blockSummary) && mintDistribution.version === 0) {
+    if (
+        !isChainParametersV0(chainParameters) &&
+        mintDistribution.version === 0
+    ) {
         throw new Error(
             'Viewing mint distribution update version 0, which is outdated.'
         );
@@ -40,7 +43,7 @@ export default withChainData(function MintDistributionView({
     const slotsPerYear = getSlotsPerYear(consensusStatus);
 
     const currentDistribitionRatio: RewardDistributionValue = toRewardDistributionValue(
-        blockSummary.updates.chainParameters.rewardParameters.mintDistribution
+        chainParameters.rewardParameters.mintDistribution
     );
 
     const { bakingReward, finalizationReward } = mintDistribution;
@@ -54,9 +57,9 @@ export default withChainData(function MintDistributionView({
         <>
             <div>
                 <Label className="mB5">Current mint distribution:</Label>
-                {!isBlockSummaryV0(blockSummary) || (
+                {!isChainParametersV0(chainParameters) || (
                     <MintRateInput
-                        value={blockSummary.updates.chainParameters.rewardParameters.mintDistribution.mintPerSlot.toString()}
+                        value={chainParameters.rewardParameters.mintDistribution.mintPerSlot.toString()}
                         paydaysPerYear={slotsPerYear}
                         disabled
                         className="mB20"

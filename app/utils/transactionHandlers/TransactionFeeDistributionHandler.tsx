@@ -6,7 +6,11 @@ import UpdateTransactionFeeDistribution, {
     UpdateTransactionFeeDistributionFields,
 } from '../../pages/multisig/updates/TransactionFee/UpdateTransactionFeeDistribution';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
+import {
+    Authorizations,
+    ChainParameters,
+    UpdateQueues,
+} from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isTransactionFeeDistribution,
@@ -31,21 +35,21 @@ export default class TransactionFeeDistributionHandler
     }
 
     async createTransaction(
-        blockSummary: BlockSummary,
+        chainParameters: ChainParameters,
+        updateQueues: UpdateQueues,
         { rewardDistribution }: UpdateTransactionFeeDistributionFields,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!blockSummary) {
+        if (!chainParameters || !updateQueues) {
             return undefined;
         }
 
         const sequenceNumber =
-            blockSummary.updates.updateQueues.transactionFeeDistribution
-                .nextSequenceNumber;
+            updateQueues.transactionFeeDistribution.nextSequenceNumber;
         const {
             threshold,
-        } = blockSummary.updates.keys.level2Keys.transactionFeeDistribution;
+        } = chainParameters.level2Keys.transactionFeeDistribution;
 
         const transactionFeeDistribution: TransactionFeeDistribution = {
             baker: rewardDistribution.first,

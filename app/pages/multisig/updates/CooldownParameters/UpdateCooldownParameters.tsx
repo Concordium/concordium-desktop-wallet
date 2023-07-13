@@ -1,5 +1,5 @@
 import React from 'react';
-import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isChainParametersV0 } from '@concordium/common-sdk/lib/versionedTypeHelpers';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import Form from '~/components/Form/';
@@ -25,16 +25,14 @@ export const fieldDisplays = {
  */
 export default function UpdateCooldownParameters({
     defaults,
-    blockSummary,
+    chainParameters,
 }: UpdateProps): JSX.Element | null {
-    if (isBlockSummaryV0(blockSummary)) {
-        throw new Error('Connected node used outdated blockSummary format');
+    if (isChainParametersV0(chainParameters)) {
+        throw new Error('Connected node used outdated chainParameters format');
     }
 
-    const currentPoolOwnerCooldown =
-        blockSummary.updates.chainParameters.poolOwnerCooldown;
-    const currentDelegatorCooldown =
-        blockSummary.updates.chainParameters.delegatorCooldown;
+    const currentPoolOwnerCooldown = chainParameters.poolOwnerCooldown;
+    const currentDelegatorCooldown = chainParameters.delegatorCooldown;
 
     return (
         <div>
