@@ -1,5 +1,5 @@
 import React from 'react';
-import { AttributeKey } from '@concordium/node-sdk';
+import { AttributeKey } from '@concordium/web-sdk';
 import attributeNamesJson from '~/constants/attributeNames.json';
 import SidedRow from '~/components/SidedRow';
 import { AttributeKeyName, ClassName } from '~/utils/types';

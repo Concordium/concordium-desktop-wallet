@@ -3,9 +3,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
 import { mapRecord } from '@concordium/common-sdk/lib/util';
-import { getAccountAddress } from '@concordium/common-sdk/lib/credentialDeploymentTransactions';
-import { getCredentialDeploymentTransactionHash } from '@concordium/common-sdk/lib/serialization';
-import type { CredentialDeploymentTransaction } from '@concordium/node-sdk';
+import {
+    getAccountAddress,
+    getCredentialDeploymentTransactionHash,
+    CredentialDeploymentTransaction,
+} from '@concordium/web-sdk';
 import routes from '~/constants/routes.json';
 
 import { createCredentialDetails } from '~/utils/rustInterface';

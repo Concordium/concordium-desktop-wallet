@@ -2,9 +2,13 @@
 import React, { ComponentType, useCallback, useState } from 'react';
 import { Redirect } from 'react-router';
 import { useSelector } from 'react-redux';
-import { ChainParameters, ChainParametersV0 } from '@concordium/node-sdk';
-import { isChainParametersV0 } from '@concordium/common-sdk/lib/versionedTypeHelpers';
-import { isBakerAccount } from '@concordium/common-sdk/lib/accountHelpers';
+import {
+    ChainParameters,
+    ChainParametersV0,
+    isChainParametersV0,
+    isBakerAccount,
+} from '@concordium/web-sdk';
+
 import CommissionsPage from '~/components/Transfers/configureBaker/CommissionsPage';
 import DelegationStatusPage from '~/components/Transfers/configureBaker/DelegationStatusPage';
 import MetadataUrlPage from '~/components/Transfers/configureBaker/MetadataUrlPage';

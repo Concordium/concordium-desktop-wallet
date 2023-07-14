@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
-import type { ChainParametersV1 } from '@concordium/node-sdk';
-import { isChainParametersV0 } from '@concordium/common-sdk/lib/versionedTypeHelpers';
+import type { ChainParametersV1 } from '@concordium/web-sdk';
+import { isChainParametersV0 } from '@concordium/web-sdk';
 import React, { ComponentType, useCallback, useState } from 'react';
 import { Redirect } from 'react-router';
 import withExchangeRate from '~/components/Transfers/withExchangeRate';

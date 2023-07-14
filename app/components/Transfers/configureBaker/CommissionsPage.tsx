@@ -1,4 +1,4 @@
-import { ChainParameters, ChainParametersV0 } from '@concordium/node-sdk';
+import { ChainParameters, ChainParametersV0 } from '@concordium/web-sdk';
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 

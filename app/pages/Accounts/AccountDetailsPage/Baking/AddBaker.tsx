@@ -1,8 +1,8 @@
 /* eslint-disable react/display-name */
 import React, { ComponentType, useCallback } from 'react';
-import { isChainParametersV0 } from '@concordium/common-sdk/lib/versionedTypeHelpers';
+import { isChainParametersV0, ChainParametersV1 } from '@concordium/web-sdk';
 import { Redirect } from 'react-router';
-import { ChainParametersV1 } from '@concordium/node-sdk';
+
 import withExchangeRate from '~/components/Transfers/withExchangeRate';
 import withNonce, { AccountAndNonce } from '~/components/Transfers/withNonce';
 import { isDefined } from '~/utils/basicHelpers';

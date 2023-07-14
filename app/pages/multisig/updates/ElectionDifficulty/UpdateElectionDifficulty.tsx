@@ -2,7 +2,7 @@ import {
     isChainParametersV0,
     isChainParametersV1,
     isConsensusStatusV0,
-} from '@concordium/common-sdk/lib/versionedTypeHelpers';
+} from '@concordium/web-sdk';
 import React from 'react';
 import { UpdateProps } from '~/utils/transactionTypes';
 import ElectionDifficultyInput from './ElectionDifficultyInput';

@@ -1,6 +1,6 @@
 import React from 'react';
-import type { StakePendingChange as PendingChange } from '@concordium/node-sdk';
-import { isRemovalPendingChange } from '@concordium/common-sdk/lib/accountHelpers';
+import type { StakePendingChange as PendingChange } from '@concordium/web-sdk';
+import { isRemovalPendingChange } from '@concordium/web-sdk';
 import { useBlockChainParameters, useConsensusStatus } from '~/utils/dataHooks';
 import { displayAsCcd } from '~/utils/ccd';
 import {

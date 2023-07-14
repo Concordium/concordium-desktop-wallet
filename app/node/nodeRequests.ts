@@ -1,9 +1,11 @@
 /**
  * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
  */
-import { isAccountTransactionType } from '@concordium/common-sdk/lib/types';
-import { TransactionExpiry } from '@concordium/common-sdk/lib/types/transactionExpiry';
-import { AccountAddress } from '@concordium/common-sdk/lib/types/accountAddress';
+import {
+    isAccountTransactionType,
+    TransactionExpiry,
+    AccountAddress,
+} from '@concordium/web-sdk';
 import type { Buffer } from 'buffer/';
 import { serializeTransferPayload } from '~/utils/transactionSerialization';
 import {
@@ -51,10 +53,6 @@ export function sendAccountTransaction(
         transaction.payload
     );
 
-    // TODO Fix
-    const baseEnergy =
-        BigInt(transaction.energyAmount) - 100n - 60n - BigInt(payload.length);
-
     const header = {
         sender: new AccountAddress(transaction.sender),
         expiry: TransactionExpiry.fromEpochSeconds(transaction.expiry),
@@ -63,8 +61,8 @@ export function sendAccountTransaction(
 
     return window.grpc.sendAccountTransaction(
         header,
+        BigInt(transaction.energyAmount),
         payload,
-        baseEnergy,
         signatures
     );
 }

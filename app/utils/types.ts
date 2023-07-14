@@ -3,7 +3,7 @@ import type { Buffer } from 'buffer/';
 import type { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import type { HTMLAttributes } from 'react';
 import type { RegisterOptions } from 'react-hook-form';
-import type { BakerId } from '@concordium/node-sdk';
+import type { BakerId } from '@concordium/web-sdk';
 import {
     OpenStatus,
     TransactionKindString,
@@ -15,11 +15,8 @@ export type {
     AccountInfo,
     AccountEncryptedAmount,
     BakerId,
-} from '@concordium/node-sdk';
-export {
-    OpenStatus,
-    TransactionKindString,
-} from '@concordium/common-sdk/lib/types';
+} from '@concordium/web-sdk';
+export { OpenStatus, TransactionKindString };
 
 export type Dispatch = GenericDispatch<AnyAction>;
 

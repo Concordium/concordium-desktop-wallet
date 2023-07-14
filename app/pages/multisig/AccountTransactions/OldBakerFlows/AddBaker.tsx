@@ -8,8 +8,8 @@ import {
     Redirect,
 } from 'react-router';
 import { push } from 'connected-react-router';
-import { isBakerAccount } from '@concordium/common-sdk/lib/accountHelpers';
-import { ChainParameters } from '@concordium/node-sdk';
+import { isBakerAccount, ChainParameters } from '@concordium/web-sdk';
+
 import MultiSignatureLayout from '../../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';

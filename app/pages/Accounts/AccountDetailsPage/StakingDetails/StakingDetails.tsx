@@ -4,8 +4,9 @@ import {
     AccountDelegationDetails,
     BakerPoolPendingChangeType,
     DelegationTargetType,
-} from '@concordium/common-sdk/lib/types';
-import { isReduceStakePendingChange } from '@concordium/common-sdk/lib/accountHelpers';
+    isReduceStakePendingChange,
+} from '@concordium/web-sdk';
+
 import React, { PropsWithChildren } from 'react';
 import RegisteredIcon from '@resources/svg/logo-checkmark.svg';
 import Label from '~/components/Label';

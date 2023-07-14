@@ -1,4 +1,4 @@
-import {
+import type {
     AccountInfo,
     AccountTransactionHeader,
     AccountTransactionSignature,
@@ -14,7 +14,7 @@ import {
     PeerInfo,
     RewardStatus,
     UpdateInstruction,
-} from '@concordium/node-sdk';
+} from '@concordium/web-sdk';
 import {
     OpenDialogOptions,
     OpenDialogReturnValue,
@@ -105,8 +105,8 @@ export type GRPC = {
     ) => Promise<ConsensusAndGlobalResult>;
     sendAccountTransaction: (
         header: AccountTransactionHeader,
+        energyCost: bigint,
         payload: Buffer,
-        baseEnergyCost: bigint,
         signature: AccountTransactionSignature
     ) => Promise<string>;
     sendUpdateInstruction: (

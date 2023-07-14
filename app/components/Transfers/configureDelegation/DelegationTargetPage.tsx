@@ -1,7 +1,7 @@
 import React from 'react';
 import { useForm, Validate } from 'react-hook-form';
-import { OpenStatusText } from '@concordium/common-sdk/lib/types';
-import { isDelegatorAccount } from '@concordium/common-sdk/lib/accountHelpers';
+import { OpenStatusText, isDelegatorAccount } from '@concordium/web-sdk';
+
 import Form from '~/components/Form';
 import ExternalLink from '~/components/ExternalLink';
 import { validBigInt } from '~/components/Form/util/validation';

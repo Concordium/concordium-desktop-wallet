@@ -1,6 +1,6 @@
 import React from 'react';
 import { FieldValues } from 'react-hook-form';
-import { UpdateQueues } from '@concordium/node-sdk';
+import { UpdateQueues } from '@concordium/web-sdk';
 import { ChainData } from '~/utils/withChainData';
 import {
     UpdateType,

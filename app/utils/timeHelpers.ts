@@ -5,12 +5,10 @@ import {
     ConsensusStatus,
     RewardStatus,
     StakePendingChange,
-} from '@concordium/common-sdk/lib/types';
-import {
     isStakePendingChangeV0,
     isChainParametersV0,
-} from '@concordium/common-sdk/lib/versionedTypeHelpers';
-import { isRewardStatusV1 } from '@concordium/common-sdk/lib/rewardStatusHelpers';
+    isRewardStatusV1,
+} from '@concordium/web-sdk';
 import { ensureNumberLength } from './basicHelpers';
 import { TimeStampUnit, YearMonth, YearMonthDate } from './types';
 

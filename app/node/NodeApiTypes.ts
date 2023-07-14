@@ -1,4 +1,4 @@
-import { Authorizations } from '@concordium/node-sdk/';
+import { Authorizations } from '@concordium/web-sdk/';
 import { RewardFraction, VerifyKey } from '../utils/types';
 
 export {
@@ -6,7 +6,7 @@ export {
     UpdateQueues,
     ConsensusStatus,
     Authorizations,
-} from '@concordium/node-sdk/';
+} from '@concordium/web-sdk/';
 
 // This file contains interfaces that matches what is returned
 // from the Concordium Node using GRPC.

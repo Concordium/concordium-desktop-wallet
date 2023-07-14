@@ -2,7 +2,7 @@ import {
     BlockItemSummaryInBlock,
     NodeCatchupStatus,
     TransactionStatusEnum,
-} from '@concordium/common-sdk/lib/types';
+} from '@concordium/web-sdk';
 import {
     getConsensusStatus,
     getAccountInfo,

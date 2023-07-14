@@ -1,6 +1,6 @@
 import React from 'react';
-import { isUpdateQueuesV0 } from '@concordium/common-sdk/lib/blockSummaryHelpers';
-import type { UpdateQueues } from '@concordium/node-sdk';
+import { isUpdateQueuesV0 } from '@concordium/web-sdk';
+import type { UpdateQueues } from '@concordium/web-sdk';
 import BakerStakeThresholdView from '~/pages/multisig/updates/BakerStakeThreshold/BakerStakeThresholdView';
 import UpdateBakerStakeThreshold, {
     UpdateBakerStakeThresholdFields,

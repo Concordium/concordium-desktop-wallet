@@ -1,4 +1,4 @@
-import { TransactionSummaryType } from '@concordium/common-sdk/lib/types';
+import { TransactionSummaryType } from '@concordium/web-sdk';
 import { parse, stringify } from './JSONHelper';
 import { getAll, updateEntry } from '~/database/MultiSignatureProposalDao';
 import { loadProposals } from '~/features/MultiSignatureSlice';

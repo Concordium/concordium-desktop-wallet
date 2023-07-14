@@ -1,5 +1,5 @@
 import React from 'react';
-import { isChainParametersV0 } from '@concordium/common-sdk/lib/versionedTypeHelpers';
+import { isChainParametersV0 } from '@concordium/web-sdk';
 import {
     RegisterOptions,
     useFormContext,

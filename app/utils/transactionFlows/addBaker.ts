@@ -1,4 +1,4 @@
-import { AccountInfo } from '@concordium/node-sdk';
+import { AccountInfo } from '@concordium/web-sdk';
 import { ValidateValues } from '~/components/MultiStepForm';
 import { ChainParameters } from '~/node/NodeApiTypes';
 import { collapseFraction } from '../basicHelpers';

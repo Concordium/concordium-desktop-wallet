@@ -4,7 +4,7 @@ import {
     ReleaseSchedule,
     TransactionSummaryType,
     TransactionKindString,
-} from '@concordium/common-sdk/lib/types';
+} from '@concordium/web-sdk';
 import { Validate } from 'react-hook-form';
 import {
     dateFromTimeStamp,

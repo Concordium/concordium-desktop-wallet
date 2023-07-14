@@ -1,4 +1,4 @@
-import { AccountInfoBaker } from '@concordium/node-sdk';
+import { AccountInfoBaker } from '@concordium/web-sdk';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { goBack, push } from 'connected-react-router';

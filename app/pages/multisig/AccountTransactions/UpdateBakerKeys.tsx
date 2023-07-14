@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import React, { ComponentType, useCallback } from 'react';
 import { Redirect, useRouteMatch } from 'react-router';
-import { isBakerAccount } from '@concordium/common-sdk/lib/accountHelpers';
+import { isBakerAccount } from '@concordium/web-sdk';
 import { ConfigureBaker, Fraction } from '~/utils/types';
 import MultiSigAccountTransactionFlow, {
     MultiSigAccountTransactionFlowLoading,

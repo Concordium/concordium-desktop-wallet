@@ -1,4 +1,4 @@
-import { PoolParametersV1 } from '@concordium/node-sdk';
+import { PoolParametersV1 } from '@concordium/web-sdk';
 import { CommissionRange, Fraction } from '~/utils/types';
 import updateConstants from '~/constants/updateConstants.json';
 

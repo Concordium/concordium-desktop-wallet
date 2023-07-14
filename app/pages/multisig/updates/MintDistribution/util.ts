@@ -1,4 +1,4 @@
-import { isConsensusStatusV0 } from '@concordium/common-sdk/lib/versionedTypeHelpers';
+import { isConsensusStatusV0 } from '@concordium/web-sdk';
 import { ConsensusStatus, MintDistributionNode } from '~/node/NodeApiTypes';
 import updateConstants from '~/constants/updateConstants.json';
 import { RewardDistributionValue } from '../../common/RewardDistribution';

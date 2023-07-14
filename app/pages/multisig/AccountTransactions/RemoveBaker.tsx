@@ -2,7 +2,7 @@
 import React, { ComponentType, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, useRouteMatch } from 'react-router';
-import { isBakerAccount } from '@concordium/common-sdk/lib/accountHelpers';
+import { isBakerAccount } from '@concordium/web-sdk';
 import { ConfigureBaker, Fraction } from '~/utils/types';
 import MultiSigAccountTransactionFlow, {
     MultiSigAccountTransactionFlowLoading,

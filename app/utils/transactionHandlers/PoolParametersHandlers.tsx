@@ -1,5 +1,5 @@
 import React from 'react';
-import { isUpdateQueuesV0 } from '@concordium/common-sdk/lib/blockSummaryHelpers';
+import { isUpdateQueuesV0 } from '@concordium/web-sdk';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
 import PoolParametersView from '~/pages/multisig/updates/PoolParameters/PoolParametersView';

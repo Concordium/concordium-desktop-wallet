@@ -1,8 +1,9 @@
-import { isDelegatorAccount } from '@concordium/common-sdk/lib/accountHelpers';
 import {
+    isDelegatorAccount,
     BakerPoolPendingChangeType,
     DelegationTargetType,
-} from '@concordium/common-sdk/lib/types';
+} from '@concordium/web-sdk';
+
 import { Account, AccountStatus, Dispatch } from '../types';
 import { findAccounts } from '~/database/AccountDao';
 import {

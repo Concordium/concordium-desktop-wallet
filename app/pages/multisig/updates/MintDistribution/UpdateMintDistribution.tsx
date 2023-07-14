@@ -1,6 +1,6 @@
 import React from 'react';
 import { Validate } from 'react-hook-form';
-import { isChainParametersV0 } from '@concordium/common-sdk/lib/versionedTypeHelpers';
+import { isChainParametersV0 } from '@concordium/web-sdk';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 

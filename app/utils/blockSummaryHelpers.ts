@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import { isChainParametersV0 } from '@concordium/common-sdk/lib/versionedTypeHelpers';
+import { isChainParametersV0 } from '@concordium/web-sdk';
 import { ChainParameters } from '~/node/NodeApiTypes';
 
 export function getMinimumStakeForBaking(

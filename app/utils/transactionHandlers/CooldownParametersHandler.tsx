@@ -1,9 +1,10 @@
 import React from 'react';
-import { isUpdateQueuesV0 } from '@concordium/common-sdk/lib/blockSummaryHelpers';
 import {
+    isUpdateQueuesV0,
     isAuthorizationsV1,
     isChainParametersV0,
-} from '@concordium/common-sdk/lib/versionedTypeHelpers';
+} from '@concordium/web-sdk';
+
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
 import CooldownParametersView from '~/pages/multisig/updates/CooldownParameters/CooldownParametersView';

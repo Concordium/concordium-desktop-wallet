@@ -2,7 +2,7 @@ import {
     ConsensusStatus,
     ConsensusStatusV0,
     KeysMatching,
-} from '@concordium/node-sdk';
+} from '@concordium/web-sdk';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Dispatch } from 'redux';
 import { getConsensusStatus } from '~/node/nodeRequests';

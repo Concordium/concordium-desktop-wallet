@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { goBack, push } from 'connected-react-router';
 import { Redirect } from 'react-router';
-import { isBakerAccount } from '@concordium/common-sdk/lib/accountHelpers';
+import { isBakerAccount } from '@concordium/web-sdk';
 import Form from '~/components/Form';
 import PickBakerStakeAmount from '~/components/PickBakerStakeAmount';
 import Card from '~/cross-app-components/Card';

@@ -3,7 +3,7 @@ import {
     isChainParametersV0,
     isChainParametersV1,
     isConsensusStatusV0,
-} from '@concordium/common-sdk/lib/versionedTypeHelpers';
+} from '@concordium/web-sdk';
 import Loading from '~/cross-app-components/Loading';
 import withChainData, { ChainData } from '~/utils/withChainData';
 import ElectionDifficultyInput from './ElectionDifficultyInput';

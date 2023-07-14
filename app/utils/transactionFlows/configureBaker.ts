@@ -1,11 +1,12 @@
-import type { AccountInfo } from '@concordium/node-sdk';
-import { isBakerAccountV1 } from '@concordium/common-sdk/lib/versionedTypeHelpers';
+import type { AccountInfo } from '@concordium/web-sdk';
 import {
+    isBakerAccountV1,
     ChainParameters,
     ChainParametersV0,
     OpenStatus,
     OpenStatusText,
-} from '@concordium/common-sdk/lib/types';
+} from '@concordium/web-sdk';
+
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { isDefined, multiplyFraction } from '../basicHelpers';
 import { ccdToMicroCcd, microCcdToCcd } from '../ccd';

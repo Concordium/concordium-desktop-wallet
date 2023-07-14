@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
-import { UpdateQueues } from '@concordium/node-sdk';
+import { UpdateQueues } from '@concordium/web-sdk';
 import {
     getDefaultExpiry,
     TimeConstants,

@@ -9,7 +9,7 @@ import { Mutex, MutexInterface } from 'async-mutex';
 import {
     AccountTransactionSummary,
     TransactionKindString,
-} from '@concordium/common-sdk/lib/types';
+} from '@concordium/web-sdk';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
 import {

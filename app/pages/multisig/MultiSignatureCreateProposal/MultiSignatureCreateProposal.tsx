@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useParams, Route, Switch } from 'react-router';
 import { FieldValues } from 'react-hook-form';
-import { UpdateQueues } from '@concordium/node-sdk';
+import { UpdateQueues } from '@concordium/web-sdk';
 import Modal from '~/cross-app-components/Modal';
 import {
     instanceOfUpdateInstruction,

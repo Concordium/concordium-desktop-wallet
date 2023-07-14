@@ -1,5 +1,5 @@
 import React from 'react';
-import { isChainParametersV0 } from '@concordium/common-sdk/lib/versionedTypeHelpers';
+import { isChainParametersV0 } from '@concordium/web-sdk';
 import { PoolParameters } from '~/utils/types';
 import Loading from '~/cross-app-components/Loading';
 import withChainData, { ChainData } from '~/utils/withChainData';

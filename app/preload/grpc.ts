@@ -1,17 +1,15 @@
 import {
     createConcordiumClient,
     ConcordiumGRPCClient,
-} from '@concordium/web-sdk';
-import {
     AccountTransactionHeader,
     AccountTransactionSignature,
     BakerId,
     CredentialDeploymentTransaction,
     UpdateInstruction,
-} from '@concordium/common-sdk/lib/types';
-import { AccountAddress } from '@concordium/common-sdk/lib/types/accountAddress';
-import { CredentialRegistrationId } from '@concordium/common-sdk/lib/types/CredentialRegistrationId';
-import { streamToList } from '@concordium/common-sdk/lib/util';
+    CredentialRegistrationId,
+    AccountAddress,
+    streamToList,
+} from '@concordium/web-sdk';
 import type { Buffer } from 'buffer/';
 
 import { GRPC, ConsensusAndGlobalResult } from '~/preload/preloadTypes';
@@ -66,14 +64,14 @@ const exposedMethods: GRPC = {
     },
     sendAccountTransaction: (
         header: AccountTransactionHeader,
+        energyCost: bigint,
         payload: Buffer,
-        baseEnergyCost: bigint,
         signature: AccountTransactionSignature
     ) =>
         client.sendRawAccountTransaction(
             header,
+            energyCost,
             payload,
-            baseEnergyCost,
             signature
         ),
     sendUpdateInstruction: (

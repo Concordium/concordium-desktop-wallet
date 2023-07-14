@@ -8,8 +8,8 @@ import React, {
 import { SubmitHandler, Validate } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { isAlias } from '@concordium/common-sdk/lib/alias';
-import { AccountAddress } from '@concordium/common-sdk/lib/types/accountAddress';
+import { isAlias, AccountAddress } from '@concordium/web-sdk';
+
 import {
     AddressBookEntry,
     EqualRecord,

@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { isChainParametersV0 } from '@concordium/common-sdk/lib/versionedTypeHelpers';
-import { isRewardStatusV1 } from '@concordium/common-sdk/lib/rewardStatusHelpers';
-import { isBakerAccount } from '@concordium/common-sdk/lib/accountHelpers';
-import { ChainParameters, ChainParametersV0 } from '@concordium/node-sdk';
+import {
+    isChainParametersV0,
+    isRewardStatusV1,
+    isBakerAccount,
+    ChainParameters,
+    ChainParametersV0,
+} from '@concordium/web-sdk';
+
 import { useDispatch, useSelector } from 'react-redux';
 import { getAccount } from '~/database/AccountDao';
 import { ConsensusStatus } from '~/node/NodeApiTypes';
