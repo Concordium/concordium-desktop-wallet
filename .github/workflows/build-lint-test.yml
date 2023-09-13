@@ -45,7 +45,7 @@ jobs:
             - uses: actions/setup-node@v2
               if: steps.fetch-dependencies.outputs.cache-hit != 'true'
               with:
-                  node-version: '14.16.0'
+                  node-version: '16.20.2'
 
             - name: Download dependencies
               if: steps.fetch-dependencies.outputs.cache-hit != 'true'
@@ -61,7 +61,7 @@ jobs:
                   submodules: 'recursive'
             - uses: actions/setup-node@v2
               with:
-                  node-version: '14.16.0'
+                  node-version: '16.20.2'
 
             - name: Get cached dependencies
               uses: actions/cache@v2
@@ -98,7 +98,7 @@ jobs:
                   submodules: 'recursive'
             - uses: actions/setup-node@v2
               with:
-                  node-version: '14.16.0'
+                  node-version: '16.20.2'
 
             - name: Get cached dependencies
               uses: actions/cache@v2
@@ -132,7 +132,7 @@ jobs:
                   submodules: 'recursive'
             - uses: actions/setup-node@v2
               with:
-                  node-version: '14.16.0'
+                  node-version: '16.20.2'
 
             - name: Get cached dependencies
               uses: actions/cache@v2
