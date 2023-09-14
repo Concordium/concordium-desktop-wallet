@@ -25,7 +25,7 @@ export default function withUpdateQueue<TProps extends WithUpdateQueues>(
             return {
                 nextUpdateSequenceNumbers,
             };
-        }, [dispatch]);
+        }, []);
 
         const enrichedProps: TProps = {
             ...props,

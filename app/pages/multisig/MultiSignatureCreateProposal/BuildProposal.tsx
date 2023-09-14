@@ -73,8 +73,6 @@ export default function BuildProposal({
 
         if (newProposal) {
             onFinish(newProposal, fields);
-        } else {
-            console.log('test');
         }
     }
 
