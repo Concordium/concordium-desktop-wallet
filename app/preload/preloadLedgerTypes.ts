@@ -24,6 +24,7 @@ import {
     TimeParameters,
     CooldownParameters,
     PoolParameters,
+    BlockEnergyLimit,
 } from '~/utils/types';
 import { AppAndVersion } from '../features/ledger/GetAppAndVersion';
 import { AccountPathInput } from '../features/ledger/Path';
@@ -107,6 +108,7 @@ type LedgerCommands = {
     signTimeParameters: SignUpdate<TimeParameters>;
     signCooldownParameters: SignUpdate<CooldownParameters>;
     signPoolParameters: SignUpdate<PoolParameters>;
+    signBlockEnergyLimit: SignUpdate<BlockEnergyLimit>;
     signHigherLevelKeysUpdate: SignKeyUpdate<HigherLevelKeyUpdate>;
     signAuthorizationKeysUpdate: SignVersionedKeyUpdate<AuthorizationKeysUpdate>;
     getAppAndVersion: () => Promise<AppAndVersion>;

@@ -34,6 +34,7 @@ import {
     CommissionRates,
     CommissionRanges,
     AuthorizationKeysUpdateType,
+    BlockEnergyLimit,
 } from './types';
 
 /**
@@ -62,6 +63,7 @@ export enum OnChainUpdateType {
     UpdatePoolParameters = 15,
     UpdateTimeParameters = 16,
     UpdateMintDistributionV1 = 17,
+    UpdateBlockEnergyLimit = 20,
 }
 
 /**
@@ -207,6 +209,17 @@ export function serializeBakerStakeThreshold(
         BigInt(bakerStakeThreshold.threshold)
     );
     return serializedBakerStakeThreshold;
+}
+
+/**
+ * Serializes a BlockEnergyLimit to the byte format expected
+ * by the chain.
+ */
+export function serializeBlockEnergyLimit(blockEnergyLimit: BlockEnergyLimit) {
+    const serializedBlockEnergyLimit = encodeWord64(
+        BigInt(blockEnergyLimit.blockEnergyLimit)
+    );
+    return serializedBlockEnergyLimit;
 }
 
 /**
@@ -579,6 +592,8 @@ function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
             return OnChainUpdateType.UpdateTimeParameters;
         case UpdateType.UpdateMintDistributionV1:
             return OnChainUpdateType.UpdateMintDistributionV1;
+        case UpdateType.BlockEnergyLimit:
+            return OnChainUpdateType.UpdateBlockEnergyLimit;
         default:
             throw new Error(`An invalid update type was given: ${type}`);
     }

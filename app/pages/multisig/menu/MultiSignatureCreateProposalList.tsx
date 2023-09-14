@@ -13,7 +13,10 @@ import { proposalsSelector } from '~/features/MultiSignatureSlice';
 import { expireProposals } from '~/utils/ProposalHelper';
 import routes from '~/constants/routes.json';
 import { useProtocolVersion } from '~/utils/dataHooks';
-import { hasDelegationProtocol } from '~/utils/protocolVersion';
+import {
+    hasDelegationProtocol,
+    hasConsensusUpdateProtocol,
+} from '~/utils/protocolVersion';
 import { not } from '~/utils/functionHelpers';
 
 import styles from '../MultiSignaturePage/MultiSignaturePage.module.scss';
@@ -126,6 +129,12 @@ const updateInstructionTypes: TypeTuple[] = [
         UpdateType.TimeParameters,
         'Update time parameters',
         hasDelegationProtocol,
+    ],
+    [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.BlockEnergyLimit,
+        'Update block energy limit',
+        hasConsensusUpdateProtocol,
     ],
 ];
 

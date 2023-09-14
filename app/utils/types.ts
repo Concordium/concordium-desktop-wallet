@@ -764,7 +764,8 @@ export type UpdateInstructionPayload =
     | AddIdentityProvider
     | CooldownParameters
     | PoolParameters
-    | TimeParameters;
+    | TimeParameters
+    | BlockEnergyLimit;
 
 // An actual signature, which goes into an account transaction.
 export type Signature = Hex;
@@ -817,6 +818,7 @@ export enum UpdateType {
     PoolParameters,
     TimeParameters,
     UpdateMintDistributionV1,
+    BlockEnergyLimit,
 }
 
 export enum RootKeysUpdateTypes {
@@ -1098,6 +1100,12 @@ export function isPoolParameters(
     return UpdateType.PoolParameters === transaction.type;
 }
 
+export function isBlockEnergyLimit(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<BlockEnergyLimit> {
+    return UpdateType.BlockEnergyLimit === transaction.type;
+}
+
 /**
  * Enum for the different states that a multi signature transaction proposal
  * can go through.
@@ -1201,6 +1209,10 @@ export interface BakerStakeThreshold {
 
 export interface ElectionDifficulty {
     electionDifficulty: Word32;
+}
+
+export interface BlockEnergyLimit {
+    blockEnergyLimit: Word64;
 }
 
 export interface TimeParameters {

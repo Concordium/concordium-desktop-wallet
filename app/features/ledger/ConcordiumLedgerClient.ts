@@ -22,6 +22,7 @@ import {
     TimeParameters,
     CooldownParameters,
     PoolParameters,
+    BlockEnergyLimit,
 } from '~/utils/types';
 import { pipe } from '~/utils/basicHelpers';
 
@@ -330,6 +331,20 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         return toBuffer(
             window.ledger.signPoolParameters(
+                transaction,
+                serializedPayload,
+                path
+            )
+        );
+    }
+
+    signBlockEnergyLimit(
+        transaction: UpdateInstruction<BlockEnergyLimit>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return toBuffer(
+            window.ledger.signBlockEnergyLimit(
                 transaction,
                 serializedPayload,
                 path
