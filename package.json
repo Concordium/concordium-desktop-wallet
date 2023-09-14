@@ -26,7 +26,7 @@
     "package": "yarn build && node ./scripts/build.js",
     "package-win-no-sign": "set SIGNING=skip && yarn build && node ./scripts/build.js",
     "package-mac-no-notarize": "export NOTARIZE=skip && yarn build && node ./scripts/build.js",
-    "postinstall": "node internals/scripts/CheckNativeDep.js && electron-builder install-app-deps && yarn build-dll && opencollective-postinstall",
+    "postinstall": "node internals/scripts/CheckNativeDep.js && cross-env npm_config_openssl_fips='' electron-builder install-app-deps && yarn build-dll && opencollective-postinstall",
     "postlint-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{ts,tsx,js,jsx,json,html,yml}'",
     "postlint-styles-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{css,scss}'",
     "preinstall": "node ./internals/scripts/CheckYarn.js",
