@@ -9,7 +9,7 @@ import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransact
 import {
     Authorizations,
     ChainParameters,
-    UpdateQueues,
+    NextUpdateSequenceNumbers,
 } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
@@ -36,17 +36,16 @@ export default class FoundationAccountHandler
 
     async createTransaction(
         chainParameters: ChainParameters,
-        updateQueues: UpdateQueues,
+        nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
         { foundationAccount }: UpdateFoundationAccountFields,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!chainParameters || !updateQueues) {
+        if (!chainParameters || !nextUpdateSequenceNumbers) {
             return undefined;
         }
 
-        const sequenceNumber =
-            updateQueues.foundationAccount.nextSequenceNumber;
+        const sequenceNumber = nextUpdateSequenceNumbers.foundationAccount;
         const { threshold } = chainParameters.level2Keys.foundationAccount;
 
         return createUpdateMultiSignatureTransaction(

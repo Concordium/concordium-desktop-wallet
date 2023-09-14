@@ -10,7 +10,7 @@ import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransact
 import {
     Authorizations,
     ChainParameters,
-    UpdateQueues,
+    NextUpdateSequenceNumbers,
 } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
@@ -37,16 +37,16 @@ export default class MicroGtuPerEuroHandler
 
     async createTransaction(
         chainParameters: ChainParameters,
-        updateQueues: UpdateQueues,
+        nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
         { microGtuPerEuroRate }: UpdateMicroGtuPerEuroRateFields,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!chainParameters || !updateQueues) {
+        if (!chainParameters || !nextUpdateSequenceNumbers) {
             return undefined;
         }
 
-        const sequenceNumber = updateQueues.microGTUPerEuro.nextSequenceNumber;
+        const sequenceNumber = nextUpdateSequenceNumbers.microCcdPerEuro;
         const { threshold } = chainParameters.level2Keys.microGTUPerEuro;
 
         const reduced = getReducedExchangeRate({

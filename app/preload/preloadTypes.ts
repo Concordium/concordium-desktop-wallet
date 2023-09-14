@@ -10,6 +10,7 @@ import type {
     CredentialDeploymentTransaction,
     CryptographicParameters,
     NextAccountNonce,
+    NextUpdateSequenceNumbers,
     PassiveDelegationStatus,
     PeerInfo,
     RewardStatus,
@@ -126,6 +127,9 @@ export type GRPC = {
         address: string
     ) => Promise<NextAccountNonce | undefined>;
     getBlockChainParameters: (blockHash?: string) => Promise<ChainParameters>;
+    getNextUpdateSequenceNumbers: (
+        blockHash?: string
+    ) => Promise<NextUpdateSequenceNumbers>;
     getAccountInfoOfCredential: GetAccountInfo;
     getAccountInfo: GetAccountInfo;
     getIdentityProviders: (blockHash: string) => Promise<IpInfo[] | undefined>;

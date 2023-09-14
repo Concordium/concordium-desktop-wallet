@@ -10,7 +10,7 @@ import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransact
 import {
     Authorizations,
     ChainParameters,
-    UpdateQueues,
+    NextUpdateSequenceNumbers,
 } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
@@ -37,16 +37,16 @@ export default class EuroPerEnergyHandler
 
     async createTransaction(
         chainParameters: ChainParameters,
-        updateQueues: UpdateQueues,
+        nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
         { euroPerEnergyRate }: UpdateEuroPerEnergyFields,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!chainParameters || !updateQueues) {
+        if (!chainParameters || !nextUpdateSequenceNumbers) {
             return undefined;
         }
 
-        const sequenceNumber = updateQueues.euroPerEnergy.nextSequenceNumber;
+        const sequenceNumber = nextUpdateSequenceNumbers.euroPerEnergy;
         const { threshold } = chainParameters.level2Keys.euroPerEnergy;
 
         const reduced = getReducedExchangeRate({

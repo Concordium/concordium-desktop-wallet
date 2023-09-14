@@ -9,7 +9,7 @@ import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransact
 import {
     Authorizations,
     ChainParameters,
-    UpdateQueues,
+    NextUpdateSequenceNumbers,
 } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
@@ -36,17 +36,17 @@ export default class ProtocolUpdateHandler
 
     async createTransaction(
         chainParameters: ChainParameters,
-        updateQueues: UpdateQueues,
+        nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
         { specificationAuxiliaryData: files, ...fields }: UpdateProtocolFields,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!chainParameters || !updateQueues) {
+        if (!chainParameters || !nextUpdateSequenceNumbers) {
             return undefined;
         }
 
         const { threshold } = chainParameters.level2Keys.protocol;
-        const sequenceNumber = updateQueues.protocol.nextSequenceNumber;
+        const sequenceNumber = nextUpdateSequenceNumbers.protocol;
 
         let specificationAuxiliaryData: string | undefined;
         if (files) {

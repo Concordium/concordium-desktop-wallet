@@ -11,7 +11,7 @@ import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransact
 import {
     Authorizations,
     ChainParameters,
-    UpdateQueues,
+    NextUpdateSequenceNumbers,
 } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
@@ -38,17 +38,16 @@ export default class ElectionDifficultyHandler
 
     async createTransaction(
         chainParameters: ChainParameters,
-        updateQueues: UpdateQueues,
+        nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
         { electionDifficulty }: ElectionDifficultyField,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!chainParameters || !updateQueues) {
+        if (!chainParameters || !nextUpdateSequenceNumbers) {
             return undefined;
         }
 
-        const sequenceNumber =
-            updateQueues.electionDifficulty.nextSequenceNumber;
+        const sequenceNumber = nextUpdateSequenceNumbers.electionDifficulty;
         const { threshold } = chainParameters.level2Keys.electionDifficulty;
         const parsedElectionDifficulty = toElectionDifficultyResolution(
             electionDifficulty

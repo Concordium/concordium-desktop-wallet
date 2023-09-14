@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-    isUpdateQueuesV0,
-    isAuthorizationsV1,
-    isChainParametersV0,
-} from '@concordium/web-sdk';
+import { isAuthorizationsV1, isChainParametersV0 } from '@concordium/web-sdk';
 
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
@@ -15,7 +11,7 @@ import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransact
 import {
     Authorizations,
     ChainParameters,
-    UpdateQueues,
+    NextUpdateSequenceNumbers,
 } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
@@ -42,7 +38,7 @@ export default class CooldownParametersHandler
 
     async createTransaction(
         chainParameters: ChainParameters,
-        updateQueues: UpdateQueues,
+        nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
         {
             delegatorCooldown,
             poolOwnerCooldown,
@@ -50,18 +46,14 @@ export default class CooldownParametersHandler
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!chainParameters || !updateQueues) {
+        if (!chainParameters || !nextUpdateSequenceNumbers) {
             return undefined;
         }
 
-        if (
-            isUpdateQueuesV0(updateQueues) ||
-            isChainParametersV0(chainParameters)
-        ) {
+        if (isChainParametersV0(chainParameters)) {
             throw new Error('Update incompatible with chain protocol version');
         }
-        const sequenceNumber =
-            updateQueues.cooldownParameters.nextSequenceNumber;
+        const sequenceNumber = nextUpdateSequenceNumbers.cooldownParameters;
         const { threshold } = chainParameters.level2Keys.cooldownParameters;
 
         const cooldownParameters: CooldownParameters = {

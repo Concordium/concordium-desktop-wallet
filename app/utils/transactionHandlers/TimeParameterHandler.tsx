@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-    isUpdateQueuesV0,
-    isAuthorizationsV1,
-    isChainParametersV0,
-} from '@concordium/web-sdk';
+import { isAuthorizationsV1, isChainParametersV0 } from '@concordium/web-sdk';
 
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
@@ -16,7 +12,7 @@ import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransact
 import {
     Authorizations,
     ChainParameters,
-    UpdateQueues,
+    NextUpdateSequenceNumbers,
 } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
@@ -43,24 +39,21 @@ export default class TimeParametersHandler
 
     async createTransaction(
         chainParameters: ChainParameters,
-        updateQueues: UpdateQueues,
+        nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
         { mintPerPayday, rewardPeriodLength }: UpdateTimeParametersFields,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
         const parsedMintRate = parseMintRate(mintPerPayday);
-        if (!chainParameters || !updateQueues || !parsedMintRate) {
+        if (!chainParameters || !nextUpdateSequenceNumbers || !parsedMintRate) {
             return undefined;
         }
 
-        if (
-            isUpdateQueuesV0(updateQueues) ||
-            isChainParametersV0(chainParameters)
-        ) {
+        if (isChainParametersV0(chainParameters)) {
             throw new Error('Update incompatible with chain protocol version');
         }
 
-        const sequenceNumber = updateQueues.timeParameters.nextSequenceNumber;
+        const sequenceNumber = nextUpdateSequenceNumbers.timeParameters;
         const { threshold } = chainParameters.level2Keys.timeParameters;
 
         const timeParameters: TimeParameters = {

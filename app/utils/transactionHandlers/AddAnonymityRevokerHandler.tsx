@@ -9,7 +9,7 @@ import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransact
 import {
     Authorizations,
     ChainParameters,
-    UpdateQueues,
+    NextUpdateSequenceNumbers,
 } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
@@ -36,7 +36,7 @@ export default class AddAnonymityRevokerHandler
 
     async createTransaction(
         chainParameters: ChainParameters,
-        updateQueues: UpdateQueues,
+        nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
         {
             name,
             url,
@@ -47,7 +47,7 @@ export default class AddAnonymityRevokerHandler
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!chainParameters || !updateQueues) {
+        if (!chainParameters || !nextUpdateSequenceNumbers) {
             return undefined;
         }
 
@@ -57,8 +57,7 @@ export default class AddAnonymityRevokerHandler
             description,
         };
 
-        const sequenceNumber =
-            updateQueues.addAnonymityRevoker.nextSequenceNumber;
+        const sequenceNumber = nextUpdateSequenceNumbers.addAnonymityRevoker;
         const { threshold } = chainParameters.level2Keys.addAnonymityRevoker;
 
         const payload = {

@@ -9,7 +9,7 @@ import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransact
 import {
     Authorizations,
     ChainParameters,
-    UpdateQueues,
+    NextUpdateSequenceNumbers,
 } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
@@ -36,16 +36,16 @@ export default class GasRewardsHandler
 
     async createTransaction(
         chainParameters: ChainParameters,
-        updateQueues: UpdateQueues,
+        nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
         gasRewards: UpdateGasRewardsFields,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!chainParameters || !updateQueues) {
+        if (!chainParameters || !nextUpdateSequenceNumbers) {
             return undefined;
         }
 
-        const sequenceNumber = updateQueues.gasRewards.nextSequenceNumber;
+        const sequenceNumber = nextUpdateSequenceNumbers.gasRewards;
         const { threshold } = chainParameters.level2Keys.paramGASRewards;
 
         return createUpdateMultiSignatureTransaction(

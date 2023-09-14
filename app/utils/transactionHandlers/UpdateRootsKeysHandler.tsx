@@ -4,7 +4,10 @@ import UpdateRootKeys from '~/pages/multisig/updates/UpdateGovernanceKeys/Update
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceRootPath } from '../../features/ledger/Path';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { ChainParameters, UpdateQueues } from '../../node/NodeApiTypes';
+import {
+    ChainParameters,
+    NextUpdateSequenceNumbers,
+} from '../../node/NodeApiTypes';
 import {
     UpdateInstruction,
     MultiSignatureTransaction,
@@ -31,16 +34,16 @@ export default class UpdateRootKeysHandler
 
     async createTransaction(
         chainParameters: ChainParameters,
-        updateQueues: UpdateQueues,
+        nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
         higherLevelKeyUpdate: HigherLevelKeyUpdate,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!chainParameters || !updateQueues) {
+        if (!chainParameters || !nextUpdateSequenceNumbers) {
             return undefined;
         }
 
-        const sequenceNumber = updateQueues.rootKeys.nextSequenceNumber;
+        const sequenceNumber = nextUpdateSequenceNumbers.rootKeys;
         const { threshold } = chainParameters.rootKeys;
 
         return createUpdateMultiSignatureTransaction(

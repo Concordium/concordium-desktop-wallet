@@ -10,7 +10,7 @@ import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransact
 import {
     Authorizations,
     ChainParameters,
-    UpdateQueues,
+    NextUpdateSequenceNumbers,
 } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
@@ -37,16 +37,16 @@ export default class MintDistributionHandler
 
     async createTransaction(
         chainParameters: ChainParameters,
-        updateQueues: UpdateQueues,
+        nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
         { mintPerSlot, rewardDistribution }: UpdateMintDistributionFields,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!chainParameters || !updateQueues) {
+        if (!chainParameters || !nextUpdateSequenceNumbers) {
             return undefined;
         }
 
-        const sequenceNumber = updateQueues.mintDistribution.nextSequenceNumber;
+        const sequenceNumber = nextUpdateSequenceNumbers.mintDistribution;
         const { threshold } = chainParameters.level2Keys.mintDistribution;
 
         let mintDistribution: MintDistribution;

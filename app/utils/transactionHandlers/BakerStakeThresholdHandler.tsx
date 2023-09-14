@@ -1,6 +1,5 @@
 import React from 'react';
-import { isUpdateQueuesV0 } from '@concordium/web-sdk';
-import type { UpdateQueues } from '@concordium/web-sdk';
+import type { NextUpdateSequenceNumbers } from '@concordium/web-sdk';
 import BakerStakeThresholdView from '~/pages/multisig/updates/BakerStakeThreshold/BakerStakeThresholdView';
 import UpdateBakerStakeThreshold, {
     UpdateBakerStakeThresholdFields,
@@ -34,21 +33,16 @@ export default class BakerStakeThresholdHandler
 
     async createTransaction(
         chainParameters: ChainParameters,
-        updateQueues: UpdateQueues,
+        nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
         { threshold: bakerStakeThreshold }: UpdateBakerStakeThresholdFields,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!chainParameters || !updateQueues) {
+        if (!chainParameters || !nextUpdateSequenceNumbers) {
             return undefined;
         }
 
-        if (!isUpdateQueuesV0(updateQueues)) {
-            throw new Error('Update incompatible with chain protocol version');
-        }
-
-        const sequenceNumber =
-            updateQueues.bakerStakeThreshold.nextSequenceNumber;
+        const sequenceNumber = nextUpdateSequenceNumbers.poolParameters;
         const { threshold } = chainParameters.level2Keys.poolParameters;
 
         return createUpdateMultiSignatureTransaction(

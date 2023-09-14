@@ -107,6 +107,7 @@ export const {
     getAccountInfo,
     getAccountInfoOfCredential,
     getBlockChainParameters,
+    getNextUpdateSequenceNumbers,
     getRewardStatus,
     getPoolInfo,
     getPassiveDelegationInfo,

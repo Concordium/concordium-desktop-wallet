@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useParams, Route, Switch } from 'react-router';
 import { FieldValues } from 'react-hook-form';
-import { UpdateQueues } from '@concordium/web-sdk';
 import Modal from '~/cross-app-components/Modal';
 import {
     instanceOfUpdateInstruction,
@@ -26,6 +25,7 @@ import BuildKeyProposal from './BuildKeyProposal';
 import { createProposalRoute } from '~/utils/routerHelper';
 
 import Loading from '~/cross-app-components/Loading';
+import { ensureUpdateQueue, WithUpdateQueues } from '~/utils/withUpdateQueue';
 
 export interface MultiSignatureCreateProposalForm {
     effectiveTime: Date;
@@ -39,10 +39,6 @@ function getSigningRoute(type: UpdateType) {
     )}/sign`;
 }
 
-interface WithUpdateQueues {
-    updateQueues: UpdateQueues;
-}
-
 /**
  * Component for displaying the UI required to create a multi signature transaction
  * proposal. It dynamically loads the correct component to show wrapped in a bit of
@@ -53,7 +49,7 @@ interface WithUpdateQueues {
 function MultiSignatureCreateProposal({
     chainParameters,
     consensusStatus,
-    updateQueues,
+    nextUpdateSequenceNumbers,
 }: Required<ChainData> & WithUpdateQueues) {
     const proposals = useSelector(proposalsSelector);
     const [restrictionModalOpen, setRestrictionModalOpen] = useState(false);
@@ -142,7 +138,9 @@ function MultiSignatureCreateProposal({
                                 type={type}
                                 onFinish={handleProposal}
                                 chainParameters={chainParameters}
-                                updateQueues={updateQueues}
+                                nextUpdateSequenceNumbers={
+                                    nextUpdateSequenceNumbers
+                                }
                                 consensusStatus={consensusStatus}
                                 defaults={defaults}
                             />
@@ -162,4 +160,6 @@ function LoadingComponent() {
     );
 }
 
-export default ensureChainData(MultiSignatureCreateProposal, LoadingComponent);
+export default ensureUpdateQueue(
+    ensureChainData(MultiSignatureCreateProposal, LoadingComponent)
+);

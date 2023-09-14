@@ -9,7 +9,7 @@ import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransact
 import {
     Authorizations,
     ChainParameters,
-    UpdateQueues,
+    NextUpdateSequenceNumbers,
 } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
@@ -36,7 +36,7 @@ export default class AddIdentityProviderHandler
 
     async createTransaction(
         chainParameters: ChainParameters,
-        updateQueues: UpdateQueues,
+        nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
         {
             name,
             url,
@@ -48,7 +48,7 @@ export default class AddIdentityProviderHandler
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!chainParameters || !updateQueues) {
+        if (!chainParameters || !nextUpdateSequenceNumbers) {
             return undefined;
         }
 
@@ -58,8 +58,7 @@ export default class AddIdentityProviderHandler
             description,
         };
 
-        const sequenceNumber =
-            updateQueues.addIdentityProvider.nextSequenceNumber;
+        const sequenceNumber = nextUpdateSequenceNumbers.addIdentityProvider;
         const { threshold } = chainParameters.level2Keys.addIdentityProvider;
 
         const payload = {

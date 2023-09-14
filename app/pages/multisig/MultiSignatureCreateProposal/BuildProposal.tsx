@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
-import { UpdateQueues } from '@concordium/web-sdk';
+import { NextUpdateSequenceNumbers } from '@concordium/web-sdk';
 import {
     getDefaultExpiry,
     TimeConstants,
@@ -21,7 +21,7 @@ export interface MultiSignatureCreateProposalForm {
 
 interface Props extends Required<ChainData> {
     defaults: FieldValues;
-    updateQueues: UpdateQueues;
+    nextUpdateSequenceNumbers: NextUpdateSequenceNumbers;
     type: UpdateType;
     onFinish: (
         proposal: Omit<MultiSignatureTransaction, 'id'> | undefined,
@@ -32,7 +32,7 @@ interface Props extends Required<ChainData> {
 export default function BuildProposal({
     type,
     chainParameters,
-    updateQueues,
+    nextUpdateSequenceNumbers,
     consensusStatus,
     onFinish,
     defaults,
@@ -65,7 +65,7 @@ export default function BuildProposal({
 
         const newProposal = await handler.createTransaction(
             chainParameters,
-            updateQueues,
+            nextUpdateSequenceNumbers,
             dynamicFields,
             effectiveTimeInSeconds,
             expiryTimeInSeconds
@@ -73,6 +73,8 @@ export default function BuildProposal({
 
         if (newProposal) {
             onFinish(newProposal, fields);
+        } else {
+            console.log('test');
         }
     }
 

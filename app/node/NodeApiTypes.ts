@@ -3,7 +3,7 @@ import { RewardFraction, VerifyKey } from '../utils/types';
 
 export {
     ChainParameters,
-    UpdateQueues,
+    NextUpdateSequenceNumbers,
     ConsensusStatus,
     Authorizations,
 } from '@concordium/web-sdk/';

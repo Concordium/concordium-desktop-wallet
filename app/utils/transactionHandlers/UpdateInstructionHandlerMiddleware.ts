@@ -2,7 +2,7 @@ import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import {
     Authorizations,
     ChainParameters,
-    UpdateQueues,
+    NextUpdateSequenceNumbers,
 } from '~/node/NodeApiTypes';
 import {
     TransactionExportType,
@@ -57,7 +57,7 @@ export default class UpdateInstructionHandlerTypeMiddleware<T>
 
     createTransaction(
         chainParameters: ChainParameters,
-        updateQueues: UpdateQueues,
+        updateQueues: NextUpdateSequenceNumbers,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fields: any,
         effectiveTime: bigint,

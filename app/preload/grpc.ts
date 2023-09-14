@@ -91,6 +91,8 @@ const exposedMethods: GRPC = {
         client.getNextAccountNonce(new AccountAddress(address)),
     getBlockChainParameters: (blockHash?: string) =>
         client.getBlockChainParameters(blockHash),
+    getNextUpdateSequenceNumbers: (blockHash?: string) =>
+        client.getNextUpdateSequenceNumbers(blockHash),
     getAccountInfo: (address: string, blockHash?: string) => {
         return client.getAccountInfo(new AccountAddress(address), blockHash);
     },

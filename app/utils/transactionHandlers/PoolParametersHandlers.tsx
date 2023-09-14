@@ -1,5 +1,4 @@
 import React from 'react';
-import { isUpdateQueuesV0 } from '@concordium/web-sdk';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
 import PoolParametersView from '~/pages/multisig/updates/PoolParameters/PoolParametersView';
@@ -9,7 +8,7 @@ import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransact
 import {
     Authorizations,
     ChainParameters,
-    UpdateQueues,
+    NextUpdateSequenceNumbers,
 } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
@@ -37,7 +36,7 @@ export default class PoolParametersHandler
 
     async createTransaction(
         chainParameters: ChainParameters,
-        updateQueues: UpdateQueues,
+        nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
         {
             passiveFinalizationCommission,
             passiveBakingCommission,
@@ -52,15 +51,11 @@ export default class PoolParametersHandler
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!chainParameters || !updateQueues) {
+        if (!chainParameters || !nextUpdateSequenceNumbers) {
             return undefined;
         }
 
-        if (isUpdateQueuesV0(updateQueues)) {
-            throw new Error('Update incompatible with chain protocol version');
-        }
-
-        const sequenceNumber = updateQueues.poolParameters.nextSequenceNumber;
+        const sequenceNumber = nextUpdateSequenceNumbers.poolParameters;
         const { threshold } = chainParameters.level2Keys.poolParameters;
 
         const reducedLeverageBound = getReducedFraction({
