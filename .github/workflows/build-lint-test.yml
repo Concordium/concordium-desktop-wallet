@@ -73,9 +73,6 @@ jobs:
                       **/target
                   key: ${{ runner.os }}-v3-${{ hashFiles('**/yarn.lock', '**/rust-src/') }}
 
-            - name: Build proto
-              run: yarn build-proto
-
             - name: Build
               run: yarn build-ci
 
