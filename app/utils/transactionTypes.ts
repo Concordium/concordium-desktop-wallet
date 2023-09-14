@@ -1,4 +1,4 @@
-import { UpdateQueues } from '@concordium/web-sdk';
+import { NextUpdateSequenceNumbers } from '@concordium/web-sdk';
 import type { Buffer } from 'buffer/';
 import { FieldValues } from 'react-hook-form';
 import { AccountPathInput } from '~/features/ledger/Path';
@@ -113,7 +113,7 @@ export interface UpdateInstructionHandler<T, S, P = UpdateInstruction>
      */
     createTransaction: (
         chainParameters: ChainParameters,
-        updateQueue: UpdateQueues,
+        nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fields: any,
         effectiveTime: bigint,
