@@ -136,6 +136,12 @@ const updateInstructionTypes: TypeTuple[] = [
         'Update block energy limit',
         hasConsensusUpdateProtocol,
     ],
+    [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.FinalizationCommitteeParameters,
+        'Update finalization committee parameters',
+        hasConsensusUpdateProtocol,
+    ],
 ];
 
 /**

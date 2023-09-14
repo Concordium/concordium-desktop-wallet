@@ -35,6 +35,7 @@ import {
     CommissionRanges,
     AuthorizationKeysUpdateType,
     BlockEnergyLimit,
+    FinalizationCommitteeParameters,
 } from './types';
 
 /**
@@ -64,6 +65,7 @@ export enum OnChainUpdateType {
     UpdateTimeParameters = 16,
     UpdateMintDistributionV1 = 17,
     UpdateBlockEnergyLimit = 20,
+    UpdateFinalizationCommitteeParameters = 22,
 }
 
 /**
@@ -220,6 +222,22 @@ export function serializeBlockEnergyLimit(blockEnergyLimit: BlockEnergyLimit) {
         BigInt(blockEnergyLimit.blockEnergyLimit)
     );
     return serializedBlockEnergyLimit;
+}
+
+/**
+ * Serializes a FinalizationCommitteeParameters to the byte format expected
+ * by the chain.
+ */
+export function serializeFinalizationCommitteeParameters(
+    finalizationCommitteeParameters: FinalizationCommitteeParameters
+) {
+    return Buffer.concat([
+        encodeWord32(finalizationCommitteeParameters.minFinalizers),
+        encodeWord32(finalizationCommitteeParameters.maxFinalizers),
+        encodeWord32(
+            finalizationCommitteeParameters.relativeStakeThresholdFraction
+        ),
+    ]);
 }
 
 /**
@@ -594,6 +612,8 @@ function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
             return OnChainUpdateType.UpdateMintDistributionV1;
         case UpdateType.BlockEnergyLimit:
             return OnChainUpdateType.UpdateBlockEnergyLimit;
+        case UpdateType.FinalizationCommitteeParameters:
+            return OnChainUpdateType.UpdateFinalizationCommitteeParameters;
         default:
             throw new Error(`An invalid update type was given: ${type}`);
     }

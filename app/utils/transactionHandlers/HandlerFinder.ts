@@ -56,6 +56,7 @@ import CooldownParametersHandler from './CooldownParametersHandler';
 import PoolParametersHandler from './PoolParametersHandlers';
 import { throwLoggedError } from '../basicHelpers';
 import BlockEnergyLimitHandler from './BlockEnergyLimitHandler';
+import FinalizationCommitteeParametersHandler from './FinalizationCommitteeParametersHandler';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -238,6 +239,10 @@ export function findUpdateInstructionHandler(
         case UpdateType.BlockEnergyLimit:
             return new UpdateInstructionHandlerTypeMiddleware(
                 new BlockEnergyLimitHandler()
+            );
+        case UpdateType.FinalizationCommitteeParameters:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new FinalizationCommitteeParametersHandler()
             );
         default:
             return throwLoggedError(`Unsupported transaction type: ${type}`);
