@@ -153,7 +153,6 @@
     "@svgr/webpack": "^5.5.0",
     "@teamsupercell/typings-for-css-modules-loader": "^2.4.0",
     "@types/archiver": "^5.1.1",
-    "@types/bs58check": "^2.1.0",
     "@types/enzyme": "^3.10.5",
     "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/history": "^4.7.7",
@@ -254,7 +253,7 @@
     "archiver": "^5.3.0",
     "async-mutex": "^0.3.2",
     "axios": "^0.21.0",
-    "bs58check": "^2.1.2",
+    "bs58check": "^3.0.1",
     "buffer": "^6.0.3",
     "cbor": "^8.0.0",
     "clsx": "^1.1.1",
@@ -330,5 +329,8 @@
     "hooks": {
       "pre-commit": "lint-staged"
     }
+  },
+  "resolutions": {
+    "@noble/hashes": "1.2.0"
   }
 }
