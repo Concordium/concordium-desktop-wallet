@@ -113,6 +113,6 @@ export const {
     getRewardStatus,
     getPoolInfo,
     getPassiveDelegationInfo,
-    getPeerList,
+    healthCheck,
     sendCredentialDeploymentTransaction,
 } = window.grpc;
