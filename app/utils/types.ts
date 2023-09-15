@@ -6,6 +6,7 @@ import type { RegisterOptions } from 'react-hook-form';
 import type { BakerId } from '@concordium/web-sdk';
 import {
     OpenStatus,
+    Ratio,
     TransactionKindString,
 } from '@concordium/common-sdk/lib/types';
 import { RejectReason } from './node/RejectReasonHelper';
@@ -765,6 +766,7 @@ export type UpdateInstructionPayload =
     | CooldownParameters
     | PoolParameters
     | TimeParameters
+    | TimeoutParameters
     | MinBlockTime
     | BlockEnergyLimit
     | FinalizationCommitteeParameters;
@@ -820,6 +822,7 @@ export enum UpdateType {
     PoolParameters,
     TimeParameters,
     UpdateMintDistributionV1,
+    TimeoutParameters,
     MinBlockTime,
     BlockEnergyLimit,
     FinalizationCommitteeParameters,
@@ -1110,6 +1113,12 @@ export function isBlockEnergyLimit(
     return UpdateType.BlockEnergyLimit === transaction.type;
 }
 
+export function isTimeoutParameters(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<TimeoutParameters> {
+    return UpdateType.TimeoutParameters === transaction.type;
+}
+
 export function isFinalizationCommitteeParameters(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<FinalizationCommitteeParameters> {
@@ -1239,6 +1248,12 @@ export interface FinalizationCommitteeParameters {
 
 export interface MinBlockTime {
     minBlockTime: Word64;
+}
+
+export interface TimeoutParameters {
+    timeoutBase: Word64;
+    timeoutIncrease: Fraction;
+    timeoutDecrease: Fraction;
 }
 
 export interface TimeParameters {

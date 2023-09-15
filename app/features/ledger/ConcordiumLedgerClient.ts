@@ -25,6 +25,7 @@ import {
     BlockEnergyLimit,
     FinalizationCommitteeParameters,
     MinBlockTime,
+    TimeoutParameters,
 } from '~/utils/types';
 import { pipe } from '~/utils/basicHelpers';
 
@@ -375,6 +376,20 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         return toBuffer(
             window.ledger.signMinBlockTime(transaction, serializedPayload, path)
+        );
+    }
+
+    signTimeoutParameters(
+        transaction: UpdateInstruction<TimeoutParameters>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return toBuffer(
+            window.ledger.signTimeoutParameters(
+                transaction,
+                serializedPayload,
+                path
+            )
         );
     }
 }

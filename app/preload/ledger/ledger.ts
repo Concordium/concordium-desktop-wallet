@@ -32,6 +32,7 @@ import {
     BlockEnergyLimit,
     FinalizationCommitteeParameters,
     MinBlockTime,
+    TimeoutParameters,
 } from '~/utils/types';
 import { LedgerCommands } from '~/preload/preloadTypes';
 
@@ -308,6 +309,17 @@ export default function exposedMethods(
             keypath: number[]
         ) => {
             return getLedgerClient().signMinBlockTime(
+                transaction,
+                serializedPayload,
+                keypath
+            );
+        },
+        signTimeoutParameters: (
+            transaction: UpdateInstruction<TimeoutParameters>,
+            serializedPayload: Buffer,
+            keypath: number[]
+        ) => {
+            return getLedgerClient().signTimeoutParameters(
                 transaction,
                 serializedPayload,
                 keypath

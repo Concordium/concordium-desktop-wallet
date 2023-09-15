@@ -51,16 +51,18 @@ export interface RelativeRateFieldProps
     /**
      * Unit of denominator. Position is "prefix" if string value.
      */
-    denominatorUnit: RelativeRateFieldUnit;
+    denominatorUnit?: RelativeRateFieldUnit;
     /**
      * Unit of value in the field. Position is "prefix" if string value.
      */
-    numeratorUnit: RelativeRateFieldUnit;
+    numeratorUnit?: RelativeRateFieldUnit;
     value: RelativeRateValue;
     display?: boolean;
     onChange?(v: RelativeRateValue): void;
     onBlur?(): void;
 }
+
+const emptyUnit: RelativeRateFieldUnit = { value: '', position: 'prefix' };
 
 /**
  * @description
@@ -70,8 +72,8 @@ export interface RelativeRateFieldProps
  * <RelativeRateField value={value} onChange={setValue} numeratorUnit={{ value: '€' }} denominatorUnit={{ value: '€' }} />
  */
 export function RelativeRateField({
-    denominatorUnit,
-    numeratorUnit,
+    denominatorUnit = emptyUnit,
+    numeratorUnit = emptyUnit,
     splitSymbol = '=',
     label,
     isInvalid,
