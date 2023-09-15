@@ -1,5 +1,4 @@
 import {
-    createConcordiumClient,
     ConcordiumGRPCClient,
     AccountTransactionHeader,
     AccountTransactionSignature,
@@ -11,16 +10,33 @@ import {
     streamToList,
 } from '@concordium/web-sdk';
 import type { Buffer } from 'buffer/';
+import { credentials } from '@grpc/grpc-js';
+import { GrpcTransport } from '@protobuf-ts/grpc-transport';
 
 import { GRPC, ConsensusAndGlobalResult } from '~/preload/preloadTypes';
 
 const defaultDeadlineMs = 15000;
 let client: ConcordiumGRPCClient;
 
-export function setClientLocation(address: string, port: string) {
-    client = createConcordiumClient(address, Number.parseInt(port, 10), {
-        timeout: defaultDeadlineMs,
+function createConcordiumClient(
+    address: string,
+    port: number,
+    timeout: number
+) {
+    const grpcTransport = new GrpcTransport({
+        host: `${address}:${port}`,
+        channelCredentials: credentials.createSsl(),
+        timeout,
     });
+    return new ConcordiumGRPCClient(grpcTransport);
+}
+
+export function setClientLocation(address: string, port: string) {
+    client = createConcordiumClient(
+        address,
+        Number.parseInt(port, 10),
+        defaultDeadlineMs
+    );
 }
 
 async function getConsensusStatusAndCryptographicParameters(
@@ -31,7 +47,7 @@ async function getConsensusStatusAndCryptographicParameters(
         const newClient = createConcordiumClient(
             address,
             Number.parseInt(port, 10),
-            { timeout: defaultDeadlineMs }
+            defaultDeadlineMs
         );
         const consensusStatus = await newClient.getConsensusStatus();
         const global = await newClient.getCryptographicParameters(
