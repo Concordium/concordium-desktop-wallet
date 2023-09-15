@@ -142,6 +142,12 @@ const updateInstructionTypes: TypeTuple[] = [
         'Update finalization committee parameters',
         hasConsensusUpdateProtocol,
     ],
+    [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.MinBlockTime,
+        'Update minimum block time',
+        hasConsensusUpdateProtocol,
+    ],
 ];
 
 /**

@@ -36,6 +36,7 @@ import {
     AuthorizationKeysUpdateType,
     BlockEnergyLimit,
     FinalizationCommitteeParameters,
+    MinBlockTime,
 } from './types';
 
 /**
@@ -64,6 +65,7 @@ export enum OnChainUpdateType {
     UpdatePoolParameters = 15,
     UpdateTimeParameters = 16,
     UpdateMintDistributionV1 = 17,
+    UpdateMinBlockTime = 19,
     UpdateBlockEnergyLimit = 20,
     UpdateFinalizationCommitteeParameters = 22,
 }
@@ -238,6 +240,17 @@ export function serializeFinalizationCommitteeParameters(
             finalizationCommitteeParameters.relativeStakeThresholdFraction
         ),
     ]);
+}
+
+/**
+ * Serializes a MinBlockTime to the byte format expected
+ * by the chain.
+ */
+export function serializeMinBlockTime(minBlockTime: MinBlockTime) {
+    const serializedMinBlockTime = encodeWord64(
+        BigInt(minBlockTime.minBlockTime)
+    );
+    return serializedMinBlockTime;
 }
 
 /**
@@ -614,6 +627,8 @@ function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
             return OnChainUpdateType.UpdateBlockEnergyLimit;
         case UpdateType.FinalizationCommitteeParameters:
             return OnChainUpdateType.UpdateFinalizationCommitteeParameters;
+        case UpdateType.MinBlockTime:
+            return OnChainUpdateType.UpdateMinBlockTime;
         default:
             throw new Error(`An invalid update type was given: ${type}`);
     }

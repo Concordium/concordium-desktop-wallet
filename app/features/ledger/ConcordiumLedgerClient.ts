@@ -24,6 +24,7 @@ import {
     PoolParameters,
     BlockEnergyLimit,
     FinalizationCommitteeParameters,
+    MinBlockTime,
 } from '~/utils/types';
 import { pipe } from '~/utils/basicHelpers';
 
@@ -364,6 +365,16 @@ export default class ConcordiumLedgerClient {
                 serializedPayload,
                 path
             )
+        );
+    }
+
+    signMinBlockTime(
+        transaction: UpdateInstruction<MinBlockTime>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return toBuffer(
+            window.ledger.signMinBlockTime(transaction, serializedPayload, path)
         );
     }
 }

@@ -2,8 +2,8 @@ import React from 'react';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import Form from '~/components/Form/';
-import { mustBeAnInteger, requiredMessage, enterHere } from '../common/util';
 import { assertChainParametersV2OrHigher } from '~/utils/blockSummaryHelpers';
+import { enterHere, validationRulesForPositiveWord64 } from '../common/util';
 
 export interface BlockEnergyLimitFields {
     blockEnergyLimit: bigint;
@@ -43,21 +43,9 @@ export default function BlockEnergyLimit({
                 }
                 label={`New ${fieldDisplays.blockEnergyLimit} (NRG)`}
                 placeholder={enterHere(fieldDisplays.blockEnergyLimit)}
-                rules={{
-                    required: requiredMessage(fieldDisplays.blockEnergyLimit),
-                    min: {
-                        value: 1,
-                        message: 'Block energy limit must be positive',
-                    },
-                    max: {
-                        value: '18446744073709551615',
-                        message:
-                            'Block energy limit must be below 18446744073709551615',
-                    },
-                    validate: {
-                        mustBeAnInteger,
-                    },
-                }}
+                rules={validationRulesForPositiveWord64(
+                    fieldDisplays.blockEnergyLimit
+                )}
             />
         </div>
     );
