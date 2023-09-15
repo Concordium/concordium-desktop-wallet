@@ -84,7 +84,7 @@ export async function fetchGlobal(specificBlockHash?: string): Promise<Global> {
 }
 
 export async function getEnergyToMicroGtuRate(): Promise<Fraction> {
-    const params = await getBlockChainParameters(undefined);
+    const params = await getBlockChainParameters();
     const { euroPerEnergy, microGTUPerEuro } = params;
     const denominator = BigInt(
         euroPerEnergy.denominator * microGTUPerEuro.denominator

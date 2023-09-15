@@ -247,7 +247,7 @@
     "yargs": "^17.1.1"
   },
   "dependencies": {
-     "@concordium/web-sdk": "^6.4.0",
+    "@concordium/web-sdk": "^6.4.0",
     "@hot-loader/react-dom": "^16.13.0",
     "@reduxjs/toolkit": "^1.4.0",
     "archiver": "^5.3.0",

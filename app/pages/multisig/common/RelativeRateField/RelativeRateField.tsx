@@ -124,7 +124,7 @@ export function RelativeRateField({
                                 fallbackValue={0}
                                 value={value.numerator}
                                 onChange={(v) =>
-                                    onChange({ ...value, numerator: v || '' })
+                                    onChange({ ...value, numerator: v })
                                 }
                                 disabled={disabled}
                                 onBlur={onBlur}
@@ -142,7 +142,7 @@ export function RelativeRateField({
                                 fallbackValue={0}
                                 value={value.denominator}
                                 onChange={(v) =>
-                                    onChange({ ...value, denominator: v || '' })
+                                    onChange({ ...value, denominator: v })
                                 }
                                 disabled={disabled}
                                 onBlur={onBlur}

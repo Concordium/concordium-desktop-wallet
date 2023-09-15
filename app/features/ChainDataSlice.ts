@@ -10,9 +10,6 @@ import type { RootState } from '~/store/store';
 import { pipe } from '~/utils/basicHelpers';
 import { orUndefined } from '~/utils/functionHelpers';
 
-// TODO test this with v0 and v1
-// TODO save concordiumBFTStatus?
-
 type CSDateKey = KeysMatching<ConsensusStatusV0, Date>;
 type CSBigIntKey = KeysMatching<ConsensusStatusV0, bigint>;
 
