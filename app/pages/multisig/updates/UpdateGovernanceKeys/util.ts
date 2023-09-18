@@ -22,7 +22,7 @@ export function getCurrentThresholds(
         authorizations.protocol.threshold
     );
     currentThresholds.set(
-        AccessStructureEnum.electionDifficulty,
+        AccessStructureEnum.consensus,
         authorizations.electionDifficulty.threshold
     );
     currentThresholds.set(
@@ -190,8 +190,8 @@ export function getAccessStructureTitle(
             return 'Emergency';
         case AccessStructureEnum.protocol:
             return 'Protocol update';
-        case AccessStructureEnum.electionDifficulty:
-            return 'Election difficulty';
+        case AccessStructureEnum.consensus:
+            return 'Consensus';
         case AccessStructureEnum.euroPerEnergy:
             return 'Euro per energy';
         case AccessStructureEnum.microGtuPerEuro:
@@ -255,9 +255,10 @@ export function mapCurrentAuthorizationsToUpdate(
             authorizations.protocol,
             AccessStructureEnum.protocol
         ),
+        // The election difficulty authorization is used for the new consensus updates
         mapAuthorizationToAccessStructure(
             authorizations.electionDifficulty,
-            AccessStructureEnum.electionDifficulty
+            AccessStructureEnum.consensus
         ),
         mapAuthorizationToAccessStructure(
             authorizations.euroPerEnergy,

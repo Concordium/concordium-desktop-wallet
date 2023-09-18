@@ -1325,7 +1325,7 @@ export interface KeyIndexWithStatus {
 export enum AccessStructureEnum {
     emergency,
     protocol,
-    electionDifficulty,
+    consensus,
     euroPerEnergy,
     microGtuPerEuro,
     foundationAccount,
