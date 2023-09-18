@@ -8,6 +8,12 @@
 -   Support for finalization committee parameters chain update.
 -   Support for minimum block time chain update.
 -   Support for timeout parameters chain update.
+-   Support for the new version of the GAS rewards update.
+
+### Changed
+
+-   Election difficulty authorization is displayed as `Consensus`.
+-   Election difficulty update is only shown when protocol is below version 6.
 
 ## 1.5.0
 
