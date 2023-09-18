@@ -70,6 +70,7 @@ const updateInstructionTypes: TypeTuple[] = [
         TransactionTypes.UpdateInstruction,
         UpdateType.UpdateElectionDifficulty,
         'Update election difficulty',
+        not(hasConsensusUpdateProtocol),
     ],
     [
         TransactionTypes.UpdateInstruction,
