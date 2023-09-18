@@ -14,7 +14,7 @@ interface Props extends ChainData {
  * Displays an overview of a baker stake threshold.
  */
 export default withChainData(function TimeoutParametersView({
-    finalizationCommitteeParameters,
+    timeoutParameters,
     chainParameters,
 }: Props) {
     if (!chainParameters) {
@@ -29,17 +29,17 @@ export default withChainData(function TimeoutParametersView({
     }
 
     const current = getTimeoutParameters(chainParameters);
-    const newParameters = getTimeoutParameters(finalizationCommitteeParameters);
+    const newParameters = getTimeoutParameters(timeoutParameters);
 
     return (
         <>
             <ShowTimeoutParameters
                 parameters={current}
-                title="Current finalization committee parameters"
+                title="Current timeout parameters"
             />
             <ShowTimeoutParameters
                 parameters={newParameters}
-                title="New finalization committee parameters"
+                title="New timeout parameters"
             />
         </>
     );

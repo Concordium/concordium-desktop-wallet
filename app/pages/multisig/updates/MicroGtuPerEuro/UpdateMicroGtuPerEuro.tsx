@@ -32,8 +32,8 @@ export default function UpdateMicroGtuPerEuroRate({
         <div>
             <div className="body3 mono mB10">
                 Current rate: {getCcdSymbol()}
-                {denominatorUnit.value}
-                {currentValue.denominator} = {numeratorUnit.value}
+                {denominatorUnit?.value}
+                {currentValue.denominator} = {numeratorUnit?.value}
                 {currentValue.numerator}
             </div>
             <FormRelativeRateField

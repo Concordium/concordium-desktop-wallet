@@ -19,13 +19,16 @@ export default function ShowFinalizationCommitteeParameters({
                 <Label className="mB5">{fieldDisplays.timeoutBase}:</Label>
                 <div className="body3 mono mB10">{timeoutBase.toString()}</div>
                 <RelativeRateField
+                    className="mB10"
                     label={`New ${fieldDisplays.timeoutIncrease}:`}
                     value={timeoutIncrease}
+                    splitSymbol="/"
                     display
                 />
                 <RelativeRateField
                     label={`New ${fieldDisplays.timeoutDecrease}:`}
                     value={timeoutDecrease}
+                    splitSymbol="/"
                     display
                 />
             </div>

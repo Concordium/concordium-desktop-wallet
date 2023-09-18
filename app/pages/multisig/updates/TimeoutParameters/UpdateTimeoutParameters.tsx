@@ -1,5 +1,6 @@
 import React from 'react';
 import { isChainParametersV0, isChainParametersV1 } from '@concordium/web-sdk';
+import { Validate } from 'react-hook-form';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import Form from '~/components/Form/';
@@ -13,6 +14,7 @@ import ShowTimeoutParameters from './TimeoutParametersShow';
 import { FormRelativeRateField } from '../../common/RelativeRateField';
 import {
     isPositiveNumber,
+    RelativeRateValue,
     validBigIntValues,
 } from '../../common/RelativeRateField/util';
 
@@ -21,6 +23,13 @@ const fieldNames: EqualRecord<TimeoutParametersFields> = {
     timeoutIncrease: 'timeoutIncrease',
     timeoutDecrease: 'timeoutDecrease',
 };
+
+export const isGreaterThanOne: Validate = (value: RelativeRateValue) =>
+    parseInt(value.numerator, 10) > parseInt(value.denominator, 10) ||
+    'Value must above 1';
+export const isLessThanOne: Validate = (value: RelativeRateValue) =>
+    parseInt(value.numerator, 10) < parseInt(value.denominator, 10) ||
+    'Value must be below 1';
 
 /**
  * Component for creating an update timeout parameters transaction.
@@ -38,8 +47,6 @@ export default function UpdateTimeoutParametersFields({
 
     const current = getTimeoutParameters(chainParameters);
 
-    // TODO The timeout increase ratio must be greater than 1. The timeout decrease must be between 0 and 1.
-
     return (
         <div>
             <ShowTimeoutParameters
@@ -48,7 +55,7 @@ export default function UpdateTimeoutParametersFields({
             />
             <h3>New timeout parameters</h3>
             <Form.Input
-                className="body2"
+                className="body2 mB10"
                 name={fieldNames.timeoutBase}
                 defaultValue={
                     defaults.timeoutBase || current.timeoutBase.toString()
@@ -62,26 +69,32 @@ export default function UpdateTimeoutParametersFields({
             <FormRelativeRateField
                 name={fieldNames.timeoutIncrease}
                 label="New timeout increase"
+                className="mB10"
                 defaultValue={
                     defaults.timeoutIncrease || current.timeoutIncrease
                 }
+                splitSymbol="/"
                 rules={{
                     validate: {
                         isPositiveNumber,
                         validBigIntValues,
+                        isGreaterThanOne,
                     },
                 }}
             />
             <FormRelativeRateField
                 name={fieldNames.timeoutDecrease}
                 label="New timeout decrease"
+                className="mB10"
                 defaultValue={
                     defaults.timeoutDecrease || current.timeoutDecrease
                 }
+                splitSymbol="/"
                 rules={{
                     validate: {
                         isPositiveNumber,
                         validBigIntValues,
+                        isLessThanOne,
                     },
                 }}
             />

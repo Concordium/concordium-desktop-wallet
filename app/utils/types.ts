@@ -6,7 +6,6 @@ import type { RegisterOptions } from 'react-hook-form';
 import type { BakerId } from '@concordium/web-sdk';
 import {
     OpenStatus,
-    Ratio,
     TransactionKindString,
 } from '@concordium/common-sdk/lib/types';
 import { RejectReason } from './node/RejectReasonHelper';
