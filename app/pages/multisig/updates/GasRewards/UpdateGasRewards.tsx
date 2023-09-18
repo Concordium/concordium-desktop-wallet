@@ -1,10 +1,15 @@
 import React, { useMemo } from 'react';
 import { GasRewards } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
-import GasRewardsForm from './GasRewardsForm';
+import GasRewardsForm, {
+    UpdateGasRewardsFieldsV0,
+    UpdateGasRewardsFieldsV1,
+} from './GasRewardsForm';
 import { toRewardFractions } from './util';
 
-export type { UpdateGasRewardsFields } from './GasRewardsForm';
+export type UpdateGasRewardsFields =
+    | UpdateGasRewardsFieldsV0
+    | UpdateGasRewardsFieldsV1;
 
 /**
  * The component used for creating an update transaction for updating the
@@ -15,7 +20,7 @@ export default function UpdateGasRewards({
     chainParameters,
 }: UpdateProps) {
     const currentRewards: GasRewards = useMemo(
-        () => toRewardFractions(chainParameters.rewardParameters.gASRewards),
+        () => toRewardFractions(chainParameters),
         [chainParameters]
     );
 

@@ -20,9 +20,7 @@ export default withChainData(function GasRewardsView({
         return <Loading inline />;
     }
 
-    const currentValue = toRewardFractions(
-        chainParameters.rewardParameters.gASRewards
-    );
+    const currentValue = toRewardFractions(chainParameters);
 
     return (
         <>

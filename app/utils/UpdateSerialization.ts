@@ -69,6 +69,7 @@ export enum OnChainUpdateType {
     UpdateTimeoutParameters = 18,
     UpdateMinBlockTime = 19,
     UpdateBlockEnergyLimit = 20,
+    UpdateGASRewardsV1 = 21,
     UpdateFinalizationCommitteeParameters = 22,
 }
 
@@ -413,8 +414,7 @@ export function serializeProtocolUpdate(
 export function serializeGasRewards(gasRewards: GasRewards) {
     const serializedGasRewards = Buffer.alloc(16);
     serializedGasRewards.writeUInt32BE(gasRewards.baker, 0);
-    // TODO Make sure we handle this
-    if (gasRewards.finalizationProof) {
+    if (gasRewards.version === 0) {
         serializedGasRewards.writeUInt32BE(gasRewards.finalizationProof, 4);
     }
     serializedGasRewards.writeUInt32BE(gasRewards.accountCreation, 8);
@@ -649,6 +649,8 @@ function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
             return OnChainUpdateType.UpdateMinBlockTime;
         case UpdateType.TimeoutParameters:
             return OnChainUpdateType.UpdateTimeoutParameters;
+        case UpdateType.UpdateGASRewardsV1:
+            return OnChainUpdateType.UpdateGASRewards;
         default:
             throw new Error(`An invalid update type was given: ${type}`);
     }
