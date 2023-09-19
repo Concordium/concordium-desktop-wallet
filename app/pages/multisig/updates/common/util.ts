@@ -24,11 +24,11 @@ export const validationRulesForPositiveWord64 = (name: string) => ({
     required: requiredMessage(name),
     min: {
         value: 1,
-        message: `${name} must be positive`,
+        message: `The ${name} must be positive`,
     },
     max: {
         value: '18446744073709551615',
-        message: `${name} must be below 18446744073709551615`,
+        message: `The ${name} must be below 18446744073709551615`,
     },
     validate: {
         mustBeAnInteger,
