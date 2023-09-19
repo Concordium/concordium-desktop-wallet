@@ -1,5 +1,4 @@
 import React from 'react';
-import { isChainParametersV0, isChainParametersV1 } from '@concordium/web-sdk';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import Form from '~/components/Form/';
@@ -12,6 +11,7 @@ import {
 import ShowFinalizationCommitteeParameters from './FinalizationCommitteeParametersShow';
 import { FormRewardFractionField as FractionFieldForm } from '../common/RewardFractionField/RewardFractionField';
 import { UINT32_MAX } from '~/utils/basicHelpers';
+import { assertChainParametersV2OrHigher } from '~/utils/blockSummaryHelpers';
 
 const fieldNames: EqualRecord<FinalizationCommitteeParametersFields> = {
     minFinalizers: 'minFinalizers',
@@ -41,12 +41,7 @@ export default function UpdateFinalizationCommitteeParametersFields({
     defaults,
     chainParameters,
 }: UpdateProps): JSX.Element | null {
-    if (
-        isChainParametersV0(chainParameters) ||
-        isChainParametersV1(chainParameters)
-    ) {
-        throw new Error('Connected node used outdated chainParameters format');
-    }
+    assertChainParametersV2OrHigher(chainParameters);
 
     const current = getCurrentFinalizationCommitteeParameters(chainParameters);
 
