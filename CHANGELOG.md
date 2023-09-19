@@ -5,6 +5,7 @@
 ### Added
 
 -   Support for block energy limit chain update.
+-   Support for finalization committee parameters chain update.
 
 ## 1.5.0
 
