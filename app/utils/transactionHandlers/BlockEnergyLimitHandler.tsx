@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-    isChainParametersV0,
-    isChainParametersV1,
-    NextUpdateSequenceNumbers,
-} from '@concordium/web-sdk';
+import { NextUpdateSequenceNumbers } from '@concordium/web-sdk';
 import BlockEnergyLimitView from '~/pages/multisig/updates/BlockEnergyLimit/BlockEnergyLimitView';
 import UpdateBlockEnergyLimit, {
     BlockEnergyLimitFields,
@@ -22,6 +18,7 @@ import {
 } from '../types';
 import { serializeBlockEnergyLimit } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
+import { assertChainParametersV2OrHigher } from '../blockSummaryHelpers';
 
 const TYPE = 'Update block energy limit';
 
@@ -46,14 +43,13 @@ export default class BlockEnergyLimitHandler
             return undefined;
         }
 
-        if (
-            isChainParametersV0(chainParameters) ||
-            isChainParametersV1(chainParameters)
-        ) {
-            throw new Error('Update incompatible with chain protocol version');
-        }
+        assertChainParametersV2OrHigher(
+            chainParameters,
+            'Update incompatible with chain protocol version'
+        );
 
         const sequenceNumber = nextUpdateSequenceNumbers.blockEnergyLimit;
+        // ElectionDifficulty was removed when BlockEnergyLimit was added, and its index was repurposed for BlockEnergyLimit and other new updates.
         const { threshold } = chainParameters.level2Keys.electionDifficulty;
 
         return createUpdateMultiSignatureTransaction(
