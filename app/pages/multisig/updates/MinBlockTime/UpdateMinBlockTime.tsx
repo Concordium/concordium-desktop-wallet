@@ -1,9 +1,9 @@
 import React from 'react';
-import { isChainParametersV0, isChainParametersV1 } from '@concordium/web-sdk';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import Form from '~/components/Form/';
 import { enterHere, validationRulesForPositiveWord64 } from '../common/util';
+import { assertChainParametersV2OrHigher } from '~/utils/blockSummaryHelpers';
 
 export interface MinBlockTimeFields {
     minBlockTime: bigint;
@@ -24,12 +24,7 @@ export default function MinBlockTime({
     defaults,
     chainParameters,
 }: UpdateProps): JSX.Element | null {
-    if (
-        isChainParametersV0(chainParameters) ||
-        isChainParametersV1(chainParameters)
-    ) {
-        throw new Error('Connected node used outdated chainParameters format');
-    }
+    assertChainParametersV2OrHigher(chainParameters);
 
     const currentMinBlockTime = chainParameters.minBlockTime;
 

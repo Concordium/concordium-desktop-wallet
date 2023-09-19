@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-    isChainParametersV0,
-    isChainParametersV1,
-    NextUpdateSequenceNumbers,
-} from '@concordium/web-sdk';
+import { NextUpdateSequenceNumbers } from '@concordium/web-sdk';
 import MinBlockTimeView from '~/pages/multisig/updates/MinBlockTime/MinBlockTimeView';
 import UpdateMinBlockTime, {
     MinBlockTimeFields,
@@ -22,6 +18,7 @@ import {
 } from '../types';
 import { serializeMinBlockTime } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
+import { assertChainParametersV2OrHigher } from '../blockSummaryHelpers';
 
 const TYPE = 'Update minimum block time';
 
@@ -46,12 +43,10 @@ export default class MinBlockTimeHandler
             return undefined;
         }
 
-        if (
-            isChainParametersV0(chainParameters) ||
-            isChainParametersV1(chainParameters)
-        ) {
-            throw new Error('Update incompatible with chain protocol version');
-        }
+        assertChainParametersV2OrHigher(
+            chainParameters,
+            'Update incompatible with chain protocol version'
+        );
 
         const sequenceNumber = nextUpdateSequenceNumbers.minBlockTime;
         const { threshold } = chainParameters.level2Keys.electionDifficulty;
