@@ -14,6 +14,7 @@ import {
     UpdateInstructionSignatureWithIndex,
     UpdateInstruction,
 } from '~/utils/types';
+import { serializeUpdateType } from '~/utils/UpdateSerialization';
 
 /**
  * Updates the location of the node endpoint;
@@ -76,7 +77,9 @@ export function sendUpdateInstruction(
 ) {
     const transaction = {
         header: updateInstruction.header,
-        payload: serializedPayload.toString('hex'),
+        payload:
+            serializeUpdateType(updateInstruction.type).toString('hex') +
+            serializedPayload.toString('hex'),
     };
     const signatures: Record<number, string> = {};
     signaturesWithIndices.forEach(({ signature, authorizationKeyIndex }) => {

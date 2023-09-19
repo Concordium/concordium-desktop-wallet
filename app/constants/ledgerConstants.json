@@ -1,3 +1,6 @@
 {
-    "requiredVersion": "3.0.0"
+    "requiredVersion": "3.0.0",
+    "appName": "Concordium",
+    "governanceAppName": "CCDGovernance",
+    "governanceRequiredVersion": "0.0.1"
 }

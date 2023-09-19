@@ -22,13 +22,21 @@ export type LedgerCallback<ReturnType = void> = (
 export type LedgerSubmitHandler = () => Promise<void>;
 
 export function isConcordiumApp({ name }: AppAndVersion) {
-    return name === 'Concordium';
+    return (
+        name === ledgerConstants.appName ||
+        name === ledgerConstants.governanceAppName
+    );
 }
 
-export function isOutdated({ version }: AppAndVersion) {
+export function isOutdated({ version, name }: AppAndVersion) {
     const currentVersion = valid(version);
     if (!currentVersion) {
         throw new Error('Invalid version');
     }
-    return lt(currentVersion, ledgerConstants.requiredVersion);
+    return lt(
+        currentVersion,
+        name === ledgerConstants.appName
+            ? ledgerConstants.requiredVersion
+            : ledgerConstants.governanceRequiredVersion
+    );
 }
