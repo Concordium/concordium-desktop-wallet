@@ -38,10 +38,7 @@ export function assertChainParametersV2OrHigher(
     ChainParameters,
     ChainParametersV0 | ChainParametersV1
 > {
-    if (
-        isChainParametersV0(chainParameters) ||
-        isChainParametersV1(chainParameters)
-    ) {
+    if (!isChainParametersV2OrHigher(chainParameters)) {
         throw new Error(errorMessage);
     }
 }
