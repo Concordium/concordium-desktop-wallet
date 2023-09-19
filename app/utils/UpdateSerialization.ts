@@ -256,7 +256,7 @@ export function serializeMinBlockTime(minBlockTime: MinBlockTime) {
 }
 
 /**
- * Serializes TimeoutParameters  to the byte format expected
+ * Serializes TimeoutParameters to the byte format expected
  * by the chain.
  */
 export function serializeTimeoutParameters(

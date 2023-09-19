@@ -22,7 +22,7 @@ import { serializeTimeoutParameters } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 import { TimeoutParametersFields } from '~/pages/multisig/updates/TimeoutParameters/util';
 
-const TYPE = 'Update block energy limit';
+const TYPE = 'Update timeout parameters';
 
 type TransactionType = UpdateInstruction<TimeoutParameters>;
 
@@ -52,8 +52,7 @@ export default class TimeoutParametersHandler
             throw new Error('Update incompatible with chain protocol version');
         }
 
-        const sequenceNumber =
-            nextUpdateSequenceNumbers.finalizationCommiteeParameters;
+        const sequenceNumber = nextUpdateSequenceNumbers.timeoutParameters;
         const { threshold } = chainParameters.level2Keys.electionDifficulty;
 
         const payload = {

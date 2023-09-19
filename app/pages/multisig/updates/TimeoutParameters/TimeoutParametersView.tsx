@@ -11,7 +11,7 @@ interface Props extends ChainData {
 }
 
 /**
- * Displays an overview of a baker stake threshold.
+ * Displays an overview of a timeout parameter update.
  */
 export default withChainData(function TimeoutParametersView({
     timeoutParameters,

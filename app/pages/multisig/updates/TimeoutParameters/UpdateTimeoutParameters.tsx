@@ -25,10 +25,9 @@ const fieldNames: EqualRecord<TimeoutParametersFields> = {
 };
 
 export const isGreaterThanOne: Validate = (value: RelativeRateValue) =>
-    parseInt(value.numerator, 10) > parseInt(value.denominator, 10) ||
-    'Value must above 1';
+    BigInt(value.numerator) > BigInt(value.denominator) || 'Value must above 1';
 export const isLessThanOne: Validate = (value: RelativeRateValue) =>
-    parseInt(value.numerator, 10) < parseInt(value.denominator, 10) ||
+    BigInt(value.numerator) < BigInt(value.denominator) ||
     'Value must be below 1';
 
 /**
