@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-    isChainParametersV0,
-    isChainParametersV1,
-    NextUpdateSequenceNumbers,
-} from '@concordium/web-sdk';
+import { NextUpdateSequenceNumbers } from '@concordium/web-sdk';
 import FinalizationCommitteeParametersView from '~/pages/multisig/updates/FinalizationCommitteeParameters/FinalizationCommitteeParametersView';
 import UpdateFinalizationCommitteeParameters from '~/pages/multisig/updates/FinalizationCommitteeParameters/UpdateFinalizationCommitteeParameters';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
@@ -21,8 +17,9 @@ import {
 import { serializeFinalizationCommitteeParameters } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 import { FinalizationCommitteeParametersFields } from '~/pages/multisig/updates/FinalizationCommitteeParameters/util';
+import { assertChainParametersV2OrHigher } from '../blockSummaryHelpers';
 
-const TYPE = 'Update block energy limit';
+const TYPE = 'Update finalization committee parameters';
 
 type TransactionType = UpdateInstruction<FinalizationCommitteeParameters>;
 
@@ -45,16 +42,15 @@ export default class FinalizationCommitteeParametersHandler
             return undefined;
         }
 
-        if (
-            isChainParametersV0(chainParameters) ||
-            isChainParametersV1(chainParameters)
-        ) {
-            throw new Error('Update incompatible with chain protocol version');
-        }
+        assertChainParametersV2OrHigher(
+            chainParameters,
+            'Update incompatible with chain protocol version'
+        );
 
         const sequenceNumber =
             nextUpdateSequenceNumbers.finalizationCommiteeParameters;
-        const { threshold } = chainParameters.level2Keys.electionDifficulty;
+        // This update shares authorization with the pool parameter update
+        const { threshold } = chainParameters.level2Keys.poolParameters;
 
         return createUpdateMultiSignatureTransaction(
             fields,
@@ -91,7 +87,8 @@ export default class FinalizationCommitteeParametersHandler
     }
 
     getAuthorization(authorizations: Authorizations) {
-        return authorizations.electionDifficulty;
+        // This update shares authorization with the pool parameter update
+        return authorizations.poolParameters;
     }
 
     update = UpdateFinalizationCommitteeParameters;

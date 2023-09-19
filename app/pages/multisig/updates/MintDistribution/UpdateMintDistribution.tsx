@@ -17,6 +17,7 @@ import {
 } from './util';
 import { parseMintRate } from '~/utils/mintDistributionHelpers';
 import Label from '~/components/Label';
+import { UINT32_MAX } from '~/utils/basicHelpers';
 
 export interface UpdateMintDistributionFields {
     mintPerSlot: string;
@@ -38,7 +39,7 @@ const isValidNumber = (parseFun: (v: string) => number): Validate => (
 
 const isValidFloat = isValidNumber(parseFloat);
 
-const MINT_PER_SLOT_MAX = 2 ** 32 - 1; // UInt32 upper bound
+const MINT_PER_SLOT_MAX = UINT32_MAX;
 
 /**
  * Component for creating an update mint distribution transaction.

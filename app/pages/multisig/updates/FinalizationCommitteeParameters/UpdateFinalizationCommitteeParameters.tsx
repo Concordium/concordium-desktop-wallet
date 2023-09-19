@@ -11,14 +11,13 @@ import {
 } from './util';
 import ShowFinalizationCommitteeParameters from './FinalizationCommitteeParametersShow';
 import { FormRewardFractionField as FractionFieldForm } from '../common/RewardFractionField/RewardFractionField';
+import { UINT32_MAX } from '~/utils/basicHelpers';
 
 const fieldNames: EqualRecord<FinalizationCommitteeParametersFields> = {
     minFinalizers: 'minFinalizers',
     maxFinalizers: 'maxFinalizers',
     relativeStakeThresholdFraction: 'relativeStakeThresholdFraction',
 };
-
-const UINT32_MAX = 2 ** 32 - 1; // UInt32 upper bound
 
 const validationRules = (name: string) => ({
     required: requiredMessage(name),
@@ -36,7 +35,7 @@ const validationRules = (name: string) => ({
 });
 
 /**
- * Component for creating an update block energy limit transaction.
+ * Component for creating an update finalization committee parameters transaction.
  */
 export default function UpdateFinalizationCommitteeParametersFields({
     defaults,

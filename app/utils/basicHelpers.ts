@@ -213,3 +213,5 @@ export function filterRecordEntries<K extends string | number | symbol, V>(
         return acc;
     }, result);
 }
+
+export const UINT32_MAX = 2 ** 32 - 1; // UInt32 upper bound
