@@ -29,6 +29,7 @@ import {
     TimeParameters,
     CooldownParameters,
     PoolParameters,
+    BlockEnergyLimit,
 } from '~/utils/types';
 import { LedgerCommands } from '~/preload/preloadTypes';
 
@@ -272,6 +273,17 @@ export default function exposedMethods(
             keypath: number[]
         ) => {
             return getLedgerClient().signPoolParameters(
+                transaction,
+                serializedPayload,
+                keypath
+            );
+        },
+        signBlockEnergyLimit: (
+            transaction: UpdateInstruction<BlockEnergyLimit>,
+            serializedPayload: Buffer,
+            keypath: number[]
+        ) => {
+            return getLedgerClient().signBlockEnergyLimit(
                 transaction,
                 serializedPayload,
                 keypath

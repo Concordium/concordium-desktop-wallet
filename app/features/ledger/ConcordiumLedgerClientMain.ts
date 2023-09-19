@@ -43,6 +43,7 @@ import {
     TimeParameters,
     CooldownParameters,
     PoolParameters,
+    BlockEnergyLimit,
 } from '~/utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
@@ -394,6 +395,20 @@ export default class ConcordiumLedgerClientMain {
     ): Promise<Buffer> {
         return signAddAnonymityRevokerTransaction(
             this.transport,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signBlockEnergyLimit(
+        transaction: UpdateInstruction<BlockEnergyLimit>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
+            this.transport,
+            0x45,
             path,
             transaction,
             serializedPayload

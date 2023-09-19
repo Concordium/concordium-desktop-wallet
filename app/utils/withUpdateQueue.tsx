@@ -9,6 +9,7 @@ import Execute from '~/components/Execute';
 
 export interface WithUpdateQueues {
     nextUpdateSequenceNumbers: NextUpdateSequenceNumbers;
+    // TODO: Add the queues if needed
 }
 
 export default function withUpdateQueue<TProps extends WithUpdateQueues>(
