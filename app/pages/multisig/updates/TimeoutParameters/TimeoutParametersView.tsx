@@ -1,10 +1,10 @@
 import React from 'react';
-import { isChainParametersV0, isChainParametersV1 } from '@concordium/web-sdk';
 import Loading from '~/cross-app-components/Loading';
 import { TimeoutParameters } from '~/utils/types';
 import withChainData, { ChainData } from '~/utils/withChainData';
 import ShowTimeoutParameters from './TimeoutParametersShow';
 import { getTimeoutParameters } from './util';
+import { assertChainParametersV2OrHigher } from '~/utils/blockSummaryHelpers';
 
 interface Props extends ChainData {
     timeoutParameters: TimeoutParameters;
@@ -20,13 +20,7 @@ export default withChainData(function TimeoutParametersView({
     if (!chainParameters) {
         return <Loading inline />;
     }
-
-    if (
-        isChainParametersV0(chainParameters) ||
-        isChainParametersV1(chainParameters)
-    ) {
-        throw new Error('Connected node used outdated chainParameters format');
-    }
+    assertChainParametersV2OrHigher(chainParameters);
 
     const current = getTimeoutParameters(chainParameters);
     const newParameters = getTimeoutParameters(timeoutParameters);

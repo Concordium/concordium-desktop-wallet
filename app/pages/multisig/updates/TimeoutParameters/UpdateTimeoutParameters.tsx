@@ -1,5 +1,4 @@
 import React from 'react';
-import { isChainParametersV0, isChainParametersV1 } from '@concordium/web-sdk';
 import { Validate } from 'react-hook-form';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
@@ -17,6 +16,7 @@ import {
     RelativeRateValue,
     validBigIntValues,
 } from '../../common/RelativeRateField/util';
+import { assertChainParametersV2OrHigher } from '~/utils/blockSummaryHelpers';
 
 const fieldNames: EqualRecord<TimeoutParametersFields> = {
     timeoutBase: 'timeoutBase',
@@ -37,12 +37,7 @@ export default function UpdateTimeoutParametersFields({
     defaults,
     chainParameters,
 }: UpdateProps): JSX.Element | null {
-    if (
-        isChainParametersV0(chainParameters) ||
-        isChainParametersV1(chainParameters)
-    ) {
-        throw new Error('Connected node used outdated chainParameters format');
-    }
+    assertChainParametersV2OrHigher(chainParameters);
 
     const current = getTimeoutParameters(chainParameters);
 
