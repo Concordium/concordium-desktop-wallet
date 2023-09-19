@@ -765,6 +765,7 @@ export type UpdateInstructionPayload =
     | CooldownParameters
     | PoolParameters
     | TimeParameters
+    | MinBlockTime
     | BlockEnergyLimit
     | FinalizationCommitteeParameters;
 
@@ -819,6 +820,7 @@ export enum UpdateType {
     PoolParameters,
     TimeParameters,
     UpdateMintDistributionV1,
+    MinBlockTime,
     BlockEnergyLimit,
     FinalizationCommitteeParameters,
 }
@@ -1107,10 +1109,17 @@ export function isBlockEnergyLimit(
 ): transaction is UpdateInstruction<BlockEnergyLimit> {
     return UpdateType.BlockEnergyLimit === transaction.type;
 }
+
 export function isFinalizationCommitteeParameters(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<FinalizationCommitteeParameters> {
     return UpdateType.FinalizationCommitteeParameters === transaction.type;
+}
+
+export function isMinBlockTime(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<MinBlockTime> {
+    return UpdateType.MinBlockTime === transaction.type;
 }
 
 /**
@@ -1226,6 +1235,10 @@ export interface FinalizationCommitteeParameters {
     minFinalizers: Word32;
     maxFinalizers: Word32;
     relativeStakeThresholdFraction: Word32;
+}
+
+export interface MinBlockTime {
+    minBlockTime: Word64;
 }
 
 export interface TimeParameters {

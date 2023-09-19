@@ -31,6 +31,7 @@ import {
     PoolParameters,
     BlockEnergyLimit,
     FinalizationCommitteeParameters,
+    MinBlockTime,
 } from '~/utils/types';
 import { LedgerCommands } from '~/preload/preloadTypes';
 
@@ -296,6 +297,17 @@ export default function exposedMethods(
             keypath: number[]
         ) => {
             return getLedgerClient().signFinalizationCommitteeParameters(
+                transaction,
+                serializedPayload,
+                keypath
+            );
+        },
+        signMinBlockTime: (
+            transaction: UpdateInstruction<MinBlockTime>,
+            serializedPayload: Buffer,
+            keypath: number[]
+        ) => {
+            return getLedgerClient().signMinBlockTime(
                 transaction,
                 serializedPayload,
                 keypath

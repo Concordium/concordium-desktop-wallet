@@ -45,6 +45,7 @@ import {
     PoolParameters,
     BlockEnergyLimit,
     FinalizationCommitteeParameters,
+    MinBlockTime,
 } from '~/utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
@@ -424,6 +425,20 @@ export default class ConcordiumLedgerClientMain {
         return signUpdateTransaction(
             this.transport,
             0x46,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signMinBlockTime(
+        transaction: UpdateInstruction<MinBlockTime>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
+            this.transport,
+            0x44,
             path,
             transaction,
             serializedPayload
