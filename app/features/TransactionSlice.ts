@@ -121,7 +121,6 @@ function shieldedOnlyFilter(filter: TransactionFilter): TransactionFilter {
         configureBaker: false,
         configureDelegation: false,
         paydayAccountReward: false,
-        // TODO should this not be added?
         failed: false,
     };
 

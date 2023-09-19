@@ -3,9 +3,8 @@ import { Validate } from 'react-hook-form';
 import { isValidBigInt } from '~/utils/numberStringHelpers';
 import { ExchangeRate } from '~/utils/types';
 
-// TODO why was this type string / undefined?
 export type RelativeRateValue = {
-    [P in keyof ExchangeRate]: string;
+    [P in keyof ExchangeRate]: string | undefined;
 };
 
 const validatePositiveNumber = (v = '') => parseInt(v, 10) > 0;

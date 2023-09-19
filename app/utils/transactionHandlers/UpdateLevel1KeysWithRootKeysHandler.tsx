@@ -39,9 +39,6 @@ export default class UpdateLevel1KeysUsingRootKeysHandler
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!chainParameters) {
-            return undefined;
-        }
         if (!chainParameters || !nextUpdateSequenceNumbers) {
             return undefined;
         }

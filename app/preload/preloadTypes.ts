@@ -9,10 +9,10 @@ import type {
     ConsensusStatus,
     CredentialDeploymentTransaction,
     CryptographicParameters,
+    HealthCheckResponse,
     NextAccountNonce,
     NextUpdateSequenceNumbers,
     PassiveDelegationStatus,
-    PeerInfo,
     RewardStatus,
     UpdateInstruction,
 } from '@concordium/web-sdk';
@@ -134,8 +134,7 @@ export type GRPC = {
     getAccountInfo: GetAccountInfo;
     getIdentityProviders: (blockHash: string) => Promise<IpInfo[] | undefined>;
     getAnonymityRevokers: (blockHash: string) => Promise<ArInfo[] | undefined>;
-    // We return a Uint8Array here, because PeerListResponse must be manually serialized/deserialized.
-    getPeerList: () => Promise<PeerInfo[]>;
+    healthCheck: () => Promise<HealthCheckResponse>;
     getRewardStatus: (blockHash?: string) => Promise<RewardStatus | undefined>;
     getPoolInfo: (
         bakerId: BakerId,

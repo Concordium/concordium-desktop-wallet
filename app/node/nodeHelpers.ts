@@ -1,6 +1,5 @@
 import {
     BlockItemSummaryInBlock,
-    NodeCatchupStatus,
     TransactionStatusEnum,
 } from '@concordium/web-sdk';
 import {
@@ -10,7 +9,6 @@ import {
     getBlockChainParameters,
     getIdentityProviders,
     getAnonymityRevokers,
-    getPeerList,
     getTransactionStatus,
     getPoolInfo,
     getRewardStatus,
@@ -84,7 +82,7 @@ export async function fetchGlobal(specificBlockHash?: string): Promise<Global> {
 }
 
 export async function getEnergyToMicroGtuRate(): Promise<Fraction> {
-    const params = await getBlockChainParameters(undefined);
+    const params = await getBlockChainParameters();
     const { euroPerEnergy, microGTUPerEuro } = params;
     const denominator = BigInt(
         euroPerEnergy.denominator * microGTUPerEuro.denominator
@@ -93,25 +91,6 @@ export async function getEnergyToMicroGtuRate(): Promise<Fraction> {
         euroPerEnergy.numerator * microGTUPerEuro.numerator
     );
     return { numerator, denominator };
-}
-
-// TODO Is there a better way to do this in gRPC 2
-/**
- * Check whether the node is up to date.
- * N.B. that this is a heuristic guess, which assumes if more than half the peers are not synchronized with the node,
- * the node is not up to date.
- */
-export async function isNodeUpToDate() {
-    const peers = await getPeerList();
-
-    const pendingPeers = peers.filter(
-        (p) =>
-            p.consensusInfo.tag === 'nodeCatchupStatus' &&
-            p.consensusInfo.catchupStatus === NodeCatchupStatus.Pending
-    );
-    const halfOfThePeers = Math.floor(peers.length / 2);
-
-    return pendingPeers.length < halfOfThePeers;
 }
 
 /**

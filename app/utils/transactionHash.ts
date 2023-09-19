@@ -25,11 +25,11 @@ export async function getUpdateInstructionTransactionHash(
     updateInstruction: UpdateInstruction
 ) {
     const handler = findUpdateInstructionHandler(updateInstruction.type);
-    const keys = await getBlockChainParameters();
+    const chainParameters = await getBlockChainParameters();
 
     const signatures = await Promise.all(
         updateInstruction.signatures.map((sig) =>
-            attachKeyIndex(sig, keys, updateInstruction, handler)
+            attachKeyIndex(sig, chainParameters, updateInstruction, handler)
         )
     );
 

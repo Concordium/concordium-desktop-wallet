@@ -576,7 +576,7 @@ export function isSuccessfulTransaction(summary: BlockItemSummary) {
     if (summary.type === TransactionSummaryType.AccountTransaction) {
         return summary.transactionType !== TransactionKindString.Failed;
     }
-    // other block items don't fail // TODO is this completely true
+    // Other block items don't fail
     return true;
 }
 

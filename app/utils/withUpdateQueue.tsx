@@ -26,7 +26,7 @@ export default function withUpdateQueue<TProps extends WithUpdateQueues>(
             return {
                 nextUpdateSequenceNumbers,
             };
-        }, [dispatch]);
+        }, []);
 
         const enrichedProps: TProps = {
             ...props,
@@ -44,7 +44,7 @@ export default function withUpdateQueue<TProps extends WithUpdateQueues>(
                     }
                     onSuccess={setChainData}
                     errorTitle="Error communicating with node"
-                    errorContent="We were unable to retrieve the block summary from the
+                    errorContent="We were unable to retrieve the update queues from the
             configured node. Verify your node settings, and check that
             the node is running."
                 />

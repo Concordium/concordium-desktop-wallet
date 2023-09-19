@@ -4,7 +4,7 @@ import PendingImage from '@resources/svg/pending-arrows.svg';
 import SuccessImage from '@resources/svg/success.svg';
 import RejectedImage from '@resources/svg/warning.svg';
 import ScanningImage from '@resources/svg/scan.svg';
-import { isNodeUpToDate } from '~/node/nodeHelpers';
+import { healthCheck } from '~/node/nodeRequests';
 import AbortController from '~/utils/AbortController';
 import { specificSettingSelector } from '~/features/SettingsSlice';
 import settingKeys from '~/constants/settingKeys.json';
@@ -57,10 +57,16 @@ export default function NodeStatus(): JSX.Element {
             );
             let status = NodeConnectionStatus.Unavailable;
             try {
-                const upToDate = await isNodeUpToDate();
-                status = upToDate
-                    ? NodeConnectionStatus.Ready
-                    : NodeConnectionStatus.CatchingUp;
+                const healthResponse = await healthCheck();
+                if (healthResponse.isHealthy) {
+                    status = NodeConnectionStatus.Ready;
+                } else if (
+                    healthResponse.message?.includes(
+                        'Last finalized block is too far behind'
+                    )
+                ) {
+                    status = NodeConnectionStatus.CatchingUp;
+                }
             } catch {
                 // do nothing, status defaults to unavailable.
             } finally {

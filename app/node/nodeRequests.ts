@@ -45,7 +45,9 @@ export function sendAccountTransaction(
 ) {
     const type = transaction.transactionKind as number;
     if (!isAccountTransactionType(type)) {
-        throw Error('unreachable');
+        throw Error(
+            'Unreachable: received an account transaction with an invalid transaction type'
+        );
     }
 
     const payload = serializeTransferPayload(
@@ -111,6 +113,6 @@ export const {
     getRewardStatus,
     getPoolInfo,
     getPassiveDelegationInfo,
-    getPeerList,
+    healthCheck,
     sendCredentialDeploymentTransaction,
 } = window.grpc;
