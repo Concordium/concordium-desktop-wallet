@@ -76,7 +76,7 @@ export default function GasRewardsForm({
                     RewardFractionFieldProps,
                     'className' | 'label'
                 > & { key: string } = {
-                    label,
+                    label: label || '',
                     className: 'mB10',
                     key: field,
                 };

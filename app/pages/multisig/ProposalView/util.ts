@@ -14,13 +14,11 @@ import { parse, stringify } from '~/utils/JSONHelper';
 import { ModalErrorInput } from '~/components/SimpleErrorModal';
 import { updateCurrentProposal } from '~/features/MultiSignatureSlice';
 import getTransactionSignDigest from '~/utils/transactionHash';
-import {
-    fetchLastFinalizedBlockSummary,
-    getAccountInfoOfAddress,
-} from '~/node/nodeHelpers';
+import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
 import { findKeyIndex } from '~/utils/updates/AuthorizationHelper';
 import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import errorMessages from '~/constants/errorMessages.json';
+import { getBlockChainParameters } from '~/node/nodeRequests';
 
 /**
  * @param transactionObject, transaction object, which contains a signature, which is to be added to the current proposal
@@ -78,7 +76,7 @@ async function HandleAccountTransactionSignatureFile(
 
     const validSignature = await ed.verify(
         signature[signatureIndex],
-        await getTransactionSignDigest(proposal),
+        getTransactionSignDigest(proposal),
         verificationKey.verifyKey
     );
 
@@ -106,7 +104,7 @@ async function isSignatureValid(
     proposal: UpdateInstruction,
     signature: UpdateInstructionSignature
 ): Promise<boolean> {
-    const transactionSignatureDigest = await getTransactionSignDigest(proposal);
+    const transactionSignatureDigest = getTransactionSignDigest(proposal);
     return ed.verify(
         signature.signature,
         transactionSignatureDigest,
@@ -151,10 +149,9 @@ async function HandleUpdateInstructionSignatureFile(
         };
     }
 
-    let blockSummary;
+    let keys;
     try {
-        blockSummary = (await fetchLastFinalizedBlockSummary())
-            .lastFinalizedBlockSummary;
+        keys = await getBlockChainParameters();
     } catch {
         return {
             show: true,
@@ -166,7 +163,7 @@ async function HandleUpdateInstructionSignatureFile(
     const handler = findUpdateInstructionHandler(proposal.type);
     const keyIndex = findKeyIndex(
         signature.authorizationPublicKey,
-        blockSummary.updates.keys,
+        keys,
         proposal,
         handler
     );
@@ -245,7 +242,9 @@ export async function HandleSignatureFiles(
             return {
                 show: true,
                 header: 'Unable to load signature',
-                content: `We were unable to load a given signature due to: ${e.message}`,
+                content: `We were unable to load a given signature due to: ${
+                    (e as Error).message
+                }`,
             };
         }
     }

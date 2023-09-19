@@ -3,7 +3,10 @@ import HigherLevelKeysView from '~/pages/multisig/updates/UpdateGovernanceKeys/H
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceRootPath } from '../../features/ledger/Path';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { BlockSummary } from '../../node/NodeApiTypes';
+import {
+    ChainParameters,
+    NextUpdateSequenceNumbers,
+} from '../../node/NodeApiTypes';
 import {
     UpdateInstruction,
     MultiSignatureTransaction,
@@ -30,18 +33,18 @@ export default class UpdateLevel1KeysUsingRootKeysHandler
     }
 
     async createTransaction(
-        blockSummary: BlockSummary,
+        chainParameters: ChainParameters,
+        nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
         higherLevelKeyUpdate: HigherLevelKeyUpdate,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!blockSummary) {
+        if (!chainParameters || !nextUpdateSequenceNumbers) {
             return undefined;
         }
 
-        const sequenceNumber =
-            blockSummary.updates.updateQueues.level1Keys.nextSequenceNumber;
-        const { threshold } = blockSummary.updates.keys.rootKeys;
+        const sequenceNumber = nextUpdateSequenceNumbers.level1Keys;
+        const { threshold } = chainParameters.rootKeys;
 
         return createUpdateMultiSignatureTransaction(
             { ...higherLevelKeyUpdate, keyUpdateType: 1 },

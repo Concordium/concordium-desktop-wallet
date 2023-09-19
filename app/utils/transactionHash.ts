@@ -14,9 +14,9 @@ import {
     getAccountTransactionSignDigest,
 } from './transactionSerialization';
 import { hashSha256 } from './serializationHelpers';
-import { fetchLastFinalizedBlockSummary } from '~/node/nodeHelpers';
 import { attachKeyIndex } from '~/utils/updates/AuthorizationHelper';
 import { throwLoggedError } from './basicHelpers';
+import { getBlockChainParameters } from '~/node/nodeRequests';
 
 /**
  * Given an update instruction, return the transaction hash.
@@ -25,12 +25,11 @@ export async function getUpdateInstructionTransactionHash(
     updateInstruction: UpdateInstruction
 ) {
     const handler = findUpdateInstructionHandler(updateInstruction.type);
-    const blockSummary = (await fetchLastFinalizedBlockSummary())
-        .lastFinalizedBlockSummary;
+    const chainParameters = await getBlockChainParameters();
 
     const signatures = await Promise.all(
         updateInstruction.signatures.map((sig) =>
-            attachKeyIndex(sig, blockSummary, updateInstruction, handler)
+            attachKeyIndex(sig, chainParameters, updateInstruction, handler)
         )
     );
 
@@ -40,7 +39,7 @@ export async function getUpdateInstructionTransactionHash(
         handler.serializePayload(updateInstruction)
     );
 
-    const hash = await hashSha256(serializedUpdateInstruction);
+    const hash = hashSha256(serializedUpdateInstruction);
     return hash.toString('hex');
 }
 

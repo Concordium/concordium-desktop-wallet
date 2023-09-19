@@ -4,7 +4,7 @@ import { UpdateType } from '~/utils/types';
 import UpdateAuthorizationKeys from './UpdateAuthorizationKeys';
 
 export default function UpdateLevel2KeysWithRootKeys({
-    blockSummary,
+    chainParameters,
     consensusStatus,
     handleAuthorizationKeySubmit,
     defaults,
@@ -17,7 +17,7 @@ export default function UpdateLevel2KeysWithRootKeys({
         <UpdateAuthorizationKeys
             defaults={defaults}
             consensusStatus={consensusStatus}
-            blockSummary={blockSummary}
+            chainParameters={chainParameters}
             type={UpdateType.UpdateLevel2KeysUsingRootKeys}
             handleKeySubmit={handleAuthorizationKeySubmit}
         />

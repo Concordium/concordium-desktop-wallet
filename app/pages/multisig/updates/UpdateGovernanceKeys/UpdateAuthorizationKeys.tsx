@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Route, Switch, useRouteMatch } from 'react-router';
 import { FieldValues } from 'react-hook-form';
 import Columns from '~/components/Columns/Columns';
-import { BlockSummary, Key, ConsensusStatus } from '~/node/NodeApiTypes';
+import { ChainParameters, Key, ConsensusStatus } from '~/node/NodeApiTypes';
 import {
     AccessStructure,
     AccessStructureEnum,
@@ -47,7 +47,7 @@ function getKeyUpdateType(protocolVersion: bigint, type: UpdateType) {
 
 interface Props {
     defaults: FieldValues;
-    blockSummary: BlockSummary;
+    chainParameters: ChainParameters;
     consensusStatus: ConsensusStatus;
     type: UpdateType;
     handleKeySubmit(
@@ -59,7 +59,7 @@ interface Props {
 
 export default function UpdateAuthorizationKeys({
     defaults,
-    blockSummary,
+    chainParameters,
     consensusStatus,
     type,
     handleKeySubmit,
@@ -78,9 +78,9 @@ export default function UpdateAuthorizationKeys({
         consensusStatus.protocolVersion,
         type
     );
-    const currentKeys = blockSummary.updates.keys.level2Keys.keys;
+    const currentKeys = chainParameters.level2Keys.keys;
     const currentKeySetSize = currentKeys.length;
-    const currentAuthorizations = blockSummary.updates.keys.level2Keys;
+    const currentAuthorizations = chainParameters.level2Keys;
     const currentAccessStructures = mapCurrentAuthorizationsToUpdate(
         keyUpdateType,
         currentAuthorizations

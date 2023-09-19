@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
-import { BlockSummaryV0 } from '@concordium/node-sdk';
-import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { isBakerAccount } from '@concordium/web-sdk';
 import MultiSignatureLayout from '../../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
-import { BlockSummary } from '~/node/NodeApiTypes';
+import { ChainParameters } from '~/node/NodeApiTypes';
 import {
     Account,
     TransactionKindId,
@@ -47,6 +46,7 @@ import { findAccountTransactionHandler } from '~/utils/transactionHandlers/Handl
 import { ccdToMicroCcd, microCcdToCcd } from '~/utils/ccd';
 
 import styles from '../../common/MultiSignatureFlowPage.module.scss';
+import { getMinimumStakeForBaking } from '~/utils/blockSummaryHelpers';
 
 function toMicroUnitsSafe(str: string | undefined) {
     if (str === undefined) {
@@ -60,14 +60,14 @@ function toMicroUnitsSafe(str: string | undefined) {
 }
 interface PageProps extends ChainData {
     exchangeRate: Fraction;
-    blockSummary: BlockSummary;
+    chainParameters: ChainParameters;
 }
 
 interface State {
     account?: Account;
 }
 
-function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
+function UpdateBakerStakePage({ exchangeRate, chainParameters }: PageProps) {
     const dispatch = useDispatch();
 
     const { state } = useLocation<State>();
@@ -202,7 +202,7 @@ function UpdateBakerStakePage({ exchangeRate, blockSummary }: PageProps) {
                                             account={account}
                                             stake={stake}
                                             setStake={setStake}
-                                            blockSummary={blockSummary}
+                                            chainParameters={chainParameters}
                                             estimatedFee={estimatedFee}
                                         />
                                     ) : null}
@@ -304,7 +304,7 @@ type PickNewStakeProps = {
     account: Account;
     stake?: string;
     setStake: (s: string | undefined) => void;
-    blockSummary: BlockSummary;
+    chainParameters: ChainParameters;
     estimatedFee: Fraction;
 };
 
@@ -312,14 +312,11 @@ function PickNewStake({
     account,
     stake,
     setStake,
-    blockSummary,
+    chainParameters,
     estimatedFee,
 }: PickNewStakeProps) {
     const stakedAlready = useStakedAmount(account.address);
-    const minimumThresholdForBaking = BigInt(
-        (blockSummary as BlockSummaryV0).updates.chainParameters
-            .minimumThresholdForBaking
-    );
+    const minimumThresholdForBaking = getMinimumStakeForBaking(chainParameters);
     const cooldownUntil = useCalcBakerStakeCooldownUntil();
     const stakeGtu = toMicroUnitsSafe(stake);
 

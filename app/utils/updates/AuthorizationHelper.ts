@@ -7,7 +7,6 @@ import {
 import {
     Authorization,
     Authorizations,
-    BlockSummary,
     Key,
     Keys,
     KeysWithThreshold,
@@ -137,7 +136,7 @@ export function findKeyIndex(
  */
 export async function attachKeyIndex(
     signature: UpdateInstructionSignature,
-    blockSummary: BlockSummary,
+    keys: Keys,
     transaction: UpdateInstruction<UpdateInstructionPayload>,
     transactionHandler: UpdateInstructionHandler<
         UpdateInstruction<UpdateInstructionPayload>,
@@ -146,7 +145,7 @@ export async function attachKeyIndex(
 ): Promise<UpdateInstructionSignatureWithIndex> {
     const index = findKeyIndex(
         signature.authorizationPublicKey,
-        blockSummary.updates.keys,
+        keys,
         transaction,
         transactionHandler
     );

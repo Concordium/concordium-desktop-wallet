@@ -1,8 +1,19 @@
-import { PeerListResponse } from '~/proto/concordium_p2p_rpc_pb';
-
 /**
  * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
  */
+import {
+    isAccountTransactionType,
+    TransactionExpiry,
+    AccountAddress,
+} from '@concordium/web-sdk';
+import type { Buffer } from 'buffer/';
+import { serializeTransferPayload } from '~/utils/transactionSerialization';
+import {
+    AccountTransaction,
+    TransactionAccountSignature,
+    UpdateInstructionSignatureWithIndex,
+    UpdateInstruction,
+} from '~/utils/types';
 
 /**
  * Updates the location of the node endpoint;
@@ -28,23 +39,52 @@ function throwIfUndefined<T extends any[], V>(
     };
 }
 
-export function sendTransaction(
-    transactionPayload: Uint8Array,
-    networkId = 100
+export function sendAccountTransaction(
+    transaction: AccountTransaction,
+    signatures: TransactionAccountSignature
 ) {
-    return window.grpc.sendTransaction(transactionPayload, networkId);
-}
+    const type = transaction.transactionKind as number;
+    if (!isAccountTransactionType(type)) {
+        throw Error(
+            'Unreachable: received an account transaction with an invalid transaction type'
+        );
+    }
 
-export async function getPeerList(includeBootstrappers = false) {
-    return PeerListResponse.deserializeBinary(
-        await window.grpc.getPeerList(includeBootstrappers)
+    const payload = serializeTransferPayload(
+        transaction.transactionKind,
+        transaction.payload
+    );
+
+    const header = {
+        sender: new AccountAddress(transaction.sender),
+        expiry: TransactionExpiry.fromEpochSeconds(transaction.expiry),
+        nonce: BigInt(transaction.nonce),
+    };
+
+    return window.grpc.sendAccountTransaction(
+        header,
+        BigInt(transaction.energyAmount),
+        payload,
+        signatures
     );
 }
 
-export const getBlockSummary = throwIfUndefined(
-    window.grpc.getBlockSummary,
-    (blockHash) => `Unable to load blocksummary, on block: ${blockHash}`
-);
+export function sendUpdateInstruction(
+    updateInstruction: UpdateInstruction,
+    signaturesWithIndices: UpdateInstructionSignatureWithIndex[],
+    serializedPayload: Buffer
+) {
+    const transaction = {
+        header: updateInstruction.header,
+        payload: serializedPayload.toString('hex'),
+    };
+    const signatures: Record<number, string> = {};
+    signaturesWithIndices.forEach(({ signature, authorizationKeyIndex }) => {
+        signatures[authorizationKeyIndex] = signature;
+    });
+    return window.grpc.sendUpdateInstruction(transaction, signatures);
+}
+
 export const getNextAccountNonce = throwIfUndefined(
     window.grpc.getNextAccountNonce,
     (address) => `Unable to fetch next nonce on address: ${address}`
@@ -62,22 +102,17 @@ export const getIdentityProviders = throwIfUndefined(
     window.grpc.getIdentityProviders,
     (blockHash) => `Unable to load identity providers, on block: ${blockHash}`
 );
-export const getRewardStatus = throwIfUndefined(
-    window.grpc.getRewardStatus,
-    (blockHash) => `Unable to load reward status, on block: ${blockHash}`
-);
-
-export const getPoolStatus = throwIfUndefined(
-    window.grpc.getPoolStatus,
-    (blockHash, target) =>
-        `Unable to get pool status for ${
-            target === undefined ? 'passive delegation' : target
-        }, on block: ${blockHash}`
-);
 
 export const {
     getTransactionStatus,
     getConsensusStatus,
     getAccountInfo,
     getAccountInfoOfCredential,
+    getBlockChainParameters,
+    getNextUpdateSequenceNumbers,
+    getRewardStatus,
+    getPoolInfo,
+    getPassiveDelegationInfo,
+    healthCheck,
+    sendCredentialDeploymentTransaction,
 } = window.grpc;

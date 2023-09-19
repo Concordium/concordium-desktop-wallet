@@ -4,7 +4,7 @@ import { UpdateType } from '~/utils/types';
 import UpdateAuthorizationKeys from './UpdateAuthorizationKeys';
 
 export default function UpdateLevel2KeysWithLevel1Keys({
-    blockSummary,
+    chainParameters,
     consensusStatus,
     handleAuthorizationKeySubmit,
     defaults,
@@ -16,7 +16,7 @@ export default function UpdateLevel2KeysWithLevel1Keys({
     return (
         <UpdateAuthorizationKeys
             defaults={defaults}
-            blockSummary={blockSummary}
+            chainParameters={chainParameters}
             consensusStatus={consensusStatus}
             type={UpdateType.UpdateLevel2KeysUsingLevel1Keys}
             handleKeySubmit={handleAuthorizationKeySubmit}

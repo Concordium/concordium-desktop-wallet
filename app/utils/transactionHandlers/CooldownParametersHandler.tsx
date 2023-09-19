@@ -1,8 +1,6 @@
 import React from 'react';
-import {
-    isBlockSummaryV0,
-    isAuthorizationsV1,
-} from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isAuthorizationsV1, isChainParametersV0 } from '@concordium/web-sdk';
+
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
 import CooldownParametersView from '~/pages/multisig/updates/CooldownParameters/CooldownParametersView';
@@ -10,7 +8,11 @@ import UpdateCooldownParameters, {
     UpdateCooldownParametersFields,
 } from '~/pages/multisig/updates/CooldownParameters/UpdateCooldownParameters';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
+import {
+    Authorizations,
+    ChainParameters,
+    NextUpdateSequenceNumbers,
+} from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     CooldownParameters,
@@ -35,7 +37,8 @@ export default class CooldownParametersHandler
     }
 
     async createTransaction(
-        blockSummary: BlockSummary,
+        chainParameters: ChainParameters,
+        nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
         {
             delegatorCooldown,
             poolOwnerCooldown,
@@ -43,20 +46,15 @@ export default class CooldownParametersHandler
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!blockSummary) {
+        if (!chainParameters || !nextUpdateSequenceNumbers) {
             return undefined;
         }
 
-        if (isBlockSummaryV0(blockSummary)) {
+        if (isChainParametersV0(chainParameters)) {
             throw new Error('Update incompatible with chain protocol version');
         }
-
-        const sequenceNumber =
-            blockSummary.updates.updateQueues.cooldownParameters
-                .nextSequenceNumber;
-        const {
-            threshold,
-        } = blockSummary.updates.keys.level2Keys.cooldownParameters;
+        const sequenceNumber = nextUpdateSequenceNumbers.cooldownParameters;
+        const { threshold } = chainParameters.level2Keys.cooldownParameters;
 
         const cooldownParameters: CooldownParameters = {
             delegatorCooldown,

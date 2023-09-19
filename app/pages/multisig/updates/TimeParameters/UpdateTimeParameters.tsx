@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import { Validate, useFormContext } from 'react-hook-form';
-import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isChainParametersV0 } from '@concordium/web-sdk';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import Form from '~/components/Form/';
 import MintRateInput, { FormMintRateInput } from '../common/MintRateInput';
-import { getCurrentValue, getPaydaysPerYear } from './util';
+import { getPaydaysPerYear } from './util';
 import { parseMintRate } from '~/utils/mintDistributionHelpers';
 import Label from '~/components/Label';
 import { mustBeAnInteger, requiredMessage, enterHere } from '../common/util';
@@ -42,14 +42,14 @@ const MINT_PER_PAYDAY_MAX = 2 ** 32 - 1; // UInt32 upper bound
  */
 export default function UpdateTimeParameters({
     defaults,
-    blockSummary,
+    chainParameters,
     consensusStatus,
 }: UpdateProps): JSX.Element | null {
-    if (isBlockSummaryV0(blockSummary)) {
-        throw new Error('Connected node used outdated blockSummary format');
+    if (isChainParametersV0(chainParameters)) {
+        throw new Error('Connected node used outdated chainParameters format');
     }
 
-    const { mintPerPayday, rewardPeriodLength } = getCurrentValue(blockSummary);
+    const { mintPerPayday, rewardPeriodLength } = chainParameters;
 
     const form = useFormContext();
     const newRewardPeriodLength = form.watch(fieldNames.rewardPeriodLength);

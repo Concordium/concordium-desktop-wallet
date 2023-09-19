@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
-import type { BlockSummaryV1 } from '@concordium/node-sdk';
-import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import type { ChainParametersV1 } from '@concordium/web-sdk';
+import { isChainParametersV0 } from '@concordium/web-sdk';
 import React, { ComponentType, useCallback, useState } from 'react';
 import { Redirect } from 'react-router';
 import withExchangeRate from '~/components/Transfers/withExchangeRate';
@@ -36,11 +36,12 @@ interface Deps
         NotOptional<AccountAndNonce> {
     accountInfo: AccountInfo;
 }
-type Props = ExtendableProps<Deps, { blockSummary: BlockSummaryV1 }>;
+
+type Props = ExtendableProps<Deps, { chainParameters: ChainParametersV1 }>;
 type UnsafeDeps = MakeRequired<Partial<Deps>, 'account' | 'accountInfo'>;
 
 const hasNecessaryProps = (props: UnsafeDeps): props is Deps => {
-    return [props.exchangeRate, props.nonce, props.blockSummary].every(
+    return [props.exchangeRate, props.nonce, props.chainParameters].every(
         isDefined
     );
 };
@@ -63,7 +64,7 @@ const withDeps = (component: ComponentType<Deps>) =>
 const ensureDelegationProtocol = (c: ComponentType<Props>) =>
     ensureProps<Props, Deps>(
         c,
-        (p): p is Props => !isBlockSummaryV0(p.blockSummary),
+        (p): p is Props => !isChainParametersV0(p.chainParameters),
         <Redirect to={routes.ACCOUNTS} />
     );
 
@@ -74,9 +75,7 @@ export default withDeps(
             account,
             exchangeRate,
             accountInfo,
-            blockSummary: {
-                updates: { chainParameters },
-            },
+            chainParameters,
         } = props;
         const [showError, setShowError] = useState(false);
 

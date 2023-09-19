@@ -2,12 +2,13 @@ import React from 'react';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import ShieldImage from '@resources/svg/shield.svg';
-import type { DelegationTarget } from '@concordium/node-sdk';
+import type { DelegationTarget } from '@concordium/web-sdk';
 import {
     isBakerAccount,
     isDelegatorAccount,
-} from '@concordium/node-sdk/lib/src/accountHelpers';
-import { DelegationTargetType } from '@concordium/node-sdk/lib/src/types';
+    DelegationTargetType,
+} from '@concordium/web-sdk';
+
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
 import { Account, AccountInfo } from '~/utils/types';

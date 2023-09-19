@@ -19,7 +19,10 @@ import styles from './ConfigureBakerPage.module.scss';
 
 interface Props
     extends MultiStepFormPageProps<StakeSettings, UpdateBakerStakeFlowState>,
-        Pick<ConfigureBakerFlowDependencies, 'blockSummary' | 'exchangeRate'> {
+        Pick<
+            ConfigureBakerFlowDependencies,
+            'chainParameters' | 'exchangeRate'
+        > {
     isMultiSig?: boolean;
     account: Account;
     accountInfo?: AccountInfo;
@@ -28,14 +31,14 @@ interface Props
 function UpdateBakerStakePage({
     onNext,
     initial,
-    blockSummary,
+    chainParameters,
     exchangeRate,
     account,
     accountInfo,
     isMultiSig = false,
 }: Props) {
     const { stake: existing } = getExistingBakerValues(accountInfo) ?? {};
-    const minimumStake = BigInt(getMinimumStakeForBaking(blockSummary));
+    const minimumStake = BigInt(getMinimumStakeForBaking(chainParameters));
     const changes = getBakerFlowChanges(
         { stake: existing },
         { stake: initial }

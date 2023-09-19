@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Redirect } from 'react-router';
 import routes from '~/constants/routes.json';
-import { BlockSummary } from '~/node/NodeApiTypes';
+import { ChainParameters } from '~/node/NodeApiTypes';
 import {
     AccountTransaction,
     MakeOptional,
@@ -35,7 +35,7 @@ import { parse, stringify } from '~/utils/JSONHelper';
 
 interface Props {
     proposal: Omit<MultiSignatureTransaction, 'id'>;
-    blockSummary: BlockSummary;
+    chainParameters: ChainParameters;
 }
 
 /**
@@ -43,7 +43,7 @@ interface Props {
  * proposal that is to be signed before being generated and persisted
  * to the database.
  */
-function SignTransactionProposalView({ proposal, blockSummary }: Props) {
+function SignTransactionProposalView({ proposal, chainParameters }: Props) {
     const dispatch = useDispatch();
 
     const { transaction } = proposal;
@@ -73,7 +73,7 @@ function SignTransactionProposalView({ proposal, blockSummary }: Props) {
 
             const keyIndex = findKeyIndex(
                 publicKey,
-                blockSummary.updates.keys,
+                chainParameters,
                 updateInstruction,
                 transactionHandler
             );

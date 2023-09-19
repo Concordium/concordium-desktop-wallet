@@ -35,7 +35,7 @@ interface Props
 type UnsafeProps = MakeRequired<Partial<Props>, 'account' | 'accountInfo'>;
 
 const hasNecessaryProps = (props: UnsafeProps): props is Props => {
-    return [props.exchangeRate, props.nonce, props.blockSummary].every(
+    return [props.exchangeRate, props.nonce, props.chainParameters].every(
         isDefined
     );
 };
@@ -56,7 +56,13 @@ const withDeps = (component: ComponentType<Props>) =>
     );
 
 export default withDeps(function UpdateBakerStake(props: Props) {
-    const { nonce, account, exchangeRate, blockSummary, accountInfo } = props;
+    const {
+        nonce,
+        account,
+        exchangeRate,
+        chainParameters,
+        accountInfo,
+    } = props;
     const [showError, setShowError] = useState(false);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -103,7 +109,7 @@ export default withDeps(function UpdateBakerStake(props: Props) {
                             <UpdateBakerStakePage
                                 account={account}
                                 exchangeRate={exchangeRate}
-                                blockSummary={blockSummary}
+                                chainParameters={chainParameters}
                                 initial={initial}
                                 onNext={onNext}
                                 formValues={formValues}

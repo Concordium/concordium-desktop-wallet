@@ -1,5 +1,5 @@
 import React from 'react';
-import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isChainParametersV0 } from '@concordium/web-sdk';
 import {
     RegisterOptions,
     useFormContext,
@@ -84,15 +84,13 @@ function rangeValidationRules(name: string): RegisterOptions {
  */
 export default function UpdatePoolParameters({
     defaults,
-    blockSummary,
+    chainParameters,
 }: UpdateProps): JSX.Element | null {
-    if (isBlockSummaryV0(blockSummary)) {
-        throw new Error('Connected node used outdated blockSummary format');
+    if (isChainParametersV0(chainParameters)) {
+        throw new Error('Connected node used outdated chainParameters format');
     }
 
-    const poolParameters = convertRewardFractions(
-        blockSummary.updates.chainParameters
-    );
+    const poolParameters = convertRewardFractions(chainParameters);
     const {
         passiveFinalizationCommission,
         passiveBakingCommission,

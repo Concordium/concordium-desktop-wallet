@@ -1,8 +1,8 @@
 /* eslint-disable react/display-name */
 import React, { ComponentType, useCallback } from 'react';
-import type { BlockSummaryV1 } from '@concordium/node-sdk';
-import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isChainParametersV0, ChainParametersV1 } from '@concordium/web-sdk';
 import { Redirect } from 'react-router';
+
 import withExchangeRate from '~/components/Transfers/withExchangeRate';
 import withNonce, { AccountAndNonce } from '~/components/Transfers/withNonce';
 import { isDefined } from '~/utils/basicHelpers';
@@ -41,12 +41,12 @@ interface Deps
     accountInfo: AccountInfo;
 }
 
-type Props = ExtendableProps<Deps, { blockSummary: BlockSummaryV1 }>;
+type Props = ExtendableProps<Deps, { chainParameters: ChainParametersV1 }>;
 
 type UnsafeDeps = MakeRequired<Partial<Deps>, 'account' | 'accountInfo'>;
 
 const hasLoadedDeps = (props: UnsafeDeps): props is Deps => {
-    return [props.exchangeRate, props.nonce, props.blockSummary].every(
+    return [props.exchangeRate, props.nonce, props.chainParameters].every(
         isDefined
     );
 };
@@ -67,7 +67,7 @@ const withDeps = (component: ComponentType<Deps>) =>
 const ensureDelegationProtocol = (c: ComponentType<Props>) =>
     ensureProps<Props, Deps>(
         c,
-        (p): p is Props => !isBlockSummaryV0(p.blockSummary),
+        (p): p is Props => !isChainParametersV0(p.chainParameters),
         <Redirect to={routes.ACCOUNTS} />
     );
 
@@ -77,31 +77,30 @@ export default withDeps(
             nonce,
             account,
             exchangeRate,
-            blockSummary,
+            chainParameters,
             accountInfo,
         } = props;
-        const cp = blockSummary.updates.chainParameters;
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
         const convert = useCallback(
             convertToAddBakerTransaction(
-                getDefaultCommissions(cp),
+                getDefaultCommissions(chainParameters),
                 account,
                 nonce,
                 exchangeRate
             ),
-            [account, nonce, exchangeRate, cp]
+            [account, nonce, exchangeRate, chainParameters]
         );
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
         const validate = useCallback(
             validateAddBakerValues(
-                blockSummary,
+                chainParameters,
                 account,
                 accountInfo,
                 exchangeRate
             ),
-            [blockSummary, account, accountInfo, exchangeRate]
+            [chainParameters, account, accountInfo, exchangeRate]
         );
 
         return (
@@ -121,7 +120,7 @@ export default withDeps(
                             <AddBakerStakePage
                                 account={account}
                                 exchangeRate={exchangeRate}
-                                blockSummary={blockSummary}
+                                chainParameters={chainParameters}
                                 initial={initial}
                                 onNext={onNext}
                                 formValues={formValues}
@@ -144,7 +143,7 @@ export default withDeps(
                             <CommissionsPage
                                 initial={initial}
                                 onNext={onNext}
-                                chainParameters={cp}
+                                chainParameters={chainParameters}
                                 account={account}
                             />
                         ),

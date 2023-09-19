@@ -589,7 +589,7 @@ export async function confirmAccount(
             break;
         default:
             throwLoggedError(
-                `Unexpected status was returned by the poller: ${response.status}`
+                `Unexpected status was returned by the poller: ${response}`
             );
     }
     return loadAccounts(dispatch);

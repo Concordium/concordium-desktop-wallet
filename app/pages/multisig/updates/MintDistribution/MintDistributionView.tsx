@@ -1,5 +1,5 @@
 import React from 'react';
-import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isChainParametersV0, isConsensusStatusV0 } from '@concordium/web-sdk';
 import { MintDistribution } from '~/utils/types';
 import Loading from '~/cross-app-components/Loading';
 import withChainData, { ChainData } from '~/utils/withChainData';
@@ -25,26 +25,26 @@ interface Props extends ChainData {
  */
 export default withChainData(function MintDistributionView({
     mintDistribution,
-    blockSummary,
+    chainParameters,
     consensusStatus,
 }: Props) {
-    if (!consensusStatus || !blockSummary) {
+    if (!consensusStatus || !chainParameters) {
         return <Loading />;
     }
-    if (!isBlockSummaryV0(blockSummary) && mintDistribution.version === 0) {
+    if (
+        !isChainParametersV0(chainParameters) &&
+        mintDistribution.version === 0
+    ) {
         throw new Error(
             'Viewing mint distribution update version 0, which is outdated.'
         );
     }
 
-    const slotsPerYear = getSlotsPerYear(consensusStatus);
-
     const currentDistribitionRatio: RewardDistributionValue = toRewardDistributionValue(
-        blockSummary.updates.chainParameters.rewardParameters.mintDistribution
+        chainParameters.rewardParameters.mintDistribution
     );
 
     const { bakingReward, finalizationReward } = mintDistribution;
-    // TODO: const newMintPerSlot = `${newMintRate.mantissa}e-${newMintRate.exponent}`;
     const newDistribitionRatio: RewardDistributionValue = {
         first: bakingReward,
         second: finalizationReward,
@@ -54,14 +54,15 @@ export default withChainData(function MintDistributionView({
         <>
             <div>
                 <Label className="mB5">Current mint distribution:</Label>
-                {!isBlockSummaryV0(blockSummary) || (
-                    <MintRateInput
-                        value={blockSummary.updates.chainParameters.rewardParameters.mintDistribution.mintPerSlot.toString()}
-                        paydaysPerYear={slotsPerYear}
-                        disabled
-                        className="mB20"
-                    />
-                )}
+                {isChainParametersV0(chainParameters) &&
+                    isConsensusStatusV0(consensusStatus) && (
+                        <MintRateInput
+                            value={chainParameters.rewardParameters.mintDistribution.mintPerSlot.toString()}
+                            paydaysPerYear={getSlotsPerYear(consensusStatus)}
+                            disabled
+                            className="mB20"
+                        />
+                    )}
                 <RewardDistribution
                     labels={rewardDistributionLabels}
                     value={currentDistribitionRatio}
@@ -70,14 +71,17 @@ export default withChainData(function MintDistributionView({
             </div>
             <div>
                 <Label className="mB5">New mint distribution:</Label>
-                {mintDistribution.version === 0 && (
-                    <MintRateInput
-                        value={stringifyMintRate(mintDistribution.mintPerSlot)}
-                        paydaysPerYear={slotsPerYear}
-                        disabled
-                        className="mB20"
-                    />
-                )}
+                {mintDistribution.version === 0 &&
+                    isConsensusStatusV0(consensusStatus) && (
+                        <MintRateInput
+                            value={stringifyMintRate(
+                                mintDistribution.mintPerSlot
+                            )}
+                            paydaysPerYear={getSlotsPerYear(consensusStatus)}
+                            disabled
+                            className="mB20"
+                        />
+                    )}
                 <RewardDistribution
                     labels={rewardDistributionLabels}
                     value={newDistribitionRatio}

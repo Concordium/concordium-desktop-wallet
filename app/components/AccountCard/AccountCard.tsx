@@ -10,10 +10,7 @@ import DelegationImage from '@resources/svg/delegation.svg';
 import ReadonlyImage from '@resources/svg/read-only.svg';
 import LedgerImage from '@resources/svg/ledger.svg';
 import InfoImage from '@resources/svg/info.svg';
-import {
-    isBakerAccount,
-    isDelegatorAccount,
-} from '@concordium/node-sdk/lib/src/accountHelpers';
+import { isBakerAccount, isDelegatorAccount } from '@concordium/web-sdk';
 import { displayAsCcd } from '~/utils/ccd';
 import { AccountInfo, Account, AccountStatus, ClassName } from '~/utils/types';
 import {

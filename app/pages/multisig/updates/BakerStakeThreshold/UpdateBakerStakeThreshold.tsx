@@ -17,9 +17,11 @@ const fieldNames: EqualRecord<UpdateBakerStakeThresholdFields> = {
  * Component for creating a baker stake threshold update.
  */
 export default function UpdateBakerStakeThreshold({
-    blockSummary,
+    chainParameters,
 }: UpdateProps): JSX.Element | null {
-    const currentBakerStakeThreshold = getMinimumStakeForBaking(blockSummary);
+    const currentBakerStakeThreshold = getMinimumStakeForBaking(
+        chainParameters
+    );
 
     return (
         <div>

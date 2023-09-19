@@ -1,10 +1,11 @@
-import { AccountInfo } from '@concordium/node-sdk';
-import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
 import {
+    AccountInfo,
+    isDelegatorAccount,
     DelegationTarget,
     DelegationTargetBaker,
     DelegationTargetType,
-} from '@concordium/node-sdk/lib/src/types';
+} from '@concordium/web-sdk';
+
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { isDefined, multiplyFraction } from '../basicHelpers';
 import { ccdToMicroCcd, microCcdToCcd } from '../ccd';

@@ -13,12 +13,16 @@
         "electron-rebuild": "node ../internals/scripts/ElectronRebuild.js",
         "postinstall": "yarn electron-rebuild install-app-deps"
     },
-    "dependencies": {
+    "license": "MIT",
+   "dependencies": {
         "@journeyapps/sqlcipher": "^5.2.0",
-        "@ledgerhq/hw-transport-node-hid-singleton": "^6.27.1",
+        "@ledgerhq/hw-transport-node-hid-singleton": "^6.28.14",
         "@types/ledgerhq__hw-transport-node-hid": "^4.22.2",
         "knex": "0.95.5",
         "node-abi": "^2.30.0",
         "sqlite3": "5.0.0"
+   },
+    "resolutions": {
+        "buffer": "^6.0.3"
     }
 }

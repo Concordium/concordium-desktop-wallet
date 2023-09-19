@@ -1,6 +1,6 @@
 import { RegisterOptions, Validate } from 'react-hook-form';
 import bs58check from 'bs58check';
-import { AccountInfoBaker, AccountInfoDelegator } from '@concordium/node-sdk';
+import { AccountInfoBaker, AccountInfoDelegator } from '@concordium/web-sdk';
 import {
     Account,
     AccountInfo,

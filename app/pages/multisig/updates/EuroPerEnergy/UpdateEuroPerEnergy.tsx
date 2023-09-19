@@ -8,7 +8,7 @@ import {
     fromExchangeRate,
     RelativeRateValue,
 } from '../../common/RelativeRateField/util';
-import { commonFieldProps, getCurrentValue } from './util';
+import { commonFieldProps } from './util';
 
 export interface UpdateEuroPerEnergyFields {
     euroPerEnergyRate: RelativeRateValue;
@@ -20,9 +20,9 @@ const fieldNames: EqualRecord<UpdateEuroPerEnergyFields> = {
 
 export default function UpdateEuroPerEnergy({
     defaults,
-    blockSummary,
+    chainParameters,
 }: UpdateProps) {
-    const exchangeRate = getCurrentValue(blockSummary);
+    const exchangeRate = chainParameters.euroPerEnergy;
     const currentValue: RelativeRateValue = fromExchangeRate(exchangeRate);
     const { numeratorUnit, denominatorUnit } = commonFieldProps;
 

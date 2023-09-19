@@ -7,7 +7,11 @@ import UpdateMicroGtuPerEuro, {
 } from '~/pages/multisig/updates/MicroGtuPerEuro/UpdateMicroGtuPerEuro';
 import { getReducedExchangeRate } from '../exchangeRateHelpers';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
+import {
+    Authorizations,
+    ChainParameters,
+    NextUpdateSequenceNumbers,
+} from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     ExchangeRate,
@@ -32,21 +36,18 @@ export default class MicroGtuPerEuroHandler
     }
 
     async createTransaction(
-        blockSummary: BlockSummary,
+        chainParameters: ChainParameters,
+        nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
         { microGtuPerEuroRate }: UpdateMicroGtuPerEuroRateFields,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!blockSummary) {
+        if (!chainParameters || !nextUpdateSequenceNumbers) {
             return undefined;
         }
 
-        const sequenceNumber =
-            blockSummary.updates.updateQueues.microGTUPerEuro
-                .nextSequenceNumber;
-        const {
-            threshold,
-        } = blockSummary.updates.keys.level2Keys.microGTUPerEuro;
+        const sequenceNumber = nextUpdateSequenceNumbers.microCcdPerEuro;
+        const { threshold } = chainParameters.level2Keys.microGTUPerEuro;
 
         const reduced = getReducedExchangeRate({
             denominator: BigInt(microGtuPerEuroRate.denominator),

@@ -1,3 +1,5 @@
+import type { Buffer } from 'buffer/';
+
 /**
  * Opens an 'open file' prompt where the user can select a file to be read. The
  * file path for the chosen file is returned.

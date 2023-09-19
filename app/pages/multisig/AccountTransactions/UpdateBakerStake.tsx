@@ -2,7 +2,7 @@
 import React, { ComponentType, useCallback, useState } from 'react';
 import { Redirect, useRouteMatch } from 'react-router';
 import { useSelector } from 'react-redux';
-import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { isBakerAccount } from '@concordium/web-sdk';
 import { AccountInfo, ConfigureBaker, Fraction } from '~/utils/types';
 import MultiSigAccountTransactionFlow, {
     MultiSigAccountTransactionFlowLoading,
@@ -90,7 +90,7 @@ type Props = ConfigureBakerFlowDependencies;
 type UnsafeProps = Partial<Props>;
 
 const hasNecessaryProps = (props: UnsafeProps): props is Props => {
-    return [props.exchangeRate, props.blockSummary].every(isDefined);
+    return [props.exchangeRate, props.chainParameters].every(isDefined);
 };
 
 const withDeps = (component: ComponentType<Props>) =>
@@ -108,7 +108,7 @@ const withDeps = (component: ComponentType<Props>) =>
 
 export default withDeps(function UpdateBakerStake({
     exchangeRate,
-    blockSummary,
+    chainParameters,
 }: Props) {
     const { path: matchedPath } = useRouteMatch();
     const accountsInfo = useSelector(accountsInfoSelector);
@@ -171,7 +171,7 @@ export default withDeps(function UpdateBakerStake({
                                 <UpdateBakerStakePage
                                     account={account}
                                     exchangeRate={exchangeRate}
-                                    blockSummary={blockSummary}
+                                    chainParameters={chainParameters}
                                     initial={initial}
                                     onNext={onNext}
                                     formValues={formValues}

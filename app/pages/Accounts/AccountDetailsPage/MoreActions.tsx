@@ -1,9 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import {
-    isBakerAccount,
-    isDelegatorAccount,
-} from '@concordium/node-sdk/lib/src/accountHelpers';
+import { isBakerAccount, isDelegatorAccount } from '@concordium/web-sdk';
 import { Account, AccountInfo, TransactionKindId } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import ButtonNavLink from '~/components/ButtonNavLink';

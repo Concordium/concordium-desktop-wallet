@@ -7,6 +7,7 @@ module.exports = {
             '<rootDir>/internals/mocks/fileMock.js',
         '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
         '^~/(.*)$': '<rootDir>/app/$1',
+        '@concordium/web-sdk': '@concordium/common-sdk',
     },
     moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json'],
     moduleDirectories: ['node_modules', 'app/node_modules'],

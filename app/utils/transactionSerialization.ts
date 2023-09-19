@@ -586,7 +586,7 @@ function serializeUnversionedTransaction(
     put(serialized, 1 + serialSignature.length + header.length, payload);
     return serialized;
 }
-
+// TODO: still used?
 export function serializeTransaction(
     transaction: AccountTransaction,
     signature: TransactionAccountSignature
@@ -602,6 +602,7 @@ export function serializeTransaction(
  * Returns the transactionHash, which includes the signature, and is used as the
  * submissionId on chain.
  */
+// TODO: still used?
 export function getAccountTransactionHash(
     transaction: AccountTransaction,
     signature: TransactionAccountSignature

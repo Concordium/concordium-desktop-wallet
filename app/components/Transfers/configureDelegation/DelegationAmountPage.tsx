@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useForm, useFormContext, Validate } from 'react-hook-form';
 import { Redirect } from 'react-router';
 import clsx from 'clsx';
-import { isDelegatorAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { isDelegatorAccount } from '@concordium/web-sdk';
 import AccountCard from '~/components/AccountCard';
 import Form from '~/components/Form';
 import ErrorMessage from '~/components/Form/ErrorMessage';

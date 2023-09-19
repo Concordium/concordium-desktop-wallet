@@ -6,7 +6,11 @@ import UpdateProtocol, {
     UpdateProtocolFields,
 } from '~/pages/multisig/updates/Protocol/UpdateProtocol';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
+import {
+    Authorizations,
+    ChainParameters,
+    NextUpdateSequenceNumbers,
+} from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isProtocolUpdate,
@@ -31,18 +35,18 @@ export default class ProtocolUpdateHandler
     }
 
     async createTransaction(
-        blockSummary: BlockSummary,
+        chainParameters: ChainParameters,
+        nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
         { specificationAuxiliaryData: files, ...fields }: UpdateProtocolFields,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!blockSummary) {
+        if (!chainParameters || !nextUpdateSequenceNumbers) {
             return undefined;
         }
 
-        const { threshold } = blockSummary.updates.keys.level2Keys.protocol;
-        const sequenceNumber =
-            blockSummary.updates.updateQueues.protocol.nextSequenceNumber;
+        const { threshold } = chainParameters.level2Keys.protocol;
+        const sequenceNumber = nextUpdateSequenceNumbers.protocol;
 
         let specificationAuxiliaryData: string | undefined;
         if (files) {

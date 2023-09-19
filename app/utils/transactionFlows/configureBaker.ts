@@ -1,6 +1,12 @@
-import type { AccountInfo, ChainParametersV1 } from '@concordium/node-sdk';
-import { isBakerAccountV1 } from '@concordium/node-sdk/lib/src/accountHelpers';
-import { OpenStatus, OpenStatusText } from '@concordium/node-sdk/lib/src/types';
+import type { AccountInfo } from '@concordium/web-sdk';
+import {
+    isBakerAccountV1,
+    ChainParameters,
+    ChainParametersV0,
+    OpenStatus,
+    OpenStatusText,
+} from '@concordium/web-sdk';
+
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { isDefined, multiplyFraction } from '../basicHelpers';
 import { ccdToMicroCcd, microCcdToCcd } from '../ccd';
@@ -47,7 +53,9 @@ export interface ConfigureBakerFlowState {
     keys?: BakerKeys;
 }
 
-export const getDefaultCommissions = (cp: ChainParametersV1): Commissions => ({
+export const getDefaultCommissions = (
+    cp: Exclude<ChainParameters, ChainParametersV0>
+): Commissions => ({
     transactionFeeCommission: cp.transactionCommissionRange.max,
     bakingRewardCommission: cp.bakingCommissionRange.max,
     finalizationRewardCommission: cp.finalizationCommissionRange.max,

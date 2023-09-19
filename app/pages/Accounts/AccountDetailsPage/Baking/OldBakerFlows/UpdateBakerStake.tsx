@@ -2,8 +2,7 @@ import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { goBack, push } from 'connected-react-router';
 import { Redirect } from 'react-router';
-import { BlockSummaryV0 } from '@concordium/node-sdk';
-import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import { isBakerAccount } from '@concordium/web-sdk';
 import Form from '~/components/Form';
 import PickBakerStakeAmount from '~/components/PickBakerStakeAmount';
 import Card from '~/cross-app-components/Card';
@@ -35,6 +34,7 @@ import BackButton from '~/cross-app-components/BackButton';
 import { ccdToMicroCcd, microCcdToCcd } from '~/utils/ccd';
 
 import styles from '../../AccountDetailsPage.module.scss';
+import { getMinimumStakeForBaking } from '~/utils/blockSummaryHelpers';
 
 const LoadingComponent = () => <Loading text="Loading chain data" inline />;
 
@@ -53,7 +53,7 @@ const fieldNames: EqualRecord<FormModel> = {
 };
 
 const UpdateBakerStakeForm = ensureExchangeRateAndNonce(
-    ensureChainData(({ blockSummary, exchangeRate, nonce }: Props) => {
+    ensureChainData(({ chainParameters, exchangeRate, nonce }: Props) => {
         const dispatch = useDispatch();
         const account = useSelector(chosenAccountSelector);
         const accountInfo = useSelector(chosenAccountInfoSelector);
@@ -111,10 +111,7 @@ const UpdateBakerStakeForm = ensureExchangeRateAndNonce(
             );
         }
 
-        const minimumStake = BigInt(
-            (blockSummary as BlockSummaryV0).updates.chainParameters
-                .minimumThresholdForBaking
-        );
+        const minimumStake = BigInt(getMinimumStakeForBaking(chainParameters));
 
         if (!accountInfo) {
             return <LoadingComponent />;

@@ -21,15 +21,17 @@ import {
     updateCurrentProposal,
 } from '~/features/MultiSignatureSlice';
 import { getMultiSignatureTransactionStatus } from '~/utils/TransactionStatusPoller';
-import { sendTransaction, getNextAccountNonce } from '~/node/nodeRequests';
+import {
+    getNextAccountNonce,
+    sendAccountTransaction,
+    sendUpdateInstruction,
+} from '~/node/nodeRequests';
 import findHandler, {
     findUpdateInstructionHandler,
 } from '~/utils/transactionHandlers/HandlerFinder';
-import { serializeForSubmission } from '~/utils/UpdateSerialization';
 import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
-import { serializeTransaction } from '~/utils/transactionSerialization';
 import { attachKeyIndex } from '~/utils/updates/AuthorizationHelper';
 import withChainData, { ChainData } from '~/utils/withChainData';
 import TransactionHashView from '~/components/TransactionHash';
@@ -75,7 +77,7 @@ function getStatusText(status: MultiSignatureTransactionStatus): string {
  */
 
 const SubmittedProposalView = withChainData<Props>(
-    ({ proposal, blockSummary }) => {
+    ({ proposal, chainParameters }) => {
         const dispatch = useDispatch();
         const [showError, setShowError] = useState<ModalErrorInput>({
             show: false,
@@ -91,8 +93,8 @@ const SubmittedProposalView = withChainData<Props>(
         );
 
         // eslint-disable-next-line no-shadow
-        const init = useCallback(async (blockSummary) => {
-            let payload;
+        const init = useCallback(async (chainParameters) => {
+            let submitted;
             if (instanceOfUpdateInstruction(transaction)) {
                 const updateHandler = findUpdateInstructionHandler(
                     transaction.type
@@ -105,13 +107,13 @@ const SubmittedProposalView = withChainData<Props>(
                         transaction.signatures.map((sig) =>
                             attachKeyIndex(
                                 sig,
-                                blockSummary,
+                                chainParameters,
                                 transaction,
                                 updateHandler
                             )
                         )
                     );
-                    payload = serializeForSubmission(
+                    submitted = await sendUpdateInstruction(
                         transaction,
                         signatures,
                         serializedPayload
@@ -120,7 +122,7 @@ const SubmittedProposalView = withChainData<Props>(
                     setShowError({
                         show: true,
                         header: 'Unauthorized key',
-                        content: error.message,
+                        content: (error as Error).message,
                     });
                     return;
                 }
@@ -130,7 +132,7 @@ const SubmittedProposalView = withChainData<Props>(
                     BigInt(nextNonce.nonce) - BigInt(transaction.nonce);
 
                 if (difference === 0n) {
-                    payload = serializeTransaction(
+                    submitted = await sendAccountTransaction(
                         transaction,
                         transaction.signatures
                     );
@@ -161,7 +163,6 @@ const SubmittedProposalView = withChainData<Props>(
             } else {
                 throwLoggedError(`Unexpected Transaction type: ${transaction}`);
             }
-            const submitted = await sendTransaction(payload);
             const modifiedProposal: MultiSignatureTransaction = {
                 ...proposal,
             };
@@ -185,10 +186,10 @@ const SubmittedProposalView = withChainData<Props>(
         }, []);
 
         useEffect(() => {
-            if (blockSummary) {
-                init(blockSummary);
+            if (chainParameters) {
+                init(chainParameters);
             }
-        }, [init, blockSummary]);
+        }, [init, chainParameters]);
 
         return (
             <MultiSignatureLayout pageTitle={handler.title} disableBack>

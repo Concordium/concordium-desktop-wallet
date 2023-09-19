@@ -1,4 +1,4 @@
-import { isAuthorizationsV1 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isAuthorizationsV1 } from '@concordium/web-sdk';
 import { Authorization, Authorizations } from '../../../../node/NodeApiTypes';
 import {
     AccessStructure,

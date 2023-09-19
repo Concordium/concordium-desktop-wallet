@@ -1,4 +1,4 @@
-import { BlockSummary } from '~/node/NodeApiTypes';
+import { ChainParameters } from '~/node/NodeApiTypes';
 import updateConstants from '~/constants/updateConstants.json';
 import { RewardDistributionValue } from '../../common/RewardDistribution';
 
@@ -10,14 +10,12 @@ export const rewardDistributionLabels: [string, string, string] = [
 ];
 
 export const getCurrentValue = (
-    blockSummary: BlockSummary
+    chainParameters: ChainParameters
 ): RewardDistributionValue => ({
     first:
-        blockSummary.updates.chainParameters.rewardParameters
-            .transactionFeeDistribution.baker *
+        chainParameters.rewardParameters.transactionFeeDistribution.baker *
         updateConstants.rewardFractionResolution,
     second:
-        blockSummary.updates.chainParameters.rewardParameters
-            .transactionFeeDistribution.gasAccount *
+        chainParameters.rewardParameters.transactionFeeDistribution.gasAccount *
         updateConstants.rewardFractionResolution,
 });

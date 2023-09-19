@@ -81,9 +81,9 @@ function accessStructureView(
  */
 function AuthorizationKeysView({
     authorizationKeysUpdate,
-    blockSummary,
+    chainParameters,
 }: Props) {
-    if (!blockSummary) {
+    if (!chainParameters) {
         return <Loading inline />;
     }
 

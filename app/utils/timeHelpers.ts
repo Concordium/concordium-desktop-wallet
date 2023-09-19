@@ -5,10 +5,10 @@ import {
     ConsensusStatus,
     RewardStatus,
     StakePendingChange,
-} from '@concordium/node-sdk/lib/src/types';
-import { isStakePendingChangeV0 } from '@concordium/node-sdk/lib/src/accountHelpers';
-import { isRewardStatusV1 } from '@concordium/node-sdk/lib/src/rewardStatusHelpers';
-import { isChainParametersV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+    isStakePendingChangeV0,
+    isChainParametersV0,
+    isRewardStatusV1,
+} from '@concordium/web-sdk';
 import { ensureNumberLength } from './basicHelpers';
 import { TimeStampUnit, YearMonth, YearMonthDate } from './types';
 

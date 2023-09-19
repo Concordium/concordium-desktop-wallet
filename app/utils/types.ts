@@ -3,8 +3,11 @@ import type { Buffer } from 'buffer/';
 import type { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import type { HTMLAttributes } from 'react';
 import type { RegisterOptions } from 'react-hook-form';
-import type { BakerId } from '@concordium/node-sdk';
-import { OpenStatus } from '@concordium/node-sdk/lib/src/types';
+import type { BakerId } from '@concordium/web-sdk';
+import {
+    OpenStatus,
+    TransactionKindString,
+} from '@concordium/common-sdk/lib/types';
 import { RejectReason } from './node/RejectReasonHelper';
 import type { ExternalCredential, Genesis } from '~/database/types';
 
@@ -12,8 +15,8 @@ export type {
     AccountInfo,
     AccountEncryptedAmount,
     BakerId,
-} from '@concordium/node-sdk';
-export { OpenStatus } from '@concordium/node-sdk/lib/src/types';
+} from '@concordium/web-sdk';
+export { OpenStatus, TransactionKindString };
 
 export type Dispatch = GenericDispatch<AnyAction>;
 
@@ -167,34 +170,6 @@ export enum AccountStatus {
     Pending = 'pending',
     // eslint-disable-next-line no-shadow
     Genesis = 'genesis',
-}
-
-export enum TransactionKindString {
-    DeployModule = 'deployModule',
-    InitContract = 'initContract',
-    Update = 'update',
-    Transfer = 'transfer',
-    AddBaker = 'addBaker',
-    RemoveBaker = 'removeBaker',
-    UpdateBakerStake = 'updateBakerStake',
-    UpdateBakerRestakeEarnings = 'updateBakerRestakeEarnings',
-    UpdateBakerKeys = 'updateBakerKeys',
-    UpdateCredentialKeys = 'updateCredentialKeys',
-    BakingReward = 'bakingReward',
-    BlockReward = 'blockReward',
-    FinalizationReward = 'finalizationReward',
-    EncryptedAmountTransfer = 'encryptedAmountTransfer',
-    TransferToEncrypted = 'transferToEncrypted',
-    TransferToPublic = 'transferToPublic',
-    TransferWithSchedule = 'transferWithSchedule',
-    UpdateCredentials = 'updateCredentials',
-    RegisterData = 'registerData',
-    TransferWithMemo = 'transferWithMemo',
-    EncryptedAmountTransferWithMemo = 'encryptedAmountTransferWithMemo',
-    TransferWithScheduleAndMemo = 'transferWithScheduleAndMemo',
-    ConfigureBaker = 'configureBaker',
-    ConfigureDelegation = 'configureDelegation',
-    StakingReward = 'paydayAccountReward',
 }
 
 // The ids of the different types of an AccountTransaction.
@@ -1215,7 +1190,7 @@ export interface ProtocolUpdate {
 
 export interface GasRewards {
     baker: RewardFraction;
-    finalizationProof: RewardFraction;
+    finalizationProof?: RewardFraction;
     accountCreation: RewardFraction;
     chainUpdate: RewardFraction;
 }

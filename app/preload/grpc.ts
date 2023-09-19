@@ -1,30 +1,40 @@
 import {
-    AccountAddress,
-    CredentialRegistrationId,
-    ConcordiumNodeClient,
+    ConcordiumGRPCClient,
+    AccountTransactionHeader,
+    AccountTransactionSignature,
     BakerId,
-} from '@concordium/node-sdk';
-import { credentials, Metadata } from '@grpc/grpc-js';
-import SendTransactionClient from '~/node/ConcordiumNodeClient';
+    CredentialDeploymentTransaction,
+    UpdateInstruction,
+    CredentialRegistrationId,
+    AccountAddress,
+    streamToList,
+} from '@concordium/web-sdk';
+import type { Buffer } from 'buffer/';
+import { credentials } from '@grpc/grpc-js';
+import { GrpcTransport } from '@protobuf-ts/grpc-transport';
+
 import { GRPC, ConsensusAndGlobalResult } from '~/preload/preloadTypes';
 
 const defaultDeadlineMs = 15000;
-let client: ConcordiumNodeClient;
-let sendTransactionClient: SendTransactionClient;
-const metadata = new Metadata();
-metadata.add('authentication', 'rpcadmin');
+let client: ConcordiumGRPCClient;
+
+function createConcordiumClient(
+    address: string,
+    port: number,
+    timeout: number
+) {
+    const grpcTransport = new GrpcTransport({
+        host: `${address}:${port}`,
+        channelCredentials: credentials.createSsl(),
+        timeout,
+    });
+    return new ConcordiumGRPCClient(grpcTransport);
+}
 
 export function setClientLocation(address: string, port: string) {
-    sendTransactionClient = new SendTransactionClient(
+    client = createConcordiumClient(
         address,
-        parseInt(port, 10),
-        defaultDeadlineMs
-    );
-    client = new ConcordiumNodeClient(
-        address,
-        parseInt(port, 10),
-        credentials.createInsecure(),
-        metadata,
+        Number.parseInt(port, 10),
         defaultDeadlineMs
     );
 }
@@ -34,15 +44,13 @@ async function getConsensusStatusAndCryptographicParameters(
     port: string
 ): Promise<ConsensusAndGlobalResult> {
     try {
-        const nodeClient = new ConcordiumNodeClient(
+        const newClient = createConcordiumClient(
             address,
             Number.parseInt(port, 10),
-            credentials.createInsecure(),
-            metadata,
             defaultDeadlineMs
         );
-        const consensusStatus = await nodeClient.getConsensusStatus();
-        const global = await nodeClient.getCryptographicParameters(
+        const consensusStatus = await newClient.getConsensusStatus();
+        const global = await newClient.getCryptographicParameters(
             consensusStatus.lastFinalizedBlock
         );
         if (!global) {
@@ -61,7 +69,7 @@ async function getConsensusStatusAndCryptographicParameters(
             },
         };
     } catch (error) {
-        return { successful: false, error };
+        return { successful: false, error: error as Error };
     }
 }
 
@@ -70,40 +78,63 @@ const exposedMethods: GRPC = {
     setLocation: async (address: string, port: string) => {
         return setClientLocation(address, port);
     },
-    sendTransaction: (transactionPayload: Uint8Array, networkId: number) =>
-        sendTransactionClient.sendTransaction(transactionPayload, networkId),
+    sendAccountTransaction: (
+        header: AccountTransactionHeader,
+        energyCost: bigint,
+        payload: Buffer,
+        signature: AccountTransactionSignature
+    ) =>
+        client.sendRawAccountTransaction(
+            header,
+            energyCost,
+            payload,
+            signature
+        ),
+    sendUpdateInstruction: (
+        updateInstructionTransaction: UpdateInstruction,
+        signatures: Record<number, string>
+    ) => client.sendUpdateInstruction(updateInstructionTransaction, signatures),
+    sendCredentialDeploymentTransaction: (
+        transaction: CredentialDeploymentTransaction,
+        signatures: string[]
+    ) => client.sendCredentialDeploymentTransaction(transaction, signatures),
     getCryptographicParameters: (blockHash: string) =>
         client.getCryptographicParameters(blockHash),
     getConsensusStatus: () => client.getConsensusStatus(),
     getTransactionStatus: (transactionId: string) =>
-        client.getTransactionStatus(transactionId),
+        client.getBlockItemStatus(transactionId),
     getNextAccountNonce: (address: string) =>
         client.getNextAccountNonce(new AccountAddress(address)),
-    getBlockSummary: (blockHash: string) => client.getBlockSummary(blockHash),
-    getAccountInfo: (address: string, blockHash: string) => {
+    getBlockChainParameters: (blockHash?: string) =>
+        client.getBlockChainParameters(blockHash),
+    getNextUpdateSequenceNumbers: (blockHash?: string) =>
+        client.getNextUpdateSequenceNumbers(blockHash),
+    getAccountInfo: (address: string, blockHash?: string) => {
         return client.getAccountInfo(new AccountAddress(address), blockHash);
     },
-    getAccountInfoOfCredential: (credId: string, blockHash: string) => {
+    getAccountInfoOfCredential: (credId: string, blockHash?: string) => {
         return client.getAccountInfo(
             new CredentialRegistrationId(credId),
             blockHash
         );
     },
     getIdentityProviders: (blockHash: string) =>
-        client.getIdentityProviders(blockHash),
+        streamToList(client.getIdentityProviders(blockHash)),
     getAnonymityRevokers: (blockHash: string) =>
-        client.getAnonymityRevokers(blockHash),
-    getPeerList: async (includeBootstrappers: boolean) =>
-        (await client.getPeerList(includeBootstrappers)).serializeBinary(),
+        streamToList(client.getAnonymityRevokers(blockHash)),
+    healthCheck: async () => client.healthCheck(),
     // Creates a standalone GRPC client for testing the connection
     // to a node. This is used to verify that when changing connection
     // that the new node is on the same blockchain as the wallet was previously connected to.
     nodeConsensusAndGlobal: async (address: string, port: string) => {
         return getConsensusStatusAndCryptographicParameters(address, port);
     },
-    getRewardStatus: (blockHash: string) => client.getRewardStatus(blockHash),
-    getPoolStatus: (blockHash: string, bakerId: BakerId) =>
-        client.getPoolStatus(blockHash, bakerId),
+    getRewardStatus: (blockHash?: string) =>
+        client.getTokenomicsInfo(blockHash),
+    getPoolInfo: (bakerId: BakerId, blockHash?: string) =>
+        client.getPoolInfo(bakerId, blockHash),
+    getPassiveDelegationInfo: (blockHash?: string) =>
+        client.getPassiveDelegationInfo(blockHash),
 };
 
 export default exposedMethods;

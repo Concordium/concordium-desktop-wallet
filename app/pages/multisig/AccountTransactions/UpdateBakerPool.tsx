@@ -2,9 +2,13 @@
 import React, { ComponentType, useCallback, useState } from 'react';
 import { Redirect } from 'react-router';
 import { useSelector } from 'react-redux';
-import type { BlockSummaryV1 } from '@concordium/node-sdk';
-import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
-import { isBakerAccount } from '@concordium/node-sdk/lib/src/accountHelpers';
+import {
+    ChainParameters,
+    ChainParametersV0,
+    isChainParametersV0,
+    isBakerAccount,
+} from '@concordium/web-sdk';
+
 import CommissionsPage from '~/components/Transfers/configureBaker/CommissionsPage';
 import DelegationStatusPage from '~/components/Transfers/configureBaker/DelegationStatusPage';
 import MetadataUrlPage from '~/components/Transfers/configureBaker/MetadataUrlPage';
@@ -121,11 +125,14 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
 const toRoot = <Redirect to={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_POOL} />;
 
 type Deps = UpdateBakerPoolDependencies;
-type Props = ExtendableProps<Deps, { blockSummary: BlockSummaryV1 }>;
+type Props = ExtendableProps<
+    Deps,
+    { chainParameters: Exclude<ChainParameters, ChainParametersV0> }
+>;
 type UnsafeDeps = Partial<Deps>;
 
 const hasNecessaryProps = (props: UnsafeDeps): props is Deps =>
-    [props.exchangeRate, props.blockSummary].every(isDefined);
+    [props.exchangeRate, props.chainParameters].every(isDefined);
 
 const withDeps = (component: ComponentType<Deps>) =>
     withChainData(
@@ -143,16 +150,14 @@ const withDeps = (component: ComponentType<Deps>) =>
 const ensureDelegationProtocol = (c: ComponentType<Props>) =>
     ensureProps<Props, Deps>(
         c,
-        (p): p is Props => !isBlockSummaryV0(p.blockSummary),
+        (p): p is Props => !isChainParametersV0(p.chainParameters),
         toRoot
     );
 
 export default withDeps(
     ensureDelegationProtocol(function UpdateBakerPool({
         exchangeRate,
-        blockSummary: {
-            updates: { chainParameters },
-        },
+        chainParameters,
     }: Props) {
         const accountsInfo = useSelector(accountsInfoSelector);
         const [showError, setShowError] = useState(false);

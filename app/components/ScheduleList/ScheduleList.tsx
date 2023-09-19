@@ -1,7 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import BinIcon from '@resources/svg/bin.svg';
-import { ReleaseSchedule } from '@concordium/node-sdk/';
+import { ReleaseSchedule } from '@concordium/web-sdk/';
 import Button from '~/cross-app-components/Button';
 import { displayAsCcd } from '~/utils/ccd';
 import { getFormattedDateString } from '~/utils/timeHelpers';

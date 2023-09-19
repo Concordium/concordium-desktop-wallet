@@ -1,12 +1,15 @@
 import React from 'react';
-import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
 import PoolParametersView from '~/pages/multisig/updates/PoolParameters/PoolParametersView';
 import UpdatePoolParameters from '~/pages/multisig/updates/PoolParameters/UpdatePoolParameters';
 import { UpdatePoolParametersFields } from '~/pages/multisig/updates/PoolParameters/util';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
+import {
+    Authorizations,
+    ChainParameters,
+    NextUpdateSequenceNumbers,
+} from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     PoolParameters,
@@ -32,7 +35,8 @@ export default class PoolParametersHandler
     }
 
     async createTransaction(
-        blockSummary: BlockSummary,
+        chainParameters: ChainParameters,
+        nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
         {
             passiveFinalizationCommission,
             passiveBakingCommission,
@@ -47,19 +51,12 @@ export default class PoolParametersHandler
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!blockSummary) {
+        if (!chainParameters || !nextUpdateSequenceNumbers) {
             return undefined;
         }
 
-        if (isBlockSummaryV0(blockSummary)) {
-            throw new Error('Update incompatible with chain protocol version');
-        }
-
-        const sequenceNumber =
-            blockSummary.updates.updateQueues.poolParameters.nextSequenceNumber;
-        const {
-            threshold,
-        } = blockSummary.updates.keys.level2Keys.poolParameters;
+        const sequenceNumber = nextUpdateSequenceNumbers.poolParameters;
+        const { threshold } = chainParameters.level2Keys.poolParameters;
 
         const reducedLeverageBound = getReducedFraction({
             denominator: BigInt(leverageBound.denominator),

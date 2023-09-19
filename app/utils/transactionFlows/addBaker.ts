@@ -1,6 +1,6 @@
-import { AccountInfo } from '@concordium/node-sdk';
+import { AccountInfo } from '@concordium/web-sdk';
 import { ValidateValues } from '~/components/MultiStepForm';
-import { BlockSummary } from '~/node/NodeApiTypes';
+import { ChainParameters } from '~/node/NodeApiTypes';
 import { collapseFraction } from '../basicHelpers';
 import { getMinimumStakeForBaking } from '../blockSummaryHelpers';
 import { getConfigureBakerFullCost } from '../transactionCosts';
@@ -90,12 +90,12 @@ export function getEstimatedAddBakerFee(
 
 // As the payload of the transaction can vary a lot in size, we need to revalidate with all values, to check if account still has enough funds for the transaction.
 export const validateAddBakerValues = (
-    blockSummary: BlockSummary,
+    chainParameters: ChainParameters,
     account: Account,
     accountInfo: AccountInfo,
     exchangeRate: Fraction
 ): ValidateValues<AddBakerFlowState> => (values) => {
-    const minimumStake = BigInt(getMinimumStakeForBaking(blockSummary));
+    const minimumStake = BigInt(getMinimumStakeForBaking(chainParameters));
     const estimatedFee = getEstimatedAddBakerFee(
         exchangeRate,
         values,

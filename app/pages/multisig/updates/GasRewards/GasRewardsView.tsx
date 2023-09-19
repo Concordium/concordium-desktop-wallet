@@ -3,7 +3,7 @@ import { GasRewards } from '~/utils/types';
 import withChainData, { ChainData } from '~/utils/withChainData';
 import GasRewardsForm from './GasRewardsForm';
 import Loading from '~/cross-app-components/Loading';
-import { getCurrentValue, toRewardFractions } from './util';
+import { toRewardFractions } from './util';
 
 interface Props extends ChainData {
     gasRewards: GasRewards;
@@ -14,13 +14,15 @@ interface Props extends ChainData {
  */
 export default withChainData(function GasRewardsView({
     gasRewards,
-    blockSummary,
+    chainParameters,
 }: Props) {
-    if (!blockSummary) {
+    if (!chainParameters) {
         return <Loading inline />;
     }
 
-    const currentValue = toRewardFractions(getCurrentValue(blockSummary));
+    const currentValue = toRewardFractions(
+        chainParameters.rewardParameters.gASRewards
+    );
 
     return (
         <>

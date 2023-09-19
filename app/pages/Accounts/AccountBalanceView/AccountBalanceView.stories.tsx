@@ -52,6 +52,7 @@ const account: Account = {
 } as Account;
 
 const accountInfo: AccountInfo = {
+    accountAddress: '4inf4g36xDEQmjxDbbkqeHD2HNg9v7dohXUDH5S9en4Th53kxm',
     accountNonce: 1n,
     accountCredentials: [{} as any],
     accountAmount: 1000n * microCcdPerCcd,

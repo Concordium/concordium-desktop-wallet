@@ -23,5 +23,6 @@
     "registerData": "Data registration",
     "configureBaker": "Configure baker",
     "configureDelegation": "Configure delegation",
-    "paydayAccountReward": "Reward payout"
+    "paydayAccountReward": "Reward payout",
+    "failed": "Failed Transaction"
 }

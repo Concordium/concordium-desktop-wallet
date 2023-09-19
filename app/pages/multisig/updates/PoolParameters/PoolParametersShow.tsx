@@ -1,5 +1,5 @@
 import React from 'react';
-import type { PoolParametersV1 } from '@concordium/node-sdk';
+import type { PoolParametersV1 } from '@concordium/web-sdk';
 import { CommissionRangeField } from './CommissionRangeField';
 import { RewardFractionField } from '../common/RewardFractionField/RewardFractionField';
 import { RelativeRateField } from '../../common/RelativeRateField';

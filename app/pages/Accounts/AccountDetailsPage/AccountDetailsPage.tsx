@@ -1,8 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import {
-    isBakerAccount,
-    isDelegatorAccount,
-} from '@concordium/node-sdk/lib/src/accountHelpers';
+import { isBakerAccount, isDelegatorAccount } from '@concordium/web-sdk';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, Route } from 'react-router';

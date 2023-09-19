@@ -58,7 +58,8 @@ export default function ExportCredential({ onExported }: Props): JSX.Element {
                 credential.credentialNumber,
                 credential.identityId,
                 undefined,
-                credential.credential,
+                credential.credential.credId,
+                credential.credential.policy,
                 credential.randomness
             );
 

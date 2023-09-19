@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { GasRewards } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import GasRewardsForm from './GasRewardsForm';
-import { getCurrentValue, toRewardFractions } from './util';
+import { toRewardFractions } from './util';
 
 export type { UpdateGasRewardsFields } from './GasRewardsForm';
 
@@ -12,11 +12,11 @@ export type { UpdateGasRewardsFields } from './GasRewardsForm';
  */
 export default function UpdateGasRewards({
     defaults,
-    blockSummary,
+    chainParameters,
 }: UpdateProps) {
     const currentRewards: GasRewards = useMemo(
-        () => toRewardFractions(getCurrentValue(blockSummary)),
-        [blockSummary]
+        () => toRewardFractions(chainParameters.rewardParameters.gASRewards),
+        [chainParameters]
     );
 
     const defaultRewards = {

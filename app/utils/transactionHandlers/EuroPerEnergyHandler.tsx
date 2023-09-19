@@ -7,7 +7,11 @@ import UpdateEuroPerEnergy, {
 } from '~/pages/multisig/updates/EuroPerEnergy/UpdateEuroPerEnergy';
 import { getReducedExchangeRate } from '../exchangeRateHelpers';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
+import {
+    Authorizations,
+    ChainParameters,
+    NextUpdateSequenceNumbers,
+} from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isExchangeRate,
@@ -32,20 +36,18 @@ export default class EuroPerEnergyHandler
     }
 
     async createTransaction(
-        blockSummary: BlockSummary,
+        chainParameters: ChainParameters,
+        nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
         { euroPerEnergyRate }: UpdateEuroPerEnergyFields,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
-        if (!blockSummary) {
+        if (!chainParameters || !nextUpdateSequenceNumbers) {
             return undefined;
         }
 
-        const sequenceNumber =
-            blockSummary.updates.updateQueues.euroPerEnergy.nextSequenceNumber;
-        const {
-            threshold,
-        } = blockSummary.updates.keys.level2Keys.euroPerEnergy;
+        const sequenceNumber = nextUpdateSequenceNumbers.euroPerEnergy;
+        const { threshold } = chainParameters.level2Keys.euroPerEnergy;
 
         const reduced = getReducedExchangeRate({
             denominator: BigInt(euroPerEnergyRate.denominator),

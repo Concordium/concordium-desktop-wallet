@@ -2,40 +2,30 @@
 import { push } from 'connected-react-router';
 import React, { ComponentType, useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { ChainParameters, ConsensusStatus } from '~/node/NodeApiTypes';
-import {
-    getConsensusStatus,
-    getBlockChainParameters,
-} from '~/node/nodeRequests';
+import { NextUpdateSequenceNumbers } from '@concordium/common-sdk';
+import { getNextUpdateSequenceNumbers } from '~/node/nodeRequests';
 import routes from '~/constants/routes.json';
 import Execute from '~/components/Execute';
-import { setConsensusStatus } from '~/features/ChainDataSlice';
 
-export interface ChainData {
-    consensusStatus?: ConsensusStatus;
-    chainParameters?: ChainParameters;
+export interface WithUpdateQueues {
+    nextUpdateSequenceNumbers: NextUpdateSequenceNumbers;
 }
 
-export default function withChainData<TProps extends ChainData>(
+export default function withUpdateQueue<TProps extends WithUpdateQueues>(
     Component: ComponentType<TProps>
-): ComponentType<Omit<TProps, keyof ChainData>> {
+): ComponentType<Omit<TProps, keyof WithUpdateQueues>> {
     return (props) => {
-        const [chainData, setChainData] = useState<ChainData | undefined>();
+        const [chainData, setChainData] = useState<
+            WithUpdateQueues | undefined
+        >();
         const dispatch = useDispatch();
 
-        const init = useCallback(async (): Promise<ChainData> => {
-            const cs: ConsensusStatus = await getConsensusStatus();
-            const chainParameters = await getBlockChainParameters(
-                cs.lastFinalizedBlock
-            );
-
-            dispatch(setConsensusStatus(cs));
-
+        const init = useCallback(async (): Promise<WithUpdateQueues> => {
+            const nextUpdateSequenceNumbers = await getNextUpdateSequenceNumbers();
             return {
-                chainParameters,
-                consensusStatus: cs,
+                nextUpdateSequenceNumbers,
             };
-        }, [dispatch]);
+        }, []);
 
         const enrichedProps: TProps = {
             ...props,
@@ -53,7 +43,7 @@ export default function withChainData<TProps extends ChainData>(
                     }
                     onSuccess={setChainData}
                     errorTitle="Error communicating with node"
-                    errorContent="We were unable to retrieve the block summary from the
+                    errorContent="We were unable to retrieve the update queues from the
             configured node. Verify your node settings, and check that
             the node is running."
                 />
@@ -63,15 +53,15 @@ export default function withChainData<TProps extends ChainData>(
     };
 }
 
-export function ensureChainData<TProps extends ChainData>(
+export function ensureUpdateQueue<TProps extends WithUpdateQueues>(
     Component: ComponentType<TProps>,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     FallBack: ComponentType<any> = () => null
 ) {
-    return withChainData<TProps>((props) => {
-        const { chainParameters } = props;
+    return withUpdateQueue<TProps>((props) => {
+        const { nextUpdateSequenceNumbers } = props;
 
-        if (!chainParameters) {
+        if (!nextUpdateSequenceNumbers) {
             return <FallBack />;
         }
 

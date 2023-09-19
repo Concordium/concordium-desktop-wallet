@@ -1,15 +1,21 @@
-import {
+import type {
     AccountInfo,
+    AccountTransactionHeader,
+    AccountTransactionSignature,
     BakerId,
     BakerPoolStatus,
-    BlockSummary,
+    BlockItemStatus,
+    ChainParameters,
     ConsensusStatus,
+    CredentialDeploymentTransaction,
     CryptographicParameters,
+    HealthCheckResponse,
     NextAccountNonce,
+    NextUpdateSequenceNumbers,
+    PassiveDelegationStatus,
     RewardStatus,
-    TransactionStatus,
-    Versioned,
-} from '@concordium/node-sdk';
+    UpdateInstruction,
+} from '@concordium/web-sdk';
 import {
     OpenDialogOptions,
     OpenDialogReturnValue,
@@ -20,6 +26,7 @@ import {
     MessageBoxReturnValue,
 } from 'electron';
 import { Logger } from 'winston';
+import type { Buffer } from 'buffer/';
 import {
     Account,
     Identity,
@@ -73,7 +80,7 @@ type ConsensusAndGlobalResultSuccess = {
     successful: true;
     response: {
         consensusStatus: ConsensusStatus;
-        global: Versioned<CryptographicParameters>;
+        global: CryptographicParameters;
     };
 };
 
@@ -88,7 +95,7 @@ export type ConsensusAndGlobalResult =
 
 type GetAccountInfo = (
     address: string,
-    blockHash: string
+    blockHash?: string
 ) => Promise<AccountInfo | undefined>;
 
 export type GRPC = {
@@ -97,32 +104,45 @@ export type GRPC = {
         address: string,
         port: string
     ) => Promise<ConsensusAndGlobalResult>;
-    sendTransaction: (
-        transactionPayload: Uint8Array,
-        networkId: number
-    ) => Promise<boolean>;
+    sendAccountTransaction: (
+        header: AccountTransactionHeader,
+        energyCost: bigint,
+        payload: Buffer,
+        signature: AccountTransactionSignature
+    ) => Promise<string>;
+    sendUpdateInstruction: (
+        updateInstructionTransaction: UpdateInstruction,
+        signatures: Record<number, string>
+    ) => Promise<string>;
+    sendCredentialDeploymentTransaction: (
+        transaction: CredentialDeploymentTransaction,
+        signatures: string[]
+    ) => Promise<string>;
     getCryptographicParameters: (
         blockHash: string
-    ) => Promise<Versioned<CryptographicParameters> | undefined>;
+    ) => Promise<CryptographicParameters>;
     getConsensusStatus: () => Promise<ConsensusStatus>;
-    getTransactionStatus: (
-        transactionId: string
-    ) => Promise<TransactionStatus | undefined>;
+    getTransactionStatus: (transactionId: string) => Promise<BlockItemStatus>;
     getNextAccountNonce: (
         address: string
     ) => Promise<NextAccountNonce | undefined>;
-    getBlockSummary: (blockHash: string) => Promise<BlockSummary | undefined>;
+    getBlockChainParameters: (blockHash?: string) => Promise<ChainParameters>;
+    getNextUpdateSequenceNumbers: (
+        blockHash?: string
+    ) => Promise<NextUpdateSequenceNumbers>;
     getAccountInfoOfCredential: GetAccountInfo;
     getAccountInfo: GetAccountInfo;
     getIdentityProviders: (blockHash: string) => Promise<IpInfo[] | undefined>;
     getAnonymityRevokers: (blockHash: string) => Promise<ArInfo[] | undefined>;
-    // We return a Uint8Array here, because PeerListResponse must be manually serialized/deserialized.
-    getPeerList: (includeBootstrappers: boolean) => Promise<Uint8Array>;
-    getRewardStatus: (blockHash: string) => Promise<RewardStatus | undefined>;
-    getPoolStatus: (
-        blockHash: string,
-        bakerId: BakerId
-    ) => Promise<BakerPoolStatus | undefined>;
+    healthCheck: () => Promise<HealthCheckResponse>;
+    getRewardStatus: (blockHash?: string) => Promise<RewardStatus | undefined>;
+    getPoolInfo: (
+        bakerId: BakerId,
+        blockHash?: string
+    ) => Promise<BakerPoolStatus>;
+    getPassiveDelegationInfo: (
+        blockHash?: string
+    ) => Promise<PassiveDelegationStatus | undefined>;
 };
 
 export type FileMethods = {

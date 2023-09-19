@@ -1,9 +1,9 @@
 import React from 'react';
-import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isChainParametersV0 } from '@concordium/web-sdk';
 import { TimeParameters } from '~/utils/types';
 import Loading from '~/cross-app-components/Loading';
 import withChainData, { ChainData } from '~/utils/withChainData';
-import { getCurrentValue, getPaydaysPerYear } from './util';
+import { getPaydaysPerYear } from './util';
 import MintRateInput from '../common/MintRateInput';
 import Label from '~/components/Label';
 import { stringifyMintRate } from '~/utils/mintDistributionHelpers';
@@ -17,20 +17,20 @@ interface Props extends ChainData {
  */
 export default withChainData(function TimeParametersView({
     timeParameters,
-    blockSummary,
+    chainParameters,
     consensusStatus,
 }: Props) {
-    if (!consensusStatus || !blockSummary) {
+    if (!consensusStatus || !chainParameters) {
         return <Loading inline />;
     }
-    if (isBlockSummaryV0(blockSummary)) {
-        throw new Error('Connected node used outdated blockSummary format');
+    if (isChainParametersV0(chainParameters)) {
+        throw new Error('Connected node used outdated chainParameters format');
     }
 
     const {
         mintPerPayday: currentMintRate,
         rewardPeriodLength: currentRewardPeriodLength,
-    } = getCurrentValue(blockSummary);
+    } = chainParameters;
 
     const {
         mintRatePerPayday: newMintRate,

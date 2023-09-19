@@ -2,7 +2,7 @@ import {
     InitialAccountCredential,
     NormalAccountCredential,
     Versioned,
-} from '@concordium/node-sdk';
+} from '@concordium/web-sdk';
 import { getCredentialsOfAccount } from '~/database/CredentialDao';
 import { getWalletId } from '~/database/WalletDao';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';

@@ -1,10 +1,12 @@
 /* eslint-disable import/prefer-default-export */
-import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
-import { BlockSummary } from '~/node/NodeApiTypes';
+import { isChainParametersV0 } from '@concordium/web-sdk';
+import { ChainParameters } from '~/node/NodeApiTypes';
 
-export function getMinimumStakeForBaking(bs: BlockSummary): bigint {
-    if (isBlockSummaryV0(bs)) {
-        return bs.updates.chainParameters.minimumThresholdForBaking;
+export function getMinimumStakeForBaking(
+    chainParameters: ChainParameters
+): bigint {
+    if (isChainParametersV0(chainParameters)) {
+        return chainParameters.minimumThresholdForBaking;
     }
-    return bs.updates.chainParameters.minimumEquityCapital;
+    return chainParameters.minimumEquityCapital;
 }

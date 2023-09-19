@@ -1,5 +1,11 @@
 import PromiseWorker from 'promise-worker';
-import { AccountEncryptedAmount } from '@concordium/node-sdk/';
+import {
+    AccountEncryptedAmount,
+    AttributeKey,
+    createCredentialDeploymentTransaction,
+    CredentialDeploymentTransaction,
+    TransactionExpiry,
+} from '@concordium/web-sdk/';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error : has no default export.
 import RustWorker, { BakerKeyVariants } from './rust.worker';
@@ -9,7 +15,6 @@ import {
     IpInfo,
     ArInfo,
     Versioned,
-    CredentialDeploymentDetails,
     CredentialDeploymentInformation,
     Global,
     GenesisAccount,
@@ -24,7 +29,7 @@ import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
 import { getDefaultExpiry, secondsSinceUnixEpoch } from './timeHelpers';
 import { getAccountPath } from '~/features/ledger/Path';
-import { stringify, parse } from './JSONHelper';
+import { stringify } from './JSONHelper';
 import CredentialInfoLedgerDetails from '~/components/ledger/CredentialInfoLedgerDetails';
 import { throwLoggedError } from './basicHelpers';
 
@@ -271,55 +276,48 @@ export async function createCredentialDetails(
     attributes: string[],
     displayMessage: (message: string | JSX.Element) => void,
     ledger: ConcordiumLedgerClient
-): Promise<WithRandomness<CredentialDeploymentDetails>> {
-    const { cdi, randomness } = await createUnsignedCredentialInfo(
-        identity,
-        credentialNumber,
-        keys,
-        global,
-        attributes
+): Promise<{
+    transaction: CredentialDeploymentTransaction;
+    signatures: string[];
+}> {
+    const expiry = TransactionExpiry.fromEpochSeconds(
+        BigInt(secondsSinceUnixEpoch(getDefaultExpiry()))
     );
 
-    displayMessage(CredentialInfoLedgerDetails(cdi));
+    const identityProvider = JSON.parse(identity.identityProvider);
+    const transaction = createCredentialDeploymentTransaction(
+        {
+            identityProvider,
+            identityObject: JSON.parse(identity.identityObject).value, // TODO: perhaps do this onload?
+            prfKey: keys.prfKey,
+            idCredSecret: keys.idCredSec,
+            randomness: identity.randomness,
+        },
+        global,
+        1,
+        [{ verifyKey: keys.publicKey, schemeId: 'Ed25519' }],
+        credentialNumber,
+        attributes as AttributeKey[],
+        expiry
+    );
 
-    // Adding credential on a new account
-    const expiry = BigInt(secondsSinceUnixEpoch(getDefaultExpiry()));
+    displayMessage(CredentialInfoLedgerDetails(transaction.unsignedCdi));
     const path = getAccountPath({
         identityIndex: identity.identityNumber,
         accountIndex: credentialNumber,
         signatureIndex: 0,
     });
-    const signature = await ledger.signCredentialDeploymentOnNewAccount(
-        cdi,
-        expiry,
-        path
-    );
-    const credentialDeploymentInfoString = await worker.postMessage({
-        command: workerCommands.createCredentialDetails,
-        signature: signature.toString('hex'),
-        unsignedInfo: stringify(cdi),
-        expiry: stringify(expiry),
-    });
+    const signature = (
+        await ledger.signCredentialDeploymentOnNewAccount(
+            transaction.unsignedCdi,
+            expiry.expiryEpochSeconds,
+            path
+        )
+    ).toString('hex');
 
     displayMessage('Please wait');
 
-    try {
-        const output = parse(credentialDeploymentInfoString);
-
-        return {
-            info: {
-                credentialDeploymentInfoHex: output.hex,
-                accountAddress: output.address,
-                credentialDeploymentInfo: output.credInfo,
-                transactionId: output.hash,
-            },
-            randomness,
-        };
-    } catch (e) {
-        return throwLoggedError(
-            `Unable to create signed credential due to unexpected output: ${credentialDeploymentInfoString}`
-        );
-    }
+    return { transaction, signatures: [signature] };
 }
 
 /**

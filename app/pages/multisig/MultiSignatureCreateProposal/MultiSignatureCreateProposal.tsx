@@ -25,6 +25,7 @@ import BuildKeyProposal from './BuildKeyProposal';
 import { createProposalRoute } from '~/utils/routerHelper';
 
 import Loading from '~/cross-app-components/Loading';
+import { ensureUpdateQueue, WithUpdateQueues } from '~/utils/withUpdateQueue';
 
 export interface MultiSignatureCreateProposalForm {
     effectiveTime: Date;
@@ -46,9 +47,10 @@ function getSigningRoute(type: UpdateType) {
  * is used to get the threshold and sequence number required for update instructions.
  */
 function MultiSignatureCreateProposal({
-    blockSummary,
+    chainParameters,
     consensusStatus,
-}: Required<ChainData>) {
+    nextUpdateSequenceNumbers,
+}: Required<ChainData> & WithUpdateQueues) {
     const proposals = useSelector(proposalsSelector);
     const [restrictionModalOpen, setRestrictionModalOpen] = useState(false);
     const [defaults, setDefaults] = useState<
@@ -122,7 +124,7 @@ function MultiSignatureCreateProposal({
                     render={() => (
                         <SignTransactionProposal
                             proposal={proposal}
-                            blockSummary={blockSummary}
+                            chainParameters={chainParameters}
                         />
                     )}
                 />
@@ -135,7 +137,10 @@ function MultiSignatureCreateProposal({
                             <BuildComponent
                                 type={type}
                                 onFinish={handleProposal}
-                                blockSummary={blockSummary}
+                                chainParameters={chainParameters}
+                                nextUpdateSequenceNumbers={
+                                    nextUpdateSequenceNumbers
+                                }
                                 consensusStatus={consensusStatus}
                                 defaults={defaults}
                             />
@@ -155,4 +160,6 @@ function LoadingComponent() {
     );
 }
 
-export default ensureChainData(MultiSignatureCreateProposal, LoadingComponent);
+export default ensureUpdateQueue(
+    ensureChainData(MultiSignatureCreateProposal, LoadingComponent)
+);

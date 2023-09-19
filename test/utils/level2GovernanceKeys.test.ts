@@ -1,4 +1,4 @@
-import { VerifyKey } from '@concordium/node-sdk';
+import { VerifyKey } from '@concordium/common-sdk';
 import {
     AccessStructure,
     AccessStructureEnum,

@@ -4,14 +4,15 @@ import {
     AccountDelegationDetails,
     BakerPoolPendingChangeType,
     DelegationTargetType,
-} from '@concordium/node-sdk/lib/src/types';
-import { isReduceStakePendingChange } from '@concordium/node-sdk/lib/src/accountHelpers';
+    isReduceStakePendingChange,
+} from '@concordium/web-sdk';
+
 import React, { PropsWithChildren } from 'react';
 import RegisteredIcon from '@resources/svg/logo-checkmark.svg';
 import Label from '~/components/Label';
 import Card from '~/cross-app-components/Card';
 import { displayAsCcd } from '~/utils/ccd';
-import { useLastFinalizedBlockSummary } from '~/utils/dataHooks';
+import { useBlockChainParameters, useConsensusStatus } from '~/utils/dataHooks';
 import { toFixed } from '~/utils/numberStringHelpers';
 import { hasDelegationProtocol } from '~/utils/protocolVersion';
 import {
@@ -30,7 +31,7 @@ import {
 } from '~/utils/transactionFlows/configureDelegation';
 import { useAsyncMemo } from '~/utils/hooks';
 import { noOp } from '~/utils/basicHelpers';
-import { getPoolStatus, getRewardStatus } from '~/node/nodeRequests';
+import { getPoolInfo, getRewardStatus } from '~/node/nodeRequests';
 
 import styles from './StakingDetails.module.scss';
 
@@ -172,8 +173,8 @@ type Props = PropsWithChildren<{
 }>;
 
 export default function StakingDetails({ details }: Props) {
-    const { consensusStatus: cs, lastFinalizedBlockSummary: bs } =
-        useLastFinalizedBlockSummary() ?? {};
+    const cs = useConsensusStatus();
+    const chainParameters = useBlockChainParameters();
     const rs = useAsyncMemo(
         async () =>
             cs !== undefined
@@ -191,9 +192,9 @@ export default function StakingDetails({ details }: Props) {
                 details.delegationTarget.delegateType ===
                     DelegationTargetType.Baker
             ) {
-                const status = await getPoolStatus(
-                    cs.lastFinalizedBlock,
-                    details.delegationTarget.bakerId
+                const status = await getPoolInfo(
+                    details.delegationTarget.bakerId,
+                    cs.lastFinalizedBlock
                 );
                 return status;
             }
@@ -211,7 +212,7 @@ export default function StakingDetails({ details }: Props) {
                   details.pendingChange,
                   cs,
                   rs,
-                  bs?.updates.chainParameters
+                  chainParameters
               )
             : undefined;
 
@@ -223,7 +224,7 @@ export default function StakingDetails({ details }: Props) {
                   poolStatus.bakerStakePendingChange,
                   cs,
                   rs,
-                  bs?.updates.chainParameters
+                  chainParameters
               )
             : undefined;
 

@@ -6,7 +6,10 @@ import {
     isFulfilled,
 } from '@reduxjs/toolkit';
 import { Mutex, MutexInterface } from 'async-mutex';
-import { TransactionSummary } from '@concordium/node-sdk';
+import {
+    AccountTransactionSummary,
+    TransactionKindString,
+} from '@concordium/web-sdk';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
 import {
@@ -30,7 +33,6 @@ import {
     TransactionFilter,
     BooleanFilters,
     OriginType,
-    TransactionKindString,
 } from '../utils/types';
 import {
     isShieldedBalanceTransaction,
@@ -119,6 +121,7 @@ function shieldedOnlyFilter(filter: TransactionFilter): TransactionFilter {
         configureBaker: false,
         configureDelegation: false,
         paydayAccountReward: false,
+        failed: false,
     };
 
     return {
@@ -611,14 +614,14 @@ export async function confirmTransaction(
     dispatch: Dispatch,
     transactionHash: string,
     blockHash: string,
-    event: TransactionSummary
+    summary: AccountTransactionSummary
 ) {
     let status = TransactionStatus.Finalized;
     let rejectReason;
 
-    if (event.result.outcome === 'reject') {
+    if (summary.transactionType === TransactionKindString.Failed) {
         status = TransactionStatus.Failed;
-        const rejectReasonContent = event.result.rejectReason;
+        const rejectReasonContent = summary.rejectReason;
         if (!rejectReasonContent) {
             throwLoggedError('Missing rejection reason in transaction event');
         }
@@ -633,7 +636,7 @@ export async function confirmTransaction(
 
     const update = {
         status,
-        cost: event.cost.toString(),
+        cost: summary.cost.toString(),
         rejectReason,
         blockHash,
     };

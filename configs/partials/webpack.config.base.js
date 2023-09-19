@@ -66,6 +66,7 @@ module.exports = {
                 extensions,
             }),
         ],
+        mainFields: ['module', 'main', 'browser'],
     },
 
     optimization: {

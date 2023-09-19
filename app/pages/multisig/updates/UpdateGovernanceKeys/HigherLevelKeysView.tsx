@@ -28,14 +28,14 @@ interface Props extends ChainData {
 function HigherLevelKeysView({
     higherLevelKeyUpdate,
     type,
-    blockSummary,
+    chainParameters,
 }: Props) {
-    if (!blockSummary) {
+    if (!chainParameters) {
         return <Loading inline />;
     }
 
-    const currentThreshold = getThreshold(blockSummary.updates.keys, type);
-    const currentKeySetSize = getKeySetSize(blockSummary.updates.keys, type);
+    const currentThreshold = getThreshold(chainParameters, type);
+    const currentKeySetSize = getKeySetSize(chainParameters, type);
     const newKeySetSize = higherLevelKeyUpdate.updateKeys.filter(
         (key) => key.status !== KeyUpdateEntryStatus.Removed
     ).length;

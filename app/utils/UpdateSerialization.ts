@@ -351,7 +351,10 @@ export function serializeProtocolUpdate(
 export function serializeGasRewards(gasRewards: GasRewards) {
     const serializedGasRewards = Buffer.alloc(16);
     serializedGasRewards.writeUInt32BE(gasRewards.baker, 0);
-    serializedGasRewards.writeUInt32BE(gasRewards.finalizationProof, 4);
+    // TODO Make sure we handle this
+    if (gasRewards.finalizationProof) {
+        serializedGasRewards.writeUInt32BE(gasRewards.finalizationProof, 4);
+    }
     serializedGasRewards.writeUInt32BE(gasRewards.accountCreation, 8);
     serializedGasRewards.writeUInt32BE(gasRewards.chainUpdate, 12);
     return serializedGasRewards;
@@ -645,6 +648,7 @@ export function serializeUpdateInstruction(
     ]);
 }
 
+// TODO: used?
 /**
  * Serialize an update instruction, including serialization of the signatures, so that
  * it can be submitted to a node. The serialization update instruction is is pre-fixed

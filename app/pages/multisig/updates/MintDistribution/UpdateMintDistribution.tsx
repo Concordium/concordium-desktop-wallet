@@ -1,6 +1,6 @@
 import React from 'react';
 import { Validate } from 'react-hook-form';
-import { isBlockSummaryV0 } from '@concordium/node-sdk/lib/src/blockSummaryHelpers';
+import { isChainParametersV0, isConsensusStatusV0 } from '@concordium/web-sdk';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 
@@ -45,44 +45,43 @@ const MINT_PER_SLOT_MAX = 2 ** 32 - 1; // UInt32 upper bound
  */
 export default function UpdateMintDistribution({
     defaults,
-    blockSummary,
+    chainParameters,
     consensusStatus,
 }: UpdateProps): JSX.Element | null {
-    // Use the mintPerSlot as an indicator of whether to use v0 (which has mintPerSlot) or v1 (which doesn't)
-    let mintPerSlot: number | undefined;
     const rewardDistribution =
-        blockSummary.updates.chainParameters.rewardParameters.mintDistribution;
-    if (isBlockSummaryV0(blockSummary)) {
-        mintPerSlot =
-            blockSummary.updates.chainParameters.rewardParameters
-                .mintDistribution.mintPerSlot;
-    }
-    const slotsPerYear = getSlotsPerYear(consensusStatus);
+        chainParameters.rewardParameters.mintDistribution;
+
     const currentDistribitionRatio: RewardDistributionValue = toRewardDistributionValue(
         rewardDistribution
     );
 
-    return (
-        <>
-            <div>
-                <Label className="mB5">Current mint distribution</Label>
-                {mintPerSlot !== undefined && (
+    if (
+        isChainParametersV0(chainParameters) &&
+        isConsensusStatusV0(consensusStatus)
+    ) {
+        const {
+            mintPerSlot,
+        } = chainParameters.rewardParameters.mintDistribution;
+        const slotsPerYear = getSlotsPerYear(consensusStatus);
+
+        return (
+            <>
+                <div>
+                    <Label className="mB5">Current mint distribution</Label>
                     <MintRateInput
                         value={mintPerSlot.toString()}
-                        paydaysPerYear={slotsPerYear}
+                        paydaysPerYear={getSlotsPerYear(consensusStatus)}
                         disabled
                         className="mB20"
                     />
-                )}
-                <RewardDistribution
-                    labels={rewardDistributionLabels}
-                    value={currentDistribitionRatio}
-                    disabled
-                />
-            </div>
-            <div>
-                <Label className="mB5">New mint distribution</Label>
-                {mintPerSlot !== undefined && (
+                    <RewardDistribution
+                        labels={rewardDistributionLabels}
+                        value={currentDistribitionRatio}
+                        disabled
+                    />
+                </div>
+                <div>
+                    <Label className="mB5">New mint distribution</Label>
                     <FormMintRateInput
                         name={fieldNames.mintPerSlot}
                         defaultValue={
@@ -107,7 +106,32 @@ export default function UpdateMintDistribution({
                             },
                         }}
                     />
-                )}
+                    <FormRewardDistribution
+                        name={fieldNames.rewardDistribution}
+                        defaultValue={
+                            defaults.rewardDistribution ||
+                            currentDistribitionRatio
+                        }
+                        labels={rewardDistributionLabels}
+                        rules={{ required: 'Reward distribution is required' }}
+                    />
+                </div>
+            </>
+        );
+    }
+
+    return (
+        <>
+            <div>
+                <Label className="mB5">Current mint distribution</Label>
+                <RewardDistribution
+                    labels={rewardDistributionLabels}
+                    value={currentDistribitionRatio}
+                    disabled
+                />
+            </div>
+            <div>
+                <Label className="mB5">New mint distribution</Label>
                 <FormRewardDistribution
                     name={fieldNames.rewardDistribution}
                     defaultValue={
