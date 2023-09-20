@@ -85,7 +85,7 @@ async function getConsensusStatusAndCryptographicParameters(
 
 const exposedMethods: GRPC = {
     // Updates the location of the grpc endpoint.
-    setLocation: async (address: string, port: string, useSsl: boolean) => {
+    setLocation: (address: string, port: string, useSsl: boolean) => {
         return setClientLocation(address, port, useSsl);
     },
     sendAccountTransaction: (
