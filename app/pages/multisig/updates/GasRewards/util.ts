@@ -1,9 +1,18 @@
+import { ChainParameters, isChainParametersV2 } from '@concordium/web-sdk';
 import { GasRewards } from '~/utils/types';
 import updateConstants from '~/constants/updateConstants.json';
 
 // eslint-disable-next-line import/prefer-default-export
-export function toRewardFractions(gasRewards: GasRewards): GasRewards {
-    return (Object.keys(gasRewards) as Array<keyof GasRewards>).reduce(
+export function toRewardFractions(
+    chainParameters: ChainParameters
+): GasRewards {
+    const version = isChainParametersV2(chainParameters) ? 1 : 0;
+
+    const gasRewards = chainParameters.rewardParameters.gASRewards;
+
+    return (Object.keys(gasRewards) as Array<
+        keyof Omit<GasRewards, 'version'>
+    >).reduce(
         (a, c) => {
             const value = gasRewards[c];
             if (value) {
@@ -14,6 +23,6 @@ export function toRewardFractions(gasRewards: GasRewards): GasRewards {
             }
             return a;
         },
-        {} as GasRewards
+        { version } as GasRewards
     );
 }

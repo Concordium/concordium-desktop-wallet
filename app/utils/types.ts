@@ -825,6 +825,7 @@ export enum UpdateType {
     MinBlockTime,
     BlockEnergyLimit,
     FinalizationCommitteeParameters,
+    UpdateGASRewardsV1,
 }
 
 export enum RootKeysUpdateTypes {
@@ -1024,7 +1025,10 @@ export function isProtocolUpdate(
 export function isGasRewards(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<GasRewards> {
-    return UpdateType.UpdateGASRewards === transaction.type;
+    return (
+        UpdateType.UpdateGASRewards === transaction.type ||
+        UpdateType.UpdateGASRewardsV1 === transaction.type
+    );
 }
 
 export function isBakerStakeThreshold(
@@ -1220,12 +1224,22 @@ export interface ProtocolUpdate {
     specificationAuxiliaryData?: string;
 }
 
-export interface GasRewards {
+export interface GasRewardsV0 {
+    version: 0;
     baker: RewardFraction;
-    finalizationProof?: RewardFraction;
+    finalizationProof: RewardFraction;
     accountCreation: RewardFraction;
     chainUpdate: RewardFraction;
 }
+
+export interface GasRewardsV1 {
+    version: 1;
+    baker: RewardFraction;
+    accountCreation: RewardFraction;
+    chainUpdate: RewardFraction;
+}
+
+export type GasRewards = GasRewardsV0 | GasRewardsV1;
 
 export interface BakerStakeThreshold {
     threshold: Word64;
@@ -1325,7 +1339,7 @@ export interface KeyIndexWithStatus {
 export enum AccessStructureEnum {
     emergency,
     protocol,
-    electionDifficulty,
+    consensus,
     euroPerEnergy,
     microGtuPerEuro,
     foundationAccount,

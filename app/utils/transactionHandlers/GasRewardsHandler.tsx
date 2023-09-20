@@ -37,7 +37,7 @@ export default class GasRewardsHandler
     async createTransaction(
         chainParameters: ChainParameters,
         nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
-        gasRewards: UpdateGasRewardsFields,
+        gasRewardsFields: UpdateGasRewardsFields,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
@@ -48,9 +48,26 @@ export default class GasRewardsHandler
         const sequenceNumber = nextUpdateSequenceNumbers.gasRewards;
         const { threshold } = chainParameters.level2Keys.paramGASRewards;
 
+        let gasRewards: GasRewards;
+        let updateType: UpdateType;
+        if ('finalizationProof' in gasRewardsFields) {
+            // version 0
+            updateType = UpdateType.UpdateGASRewards;
+            gasRewards = {
+                version: 0,
+                ...gasRewardsFields,
+            };
+        } else {
+            updateType = UpdateType.UpdateGASRewardsV1;
+            gasRewards = {
+                version: 1,
+                ...gasRewardsFields,
+            };
+        }
+
         return createUpdateMultiSignatureTransaction(
             gasRewards,
-            UpdateType.UpdateGASRewards,
+            updateType,
             sequenceNumber,
             threshold,
             effectiveTime,

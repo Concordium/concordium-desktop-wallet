@@ -1,6 +1,11 @@
 import React from 'react';
 import { RegisterOptions, useFormContext, Validate } from 'react-hook-form';
-import { EqualRecord, GasRewards } from '~/utils/types';
+import {
+    EqualRecord,
+    GasRewards,
+    GasRewardsV0,
+    GasRewardsV1,
+} from '~/utils/types';
 import updateConstants from '~/constants/updateConstants.json';
 import {
     FormRewardFractionField,
@@ -12,18 +17,23 @@ import { isDefined } from '~/utils/basicHelpers';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import { isValidBigInt } from '~/utils/numberStringHelpers';
 
-export type UpdateGasRewardsFields = GasRewards;
+export type UpdateGasRewardsFieldsV0 = Omit<GasRewardsV0, 'version'>;
+export type UpdateGasRewardsFieldsV1 = Omit<GasRewardsV1, 'version'>;
 
-const fieldNames: EqualRecord<UpdateGasRewardsFields> = {
+const fieldNamesV1: EqualRecord<UpdateGasRewardsFieldsV1> = {
     baker: 'baker',
-    finalizationProof: 'finalizationProof',
     accountCreation: 'accountCreation',
     chainUpdate: 'chainUpdate',
 };
 
-const labels: { [P in keyof UpdateGasRewardsFields]: string } = {
-    baker: 'Baker:',
+const fieldNamesV0: EqualRecord<UpdateGasRewardsFieldsV0> = {
+    finalizationProof: 'finalizationProof',
+    ...fieldNamesV1,
+};
+
+const labels: { [P in keyof UpdateGasRewardsFieldsV0]: string } = {
     finalizationProof: 'Finalization proof:',
+    baker: 'Baker:',
     accountCreation: 'Account creation:',
     chainUpdate: 'Chain update:',
 };
@@ -59,7 +69,11 @@ export default function GasRewardsForm({
     readOnly = display,
     title,
 }: GasRewardsFormProps): JSX.Element {
-    const fields = Object.keys(fieldNames) as Array<keyof GasRewards>;
+    const fields = (gasRewards.version === 0
+        ? Object.keys(fieldNamesV0)
+        : Object.keys(fieldNamesV1)) as Array<
+        keyof Omit<GasRewards, 'version'>
+    >;
     const { errors = {} } = useFormContext<GasRewards>() ?? {};
 
     const firstError = fields.map((f) => errors[f]).filter(isDefined)[0]

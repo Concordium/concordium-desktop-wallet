@@ -187,6 +187,7 @@ export function findUpdateInstructionHandler(
                 new ProtocolUpdateHandler()
             );
         case UpdateType.UpdateGASRewards:
+        case UpdateType.UpdateGASRewardsV1:
             return new UpdateInstructionHandlerTypeMiddleware(
                 new GasRewardsHandler()
             );
