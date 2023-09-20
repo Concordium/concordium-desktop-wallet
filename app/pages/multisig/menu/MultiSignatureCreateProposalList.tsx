@@ -148,6 +148,12 @@ const updateInstructionTypes: TypeTuple[] = [
         'Update minimum block time',
         hasConsensusUpdateProtocol,
     ],
+    [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.TimeoutParameters,
+        'Update timeout parameters',
+        hasConsensusUpdateProtocol,
+    ],
 ];
 
 /**

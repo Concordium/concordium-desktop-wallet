@@ -37,6 +37,7 @@ import {
     BlockEnergyLimit,
     FinalizationCommitteeParameters,
     MinBlockTime,
+    TimeoutParameters,
 } from './types';
 
 /**
@@ -65,6 +66,7 @@ export enum OnChainUpdateType {
     UpdatePoolParameters = 15,
     UpdateTimeParameters = 16,
     UpdateMintDistributionV1 = 17,
+    UpdateTimeoutParameters = 18,
     UpdateMinBlockTime = 19,
     UpdateBlockEnergyLimit = 20,
     UpdateFinalizationCommitteeParameters = 22,
@@ -251,6 +253,22 @@ export function serializeMinBlockTime(minBlockTime: MinBlockTime) {
         BigInt(minBlockTime.minBlockTime)
     );
     return serializedMinBlockTime;
+}
+
+/**
+ * Serializes TimeoutParameters to the byte format expected
+ * by the chain.
+ */
+export function serializeTimeoutParameters(
+    timeoutParameters: TimeoutParameters
+) {
+    return Buffer.concat([
+        encodeWord64(timeoutParameters.timeoutBase),
+        encodeWord64(timeoutParameters.timeoutIncrease.numerator),
+        encodeWord64(timeoutParameters.timeoutIncrease.denominator),
+        encodeWord64(timeoutParameters.timeoutDecrease.numerator),
+        encodeWord64(timeoutParameters.timeoutDecrease.denominator),
+    ]);
 }
 
 /**
@@ -629,6 +647,8 @@ function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
             return OnChainUpdateType.UpdateFinalizationCommitteeParameters;
         case UpdateType.MinBlockTime:
             return OnChainUpdateType.UpdateMinBlockTime;
+        case UpdateType.TimeoutParameters:
+            return OnChainUpdateType.UpdateTimeoutParameters;
         default:
             throw new Error(`An invalid update type was given: ${type}`);
     }

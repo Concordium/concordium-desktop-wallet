@@ -29,8 +29,8 @@ export default function UpdateEuroPerEnergy({
     return (
         <div>
             <div className="body3 mono mB10">
-                Current rate: {currentValue.denominator} {denominatorUnit.value}{' '}
-                = {numeratorUnit.value}
+                Current rate: {currentValue.denominator}{' '}
+                {denominatorUnit?.value} = {numeratorUnit?.value}
                 {currentValue.numerator}
             </div>
             <FormRelativeRateField

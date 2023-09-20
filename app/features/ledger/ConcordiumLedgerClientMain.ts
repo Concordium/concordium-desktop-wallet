@@ -46,6 +46,7 @@ import {
     BlockEnergyLimit,
     FinalizationCommitteeParameters,
     MinBlockTime,
+    TimeoutParameters,
 } from '~/utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
@@ -439,6 +440,20 @@ export default class ConcordiumLedgerClientMain {
         return signUpdateTransaction(
             this.transport,
             0x44,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signTimeoutParameters(
+        transaction: UpdateInstruction<TimeoutParameters>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
+            this.transport,
+            0x43,
             path,
             transaction,
             serializedPayload

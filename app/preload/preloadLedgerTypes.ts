@@ -27,6 +27,7 @@ import {
     BlockEnergyLimit,
     FinalizationCommitteeParameters,
     MinBlockTime,
+    TimeoutParameters,
 } from '~/utils/types';
 import { AppAndVersion } from '../features/ledger/GetAppAndVersion';
 import { AccountPathInput } from '../features/ledger/Path';
@@ -113,6 +114,7 @@ type LedgerCommands = {
     signBlockEnergyLimit: SignUpdate<BlockEnergyLimit>;
     signFinalizationCommitteeParameters: SignUpdate<FinalizationCommitteeParameters>;
     signMinBlockTime: SignUpdate<MinBlockTime>;
+    signTimeoutParameters: SignUpdate<TimeoutParameters>;
     signHigherLevelKeysUpdate: SignKeyUpdate<HigherLevelKeyUpdate>;
     signAuthorizationKeysUpdate: SignVersionedKeyUpdate<AuthorizationKeysUpdate>;
     getAppAndVersion: () => Promise<AppAndVersion>;

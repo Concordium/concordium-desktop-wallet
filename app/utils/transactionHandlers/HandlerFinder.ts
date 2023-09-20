@@ -58,6 +58,7 @@ import { throwLoggedError } from '../basicHelpers';
 import BlockEnergyLimitHandler from './BlockEnergyLimitHandler';
 import FinalizationCommitteeParametersHandler from './FinalizationCommitteeParametersHandler';
 import MinBlockTimeHandler from './MinBlockTimeHandler';
+import TimeoutParametersHandler from './TimeoutParametersHandler';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -248,6 +249,10 @@ export function findUpdateInstructionHandler(
         case UpdateType.MinBlockTime:
             return new UpdateInstructionHandlerTypeMiddleware(
                 new MinBlockTimeHandler()
+            );
+        case UpdateType.TimeoutParameters:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new TimeoutParametersHandler()
             );
         default:
             return throwLoggedError(`Unsupported transaction type: ${type}`);
