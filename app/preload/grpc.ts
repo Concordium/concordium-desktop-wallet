@@ -21,32 +21,42 @@ let client: ConcordiumGRPCClient;
 function createConcordiumClient(
     address: string,
     port: number,
+    useSsl: boolean,
     timeout: number
 ) {
     const grpcTransport = new GrpcTransport({
         host: `${address}:${port}`,
-        channelCredentials: credentials.createSsl(),
+        channelCredentials: useSsl
+            ? credentials.createSsl()
+            : credentials.createInsecure(),
         timeout,
     });
     return new ConcordiumGRPCClient(grpcTransport);
 }
 
-export function setClientLocation(address: string, port: string) {
+export function setClientLocation(
+    address: string,
+    port: string,
+    useSsl: boolean
+) {
     client = createConcordiumClient(
         address,
         Number.parseInt(port, 10),
+        useSsl,
         defaultDeadlineMs
     );
 }
 
 async function getConsensusStatusAndCryptographicParameters(
     address: string,
-    port: string
+    port: string,
+    useSsl: boolean
 ): Promise<ConsensusAndGlobalResult> {
     try {
         const newClient = createConcordiumClient(
             address,
             Number.parseInt(port, 10),
+            useSsl,
             defaultDeadlineMs
         );
         const consensusStatus = await newClient.getConsensusStatus();
@@ -75,8 +85,8 @@ async function getConsensusStatusAndCryptographicParameters(
 
 const exposedMethods: GRPC = {
     // Updates the location of the grpc endpoint.
-    setLocation: async (address: string, port: string) => {
-        return setClientLocation(address, port);
+    setLocation: async (address: string, port: string, useSsl: boolean) => {
+        return setClientLocation(address, port, useSsl);
     },
     sendAccountTransaction: (
         header: AccountTransactionHeader,
@@ -126,8 +136,16 @@ const exposedMethods: GRPC = {
     // Creates a standalone GRPC client for testing the connection
     // to a node. This is used to verify that when changing connection
     // that the new node is on the same blockchain as the wallet was previously connected to.
-    nodeConsensusAndGlobal: async (address: string, port: string) => {
-        return getConsensusStatusAndCryptographicParameters(address, port);
+    nodeConsensusAndGlobal: async (
+        address: string,
+        port: string,
+        useSsl: boolean
+    ) => {
+        return getConsensusStatusAndCryptographicParameters(
+            address,
+            port,
+            useSsl
+        );
     },
     getRewardStatus: (blockHash?: string) =>
         client.getTokenomicsInfo(blockHash),

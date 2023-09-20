@@ -19,8 +19,12 @@ import { serializeUpdateType } from '~/utils/UpdateSerialization';
 /**
  * Updates the location of the node endpoint;
  */
-export function setClientLocation(address: string, port: string) {
-    return window.grpc.setLocation(address, port);
+export function setClientLocation(
+    address: string,
+    port: string,
+    useSsl: boolean
+) {
+    return window.grpc.setLocation(address, port, useSsl);
 }
 
 /**

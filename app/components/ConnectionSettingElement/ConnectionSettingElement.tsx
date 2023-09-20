@@ -45,8 +45,16 @@ function isMatchingGenesisBlock(genesisBlockHash: string, targetNet: Net) {
  * Retrieves the consesus status and global cryptographic parameters from the
  * node with the given address and port.
  */
-async function getConsensusAndGlobalFromNode(address: string, port: string) {
-    const result = await window.grpc.nodeConsensusAndGlobal(address, port);
+async function getConsensusAndGlobalFromNode(
+    address: string,
+    port: string,
+    useSsl: boolean
+) {
+    const result = await window.grpc.nodeConsensusAndGlobal(
+        address,
+        port,
+        useSsl
+    );
     if (!result.successful) {
         throw new Error(
             'The node consensus status and cryptographic parameters could not be retrieved'
@@ -70,18 +78,24 @@ export default function ConnectionSetting({
     const global = useSelector(globalSelector);
     const [address, setAddress] = useState(startValues.address);
     const [port, setPort] = useState(startValues.port);
+    const [useSsl, setUseSsl] = useState(Boolean(startValues.useSsl));
     const [connected, setConnected] = useState<boolean>();
     const [hasBeenTested, setHasBeenTested] = useState<boolean>(false);
     const [testingConnection, setTestingConnection] = useState<boolean>(false);
     const [failedMessage, setFailedMessage] = useState<string>();
 
-    async function updateValues(newAddress: string, newPort: string) {
-        startClient(dispatch, newAddress, newPort);
+    async function updateValues(
+        newAddress: string,
+        newPort: string,
+        newUseSsl: boolean
+    ) {
+        startClient(dispatch, newAddress, newPort, newUseSsl);
         updateSettingEntry(dispatch, {
             ...setting,
             value: JSON.stringify({
                 address: newAddress,
                 port: newPort,
+                useSsl: newUseSsl,
             }),
         });
     }
@@ -92,7 +106,7 @@ export default function ConnectionSetting({
             const {
                 consensusStatus,
                 nodeGlobal,
-            } = await getConsensusAndGlobalFromNode(address, port);
+            } = await getConsensusAndGlobalFromNode(address, port, useSsl);
             const genesis = await getGenesis();
             if (genesis) {
                 if (consensusStatus.genesisBlock !== genesis.genesisBlock) {
@@ -127,7 +141,7 @@ export default function ConnectionSetting({
                     nodeGlobal
                 );
             }
-            await updateValues(address, port);
+            await updateValues(address, port, useSsl);
             setConnected(true);
         } catch (e) {
             setFailedMessage('Connection failed');
@@ -183,6 +197,15 @@ export default function ConnectionSetting({
                         max: portRangeMax,
                     }}
                 />
+                <Form.Checkbox
+                    name="useSsl"
+                    defaultChecked={useSsl}
+                    onChange={(event) =>
+                        setUseSsl(Boolean(event.target.checked))
+                    }
+                >
+                    Use SSL
+                </Form.Checkbox>
                 <div className={styles.status}>
                     <ConnectionStatusComponent
                         status={status}
