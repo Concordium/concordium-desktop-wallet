@@ -15,6 +15,10 @@
 -   Election difficulty authorization is displayed as `Consensus`.
 -   Election difficulty update is only shown when protocol is below version 6.
 
+### Fixed
+
+-   Fixed an issue where single quotes in the password would crash the wallet, by not allowing single quotes in the password.
+
 ## 1.5.0
 
 ### Added
