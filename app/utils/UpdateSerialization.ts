@@ -412,14 +412,15 @@ export function serializeProtocolUpdate(
  * Serializes a GasRewards to bytes.
  */
 export function serializeGasRewards(gasRewards: GasRewards) {
-    const serializedGasRewards = Buffer.alloc(16);
-    serializedGasRewards.writeUInt32BE(gasRewards.baker, 0);
+    const serializedGasRewards = [];
+    serializedGasRewards.push(encodeWord32(gasRewards.baker));
     if (gasRewards.version === 0) {
-        serializedGasRewards.writeUInt32BE(gasRewards.finalizationProof, 4);
+        serializedGasRewards.push(encodeWord32(gasRewards.finalizationProof));
     }
-    serializedGasRewards.writeUInt32BE(gasRewards.accountCreation, 8);
-    serializedGasRewards.writeUInt32BE(gasRewards.chainUpdate, 12);
-    return serializedGasRewards;
+    serializedGasRewards.push(encodeWord32(gasRewards.accountCreation));
+    serializedGasRewards.push(encodeWord32(gasRewards.chainUpdate));
+
+    return Buffer.concat(serializedGasRewards);
 }
 
 /**
@@ -650,7 +651,7 @@ function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
         case UpdateType.TimeoutParameters:
             return OnChainUpdateType.UpdateTimeoutParameters;
         case UpdateType.UpdateGASRewardsV1:
-            return OnChainUpdateType.UpdateGASRewards;
+            return OnChainUpdateType.UpdateGASRewardsV1;
         default:
             throw new Error(`An invalid update type was given: ${type}`);
     }
