@@ -24,8 +24,8 @@ async function loadSettingsIntoStore(dispatch: Dispatch) {
     const settings = await loadAllSettings();
     const nodeLocationSetting = findSetting(settingKeys.nodeLocation, settings);
     if (nodeLocationSetting) {
-        const { address, port } = JSON.parse(nodeLocationSetting.value);
-        startClient(dispatch, address, port);
+        const { address, port, useSsl } = JSON.parse(nodeLocationSetting.value);
+        startClient(dispatch, address, port, Boolean(useSsl));
     } else {
         throwLoggedError('Unable to find node location setting.');
     }

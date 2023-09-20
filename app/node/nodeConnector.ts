@@ -7,9 +7,10 @@ import { setClientLocation } from './nodeRequests';
 export default async function startClient(
     dispatch: Dispatch,
     address: string,
-    port: string
+    port: string,
+    useSsl: boolean
 ) {
-    await setClientLocation(address, port);
+    setClientLocation(address, port, useSsl);
 
     loadGlobal(dispatch);
     listenForAccountStatus(dispatch);

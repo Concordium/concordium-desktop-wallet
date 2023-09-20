@@ -99,10 +99,11 @@ type GetAccountInfo = (
 ) => Promise<AccountInfo | undefined>;
 
 export type GRPC = {
-    setLocation: (address: string, port: string) => void;
+    setLocation: (address: string, port: string, useSsl: boolean) => void;
     nodeConsensusAndGlobal: (
         address: string,
-        port: string
+        port: string,
+        useSsl: boolean
     ) => Promise<ConsensusAndGlobalResult>;
     sendAccountTransaction: (
         header: AccountTransactionHeader,
