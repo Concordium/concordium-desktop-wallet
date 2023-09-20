@@ -7,4 +7,9 @@ export const passwordValidators: RegisterOptions = {
         value: 6,
         message: 'Password has to be at least 6 characters',
     },
+    validate: {
+        noQuotes: (password) =>
+            !password.includes("'") ||
+            "Password may not include single quote ' symbols",
+    },
 };
