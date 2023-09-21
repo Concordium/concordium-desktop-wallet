@@ -45,7 +45,7 @@ function useCapitalBoundCheck(
     accountInfo: AccountInfo | undefined,
     stake: string
 ): { showWarning: true; limitAfterUpdate: bigint } | { showWarning: false } {
-    const rewardStatus = useAsyncMemo(getRewardStatusLatest);
+    const rewardStatus = useAsyncMemo(getRewardStatusLatest, noOp, []);
     const poolStatus = useAsyncMemo(
         async () => {
             if (accountInfo) {

@@ -460,8 +460,10 @@ export async function loadAccountInfos(
 
     const blockHash = await getlastFinalizedBlockHash();
     for (const account of confirmedAccounts) {
-        const accountInfo = await getAccountInfo(account.address, blockHash);
-        if (!accountInfo) {
+        let accountInfo: AccountInfo;
+        try {
+            accountInfo = await getAccountInfo(account.address, blockHash);
+        } catch {
             throw new Error(
                 `A confirmed account (${account.name}) does not exist on the connected node. Please check that your node is up to date with the blockchain. Account Address: ${account.address}`
             );
@@ -471,12 +473,14 @@ export async function loadAccountInfos(
     }
 
     for (const account of genesisAccounts) {
-        const accountInfo = await getAccountInfoOfCredential(
-            // account.address contains the placeholder credId
-            account.address,
-            blockHash
-        );
-        if (!accountInfo) {
+        let accountInfo: AccountInfo;
+        try {
+            accountInfo = await getAccountInfoOfCredential(
+                // account.address contains the placeholder credId
+                account.address,
+                blockHash
+            );
+        } catch (e) {
             throwLoggedError(
                 `Genesis account '${account.name}' not found on chain. Associated credId: ${account.address}`
             );

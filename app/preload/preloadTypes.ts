@@ -96,7 +96,7 @@ export type ConsensusAndGlobalResult =
 type GetAccountInfo = (
     address: string,
     blockHash?: string
-) => Promise<AccountInfo | undefined>;
+) => Promise<AccountInfo>;
 
 export type GRPC = {
     setLocation: (address: string, port: string, useSsl: boolean) => void;
@@ -124,26 +124,24 @@ export type GRPC = {
     ) => Promise<CryptographicParameters>;
     getConsensusStatus: () => Promise<ConsensusStatus>;
     getTransactionStatus: (transactionId: string) => Promise<BlockItemStatus>;
-    getNextAccountNonce: (
-        address: string
-    ) => Promise<NextAccountNonce | undefined>;
+    getNextAccountNonce: (address: string) => Promise<NextAccountNonce>;
     getBlockChainParameters: (blockHash?: string) => Promise<ChainParameters>;
     getNextUpdateSequenceNumbers: (
         blockHash?: string
     ) => Promise<NextUpdateSequenceNumbers>;
     getAccountInfoOfCredential: GetAccountInfo;
     getAccountInfo: GetAccountInfo;
-    getIdentityProviders: (blockHash: string) => Promise<IpInfo[] | undefined>;
-    getAnonymityRevokers: (blockHash: string) => Promise<ArInfo[] | undefined>;
+    getIdentityProviders: (blockHash: string) => Promise<IpInfo[]>;
+    getAnonymityRevokers: (blockHash: string) => Promise<ArInfo[]>;
     healthCheck: () => Promise<HealthCheckResponse>;
-    getRewardStatus: (blockHash?: string) => Promise<RewardStatus | undefined>;
+    getRewardStatus: (blockHash?: string) => Promise<RewardStatus>;
     getPoolInfo: (
         bakerId: BakerId,
         blockHash?: string
     ) => Promise<BakerPoolStatus>;
     getPassiveDelegationInfo: (
         blockHash?: string
-    ) => Promise<PassiveDelegationStatus | undefined>;
+    ) => Promise<PassiveDelegationStatus>;
 };
 
 export type FileMethods = {
