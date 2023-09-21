@@ -67,7 +67,7 @@ async function hasPrfKeySeedBeenUsed(
     credId = await computeCredIdFromSeed(prfKeySeed, 0, global, 1);
     try {
         info = await getAccountInfoOfCredential(credId, blockHash);
-        return Boolean(info);
+        return true;
     } catch {
         return false;
     }
