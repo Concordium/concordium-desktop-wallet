@@ -142,11 +142,12 @@ async function recoverCredential(
     credentialNumber: number,
     identityId: number
 ) {
-    const accountInfo = await getAccountInfoOfCredential(credId, blockHash);
-
-    // The presence of an accountInfo implies that the credential has been deployed.
-    // if it is not present, the credential has not been deployed, and we don't need to save anything.
-    if (!accountInfo) {
+    let accountInfo: AccountInfo;
+    try {
+        accountInfo = await getAccountInfoOfCredential(credId, blockHash);
+    } catch {
+        // The presence of an accountInfo implies that the credential has been deployed.
+        // if it is not present, the credential has not been deployed, and we don't need to save anything.
         return undefined;
     }
 

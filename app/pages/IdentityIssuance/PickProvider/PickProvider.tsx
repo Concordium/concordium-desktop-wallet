@@ -54,14 +54,23 @@ async function hasPrfKeySeedBeenUsed(
     const blockHash = await getlastFinalizedBlockHash();
     // Check if this seed have been used with version 0 keygen.
     let credId = await computeCredIdFromSeed(prfKeySeed, 0, global, 0);
-    let info = await getAccountInfoOfCredential(credId, blockHash);
-    if (info) {
-        return true;
+    let info;
+    try {
+        info = await getAccountInfoOfCredential(credId, blockHash);
+        if (info) {
+            return true;
+        }
+    } catch {
+        // The seed was not used with version 0;
     }
     // Check if this index have been used with version 1 keygen.
     credId = await computeCredIdFromSeed(prfKeySeed, 0, global, 1);
-    info = await getAccountInfoOfCredential(credId, blockHash);
-    return Boolean(info);
+    try {
+        info = await getAccountInfoOfCredential(credId, blockHash);
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 interface Props {
