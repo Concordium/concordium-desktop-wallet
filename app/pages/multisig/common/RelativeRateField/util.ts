@@ -15,7 +15,7 @@ export const isValidRelativeRatePart = (v = '') =>
 export const isPositiveNumber: Validate = (value: RelativeRateValue) =>
     Object.values(value)
         .map(validatePositiveNumber)
-        .every((v) => v === true) || 'Values must above 1';
+        .every((v) => v === true) || 'Values must be positive';
 
 export const validBigIntValues: Validate = (value: RelativeRateValue) =>
     Object.values(value)
