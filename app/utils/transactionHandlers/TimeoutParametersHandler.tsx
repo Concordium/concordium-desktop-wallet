@@ -18,6 +18,7 @@ import { serializeTimeoutParameters } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 import { TimeoutParametersFields } from '~/pages/multisig/updates/TimeoutParameters/util';
 import { assertChainParametersV2OrHigher } from '../blockSummaryHelpers';
+import { getReducedFraction } from '../exchangeRateHelpers';
 
 const TYPE = 'Update timeout parameters';
 
@@ -48,14 +49,14 @@ export default class TimeoutParametersHandler
 
         const payload = {
             timeoutBase: fields.timeoutBase,
-            timeoutIncrease: {
+            timeoutIncrease: getReducedFraction({
                 numerator: BigInt(fields.timeoutIncrease.numerator),
                 denominator: BigInt(fields.timeoutIncrease.denominator),
-            },
-            timeoutDecrease: {
+            }),
+            timeoutDecrease: getReducedFraction({
                 numerator: BigInt(fields.timeoutDecrease.numerator),
                 denominator: BigInt(fields.timeoutDecrease.denominator),
-            },
+            }),
         };
 
         return createUpdateMultiSignatureTransaction(
