@@ -10,7 +10,7 @@ export interface FinalizationCommitteeParametersFields {
 export const fieldDisplays = {
     minFinalizers: 'Minimum number of finalizers',
     maxFinalizers: 'Maximum number of finalizers',
-    relativeStakeThresholdFraction: 'Relative stake threshold fraction',
+    relativeStakeThresholdFraction: 'Relative stake threshold',
 };
 
 export function getCurrentFinalizationCommitteeParameters(

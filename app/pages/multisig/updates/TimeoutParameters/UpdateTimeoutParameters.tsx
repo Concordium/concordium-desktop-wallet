@@ -55,7 +55,7 @@ export default function UpdateTimeoutParametersFields({
                 defaultValue={
                     defaults.timeoutBase || current.timeoutBase.toString()
                 }
-                label={`New ${fieldDisplays.timeoutBase} (ms)`}
+                label={`${fieldDisplays.timeoutBase} (ms)`}
                 placeholder={enterHere(fieldDisplays.timeoutBase)}
                 rules={validationRulesForPositiveWord64(
                     fieldDisplays.timeoutBase
@@ -63,7 +63,7 @@ export default function UpdateTimeoutParametersFields({
             />
             <FormRelativeRateField
                 name={fieldNames.timeoutIncrease}
-                label="New timeout increase"
+                label={fieldDisplays.timeoutIncrease}
                 className="mB10"
                 defaultValue={
                     defaults.timeoutIncrease || current.timeoutIncrease
@@ -79,7 +79,7 @@ export default function UpdateTimeoutParametersFields({
             />
             <FormRelativeRateField
                 name={fieldNames.timeoutDecrease}
-                label="New timeout decrease"
+                label={fieldDisplays.timeoutDecrease}
                 className="mB10"
                 defaultValue={
                     defaults.timeoutDecrease || current.timeoutDecrease
