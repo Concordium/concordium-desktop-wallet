@@ -58,7 +58,7 @@ export default function UpdateFinalizationCommitteeParametersFields({
                 defaultValue={
                     defaults.minFinalizers || current.minFinalizers.toString()
                 }
-                label={`New ${fieldDisplays.minFinalizers}`}
+                label={fieldDisplays.minFinalizers}
                 placeholder={enterHere(fieldDisplays.minFinalizers)}
                 rules={validationRules(fieldDisplays.minFinalizers)}
             />
@@ -68,7 +68,7 @@ export default function UpdateFinalizationCommitteeParametersFields({
                 defaultValue={
                     defaults.maxFinalizers || current.maxFinalizers.toString()
                 }
-                label={`New ${fieldDisplays.maxFinalizers}`}
+                label={fieldDisplays.maxFinalizers}
                 placeholder={enterHere(fieldDisplays.maxFinalizers)}
                 rules={validationRules(fieldDisplays.maxFinalizers)}
             />
