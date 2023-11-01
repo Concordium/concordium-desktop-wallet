@@ -46,7 +46,7 @@ export default function ExportBakerCredentials({
 
         const success = await saveFile(fileString, {
             title: 'Save validator credentials',
-            defaultPath: 'baker-credentials.json',
+            defaultPath: 'validator-credentials.json',
         });
         if (success) {
             onContinue();
