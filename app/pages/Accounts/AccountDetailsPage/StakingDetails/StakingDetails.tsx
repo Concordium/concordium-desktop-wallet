@@ -102,14 +102,6 @@ function BakerValues({ details, isDelegationProtocol }: BakerValuesProps) {
                                         .bakingCommission
                                 )}
                             />
-                            <Value
-                                title="Finalization reward commission"
-                                value={formatCommission(
-                                    (details as AccountBakerDetailsV1)
-                                        .bakerPoolInfo.commissionRates
-                                        .finalizationCommission
-                                )}
-                            />
                         </>
                     )}
                 </>
