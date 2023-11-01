@@ -188,7 +188,7 @@ export const displayDelegationTarget = (
 
     const id = (target as DelegationTargetBaker).bakerId ?? target;
 
-    return `Baker ID ${id.toString()}`;
+    return `Validator ID ${id.toString()}`;
 };
 
 export const displayRedelegate = (value: boolean) => (value ? 'Yes' : 'No');

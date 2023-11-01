@@ -64,10 +64,10 @@ function BakerValues({ details, isDelegationProtocol }: BakerValuesProps) {
     return (
         <>
             <Value
-                title="Baker stake"
+                title="Validator stake"
                 value={displayAsCcd(details.stakedAmount)}
             />
-            <Value title="Baker ID" value={details.bakerId.toString()} />
+            <Value title="Validator ID" value={details.bakerId.toString()} />
             <Value
                 title="Restake earnings"
                 value={displayRestakeEarnings(details.restakeEarnings)}
@@ -95,7 +95,7 @@ function BakerValues({ details, isDelegationProtocol }: BakerValuesProps) {
                                 )}
                             />
                             <Value
-                                title="Baking reward commission"
+                                title="Block reward commission"
                                 value={formatCommission(
                                     (details as AccountBakerDetailsV1)
                                         .bakerPoolInfo.commissionRates
@@ -144,10 +144,10 @@ interface DetailsText {
 }
 
 const bakerText: DetailsText = {
-    title: 'Baker registered',
-    pendingReduce: 'New baker stake',
+    title: 'Validator registered',
+    pendingReduce: 'New validator stake',
     pendingRemove:
-        'Baking will be stopped, and the staked amount will be unlocked on the public balance of the account.',
+        'Validation will be stopped, and the staked amount will be unlocked on the public balance of the account.',
 };
 
 const delegatorText: DetailsText = {

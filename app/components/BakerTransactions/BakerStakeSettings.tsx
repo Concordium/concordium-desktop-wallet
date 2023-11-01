@@ -51,7 +51,7 @@ export default function BakerStakeSettings({
             <div className="flexChildFill">
                 {existingValues !== undefined || (
                     <p className="mT0">
-                        To register as a baker, you must choose an amount to
+                        To register as a validator, you must choose an amount to
                         stake on the account. The staked amount will be part of
                         the balance, but while staked the amount is unavailable
                         for transactions.
@@ -68,7 +68,7 @@ export default function BakerStakeSettings({
                     )}
                 {pendingChange !== undefined && (
                     <div className="mV10 body2">
-                        Cannot update baker stake at this time:
+                        Cannot update validator stake at this time:
                         <div className="bodyEmphasized textError mV10">
                             <StakePendingChange pending={pendingChange} />
                         </div>
@@ -90,8 +90,8 @@ export default function BakerStakeSettings({
                     hasPendingChange={pendingChange !== undefined}
                 />
                 <p className="mB30">
-                    By default all baker rewards are added to the staked amount.
-                    This can be disabled below.
+                    By default all validator rewards are added to the staked
+                    amount. This can be disabled below.
                 </p>
                 <PickBakerRestake
                     initial={initialData?.restake}

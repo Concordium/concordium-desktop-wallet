@@ -101,7 +101,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
                         to={routes.ACCOUNTS_ADD_BAKER}
                         disabled={!accountInfo}
                     >
-                        Register as a baker
+                        Register as a validator
                     </ButtonNavLink>
                     {isDelegationPV && (
                         <ButtonNavLink
@@ -120,7 +120,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     to={routes.ACCOUNTS_BAKING}
                     disabled={!accountInfo}
                 >
-                    Baking
+                    Validation
                 </ButtonNavLink>
             )}
             {accountHasDeployedCredentials &&

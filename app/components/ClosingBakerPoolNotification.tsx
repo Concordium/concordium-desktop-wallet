@@ -9,7 +9,7 @@ interface Props {
 }
 
 /**
- * A notification to be shown when an account is delegating to a baker pool
+ * A notification to be shown when an account is delegating to a staking pool
  * that is going to close in the near future.
  */
 export default function ClosingBakerPoolNotification({

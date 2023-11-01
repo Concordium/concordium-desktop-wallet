@@ -44,7 +44,7 @@ const DisplayValues = ({ account, exchangeRate }: DisplayProps) => {
                 className={displayTransferStyles.fee}
                 estimatedFee={estimatedFee}
             />
-            <TitleDetail title="Stop baking" />
+            <TitleDetail title="Stop validation" />
         </>
     );
 };

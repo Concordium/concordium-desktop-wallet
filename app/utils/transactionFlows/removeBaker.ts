@@ -19,7 +19,7 @@ export type RemoveBakerPayload = NotOptional<
     Pick<ConfigureBakerPayload, 'stake'>
 >;
 
-export const removeBakerTitle = 'Remove baker';
+export const removeBakerTitle = 'Remove validator';
 
 export const convertToRemoveBakerTransaction = (
     account: Account,

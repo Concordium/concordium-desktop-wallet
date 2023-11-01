@@ -4,7 +4,8 @@ import { RewardDistributionValue } from '../../common/RewardDistribution';
 
 /* eslint-disable import/prefer-default-export */
 export const rewardDistributionLabels: [string, string, string] = [
-    'Baker reward',
+    // TODO should this have been translated from 'Baker reward'?
+    'Validator reward',
     'Next gas account',
     'Foundation',
 ];

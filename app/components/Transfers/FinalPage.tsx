@@ -95,9 +95,9 @@ function getSpecificsHandler(transaction: AccountTransaction) {
         instanceOfUpdateBakerRestakeEarnings(transaction) ||
         instanceOfUpdateBakerStake(transaction)
     ) {
-        title = 'Baker transaction submitted!';
+        title = 'Validator transaction submitted!';
     } else if (instanceOfConfigureBaker(transaction)) {
-        title = 'Configure baker transaction submitted!';
+        title = 'Configure validator transaction submitted!';
     } else if (instanceOfConfigureDelegation(transaction)) {
         title = 'Configure delegation transaction submitted!';
     } else {

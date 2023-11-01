@@ -55,6 +55,6 @@ export default async function initApplication(dispatch: Dispatch) {
     dispatch(unlock());
     listenForIdentityStatus(dispatch);
     checkForClosingBakerPools(dispatch).catch((e) =>
-        window.log.error(e, 'Error while checking for closing baker pools')
+        window.log.error(e, 'Error while checking for closing staking pools')
     );
 }

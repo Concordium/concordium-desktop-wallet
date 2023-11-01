@@ -45,7 +45,7 @@ export default function ExportBakerCredentials({
         );
 
         const success = await saveFile(fileString, {
-            title: 'Save baker credentials',
+            title: 'Save validator credentials',
             defaultPath: 'baker-credentials.json',
         });
         if (success) {
@@ -57,13 +57,13 @@ export default function ExportBakerCredentials({
         <div className={clsx('flexColumn flexChildFill', className)}>
             <div className="flexChildFill">
                 {bakerKeys === undefined ? (
-                    <Loading inline text="Generating baker keys" />
+                    <Loading inline text="Generating validator keys" />
                 ) : (
                     <>
                         <p className="mT0">
-                            Your baker keys have been generated. Before you can
-                            continue, you must export and save them. The keys
-                            will have to placed with the baker node.
+                            Your validator keys have been generated. Before you
+                            can continue, you must export and save them. The
+                            keys will have to placed with the validator node.
                         </p>
                         <DisplayPublicKey
                             name="Election verify key:"
@@ -85,7 +85,7 @@ export default function ExportBakerCredentials({
                 className={clsx('mT50', buttonClassName)}
                 onClick={hasExported ? onContinue : onExport}
             >
-                {hasExported ? 'Continue' : 'Export baker credentials'}
+                {hasExported ? 'Continue' : 'Export validator credentials'}
             </Button>
         </div>
     );

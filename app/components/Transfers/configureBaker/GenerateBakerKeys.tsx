@@ -30,7 +30,7 @@ export default function GenerateBakerKeys({
     const keys = useAsyncMemo(
         async () =>
             initialKeys ?? generateBakerKeys(account?.address, keyVariant),
-        () => setError("Couldn't generate baker keys"),
+        () => setError("Couldn't generate validator keys"),
         [account?.address, keyVariant, initialKeys]
     );
 

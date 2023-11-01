@@ -51,17 +51,17 @@ export function rejectReasonToDisplayText(
         case RejectReason.NonExistentRewardAccount:
             return 'The designated reward account does not exist';
         case RejectReason.InvalidProof:
-            return 'Proof that the baker owns relevant private keys is not valid';
+            return 'Proof that the validator owns relevant private keys is not valid';
         case RejectReason.AlreadyABaker:
-            return 'Baker with ID already exists';
+            return 'Validator with ID already exists';
         case RejectReason.NotABaker:
-            return 'Account is not a baker';
+            return 'Account is not a validator';
         case RejectReason.InsufficientBalanceForBakerStake:
             return 'Sender account has insufficient balance to cover the requested stake';
         case RejectReason.StakeUnderMinimumThresholdForBaking:
-            return 'The amount provided is under the threshold required for becoming a baker';
+            return 'The amount provided is under the threshold required for becoming a validator';
         case RejectReason.BakerInCooldown:
-            return 'Request to make change to the baker while the baker is in the cooldown period';
+            return 'Request to make change to the validator while the validator is in the cooldown period';
         case RejectReason.DuplicateAggregationKey:
             return 'Duplicate aggregation key';
         case RejectReason.NonExistentCredentialID:
@@ -105,11 +105,11 @@ export function rejectReasonToDisplayText(
         case RejectReason.NotAllowedToHandleEncrypted:
             return 'Account is not allowed to handle encrypted transfers because it has multiple credentials';
         case RejectReason.MissingBakerAddParameters:
-            return 'Missing parameters to add new baker';
+            return 'Missing parameters to add new validator';
         case RejectReason.FinalizationRewardCommissionNotInRange:
             return 'Finalization reward commission was not within the allowed range';
         case RejectReason.BakingRewardCommissionNotInRange:
-            return 'Baking reward commission was not within the allowed range';
+            return 'Block reward commission was not within the allowed range';
         case RejectReason.TransactionFeeCommissionNotInRange:
             return 'Transaction fee commission was not within the allowed range';
         case RejectReason.AlreadyADelegator:
@@ -125,11 +125,11 @@ export function rejectReasonToDisplayText(
         case RejectReason.NotADelegator:
             return 'Account is not a delegator';
         case RejectReason.DelegationTargetNotABaker:
-            return 'Delegation target is not a baker';
+            return 'Delegation target is not a validator';
         case RejectReason.StakeOverMaximumThresholdForPool:
-            return "Baking pool's total capital would become too large";
+            return "Staking pool's total capital would become too large";
         case RejectReason.PoolWouldBecomeOverDelegated:
-            return 'Fraction of delegated capital to baking pool would become too large';
+            return 'Fraction of delegated capital to staking pool would become too large';
         case RejectReason.PoolClosed:
             return 'Pool is not open for delegation';
         default:

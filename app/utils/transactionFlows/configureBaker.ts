@@ -269,7 +269,7 @@ export const convertToBakerTransaction = (
         }).every(not(isDefined))
     ) {
         throw new Error(
-            'Trying to submit a transaction without any changes to the existing baker configuration of an account.'
+            'Trying to submit a transaction without any changes to the existing validation configuration of an account.'
         );
     }
 

@@ -3,6 +3,7 @@ import { MintDistributionNode } from '~/node/NodeApiTypes';
 import updateConstants from '~/constants/updateConstants.json';
 import { RewardDistributionValue } from '../../common/RewardDistribution';
 
+// TODO Should baker be displayed as block here?
 export const rewardDistributionLabels: [string, string, string] = [
     'Baking reward account',
     'Finalization account reward',

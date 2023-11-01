@@ -139,8 +139,8 @@ export default function CommissionsPage({
         >
             <div className="flexChildFill">
                 <p className="mB30 mT0">
-                    When you open your baker as a pool, you earn commissions of
-                    stake delegated to your pool from other accounts:
+                    When you open your validator as a pool, you earn commissions
+                    of stake delegated to your pool from other accounts:
                 </p>
                 <CommissionField
                     label="Transaction fee commissions"
@@ -150,7 +150,7 @@ export default function CommissionsPage({
                     existing={existing?.transactionFeeCommission}
                 />
                 <CommissionField
-                    label="Baking reward commissions"
+                    label="Block reward commissions"
                     name={commissionsFieldNames.bakingRewardCommission}
                     min={chainParameters.bakingCommissionRange.min}
                     max={chainParameters.bakingCommissionRange.max}

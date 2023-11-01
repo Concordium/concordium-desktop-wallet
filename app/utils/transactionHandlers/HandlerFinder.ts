@@ -82,30 +82,30 @@ export function findAccountTransactionHandler(
             );
         case TransactionKindId.Add_baker:
             return new AccountHandlerTypeMiddleware(
-                new StakingHandler('Add baker', instanceOfAddBaker)
+                new StakingHandler('Add validator', instanceOfAddBaker)
             );
         case TransactionKindId.Update_baker_keys:
             return new AccountHandlerTypeMiddleware(
                 new StakingHandler(
-                    'Update baker keys',
+                    'Update validator keys',
                     instanceOfUpdateBakerKeys
                 )
             );
         case TransactionKindId.Remove_baker:
             return new AccountHandlerTypeMiddleware(
-                new StakingHandler('Remove baker', instanceOfRemoveBaker)
+                new StakingHandler('Remove validator', instanceOfRemoveBaker)
             );
         case TransactionKindId.Update_baker_stake:
             return new AccountHandlerTypeMiddleware(
                 new StakingHandler(
-                    'Update baker stake',
+                    'Update validator stake',
                     instanceOfUpdateBakerStake
                 )
             );
         case TransactionKindId.Update_baker_restake_earnings:
             return new AccountHandlerTypeMiddleware(
                 new StakingHandler(
-                    'Update baker restake earnings',
+                    'Update validator restake earnings',
                     instanceOfUpdateBakerRestakeEarnings
                 )
             );
@@ -137,7 +137,10 @@ export function findAccountTransactionHandler(
             return new AccountHandlerTypeMiddleware(new RegisterDataHandler());
         case TransactionKindId.Configure_baker:
             return new AccountHandlerTypeMiddleware(
-                new StakingHandler('Configure baker', instanceOfConfigureBaker)
+                new StakingHandler(
+                    'Configure validator',
+                    instanceOfConfigureBaker
+                )
             );
         case TransactionKindId.Configure_delegation:
             return new AccountHandlerTypeMiddleware(

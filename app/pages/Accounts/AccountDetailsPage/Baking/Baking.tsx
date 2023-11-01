@@ -36,35 +36,35 @@ function Actions({ isDelegationPV }: ActionsProps) {
                 className="mB20 flex width100"
                 to={routes.ACCOUNTS_UPDATE_BAKER_STAKE}
             >
-                Update baker stake
+                Update validator stake
             </ButtonNavLink>
             {isDelegationPV ? (
                 <ButtonNavLink
                     className="mB20 flex width100"
                     to={routes.ACCOUNTS_UPDATE_BAKER_POOL}
                 >
-                    Update baker pool
+                    Update staking pool
                 </ButtonNavLink>
             ) : (
                 <ButtonNavLink
                     className="mB20 flex width100"
                     to={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}
                 >
-                    Update baker restake earnings
+                    Update validator restake earnings
                 </ButtonNavLink>
             )}
             <ButtonNavLink
                 className="mB20 flex width100"
                 to={routes.ACCOUNTS_UPDATE_BAKER_KEYS}
             >
-                Update baker keys
+                Update validator keys
             </ButtonNavLink>
             <ButtonNavLink
                 className="flex width100"
                 to={routes.ACCOUNTS_REMOVE_BAKER}
                 negative
             >
-                Stop baking
+                Stop validation
             </ButtonNavLink>
         </>
     );

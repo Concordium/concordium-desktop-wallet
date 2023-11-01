@@ -16,7 +16,7 @@ import {
     getExistingBakerValues,
 } from './configureBaker';
 
-export const updateBakerPoolTitle = 'Update baker pool';
+export const updateBakerPoolTitle = 'Update staking pool';
 
 export type UpdateBakerPoolDependencies = NotOptional<ExchangeRate> &
     NotOptional<ChainData>;

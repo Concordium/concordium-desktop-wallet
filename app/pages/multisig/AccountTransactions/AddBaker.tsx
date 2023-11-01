@@ -110,7 +110,7 @@ const DisplayValues = ({
                 placeholder
             />
             <DisplayBakerCommission
-                title="Baking reward commission"
+                title="Block reward commission"
                 value={commissions?.bakingRewardCommission}
                 placeholder
             />

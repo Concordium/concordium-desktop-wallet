@@ -109,7 +109,7 @@ export default withDeps(
                     show={showError}
                     onClick={() => setShowError(false)}
                     header="Empty transaction"
-                    content="Transaction includes no changes to existing baker configuration for account."
+                    content="Transaction includes no changes to existing validator configuration for account."
                 />
                 <AccountTransactionFlow<
                     UpdateBakerPoolFlowState,

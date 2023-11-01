@@ -60,7 +60,7 @@ function ShieldedInfo({
 
 const getDelegationTargetId = (dt: DelegationTarget) =>
     dt.delegateType === DelegationTargetType.Baker
-        ? `Delegation to baker pool ${dt.bakerId}`
+        ? `Delegation to staking pool ${dt.bakerId}`
         : 'Passive delegation';
 
 interface PublicInfoProps {
@@ -99,7 +99,7 @@ function PublicInfo({ accountInfo }: PublicInfoProps) {
                     <div className="mB10">
                         <Label className="mB5 textWhite">
                             {accountBaker !== undefined &&
-                                `Stake with baker ${accountBaker.bakerId}`}
+                                `Stake with validator ${accountBaker.bakerId}`}
                             {accountDelegation !== undefined &&
                                 getDelegationTargetId(
                                     accountDelegation.delegationTarget

@@ -70,7 +70,7 @@ export default function DisplayConfigureBaker({ transaction }: Props) {
                 value={transaction.payload.transactionFeeCommission}
             />
             <DisplayBakerCommission
-                title="Baking reward commission"
+                title="Block reward commission"
                 value={transaction.payload.bakingRewardCommission}
             />
             <DisplayBakerCommission

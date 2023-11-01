@@ -22,9 +22,9 @@ export default function AddBakerProposalStatus({
         <ProposalStatusView
             {...proposalStatusViewProps}
             headerLeft={senderName ?? transaction.sender}
-            headerRight="Add baker"
+            headerRight="Add validator"
             status={status}
-            title="Add baker"
+            title="Add validator"
         >
             <span className="textFaded">
                 Account: {senderName ? `${senderName} ` : ''} (
