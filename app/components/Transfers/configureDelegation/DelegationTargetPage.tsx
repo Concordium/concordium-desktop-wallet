@@ -155,8 +155,8 @@ export default function DelegationTargetPage({
                             Passive delegation is an alternative to delegation
                             to a specific staking pool that has lower rewards.
                             With passive delegation you do not have to worry
-                            about the uptime or quality of a staking node. For
-                            more info you can visit:
+                            about the uptime or quality of a validation node.
+                            For more info you can visit:
                         </p>
                         <p className="mV0">
                             <ExternalLink href={urls.delegationDocumention}>
