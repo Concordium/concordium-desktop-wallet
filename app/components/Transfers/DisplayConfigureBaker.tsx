@@ -39,7 +39,8 @@ export default function DisplayConfigureBaker({ transaction }: Props) {
             {payload.stake !== undefined &&
                 (payload.stake === 0n ? (
                     <>
-                        <h5 className={styles.title}>Stop baking</h5>
+                        <h5 className={styles.title}>Stop Validation</h5>
+                        <h5 className={styles.subtitle}>(Stop baking)</h5>
                     </>
                 ) : (
                     <>
@@ -73,11 +74,19 @@ export default function DisplayConfigureBaker({ transaction }: Props) {
                 title="Block reward commission"
                 value={transaction.payload.bakingRewardCommission}
             />
+            <h5 className={styles.subtitle}>(Baker reward commission)</h5>
             <DisplayBakerCommission
                 title="Finalization reward commission"
                 value={transaction.payload.finalizationRewardCommission}
             />
             <DisplayMetadataUrl metadataUrl={payload.metadataUrl} />
+
+            {payload.keys !== undefined && (
+                <>
+                    <h5 className={styles.title}>Update validator keys</h5>
+                    <h5 className={styles.subtitle}>(Update baker keys)</h5>
+                </>
+            )}
             <DisplayPublicKey
                 name="Election verify key:"
                 publicKey={payload?.keys?.electionVerifyKey}

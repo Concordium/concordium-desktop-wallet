@@ -9,6 +9,12 @@
     }
 }
 
+.subtitle {
+    margin-bottom: 5px;
+    margin-top: 0;
+    font-weight: $font-weight-regular;
+}
+
 .value {
     composes: mono from global;
 }
