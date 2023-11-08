@@ -14,7 +14,6 @@ export interface UpdatePoolParametersFields {
     leverageBound: Fraction;
 }
 
-// TODO Should baker be displayed as block here?
 export const fieldDisplays = {
     passiveFinalizationCommission: 'Passive finalization commission',
     passiveBakingCommission: 'Passive baker commission',

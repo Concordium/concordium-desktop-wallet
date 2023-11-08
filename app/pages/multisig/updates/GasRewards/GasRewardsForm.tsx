@@ -33,8 +33,7 @@ const fieldNamesV0: EqualRecord<UpdateGasRewardsFieldsV0> = {
 
 const labels: { [P in keyof UpdateGasRewardsFieldsV0]: string } = {
     finalizationProof: 'Finalization proof:',
-    // TODO: Baker -> Validator
-    baker: 'Validator:',
+    baker: 'Baker:',
     accountCreation: 'Account creation:',
     chainUpdate: 'Chain update:',
 };

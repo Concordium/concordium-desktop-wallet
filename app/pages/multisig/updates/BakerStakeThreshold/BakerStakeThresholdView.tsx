@@ -11,7 +11,6 @@ interface Props extends ChainData {
     bakerStakeThreshold: BakerStakeThreshold;
 }
 
-// TODO Should baker be displayed as validator here (already done)?
 /**
  * Displays an overview of a baker stake threshold.
  */
@@ -22,9 +21,7 @@ export default withChainData(function BakerStakeThresholdView({
     function renderCurrentValue(cp: ChainParameters): JSX.Element {
         return (
             <div>
-                <Label className="mB5">
-                    Current validator stake threshold:
-                </Label>
+                <Label className="mB5">Current baker stake threshold:</Label>
                 <div className="body3 mono">
                     {displayAsCcd(getMinimumStakeForBaking(cp))}
                 </div>
@@ -39,7 +36,7 @@ export default withChainData(function BakerStakeThresholdView({
                 <Loading inline />
             )}
             <div>
-                <Label className="mB5">New validator stake threshold:</Label>
+                <Label className="mB5">New baker stake threshold:</Label>
                 <div className="body3 mono">
                     {displayAsCcd(bakerStakeThreshold.threshold)}
                 </div>

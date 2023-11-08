@@ -32,7 +32,7 @@ export default function UpdateBakerStakeThreshold({
             <Form.Input
                 className="body2"
                 name={fieldNames.threshold}
-                label="New validator stake threshold (µCCD)"
+                label="New baker stake threshold (µCCD)"
                 defaultValue={currentBakerStakeThreshold.toString()}
                 rules={{
                     required: 'Threshold is required',
