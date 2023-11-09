@@ -72,11 +72,12 @@ export default function DisplayConfigureBaker({ transaction }: Props) {
             />
             <DisplayBakerCommission
                 title="Block reward commission"
+                subtitle="(Baking reward)"
                 value={transaction.payload.bakingRewardCommission}
             />
-            <h5 className={styles.subtitle}>(Baker reward commission)</h5>
             <DisplayBakerCommission
                 title="Finalization reward commission"
+                subtitle="(Deprecated value)"
                 value={transaction.payload.finalizationRewardCommission}
             />
             <DisplayMetadataUrl metadataUrl={payload.metadataUrl} />

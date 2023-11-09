@@ -127,7 +127,14 @@ export default function CommissionsPage({
     };
 
     const handleSubmit = useCallback(
-        (values: Commissions) => onNext(fromPercentagesToDecimals(values)),
+        (values: Commissions) => {
+            const finalizationRewardCommission =
+                chainParameters.finalizationCommissionRange.max;
+            onNext({
+                ...fromPercentagesToDecimals(values),
+                finalizationRewardCommission,
+            });
+        },
         [onNext]
     );
 
@@ -155,13 +162,6 @@ export default function CommissionsPage({
                     min={chainParameters.bakingCommissionRange.min}
                     max={chainParameters.bakingCommissionRange.max}
                     existing={existing?.bakingRewardCommission}
-                />
-                <CommissionField
-                    label="Finalization reward commissions"
-                    name={commissionsFieldNames.finalizationRewardCommission}
-                    min={chainParameters.finalizationCommissionRange.min}
-                    max={chainParameters.finalizationCommissionRange.max}
-                    existing={existing?.finalizationRewardCommission}
                 />
             </div>
             <Form.Submit className={styles.continue}>Continue</Form.Submit>

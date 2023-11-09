@@ -9,14 +9,21 @@ interface Props {
     title: string;
     value?: number;
     placeholder?: boolean;
+    subtitle?: string;
 }
 
 const formatCommission = toFixed(3);
 
-const DisplayBakerCommission = ({ title, value, placeholder = false }: Props) =>
+const DisplayBakerCommission = ({
+    title,
+    value,
+    subtitle,
+    placeholder = false,
+}: Props) =>
     isDefined(value) || placeholder ? (
         <>
             <h5 className={styles.title}>{title}:</h5>
+            <h5 className={styles.subtitle}>{subtitle}</h5>
             <p className={styles.amount}>
                 {!value && placeholder && (
                     <span className="textFaded">To be determined</span>

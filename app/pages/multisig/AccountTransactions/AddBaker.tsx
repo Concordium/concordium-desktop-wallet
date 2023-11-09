@@ -111,11 +111,13 @@ const DisplayValues = ({
             />
             <DisplayBakerCommission
                 title="Block reward commission"
+                subtitle="(Baking reward)"
                 value={commissions?.bakingRewardCommission}
                 placeholder
             />
             <DisplayBakerCommission
                 title="Finalization reward commission"
+                subtitle="(Deprecated value)"
                 value={commissions?.finalizationRewardCommission}
                 placeholder
             />

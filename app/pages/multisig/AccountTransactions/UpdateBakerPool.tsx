@@ -101,14 +101,8 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
             {showField((v) => v.commissions?.bakingRewardCommission) && (
                 <DisplayBakerCommission
                     title="Block reward commission"
+                    subtitle="(Baking reward)"
                     value={changes.commissions?.bakingRewardCommission}
-                    placeholder
-                />
-            )}
-            {showField((v) => v.commissions?.finalizationRewardCommission) && (
-                <DisplayBakerCommission
-                    title="Finalization reward commission"
-                    value={changes.commissions?.finalizationRewardCommission}
                     placeholder
                 />
             )}
