@@ -135,7 +135,7 @@ export default function CommissionsPage({
                 finalizationRewardCommission,
             });
         },
-        [onNext]
+        [onNext, chainParameters.finalizationCommissionRange.max]
     );
 
     return (
