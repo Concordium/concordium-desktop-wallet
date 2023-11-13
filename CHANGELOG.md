@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.7.0
+
+### Changed
+
+-   Baker/baking renamed to validator/validation in UI.
+-   Default name for key file is now validator-credentials.json.
+-   Baker/delegator icons have been replaced.
+-   Finalization commission rate is now only displayed when interacting with the ledger.
+
+### Added
+
+-   labels for renamed values when interacting with the ledger.
+
 ## 1.6.0
 
 ### Added
