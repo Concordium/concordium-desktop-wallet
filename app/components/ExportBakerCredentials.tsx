@@ -63,7 +63,7 @@ export default function ExportBakerCredentials({
                         <p className="mT0">
                             Your validator keys have been generated. Before you
                             can continue, you must export and save them. The
-                            keys will have to placed with the validator node.
+                            keys will have to be placed with the validator node.
                         </p>
                         <DisplayPublicKey
                             name="Election verify key:"
