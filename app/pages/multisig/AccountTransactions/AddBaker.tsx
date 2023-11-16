@@ -27,7 +27,6 @@ import {
 } from '~/utils/transactionFlows/addBaker';
 import {
     ConfigureBakerFlowDependencies,
-    getDefaultCommissions,
     displayPoolOpen,
     displayRestakeEarnings,
 } from '~/utils/transactionFlows/configureBaker';
@@ -59,10 +58,7 @@ const DisplayValues = ({
     chainParameters,
     ...values
 }: DisplayProps) => {
-    const sanitized = getSanitizedAddBakerValues(
-        values,
-        getDefaultCommissions(chainParameters)
-    );
+    const sanitized = getSanitizedAddBakerValues(values);
 
     const {
         stake,
@@ -185,7 +181,6 @@ export default withDeps(
                 nonce: bigint
             ) =>
                 convertToAddBakerTransaction(
-                    getDefaultCommissions(chainParameters),
                     account,
                     nonce,
                     exchangeRate
