@@ -185,7 +185,7 @@ export default withDeps(
                     nonce,
                     exchangeRate
                 )(values, values.expiry),
-            [exchangeRate, chainParameters]
+            [exchangeRate]
         );
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
