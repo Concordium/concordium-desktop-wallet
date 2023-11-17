@@ -81,7 +81,7 @@ export default withDeps(
         // eslint-disable-next-line react-hooks/exhaustive-deps
         const convert = useCallback(
             convertToAddBakerTransaction(account, nonce, exchangeRate),
-            [account, nonce, exchangeRate, chainParameters]
+            [account, nonce, exchangeRate]
         );
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
