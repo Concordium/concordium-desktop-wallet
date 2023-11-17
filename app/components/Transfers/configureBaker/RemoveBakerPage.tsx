@@ -20,8 +20,8 @@ const RemoveBakerPage = withPendingBakerChangeGuard(
         return (
             <>
                 <p className="flexChildFill">
-                    This will remove the baker status of the account. After the
-                    grace period the full staked amount will be unlocked for
+                    This will remove the validator status of the account. After
+                    the grace period the full staked amount will be unlocked for
                     disposal.
                     {cooldownUntil && (
                         <>

@@ -25,9 +25,9 @@ export default function UpdateBakerRestakeEarningsProposalStatus({
         <ProposalStatusView
             {...proposalStatusViewProps}
             headerLeft={senderName ?? transaction.sender}
-            headerRight="Update baker restake earnings"
+            headerRight="Update validator restake earnings"
             status={status}
-            title="Update baker restake earnings"
+            title="Update validator restake earnings"
         >
             <span className="textFaded">
                 Account: {senderName ? `${senderName} ` : ''} (

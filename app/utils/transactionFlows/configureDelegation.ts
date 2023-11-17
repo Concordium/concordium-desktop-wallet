@@ -175,20 +175,23 @@ export const convertToConfigureDelegationTransaction = (
     return transaction;
 };
 
+export const isPassiveDelegation = (
+    target: DelegationTarget | string | bigint | null
+) =>
+    target === null ||
+    (target as DelegationTarget)?.delegateType ===
+        DelegationTargetType.PassiveDelegation;
+
 export const displayDelegationTarget = (
     target: DelegationTarget | string | bigint | null
 ) => {
-    if (
-        target === null ||
-        (target as DelegationTarget)?.delegateType ===
-            DelegationTargetType.PassiveDelegation
-    ) {
+    if (isPassiveDelegation(target)) {
         return 'Passive delegation';
     }
 
     const id = (target as DelegationTargetBaker).bakerId ?? target;
 
-    return `Baker ID ${id.toString()}`;
+    return `Validator ID ${id.toString()}`;
 };
 
 export const displayRedelegate = (value: boolean) => (value ? 'Yes' : 'No');

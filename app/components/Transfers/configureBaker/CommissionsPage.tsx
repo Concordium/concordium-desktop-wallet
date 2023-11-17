@@ -127,8 +127,15 @@ export default function CommissionsPage({
     };
 
     const handleSubmit = useCallback(
-        (values: Commissions) => onNext(fromPercentagesToDecimals(values)),
-        [onNext]
+        (values: Commissions) => {
+            const finalizationRewardCommission =
+                chainParameters.finalizationCommissionRange.max;
+            onNext({
+                ...fromPercentagesToDecimals(values),
+                finalizationRewardCommission,
+            });
+        },
+        [onNext, chainParameters.finalizationCommissionRange.max]
     );
 
     return (
@@ -139,8 +146,8 @@ export default function CommissionsPage({
         >
             <div className="flexChildFill">
                 <p className="mB30 mT0">
-                    When you open your baker as a pool, you earn commissions of
-                    stake delegated to your pool from other accounts:
+                    When you open your validator as a pool, you earn commissions
+                    of stake delegated to your pool from other accounts:
                 </p>
                 <CommissionField
                     label="Transaction fee commissions"
@@ -150,18 +157,11 @@ export default function CommissionsPage({
                     existing={existing?.transactionFeeCommission}
                 />
                 <CommissionField
-                    label="Baking reward commissions"
+                    label="Block reward commissions"
                     name={commissionsFieldNames.bakingRewardCommission}
                     min={chainParameters.bakingCommissionRange.min}
                     max={chainParameters.bakingCommissionRange.max}
                     existing={existing?.bakingRewardCommission}
-                />
-                <CommissionField
-                    label="Finalization reward commissions"
-                    name={commissionsFieldNames.finalizationRewardCommission}
-                    min={chainParameters.finalizationCommissionRange.min}
-                    max={chainParameters.finalizationCommissionRange.max}
-                    existing={existing?.finalizationRewardCommission}
                 />
             </div>
             <Form.Submit className={styles.continue}>Continue</Form.Submit>

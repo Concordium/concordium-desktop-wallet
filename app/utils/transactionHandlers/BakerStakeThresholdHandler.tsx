@@ -19,7 +19,7 @@ import {
 import { serializeBakerStakeThreshold } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Update baker stake threshold';
+const TYPE = 'Update validator stake threshold';
 
 type TransactionType = UpdateInstruction<BakerStakeThreshold>;
 

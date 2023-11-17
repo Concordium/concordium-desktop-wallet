@@ -27,6 +27,7 @@ import {
     getDelegationFlowChanges,
     getEstimatedConfigureDelegationFee,
     getExistingDelegationValues,
+    isPassiveDelegation,
 } from '~/utils/transactionFlows/configureDelegation';
 import { updateDelegationTitle } from '~/utils/transactionFlows/updateDelegation';
 import { addDelegationTitle } from '~/utils/transactionFlows/addDelegation';
@@ -37,6 +38,8 @@ import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { ValidateValues } from '~/components/MultiStepForm';
 
 import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
+
+import styles from './proposal-details/ProposalDetails.module.scss';
 
 interface DisplayProps
     extends Partial<RequiredValues & ConfigureDelegationFlowState> {
@@ -80,6 +83,11 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
                     }
                 />
             )}
+            {showField((v) => v.target) &&
+                changes.target !== undefined &&
+                !isPassiveDelegation(changes.target) && (
+                    <p className={styles.value}>(Baker ID)</p>
+                )}
             {showField((v) => v.delegate?.amount) && (
                 <AmountDetail
                     title="Delegated amount"

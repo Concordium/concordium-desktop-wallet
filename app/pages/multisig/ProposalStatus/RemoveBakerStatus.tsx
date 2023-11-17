@@ -22,9 +22,9 @@ export default function RemoveBakerProposalStatus({
         <ProposalStatusView
             {...proposalStatusViewProps}
             headerLeft={senderName ?? transaction.sender}
-            headerRight="Remove baker"
+            headerRight="Remove validator"
             status={status}
-            title="Remove baker"
+            title="Remove validator"
         >
             <span className="textFaded">
                 Account: {senderName ? `${senderName} ` : ''} (

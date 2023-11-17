@@ -16,10 +16,10 @@ export interface UpdatePoolParametersFields {
 
 export const fieldDisplays = {
     passiveFinalizationCommission: 'Passive finalization commission',
-    passiveBakingCommission: 'Passive baking commission',
+    passiveBakingCommission: 'Passive baker commission',
     passiveTransactionCommission: 'Passive transaction commission',
     finalizationCommissionRange: 'Finalization commission range',
-    bakingCommissionRange: 'Baking commission range',
+    bakingCommissionRange: 'Baker commission range',
     transactionCommissionRange: 'Transaction commission range',
     minimumEquityCapital: 'Minimum equity capital',
     capitalBound: 'Capital bound',

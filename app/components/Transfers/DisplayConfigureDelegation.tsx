@@ -10,6 +10,7 @@ import DisplayAccount from './DisplayAccount';
 import {
     displayDelegationTarget,
     displayRedelegate,
+    isPassiveDelegation,
 } from '~/utils/transactionFlows/configureDelegation';
 import { displayAsCcd } from '~/utils/ccd';
 
@@ -39,6 +40,9 @@ export default function DisplayConfigureDelegation({ transaction }: Props) {
                     <p className={styles.amount}>
                         {displayDelegationTarget(payload.delegationTarget)}
                     </p>
+                    {!isPassiveDelegation(payload.delegationTarget) && (
+                        <p className={styles.amount}>(Baker ID)</p>
+                    )}
                 </>
             )}
 

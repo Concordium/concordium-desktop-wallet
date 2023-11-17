@@ -685,7 +685,7 @@ export function validateBakerStake(
     if (bakerStakeThreshold && bakerStakeThreshold > amount) {
         return `Stake is below the threshold (${displayAsCcd(
             bakerStakeThreshold
-        )}) for baking`;
+        )}) for validation`;
     }
     if (
         accountInfo &&

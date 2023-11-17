@@ -50,8 +50,8 @@ const MetadataUrlPage = ({
         >
             <div className="flexChildFill">
                 <p className="mT0">
-                    You can choose to add a URL with metadata about your baker.
-                    Leave it blank if you don&apos;t have any.
+                    You can choose to add a URL with metadata about your
+                    validator. Leave it blank if you don&apos;t have any.
                 </p>
                 <div className="mT50">
                     {existing !== undefined && (

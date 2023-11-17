@@ -34,8 +34,8 @@ export default function DelegationStatusPage({
         <>
             <div className="flexChildFill">
                 <p>
-                    You have the option to open your baker as a pool for others
-                    to delegate their CCD to.
+                    You have the option to open your validator as a pool for
+                    others to delegate their CCD to.
                 </p>
                 <div className="mT50">
                     {existing !== undefined && (

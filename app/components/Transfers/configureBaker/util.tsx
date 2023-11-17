@@ -30,7 +30,7 @@ export const withPendingBakerChangeGuard = <P extends AccountOrInfo>(
     if (pendingChange) {
         return (
             <div className="mT30 mB0 body2">
-                Cannot update baker stake at this time:
+                Cannot update validator stake at this time:
                 <div className="bodyEmphasized textError mV10">
                     <StakePendingChange pending={pendingChange} />
                 </div>

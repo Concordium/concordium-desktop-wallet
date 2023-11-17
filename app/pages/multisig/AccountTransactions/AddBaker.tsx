@@ -27,7 +27,6 @@ import {
 } from '~/utils/transactionFlows/addBaker';
 import {
     ConfigureBakerFlowDependencies,
-    getDefaultCommissions,
     displayPoolOpen,
     displayRestakeEarnings,
 } from '~/utils/transactionFlows/configureBaker';
@@ -59,10 +58,7 @@ const DisplayValues = ({
     chainParameters,
     ...values
 }: DisplayProps) => {
-    const sanitized = getSanitizedAddBakerValues(
-        values,
-        getDefaultCommissions(chainParameters)
-    );
+    const sanitized = getSanitizedAddBakerValues(values);
 
     const {
         stake,
@@ -110,12 +106,14 @@ const DisplayValues = ({
                 placeholder
             />
             <DisplayBakerCommission
-                title="Baking reward commission"
+                title="Block reward commission"
+                subtitle="(Baking reward)"
                 value={commissions?.bakingRewardCommission}
                 placeholder
             />
             <DisplayBakerCommission
                 title="Finalization reward commission"
+                subtitle="(Deprecated value)"
                 value={commissions?.finalizationRewardCommission}
                 placeholder
             />
@@ -183,12 +181,11 @@ export default withDeps(
                 nonce: bigint
             ) =>
                 convertToAddBakerTransaction(
-                    getDefaultCommissions(chainParameters),
                     account,
                     nonce,
                     exchangeRate
                 )(values, values.expiry),
-            [exchangeRate, chainParameters]
+            [exchangeRate]
         );
 
         // eslint-disable-next-line react-hooks/exhaustive-deps

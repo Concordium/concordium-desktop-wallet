@@ -75,7 +75,7 @@ const updateInstructionTypes: TypeTuple[] = [
     [
         TransactionTypes.UpdateInstruction,
         UpdateType.UpdateBakerStakeThreshold,
-        'Update baker stake threshold',
+        'Update validator stake threshold',
         not(hasDelegationProtocol),
     ],
     [
@@ -184,37 +184,37 @@ const accountTransactionTypes: TypeTuple[] = [
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Add_baker,
-        'Add baker',
+        'Add validator',
         not(hasDelegationProtocol),
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Update_baker_keys,
-        'Update baker keys',
+        'Update validator keys',
         not(hasDelegationProtocol),
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Remove_baker,
-        'Remove baker',
+        'Remove validator',
         not(hasDelegationProtocol),
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Update_baker_stake,
-        'Update baker stake',
+        'Update validator stake',
         not(hasDelegationProtocol),
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Update_baker_restake_earnings,
-        'Update baker restake earnings',
+        'Update validator restake earnings',
         not(hasDelegationProtocol),
     ],
     [
         TransactionTypes.AccountTransaction,
         TransactionKind.Configure_baker,
-        'Configure baker',
+        'Configure validator',
         hasDelegationProtocol,
     ],
     [
@@ -231,31 +231,31 @@ const configureBakerLinks = (
             className={styles.link}
             to={routes.MULTISIGTRANSACTIONS_ADD_BAKER}
         >
-            Register as a baker
+            Register as a validator
         </ButtonNavLink>
         <ButtonNavLink
             className={styles.link}
             to={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_STAKE}
         >
-            Update baker stake
+            Update validator stake
         </ButtonNavLink>
         <ButtonNavLink
             className={styles.link}
             to={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_POOL}
         >
-            Update baker pool
+            Update staking pool
         </ButtonNavLink>
         <ButtonNavLink
             className={styles.link}
             to={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_KEYS}
         >
-            Update baker keys
+            Update validator keys
         </ButtonNavLink>
         <ButtonNavLink
             className={styles.link}
             to={routes.MULTISIGTRANSACTIONS_REMOVE_BAKER}
         >
-            Stop baking
+            Stop validation
         </ButtonNavLink>
     </>
 );

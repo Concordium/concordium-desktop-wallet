@@ -63,7 +63,7 @@ export default function DelegationTargetPage({
             const poolStatus = await getPoolInfo(bakerId);
 
             if (poolStatus.poolInfo.openStatus !== OpenStatusText.OpenForAll) {
-                return 'Targeted baker does not allow new delegators';
+                return 'Targeted validator does not allow new delegators';
             }
 
             if (
@@ -71,12 +71,12 @@ export default function DelegationTargetPage({
                 poolStatus.delegatedCapitalCap - poolStatus.delegatedCapital <
                     accountInfo.accountDelegation.stakedAmount
             ) {
-                return "Your current stake would violate the targeted baker's cap";
+                return "Your current stake would violate the targeted validator's cap";
             }
 
             return true;
         } catch {
-            return "Supplied baker ID doesn't match an active baker.";
+            return "Supplied validator ID doesn't match an active validator.";
         }
     };
 
@@ -91,7 +91,7 @@ export default function DelegationTargetPage({
         >
             <div className="flexChildFill">
                 <p className="mB30 mT0">
-                    Please choose to delegate to a specific baker pool or
+                    Please choose to delegate to a specific staking pool or
                     passive delegation.
                 </p>
                 <div className="mT50">
@@ -113,25 +113,25 @@ export default function DelegationTargetPage({
                         <Form.Input
                             name={fieldNames.poolId}
                             className="mT30 body2"
-                            placeholder="Enter baker ID"
+                            placeholder="Enter validator ID"
                             rules={{
-                                required: 'Baker ID must be specified',
+                                required: 'Validator ID must be specified',
                                 min: {
                                     value: 0,
-                                    message: "Baker ID's cannot be negative",
+                                    message: 'Validator ID cannot be negative',
                                 },
                                 validate: {
                                     wholeNumber: validBigInt(
-                                        "Baker ID's are positive whole numbers"
+                                        'Validator ID must be a positive whole number'
                                     ),
                                     validateBakerId,
                                 },
                             }}
                         />
                         <p className="mB30">
-                            If you don&apos;t already know which baker pool you
-                            want to delegate an amount to, you can look for one
-                            here:
+                            If you don&apos;t already know which staking pool
+                            you want to delegate an amount to, you can look for
+                            one here:
                         </p>
                         <p className="mV0">
                             {getTargetNet() === Net.Mainnet ? (
@@ -153,9 +153,9 @@ export default function DelegationTargetPage({
                     <>
                         <p className="mB20">
                             Passive delegation is an alternative to delegation
-                            to a specific baker pool that has lower rewards.
+                            to a specific staking pool that has lower rewards.
                             With passive delegation you do not have to worry
-                            about the uptime or quality of a baker node. For
+                            about the uptime or quality of a validator node. For
                             more info you can visit:
                         </p>
                         <p className="mV0">

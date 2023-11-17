@@ -24,10 +24,7 @@ import {
     convertToAddBakerTransaction,
     validateAddBakerValues,
 } from '~/utils/transactionFlows/addBaker';
-import {
-    ConfigureBakerFlowDependencies,
-    getDefaultCommissions,
-} from '~/utils/transactionFlows/configureBaker';
+import { ConfigureBakerFlowDependencies } from '~/utils/transactionFlows/configureBaker';
 import AddBakerStakePage from '~/components/Transfers/configureBaker/AddBakerStakePage';
 import DelegationStatusPage from '~/components/Transfers/configureBaker/DelegationStatusPage';
 import CommissionsPage from '~/components/Transfers/configureBaker/CommissionsPage';
@@ -83,13 +80,8 @@ export default withDeps(
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
         const convert = useCallback(
-            convertToAddBakerTransaction(
-                getDefaultCommissions(chainParameters),
-                account,
-                nonce,
-                exchangeRate
-            ),
-            [account, nonce, exchangeRate, chainParameters]
+            convertToAddBakerTransaction(account, nonce, exchangeRate),
+            [account, nonce, exchangeRate]
         );
 
         // eslint-disable-next-line react-hooks/exhaustive-deps

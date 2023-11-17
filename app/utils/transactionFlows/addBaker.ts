@@ -14,11 +14,9 @@ import {
     MakeOptional,
     MakeRequired,
     NotOptional,
-    OpenStatus,
     TransactionKindId,
 } from '../types';
 import {
-    Commissions,
     ConfigureBakerFlowState,
     toConfigureBakerPayload,
     convertToBakerTransaction,
@@ -34,32 +32,24 @@ export type AddBakerPayload = MakeOptional<
     'metadataUrl'
 >;
 
-export const addBakerTitle = 'Register as a baker';
+export const addBakerTitle = 'Register as a validator';
 
 export const getSanitizedAddBakerValues = (
-    values: Partial<AddBakerFlowState>,
-    defaultCommissions: Commissions
+    values: Partial<AddBakerFlowState>
 ) => {
     const sanitized = {
         ...values,
     };
 
-    if (values.openForDelegation === OpenStatus.ClosedForAll) {
-        // Ensure default pool settings are used when opting for closed pool.
-        sanitized.metadataUrl = '';
-        sanitized.commissions = defaultCommissions;
-    }
-
     return sanitized;
 };
 
 export const convertToAddBakerTransaction = (
-    defaultCommissions: Commissions,
     account: Account,
     nonce: bigint,
     exchangeRate: Fraction
 ) => (values: AddBakerFlowState, expiry?: Date): ConfigureBaker => {
-    const sanitized = getSanitizedAddBakerValues(values, defaultCommissions);
+    const sanitized = getSanitizedAddBakerValues(values);
 
     return convertToBakerTransaction(
         account,

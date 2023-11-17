@@ -220,7 +220,7 @@ export default function DelegationAmountPage({
                     <p className="mT0">
                         This transaction will{' '}
                         {target != null
-                            ? `delegate an amount of CCD to baker pool ${target}`
+                            ? `delegate an amount of CCD to staking pool ${target}`
                             : 'stake an amount of CCD using passive delegation'}
                         . You must choose the amount.
                     </p>

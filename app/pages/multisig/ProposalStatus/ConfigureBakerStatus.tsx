@@ -21,9 +21,9 @@ export default function ConfigureBakerProposalStatus({
         <ProposalStatusView
             {...proposalStatusViewProps}
             headerLeft={senderName ?? transaction.sender}
-            headerRight="Configure baker"
+            headerRight="Configure validator"
             status={status}
-            title="Configure baker"
+            title="Configure validator"
         >
             <span className="textFaded">
                 Account: {senderName ? `${senderName} ` : ''} (

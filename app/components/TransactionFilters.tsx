@@ -148,7 +148,7 @@ const transactionTypeFilters: (SingleField | GroupedField)[] = [
             TransactionKindString.UpdateBakerStake,
             TransactionKindString.ConfigureBaker,
         ],
-        display: 'Configure baker',
+        display: 'Configure validator',
     },
     {
         field: TransactionKindString.ConfigureDelegation,

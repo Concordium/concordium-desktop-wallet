@@ -89,19 +89,19 @@ $border-radius: 10px;
 .delegationImage,
 .bakerImage {
     margin-left: 10px;
-    height: auto;
-    flex: 0 0 20px;
-}
-
-.bakerImage {
     margin-top: -10px;
+    margin-bottom: -10px;
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
 }
 
 .delegationImage {
-    path,
-    ellipse {
-        fill: $color-off-black;
-    }
+    width: 70px;
+}
+
+.bakerImage {
+    width: 65px;
 }
 
 .statusImage {
