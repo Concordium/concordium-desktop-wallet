@@ -22,12 +22,13 @@ const RemoveDelegationPage = withPendingDelegationChangeGuard(
             <>
                 <p className="flexChildFill">
                     This will return the delegated amount to the public balance
-                    of the account after a grace period.
+                    of the account at the first pay day after a cool-down
+                    period.
                     {cooldownUntil && (
                         <>
                             <br />
                             <br />
-                            The grace period lasts until
+                            The cool-down period ends at
                             <span className="block bodyEmphasized mV10">
                                 {getFormattedDateString(cooldownUntil)}.
                             </span>

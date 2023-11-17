@@ -227,10 +227,10 @@ export default function DelegationAmountPage({
                 )}
                 {existing !== undefined && pendingChange === undefined && (
                     <p className="mT0">
-                        Enter your new desired amount to delegate. If you raise
-                        the stake it will take effect at the next payday, and if
-                        you lower the stake it will take effect after a grace
-                        period.
+                        Enter your new desired amount to stake. If you increase
+                        the stake it will take effect at the next pay day, and
+                        if you decrease the stake it will take effect at the
+                        first pay day after a cool-down period.
                     </p>
                 )}
                 {pendingChange !== undefined && (
