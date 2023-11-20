@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.1
+
+### Changed
+
+-   Reworded to remove usage of `grace period` term.
+
 ## 1.7.0
 
 ### Changed

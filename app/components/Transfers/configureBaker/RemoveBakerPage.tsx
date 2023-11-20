@@ -20,14 +20,13 @@ const RemoveBakerPage = withPendingBakerChangeGuard(
         return (
             <>
                 <p className="flexChildFill">
-                    This will remove the validator status of the account. After
-                    the grace period the full staked amount will be unlocked for
-                    disposal.
+                    This will return the staked amount to the public balance of
+                    the account at the first pay day after a cool-down period.
                     {cooldownUntil && (
                         <>
                             <br />
                             <br />
-                            The grace period lasts until
+                            The cool-down period ends at
                             <span className="block bodyEmphasized mV10">
                                 {getFormattedDateString(cooldownUntil)}.
                             </span>
