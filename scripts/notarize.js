@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-const { notarize } = require('electron-notarize');
+const { notarize } = require('@electron/notarize');
 
 exports.default = async function notarizing(context) {
     const { electronPlatformName, appOutDir } = context;
@@ -10,9 +10,13 @@ exports.default = async function notarizing(context) {
         );
     }
 
-    if (!process.env.APPLEID || !process.env.APPLEIDPASS) {
+    if (
+        !process.env.APPLEID ||
+        !process.env.APPLEIDPASS ||
+        !process.env.TEAMID
+    ) {
         throw new Error(
-            'The APPLEID or APPLEIDPASS environment variables used for notarizing the application was not set correctly.'
+            'The APPLEID, APPLEIDPASS or TEAMID environment variables used for notarizing the application was not set correctly.'
         );
     }
 
@@ -25,6 +29,7 @@ exports.default = async function notarizing(context) {
             appPath: `${appOutDir}/${appName}.app`,
             appleId: process.env.APPLEID,
             appleIdPassword: process.env.APPLEIDPASS,
+            teamId: process.env.TEAMID,
             ascProvider: 'K762RM4LQ3',
         });
     } catch (e) {
