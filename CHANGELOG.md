@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.2
+
+### Fixed
+
+-   Allow validators to change restaking preference while below minimum threshold
+
 ## 1.7.1
 
 ### Changed
