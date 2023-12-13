@@ -4,6 +4,7 @@ import {
     ReleaseSchedule,
     TransactionSummaryType,
     TransactionKindString,
+    isBakerAccount,
 } from '@concordium/web-sdk';
 import { Validate } from 'react-hook-form';
 import {
@@ -682,7 +683,16 @@ export function validateBakerStake(
         return 'Value is not a valid CCD amount';
     }
     const amount = ccdToMicroCcd(amountToValidate);
-    if (bakerStakeThreshold && bakerStakeThreshold > amount) {
+    const currentStake: bigint | undefined =
+        accountInfo && isBakerAccount(accountInfo)
+            ? accountInfo.accountBaker.stakedAmount
+            : undefined;
+
+    if (
+        bakerStakeThreshold &&
+        bakerStakeThreshold > amount &&
+        (!currentStake || amount !== currentStake)
+    ) {
         return `Stake is below the threshold (${displayAsCcd(
             bakerStakeThreshold
         )}) for validation`;

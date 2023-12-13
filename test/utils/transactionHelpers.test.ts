@@ -1,5 +1,9 @@
 import '../mockWindow';
-import { createRegularIntervalSchedule } from '../../app/utils/transactionHelpers';
+import { AccountInfo } from '@concordium/web-sdk';
+import {
+    createRegularIntervalSchedule,
+    validateBakerStake,
+} from '../../app/utils/transactionHelpers';
 
 test('createRegularIntervalSchedule release amounts should sum to input amount', () => {
     const totalAmount = 100n;
@@ -43,4 +47,46 @@ test('createRegularIntervalSchedule should increase timestamps by interval', () 
             true
         )
     ).toEqual(true);
+});
+
+test('validateBakerStake allows amount below threshold (if equal to currentStake)', () => {
+    const stakedAmount = 1000000n; // microCCD (1 CCD)
+    const accountAmount = 1000000000n; // microCCD (1000 CCD)
+    const accountInfo = {
+        accountAmount,
+        accountBaker: { stakedAmount },
+    } as AccountInfo;
+    const threshold = 100000000n; // microCCD (100 CCD)
+    const amount = '1'; // CCD
+    expect(
+        validateBakerStake(threshold, amount, accountInfo, 1n)
+    ).toBeUndefined();
+});
+
+test('validateBakerStake does not allow amount below threshold (if not equal to currentStake)', () => {
+    const stakedAmount = 1000000n; // microCCD (1 CCD)
+    const accountAmount = 1000000000n; // microCCD (1000 CCD)
+    const accountInfo = {
+        accountAmount,
+        accountBaker: { stakedAmount },
+    } as AccountInfo;
+    const threshold = 100000000n; // microCCD (100 CCD)
+    const amount = '5'; // CCD
+    expect(validateBakerStake(threshold, amount, accountInfo, 1n)).toContain(
+        'below the threshold'
+    );
+});
+
+test('validateBakerStake allows amount equal threshold', () => {
+    const stakedAmount = 1000000n; // microCCD (1 CCD)
+    const accountAmount = 1000000000n; // microCCD (1000 CCD)
+    const accountInfo = {
+        accountAmount,
+        accountBaker: { stakedAmount },
+    } as AccountInfo;
+    const threshold = 100000000n; // microCCD (100 CCD)
+    const amount = '100'; // CCD
+    expect(
+        validateBakerStake(threshold, amount, accountInfo, 1n)
+    ).toBeUndefined();
 });
