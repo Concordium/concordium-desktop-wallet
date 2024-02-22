@@ -1,12 +1,12 @@
 import { usb } from 'usb';
 import loggingMethods from '../logging';
 
-function add() {
-    loggingMethods.info('Added USB device!');
+function add(device: any) {
+    loggingMethods.info(`Added USB device: ${JSON.stringify(device)}`);
 }
 
-function remove() {
-    loggingMethods.info('Removed USB device!');
+function remove(device: any) {
+    loggingMethods.info(`Removed USB device: ${JSON.stringify(device)}`);
 }
 
 export default function setupUsbListener() {
