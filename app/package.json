@@ -16,7 +16,7 @@
     "license": "MIT",
    "dependencies": {
         "@journeyapps/sqlcipher": "^5.2.0",
-        "@ledgerhq/hw-transport-node-hid-singleton": "^6.28.14",
+        "@ledgerhq/hw-transport-node-hid-singleton": "^6.30.3",
         "@types/ledgerhq__hw-transport-node-hid": "^4.22.2",
         "knex": "0.95.5",
         "node-abi": "^2.30.0",
