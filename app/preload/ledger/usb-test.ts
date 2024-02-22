@@ -1,6 +1,9 @@
 import { usb } from 'usb';
 import loggingMethods from '../logging';
 
+/* eslint no-underscore-dangle: 0 */
+usb._disableHotplugEvents();
+
 function add(device: any) {
     loggingMethods.info(`Added USB device: ${JSON.stringify(device)}`);
 }
