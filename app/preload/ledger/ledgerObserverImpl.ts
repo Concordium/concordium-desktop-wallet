@@ -1,6 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid-singleton';
+import { setUsbDebounce } from '@ledgerhq/hw-transport-node-hid-singleton/src/listenDevices';
 import type {
     Observer,
     DescriptorEvent,
@@ -30,6 +31,7 @@ export default class LedgerObserverImpl implements LedgerObserver {
     async subscribeLedger(mainWindow: EventEmitter): Promise<void> {
         if (!this.ledgerSubscription) {
             setupUsbListener();
+            setUsbDebounce(0);
             this.ledgerSubscription = TransportNodeHid.listen(
                 this.createLedgerObserver(mainWindow)
             );
