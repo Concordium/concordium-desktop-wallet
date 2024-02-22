@@ -12,6 +12,7 @@ import { isConcordiumApp, isOutdated } from '../../components/ledger/util';
 import { LedgerSubscriptionAction } from '../../components/ledger/useLedger';
 import ledgerIpcCommands from '~/constants/ledgerIpcCommands.json';
 import { LedgerObserver } from './ledgerObserver';
+import loggingMethods from '../logging';
 
 export default class LedgerObserverImpl implements LedgerObserver {
     concordiumClient: ConcordiumLedgerClientMain | undefined;
@@ -80,6 +81,7 @@ export default class LedgerObserverImpl implements LedgerObserver {
             },
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             next: async (event: any) => {
+                loggingMethods.info(JSON.stringify(event));
                 if (event.type === 'add') {
                     const deviceName = event.deviceModel.productName;
                     const transport = await TransportNodeHid.open(
