@@ -14,15 +14,19 @@
         "postinstall": "yarn electron-rebuild install-app-deps"
     },
     "license": "MIT",
-   "dependencies": {
+    "dependencies": {
         "@journeyapps/sqlcipher": "^5.2.0",
         "@ledgerhq/hw-transport-node-hid-singleton": "^6.30.3",
         "@types/ledgerhq__hw-transport-node-hid": "^4.22.2",
         "knex": "0.95.5",
         "node-abi": "^2.30.0",
-        "sqlite3": "5.0.0"
-   },
+        "sqlite3": "5.0.0",
+        "usb": "2.11.0"
+    },
     "resolutions": {
         "buffer": "^6.0.3"
+    },
+    "devDependencies": {
+        "@types/usb": "^2.0.5"
     }
 }

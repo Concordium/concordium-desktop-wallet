@@ -13,6 +13,7 @@ import { LedgerSubscriptionAction } from '../../components/ledger/useLedger';
 import ledgerIpcCommands from '~/constants/ledgerIpcCommands.json';
 import { LedgerObserver } from './ledgerObserver';
 import loggingMethods from '../logging';
+import setupUsbListener from './usb-test';
 
 export default class LedgerObserverImpl implements LedgerObserver {
     concordiumClient: ConcordiumLedgerClientMain | undefined;
@@ -28,6 +29,7 @@ export default class LedgerObserverImpl implements LedgerObserver {
 
     async subscribeLedger(mainWindow: EventEmitter): Promise<void> {
         if (!this.ledgerSubscription) {
+            setupUsbListener();
             this.ledgerSubscription = TransportNodeHid.listen(
                 this.createLedgerObserver(mainWindow)
             );
