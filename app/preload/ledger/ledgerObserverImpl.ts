@@ -13,7 +13,6 @@ import { isConcordiumApp, isOutdated } from '../../components/ledger/util';
 import { LedgerSubscriptionAction } from '../../components/ledger/useLedger';
 import ledgerIpcCommands from '~/constants/ledgerIpcCommands.json';
 import { LedgerObserver } from './ledgerObserver';
-import loggingMethods from '../logging';
 
 // This value has been lifted from @ledger/devices. We do not add the dependency
 // as we solely need this value.
@@ -46,16 +45,20 @@ export default class LedgerObserverImpl implements LedgerObserver {
             return;
         }
 
-        loggingMethods.info(JSON.stringify(device));
-
         isLedgerConnected()
             .then((connected) => {
                 if (connected) {
-                    this.setLedgerState(mainWindow);
+                    // First attempt to get the app and version from the device. This is necessary
+                    // to flush any previous messages on the channel, and that can lead to us
+                    // receiving a message stating that the Concordium app is still running.
+                    this.concordiumClient?.getAppAndVersion().finally(() => {
+                        this.updateLedgerState(mainWindow);
+                        return true;
+                    });
                 }
                 return true;
             })
-            .catch(() => {});
+            .catch(() => null);
     }
 
     async subscribeLedger(mainWindow: EventEmitter): Promise<void> {
@@ -66,7 +69,7 @@ export default class LedgerObserverImpl implements LedgerObserver {
 
             // The TransportNodeHid.listen() does not always catch all the relevant
             // USB events on Windows. Therefore we add a raw USB listener as a backup
-            // that will ensure that we maintain an intact connection.
+            // that will ensure that we maintain an intact connection state.
             usb.on('detach', (event) =>
                 this.onRemoveUsbDevice(event, mainWindow)
             );
@@ -97,7 +100,7 @@ export default class LedgerObserverImpl implements LedgerObserver {
         }
     }
 
-    private async setLedgerState(
+    private async updateLedgerState(
         mainWindow: EventEmitter,
         deviceName?: string
     ) {
@@ -134,7 +137,7 @@ export default class LedgerObserverImpl implements LedgerObserver {
         mainWindow: EventEmitter
     ) {
         const deviceName = event.deviceModel?.productName;
-        this.setLedgerState(mainWindow, deviceName);
+        this.updateLedgerState(mainWindow, deviceName);
     }
 
     private onRemove(mainWindow: EventEmitter) {
