@@ -8,23 +8,20 @@ import type {
 } from '@ledgerhq/hw-transport';
 import EventEmitter from 'events';
 import { usb } from 'usb';
+import { identifyUSBProductId, ledgerUSBVendorId } from '@ledgerhq/devices';
 import ConcordiumLedgerClientMain from '../../features/ledger/ConcordiumLedgerClientMain';
 import { isConcordiumApp, isOutdated } from '../../components/ledger/util';
 import { LedgerSubscriptionAction } from '../../components/ledger/useLedger';
 import ledgerIpcCommands from '~/constants/ledgerIpcCommands.json';
 import { LedgerObserver } from './ledgerObserver';
 
-// This value has been lifted from @ledger/devices. We do not add the dependency
-// as we solely need this value.
-const ledgerUSBVendorId = 0x2c97;
-
-async function isLedgerConnected(): Promise<boolean> {
-    try {
-        await TransportNodeHid.open('');
-        return true;
-    } catch {
-        return false;
-    }
+/**
+ * A convenience method for opening a transport by providing
+ * an empty descriptor (as the descriptor is unused downstream).
+ * @returns a promise with a {@link TransportNodeHid}
+ */
+async function openTransport(): Promise<TransportNodeHid> {
+    return TransportNodeHid.open('');
 }
 
 export default class LedgerObserverImpl implements LedgerObserver {
@@ -39,23 +36,30 @@ export default class LedgerObserverImpl implements LedgerObserver {
         return this.concordiumClient;
     }
 
-    private onRemoveUsbDevice(device: usb.Device, mainWindow: EventEmitter) {
+    private handleIfLedgerIsStillConnected(
+        device: usb.Device,
+        mainWindow: EventEmitter
+    ) {
         // Ignore events for non-Ledger USB devices.
         if (device.deviceDescriptor.idVendor !== ledgerUSBVendorId) {
             return;
         }
 
-        isLedgerConnected()
-            .then((connected) => {
-                if (connected) {
-                    // First attempt to get the app and version from the device. This is necessary
-                    // to flush any previous messages on the channel, and that can lead to us
-                    // receiving a message stating that the Concordium app is still running.
-                    this.concordiumClient?.getAppAndVersion().finally(() => {
-                        this.updateLedgerState(mainWindow);
-                        return true;
-                    });
-                }
+        openTransport()
+            .then(() => {
+                // First attempt to get the app and version from the device. This is necessary
+                // to flush any previous messages on the channel, and that can lead to us
+                // receiving a message stating that the Concordium app is still running.
+                this.concordiumClient?.getAppAndVersion().finally(() => {
+                    const deviceModel = identifyUSBProductId(
+                        device.deviceDescriptor.idProduct
+                    );
+                    this.updateLedgerState(
+                        mainWindow,
+                        deviceModel?.productName
+                    );
+                    return true;
+                });
                 return true;
             })
             .catch(() => null);
@@ -68,17 +72,19 @@ export default class LedgerObserverImpl implements LedgerObserver {
             );
 
             // The TransportNodeHid.listen() does not always catch all the relevant
-            // USB events on Windows. Therefore we add a raw USB listener as a backup
+            // USB events on Windows. This is specifically a problem when opening or
+            // closing the Concordium app on the Ledger as it fires an attach and a
+            // detach event at the same time. Therefore we add a raw USB listener as a backup
             // that will ensure that we maintain an intact connection state.
             usb.on('detach', (event) =>
-                this.onRemoveUsbDevice(event, mainWindow)
+                this.handleIfLedgerIsStillConnected(event, mainWindow)
             );
         }
     }
 
     async resetTransport(mainWindow: EventEmitter) {
         TransportNodeHid.disconnect();
-        const transport = await TransportNodeHid.open('');
+        const transport = await openTransport();
         this.concordiumClient = new ConcordiumLedgerClientMain(
             mainWindow,
             transport
@@ -104,7 +110,7 @@ export default class LedgerObserverImpl implements LedgerObserver {
         mainWindow: EventEmitter,
         deviceName?: string
     ) {
-        const transport = await TransportNodeHid.open('');
+        const transport = await openTransport();
         this.concordiumClient = new ConcordiumLedgerClientMain(
             mainWindow,
             transport
