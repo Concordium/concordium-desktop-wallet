@@ -50,16 +50,19 @@ export default class LedgerObserverImpl implements LedgerObserver {
                 // First attempt to get the app and version from the device. This is necessary
                 // to flush any previous messages on the channel, and that can lead to us
                 // receiving a message stating that the Concordium app is still running.
-                this.concordiumClient?.getAppAndVersion().finally(() => {
-                    const deviceModel = identifyUSBProductId(
-                        device.deviceDescriptor.idProduct
-                    );
-                    this.updateLedgerState(
-                        mainWindow,
-                        deviceModel?.productName
-                    );
-                    return true;
-                });
+                this.concordiumClient
+                    ?.getAppAndVersion()
+                    .catch(() => {})
+                    .finally(() => {
+                        const deviceModel = identifyUSBProductId(
+                            device.deviceDescriptor.idProduct
+                        );
+                        this.updateLedgerState(
+                            mainWindow,
+                            deviceModel?.productName
+                        );
+                        return true;
+                    });
                 return true;
             })
             .catch(() => null);
@@ -110,17 +113,23 @@ export default class LedgerObserverImpl implements LedgerObserver {
         mainWindow: EventEmitter,
         deviceName?: string
     ) {
-        const transport = await openTransport();
-        this.concordiumClient = new ConcordiumLedgerClientMain(
-            mainWindow,
-            transport
-        );
         let appAndVersion;
         try {
+            const transport = await openTransport();
+            this.concordiumClient = new ConcordiumLedgerClientMain(
+                mainWindow,
+                transport
+            );
             appAndVersion = await this.concordiumClient.getAppAndVersion();
-        } catch (e) {
-            throw new Error(`Unable to get current app: ${e}`);
+        } catch {
+            mainWindow.emit(
+                ledgerIpcCommands.listenChannel,
+                LedgerSubscriptionAction.RESET,
+                deviceName
+            );
+            return;
         }
+
         let action;
         if (!appAndVersion) {
             // We could not extract the version information.
