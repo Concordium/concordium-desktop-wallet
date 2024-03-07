@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.3
+
+### Fixed
+
+-   An issue reported on Windows where the Ledger connectivity state was faulty, preventing users from signing transactions.
+
 ## 1.7.2
 
 ### Fixed

@@ -249,6 +249,7 @@
   "dependencies": {
     "@concordium/web-sdk": "^6.4.0",
     "@hot-loader/react-dom": "^16.13.0",
+    "@ledgerhq/devices": "^8.2.1",
     "@protobuf-ts/grpc-transport": "2.8.2",
     "@reduxjs/toolkit": "^1.4.0",
     "archiver": "^5.3.0",

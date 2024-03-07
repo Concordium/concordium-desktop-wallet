@@ -2,7 +2,7 @@
     "name": "concordium-desktop-wallet",
     "productName": "concordium-desktop-wallet",
     "description": "concordium-desktop-wallet",
-    "version": "1.7.2",
+    "version": "1.7.3",
     "main": "./main.prod.js",
     "author": {
         "name": "Concordium Software",
@@ -20,7 +20,8 @@
         "@types/ledgerhq__hw-transport-node-hid": "^4.22.2",
         "knex": "0.95.5",
         "node-abi": "^2.30.0",
-        "sqlite3": "5.0.0"
+        "sqlite3": "5.0.0",
+        "usb": "2.9.0"
    },
     "resolutions": {
         "buffer": "^6.0.3"
