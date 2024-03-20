@@ -20,14 +20,14 @@ const { publicKeyUrl } = require('../app/constants/verification.json');
  * openssl pkey -in concordium-desktop-wallet-pubkey.pem -pubout
  *
  * @example
- * $ node ./scripts/fileDigest.js -k <path-to-private-key> [-f <path-to-file] [--verify <path-to-public-key>] [--skiprv] \
+ * $ node ./scripts/fileDigest.js -pk <path-to-private-key> [-f <path-to-file] [--verify <path-to-public-key>] [--skiprv] \
  *      [--win] [--mac] [--linux] [--all] [--dir <path-to-dir>] [--appVersion <app-version-number>]
  */
 
 // Configuration of command line arguments
 const { argv } = yargs
-    .option('key', {
-        alias: 'k',
+    .option('pkey', {
+        alias: 'pk',
         description: 'File containing private key',
         type: 'string',
         demandOption: true,
@@ -73,7 +73,7 @@ const { argv } = yargs
 
 const {
     file: inputFile,
-    key: privateKeyPath,
+    pkey: privateKeyPath,
     verify: verifyKeyPath,
     skiprv,
     win,
@@ -183,6 +183,8 @@ async function verifyRemote(file, sigFile) {
  */
 async function writeSignature(file) {
     const sigOutFile = `${file}.sig`;
+
+    console.log(privateKeyPath);
 
     const privKey = fs.readFileSync(privateKeyPath);
     const signature = sign(null, fs.readFileSync(file), privKey);
