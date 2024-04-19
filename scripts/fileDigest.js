@@ -184,8 +184,6 @@ async function verifyRemote(file, sigFile) {
 async function writeSignature(file) {
     const sigOutFile = `${file}.sig`;
 
-    console.log(privateKeyPath);
-
     const privKey = fs.readFileSync(privateKeyPath);
     const signature = sign(null, fs.readFileSync(file), privKey);
 
