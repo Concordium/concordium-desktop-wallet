@@ -31,7 +31,7 @@ export const fieldDisplays = {
     name: 'Name',
     url: 'URL',
     description: 'Description',
-    arIdentity: 'Anonymity revoker',
+    arIdentity: 'Identity disclosure authority',
     arPublicKey: 'Public key',
 };
 
@@ -52,7 +52,7 @@ export default function CreateAddAnonymityRevoker({
                       .map((revoker) => revoker.arIdentity.toString())
                       .includes(v) ||
                   `This ${fieldDisplays.arIdentity} is already in use`
-                : 'Anonymity revokers have not been loaded yet',
+                : 'Identity disclosure authorities have not been loaded yet',
         [anonymityRevokers]
     );
 

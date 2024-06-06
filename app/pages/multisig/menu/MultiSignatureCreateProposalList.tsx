@@ -111,7 +111,7 @@ const updateInstructionTypes: TypeTuple[] = [
     [
         TransactionTypes.UpdateInstruction,
         UpdateType.AddAnonymityRevoker,
-        'Add anonymity revoker',
+        'Add identity disclosure authority',
     ],
     [
         TransactionTypes.UpdateInstruction,

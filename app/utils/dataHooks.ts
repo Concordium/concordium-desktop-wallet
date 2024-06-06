@@ -138,7 +138,7 @@ export function useIdentityProviders() {
     );
 }
 
-/** Hook for fetching anonymity revokers */
+/** Hook for fetching identity disclosure authorities */
 export function useAnonymityRevokers() {
     return useAsyncMemo<ArInfo[]>(
         fetchLastFinalizedAnonymityRevokers,

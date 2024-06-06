@@ -103,7 +103,8 @@ export const getCryptographicParameters = throwIfUndefined(
 );
 export const getAnonymityRevokers = throwIfUndefined(
     window.grpc.getAnonymityRevokers,
-    (blockHash) => `Unable to load anonymity revokers, on block: ${blockHash}`
+    (blockHash) =>
+        `Unable to load identity disclosure authorities, on block: ${blockHash}`
 );
 export const getIdentityProviders = throwIfUndefined(
     window.grpc.getIdentityProviders,
