@@ -96,6 +96,34 @@ that this is not safe and is only relevant for development.
 LEDGER_EMULATOR_URL=http://emulator-ip-address:port yarn start
 ```
 
+## Debugging with DevTools
+
+-   Read the [security implications](https://nodejs.org/en/learn/getting-started/debugging).
+
+To start the debugging client, run:
+
+```bash
+yarn start:dev-debug
+```
+
+The output will be similar to:
+
+```bash
+ws://127.0.0.1:9229/0f2c936f-b1cd-4ac9-aab3-f63b0f33d55e
+```
+
+-   Open the instpector URL in your chrome browser, as follows:
+
+```bash
+chrome://inspect/#devices
+```
+
+-   Click the `Configure` button and configure your `listenAddress + port` as outputted by the previous command.
+
+-   Click on `inspect`.
+
+-   The electron app is now running in your chrome browser and you can use the `devTools`.
+
 ## Packaging for Production
 
 To package apps for the local platform:
