@@ -112,7 +112,7 @@ The output will be similar to:
 ws://127.0.0.1:9229/0f2c936f-b1cd-4ac9-aab3-f63b0f33d55e
 ```
 
--   Open the instpector URL in your chrome browser, as follows:
+-   Open the inspector URL in your chrome browser, as follows:
 
 ```bash
 chrome://inspect/#devices
