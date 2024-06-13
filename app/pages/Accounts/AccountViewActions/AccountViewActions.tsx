@@ -34,7 +34,7 @@ const receiveAction: ActionObject = {
     isDisabled: () => false,
 };
 
-const unshieldedActions: ActionObject[] = [
+const actions: ActionObject[] = [
     {
         action: routes.ACCOUNTS_SIMPLETRANSFER,
         label: 'Send',
@@ -106,7 +106,7 @@ export default function AccountViewActions({ account, accountInfo }: Props) {
 
     return (
         <div className={styles.actionButtons}>
-            {unshieldedActions.map((props, i) => (
+            {actions.map((props, i) => (
                 <AccountViewAction
                     // eslint-disable-next-line react/no-array-index-key
                     key={i}

@@ -606,7 +606,7 @@ export interface ScheduleItem {
     timestamp: string;
 }
 
-// A description of an entity, used for Identity Provider and Anonymity Revoker
+// A description of an entity, used for Identity Provider and Identity Disclosure Authority
 export interface Description {
     name: string;
     url: string;
@@ -640,7 +640,7 @@ export interface IdentityProviderMetaData {
     support: string;
 }
 
-// Anonymity Revoker information
+// Identity Disclosure Authority information
 export interface ArInfo {
     arIdentity: number;
     arDescription: Description;
