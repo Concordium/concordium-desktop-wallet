@@ -22,7 +22,7 @@ const CredentialInfoLedgerDetails = (props: Props) => (
             <b>Signature threshold:</b> {props.credentialPublicKeys.threshold}
         </p>
         <div>
-            <b>Authorities required:</b>
+            <b>Authorities required (AR threshold):</b>
             <p className="mT0">
                 {props.revocationThreshold} out of{' '}
                 {Object.keys(props.arData).length}

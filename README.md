@@ -96,7 +96,7 @@ that this is not safe and is only relevant for development.
 LEDGER_EMULATOR_URL=http://emulator-ip-address:port yarn start
 ```
 
-## Debugging with DevTools
+## Debugging with DevTools (this flow is needed on some ubuntu versions that don't support devTools in the app)
 
 -   Read the [security implications](https://nodejs.org/en/learn/getting-started/debugging).
 
