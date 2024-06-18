@@ -207,7 +207,7 @@ export function getAccessStructureTitle(
         case AccessStructureEnum.poolParameters:
             return 'Pool parameters';
         case AccessStructureEnum.addAnonymityRevoker:
-            return 'Add anonymity revoker';
+            return 'Add identity disclosure authority';
         case AccessStructureEnum.addIdentityProvider:
             return 'Add identity provider';
         case AccessStructureEnum.cooldownParameters:

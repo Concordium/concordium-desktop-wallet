@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.7.4
+
+### Changed
+
+-   Remove `shield` button.
+-   Remove `encryptedTransfer` button.
+-   Rename `anonymity revokers` to `identity disclosure authorities`.
+
 ## 1.7.3
 
 ### Fixed

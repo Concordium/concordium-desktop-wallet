@@ -22,7 +22,7 @@ import {
 import { serializeAddAnonymityRevoker } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
 
-const TYPE = 'Add anonymity revoker';
+const TYPE = 'Add identity disclosure authority';
 
 type TransactionType = UpdateInstruction<AddAnonymityRevoker>;
 
