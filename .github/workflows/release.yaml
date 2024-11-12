@@ -29,6 +29,7 @@ permissions:
 
 jobs:
   login-aws:
+    runs-on: ubuntu
     environment: release
     steps:
       - name: login
