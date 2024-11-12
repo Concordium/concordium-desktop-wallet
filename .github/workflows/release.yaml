@@ -1,0 +1,42 @@
+name: Concordium desktop wallet release
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        type: choice
+        description: Choose which workflow should be ran
+        options:
+          - desktop-wallet-windows
+          - release-desktop-wallet-linux
+
+  push:
+    branches:
+      - ekw/SRE-1001/release-desktop-wallet
+    tags:
+      - desktop-wallet-*/*
+
+env:
+  BASE_IMAGE_VERSION: "rust-1.82_ghc-9.6.6-1"
+  STATIC_NODE_BINARY_IMAGE_NAME: 'static-node-binaries'
+  AWS_ROLE_TO_ASSUME: 'arn:aws:iam::192549843005:role/github_concordium-dektop-wallet'
+  S3_BUCKET: "s3://desktopwallet.concordium.com/"
+  ECR_REPO: "192549843005.dkr.ecr.eu-west-1.amazonaws.com/concordium/desktop-wallet-ci"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  release-desktop-wallet-linux:
+    runs-on: ubuntu
+    container:
+      image: "192549843005.dkr.ecr.eu-west-1.amazonaws.com/concordium/desktop-wallet-ci:latest"
+    with:
+      region: "eu-west-1"
+      role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+
+    steps:
+      - name: echo
+        run: |
+          node --version
