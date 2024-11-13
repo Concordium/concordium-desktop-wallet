@@ -33,8 +33,6 @@ jobs:
     outputs:
       access_key: ${{ steps.export-creds.outputs.access_key }}
       secret_key: ${{ steps.export-creds.outputs.secret_key }}
-      docker_username: ${{ steps.login-ecr.outputs.docker_username_ACCOUNT_ID_dkr_ecr_eu_west_1_amazonaws_com }}
-      docker_password: ${{ steps.login-ecr.outputs.docker_password_ACCOUNT_ID_dkr_ecr_eu_west_1_amazonaws_com }}
     environment: release
     steps:
       - name: aws creds
@@ -45,12 +43,6 @@ jobs:
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
           role-session-name: ReleaseDesktopWalletSession
           output-credentials: true
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          mask-password: false
 
       - name: Export creds
         id: export-creds
@@ -63,16 +55,13 @@ jobs:
     environment: release
     needs: login-aws
     runs-on: ubuntu-latest
-    #container:
-    #  image: "192549843005.dkr.ecr.eu-west-1.amazonaws.com/concordium/desktop-wallet-ci:latest"
-    #  credentials:
-    #    username: ${{needs.login-aws.outputs.docker_username}}
-    #    password: ${{needs.login-aws.outputs.docker_password}}
+    container:
+      image: "192549843005.dkr.ecr.eu-west-1.amazonaws.com/concordium/desktop-wallet-ci:latest"
+      credentials:
+        username: ${{needs.login-aws.outputs.access_key}}
+        password: ${{needs.login-aws.outputs.secret_key}}
 
     steps:
       - name: echo
         run: |
-          echo ${{needs.login-aws.outputs.docker_username}}
-          echo ${{needs.login-aws.outputs.docker_password}}
-          echo ${{needs.login-aws.outputs.access_key}}
-          echo ${{needs.login-aws.outputs.secret_key}}
+          node --version
