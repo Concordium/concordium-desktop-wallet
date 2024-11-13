@@ -52,7 +52,7 @@ jobs:
       - name: Export creds
         id: export-creds
         run: |
-          echo "access_key=${{steps.creds.outputs.aws-access-key-id}} secret_key=${{steps.creds.outputs.aws-secret-access-key}}" >> ${GITHUB_OUTPUT}
+          echo "access_key=${{env.AWS_ACCESS_KEY}} secret_key=${{steps.creds.outputs.aws-secret-access-key}}" >> ${GITHUB_OUTPUT}
 
 
   release-desktop-wallet-linux:
