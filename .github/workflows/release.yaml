@@ -31,8 +31,8 @@ jobs:
   login-aws:
     runs-on: ubuntu-latest
     outputs:
-      access_key: ${{steps.export-creds.outputs.access_key}}
-      secret_key: ${{steps.export-creds.outputs.secret_key}}
+      access_key: ${{ steps.export-creds.outputs.access_key }}
+      secret_key: ${{ steps.export-creds.outputs.secret_key }}
     environment: release
     steps:
       - name: aws creds
@@ -43,16 +43,11 @@ jobs:
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
           role-session-name: ReleaseDesktopWalletSession
           output-credentials: true
-      
-      - name: login to ecr
-        uses: aws-actions/amazon-ecr-login@62f4f872db3836360b72999f4b87f1ff13310f3a
-        with:
-          registry: "192549843005.dkr.ecr.eu-west-1.amazonaws.com"
 
       - name: Export creds
         id: export-creds
         run: |
-          echo "access_key=${{steps.creds.outputs.aws-access-key-id}}" >> $GITHUB_OUTPUT
+          echo "access_key=$(echo ${{steps.creds.outputs.aws-access-key-id}} | base64 -w0 | base64 -w0 )" >> $GITHUB_OUTPUT
           echo "secret_key=${{steps.creds.outputs.aws-secret-access-key}}" >> $GITHUB_OUTPUT
 
 
