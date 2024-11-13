@@ -75,6 +75,7 @@ jobs:
           ref: 'v1.7.4'
       - name: Install dependencies and build
         run: |
+          TARGET_NET="stagenet"
           node --version
           npm --version
           yarn --version
