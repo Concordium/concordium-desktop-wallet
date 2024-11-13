@@ -30,9 +30,6 @@ permissions:
 jobs:
   login-aws:
     runs-on: ubuntu-latest
-    outputs:
-      access_key: ${{steps.export-creds.outputs.access_key}}
-      secret_key: ${{steps.export-creds.outputs.secret_key}}
     environment: release
     steps:
       - name: aws creds
@@ -52,7 +49,7 @@ jobs:
       - name: Export creds
         id: export-creds
         run: |
-          echo "access_key=${{env.AWS_ACCESS_KEY}} secret_key=${{steps.creds.outputs.aws-secret-access-key}}" 
+          echo "access_key=${{steps.creds.outputs.aws-access-key-id}} secret_key=${{steps.creds.outputs.aws-secret-access-key}}" >> $GITHUB_ENV
 
 
   release-desktop-wallet-linux:
@@ -62,8 +59,8 @@ jobs:
     container:
       image: "192549843005.dkr.ecr.eu-west-1.amazonaws.com/concordium/desktop-wallet-ci:latest"
       credentials:
-        username: ${{needs.login-aws.outputs.access_key}}
-        password: ${{needs.login-aws.outputs.secret_key}}
+        username: ${{needs.login-aws.env.access_key}}
+        password: ${{needs.login-aws.enc.secret_key}}
 
     steps:
       - name: echo
