@@ -48,7 +48,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
         with:
-          mask-password: true
+          mask-password: false
 
   release-desktop-wallet-linux:
     environment: release
@@ -61,6 +61,40 @@ jobs:
           username: ${{needs.login-aws.outputs.access_key}}
           password: ${{needs.login-aws.outputs.secret_key}}
     steps:
-      - name: echo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install dependencies and build
         run: |
-          node --version
+          yarn
+          yarn package
+
+      - name: publish
+        run: |
+          # Extract version number
+          VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
+          
+          # Prepare filenames
+          if [[ $TARGET_NET = "mainnet" ]]; then
+             FILENAME_DEB="concordium-desktop-wallet-${VERSION}.deb"
+             FILENAME_RPM="concordium-desktop-wallet-${VERSION}.rpm"
+             FILENAME_APPIMAGE="concordium-desktop-wallet-${VERSION}.AppImage"
+          else
+             FILENAME_DEB="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.deb"
+             FILENAME_RPM="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.rpm"
+             FILENAME_APPIMAGE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.AppImage"
+          fi
+
+          FILENAME_LATEST_LINUX="latest-linux.yml"
+
+          OUT_FILENAME_DEB="${VERSION}/${TARGET_NET}/${FILENAME_DEB}"
+          OUT_FILENAME_RPM="${VERSION}/${TARGET_NET}/${FILENAME_RPM}"
+          OUT_FILENAME_APPIMAGE="${VERSION}/${TARGET_NET}/${FILENAME_APPIMAGE}"
+          OUT_LATEST_LINUX="${VERSION}/${TARGET_NET}/latest-linux.yml"
+          
+          # Push to s3
+          aws s3 cp "release/${FILENAME_DEB}" "${{S3_BUCKET}}/${OUT_FILENAME_DEB}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/${FILENAME_RPM}" "${{S3_BUCKET}}/${OUT_FILENAME_RPM}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/${FILENAME_APPIMAGE}" "${{S3_BUCKET}}/${OUT_FILENAME_APPIMAGE}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/${FILENAME_LATEST_LINUX}" "${{S3_BUCKET}}/${OUT_LATEST_LINUX}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
