@@ -67,6 +67,12 @@ jobs:
           submodules: recursive
       - name: Install dependencies and build
         run: |
+          node --version
+          npm --version
+          yarn --version
+          python --version
+          rustup show
+          wasm-pack --version
           yarn
           yarn package
 
