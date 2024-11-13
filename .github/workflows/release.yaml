@@ -30,14 +30,28 @@ permissions:
 jobs:
   login-aws:
     runs-on: ubuntu-latest
+    outputs:
+      pass: ${{steps.export-creds.outputs.aut_creds}}
     environment: release
     steps:
-      - name: login
+      - name: aws creds
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: "eu-west-1"
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
           role-session-name: ReleaseDesktopWalletSession
+      
+      - name: login to ecr
+        uses: aws-actions/amazon-ecr-login@62f4f872db3836360b72999f4b87f1ff13310f3a
+        with:
+          registry: "192549843005.dkr.ecr.eu-west-1.amazonaws.com"
+
+      - name: Export creds
+        id: export-creds
+        run: |
+          auth_creds=$(cat ${{ env.CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE }} | base64 -w 0)
+          echo "auth_creds=$auth_creds" >> ${GITHUB_OUTPUT}
+
 
   release-desktop-wallet-linux:
     environment: release
@@ -45,6 +59,9 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: "192549843005.dkr.ecr.eu-west-1.amazonaws.com/concordium/desktop-wallet-ci:latest"
+      credentials:
+        username: "oauth2accesstoken"
+        password: ${{needs.login-aws.aoutputs.pass}}
 
     steps:
       - name: echo
