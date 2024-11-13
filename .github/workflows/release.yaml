@@ -60,6 +60,8 @@ jobs:
         credentials:
           username: ${{needs.login-aws.outputs.access_key}}
           password: ${{needs.login-aws.outputs.secret_key}}
+        ports:
+          - 80:80
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
