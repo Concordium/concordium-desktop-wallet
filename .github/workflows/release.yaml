@@ -31,8 +31,10 @@ jobs:
   login-aws:
     runs-on: ubuntu-latest
     outputs:
-      access_key: ${{ steps.export-creds.outputs.access_key }}
-      secret_key: ${{ steps.export-creds.outputs.secret_key }}
+      access_key: ${{ steps.login-ecr.outputs.docker_username_192549843005_dkr_ecr_eu_west_1_amazonaws_com }}
+      secret_key: ${{ steps.login-ecr.outputs.docker_password_192549843005_dkr_ecr_eu_west_1_amazonaws_com }}
+      #access_key: ${{ steps.export-creds.outputs.access_key }}
+      #secret_key: ${{ steps.export-creds.outputs.secret_key }}
     environment: release
     steps:
       - name: aws creds
@@ -42,26 +44,36 @@ jobs:
           aws-region: "eu-west-1"
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
           role-session-name: ReleaseDesktopWalletSession
-          output-credentials: true
+          mask-aws-account-id: false
 
-      - name: Export creds
-        id: export-creds
-        run: |
-          echo "access_key=$(echo ${{steps.creds.outputs.aws-access-key-id}} | base64 -w0 | base64 -w0 )" >> $GITHUB_OUTPUT
-          echo "secret_key=$(echo ${{steps.creds.outputs.aws-secret-access-key}} | base64 -w0 | base64 -w0 )" >> $GITHUB_OUTPUT
+        steps:
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: false
+
+      #- name: Export creds
+      #  id: export-creds
+      #  run: |
+      #    echo "access_key=$(echo ${{steps.creds.outputs.aws-access-key-id}} | base64 -w0 | base64 -w0 )" >> $GITHUB_OUTPUT
+      #    echo "secret_key=$(echo ${{steps.creds.outputs.aws-secret-access-key}} | base64 -w0 | base64 -w0 )" >> $GITHUB_OUTPUT
 
 
   release-desktop-wallet-linux:
     environment: release
     needs: login-aws
     runs-on: ubuntu-latest
-    container:
-      image: "192549843005.dkr.ecr.eu-west-1.amazonaws.com/concordium/desktop-wallet-ci:latest"
-      credentials:
-        username: ${{needs.login-aws.outputs.access_key}}
-        password: ${{needs.login-aws.outputs.secret_key}}
+    services:
+      internal-service:
+        image: "192549843005.dkr.ecr.eu-west-1.amazonaws.com/concordium/desktop-wallet-ci:latest"
+        credentials:
+          username: ${{needs.login-aws.outputs.access_key}}
+          password: ${{needs.login-aws.outputs.secret_key}}
 
     steps:
-      - name: echo
-        run: |
-          node --version
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: false
