@@ -33,8 +33,6 @@ jobs:
     outputs:
       access_key: ${{ steps.login-ecr.outputs.docker_username_192549843005_dkr_ecr_eu_west_1_amazonaws_com }}
       secret_key: ${{ steps.login-ecr.outputs.docker_password_192549843005_dkr_ecr_eu_west_1_amazonaws_com }}
-      #access_key: ${{ steps.export-creds.outputs.access_key }}
-      #secret_key: ${{ steps.export-creds.outputs.secret_key }}
     environment: release
     steps:
       - name: aws creds
@@ -50,14 +48,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
         with:
-          mask-password: false
-
-      #- name: Export creds
-      #  id: export-creds
-      #  run: |
-      #    echo "access_key=$(echo ${{steps.creds.outputs.aws-access-key-id}} | base64 -w0 | base64 -w0 )" >> $GITHUB_OUTPUT
-      #    echo "secret_key=$(echo ${{steps.creds.outputs.aws-secret-access-key}} | base64 -w0 | base64 -w0 )" >> $GITHUB_OUTPUT
-
+          #mask-password: false
 
   release-desktop-wallet-linux:
     environment: release
