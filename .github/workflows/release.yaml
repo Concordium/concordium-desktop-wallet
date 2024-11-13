@@ -94,7 +94,7 @@ jobs:
           OUT_LATEST_LINUX="${VERSION}/${TARGET_NET}/latest-linux.yml"
           
           # Push to s3
-          aws s3 cp "release/${FILENAME_DEB}" "${{S3_BUCKET}}/${OUT_FILENAME_DEB}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-          aws s3 cp "release/${FILENAME_RPM}" "${{S3_BUCKET}}/${OUT_FILENAME_RPM}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-          aws s3 cp "release/${FILENAME_APPIMAGE}" "${{S3_BUCKET}}/${OUT_FILENAME_APPIMAGE}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-          aws s3 cp "release/${FILENAME_LATEST_LINUX}" "${{S3_BUCKET}}/${OUT_LATEST_LINUX}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/${FILENAME_DEB}" "${{env.S3_BUCKET}}/${OUT_FILENAME_DEB}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/${FILENAME_RPM}" "${{env.S3_BUCKET}}/${OUT_FILENAME_RPM}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/${FILENAME_APPIMAGE}" "${{env.S3_BUCKET}}/${OUT_FILENAME_APPIMAGE}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/${FILENAME_LATEST_LINUX}" "${{env.S3_BUCKET}}/${OUT_LATEST_LINUX}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
