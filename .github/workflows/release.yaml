@@ -72,6 +72,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          ref: 'v1.7.4'
       - name: Install dependencies and build
         run: |
           node --version
@@ -83,31 +84,31 @@ jobs:
           yarn
           yarn package
 
-      - name: publish
-        run: |
-          # Extract version number
-          VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
-          
-          # Prepare filenames
-          if [[ $TARGET_NET = "mainnet" ]]; then
-             FILENAME_DEB="concordium-desktop-wallet-${VERSION}.deb"
-             FILENAME_RPM="concordium-desktop-wallet-${VERSION}.rpm"
-             FILENAME_APPIMAGE="concordium-desktop-wallet-${VERSION}.AppImage"
-          else
-             FILENAME_DEB="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.deb"
-             FILENAME_RPM="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.rpm"
-             FILENAME_APPIMAGE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.AppImage"
-          fi
-
-          FILENAME_LATEST_LINUX="latest-linux.yml"
-
-          OUT_FILENAME_DEB="${VERSION}/${TARGET_NET}/${FILENAME_DEB}"
-          OUT_FILENAME_RPM="${VERSION}/${TARGET_NET}/${FILENAME_RPM}"
-          OUT_FILENAME_APPIMAGE="${VERSION}/${TARGET_NET}/${FILENAME_APPIMAGE}"
-          OUT_LATEST_LINUX="${VERSION}/${TARGET_NET}/latest-linux.yml"
-          
-          # Push to s3
-          aws s3 cp "release/${FILENAME_DEB}" "${{env.S3_BUCKET}}/${OUT_FILENAME_DEB}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-          aws s3 cp "release/${FILENAME_RPM}" "${{env.S3_BUCKET}}/${OUT_FILENAME_RPM}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-          aws s3 cp "release/${FILENAME_APPIMAGE}" "${{env.S3_BUCKET}}/${OUT_FILENAME_APPIMAGE}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-          aws s3 cp "release/${FILENAME_LATEST_LINUX}" "${{env.S3_BUCKET}}/${OUT_LATEST_LINUX}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+#      - name: publish
+#        run: |
+#          # Extract version number
+#          VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
+#          
+#          # Prepare filenames
+#          if [[ $TARGET_NET = "mainnet" ]]; then
+#             FILENAME_DEB="concordium-desktop-wallet-${VERSION}.deb"
+#             FILENAME_RPM="concordium-desktop-wallet-${VERSION}.rpm"
+#             FILENAME_APPIMAGE="concordium-desktop-wallet-${VERSION}.AppImage"
+#          else
+#             FILENAME_DEB="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.deb"
+#             FILENAME_RPM="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.rpm"
+#             FILENAME_APPIMAGE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.AppImage"
+#          fi
+#
+#          FILENAME_LATEST_LINUX="latest-linux.yml"
+#
+#          OUT_FILENAME_DEB="${VERSION}/${TARGET_NET}/${FILENAME_DEB}"
+#          OUT_FILENAME_RPM="${VERSION}/${TARGET_NET}/${FILENAME_RPM}"
+#          OUT_FILENAME_APPIMAGE="${VERSION}/${TARGET_NET}/${FILENAME_APPIMAGE}"
+#          OUT_LATEST_LINUX="${VERSION}/${TARGET_NET}/latest-linux.yml"
+#          
+#          # Push to s3
+#          aws s3 cp "release/${FILENAME_DEB}" "${{env.S3_BUCKET}}/${OUT_FILENAME_DEB}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+#          aws s3 cp "release/${FILENAME_RPM}" "${{env.S3_BUCKET}}/${OUT_FILENAME_RPM}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+#          aws s3 cp "release/${FILENAME_APPIMAGE}" "${{env.S3_BUCKET}}/${OUT_FILENAME_APPIMAGE}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+#          aws s3 cp "release/${FILENAME_LATEST_LINUX}" "${{env.S3_BUCKET}}/${OUT_LATEST_LINUX}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
