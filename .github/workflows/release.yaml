@@ -70,8 +70,6 @@ jobs:
           username: ${{needs.login-aws.outputs.access_key}}
           password: ${{needs.login-aws.outputs.secret_key}}
     steps:
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          mask-password: false
+      - name: echo
+        run: |
+          node --version
