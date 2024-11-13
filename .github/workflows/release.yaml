@@ -48,7 +48,7 @@ jobs:
         id: export-creds
         run: |
           echo "access_key=$(echo ${{steps.creds.outputs.aws-access-key-id}} | base64 -w0 | base64 -w0 )" >> $GITHUB_OUTPUT
-          echo "secret_key=${{steps.creds.outputs.aws-secret-access-key}}" >> $GITHUB_OUTPUT
+          echo "secret_key=$(echo ${{steps.creds.outputs.aws-secret-access-key}} | base64 -w0 | base64 -w0 )" >> $GITHUB_OUTPUT
 
 
   release-desktop-wallet-linux:
