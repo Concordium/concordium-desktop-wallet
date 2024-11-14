@@ -82,6 +82,7 @@ jobs:
           python --version
           rustup show
           wasm-pack --version
+          cargo --version
           yarn
           yarn package
 
