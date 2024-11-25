@@ -78,6 +78,7 @@ jobs:
         run: |
           rustup toolchain install 1.68.2-x86_64-unknown-linux-gnu
           rustup default 1.68.2
+          export PATH=$PATH:$HOME/.cargo:§HOME/.cargo:bin
       - name: Install dependencies and build
         run: |
           TARGET_NET="stagenet"
