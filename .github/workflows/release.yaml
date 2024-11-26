@@ -33,6 +33,13 @@ jobs:
     runs-on: ubuntu-latest
     environment: release
     steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          ref: 'v1.7.4'
+
       - name: build ci image
         uses: docker/build-push-action@v6
         with:
