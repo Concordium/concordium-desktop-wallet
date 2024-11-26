@@ -71,7 +71,7 @@ jobs:
 
   release-desktop-wallet-linux:
     environment: release
-    needs: 
+    needs: Build-pipeline-image
     runs-on: ubuntu-latest
     container:
       image: "desktop-wallet-ci:latest"
