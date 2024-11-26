@@ -18,7 +18,7 @@ on:
 
 env:
   BASE_IMAGE_VERSION: "rust-1.82_ghc-9.6.6-1"
-  NODE_VERSION: "7.0.5"
+  NODE_VERSION: "16.20.2"
   STATIC_NODE_BINARY_IMAGE_NAME: 'static-node-binaries'
   AWS_ROLE_TO_ASSUME: "arn:aws:iam::192549843005:role/github_concordium-desktop-wallet"
   S3_BUCKET: "s3://desktopwallet.concordium.com/"
