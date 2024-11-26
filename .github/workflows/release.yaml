@@ -39,7 +39,7 @@ jobs:
           push: false
           tags: desktop-wallet-ci:latest
           context: '.'
-          file: ''
+          file: './scripts/desktop-wallet-ci.Dockerfile'
 #          cache-to: type=gha,mode=max
 #          cache-from: type=gha
           build-args: |
