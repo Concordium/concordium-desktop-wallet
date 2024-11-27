@@ -64,36 +64,9 @@ jobs:
           tags: "192549843005.dkr.ecr.eu-west-1.amazonaws.com/concordium/desktop-wallet-ci:test"
           context: '.'
           file: 'scripts/desktop-wallet-ci.Dockerfile'
-          #cache-to: type=gha,mode=max
-          #cache-from: type=gha
           build-args: |
             BASE_VERSION=${{ env.BASE_IMAGE_VERSION }}
             NODE_VERSION=${{ env.NODE_VERSION }}
-
-#  Build-pipeline-image:
-#    runs-on: ubuntu-latest
-#    environment: release
-#    steps:
-#
-#      - name: Checkout repository
-#        uses: actions/checkout@v4
-#        with:
-#          submodules: recursive
-#          ref: ${{ github.ref_name }}
-#
-#      - name: build ci image
-#        uses: docker/build-push-action@v6
-#        with:
-#          push: true
-#          tags: "192549843005.dkr.ecr.eu-west-1.amazonaws.com/concordium/desktop-wallet-ci:test"
-#          context: '.'
-#          file: 'scripts/desktop-wallet-ci.Dockerfile'
-##          cache-to: type=gha,mode=max
-##          cache-from: type=gha
-#          outputs: type=docker,dest=/tmp/myimage.tar
-#          build-args: |
-#            BASE_VERSION=${{ env.BASE_IMAGE_VERSION }}
-#            NODE_VERSION=${{ env.NODE_VERSION }}
 
   release-desktop-wallet-linux:
     environment: release
@@ -125,31 +98,61 @@ jobs:
           yarn
           yarn package
 
-#      - name: publish
-#        run: |
-#          # Extract version number
-#          VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
-#
-#          # Prepare filenames
-#          if [[ $TARGET_NET = "mainnet" ]]; then
-#             FILENAME_DEB="concordium-desktop-wallet-${VERSION}.deb"
-#             FILENAME_RPM="concordium-desktop-wallet-${VERSION}.rpm"
-#             FILENAME_APPIMAGE="concordium-desktop-wallet-${VERSION}.AppImage"
-#          else
-#             FILENAME_DEB="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.deb"
-#             FILENAME_RPM="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.rpm"
-#             FILENAME_APPIMAGE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.AppImage"
-#          fi
-#
-#          FILENAME_LATEST_LINUX="latest-linux.yml"
-#
-#          OUT_FILENAME_DEB="${VERSION}/${TARGET_NET}/${FILENAME_DEB}"
-#          OUT_FILENAME_RPM="${VERSION}/${TARGET_NET}/${FILENAME_RPM}"
-#          OUT_FILENAME_APPIMAGE="${VERSION}/${TARGET_NET}/${FILENAME_APPIMAGE}"
-#          OUT_LATEST_LINUX="${VERSION}/${TARGET_NET}/latest-linux.yml"
-#
-#          # Push to s3
+      - name: publish
+        run: |
+          # Extract version number
+          VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
+
+          # Prepare filenames
+          if [[ $TARGET_NET = "mainnet" ]]; then
+             FILENAME_DEB="concordium-desktop-wallet-${VERSION}.deb"
+             FILENAME_RPM="concordium-desktop-wallet-${VERSION}.rpm"
+             FILENAME_APPIMAGE="concordium-desktop-wallet-${VERSION}.AppImage"
+          else
+             FILENAME_DEB="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.deb"
+             FILENAME_RPM="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.rpm"
+             FILENAME_APPIMAGE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.AppImage"
+          fi
+
+          FILENAME_LATEST_LINUX="latest-linux.yml"
+
+          OUT_FILENAME_DEB="${VERSION}/${TARGET_NET}/${FILENAME_DEB}"
+          OUT_FILENAME_RPM="${VERSION}/${TARGET_NET}/${FILENAME_RPM}"
+          OUT_FILENAME_APPIMAGE="${VERSION}/${TARGET_NET}/${FILENAME_APPIMAGE}"
+          OUT_LATEST_LINUX="${VERSION}/${TARGET_NET}/latest-linux.yml"
+
+          # Push to s3
+          echo ${FILENAME_DEB}
+          echo ${FILENAME_RPM}
+          echo ${FILENAME_APPIMAGE}
+          echo ${FILENAME_LATEST_LINUX}
 #          aws s3 cp "release/${FILENAME_DEB}" "${{env.S3_BUCKET}}/${OUT_FILENAME_DEB}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
 #          aws s3 cp "release/${FILENAME_RPM}" "${{env.S3_BUCKET}}/${OUT_FILENAME_RPM}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
 #          aws s3 cp "release/${FILENAME_APPIMAGE}" "${{env.S3_BUCKET}}/${OUT_FILENAME_APPIMAGE}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
 #          aws s3 cp "release/${FILENAME_LATEST_LINUX}" "${{env.S3_BUCKET}}/${OUT_LATEST_LINUX}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+
+#  release-desktop-wallet-windows:
+#    runs-on: windows-latest
+#    steps:
+#      - name: setup
+#        run: |
+#          # Extract version number
+#          VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
+#
+#          if [[ $TARGET_NET = "mainnet" ]]; then
+#              FILENAME_EXE="concordium-desktop-wallet-${VERSION}.exe"
+#          else
+#              FILENAME_EXE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.exe"
+#          fi
+#          
+#          OUT_FILENAME_EXE="${VERSION}/${TARGET_NET}/${FILENAME_EXE}"
+#
+#          check_uniqueness() {
+#              # Fail if file already exists
+#              totalFoundObjects=$(aws s3 ls "${S3_BUCKET}/$1" --summarize | grep "Total Objects: " | sed 's/[^0-9]*//g')
+#              if [ "$totalFoundObjects" -ne "0" ]; then
+#                  echo "${S3_BUCKET}/$1 already exists"
+#                  false
+#              fi
+#          }
+    
