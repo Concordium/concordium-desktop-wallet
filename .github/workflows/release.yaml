@@ -44,7 +44,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: false
-          tags: localhost:desktop-wallet-ci:latest
+          tags: localhost/desktop-wallet-ci:latest
           context: '.'
           file: 'scripts/desktop-wallet-ci.Dockerfile'
 #          cache-to: type=gha,mode=max
@@ -81,7 +81,7 @@ jobs:
     needs: Build-pipeline-image
     runs-on: ubuntu-latest
     container:
-      image: localhost:desktop-wallet-ci:latest
+      image: localhost/desktop-wallet-ci:latest
       #credentials:
       #  username: ${{needs.login-aws.outputs.access_key}}
       #  password: ${{needs.login-aws.outputs.secret_key}}
