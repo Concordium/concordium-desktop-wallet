@@ -64,8 +64,8 @@ jobs:
           tags: "192549843005.dkr.ecr.eu-west-1.amazonaws.com/concordium/desktop-wallet-ci:test"
           context: '.'
           file: 'scripts/desktop-wallet-ci.Dockerfile'
-          cache-to: type=gha,mode=max
-          cache-from: type=gha
+          #cache-to: type=gha,mode=max
+          #cache-from: type=gha
           build-args: |
             BASE_VERSION=${{ env.BASE_IMAGE_VERSION }}
             NODE_VERSION=${{ env.NODE_VERSION }}
