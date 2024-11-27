@@ -100,7 +100,7 @@ jobs:
     needs: login-aws
     runs-on: ubuntu-latest
     container:
-      image: "192549843005.dkr.ecr.eu-west-1.amazonaws.com/concordium/desktop-wallet-ci:test"
+      image: "192549843005.dkr.ecr.eu-west-1.amazonaws.com/concordium/desktop-wallet-ci:latest"
       credentials:
         username: ${{needs.login-aws.outputs.access_key}}
         password: ${{needs.login-aws.outputs.secret_key}}
