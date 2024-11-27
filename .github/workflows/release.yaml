@@ -38,7 +38,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          ref: 'v1.7.4'
+          ref: ${{ github.ref_name }}
 
       - name: build ci image
         uses: docker/build-push-action@v6
