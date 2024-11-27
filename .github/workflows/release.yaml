@@ -118,6 +118,7 @@ jobs:
 
       - name: Install dependencies and build
         run: |
+          rustup default stable
           node --version
           npm --version
           yarn --version
