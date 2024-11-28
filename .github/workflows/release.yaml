@@ -159,7 +159,7 @@ jobs:
           submodules: recursive
           ref: ${{ github.ref_name }}
       - name: install dependencies
-        uses: jetli/wasm-pack-action@c0.4.0
+        uses: jetli/wasm-pack-action@v0.4.0
           
       - name: setup
         shell: bash
