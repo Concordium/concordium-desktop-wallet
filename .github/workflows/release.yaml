@@ -145,6 +145,14 @@ jobs:
     environment: release
     needs: login-aws
     steps:
+      - name: aws creds
+        uses: aws-actions/configure-aws-credentials@v4
+        id: creds
+        with:
+          aws-region: "eu-west-1"
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          role-session-name: ReleaseDesktopWalletSession
+          
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
