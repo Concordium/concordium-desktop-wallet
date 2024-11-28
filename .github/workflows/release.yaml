@@ -166,7 +166,7 @@ jobs:
       - name: install node
         uses: actions/setup-node@v4
         with:
-          node-version: 14.16.0
+          node-version: 22.11.0
           
       - name: setup
         shell: bash
