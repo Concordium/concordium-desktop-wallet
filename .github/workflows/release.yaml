@@ -151,6 +151,7 @@ jobs:
           submodules: recursive
           ref: ${{ github.ref_name }}
       - name: setup
+        shell: bash
         run: |
           # Extract version number
           VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
