@@ -172,4 +172,22 @@ jobs:
                   false
               fi
           }
+          OUT_FILENAME_LATEST_WINDOWS="${VERSION}/${TARGET_NET}/latest.yml"
+                    
+          check_uniqueness "${OUT_FILENAME_EXE}"
+          check_uniqueness "${OUT_FILENAME_LATEST_WINDOWS}"
+
+          # Print system info
+          node --version
+          npm --version
+          yarn --version
+          python --version
+          rustup show
+          wasm-pack --version
+
+          # Install dependencies
+          yarn
+
+          # Build
+          yarn package-win-no-sign
     
