@@ -59,14 +59,14 @@ jobs:
 
       
       - name: Checkout repository
-        if: ${{ env.EC }} != 0
+        if: ${{ env.EC == 254 }}
         uses: actions/checkout@v4
         with:
           submodules: recursive
           ref: ${{ github.ref_name }}
 
       - name: build ci image
-        if: ${{ env.EC }} != 0
+        if: ${{ env.EC == 254 }}
         uses: docker/build-push-action@v6
         with:
           push: true
