@@ -170,7 +170,7 @@ jobs:
               FILENAME_EXE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.exe"
           fi
           
-          OUT_FILENAME_EXE="${VERSION}/${TARGET_NET}/${FILENAME_EXE}"
+          OUT_FILENAME_EXE="${VERSION}/${TARGET_NET}/${FILENAME_EXE}/test"
 
           check_uniqueness() {
               # Fail if file already exists
