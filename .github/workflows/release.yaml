@@ -141,7 +141,7 @@ jobs:
 #          aws s3 cp "release/${FILENAME_LATEST_LINUX}" "${{env.S3_BUCKET}}/${OUT_LATEST_LINUX}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
 
   release-desktop-wallet-windows:
-    runs-on: windows-latest
+    runs-on: windows-2019
     environment: release
     needs: login-aws
     steps:
@@ -167,11 +167,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 14.16.0
-
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v2
-        with:
-          vs-version: '[16.4,16.5)'
           
       - name: setup
         shell: bash
@@ -207,7 +202,6 @@ jobs:
           python --version
           rustup show
           wasm-pack --version
-          yarn add node-gyp@10.1.0
 
           # Install dependencies
           yarn --network-timeout 1000000
