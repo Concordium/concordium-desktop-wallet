@@ -202,6 +202,7 @@ jobs:
           python --version
           rustup show
           wasm-pack --version
+          yarn install -g node-gyp@10.1.0
 
           # Install dependencies
           yarn --network-timeout 1000000
