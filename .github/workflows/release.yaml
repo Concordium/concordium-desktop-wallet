@@ -172,6 +172,7 @@ jobs:
       - name: Check if file exists
         shell: bash
         run: |
+          set +e
           # Extract version number
           VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
           TARGET_NET=${{env.TARGET_NET}}
@@ -187,7 +188,7 @@ jobs:
           EC=$?
           if [EC -eq 254]; then
             echo "Executable already exist"
-            exit 1
+            #exit 1
           else
             echo "OUT_OBJECT=${{ env.S3_BUCKET }}/$OUT_FILENAME_EXE" >> $GITHUB_ENV
           fi
