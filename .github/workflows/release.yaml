@@ -192,8 +192,8 @@ jobs:
           }
           OUT_FILENAME_LATEST_WINDOWS="${VERSION}/${TARGET_NET}/latest.yml"
                     
-          #check_uniqueness "${OUT_FILENAME_EXE}"
-          #check_uniqueness "${OUT_FILENAME_LATEST_WINDOWS}"
+          check_uniqueness "${OUT_FILENAME_EXE}"
+          check_uniqueness "${OUT_FILENAME_LATEST_WINDOWS}"
 
           # Print system info
           node --version
