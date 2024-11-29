@@ -167,6 +167,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 14.16.0
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v2
+        with:
+          vs-version: '[16.4,16.5)'
           
       - name: setup
         shell: bash
