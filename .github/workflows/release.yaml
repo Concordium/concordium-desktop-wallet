@@ -153,29 +153,6 @@ jobs:
           aws-region: "eu-west-1"
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
           role-session-name: ReleaseDesktopWalletSession
-
-      - name: Check if file exists
-        shell: bash
-        run: |
-          # Extract version number
-          VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
-          TARGET_NET=${{env.TARGET_NET}}
-
-          if [ $TARGET_NET = "mainnet" ]; then
-              FILENAME_EXE="concordium-desktop-wallet-${VERSION}.exe"
-          else
-              FILENAME_EXE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.exe"
-          fi
-          
-          OUT_FILENAME_EXE="${VERSION}/${TARGET_NET}/${FILENAME_EXE}/test"
-          aws s3 ls ${{ env.S3_BUCKET }}/$OUT_FILENAME_EXE
-          EC=$?
-          if [EC -eq 254]; then
-            echo "Executable already exist"
-            exit 1
-          else
-            echo "OUT_OBJECT=${{ env.S3_BUCKET }}/$OUT_FILENAME_EXE" >> $GITHUB_ENV
-          fi
           
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -191,6 +168,29 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 14.16.0
+
+      - name: Check if file exists
+        shell: bash
+        run: |
+          # Extract version number
+          VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
+          TARGET_NET=${{env.TARGET_NET}}
+  
+          if [ $TARGET_NET = "mainnet" ]; then
+              FILENAME_EXE="concordium-desktop-wallet-${VERSION}.exe"
+          else
+              FILENAME_EXE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.exe"
+          fi
+          
+          OUT_FILENAME_EXE="${VERSION}/${TARGET_NET}/${FILENAME_EXE}/test"
+          aws s3 ls ${{ env.S3_BUCKET }}/$OUT_FILENAME_EXE
+          EC=$?
+          if [EC -eq 254]; then
+            echo "Executable already exist"
+            exit 1
+          else
+            echo "OUT_OBJECT=${{ env.S3_BUCKET }}/$OUT_FILENAME_EXE" >> $GITHUB_ENV
+          fi
           
       - name: setup
         shell: bash
