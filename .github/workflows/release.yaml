@@ -144,10 +144,6 @@ jobs:
     runs-on: windows-latest
     environment: release
     needs: login-aws
-    container:
-      image: dockurr/windows
-      env:
-        VERSION: "10"
     steps:
       - name: aws creds
         uses: aws-actions/configure-aws-credentials@v4
@@ -175,6 +171,7 @@ jobs:
       - name: setup
         shell: bash
         run: |
+          #! C:\msys64\usr\bin\bash.exe
           # Extract version number
           VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
 
