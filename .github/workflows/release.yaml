@@ -144,6 +144,10 @@ jobs:
     runs-on: windows-latest
     environment: release
     needs: login-aws
+    container:
+      image: dockurr/windows
+      env:
+        VERSION: "10"
     steps:
       - name: aws creds
         uses: aws-actions/configure-aws-credentials@v4
@@ -166,7 +170,7 @@ jobs:
       - name: install node
         uses: actions/setup-node@v4
         with:
-          node-version: 22.11.0
+          node-version: 14.16.0
           
       - name: setup
         shell: bash
@@ -202,7 +206,7 @@ jobs:
           python --version
           rustup show
           wasm-pack --version
-          yarn global add node-gyp@10.1.0
+          yarn add node-gyp@10.1.0
 
           # Install dependencies
           yarn --network-timeout 1000000
