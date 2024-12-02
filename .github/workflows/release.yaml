@@ -22,7 +22,7 @@ env:
   NODE_VERSION: "16.20.2"
   STATIC_NODE_BINARY_IMAGE_NAME: 'static-node-binaries'
   AWS_ROLE_TO_ASSUME: "arn:aws:iam::192549843005:role/github_concordium-desktop-wallet"
-  S3_BUCKET: "s3://desktopwallet.concordium.com/"
+  S3_BUCKET: "s3://desktopwallet.concordium.com"
   ECR_REPO: "192549843005.dkr.ecr.eu-west-1.amazonaws.com/concordium/desktop-wallet-ci"
 
 permissions:
