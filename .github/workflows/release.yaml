@@ -185,19 +185,21 @@ jobs:
           
           OUT_FILENAME_EXE="${VERSION}/${TARGET_NET}/${FILENAME_EXE}"
           OUT_OBJECT=${{ env.S3_BUCKET }}/$OUT_FILENAME_EXE
+          echo $OUT_OBJECT
           aws s3 ls $OUT_OBJECT
           EC=$?
-          echo "OUT_OBJECT=$OUT_OBJECT" >> $GITHUB_ENV
-          echo "ERROR_CODE=$EC" >> $GITHUB_ENV
+          echo $EC
           if [ $EC -eq 0 ]; then
-            echo "$OUT_OBJECT already exist"
+          echo "$OUT_OBJECT already exist"
           elif [ $EC -ne 254 ]; then
-            echo "Error: $EC"
+          echo "Error: $EC"
           fi
+          echo "OUT_OBJECT=$OUT_OBJECT" >> $GITHUB_ENV
+          echo "EXIT_CODE=$EC" >> $GITHUB_ENV
           
           
       - name: setup
-        if: ${{ env.ERROR_CODE == 254 }}
+        if: ${{ env.EXIT_CODE == 254 }}
         shell: bash
         run: |
           # Print system info
