@@ -180,7 +180,7 @@ jobs:
           if [ $TARGET_NET = "mainnet" ]; then
               FILENAME_EXE="concordium-desktop-wallet-${VERSION}.exe"
           else
-              FILENAME_EXE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.exe"
+              FILENAME_EXE="concordium-desktop-wallet-${TARGET_NET}.exe"
           fi
           OUT_YML="${VERSION}/${TARGET_NET}/latest.yml"
           OUT_FILENAME_EXE="${VERSION}/${TARGET_NET}/${FILENAME_EXE}"
