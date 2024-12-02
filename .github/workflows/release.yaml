@@ -193,6 +193,7 @@ jobs:
             echo "Error: $EC"
           fi
           echo "OUT_EXE=$OUT_FILENAME_EXE" >> $GITHUB_ENV
+          echo "FILENAME_EXE=$FILENAME_EXE" >> $GITHUB_ENV
           echo "OUT_YML=$OUT_YML" >> $GITHUB_ENV
           echo "EXIT_CODE=$EC" >> $GITHUB_ENV
           
@@ -217,5 +218,5 @@ jobs:
 
           # Push
           aws s3 cp "release/latest.yml" ${{ env.S3_BUCKET }}/${{ env.OUT_YML }}
-          aws s3 cp "release/${{ env.OUT_EXE}}" ${{ env.S3_BUCKET }}/${{ env.OUT_EXE }}
+          aws s3 cp "release/${{ env.FILENAME_EXE}}" ${{ env.S3_BUCKET }}/${{ env.OUT_EXE }}
     
