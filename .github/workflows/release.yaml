@@ -18,7 +18,7 @@ on:
 
 env:
   BASE_IMAGE_VERSION: "rust-1.74.1_ghc-9.6.4"
-  TARGET_NET: "stagenet"
+  TARGET_NET: "mainnet"
   NODE_VERSION: "16.20.2"
   STATIC_NODE_BINARY_IMAGE_NAME: 'static-node-binaries'
   AWS_ROLE_TO_ASSUME: "arn:aws:iam::192549843005:role/github_concordium-desktop-wallet"
@@ -202,6 +202,7 @@ jobs:
         if: ${{ env.EXIT_CODE == 1 }}
         shell: bash
         run: |
+          TARGET_NET="mainnet"
           # Print system info
           node --version
           npm --version
