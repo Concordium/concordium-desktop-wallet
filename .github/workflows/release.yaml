@@ -216,6 +216,6 @@ jobs:
           yarn package-win-no-sign
 
           # Push
-          aws s3 cp "release/${{ env.OUT_YML}}" ${{ env.S3_BUCKET }}/${{ env.OUT_YML }}
+          aws s3 cp "release/latest.yml" ${{ env.S3_BUCKET }}/${{ env.OUT_YML }}
           aws s3 cp "release/${{ env.OUT_EXE}}" ${{ env.S3_BUCKET }}/${{ env.OUT_EXE }}
     
