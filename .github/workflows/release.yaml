@@ -174,13 +174,13 @@ jobs:
         run: |
           set +e
           # Extract version number
-          VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)/test
+          VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
           TARGET_NET="mainnet" #{{env.TARGET_NET}}
   
           if [ $TARGET_NET = "mainnet" ]; then
-              FILENAME_EXE="concordium-desktop-wallet-1.7.4.exe"
+              FILENAME_EXE="concordium-desktop-wallet-${VERSION}.exe"
           else
-              FILENAME_EXE="concordium-desktop-wallet-${TARGET_NET}-1.7.4.exe"
+              FILENAME_EXE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.exe"
           fi
           OUT_YML="${VERSION}/test/${TARGET_NET}/latest.yml"
           OUT_FILENAME_EXE="${VERSION}/${TARGET_NET}/${FILENAME_EXE}"
