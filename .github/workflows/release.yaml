@@ -186,7 +186,7 @@ jobs:
           OUT_FILENAME_EXE="${VERSION}/${TARGET_NET}/${FILENAME_EXE}"
           aws s3 ls ${{ env.S3_BUCKET }}/$OUT_FILENAME_EXE
           EC=$?
-          if [$EC -eq 254]; then
+          if [$EC -eq 0]; then
             echo "Executable already exist"
             exit 1
           else
