@@ -178,7 +178,7 @@ jobs:
           TARGET_NET="mainnet" #{{env.TARGET_NET}}
   
           if [ $TARGET_NET = "mainnet" ]; then
-              FILENAME_EXE="concordium-desktop-wallet.exe"
+              FILENAME_EXE="concordium-desktop-wallet-1.7.4.exe"
           else
               FILENAME_EXE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.exe"
           fi
