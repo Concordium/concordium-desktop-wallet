@@ -97,6 +97,15 @@ jobs:
       - name: Install AWS CLI
         run: apt install awscli -y
 
+      - name: aws creds
+        uses: aws-actions/configure-aws-credentials@v4
+        id: creds
+        with:
+          aws-region: "eu-west-1"
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          role-session-name: ReleaseDesktopWalletSession
+          mask-aws-account-id: false
+
       #- name: check if executable exist
 
       - name: Install dependencies and build
