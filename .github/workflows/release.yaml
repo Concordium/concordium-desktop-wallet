@@ -108,7 +108,7 @@ jobs:
           yarn package
 
       - name: Install AWS CLI
-        run: snap install aws-cli
+        run: apt-get install aws-cli
 
       - name: publish
         run: |
