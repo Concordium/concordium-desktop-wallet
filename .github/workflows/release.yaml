@@ -245,4 +245,3 @@ jobs:
           # Push
           aws s3 cp "release/latest.yml" ${{ env.S3_BUCKET }}/${{ env.OUT_YML }} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
           aws s3 cp "release/${{ env.FILENAME_EXE}}" ${{ env.S3_BUCKET }}/${{ env.OUT_EXE }} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-    
