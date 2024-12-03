@@ -2,8 +2,6 @@ name: Concordium desktop wallet release
 
 on:
   push:
-    branches:
-      - ekw/SRE-1001/release-desktop-wallet
     tags:
       - desktop-wallet-*/*
 
@@ -57,7 +55,7 @@ jobs:
           # Extract version number
           VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
 
-          TAG_VERSION=1.7.4 #${{ github.ref_name }}
+          TAG_VERSION=${{ github.ref_name }}
           if [ "$VERSION" != "$TAG_VERSION" ]; then
             echo "Tag version is not correct. Tag version: $TAG_VERSION version from package.json: $VERSION"
             EC=0
@@ -185,7 +183,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          ref: v1.7.4
+          ref: ${{ github.ref_name }}
+
       - name: install dependencies
         uses: jetli/wasm-pack-action@v0.4.0
         with:
