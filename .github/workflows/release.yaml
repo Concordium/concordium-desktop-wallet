@@ -106,9 +106,48 @@ jobs:
           role-session-name: ReleaseDesktopWalletSession
           mask-aws-account-id: false
 
-      #- name: check if executable exist
+      - name: check if executable exist
+        run: |
+          set +e
+          # Extract version number
+          VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
+          TARGET_NET=${{env.TARGET_NET}}
+
+          # Prepare filenames
+          if [ $TARGET_NET = "mainnet" ]; then
+             FILENAME_DEB="concordium-desktop-wallet-${VERSION}.deb"
+             FILENAME_RPM="concordium-desktop-wallet-${VERSION}.rpm"
+             FILENAME_APPIMAGE="concordium-desktop-wallet-${VERSION}.AppImage"
+             FILENAME="concordium-desktop-wallet-${VERSION}"
+          else
+             FILENAME_DEB="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.deb"
+             FILENAME_RPM="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.rpm"
+             FILENAME_APPIMAGE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.AppImage"
+             FILENAME="concordium-desktop-wallet-${TARGET_NET}-${VERSION}"
+          fi
+
+          FILENAME_LATEST_LINUX="latest-linux.yml"
+
+          OUT_FILENAME_DEB="${VERSION}/${TARGET_NET}/${FILENAME_DEB}"
+          OUT_FILENAME_RPM="${VERSION}/${TARGET_NET}/${FILENAME_RPM}"
+          OUT_FILENAME_APPIMAGE="${VERSION}/${TARGET_NET}/${FILENAME_APPIMAGE}"
+          OUT_FILENAME="${VERSION}/${TARGET_NET}/${FILENAME}"
+          OUT_LATEST_LINUX="${VERSION}/${TARGET_NET}/latest-linux.yml"
+          aws s3 ls ${{env.S3_BUCKET}}/test/${OUT_FILENAME}.deb
+          EC=$?
+          if [ EC -eq 0 ]; then
+            echo ".deb file already exist"
+          elif [ EC -ne 1 ]; then
+            echo "Error: $EC"
+          fi
+          echo "EXIT_CODE=$EC" >> $GITHUB_ENV
+          echo "OUT_FILENAME=$OUT_FILENAME" >> $GITHUB_ENV
+          echo "FILENAME=$FILENAME" >> $GITHUB_ENV
+          echo "OUT_YML_FILENAME=$OUT_LATEST_LINUX" >> $GITHUB_ENV
+
 
       - name: Install dependencies and build
+        if: ${{ env.EXIT_CODE == 1 }}
         run: |
           rustup default stable
           node --version
@@ -122,43 +161,15 @@ jobs:
           yarn package
 
       - name: publish
+        if: ${{ env.EXIT_CODE == 1 }}
         run: |
           set +e
-          # Extract version number
-          VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
-          TARGET_NET=${{env.TARGET_NET}}
-
-          # Prepare filenames
-          if [ $TARGET_NET = "mainnet" ]; then
-             FILENAME_DEB="concordium-desktop-wallet-${VERSION}.deb"
-             FILENAME_RPM="concordium-desktop-wallet-${VERSION}.rpm"
-             FILENAME_APPIMAGE="concordium-desktop-wallet-${VERSION}.AppImage"
-          else
-             FILENAME_DEB="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.deb"
-             FILENAME_RPM="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.rpm"
-             FILENAME_APPIMAGE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.AppImage"
-          fi
-
-          FILENAME_LATEST_LINUX="latest-linux.yml"
-
-          OUT_FILENAME_DEB="${VERSION}/${TARGET_NET}/${FILENAME_DEB}"
-          OUT_FILENAME_RPM="${VERSION}/${TARGET_NET}/${FILENAME_RPM}"
-          OUT_FILENAME_APPIMAGE="${VERSION}/${TARGET_NET}/${FILENAME_APPIMAGE}"
-          OUT_LATEST_LINUX="${VERSION}/${TARGET_NET}/latest-linux.yml"
-          aws s3 ls ${{env.S3_BUCKET}}/test/${OUT_FILENAME_DEB}
-          EC=$?
-          if [ EC -eq 0 ]; then
-            echo ".deb file already exist"
-            exit 1
-          elif [ EC -ne 1 ]; then
-            echo "Error: $EC"
-          fi
 
           # Push to s3
-          aws s3 cp "release/${FILENAME_DEB}" "${{env.S3_BUCKET}}/test/${OUT_FILENAME_DEB}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-          aws s3 cp "release/${FILENAME_RPM}" "${{env.S3_BUCKET}}/test/${OUT_FILENAME_RPM}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-          aws s3 cp "release/${FILENAME_APPIMAGE}" "${{env.S3_BUCKET}}/test/${OUT_FILENAME_APPIMAGE}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-          aws s3 cp "release/${FILENAME_LATEST_LINUX}" "${{env.S3_BUCKET}}/test/${OUT_LATEST_LINUX}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/${{ env.FILENAME }}.deb" "${{env.S3_BUCKET}}/test/${{ env.OUT_FILENAME }}.deb" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/${{ env.FILENAME }}.rpm" "${{env.S3_BUCKET}}/test/${{ env.OUT_FILENAME }}.rpm" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/${{ env.FILENAME }}.AppImage" "${{env.S3_BUCKET}}/test/${{ env.OUT_FILENAME }}.rpm" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/latest-linux.yml" "${{env.S3_BUCKET}}/test/${{ env.OUT_YML_FILENAME }}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
 
 #  #using windows-2019 to be able to use visual studio 2019, newer versions do not support older versions of node
 #  release-desktop-wallet-windows:
