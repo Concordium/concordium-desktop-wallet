@@ -108,7 +108,7 @@ jobs:
           yarn package
 
       - name: Install AWS CLI
-        uses: unfor19/install-aws-cli-action@v1
+        run: snap install aws-cli
 
       - name: publish
         run: |
@@ -143,92 +143,92 @@ jobs:
           fi
 
           # Push to s3
-          aws s3 cp "release/${FILENAME_DEB}" "${{env.S3_BUCKET}}/test/${OUT_FILENAME_DEB}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-          aws s3 cp "release/${FILENAME_RPM}" "${{env.S3_BUCKET}}/test/${OUT_FILENAME_RPM}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-          aws s3 cp "release/${FILENAME_APPIMAGE}" "${{env.S3_BUCKET}}/test/${OUT_FILENAME_APPIMAGE}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-          aws s3 cp "release/${FILENAME_LATEST_LINUX}" "${{env.S3_BUCKET}}/test/${OUT_LATEST_LINUX}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/${FILENAME_DEB}" "${{env.S3_BUCKET}}/${OUT_FILENAME_DEB}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/${FILENAME_RPM}" "${{env.S3_BUCKET}}/${OUT_FILENAME_RPM}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/${FILENAME_APPIMAGE}" "${{env.S3_BUCKET}}/${OUT_FILENAME_APPIMAGE}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/${FILENAME_LATEST_LINUX}" "${{env.S3_BUCKET}}/${OUT_LATEST_LINUX}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
 
   #using windows-2019 to be able to use visual studio 2019, newer versions do not support older versions of node
-#  release-desktop-wallet-windows:
-#    runs-on: windows-2019
-#    environment: release
-#    needs: login-aws
-#    steps:
-#      - name: aws creds
-#        uses: aws-actions/configure-aws-credentials@v4
-#        id: creds
-#        with:
-#          aws-region: "eu-west-1"
-#          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
-#          role-session-name: ReleaseDesktopWalletSession
-#          
-#      - name: Checkout repository
-#        uses: actions/checkout@v4
-#        with:
-#          submodules: recursive
-#          ref: v1.7.4
-#      - name: install dependencies
-#        uses: jetli/wasm-pack-action@v0.4.0
-#        with:
-#          version: 'v0.9.1'
-#
-#      - name: install node
-#        uses: actions/setup-node@v4
-#        with:
-#          node-version: 14.16.0
-#
-#      - name: Check if file exists
-#        shell: bash
-#        run: |
-#          set +e
-#          # Extract version number
-#          VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
-#          TARGET_NET=${{env.TARGET_NET}}
-#  
-#          if [ $TARGET_NET = "mainnet" ]; then
-#              FILENAME_EXE="concordium-desktop-wallet-${VERSION}.exe"
-#          else
-#              FILENAME_EXE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.exe"
-#          fi
-#          OUT_YML="${VERSION}/${TARGET_NET}/latest.yml"
-#          OUT_FILENAME_EXE="${VERSION}/${TARGET_NET}/${FILENAME_EXE}"
-#          aws s3 ls ${{ env.S3_BUCKET }}/$OUT_FILENAME_EXE
-#          EC=$?
-#          echo $EC
-#          if [ $EC -eq 0 ]; then
-#            echo "$OUT_OBJECT already exist"
-#          elif [ $EC -ne 1 ]; then
-#            echo "Error: $EC"
-#          fi
-#          echo "OUT_EXE=$OUT_FILENAME_EXE" >> $GITHUB_ENV
-#          echo "FILENAME_EXE=$FILENAME_EXE" >> $GITHUB_ENV
-#          echo "OUT_YML=$OUT_YML" >> $GITHUB_ENV
-#          echo "EXIT_CODE=$EC" >> $GITHUB_ENV
-#          
-#          
-#      - name: Build and push desktop wallet
-#        if: ${{ env.EXIT_CODE == 1 }}
-#        shell: bash
-#        run: |
-#          TARGET_NET=${{env.TARGET_NET}}
-#
-#          # Print system info
-#          node --version
-#          npm --version
-#          yarn --version
-#          python --version
-#          rustup show
-#          wasm-pack --version
-#
-#          # Install dependencies
-#          yarn --network-timeout 1000000
-#
-#          # Build
-#          yarn package-win-no-sign
-#
-#          ls release
-#
-#          # Push
-#          aws s3 cp "release/latest.yml" ${{ env.S3_BUCKET }}/${{ env.OUT_YML }} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-#          aws s3 cp "release/${{ env.FILENAME_EXE}}" ${{ env.S3_BUCKET }}/${{ env.OUT_EXE }} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-#    
+  release-desktop-wallet-windows:
+    runs-on: windows-2019
+    environment: release
+    needs: login-aws
+    steps:
+      - name: aws creds
+        uses: aws-actions/configure-aws-credentials@v4
+        id: creds
+        with:
+          aws-region: "eu-west-1"
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          role-session-name: ReleaseDesktopWalletSession
+          
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          ref: v1.7.4
+      - name: install dependencies
+        uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          version: 'v0.9.1'
+
+      - name: install node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 14.16.0
+
+      - name: Check if file exists
+        shell: bash
+        run: |
+          set +e
+          # Extract version number
+          VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
+          TARGET_NET=${{env.TARGET_NET}}
+  
+          if [ $TARGET_NET = "mainnet" ]; then
+              FILENAME_EXE="concordium-desktop-wallet-${VERSION}.exe"
+          else
+              FILENAME_EXE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.exe"
+          fi
+          OUT_YML="${VERSION}/${TARGET_NET}/latest.yml"
+          OUT_FILENAME_EXE="${VERSION}/${TARGET_NET}/${FILENAME_EXE}"
+          aws s3 ls ${{ env.S3_BUCKET }}/$OUT_FILENAME_EXE
+          EC=$?
+          echo $EC
+          if [ $EC -eq 0 ]; then
+            echo "$OUT_OBJECT already exist"
+          elif [ $EC -ne 1 ]; then
+            echo "Error: $EC"
+          fi
+          echo "OUT_EXE=$OUT_FILENAME_EXE" >> $GITHUB_ENV
+          echo "FILENAME_EXE=$FILENAME_EXE" >> $GITHUB_ENV
+          echo "OUT_YML=$OUT_YML" >> $GITHUB_ENV
+          echo "EXIT_CODE=$EC" >> $GITHUB_ENV
+          
+          
+      - name: Build and push desktop wallet
+        if: ${{ env.EXIT_CODE == 1 }}
+        shell: bash
+        run: |
+          TARGET_NET=${{env.TARGET_NET}}
+
+          # Print system info
+          node --version
+          npm --version
+          yarn --version
+          python --version
+          rustup show
+          wasm-pack --version
+
+          # Install dependencies
+          yarn --network-timeout 1000000
+
+          # Build
+          yarn package-win-no-sign
+
+          ls release
+
+          # Push
+          aws s3 cp "release/latest.yml" ${{ env.S3_BUCKET }}/${{ env.OUT_YML }} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/${{ env.FILENAME_EXE}}" ${{ env.S3_BUCKET }}/${{ env.OUT_EXE }} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+    
