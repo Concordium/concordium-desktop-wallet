@@ -67,7 +67,6 @@ jobs:
 
       - name: Check version
         run: |
-          set +e
           # Extract version number
           VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
 
