@@ -64,7 +64,7 @@ jobs:
           VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
 
           TAG_VERSION=${{ github.ref_name }}
-          if [ "$VERSION" -ne "$TAG_VERSION" ]; then
+          if [[ "$VERSION" -ne "$TAG_VERSION" ]]; then
             echo "Tag version is not correct. Tag version: $TAG_VERSION version from package.json: $VERSION"
             EC=0
             exit 1
