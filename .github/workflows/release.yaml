@@ -1,18 +1,7 @@
 name: Concordium desktop wallet release
 
 on:
-  workflow_dispatch:
-    inputs:
-      service:
-        type: choice
-        description: Choose which workflow should be ran
-        options:
-          - desktop-wallet-windows
-          - release-desktop-wallet-linux
-
   push:
-    branches:
-      - ekw/SRE-1001/release-desktop-wallet
     tags:
       - desktop-wallet-*/*
 
@@ -35,6 +24,7 @@ jobs:
     outputs:
       access_key: ${{ steps.login-ecr.outputs.docker_username_192549843005_dkr_ecr_eu_west_1_amazonaws_com }}
       secret_key: ${{ steps.login-ecr.outputs.docker_password_192549843005_dkr_ecr_eu_west_1_amazonaws_com }}
+      CONTAINER_TAG: ${{ env.CONTAINER_TAG }}
     environment: release
     steps:
       - name: aws creds
@@ -70,10 +60,11 @@ jobs:
             exit 1
           fi
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "CONTAINER_TAG=${{ env.ECR_REPO }}:$VERSION"
       
       - name: Check if image exist
         run: |
-          aws ecr describe-images --registry-id "192549843005" --repository-name "concordium/desktop-wallet-ci" --region eu-west-1  --image-ids=imageTag=test
+          aws ecr describe-images --registry-id "192549843005" --repository-name "concordium/desktop-wallet-ci" --region eu-west-1  --image-ids=imageTag=${{ env.VERSION }}
           echo "EC=$?" >> $GITHUB_ENV
 
       - name: build ci image
@@ -81,7 +72,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: "192549843005.dkr.ecr.eu-west-1.amazonaws.com/concordium/desktop-wallet-ci:${{ env.VERSION }}-test"
+          tags: "${{ env.CONTAINER_TAG }}"
           context: '.'
           file: 'scripts/desktop-wallet-ci.Dockerfile'
           build-args: |
@@ -93,7 +84,7 @@ jobs:
     needs: login-aws
     runs-on: ubuntu-latest
     container:
-      image: "192549843005.dkr.ecr.eu-west-1.amazonaws.com/concordium/desktop-wallet-ci:test"
+      image: "192549843005.dkr.ecr.eu-west-1.amazonaws.com/concordium/desktop-wallet-ci:${{ github.ref_name }}"
       credentials:
         username: ${{needs.login-aws.outputs.access_key}}
         password: ${{needs.login-aws.outputs.secret_key}}
@@ -124,22 +115,13 @@ jobs:
 
           # Prepare filenames
           if [ $TARGET_NET = "mainnet" ]; then
-             FILENAME_DEB="concordium-desktop-wallet-${{ env.VERSION }}.deb"
-             FILENAME_RPM="concordium-desktop-wallet-${{ env.VERSION }}.rpm"
-             FILENAME_APPIMAGE="concordium-desktop-wallet-${{ env.VERSION }}.AppImage"
              FILENAME="concordium-desktop-wallet-${{ env.VERSION }}"
           else
-             FILENAME_DEB="concordium-desktop-wallet-${TARGET_NET}-${{ env.VERSION }}.deb"
-             FILENAME_RPM="concordium-desktop-wallet-${TARGET_NET}-${{ env.VERSION }}.rpm"
-             FILENAME_APPIMAGE="concordium-desktop-wallet-${TARGET_NET}-${{ env.VERSION }}.AppImage"
              FILENAME="concordium-desktop-wallet-${TARGET_NET}-${{ env.VERSION }}"
           fi
 
           FILENAME_LATEST_LINUX="latest-linux.yml"
 
-          OUT_FILENAME_DEB="${{ env.VERSION }}/${TARGET_NET}/${FILENAME_DEB}"
-          OUT_FILENAME_RPM="${{ env.VERSION }}/${TARGET_NET}/${FILENAME_RPM}"
-          OUT_FILENAME_APPIMAGE="${{ env.VERSION }}/${TARGET_NET}/${FILENAME_APPIMAGE}"
           OUT_FILENAME="${{ env.VERSION }}/${TARGET_NET}/${FILENAME}"
           OUT_LATEST_LINUX="${{ env.VERSION }}/${TARGET_NET}/latest-linux.yml"
           aws s3 ls ${{env.S3_BUCKET}}/${OUT_FILENAME}.deb
@@ -175,10 +157,10 @@ jobs:
           set +e
 
           # Push to s3
-          aws s3 cp "release/${{ env.FILENAME }}.deb" "${{env.S3_BUCKET}}/test/${{ env.OUT_FILENAME }}.deb" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-          aws s3 cp "release/${{ env.FILENAME }}.rpm" "${{env.S3_BUCKET}}/test/${{ env.OUT_FILENAME }}.rpm" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-          aws s3 cp "release/${{ env.FILENAME }}.AppImage" "${{env.S3_BUCKET}}/test/${{ env.OUT_FILENAME }}.rpm" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-          aws s3 cp "release/latest-linux.yml" "${{env.S3_BUCKET}}/test/${{ env.OUT_YML_FILENAME }}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/${{ env.FILENAME }}.deb" "${{env.S3_BUCKET}}/${{ env.OUT_FILENAME }}.deb" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/${{ env.FILENAME }}.rpm" "${{env.S3_BUCKET}}/${{ env.OUT_FILENAME }}.rpm" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/${{ env.FILENAME }}.AppImage" "${{env.S3_BUCKET}}/${{ env.OUT_FILENAME }}.rpm" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/latest-linux.yml" "${{env.S3_BUCKET}}/${{ env.OUT_YML_FILENAME }}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
 
   #using windows-2019 to be able to use visual studio 2019, newer versions do not support older versions of node
   release-desktop-wallet-windows:
@@ -251,15 +233,12 @@ jobs:
           rustup show
           wasm-pack --version
 
-          # Install dependencies
           yarn --network-timeout 1000000
 
           # Build
           yarn package-win-no-sign
 
-          ls release
-
           # Push
-          aws s3 cp "release/latest.yml" ${{ env.S3_BUCKET }}/test/${{ env.OUT_YML }} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-          aws s3 cp "release/${{ env.FILENAME_EXE}}" ${{ env.S3_BUCKET }}/test/${{ env.OUT_EXE }} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/latest.yml" ${{ env.S3_BUCKET }}/${{ env.OUT_YML }} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp "release/${{ env.FILENAME_EXE}}" ${{ env.S3_BUCKET }}/${{ env.OUT_EXE }} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
     
