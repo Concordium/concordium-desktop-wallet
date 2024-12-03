@@ -114,7 +114,7 @@ jobs:
           TARGET_NET=${{env.TARGET_NET}}
 
           # Prepare filenames
-          if [[ $TARGET_NET = "mainnet" ]]; then
+          if [ $TARGET_NET = "mainnet" ]; then
              FILENAME_DEB="concordium-desktop-wallet-${VERSION}.deb"
              FILENAME_RPM="concordium-desktop-wallet-${VERSION}.rpm"
              FILENAME_APPIMAGE="concordium-desktop-wallet-${VERSION}.AppImage"
