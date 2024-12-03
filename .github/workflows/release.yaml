@@ -66,6 +66,7 @@ jobs:
       
       - name: Check if image exist
         run: |
+          set +e
           aws ecr describe-images --registry-id "192549843005" --repository-name "concordium/desktop-wallet-ci" --region eu-west-1  --image-ids=imageTag=${{ env.VERSION }}
           echo "EC=$?" >> $GITHUB_ENV
 
