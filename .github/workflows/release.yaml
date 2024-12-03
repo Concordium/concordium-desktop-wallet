@@ -95,9 +95,7 @@ jobs:
           ref: ${{ github.ref_name }}
 
       - name: Install dependencies and build
-        shell: bash
         run: |
-          aws help
           rustup default stable
           node --version
           npm --version
@@ -108,6 +106,9 @@ jobs:
 
           yarn
           yarn package
+
+      - name: Install AWS CLI
+        uses: unfor19/install-aws-cli-action@v1
 
       - name: publish
         run: |
