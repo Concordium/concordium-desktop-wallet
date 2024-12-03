@@ -3,7 +3,7 @@ name: Concordium desktop wallet release
 on:
   push:
     tags:
-      - desktop-wallet-*/*
+      - '*.*.*'
 
 env:
   BASE_IMAGE_VERSION: "rust-1.74.1_ghc-9.6.4"
