@@ -123,6 +123,7 @@ jobs:
 
       - name: publish
         run: |
+          set +e
           # Extract version number
           VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
           TARGET_NET=${{env.TARGET_NET}}
