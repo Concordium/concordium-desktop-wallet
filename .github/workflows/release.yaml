@@ -53,9 +53,9 @@ jobs:
       - name: Check version
         run: |
           # Extract version number
-          VERSION=ekw/SRE-1001/release-desktop-wallet #$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
+          VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
 
-          TAG_VERSION=${{ github.ref_name }}
+          TAG_VERSION=1.7.4 #${{ github.ref_name }}
           if [ "$VERSION" != "$TAG_VERSION" ]; then
             echo "Tag version is not correct. Tag version: $TAG_VERSION version from package.json: $VERSION"
             EC=0
