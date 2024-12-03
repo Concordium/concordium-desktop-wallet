@@ -51,15 +51,8 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
         with:
           mask-password: false
-      
-      - name: Check if image exist
-        run: |
-          aws ecr describe-images --registry-id "192549843005" --repository-name "concordium/desktop-wallet-ci" --region eu-west-1  --image-ids=imageTag=test
-          echo "EC=$?" >> $GITHUB_ENV
 
-      
       - name: Checkout repository
-        if: ${{ env.EC == 254 }}
         uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -77,6 +70,11 @@ jobs:
             exit 1
           fi
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+      
+      - name: Check if image exist
+        run: |
+          aws ecr describe-images --registry-id "192549843005" --repository-name "concordium/desktop-wallet-ci" --region eu-west-1  --image-ids=imageTag=test
+          echo "EC=$?" >> $GITHUB_ENV
 
       - name: build ci image
         if: ${{ env.EC == 254 }}
