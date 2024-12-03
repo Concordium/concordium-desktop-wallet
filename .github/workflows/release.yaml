@@ -116,7 +116,7 @@ jobs:
       - name: check if executable exist
         run: |
           set +e
-          TARGET_NET=${{needs.login-aws.outputs.TARGET_NET}}
+          TARGET_NET=${{env.TARGET_NET}}
 
           # Prepare filenames
           if [ $TARGET_NET = "mainnet" ]; then
