@@ -131,9 +131,9 @@ jobs:
           OUT_LATEST_LINUX="${{ needs.login-aws.outputs.VERSION }}/${TARGET_NET}/latest-linux.yml"
           aws s3 ls ${{env.S3_BUCKET}}/${OUT_FILENAME}.deb
           EC=$?
-          if [ EC -eq 0 ]; then
+          if [ $EC -eq 0 ]; then
             echo ".deb file already exist"
-          elif [ EC -ne 1 ]; then
+          elif [ $EC -ne 1 ]; then
             echo "Error: $EC"
           fi
           echo "EXIT_CODE=$EC" >> $GITHUB_ENV
