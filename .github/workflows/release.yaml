@@ -95,7 +95,9 @@ jobs:
           ref: ${{ github.ref_name }}
 
       - name: Install dependencies and build
+        shell: bash
         run: |
+          aws help
           rustup default stable
           node --version
           npm --version
