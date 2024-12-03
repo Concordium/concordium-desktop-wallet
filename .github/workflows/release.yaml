@@ -95,7 +95,7 @@ jobs:
           ref: ${{ github.ref_name }}
 
       - name: Install AWS CLI
-        run: apt install awscli
+        run: apt install awscli -y
 
       #- name: check if executable exist
 
