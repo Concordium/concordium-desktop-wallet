@@ -26,7 +26,8 @@ jobs:
     outputs:
       access_key: ${{ steps.login-ecr.outputs.docker_username_192549843005_dkr_ecr_eu_west_1_amazonaws_com }}
       secret_key: ${{ steps.login-ecr.outputs.docker_password_192549843005_dkr_ecr_eu_west_1_amazonaws_com }}
-      CONTAINER_TAG: ${{ env.CONTAINER_TAG }}
+      CONTAINER_TAG: ${{ steps.version_check.outputs.CONTAINER_TAG }}
+      VERSION: ${{ steps.version_check.outputs.VERSION }}
     environment: release
     steps:
       - name: aws creds
@@ -51,6 +52,7 @@ jobs:
           ref: ${{ github.ref_name }}
 
       - name: Check version
+        id: version_check
         run: |
           # Extract version number
           VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
@@ -61,13 +63,13 @@ jobs:
             EC=0
             exit 1
           fi
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "CONTAINER_TAG=${{ env.ECR_REPO }}:$VERSION" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "CONTAINER_TAG=${{ env.ECR_REPO }}:$VERSION" >> $GITHUB_OUTPUT
       
       - name: Check if image exist
         run: |
           set +e
-          aws ecr describe-images --registry-id "192549843005" --repository-name "concordium/desktop-wallet-ci" --region eu-west-1  --image-ids=imageTag=${{ env.VERSION }}
+          aws ecr describe-images --registry-id "192549843005" --repository-name "concordium/desktop-wallet-ci" --region eu-west-1  --image-ids=imageTag=${{ steps.version_check.outputs.VERSION }}
           echo "EC=$?" >> $GITHUB_ENV
 
       - name: build ci image
@@ -75,7 +77,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: "${{ env.CONTAINER_TAG }}"
+          tags: "${{ steps.version_check.outputs.CONTAINER_TAG }}"
           context: '.'
           file: 'scripts/desktop-wallet-ci.Dockerfile'
           build-args: |
@@ -114,19 +116,19 @@ jobs:
       - name: check if executable exist
         run: |
           set +e
-          TARGET_NET=${{env.TARGET_NET}}
+          TARGET_NET=${{needs.login-aws.outputs.TARGET_NET}}
 
           # Prepare filenames
           if [ $TARGET_NET = "mainnet" ]; then
-             FILENAME="concordium-desktop-wallet-${{ env.VERSION }}"
+             FILENAME="concordium-desktop-wallet-${{ needs.login-aws.outputs.VERSION }}"
           else
-             FILENAME="concordium-desktop-wallet-${TARGET_NET}-${{ env.VERSION }}"
+             FILENAME="concordium-desktop-wallet-${TARGET_NET}-${{ needs.login-aws.outputs.VERSION }}"
           fi
 
           FILENAME_LATEST_LINUX="latest-linux.yml"
 
-          OUT_FILENAME="${{ env.VERSION }}/${TARGET_NET}/${FILENAME}"
-          OUT_LATEST_LINUX="${{ env.VERSION }}/${TARGET_NET}/latest-linux.yml"
+          OUT_FILENAME="${{ needs.login-aws.outputs.VERSION }}/${TARGET_NET}/${FILENAME}"
+          OUT_LATEST_LINUX="${{ needs.login-aws.outputs.VERSION }}/${TARGET_NET}/latest-linux.yml"
           aws s3 ls ${{env.S3_BUCKET}}/${OUT_FILENAME}.deb
           EC=$?
           if [ EC -eq 0 ]; then
@@ -202,12 +204,12 @@ jobs:
 
   
           if [ $TARGET_NET = "mainnet" ]; then
-              FILENAME_EXE="concordium-desktop-wallet-${{ env.VERSION }}.exe"
+              FILENAME_EXE="concordium-desktop-wallet-${{ needs.login-aws.outputs.VERSION }}.exe"
           else
-              FILENAME_EXE="concordium-desktop-wallet-${TARGET_NET}-${{ env.VERSION }}.exe"
+              FILENAME_EXE="concordium-desktop-wallet-${TARGET_NET}-${{ needs.login-aws.outputs.VERSION }}.exe"
           fi
-          OUT_YML="${{ env.VERSION }}/${TARGET_NET}/latest.yml"
-          OUT_FILENAME_EXE="${{ env.VERSION }}/${TARGET_NET}/${FILENAME_EXE}"
+          OUT_YML="${{ needs.login-aws.outputs.VERSION }}/${TARGET_NET}/latest.yml"
+          OUT_FILENAME_EXE="${{ needs.login-aws.outputs.VERSION }}/${TARGET_NET}/${FILENAME_EXE}"
           aws s3 ls ${{ env.S3_BUCKET }}/$OUT_FILENAME_EXE
           EC=$?
           echo $EC
