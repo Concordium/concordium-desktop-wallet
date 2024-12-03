@@ -62,7 +62,7 @@ jobs:
             exit 1
           fi
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "CONTAINER_TAG=${{ env.ECR_REPO }}:$VERSION"
+          echo "CONTAINER_TAG=${{ env.ECR_REPO }}:$VERSION" >> $GITHUB_ENV
       
       - name: Check if image exist
         run: |
