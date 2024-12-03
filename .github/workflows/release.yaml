@@ -133,7 +133,7 @@ jobs:
           OUT_FILENAME_APPIMAGE="${VERSION}/${TARGET_NET}/${FILENAME_APPIMAGE}"
           OUT_FILENAME="${VERSION}/${TARGET_NET}/${FILENAME}"
           OUT_LATEST_LINUX="${VERSION}/${TARGET_NET}/latest-linux.yml"
-          aws s3 ls ${{env.S3_BUCKET}}/test/${OUT_FILENAME}.deb
+          aws s3 ls ${{env.S3_BUCKET}}/${OUT_FILENAME}.deb
           EC=$?
           if [ EC -eq 0 ]; then
             echo ".deb file already exist"
