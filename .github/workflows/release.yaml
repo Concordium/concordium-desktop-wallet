@@ -53,7 +53,7 @@ jobs:
         id: version_check
         run: |
           # Extract version number
-          VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
+          VERSION=$(jq '.version' -r app/package.json)
 
           TAG_VERSION=${{ github.ref_name }}
           if [ "$VERSION" != "$TAG_VERSION" ]; then
@@ -102,7 +102,7 @@ jobs:
       - name: Install AWS CLI
         run: apt install awscli -y
 
-      - name: aws creds
+      - name: Login to Amazon ECR
         uses: aws-actions/configure-aws-credentials@v4
         id: creds
         with:
@@ -154,7 +154,7 @@ jobs:
           yarn
           yarn package
 
-      - name: publish
+      - name: Publish
         if: ${{ env.EXIT_CODE == 1 }}
         run: |
           set +e
@@ -185,7 +185,7 @@ jobs:
           submodules: recursive
           ref: ${{ github.ref_name }}
 
-      - name: install dependencies
+      - name: Install dependencies
         uses: jetli/wasm-pack-action@v0.4.0
         with:
           version: 'v0.9.1'
