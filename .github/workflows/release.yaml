@@ -111,7 +111,7 @@ jobs:
           role-session-name: ReleaseDesktopWalletSession
           mask-aws-account-id: false
 
-      - name: check if executable exist
+      - name: Check if executable exist
         run: |
           set +e
           TARGET_NET=${{env.TARGET_NET}}
