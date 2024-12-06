@@ -134,7 +134,7 @@ jobs:
           elif [ $EC -ne 1 ]; then
             echo "Error: $EC"
           fi
-          #echo "EXIT_CODE=$EC" >> $GITHUB_ENV
+          echo "EXIT_CODE=$EC" >> $GITHUB_ENV
           #echo "OUT_FILENAME=$OUT_FILENAME" >> $GITHUB_ENV
           #echo "FILENAME=$FILENAME" >> $GITHUB_ENV
           #echo "OUT_YML_FILENAME=$OUT_LATEST_LINUX" >> $GITHUB_ENV
@@ -224,7 +224,7 @@ jobs:
           #echo "OUT_EXE=$OUT_FILENAME_EXE" >> $GITHUB_ENV
           #echo "FILENAME_EXE=$FILENAME_EXE" >> $GITHUB_ENV
           #echo "OUT_YML=$OUT_YML" >> $GITHUB_ENV
-          #echo "EXIT_CODE=$EC" >> $GITHUB_ENV
+          echo "EXIT_CODE=$EC" >> $GITHUB_ENV
           echo "OUT_FOLDER=$OUT_FOLDER" >> $GITHUB_ENV
           
           
