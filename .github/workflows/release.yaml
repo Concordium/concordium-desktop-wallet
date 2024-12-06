@@ -161,7 +161,7 @@ jobs:
           set +e
 
           # Push to s3
-          aws s3 cp --recursive release/ ${{ env.OUT_FOLDER }} --exclude linux-unpacked builder-debug.yml --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp --recursive release/ ${{ env.OUT_FOLDER }} --exclude linux-unpacked --exclude builder-debug.yml --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
           #aws s3 cp "release/${{ env.FILENAME }}.deb" "${{env.S3_BUCKET}}/${{ env.OUT_FILENAME }}.deb" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
           #aws s3 cp "release/${{ env.FILENAME }}.rpm" "${{env.S3_BUCKET}}/${{ env.OUT_FILENAME }}.rpm" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
           #aws s3 cp "release/${{ env.FILENAME }}.AppImage" "${{env.S3_BUCKET}}/${{ env.OUT_FILENAME }}.rpm" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
@@ -248,6 +248,6 @@ jobs:
           yarn package-win-no-sign
 
           # Push
-          aws s3 cp release/ ${{ env.OUT_FOLDER }} --exclude win-unpacked builder-debug.yml *.blockmap --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp release/ ${{ env.OUT_FOLDER }} --exclude win-unpacked --exclude builder-debug.yml --exclude *.blockmap --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
           #aws s3 cp "release/latest.yml" ${{ env.S3_BUCKET }}/${{ env.OUT_YML }} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
           #aws s3 cp "release/${{ env.FILENAME_EXE}}" ${{ env.S3_BUCKET }}/${{ env.OUT_EXE }} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
