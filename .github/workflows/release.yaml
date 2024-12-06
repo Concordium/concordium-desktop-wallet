@@ -2,8 +2,10 @@ name: Concordium desktop wallet release
 
 on:
   push:
+    branches:
+      - 'ekw/SRE-1001/release-desktop-wallet'
     tags:
-      - '*.*.*'
+      - '*/*.*.*'
 
 env:
   BASE_IMAGE_VERSION: "rust-1.74.1_ghc-9.6.4"
@@ -55,10 +57,9 @@ jobs:
           # Extract version number
           VERSION=$(jq '.version' -r app/package.json)
 
-          TAG_VERSION=${{ github.ref_name }}
+          TAG_VERSION=1.7.4 ${{ github.ref_name }}
           if [ "$VERSION" != "$TAG_VERSION" ]; then
             echo "Tag version is not correct. Tag version: $TAG_VERSION version from package.json: $VERSION"
-            EC=0
             exit 1
           fi
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
@@ -99,9 +100,6 @@ jobs:
           submodules: recursive
           ref: ${{ github.ref_name }}
 
-      - name: Install AWS CLI
-        run: apt install awscli -y
-
       - name: Login to Amazon ECR
         uses: aws-actions/configure-aws-credentials@v4
         id: creds
@@ -115,6 +113,7 @@ jobs:
         run: |
           set +e
           TARGET_NET=${{env.TARGET_NET}}
+          VERSION=${{ needs.login-aws.outputs.VERSION }}
 
           # Prepare filenames
           if [ $TARGET_NET = "mainnet" ]; then
@@ -123,10 +122,11 @@ jobs:
              FILENAME="concordium-desktop-wallet-${TARGET_NET}-${{ needs.login-aws.outputs.VERSION }}"
           fi
 
-          FILENAME_LATEST_LINUX="latest-linux.yml"
+          #FILENAME_LATEST_LINUX="latest-linux.yml"
 
-          OUT_FILENAME="${{ needs.login-aws.outputs.VERSION }}/${TARGET_NET}/${FILENAME}"
-          OUT_LATEST_LINUX="${{ needs.login-aws.outputs.VERSION }}/${TARGET_NET}/latest-linux.yml"
+          #OUT_FILENAME="${{ needs.login-aws.outputs.VERSION }}/${TARGET_NET}/${FILENAME}"
+          #OUT_LATEST_LINUX="${{ needs.login-aws.outputs.VERSION }}/${TARGET_NET}/latest-linux.yml"
+          OUT_FOLDER="${{ env.S3_BUCKET }}/test/${VERSION}/${TARGET_NET}"
           aws s3 ls ${{env.S3_BUCKET}}/${OUT_FILENAME}.deb
           EC=$?
           if [ $EC -eq 0 ]; then
@@ -134,10 +134,11 @@ jobs:
           elif [ $EC -ne 1 ]; then
             echo "Error: $EC"
           fi
-          echo "EXIT_CODE=$EC" >> $GITHUB_ENV
-          echo "OUT_FILENAME=$OUT_FILENAME" >> $GITHUB_ENV
-          echo "FILENAME=$FILENAME" >> $GITHUB_ENV
-          echo "OUT_YML_FILENAME=$OUT_LATEST_LINUX" >> $GITHUB_ENV
+          #echo "EXIT_CODE=$EC" >> $GITHUB_ENV
+          #echo "OUT_FILENAME=$OUT_FILENAME" >> $GITHUB_ENV
+          #echo "FILENAME=$FILENAME" >> $GITHUB_ENV
+          #echo "OUT_YML_FILENAME=$OUT_LATEST_LINUX" >> $GITHUB_ENV
+          echo "OUT_FOLDER=$OUT_FOLDER" >> $GITHUB_ENV
 
 
       - name: Install dependencies and build
@@ -160,10 +161,11 @@ jobs:
           set +e
 
           # Push to s3
-          aws s3 cp "release/${{ env.FILENAME }}.deb" "${{env.S3_BUCKET}}/${{ env.OUT_FILENAME }}.deb" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-          aws s3 cp "release/${{ env.FILENAME }}.rpm" "${{env.S3_BUCKET}}/${{ env.OUT_FILENAME }}.rpm" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-          aws s3 cp "release/${{ env.FILENAME }}.AppImage" "${{env.S3_BUCKET}}/${{ env.OUT_FILENAME }}.rpm" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-          aws s3 cp "release/latest-linux.yml" "${{env.S3_BUCKET}}/${{ env.OUT_YML_FILENAME }}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp --recursive release/ ${{ env.OUT_FOLDER }} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          #aws s3 cp "release/${{ env.FILENAME }}.deb" "${{env.S3_BUCKET}}/${{ env.OUT_FILENAME }}.deb" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          #aws s3 cp "release/${{ env.FILENAME }}.rpm" "${{env.S3_BUCKET}}/${{ env.OUT_FILENAME }}.rpm" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          #aws s3 cp "release/${{ env.FILENAME }}.AppImage" "${{env.S3_BUCKET}}/${{ env.OUT_FILENAME }}.rpm" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          #aws s3 cp "release/latest-linux.yml" "${{env.S3_BUCKET}}/${{ env.OUT_YML_FILENAME }}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
 
   #using windows-2019 to be able to use visual studio 2019, newer versions do not support older versions of node
   release-desktop-wallet-windows:
@@ -200,6 +202,7 @@ jobs:
         run: |
           set +e
           TARGET_NET=${{env.TARGET_NET}}
+          VERSION=${{ needs.login-aws.outputs.VERSION }}
 
   
           if [ $TARGET_NET = "mainnet" ]; then
@@ -207,8 +210,9 @@ jobs:
           else
               FILENAME_EXE="concordium-desktop-wallet-${TARGET_NET}-${{ needs.login-aws.outputs.VERSION }}.exe"
           fi
-          OUT_YML="${{ needs.login-aws.outputs.VERSION }}/${TARGET_NET}/latest.yml"
-          OUT_FILENAME_EXE="${{ needs.login-aws.outputs.VERSION }}/${TARGET_NET}/${FILENAME_EXE}"
+          #OUT_YML="${{ needs.login-aws.outputs.VERSION }}/${TARGET_NET}/latest.yml"
+          #OUT_FILENAME_EXE="${{ needs.login-aws.outputs.VERSION }}/${TARGET_NET}/${FILENAME_EXE}"
+          OUT_FOLDER="${{ env.S3_BUCKET }}/test/${VERSION}/${TARGET_NET}"
           aws s3 ls ${{ env.S3_BUCKET }}/$OUT_FILENAME_EXE
           EC=$?
           echo $EC
@@ -217,10 +221,11 @@ jobs:
           elif [ $EC -ne 1 ]; then
             echo "Error: $EC"
           fi
-          echo "OUT_EXE=$OUT_FILENAME_EXE" >> $GITHUB_ENV
-          echo "FILENAME_EXE=$FILENAME_EXE" >> $GITHUB_ENV
-          echo "OUT_YML=$OUT_YML" >> $GITHUB_ENV
-          echo "EXIT_CODE=$EC" >> $GITHUB_ENV
+          #echo "OUT_EXE=$OUT_FILENAME_EXE" >> $GITHUB_ENV
+          #echo "FILENAME_EXE=$FILENAME_EXE" >> $GITHUB_ENV
+          #echo "OUT_YML=$OUT_YML" >> $GITHUB_ENV
+          #echo "EXIT_CODE=$EC" >> $GITHUB_ENV
+          echo "OUT_FOLDER=$OUT_FOLDER" >> $GITHUB_ENV
           
           
       - name: Build and push desktop wallet
@@ -243,5 +248,6 @@ jobs:
           yarn package-win-no-sign
 
           # Push
-          aws s3 cp "release/latest.yml" ${{ env.S3_BUCKET }}/${{ env.OUT_YML }} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-          aws s3 cp "release/${{ env.FILENAME_EXE}}" ${{ env.S3_BUCKET }}/${{ env.OUT_EXE }} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp --recursive release/ ${{ env.OUT_FOLDER }} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          #aws s3 cp "release/latest.yml" ${{ env.S3_BUCKET }}/${{ env.OUT_YML }} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          #aws s3 cp "release/${{ env.FILENAME_EXE}}" ${{ env.S3_BUCKET }}/${{ env.OUT_EXE }} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
