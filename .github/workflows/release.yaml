@@ -66,11 +66,11 @@ jobs:
       #    echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
       #    echo "CONTAINER_TAG=${{ env.ECR_REPO }}:$VERSION" >> $GITHUB_OUTPUT
       
-      - name: Check if image exist
-        run: |
-          set +e
-          aws ecr describe-images --registry-id "192549843005" --repository-name "concordium/desktop-wallet-ci" --region eu-west-1  --image-ids=imageTag=${{ steps.version_check.outputs.VERSION }}
-          echo "EC=$?" >> $GITHUB_ENV
+      #- name: Check if image exist
+      #  run: |
+      #    set +e
+      #    aws ecr describe-images --registry-id "192549843005" --repository-name "concordium/desktop-wallet-ci" --region eu-west-1  --image-ids=imageTag=${{ steps.version_check.outputs.VERSION }}
+          echo "EC=254" >> $GITHUB_ENV #echo "EC=$?" >> $GITHUB_ENV
 
       - name: build ci image
         if: ${{ env.EC == 254 }}
