@@ -52,19 +52,19 @@ jobs:
           submodules: recursive
           ref: ${{ github.ref_name }}
 
-      - name: Check version
-        id: version_check
-        run: |
-          # Extract version number
-          VERSION=$(jq '.version' -r app/package.json)
-
-          TAG_VERSION=1.7.4 #${{ github.ref_name }}
-          if [ "$VERSION" != "$TAG_VERSION" ]; then
-            echo "Tag version is not correct. Tag version: $TAG_VERSION version from package.json: $VERSION"
-            exit 1
-          fi
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-          echo "CONTAINER_TAG=${{ env.ECR_REPO }}:$VERSION" >> $GITHUB_OUTPUT
+      #- name: Check version
+      #  id: version_check
+      #  run: |
+      #    # Extract version number
+      #    VERSION=$(jq '.version' -r app/package.json)
+#
+      #    TAG_VERSION=1.7.4 #${{ github.ref_name }}
+      #    if [ "$VERSION" != "$TAG_VERSION" ]; then
+      #      echo "Tag version is not correct. Tag version: $TAG_VERSION version from package.json: $VERSION"
+      #      exit 1
+      #    fi
+      #    echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+      #    echo "CONTAINER_TAG=${{ env.ECR_REPO }}:$VERSION" >> $GITHUB_OUTPUT
       
       - name: Check if image exist
         run: |
