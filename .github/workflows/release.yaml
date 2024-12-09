@@ -52,24 +52,25 @@ jobs:
           submodules: recursive
           ref: ${{ github.ref_name }}
 
-      #- name: Check version
-      #  id: version_check
-      #  run: |
-      #    # Extract version number
-      #    VERSION=$(jq '.version' -r app/package.json)
-#
-      #    TAG_VERSION=1.7.4 #${{ github.ref_name }}
-      #    if [ "$VERSION" != "$TAG_VERSION" ]; then
-      #      echo "Tag version is not correct. Tag version: $TAG_VERSION version from package.json: $VERSION"
-      #      exit 1
-      #    fi
-      #    echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-      #    echo "CONTAINER_TAG=${{ env.ECR_REPO }}:$VERSION" >> $GITHUB_OUTPUT
+      - name: Check version
+        id: version_check
+        run: |
+          # Extract version number
+          VERSION=$(jq '.version' -r app/package.json)
+
+          TAG_VERSION=1.7.4 #${{ github.ref_name }}
+          if [ "$VERSION" != "$TAG_VERSION" ]; then
+            echo "Tag version is not correct. Tag version: $TAG_VERSION version from package.json: $VERSION"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "CONTAINER_TAG=${{ env.ECR_REPO }}:$VERSION" >> $GITHUB_OUTPUT
       
       - name: Check if image exist
         run: |
           set +e
           #aws ecr describe-images --registry-id "192549843005" --repository-name "concordium/desktop-wallet-ci" --region eu-west-1  --image-ids=imageTag=${{ steps.version_check.outputs.VERSION }}
+          docker pull ${{ steps.version_check.outputs.CONTAINER_TAG }}
           echo "EC=254" >> $GITHUB_ENV #echo "EC=$?" >> $GITHUB_ENV
 
       - name: build ci image
@@ -80,8 +81,6 @@ jobs:
           tags: "${{ steps.version_check.outputs.CONTAINER_TAG }}"
           context: '.'
           file: 'scripts/desktop-wallet-ci.Dockerfile'
-          cache-from: type=registry,ref=${{ env.ECR_REPO }}
-          cache-to: type=registry,ref=${{ env.ECR_REPO }}
           build-args: |
             BASE_VERSION=${{ env.BASE_IMAGE_VERSION }}
             NODE_VERSION=${{ env.NODE_VERSION }}
