@@ -81,7 +81,7 @@ jobs:
           context: '.'
           file: 'scripts/desktop-wallet-ci.Dockerfile'
           cache-from: type=registry,ref=${{ env.ECR_REPO }}
-          cache-to: type,ref=${{ env.ECR_REPO }}
+          cache-to: type=registry,ref=${{ env.ECR_REPO }}
           build-args: |
             BASE_VERSION=${{ env.BASE_IMAGE_VERSION }}
             NODE_VERSION=${{ env.NODE_VERSION }}
