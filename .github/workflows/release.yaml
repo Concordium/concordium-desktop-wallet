@@ -82,7 +82,7 @@ jobs:
           context: '.'
           file: 'scripts/desktop-wallet-ci.Dockerfile'
           cache-from: type=local,src=/$HOME/cache
-          cache-to: type=local,src=/$HOME/cache
+          cache-to: type=local,dest=/$HOME/cache
           build-args: |
             BASE_VERSION=${{ env.BASE_IMAGE_VERSION }}
             NODE_VERSION=${{ env.NODE_VERSION }}
