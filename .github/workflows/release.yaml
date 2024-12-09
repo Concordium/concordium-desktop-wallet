@@ -81,8 +81,8 @@ jobs:
           tags: "${{ steps.version_check.outputs.CONTAINER_TAG }}"
           context: '.'
           file: 'scripts/desktop-wallet-ci.Dockerfile'
-          cache-from: type=gha
-          cache-to: type=gha
+          cache-from: type=local,src=/$HOME/cache
+          cache-to: type=local,src=/$HOME/cache
           build-args: |
             BASE_VERSION=${{ env.BASE_IMAGE_VERSION }}
             NODE_VERSION=${{ env.NODE_VERSION }}
