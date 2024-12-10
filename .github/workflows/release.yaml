@@ -70,7 +70,7 @@ jobs:
         run: |
           set +e
           #aws ecr describe-images --registry-id "192549843005" --repository-name "concordium/desktop-wallet-ci" --region eu-west-1  --image-ids=imageTag=${{ steps.version_check.outputs.VERSION }}
-          #docker pull ${{ steps.version_check.outputs.CONTAINER_TAG }}
+          docker pull ${{ steps.version_check.outputs.CONTAINER_TAG }}
           echo "EC=254" >> $GITHUB_ENV #echo "EC=$?" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx

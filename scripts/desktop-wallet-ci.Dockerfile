@@ -13,7 +13,8 @@ RUN apt-get update && apt-get install -y \
     libusb-1.0-0-dev \
     rpm \
     awscli \
-    sl
+    sl \
+    sed
     
 RUN curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
