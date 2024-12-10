@@ -12,9 +12,7 @@ RUN apt-get update && apt-get install -y \
     libudev-dev \
     libusb-1.0-0-dev \
     rpm \
-    awscli \
-    sl \
-    sed
+    awscli
     
 RUN curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
@@ -24,5 +22,7 @@ RUN . $NVM_DIR/nvm.sh \
     && nvm install ${NODE_VERSION} \
     && npm install --global yarn \
     && nvm use ${NODE_VERSION}
+
+RUN echo "new thing"
 
 ENV PATH=$NVM_DIR/versions/node/v${NODE_VERSION}/bin:${PATH}
