@@ -24,5 +24,6 @@ RUN . $NVM_DIR/nvm.sh \
     && nvm use ${NODE_VERSION}
 
 RUN echo "new thing"
+RUN echo "Another new thing"
 
 ENV PATH=$NVM_DIR/versions/node/v${NODE_VERSION}/bin:${PATH}
