@@ -215,6 +215,7 @@ jobs:
           echo "FILENAME=$FILENAME" >> $GITHUB_ENV
 
       - name: Check if executable exist
+        shell: bash
         run: |
           aws s3 ls "${{ env.OUT_FOLDER }}/latest.yml"
           EC=$?
@@ -227,6 +228,7 @@ jobs:
           echo "EXIT_CODE=$EC" >> $GITHUB_ENV
           
       - name: Output dependency versions
+        shell: bash
         run: |
           echo "::info:: node version: $(node --version)"
           echo "::info:: npm version: $(npm --version)"
