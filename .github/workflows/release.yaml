@@ -223,8 +223,10 @@ jobs:
           echo $EC
           if [ $EC -eq 0 ]; then
             echo "$OUT_OBJECT already exist"
+            exit 1
           elif [ $EC -ne 1 ]; then
             echo "Error: $EC"
+            exit 1
           fi
           echo "EXIT_CODE=$EC" >> $GITHUB_ENV
           
