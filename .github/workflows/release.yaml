@@ -81,7 +81,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: "${{ steps.version_check.outputs.CONTAINER_TAG }}"
+          tags: "${{ steps.version_check.outputs.CONTAINER_TAG }}-dev"
           context: '.'
           file: 'scripts/desktop-wallet-ci.Dockerfile'
           cache-from: type=gha
