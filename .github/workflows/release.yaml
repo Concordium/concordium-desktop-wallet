@@ -217,6 +217,7 @@ jobs:
       - name: Check if executable exist
         shell: bash
         run: |
+          set +e
           aws s3 ls "${{ env.OUT_FOLDER }}/latest.yml"
           EC=$?
           echo $EC
