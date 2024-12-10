@@ -190,7 +190,7 @@ jobs:
       - name: Install dependencies
         uses: jetli/wasm-pack-action@v0.4.0
         with:
-          version: ${{ env.PACK_VERSION }}
+          version: ${{ env.WASM-PACK_VERSION }}
 
       - name: install node
         uses: actions/setup-node@v4
