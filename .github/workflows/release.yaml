@@ -9,7 +9,6 @@ on:
 
 env:
   BASE_IMAGE_VERSION: "rust-1.74.1_ghc-9.6.4"
-  TARGET_NET: "mainnet"
   STATIC_NODE_BINARY_IMAGE_NAME: 'static-node-binaries'
   AWS_ROLE_TO_ASSUME: "arn:aws:iam::192549843005:role/github_concordium-desktop-wallet"
   S3_BUCKET: "s3://desktopwallet.concordium.com"
@@ -29,6 +28,7 @@ jobs:
       secret_key: ${{ steps.login-ecr.outputs.docker_password_192549843005_dkr_ecr_eu_west_1_amazonaws_com }}
       CONTAINER_TAG: ${{ steps.version_check.outputs.CONTAINER_TAG }}
       VERSION: ${{ steps.version_check.outputs.VERSION }}
+      TARGET_NET: ${{ steps.target_net.outputs.TARGET_NET }}
     environment: release
     steps:
       - name: aws creds
@@ -52,13 +52,26 @@ jobs:
           submodules: recursive
           ref: ${{ github.ref_name }}
 
-      - name: Check version
+      - name: Set target net if correctly formatted
+        id: target_net
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          TARGET_NET=${TAG%%/*}
+          if [ $TARGET_NET != "Stagenet" ] || [ $TARGET_NET != "Testnet" ] || [ $TARGET_NET =! "Mainnet" ]; then
+            echo "Tag does not contain target net"
+            exit 1
+          fi
+          echo "TARGET_NET=$TARGET_NET" >> $GITHUB_OUTPUT
+
+
+      - name: Verify version
         id: version_check
         run: |
           # Extract version number
           VERSION=$(jq '.version' -r app/package.json)
 
-          TAG_VERSION=1.7.4 #${{ github.ref_name }}
+          TAG_VERSION=${{ github.ref_name }}
           if [ "$VERSION" != "$TAG_VERSION" ]; then
             echo "Tag version is not correct. Tag version: $TAG_VERSION version from package.json: $VERSION"
             exit 1
@@ -118,23 +131,16 @@ jobs:
       - name: Generate filename
         run: |
           set +e
-          TARGET_NET=${{env.TARGET_NET}}
+          TARGET_NET=${{ needs.login-aws.outputs.TARGET_NET}}
           VERSION=${{ needs.login-aws.outputs.VERSION }}
 
-          # Prepare filenames
-          if [ $TARGET_NET = "mainnet" ]; then
-             FILENAME="concordium-desktop-wallet-${{ needs.login-aws.outputs.VERSION }}"
-          else
-             FILENAME="concordium-desktop-wallet-${TARGET_NET}-${{ needs.login-aws.outputs.VERSION }}"
-          fi
-          OUT_FOLDER="${{ env.S3_BUCKET }}/test/${VERSION}/${TARGET_NET}"
-          echo "OUT_FOLDER=$OUT_FOLDER" >> $GITHUB_ENV
-          echo "FILENAME=$FILENAME" >> $GITHUB_ENV
+          OUT_FOLDER_PATH="${{ env.S3_BUCKET }}/${VERSION}/${TARGET_NET}"
+          echo "OUT_FOLDER_PATH=$OUT_FOLDER_PATH" >> $GITHUB_ENV
 
       - name: Check if Executable exist
         run: |
           set +e
-          aws s3 ls "${{ env.OUT_FOLDER }}/latest-linux.yml"
+          aws s3 ls "${{ env.OUT_FOLDER_PATH }}/latest-linux.yml"
           EC=$?
           if [ $EC -eq 0 ]; then
             echo ".deb file already exist"
@@ -164,9 +170,9 @@ jobs:
           yarn package
 
           # Push to s3
-          aws s3 cp --recursive release/ ${{ env.OUT_FOLDER }} --exclude linux-unpacked/* --exclude builder-debug.yml --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp --recursive release/ ${{ env.OUT_FOLDER_PATH }} --exclude linux-unpacked/* --exclude builder-debug.yml --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
 
-  #using windows-2019 to be able to use visual studio 2019, newer versions do not support older versions of node
+  #using windows-2019 to be able to use visual studio 2019, newer versions do not support older versions of node.js
   release-desktop-wallet-windows:
     runs-on: windows-2019
     environment: release
@@ -200,24 +206,17 @@ jobs:
         shell: bash
         run: |
           set +e
-          TARGET_NET=${{env.TARGET_NET}}
+          TARGET_NET=${{ needs.login-aws.outputs.TARGET_NET}}
           VERSION=${{ needs.login-aws.outputs.VERSION }}
 
-  
-          if [ $TARGET_NET = "mainnet" ]; then
-              FILENAME_EXE="concordium-desktop-wallet-${{ needs.login-aws.outputs.VERSION }}.exe"
-          else
-              FILENAME_EXE="concordium-desktop-wallet-${TARGET_NET}-${{ needs.login-aws.outputs.VERSION }}.exe"
-          fi
-          OUT_FOLDER="${{ env.S3_BUCKET }}/test/${VERSION}/${TARGET_NET}"
-          echo "OUT_FOLDER=$OUT_FOLDER" >> $GITHUB_ENV
-          echo "FILENAME=$FILENAME" >> $GITHUB_ENV
+          OUT_FOLDER_PATH="${{ env.S3_BUCKET }}/${VERSION}/${TARGET_NET}"
+          echo "OUT_FOLDER_PATH=$OUT_FOLDER_PATH" >> $GITHUB_ENV
 
       - name: Check if executable exist
         shell: bash
         run: |
           set +e
-          aws s3 ls "${{ env.OUT_FOLDER }}/latest.yml"
+          aws s3 ls "${{ env.OUT_FOLDER_PATH }}/latest.yml"
           EC=$?
           echo $EC
           if [ $EC -eq 0 ]; then
@@ -249,4 +248,4 @@ jobs:
           yarn package-win-no-sign
 
           # Push
-          aws s3 cp --recursive release/ ${{ env.OUT_FOLDER }} --exclude win-unpacked/* --exclude builder-debug.yml --exclude *.blockmap --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+          aws s3 cp --recursive release/ ${{ env.OUT_FOLDER_PATH }} --exclude win-unpacked/* --exclude builder-debug.yml --exclude *.blockmap --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
