@@ -2,8 +2,6 @@ name: Concordium desktop wallet release
 
 on:
   push:
-    branches:
-      - 'ekw/SRE-1001/release-desktop-wallet'
     tags:
       - '*/*.*.*'
 
@@ -21,7 +19,7 @@ permissions:
   contents: read
 
 jobs:
-  login-aws:
+  build-ci-image:
     runs-on: ubuntu-latest
     outputs:
       access_key: ${{ steps.login-ecr.outputs.docker_username_192549843005_dkr_ecr_eu_west_1_amazonaws_com }}
@@ -31,7 +29,7 @@ jobs:
       TARGET_NET: ${{ steps.target_net.outputs.TARGET_NET }}
     environment: release
     steps:
-      - name: aws creds
+      - name: Assume role
         uses: aws-actions/configure-aws-credentials@v4
         id: creds
         with:
@@ -78,22 +76,15 @@ jobs:
           fi
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "CONTAINER_TAG=${{ env.ECR_REPO }}:$VERSION" >> $GITHUB_OUTPUT
-      
-      - name: Check if image exist
-        run: |
-          set +e
-          aws ecr describe-images --registry-id "192549843005" --repository-name "concordium/desktop-wallet-ci" --region eu-west-1  --image-ids=imageTag=${{ steps.version_check.outputs.VERSION }}
-          echo "EC=$?" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: build ci image
-        if: ${{ env.EC == 254 }}
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: "${{ steps.version_check.outputs.CONTAINER_TAG }}-dev"
+          tags: "${{ steps.version_check.outputs.CONTAINER_TAG }}"
           context: '.'
           file: 'scripts/desktop-wallet-ci.Dockerfile'
           cache-from: type=gha
@@ -104,13 +95,13 @@ jobs:
 
   release-desktop-wallet-linux:
     environment: release
-    needs: login-aws
+    needs: build-ci-image
     runs-on: ubuntu-latest
     container:
-      image: "${{needs.login-aws.outputs.CONTAINER_TAG}}"
+      image: "${{needs.build-ci-image.outputs.CONTAINER_TAG}}"
       credentials:
-        username: ${{needs.login-aws.outputs.access_key}}
-        password: ${{needs.login-aws.outputs.secret_key}}
+        username: ${{needs.build-ci-image.outputs.access_key}}
+        password: ${{needs.build-ci-image.outputs.secret_key}}
       options: -u root
     steps:
       - name: Checkout repository
@@ -128,11 +119,11 @@ jobs:
           role-session-name: ReleaseDesktopWalletSession
           mask-aws-account-id: false
 
-      - name: Generate filename
+      - name: Generate output folder
         run: |
           set +e
-          TARGET_NET=${{ needs.login-aws.outputs.TARGET_NET}}
-          VERSION=${{ needs.login-aws.outputs.VERSION }}
+          TARGET_NET=${{ needs.build-ci-image.outputs.TARGET_NET}}
+          VERSION=${{ needs.build-ci-image.outputs.VERSION }}
 
           OUT_FOLDER_PATH="${{ env.S3_BUCKET }}/${VERSION}/${TARGET_NET}"
           echo "OUT_FOLDER_PATH=$OUT_FOLDER_PATH" >> $GITHUB_ENV
@@ -176,7 +167,7 @@ jobs:
   release-desktop-wallet-windows:
     runs-on: windows-2019
     environment: release
-    needs: login-aws
+    needs: build-ci-image
     steps:
       - name: aws creds
         uses: aws-actions/configure-aws-credentials@v4
@@ -202,12 +193,12 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Generate filename
+      - name: Generate output folder
         shell: bash
         run: |
           set +e
-          TARGET_NET=${{ needs.login-aws.outputs.TARGET_NET}}
-          VERSION=${{ needs.login-aws.outputs.VERSION }}
+          TARGET_NET=${{ needs.build-ci-image.outputs.TARGET_NET}}
+          VERSION=${{ needs.build-ci-image.outputs.VERSION }}
 
           OUT_FOLDER_PATH="${{ env.S3_BUCKET }}/${VERSION}/${TARGET_NET}"
           echo "OUT_FOLDER_PATH=$OUT_FOLDER_PATH" >> $GITHUB_ENV
