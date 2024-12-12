@@ -59,7 +59,7 @@ jobs:
         run: |
           TARGET_NET=${TAG##desktop-wallet/*-}
           if [ $TARGET_NET != "stagenet" ] || [ $TARGET_NET != "testnet" ] || [ $TARGET_NET =! "mainnet" ]; then
-            echo "Tag does not contain target net"
+            ::error:: Tag does not contain target net"
             exit 1
           fi
           echo "TARGET_NET=$TARGET_NET" >> $GITHUB_OUTPUT
@@ -73,7 +73,7 @@ jobs:
 
           TAG_VERSION=${{ github.ref_name }}
           if [ "$VERSION" != "$TAG_VERSION" ]; then
-            echo "Tag version is not correct. Tag version: $TAG_VERSION version from package.json: $VERSION"
+            echo "::error:: Tag version is not correct. Tag version: $TAG_VERSION version from package.json: $VERSION"
             exit 1
           fi
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
@@ -136,7 +136,7 @@ jobs:
           aws s3 ls "${{ env.OUT_FOLDER_PATH }}/latest-linux.yml"
           EC=$?
           if [ $EC -eq 0 ]; then
-            echo ".deb file already exist"
+            echo ::error:: file file already exist"
             exit 1
           elif [ $EC -ne 1 ]; then
             echo "::error:: $EC"
@@ -210,7 +210,7 @@ jobs:
           EC=$?
           echo $EC
           if [ $EC -eq 0 ]; then
-            echo "$OUT_OBJECT already exist"
+            echo "::error:: file already exist"
             exit 1
           elif [ $EC -ne 1 ]; then
             echo "::error:: $EC"
