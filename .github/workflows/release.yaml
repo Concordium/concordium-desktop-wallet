@@ -2,6 +2,8 @@ name: Concordium desktop wallet release
 
 on:
   push:
+    branches:
+      - 'ekw/SRE-1001/release-desktop-wallet'
     tags:
       - 'desktop-wallet/*.*.*-stagenet'
       - 'desktop-wallet/*.*.*-testnet'
