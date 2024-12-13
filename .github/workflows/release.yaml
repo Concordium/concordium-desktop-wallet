@@ -59,7 +59,7 @@ jobs:
         run: |
           TARGET_NET=${TAG##desktop-wallet/*-}
           if [ $TARGET_NET != "stagenet" ] || [ $TARGET_NET != "testnet" ] || [ $TARGET_NET =! "mainnet" ]; then
-            ::error:: Tag does not contain target net"
+            echo "::error:: Tag does not contain target net"
             exit 1
           fi
           echo "TARGET_NET=$TARGET_NET" >> $GITHUB_OUTPUT
