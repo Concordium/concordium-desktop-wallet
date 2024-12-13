@@ -142,7 +142,7 @@ jobs:
           aws s3 ls "${{ env.OUT_FOLDER_PATH }}/latest-linux.yml"
           EC=$?
           if [ $EC -eq 0 ]; then
-            echo ::error:: file file already exist"
+            echo "::error:: file file already exist"
             exit 1
           elif [ $EC -ne 1 ]; then
             echo "::error:: $EC"
