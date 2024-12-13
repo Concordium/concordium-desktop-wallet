@@ -61,7 +61,7 @@ jobs:
         run: |
           TARGET_NET=${TAG##desktop-wallet/*-}
           echo "$TARGET_NET"
-          if [[ $TARGET_NET != "stagenet" || "testnet" || "mainnet" ]]; then
+          if [[ $TARGET_NET != "stagenet" ]] || [[ $TARGET_NET != "testnet" ]] || [[ $TARGET_NET != "mainnet" ]]; then
             echo "::error:: Tag does not contain target net"
             exit 1
           fi
@@ -76,7 +76,8 @@ jobs:
           # Extract version number
           VERSION=$(jq '.version' -r app/package.json)
 
-          TAG_VERSION=${TAG##*/%%-*}
+          TAG_VERSION_NET=${TAG##*/}
+          TAG_VERSION=${TAG_VERSION_NET%%-*}
           if [ "$VERSION" != "$TAG_VERSION" ]; then
             echo "::error:: Tag version is not correct. Tag version: $TAG_VERSION version from package.json: $VERSION"
             exit 1
