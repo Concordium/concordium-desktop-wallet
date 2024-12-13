@@ -82,6 +82,9 @@ jobs:
             echo "::error:: Tag version is not correct. Tag version: $TAG_VERSION version from package.json: $VERSION"
             exit 1
           fi
+          aws ecr describe-images --registry-id "192549843005" --repository-name "concordium/desktop-wallet-ci" --region eu-west-1  --image-ids=imageTag=$VERSION-test
+          EC=$?
+          echo "EXIT_CODE=$EC" >> $GITHUB_ENV
           echo "VERSION=$VERSION-test" >> $GITHUB_OUTPUT
           echo "CONTAINER_TAG=${{ env.ECR_REPO }}:$VERSION-test" >> $GITHUB_OUTPUT
 
@@ -89,6 +92,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: build ci image
+        if: ${{ env.EXIT_CODE == 254 }}
         uses: docker/build-push-action@v6
         with:
           push: true
@@ -152,12 +156,12 @@ jobs:
       - name: Output dependency versions
         run: |
           rustup default stable
-          echo "::info:: node version: $(node --version)"
-          echo "::info:: npm version: $(npm --version)"
-          echo "::info:: yarn version: $(yarn --version)"
-          echo "::info:: python version: $(python --version)"
-          echo "::info:: rustup version: $(rustup show)"
-          echo "::info:: wasm-pack version: $(wasm-pack --version)"
+          echo "::notice::node version: $(node --version)"
+          echo "::notice::npm version: $(npm --version)"
+          echo "::notice::yarn version: $(yarn --version)"
+          echo "::notice::python version: $(python --version)"
+          echo "::notice::rustup version: $(rustup show)"
+          echo "::notice::wasm-pack version: $(wasm-pack --version)"
 
       - name: Build and publish
         run: |
@@ -226,12 +230,12 @@ jobs:
       - name: Output dependency versions
         shell: bash
         run: |
-          echo "::info:: node version: $(node --version)"
-          echo "::info:: npm version: $(npm --version)"
-          echo "::info:: yarn version: $(yarn --version)"
-          echo "::info:: python version: $(python --version)"
-          echo "::info:: rustup version: $(rustup show)"
-          echo "::info:: wasm-pack version: $(wasm-pack --version)"
+          echo "::notice::node version: $(node --version)"
+          echo "::notice::npm version: $(npm --version)"
+          echo "::notice::yarn version: $(yarn --version)"
+          echo "::notice::python version: $(python --version)"
+          echo "::notice::rustup version: $(rustup show)"
+          echo "::notice::wasm-pack version: $(wasm-pack --version)"
           
       - name: Build and push desktop wallet
         shell: bash
