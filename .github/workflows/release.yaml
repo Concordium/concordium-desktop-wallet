@@ -1,0 +1,244 @@
+name: Concordium desktop wallet release
+
+on:
+  push:
+    tags:
+      - 'desktop-wallet/*.*.*-stagenet'
+      - 'desktop-wallet/*.*.*-testnet'
+      - 'desktop-wallet/*.*.*-mainnet'
+
+env:
+  BASE_IMAGE_VERSION: "rust-1.74.1_ghc-9.6.4"
+  STATIC_NODE_BINARY_IMAGE_NAME: 'static-node-binaries'
+  AWS_ROLE_TO_ASSUME: "arn:aws:iam::192549843005:role/github_concordium-desktop-wallet"
+  S3_BUCKET: "s3://desktopwallet.concordium.com"
+  ECR_REPO: "192549843005.dkr.ecr.eu-west-1.amazonaws.com/concordium/desktop-wallet-ci"
+  WASM-PACK_VERSION: "v0.9.1"
+  NODE_VERSION: "14.16.0"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-ci-image:
+    runs-on: ubuntu-latest
+    outputs:
+      access_key: ${{ steps.login-ecr.outputs.docker_username_192549843005_dkr_ecr_eu_west_1_amazonaws_com }}
+      secret_key: ${{ steps.login-ecr.outputs.docker_password_192549843005_dkr_ecr_eu_west_1_amazonaws_com }}
+      CONTAINER_TAG: ${{ steps.version_check.outputs.CONTAINER_TAG }}
+      VERSION: ${{ steps.version_check.outputs.VERSION }}
+      TARGET_NET: ${{ steps.target_net.outputs.TARGET_NET }}
+    environment: release
+    steps:
+      - name: Assume role
+        uses: aws-actions/configure-aws-credentials@v4
+        id: creds
+        with:
+          aws-region: "eu-west-1"
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          role-session-name: ReleaseDesktopWalletSession
+          mask-aws-account-id: false
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: false
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          ref: ${{ github.ref_name }}
+
+      - name: Set target net if correctly formatted
+        id: target_net
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          TARGET_NET=${TAG##desktop-wallet/*-}
+          echo "$TARGET_NET"
+          if [[ $TARGET_NET != "stagenet" ]] && [[ $TARGET_NET != "testnet" ]] && [[ $TARGET_NET != "mainnet" ]]; then
+            echo "::error:: Tag does not contain target net"
+            exit 1
+          fi
+          echo "TARGET_NET=$TARGET_NET" >> $GITHUB_OUTPUT
+
+
+      - name: Verify version
+        id: version_check
+        env:
+          TAG: ${{ github.ref_name}}
+        run: |
+          # Extract version number
+          VERSION=$(jq '.version' -r app/package.json)
+
+          TAG_VERSION_NET=${TAG##*/}
+          TAG_VERSION=${TAG_VERSION_NET%%-*}
+          if [ "$VERSION" != "$TAG_VERSION" ]; then
+            echo "::error:: Tag version is not correct. Tag version: $TAG_VERSION version from package.json: $VERSION"
+            exit 1
+          fi
+          aws ecr describe-images --registry-id "192549843005" --repository-name "concordium/desktop-wallet-ci" --region eu-west-1  --image-ids=imageTag=$VERSION
+          EC=$?
+          echo "EXIT_CODE=$EC" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "CONTAINER_TAG=${{ env.ECR_REPO }}:$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: build ci image
+        if: ${{ env.EXIT_CODE == 254 }}
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: "${{ steps.version_check.outputs.CONTAINER_TAG }}"
+          context: '.'
+          file: 'scripts/desktop-wallet-ci.Dockerfile'
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BASE_VERSION=${{ env.BASE_IMAGE_VERSION }}
+            NODE_VERSION=${{ env.NODE_VERSION }}
+
+  release-desktop-wallet-linux:
+    environment: release
+    needs: build-ci-image
+    runs-on: ubuntu-latest
+    container:
+      image: "${{needs.build-ci-image.outputs.CONTAINER_TAG}}"
+      credentials:
+        username: ${{needs.build-ci-image.outputs.access_key}}
+        password: ${{needs.build-ci-image.outputs.secret_key}}
+      options: -u root
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          ref: ${{ github.ref_name }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/configure-aws-credentials@v4
+        id: creds
+        with:
+          aws-region: "eu-west-1"
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          role-session-name: ReleaseDesktopWalletSession
+          mask-aws-account-id: false
+
+      - name: Generate output folder
+        run: |
+          set +e
+          TARGET_NET=${{ needs.build-ci-image.outputs.TARGET_NET}}
+          VERSION=${{ needs.build-ci-image.outputs.VERSION }}
+
+          OUT_FOLDER_PATH="${{ env.S3_BUCKET }}/${VERSION}/${TARGET_NET}"
+          echo "OUT_FOLDER_PATH=$OUT_FOLDER_PATH" >> $GITHUB_ENV
+
+      - name: Check if Executable exist
+        run: |
+          set +e
+          aws s3 ls "${{ env.OUT_FOLDER_PATH }}/latest-linux.yml"
+          EC=$?
+          if [ $EC -eq 0 ]; then
+            echo "::error:: file file already exist"
+            exit 1
+          elif [ $EC -ne 1 ]; then
+            echo "::error:: $EC"
+            exit 1
+          fi
+
+      - name: Output dependency versions
+        run: |
+          rustup default stable
+          echo "::notice::node version: $(node --version)"
+          echo "::notice::npm version: $(npm --version)"
+          echo "::notice::yarn version: $(yarn --version)"
+          echo "::notice::python version: $(python --version)"
+          echo "::notice::rustup version: $(rustup show)"
+          echo "::notice::wasm-pack version: $(wasm-pack --version)"
+
+      - name: Build and publish
+        run: |
+          set +e
+
+          yarn
+          yarn package
+
+          aws s3 cp --recursive release/ ${{ env.OUT_FOLDER_PATH }} --exclude linux-unpacked/* --exclude builder-debug.yml --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+
+  #using windows-2019 to be able to use visual studio 2019, newer versions do not support older versions of node.js
+  release-desktop-wallet-windows:
+    runs-on: windows-2019
+    environment: release
+    needs: build-ci-image
+    steps:
+      - name: aws creds
+        uses: aws-actions/configure-aws-credentials@v4
+        id: creds
+        with:
+          aws-region: "eu-west-1"
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          role-session-name: ReleaseDesktopWalletSession
+          
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          ref: ${{ github.ref_name }}
+
+      - name: Install dependencies
+        uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          version: ${{ env.WASM-PACK_VERSION }}
+
+      - name: install node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Generate output folder
+        shell: bash
+        run: |
+          set +e
+          TARGET_NET=${{ needs.build-ci-image.outputs.TARGET_NET}}
+          VERSION=${{ needs.build-ci-image.outputs.VERSION }}
+
+          OUT_FOLDER_PATH="${{ env.S3_BUCKET }}/${VERSION}/${TARGET_NET}"
+          echo "OUT_FOLDER_PATH=$OUT_FOLDER_PATH" >> $GITHUB_ENV
+
+      - name: Check if executable exist
+        shell: bash
+        run: |
+          set +e
+          aws s3 ls "${{ env.OUT_FOLDER_PATH }}/latest.yml"
+          EC=$?
+          echo $EC
+          if [ $EC -eq 0 ]; then
+            echo "::error:: file already exist"
+            exit 1
+          elif [ $EC -ne 1 ]; then
+            echo "::error:: $EC"
+            exit 1
+          fi
+          
+      - name: Output dependency versions
+        shell: bash
+        run: |
+          echo "::notice::node version: $(node --version)"
+          echo "::notice::npm version: $(npm --version)"
+          echo "::notice::yarn version: $(yarn --version)"
+          echo "::notice::python version: $(python --version)"
+          echo "::notice::rustup version: $(rustup show)"
+          echo "::notice::wasm-pack version: $(wasm-pack --version)"
+          
+      - name: Build and push desktop wallet
+        shell: bash
+        run: |
+          yarn --network-timeout 1000000
+          yarn package-win-no-sign
+
+          aws s3 cp --recursive release/ ${{ env.OUT_FOLDER_PATH }} --exclude win-unpacked/* --exclude builder-debug.yml --exclude *.blockmap --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
