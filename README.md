@@ -37,7 +37,7 @@ git submodule update --init
 Then install dependencies:
 
 ```bash
-yarn
+PYTHON=python2.7 yarn
 ```
 
 ### Windows
