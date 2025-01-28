@@ -37,13 +37,18 @@ git submodule update --init
 Then install dependencies:
 
 ```bash
-yarn
+PYTHON=python2.7 yarn
 ```
 
 ### Windows
 
 On Windows you can run the above through e.g. Git bash, or if you want to run it from the Command Prompt, then
 you must add `sh` to your PATH for the proto build to run. You can get `sh` bundled with Git bash.
+
+### MacOS ARM
+
+You'll likely see a lot of errors in the console when installing native dependencies. Ignore these and try to
+build and run the application in the next steps to see if the installation was successful.
 
 ## Starting Development
 
@@ -78,13 +83,14 @@ which is only recompiled with a full restart.
 
 ## Targeting specific network
 
-To build the application for a specific network you must supply the `TARGET_NET` variable. The value
-has to be one of `stagenet`, `testnet`, `protonet`, or `mainnet`, otherwise the build will fail. If `TARGET_NET` is not
+To build the application for a specific network you must supply the `TARGET_NET` variable. If `TARGET_NET` is not
 set the build will be for `mainnet`. Note that the `TARGET_NET` will be appended to the filenames for
 `stagenet` and `testnet`.
 
+Valid networks options are: `stagenet`, `testnet`, `protonet`, or `mainnet`. Default is `mainnet`.
+
 ```bash
-TARGET_NET=stagenet yarn package
+TARGET_NET=testnet yarn package # or any other build/run command
 ```
 
 ## Targeting Ledger emulator (Speculos)
