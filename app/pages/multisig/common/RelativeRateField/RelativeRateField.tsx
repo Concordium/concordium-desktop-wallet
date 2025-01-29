@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import clsx from 'clsx';
 import React, { InputHTMLAttributes, PropsWithChildren, useMemo } from 'react';
@@ -89,8 +90,8 @@ export function RelativeRateField({
         try {
             const r = fromExchangeRate(
                 getReducedExchangeRate({
-                    numerator: BigInt(value.numerator),
-                    denominator: BigInt(value.denominator),
+                    numerator: BigInt(value.numerator!), // unwrap and catch the error
+                    denominator: BigInt(value.denominator!),
                 })
             );
 

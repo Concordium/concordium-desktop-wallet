@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Buffer } from 'buffer/';
 import Label from '~/components/Label';
 import { ProtocolUpdate } from '~/utils/types';
 

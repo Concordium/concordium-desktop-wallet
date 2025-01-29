@@ -22,9 +22,6 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
         path: fromRoot('./app'),
         filename: 'preload.dev.js',
     },
-    experiments: {
-        asyncWebAssembly: true,
-    },
     plugins: [
         new webpack.EnvironmentPlugin({
             NODE_ENV: 'development',

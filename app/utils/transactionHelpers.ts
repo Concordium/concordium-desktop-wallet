@@ -4,7 +4,8 @@ import {
     ReleaseSchedule,
     TransactionSummaryType,
     TransactionKindString,
-    isBakerAccount,
+    AccountInfoType,
+    CcdAmount,
 } from '@concordium/web-sdk';
 import { Validate } from 'react-hook-form';
 import {
@@ -666,7 +667,10 @@ export const validateDelegateAmount = (
         return `Cannot delegate more than (${displayAsCcd(max)})`;
     }
 
-    if (BigInt(accountInfo.accountAmount) < amount + estimatedFee) {
+    if (
+        BigInt(accountInfo.accountAmount.microCcdAmount) <
+        amount + estimatedFee
+    ) {
         return 'Insufficient funds';
     }
 
@@ -684,8 +688,8 @@ export function validateBakerStake(
     }
     const amount = ccdToMicroCcd(amountToValidate);
     const currentStake: bigint | undefined =
-        accountInfo && isBakerAccount(accountInfo)
-            ? accountInfo.accountBaker.stakedAmount
+        accountInfo && accountInfo.type === AccountInfoType.Baker
+            ? accountInfo.accountBaker.stakedAmount.microCcdAmount
             : undefined;
 
     if (
@@ -699,7 +703,8 @@ export function validateBakerStake(
     }
     if (
         accountInfo &&
-        BigInt(accountInfo.accountAmount) < amount + (estimatedFee || 0n)
+        BigInt(accountInfo.accountAmount.microCcdAmount) <
+            amount + (estimatedFee || 0n)
     ) {
         return 'Insufficient funds';
     }
@@ -798,7 +803,7 @@ export function isShieldedBalanceTransaction(transaction: TransferTransaction) {
 
 export function toReleaseSchedule(release: SchedulePoint): ReleaseSchedule {
     return {
-        amount: BigInt(release.amount),
+        amount: CcdAmount.fromMicroCcd(release.amount),
         timestamp: dateFromTimeStamp(
             release.timestamp,
             TimeStampUnit.milliSeconds

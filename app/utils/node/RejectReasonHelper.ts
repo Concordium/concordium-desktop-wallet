@@ -1,4 +1,4 @@
-import { RejectReasonTag as RejectReason } from '@concordium/common-sdk/lib/types/rejectReason';
+import { RejectReasonTag as RejectReason } from '@concordium/web-sdk/types';
 
 export { RejectReason };
 

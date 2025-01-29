@@ -1,6 +1,6 @@
 import React from 'react';
 import { useForm, Validate } from 'react-hook-form';
-import { OpenStatusText, isDelegatorAccount } from '@concordium/web-sdk';
+import { AccountInfoType, OpenStatusText } from '@concordium/web-sdk';
 
 import Form from '~/components/Form';
 import ExternalLink from '~/components/ExternalLink';
@@ -62,14 +62,23 @@ export default function DelegationTargetPage({
             // Throws if response is undefined.
             const poolStatus = await getPoolInfo(bakerId);
 
+            if (
+                poolStatus.poolInfo === undefined ||
+                poolStatus.delegatedCapitalCap === undefined ||
+                poolStatus.delegatedCapital === undefined
+            ) {
+                throw new Error();
+            }
+
             if (poolStatus.poolInfo.openStatus !== OpenStatusText.OpenForAll) {
                 return 'Targeted validator does not allow new delegators';
             }
 
             if (
-                isDelegatorAccount(accountInfo) &&
-                poolStatus.delegatedCapitalCap - poolStatus.delegatedCapital <
-                    accountInfo.accountDelegation.stakedAmount
+                accountInfo.type === AccountInfoType.Delegator &&
+                poolStatus.delegatedCapitalCap.microCcdAmount -
+                    poolStatus.delegatedCapital.microCcdAmount <
+                    accountInfo.accountDelegation.stakedAmount.microCcdAmount
             ) {
                 return "Your current stake would violate the targeted validator's cap";
             }

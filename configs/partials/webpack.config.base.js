@@ -52,7 +52,6 @@ module.exports = {
         library: {
             type: 'commonjs2',
         },
-        webassemblyModuleFilename: 'crypto.wasm',
     },
 
     /**
@@ -67,6 +66,14 @@ module.exports = {
             }),
         ],
         mainFields: ['module', 'main', 'browser'],
+        alias: {
+            // Resolve bundler-specific wasm entrypoints.
+            '@concordium/rust-bindings': '@concordium/rust-bindings/bundler',
+        },
+    },
+
+    experiments: {
+        asyncWebAssembly: true,
     },
 
     optimization: {

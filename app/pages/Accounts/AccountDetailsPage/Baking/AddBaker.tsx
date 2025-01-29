@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
 import React, { ComponentType, useCallback } from 'react';
-import { isChainParametersV0, ChainParametersV1 } from '@concordium/web-sdk';
+import { ChainParametersV1 } from '@concordium/web-sdk';
 import { Redirect } from 'react-router';
 
 import withExchangeRate from '~/components/Transfers/withExchangeRate';
@@ -61,12 +61,16 @@ const withDeps = (component: ComponentType<Deps>) =>
         )
     );
 
-const ensureDelegationProtocol = (c: ComponentType<Props>) =>
-    ensureProps<Props, Deps>(
-        c,
-        (p): p is Props => !isChainParametersV0(p.chainParameters),
-        <Redirect to={routes.ACCOUNTS} />
-    );
+const ensureDelegationProtocol = (C: ComponentType<Props>) => {
+    return (props: Deps) => {
+        // eslint-disable-next-line react/destructuring-assignment
+        if (props.chainParameters.version === 0) {
+            return <Redirect to={routes.ACCOUNTS} />;
+        }
+
+        return <C {...(props as Props)} />;
+    };
+};
 
 export default withDeps(
     ensureDelegationProtocol(function AddBaker(props: Props) {

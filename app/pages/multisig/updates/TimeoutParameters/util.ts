@@ -17,7 +17,7 @@ export function getTimeoutParameters(
     chainParameters: TimeoutParameters
 ): TimeoutParametersFields {
     return {
-        timeoutBase: chainParameters.timeoutBase,
+        timeoutBase: chainParameters.timeoutBase.value,
         timeoutIncrease: {
             numerator: chainParameters.timeoutIncrease.numerator.toString(),
             denominator: chainParameters.timeoutIncrease.denominator.toString(),

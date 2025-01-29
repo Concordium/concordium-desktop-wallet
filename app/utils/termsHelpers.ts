@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer/';
+
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import terms from 'url-loader!@resources/html/terms.html';
 import localStorageKeys from '~/constants/localStorage.json';
@@ -5,9 +7,9 @@ import localStorageKeys from '~/constants/localStorage.json';
 export const termsUrlBase64 = terms;
 
 const getHash = async (v: string) => {
-    return Buffer.from(
-        await window.cryptoMethods.sha256([Buffer.from(v)])
-    ).toString('hex');
+    return Buffer.from(window.cryptoMethods.sha256([Buffer.from(v)])).toString(
+        'hex'
+    );
 };
 
 export const storeTerms = async (): Promise<void> => {

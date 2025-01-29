@@ -214,4 +214,26 @@ export function filterRecordEntries<K extends string | number | symbol, V>(
     }, result);
 }
 
+// Maps a `Record<A,C>` to a `Record<B,D>`.
+// Works the same way as a list mapping, allowing both a value and key mapping.
+// If `keyMapper()` is not provided, it will map `Record<A,C>` to `Record<A,D>`
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export function mapRecord<
+    A extends string | number | symbol,
+    B,
+    C extends string | number | symbol,
+    D
+>(
+    rec: Record<A, B>,
+    valMapper: (x: B) => D,
+    keyMapper: (x: A) => C = (a: any) => a
+): Record<C, D> {
+    const ret: any = {};
+    // eslint-disable-next-line guard-for-in, no-restricted-syntax
+    for (const i in rec) {
+        ret[keyMapper(i)] = valMapper(rec[i]);
+    }
+    return ret;
+}
+
 export const UINT32_MAX = 2 ** 32 - 1; // UInt32 upper bound

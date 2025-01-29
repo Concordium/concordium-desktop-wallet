@@ -2,17 +2,15 @@ import {
     ChainParameters,
     ChainParametersV0,
     ChainParametersV1,
-    isChainParametersV0,
-    isChainParametersV1,
 } from '@concordium/web-sdk';
 
 export function getMinimumStakeForBaking(
     chainParameters: ChainParameters
 ): bigint {
-    if (isChainParametersV0(chainParameters)) {
-        return chainParameters.minimumThresholdForBaking;
+    if (chainParameters.version === 0) {
+        return chainParameters.minimumThresholdForBaking.microCcdAmount;
     }
-    return chainParameters.minimumEquityCapital;
+    return chainParameters.minimumEquityCapital.microCcdAmount;
 }
 
 export function isChainParametersV2OrHigher(
@@ -21,10 +19,7 @@ export function isChainParametersV2OrHigher(
     ChainParameters,
     ChainParametersV0 | ChainParametersV1
 > {
-    return (
-        !isChainParametersV0(chainParameters) &&
-        !isChainParametersV1(chainParameters)
-    );
+    return chainParameters.version >= 2;
 }
 
 /**

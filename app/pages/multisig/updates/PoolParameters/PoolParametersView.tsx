@@ -1,5 +1,6 @@
 import React from 'react';
-import { isChainParametersV0 } from '@concordium/web-sdk';
+import { CcdAmount, PoolParametersV1 } from '@concordium/web-sdk';
+
 import { PoolParameters } from '~/utils/types';
 import Loading from '~/cross-app-components/Loading';
 import withChainData, { ChainData } from '~/utils/withChainData';
@@ -21,11 +22,11 @@ export default withChainData(function PoolParametersView({
     if (!consensusStatus || !chainParameters) {
         return <Loading inline />;
     }
-    if (isChainParametersV0(chainParameters)) {
+    if (chainParameters.version === 0) {
         throw new Error('Connected node used outdated chainParameters format');
     }
 
-    const newPoolParameters = {
+    const newPoolParameters: PoolParametersV1 = {
         passiveFinalizationCommission:
             poolParameters.passiveCommissions.finalizationRewardCommission,
         passiveBakingCommission:
@@ -38,7 +39,9 @@ export default withChainData(function PoolParametersView({
             poolParameters.commissionBounds.bakingRewardCommission,
         transactionCommissionRange:
             poolParameters.commissionBounds.transactionFeeCommission,
-        minimumEquityCapital: poolParameters.minimumEquityCapital,
+        minimumEquityCapital: CcdAmount.fromMicroCcd(
+            poolParameters.minimumEquityCapital
+        ),
         capitalBound: poolParameters.capitalBound,
         leverageBound: poolParameters.leverageBound,
     };

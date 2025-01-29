@@ -30,7 +30,7 @@ export default withChainData(function FoundationAccountView({
                 <DisplayAddress
                     className="mT5"
                     lineClassName={styles.accountAddress}
-                    address={currentFoundationAccount}
+                    address={currentFoundationAccount.toString()}
                 />
             </div>
             <div>

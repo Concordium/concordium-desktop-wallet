@@ -71,7 +71,7 @@ export function encrypt(data: string, password: string): EncryptedData {
     const salt = crypto.randomBytes(16);
     const key = crypto.pbkdf2Sync(
         password,
-        salt,
+        new Uint8Array(salt),
         iterations,
         keyLen,
         hashAlgorithmInternal
@@ -79,8 +79,8 @@ export function encrypt(data: string, password: string): EncryptedData {
     const initializationVector = crypto.randomBytes(16);
     const cipher = crypto.createCipheriv(
         aes256EncryptionMethod,
-        key,
-        initializationVector
+        new Uint8Array(key),
+        new Uint8Array(initializationVector)
     );
     let cipherText = cipher.update(data, 'utf8', encoding);
     cipherText += cipher.final(encoding);
@@ -132,7 +132,7 @@ export function decrypt(
     );
     const decipher = crypto.createDecipheriv(
         internalEncryptionMethod,
-        key,
+        new Uint8Array(key),
         Buffer.from(initializationVector, encoding)
     );
     let data = decipher.update(cipherText, encoding, 'utf8');
@@ -143,7 +143,7 @@ export function decrypt(
 function hashSha256(data: (string | Buffer | Uint8Array)[]) {
     const hash = crypto.createHash('sha256');
     data.forEach((input) => hash.update(input));
-    return Buffer.from(hash.digest());
+    return Buffer.from(new Uint8Array(hash.digest()));
 }
 
 const exposedMethods: CryptoMethods = {

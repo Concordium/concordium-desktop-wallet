@@ -2,7 +2,8 @@ import React, { useCallback, useMemo } from 'react';
 import { useForm, useFormContext, Validate } from 'react-hook-form';
 import { Redirect } from 'react-router';
 import clsx from 'clsx';
-import { isDelegatorAccount } from '@concordium/web-sdk';
+import { AccountInfoType } from '@concordium/web-sdk';
+
 import AccountCard from '~/components/AccountCard';
 import Form from '~/components/Form';
 import ErrorMessage from '~/components/Form/ErrorMessage';
@@ -163,7 +164,8 @@ export default function DelegationAmountPage({
     const existing = getExistingDelegationValues(accountInfo);
 
     const pendingChange =
-        accountInfo !== undefined && isDelegatorAccount(accountInfo)
+        accountInfo !== undefined &&
+        accountInfo.type === AccountInfoType.Delegator
             ? accountInfo.accountDelegation.pendingChange
             : undefined;
     const defaultValues: SubState = {
@@ -246,17 +248,23 @@ export default function DelegationAmountPage({
                 {poolInfo && (
                     <div className="body2 mV30">
                         <Label className="mB5">Target pool status</Label>
-                        <SidedRow
-                            left="Current pool:"
-                            right={`${displayAsCcd(poolInfo.delegatedCapital)}`}
-                        />
-                        <SidedRow
-                            className="mT5"
-                            left="Pool limit:"
-                            right={`${displayAsCcd(
-                                poolInfo.delegatedCapitalCap
-                            )}`}
-                        />
+                        {poolInfo.delegatedCapital !== undefined && (
+                            <SidedRow
+                                left="Current pool:"
+                                right={`${displayAsCcd(
+                                    poolInfo.delegatedCapital
+                                )}`}
+                            />
+                        )}
+                        {poolInfo.delegatedCapitalCap !== undefined && (
+                            <SidedRow
+                                className="mT5"
+                                left="Pool limit:"
+                                right={`${displayAsCcd(
+                                    poolInfo.delegatedCapitalCap
+                                )}`}
+                            />
+                        )}
                     </div>
                 )}
                 {showAccountCard && (
@@ -266,7 +274,11 @@ export default function DelegationAmountPage({
                     accountInfo={accountInfo}
                     existing={existing?.delegate?.amount}
                     estimatedFee={estimatedFee}
-                    max={poolInfo ? poolInfo.delegatedCapitalCap : undefined}
+                    max={
+                        poolInfo?.delegatedCapitalCap
+                            ? poolInfo.delegatedCapitalCap.microCcdAmount
+                            : undefined
+                    }
                     hasPendingChange={pendingChange !== undefined}
                 />
                 <p className="mB30">

@@ -5,6 +5,7 @@ import {
     isAccountTransactionType,
     TransactionExpiry,
     AccountAddress,
+    SequenceNumber,
 } from '@concordium/web-sdk';
 import type { Buffer } from 'buffer/';
 import { serializeTransferPayload } from '~/utils/transactionSerialization';
@@ -61,9 +62,9 @@ export function sendAccountTransaction(
     );
 
     const header = {
-        sender: new AccountAddress(transaction.sender),
+        sender: AccountAddress.fromBase58(transaction.sender),
         expiry: TransactionExpiry.fromEpochSeconds(transaction.expiry),
-        nonce: BigInt(transaction.nonce),
+        nonce: SequenceNumber.create(BigInt(transaction.nonce)),
     };
 
     return window.grpc.sendAccountTransaction(

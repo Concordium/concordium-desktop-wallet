@@ -2,7 +2,8 @@
 import React, { ComponentType, useCallback, useState } from 'react';
 import { Redirect, useRouteMatch } from 'react-router';
 import { useSelector } from 'react-redux';
-import { isBakerAccount } from '@concordium/web-sdk';
+import { AccountInfoType } from '@concordium/web-sdk';
+
 import { AccountInfo, ConfigureBaker, Fraction } from '~/utils/types';
 import MultiSigAccountTransactionFlow, {
     MultiSigAccountTransactionFlowLoading,
@@ -36,7 +37,6 @@ import DelegationAmountPage from '~/components/Transfers/configureDelegation/Del
 import { shouldShowField } from './utils';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { ValidateValues } from '~/components/MultiStepForm';
-
 import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
 
 import styles from './proposal-details/ProposalDetails.module.scss';
@@ -52,11 +52,11 @@ const DisplayValues = ({ account, exchangeRate, ...values }: DisplayProps) => {
     const existingValues =
         accountInfo !== undefined
             ? getExistingDelegationValues(accountInfo)
-            : undefined ?? {};
+            : {};
     const changes =
         existingValues !== undefined
             ? getDelegationFlowChanges(values, existingValues)
-            : undefined ?? values;
+            : values;
     const showField = shouldShowField(values, changes);
 
     const estimatedFee =
@@ -190,7 +190,9 @@ export default withDeps(function ConfigureDelegation({
                     <DisplayValues {...v} exchangeRate={exchangeRate} />
                 )}
                 validate={validate}
-                accountFilter={(_, i) => isDefined(i) && !isBakerAccount(i)}
+                accountFilter={(_, i) =>
+                    isDefined(i) && i.type !== AccountInfoType.Baker
+                }
             >
                 {({ account }) => ({
                     target: {

@@ -1,3 +1,4 @@
+import { CcdAmount } from '@concordium/web-sdk';
 import {
     getPowerOf10,
     formatNumberStringWithDigits,
@@ -18,7 +19,10 @@ const separator = '.';
  * Given an ambigous input, convert it into a bigint.
  * N.B. In case the input is a string, it is assumed that it represents the value in microCCD.
  */
-function toBigInt(input: bigint | string): bigint {
+function toBigInt(input: bigint | string | CcdAmount.Type): bigint {
+    if (typeof input === 'object') {
+        return input.microCcdAmount;
+    }
     if (typeof input === 'string') {
         try {
             return BigInt(input);
@@ -77,7 +81,7 @@ export const formatCcdString = formatNumberStringWithDigits(2);
  * Allows input type string, because microCCD from external sources are strings.
  * N.B. In case the input is a string, it is assumed that it represents the value in microCCD.
  */
-export function displayAsCcd(microCcdAmount: bigint | string) {
+export function displayAsCcd(microCcdAmount: bigint | string | CcdAmount.Type) {
     const amount: bigint = toBigInt(microCcdAmount);
     const negative = amount < 0n ? '-' : '';
     const abs = amount < 0n ? -amount : amount;

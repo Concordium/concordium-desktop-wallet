@@ -136,7 +136,7 @@ async function loadTransactionFile(
         const accountNonce = await getNextAccountNonce(address);
         const maxOpenNonce = await getMaxOpenNonceOnAccount(address);
         nonceTracker[address] = max(
-            BigInt(accountNonce.nonce),
+            BigInt(accountNonce.nonce.value),
             maxOpenNonce + 1n
         );
     }

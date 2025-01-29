@@ -3,11 +3,9 @@ import React, { ComponentType, useCallback } from 'react';
 import { Redirect } from 'react-router';
 import { useSelector } from 'react-redux';
 import {
+    AccountInfoType,
     ChainParameters,
     ChainParametersV0,
-    isChainParametersV0,
-    isBakerAccount,
-    isDelegatorAccount,
 } from '@concordium/web-sdk';
 
 import CommissionsPage from '~/components/Transfers/configureBaker/CommissionsPage';
@@ -160,12 +158,16 @@ const withDeps = (component: ComponentType<Deps>) =>
         )
     );
 
-const ensureDelegationProtocol = (c: ComponentType<Props>) =>
-    ensureProps<Props, Deps>(
-        c,
-        (p): p is Props => !isChainParametersV0(p.chainParameters),
-        toRoot
-    );
+const ensureDelegationProtocol = (C: ComponentType<Props>) => {
+    return (props: Deps) => {
+        // eslint-disable-next-line react/destructuring-assignment
+        if (props.chainParameters.version === 0) {
+            return toRoot;
+        }
+
+        return <C {...(props as Props)} />;
+    };
+};
 
 export default withDeps(
     ensureDelegationProtocol(function AddBaker({
@@ -206,7 +208,9 @@ export default withDeps(
                 convert={convert}
                 validate={validate}
                 accountFilter={(_, i) =>
-                    isDefined(i) && !isBakerAccount(i) && !isDelegatorAccount(i)
+                    isDefined(i) &&
+                    i.type !== AccountInfoType.Delegator &&
+                    i.type !== AccountInfoType.Baker
                 }
                 preview={(v) => (
                     <DisplayValues

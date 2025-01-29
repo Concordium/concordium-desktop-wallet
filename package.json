@@ -2,6 +2,7 @@
     "name": "concordium-desktop-wallet",
     "productName": "Concordium Desktop Wallet",
     "description": "concordium-desktop-wallet",
+    "packageManager": "yarn@4.6.0",
     "scripts": {
         "build": "concurrently \"yarn build-main\" \"yarn build-renderer\" \"yarn build-preload\"",
         "build-ci": "yarn build-main && concurrently \"yarn build-renderer\" \"yarn build-preload\"",
@@ -232,7 +233,7 @@
         "yargs": "^17.1.1"
     },
     "dependencies": {
-        "@concordium/web-sdk": "^6.4.0",
+        "@concordium/web-sdk": "^9.0.0",
         "@hot-loader/react-dom": "^16.13.0",
         "@ledgerhq/devices": "^8.2.1",
         "@protobuf-ts/grpc-transport": "2.8.2",
@@ -311,9 +312,5 @@
         "baseBranches": [
             "next"
         ]
-    },
-    "resolutions": {
-        "@noble/hashes": "1.2.0"
-    },
-    "packageManager": "yarn@4.6.0"
+    }
 }

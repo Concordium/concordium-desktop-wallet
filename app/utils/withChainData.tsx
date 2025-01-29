@@ -26,7 +26,7 @@ export default function withChainData<TProps extends ChainData>(
         const init = useCallback(async (): Promise<ChainData> => {
             const cs: ConsensusStatus = await getConsensusStatus();
             const chainParameters = await getBlockChainParameters(
-                cs.lastFinalizedBlock
+                cs.lastFinalizedBlock.toString()
             );
 
             dispatch(setConsensusStatus(cs));

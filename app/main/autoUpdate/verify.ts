@@ -70,7 +70,7 @@ export function getVerificationFunctions({
 
             const success = verify(
                 null,
-                readFileSync(filePath),
+                new Uint8Array(readFileSync(filePath)),
                 Buffer.from(pubKey, 'ascii'),
                 remoteSig
             );

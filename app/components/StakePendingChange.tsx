@@ -1,6 +1,6 @@
 import React from 'react';
 import type { StakePendingChange as PendingChange } from '@concordium/web-sdk';
-import { isRemovalPendingChange } from '@concordium/web-sdk';
+import { StakePendingChangeType } from '@concordium/web-sdk';
 import { useBlockChainParameters, useConsensusStatus } from '~/utils/dataHooks';
 import { displayAsCcd } from '~/utils/ccd';
 import {
@@ -22,7 +22,7 @@ export default function StakePendingChange({ pending }: Props) {
     const rs = useAsyncMemo(
         async () =>
             cs !== undefined
-                ? getRewardStatus(cs.lastFinalizedBlock)
+                ? getRewardStatus(cs.lastFinalizedBlock.toString())
                 : undefined,
         noOp,
         [cs]
@@ -40,7 +40,7 @@ export default function StakePendingChange({ pending }: Props) {
     );
     const formattedDate = getFormattedDateString(changeAtDate);
 
-    return isRemovalPendingChange(pending) ? (
+    return pending.change === StakePendingChangeType.RemoveStake ? (
         <>
             Stake is being removed on
             <br />

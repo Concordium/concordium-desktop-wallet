@@ -1,7 +1,8 @@
 import React, { useCallback, useState } from 'react';
 import { Validate } from 'react-hook-form';
-import { hashSha256 } from '~/utils/serializationHelpers';
+import { Buffer } from 'buffer/';
 
+import { hashSha256 } from '~/utils/serializationHelpers';
 import { EqualRecord, AddIdentityProvider, Description } from '~/utils/types';
 import Form from '~/components/Form';
 import { UpdateProps } from '~/utils/transactionTypes';

@@ -202,7 +202,7 @@ export default function MultiSigAccountTransactionFlow<
                 return undefined;
             }
             const { nonce: n } = await getNextAccountNonce(
-                values.account.address
+                values.account?.address
             );
             return n;
         },
@@ -221,7 +221,7 @@ export default function MultiSigAccountTransactionFlow<
                 throw new Error('Tried to create transaction with no nonce');
             }
 
-            const t = convert(v, nonce);
+            const t = convert(v, nonce.value);
             setTransaction(t);
 
             dispatch(push(signPath));

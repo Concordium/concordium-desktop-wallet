@@ -17,7 +17,7 @@ export default function withAccountSync<P>(
         const ReloadWrapper = useCallback(
             () => {
                 useAccountSync(onError);
-                return <Component {...(props as P)} />;
+                return <Component {...(props as P & React.Attributes)} />;
             },
             // eslint-disable-next-line react-hooks/exhaustive-deps
             [account?.address]

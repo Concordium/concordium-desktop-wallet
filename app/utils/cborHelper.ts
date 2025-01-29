@@ -17,9 +17,9 @@ export function encodeAsCBOR(value: string): Buffer {
         ) {
             throw new Error('Unsafe number given to CBOR encoder');
         }
-        return Buffer.from(encode(asNumber));
+        return Buffer.from(new Uint8Array(encode(asNumber)));
     }
-    return Buffer.from(encode(value));
+    return Buffer.from(new Uint8Array(encode(value)));
 }
 
 /**

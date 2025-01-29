@@ -3,11 +3,7 @@ import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import ShieldImage from '@resources/svg/shield.svg';
 import type { DelegationTarget } from '@concordium/web-sdk';
-import {
-    isBakerAccount,
-    isDelegatorAccount,
-    DelegationTargetType,
-} from '@concordium/web-sdk';
+import { AccountInfoType, DelegationTargetType } from '@concordium/web-sdk';
 
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
@@ -69,11 +65,12 @@ interface PublicInfoProps {
 
 function PublicInfo({ accountInfo }: PublicInfoProps) {
     const accountBaker =
-        accountInfo !== undefined && isBakerAccount(accountInfo)
+        accountInfo !== undefined && accountInfo.type === AccountInfoType.Baker
             ? accountInfo.accountBaker
             : undefined;
     const accountDelegation =
-        accountInfo !== undefined && isDelegatorAccount(accountInfo)
+        accountInfo !== undefined &&
+        accountInfo.type === AccountInfoType.Delegator
             ? accountInfo.accountDelegation
             : undefined;
 

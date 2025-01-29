@@ -163,16 +163,16 @@ export function getPublicAccountAmounts(
     if (!accountInfo) {
         return { total: 0n, staked: 0n, scheduled: 0n, atDisposal: 0n };
     }
-    const total = BigInt(accountInfo.accountAmount);
+    const total = BigInt(accountInfo.accountAmount.microCcdAmount);
     const staked =
         (accountInfo as AccountInfoBaker).accountBaker?.stakedAmount ??
         (accountInfo as AccountInfoDelegator).accountDelegation?.stakedAmount ??
         0n;
     const scheduled = accountInfo.accountReleaseSchedule
-        ? BigInt(accountInfo.accountReleaseSchedule.total)
+        ? BigInt(accountInfo.accountReleaseSchedule.total.microCcdAmount)
         : 0n;
-    const atDisposal = total - max(scheduled, staked);
-    return { total, staked, scheduled, atDisposal };
+    const atDisposal = total - max(scheduled, staked.microCcdAmount);
+    return { total, staked: staked.microCcdAmount, scheduled, atDisposal };
 }
 
 export function getAmountAtDisposal(accountInfo: AccountInfo): bigint {

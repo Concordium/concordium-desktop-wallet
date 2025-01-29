@@ -22,7 +22,7 @@ import {
 
 export async function getlastFinalizedBlockHash(): Promise<string> {
     const consensusStatus = await getConsensusStatus();
-    return consensusStatus.lastFinalizedBlock;
+    return consensusStatus.lastFinalizedBlock.toString();
 }
 
 /**
@@ -76,7 +76,7 @@ export async function fetchGlobal(specificBlockHash?: string): Promise<Global> {
     let blockHash = specificBlockHash;
     if (!blockHash) {
         const consensusStatus = await getConsensusStatus();
-        blockHash = consensusStatus.lastFinalizedBlock;
+        blockHash = consensusStatus.lastFinalizedBlock.toString();
     }
     return getCryptographicParameters(blockHash);
 }

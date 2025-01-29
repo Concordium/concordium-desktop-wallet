@@ -56,6 +56,12 @@ const isGreen = (
         return viewingShielded;
     }
     if (TransactionKindString.TransferToPublic === kind) {
+        if (
+            transaction.subtotal === undefined ||
+            transaction.cost === undefined
+        ) {
+            throw new Error('missing fields for transaction');
+        }
         return (
             !viewingShielded &&
             BigInt(transaction.subtotal) > BigInt(transaction.cost)
@@ -139,6 +145,10 @@ function parseShieldedAmount(
 
 function parseAmount(transaction: TransferTransaction, isOutgoing: boolean) {
     if (isTransferKind(transaction.transactionKind)) {
+        if (transaction.subtotal === undefined) {
+            throw new Error('missing tx fields');
+        }
+
         if (isOutgoing) {
             const cost = BigInt(transaction.cost || '0');
 
@@ -178,6 +188,9 @@ function parseAmount(transaction: TransferTransaction, isOutgoing: boolean) {
         return buildCostFreeAmountString(BigInt(transaction.subtotal));
     }
     if (isRewardKind(transaction.transactionKind)) {
+        if (transaction.subtotal === undefined) {
+            throw new Error('missing tx fields');
+        }
         return buildCostFreeAmountString(BigInt(transaction.subtotal));
     }
     return buildCostString(BigInt(transaction.cost || '0'));

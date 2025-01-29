@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import { Meta, Story } from '@storybook/react/types-6-0';
+import {
+    AccountAddress,
+    AccountInfoType,
+    CcdAmount,
+    SequenceNumber,
+} from '@concordium/web-sdk';
 
 import { AccountState } from '~/features/AccountSlice';
 import { StoreWrapper } from '~/store/store';
@@ -52,18 +58,23 @@ const account: Account = {
 } as Account;
 
 const accountInfo: AccountInfo = {
-    accountAddress: '4inf4g36xDEQmjxDbbkqeHD2HNg9v7dohXUDH5S9en4Th53kxm',
-    accountNonce: 1n,
+    type: AccountInfoType.Simple,
+    accountAddress: AccountAddress.fromBase58(
+        '4inf4g36xDEQmjxDbbkqeHD2HNg9v7dohXUDH5S9en4Th53kxm'
+    ),
+    accountNonce: SequenceNumber.create(1),
     accountCredentials: [{} as any],
-    accountAmount: 1000n * microCcdPerCcd,
+    accountAmount: CcdAmount.fromCcd(1000),
     accountReleaseSchedule: {
-        total: 100n * microCcdPerCcd,
+        total: CcdAmount.fromCcd(1000),
         schedule: [],
     },
     accountIndex: 0n,
     accountThreshold: 1,
     accountEncryptionKey: '',
     accountEncryptedAmount: {} as any,
+    accountCooldowns: [],
+    accountAvailableBalance: CcdAmount.fromCcd(1000),
 } as AccountInfo;
 
 export const SingleSig = Template.bind({});
@@ -86,6 +97,7 @@ Baker.args = {
     account,
     accountInfo: {
         ...accountInfo,
+        type: AccountInfoType.Baker,
         accountBaker: {
             bakerId: 123,
             stakedAmount: `${400n * microCcdPerCcd}`,
