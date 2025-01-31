@@ -42,15 +42,13 @@ try {
 
     const AppContainer = ReactHotAppContainer;
 
-    document.addEventListener('DOMContentLoaded', () =>
-        render(
-            <AppContainer>
-                <ErrorBoundary>
-                    <Root store={store} history={history} />
-                </ErrorBoundary>
-            </AppContainer>,
-            document.getElementById('root')
-        )
+    render(
+        <AppContainer>
+            <ErrorBoundary>
+                <Root store={store} history={history} />
+            </ErrorBoundary>
+        </AppContainer>,
+        document.getElementById('root')
     );
 } catch (error) {
     window.log.error(error, 'Error thrown in index.tsx');

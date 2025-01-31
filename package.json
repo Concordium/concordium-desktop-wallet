@@ -15,7 +15,7 @@
         "build-renderer": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.renderer.prod.js --color",
         "build-renderer-dev": "cross-env NODE_ENV=development webpack --config configs/webpack.config.renderer.dev.js --color --progress",
         "build-storybook": "build-storybook",
-        "clean": "yarn clean-scss-modules",
+        "clean": "yarn clean-scss-modules && rimraf ./dll ./app/*.dev.js ./app/*.module.wasm",
         "clean-scss-modules": "rimraf ./**/*.module.scss.d.ts",
         "generate-verification-assets": "node ./scripts/fileDigest.js -k",
         "lint": "eslint . --cache --ext .ts,.tsx --max-warnings 0",
@@ -312,5 +312,10 @@
         "baseBranches": [
             "next"
         ]
+    },
+    "resolutions": {
+        "@noble/hashes@npm:^1.2.0": "patch:@noble/hashes@npm%3A1.7.1#~/.yarn/patches/@noble-hashes-npm-1.7.1-4106ab26c5.patch",
+        "@noble/hashes@npm:^1.3.2": "patch:@noble/hashes@npm%3A1.7.1#~/.yarn/patches/@noble-hashes-npm-1.7.1-4106ab26c5.patch",
+        "@noble/hashes@npm:~1.7.1": "patch:@noble/hashes@npm%3A1.7.1#~/.yarn/patches/@noble-hashes-npm-1.7.1-4106ab26c5.patch"
     }
 }

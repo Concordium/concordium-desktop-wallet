@@ -54,19 +54,19 @@ interface SerializableConcordiumBftStatus {
     triggerBlockTime: number;
 }
 
-function toSerializableCS({
-    ...cs
-}: ConsensusStatus): SerializableConsensusStatus {
+function toSerializableCS(cs: ConsensusStatus): SerializableConsensusStatus {
     const scs: SerializableConsensusStatus = {
         ...(cs as ConsensusStatusCommon),
         version: cs.version,
-        bestBlock: cs.bestBlock.toString(), // BlockHash.Type;
-        genesisBlock: cs.genesisBlock.toString(), // BlockHash.Type;
-        currentEraGenesisBlock: cs.currentEraGenesisBlock.toString(), // BlockHash.Type;
-        lastFinalizedBlock: cs.lastFinalizedBlock.toString(), // BlockHash.Type;
-        epochDuration: cs.epochDuration.toString(), // Duration.Type;
+        bestBlock: BlockHash.toHexString(cs.bestBlock), // BlockHash.Type;
+        genesisBlock: BlockHash.toHexString(cs.genesisBlock), // BlockHash.Type;
+        currentEraGenesisBlock: BlockHash.toHexString(
+            cs.currentEraGenesisBlock
+        ), // BlockHash.Type;
+        lastFinalizedBlock: BlockHash.toHexString(cs.lastFinalizedBlock), // BlockHash.Type;
+        epochDuration: cs.epochDuration.value.toString(), // Duration.Type;
         bestBlockHeight: cs.bestBlockHeight.toString(), // bigint;
-        lastFinalizedBlockHeight: cs.lastFinalizedBlock.toString(), // bigint;
+        lastFinalizedBlockHeight: cs.lastFinalizedBlockHeight.toString(), // bigint;
         finalizationCount: cs.finalizationCount.toString(), // bigint;
         blocksVerifiedCount: cs.blocksVerifiedCount.toString(), // bigint;
         blocksReceivedCount: cs.blocksReceivedCount.toString(), // bigint;
@@ -87,7 +87,7 @@ function toSerializableCS({
         case 1: {
             scs.concordiumBFTStatus = {
                 ...cs.concordiumBFTStatus,
-                currentTimeoutDuration: cs.concordiumBFTStatus.currentTimeoutDuration.toString(),
+                currentTimeoutDuration: cs.concordiumBFTStatus.currentTimeoutDuration.value.toString(),
                 currentEpoch: cs.concordiumBFTStatus.currentEpoch.toString(),
                 currentRound: cs.concordiumBFTStatus.currentRound.toString(),
                 triggerBlockTime: cs.concordiumBFTStatus.triggerBlockTime.getTime(),
@@ -98,9 +98,7 @@ function toSerializableCS({
     return scs;
 }
 
-function toOriginalCS({
-    ...scs
-}: SerializableConsensusStatus): ConsensusStatus {
+function toOriginalCS(scs: SerializableConsensusStatus): ConsensusStatus {
     const cs: ConsensusStatusCommon = {
         ...scs,
         bestBlock: BlockHash.fromHexString(scs.bestBlock), // BlockHash.Type;
@@ -111,7 +109,7 @@ function toOriginalCS({
         lastFinalizedBlock: BlockHash.fromHexString(scs.lastFinalizedBlock), // BlockHash.Type;
         epochDuration: Duration.fromMillis(BigInt(scs.epochDuration)), // Duration.Type;
         bestBlockHeight: BigInt(scs.bestBlockHeight), // bigint;
-        lastFinalizedBlockHeight: BigInt(scs.lastFinalizedBlock), // bigint;
+        lastFinalizedBlockHeight: BigInt(scs.lastFinalizedBlockHeight), // bigint;
         finalizationCount: BigInt(scs.finalizationCount), // bigint;
         blocksVerifiedCount: BigInt(scs.blocksVerifiedCount), // bigint;
         blocksReceivedCount: BigInt(scs.blocksReceivedCount), // bigint;
