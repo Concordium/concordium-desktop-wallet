@@ -1,20 +1,22 @@
 import type {
-    AccountInfo,
     AccountTransactionHeader,
     AccountTransactionSignature,
     BakerId,
     BakerPoolStatus,
-    BlockItemStatus,
-    ChainParameters,
     ConsensusStatus,
     CredentialDeploymentTransaction,
     CryptographicParameters,
     HealthCheckResponse,
-    NextAccountNonce,
-    NextUpdateSequenceNumbers,
     PassiveDelegationStatus,
     RewardStatus,
     UpdateInstruction,
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    NextUpdateSequenceNumbers,
+    NextAccountNonce,
+    ChainParameters,
+    AccountInfo,
+    BlockItemStatus,
+    TransactionHash,
 } from '@concordium/web-sdk';
 import {
     OpenDialogOptions,
@@ -93,55 +95,98 @@ export type ConsensusAndGlobalResult =
     | ConsensusAndGlobalResultSuccess
     | ConsensusAndGlobalResultFailure;
 
-type GetAccountInfo = (
-    address: string,
-    blockHash?: string
-) => Promise<AccountInfo>;
+type GetAccountInfo = (address: string, blockHash?: string) => Promise<string>;
 
+// TODO: ensure that messsages sent through exposed fuunctions are properly serialized
 export type GRPC = {
     setLocation: (address: string, port: string, useSsl: boolean) => void;
+    /**
+     * @returns stringified {@linkcode ConsensusAndGlobalResult}
+     */
     nodeConsensusAndGlobal: (
         address: string,
         port: string,
         useSsl: boolean
-    ) => Promise<ConsensusAndGlobalResult>;
+    ) => Promise<string>;
+    /**
+     * @returns stringified {@linkcode TransactionHash.Type}
+     */
     sendAccountTransaction: (
         header: AccountTransactionHeader,
         energyCost: bigint,
         payload: Buffer,
         signature: AccountTransactionSignature
     ) => Promise<string>;
+    /**
+     * @returns stringified {@linkcode TransactionHash.Type}
+     */
     sendUpdateInstruction: (
         updateInstructionTransaction: UpdateInstruction,
         signatures: Record<number, string>
     ) => Promise<string>;
+    /**
+     * @returns stringified {@linkcode TransactionHash.Type}
+     */
     sendCredentialDeploymentTransaction: (
         transaction: CredentialDeploymentTransaction,
         signatures: string[]
     ) => Promise<string>;
-    getCryptographicParameters: (
-        blockHash: string
-    ) => Promise<CryptographicParameters>;
-    getConsensusStatus: () => Promise<ConsensusStatus>;
-    getTransactionStatus: (transactionId: string) => Promise<BlockItemStatus>;
-    getNextAccountNonce: (address: string) => Promise<NextAccountNonce>;
-    getBlockChainParameters: (blockHash?: string) => Promise<ChainParameters>;
-    getNextUpdateSequenceNumbers: (
-        blockHash?: string
-    ) => Promise<NextUpdateSequenceNumbers>;
+    /**
+     * @returns stringified {@linkcode CryptographicParameters}
+     */
+    getCryptographicParameters: (blockHash: string) => Promise<string>;
+    /**
+     * @returns stringified {@linkcode ConsensusStatus}
+     */
+    getConsensusStatus: () => Promise<string>;
+    /**
+     * @returns stringified {@linkcode BlockItemStatus}
+     */
+    getTransactionStatus: (transactionId: string) => Promise<string>;
+    /**
+     * @returns stringified {@linkcode NextAccountNonce}
+     */
+    getNextAccountNonce: (address: string) => Promise<string>;
+    /**
+     * @returns stringified {@linkcode ChainParameters}
+     */
+    getBlockChainParameters: (blockHash?: string) => Promise<string>;
+    /**
+     * @returns stringified {@linkcode NextUpdateSequenceNumbers}
+     */
+    getNextUpdateSequenceNumbers: (blockHash?: string) => Promise<string>;
+    /**
+     * @returns stringified {@linkcode AccountInfo}
+     */
     getAccountInfoOfCredential: GetAccountInfo;
+    /**
+     * @returns stringified {@linkcode AccountInfo}
+     */
     getAccountInfo: GetAccountInfo;
-    getIdentityProviders: (blockHash: string) => Promise<IpInfo[]>;
-    getAnonymityRevokers: (blockHash: string) => Promise<ArInfo[]>;
-    healthCheck: () => Promise<HealthCheckResponse>;
-    getRewardStatus: (blockHash?: string) => Promise<RewardStatus>;
-    getPoolInfo: (
-        bakerId: BakerId,
-        blockHash?: string
-    ) => Promise<BakerPoolStatus>;
-    getPassiveDelegationInfo: (
-        blockHash?: string
-    ) => Promise<PassiveDelegationStatus>;
+    /**
+     * @returns stringified {@linkcode IpInfo[]}
+     */
+    getIdentityProviders: (blockHash: string) => Promise<string>;
+    /**
+     * @returns stringified {@linkcode ArInfo[]}
+     */
+    getAnonymityRevokers: (blockHash: string) => Promise<string>;
+    /**
+     * @returns stringified {@linkcode HealthCheckResponse}
+     */
+    healthCheck: () => Promise<string>;
+    /**
+     * @returns stringified {@linkcode RewardStatus}
+     */
+    getRewardStatus: (blockHash?: string) => Promise<string>;
+    /**
+     * @returns stringified {@linkcode BakerPoolStatus}
+     */
+    getPoolInfo: (bakerId: BakerId, blockHash?: string) => Promise<string>;
+    /**
+     * @returns stringified {@linkcode PassiveDelegationStatus}
+     */
+    getPassiveDelegationInfo: (blockHash?: string) => Promise<string>;
 };
 
 export type FileMethods = {

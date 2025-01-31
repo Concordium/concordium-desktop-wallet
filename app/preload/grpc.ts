@@ -21,6 +21,7 @@ import {
 import type { Buffer } from 'buffer/';
 
 import { GRPC, ConsensusAndGlobalResult } from '~/preload/preloadTypes';
+import { stringify } from '~/utils/JSONHelper';
 
 const defaultDeadlineMs = 15000;
 let client: ConcordiumGRPCClient;
@@ -106,14 +107,14 @@ const exposedMethods: GRPC = {
                 payload,
                 signature
             )
-            .then((v) => v.toString()),
+            .then(stringify),
     sendUpdateInstruction: (
         updateInstructionTransaction: UpdateInstruction,
         signatures: Record<number, string>
     ) =>
         client
             .sendUpdateInstruction(updateInstructionTransaction, signatures)
-            .then((v) => v.toString()),
+            .then(stringify),
     sendCredentialDeploymentTransaction: (
         transaction: CredentialDeploymentTransaction,
         signatures: string[]
@@ -123,45 +124,55 @@ const exposedMethods: GRPC = {
                 serializeCredentialDeploymentPayload(signatures, transaction),
                 TransactionExpiry.futureMinutes(5)
             )
-            .then((v) => v.toString()),
+            .then(stringify),
     getCryptographicParameters: (blockHash: string) =>
-        client.getCryptographicParameters(BlockHash.fromHexString(blockHash)),
-    getConsensusStatus: () => client.getConsensusStatus(),
+        client
+            .getCryptographicParameters(BlockHash.fromHexString(blockHash))
+            .then(stringify),
+    getConsensusStatus: () => client.getConsensusStatus().then(stringify),
     getTransactionStatus: (transactionHash: string) =>
-        client.getBlockItemStatus(
-            TransactionHash.fromHexString(transactionHash)
-        ),
+        client
+            .getBlockItemStatus(TransactionHash.fromHexString(transactionHash))
+            .then(stringify),
     getNextAccountNonce: (address: string) =>
-        client.getNextAccountNonce(AccountAddress.fromBase58(address)),
+        client
+            .getNextAccountNonce(AccountAddress.fromBase58(address))
+            .then(stringify),
     getBlockChainParameters: (blockHash?: string) =>
-        client.getBlockChainParameters(
-            blockHash ? BlockHash.fromHexString(blockHash) : undefined
-        ),
+        client
+            .getBlockChainParameters(
+                blockHash ? BlockHash.fromHexString(blockHash) : undefined
+            )
+            .then(stringify),
     getNextUpdateSequenceNumbers: (blockHash?: string) =>
-        client.getNextUpdateSequenceNumbers(
-            blockHash ? BlockHash.fromHexString(blockHash) : undefined
-        ),
-    getAccountInfo: (address: string, blockHash?: string) => {
-        return client.getAccountInfo(
-            AccountAddress.fromBase58(address),
-            blockHash ? BlockHash.fromHexString(blockHash) : undefined
-        );
-    },
-    getAccountInfoOfCredential: (credId: string, blockHash?: string) => {
-        return client.getAccountInfo(
-            CredentialRegistrationId.fromHexString(credId),
-            blockHash ? BlockHash.fromHexString(blockHash) : undefined
-        );
-    },
+        client
+            .getNextUpdateSequenceNumbers(
+                blockHash ? BlockHash.fromHexString(blockHash) : undefined
+            )
+            .then(stringify),
+    getAccountInfo: (address: string, blockHash?: string) =>
+        client
+            .getAccountInfo(
+                AccountAddress.fromBase58(address),
+                blockHash ? BlockHash.fromHexString(blockHash) : undefined
+            )
+            .then(stringify),
+    getAccountInfoOfCredential: (credId: string, blockHash?: string) =>
+        client
+            .getAccountInfo(
+                CredentialRegistrationId.fromHexString(credId),
+                blockHash ? BlockHash.fromHexString(blockHash) : undefined
+            )
+            .then(stringify),
     getIdentityProviders: (blockHash: string) =>
         streamToList(
             client.getIdentityProviders(BlockHash.fromHexString(blockHash))
-        ),
+        ).then(stringify),
     getAnonymityRevokers: (blockHash: string) =>
         streamToList(
             client.getAnonymityRevokers(BlockHash.fromHexString(blockHash))
-        ),
-    healthCheck: async () => client.healthCheck(),
+        ).then(stringify),
+    healthCheck: async () => client.healthCheck().then(stringify),
     // Creates a standalone GRPC client for testing the connection
     // to a node. This is used to verify that when changing connection
     // that the new node is on the same blockchain as the wallet was previously connected to.
@@ -169,26 +180,31 @@ const exposedMethods: GRPC = {
         address: string,
         port: string,
         useSsl: boolean
-    ) => {
-        return getConsensusStatusAndCryptographicParameters(
+    ) =>
+        getConsensusStatusAndCryptographicParameters(
             address,
             port,
             useSsl
-        );
-    },
+        ).then(stringify),
     getRewardStatus: (blockHash?: string) =>
-        client.getTokenomicsInfo(
-            blockHash ? BlockHash.fromHexString(blockHash) : undefined
-        ),
+        client
+            .getTokenomicsInfo(
+                blockHash ? BlockHash.fromHexString(blockHash) : undefined
+            )
+            .then(stringify),
     getPoolInfo: (bakerId: BakerId, blockHash?: string) =>
-        client.getPoolInfo(
-            bakerId,
-            blockHash ? BlockHash.fromHexString(blockHash) : undefined
-        ),
+        client
+            .getPoolInfo(
+                bakerId,
+                blockHash ? BlockHash.fromHexString(blockHash) : undefined
+            )
+            .then(stringify),
     getPassiveDelegationInfo: (blockHash?: string) =>
-        client.getPassiveDelegationInfo(
-            blockHash ? BlockHash.fromHexString(blockHash) : undefined
-        ),
+        client
+            .getPassiveDelegationInfo(
+                blockHash ? BlockHash.fromHexString(blockHash) : undefined
+            )
+            .then(stringify),
 };
 
 export default exposedMethods;

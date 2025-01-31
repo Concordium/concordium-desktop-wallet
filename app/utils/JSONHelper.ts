@@ -1,18 +1,122 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import {
+    AccountAddress,
+    BlockHash,
+    CcdAmount,
+    ContractAddress,
+    ContractName,
+    CredentialRegistrationId,
+    DataBlob,
+    Duration,
+    Energy,
+    EntrypointName,
+    InitName,
+    ModuleReference,
+    Parameter,
+    ReceiveName,
+    ReturnValue,
+    SequenceNumber,
+    Timestamp,
+    TransactionExpiry,
+    TransactionHash,
+} from '@concordium/web-sdk';
+
 const types = {
     BigInt: 'bigint',
     Date: 'date',
+    AccountAddress: 'accountAddress',
+    BlockHash: 'blockHash',
+    CcdAmount: 'ccdAmount',
+    ContractAddress: 'contractAddress',
+    ContractName: 'contractName',
+    CredentialRegistrationId: 'credentialRegistrationId',
+    DataBlob: 'dataBlob',
+    Duration: 'duration',
+    Energy: 'energy',
+    EntrypointName: 'entrypointName',
+    InitName: 'initName',
+    ModuleReference: 'moduleReference',
+    Parameter: 'parameter',
+    ReceiveName: 'receiveName',
+    ReturnValue: 'returnValue',
+    SequenceNumber: 'sequenceNumber',
+    Timestamp: 'timestamp',
+    TransactionExpiry: 'transactionExpiry',
+    TransactionHash: 'transactionHash',
 };
 
-function replacer(this: any, k: string, v: any) {
-    if (typeof v === types.BigInt) {
-        return { '@type': types.BigInt, value: v.toString() };
+function replacer(this: any, key: string) {
+    const value = this[key];
+
+    if (typeof value === types.BigInt) {
+        return { '@type': types.BigInt, value: value.toString() };
     }
-    if (this[k] instanceof Date) {
-        return { '@type': types.Date, value: v };
+    if (value instanceof Date) {
+        return { '@type': types.Date, value: value.toJSON() };
     }
-    return v;
+
+    // Handle concordium domain types
+    // eslint-disable-next-line default-case
+    switch (true) {
+        case AccountAddress.instanceOf(value):
+            return { '@type': types.AccountAddress, value: value.toJSON() };
+        case BlockHash.instanceOf(value):
+            return { '@type': types.BlockHash, value: value.toJSON() };
+        case CcdAmount.instanceOf(value):
+            return { '@type': types.CcdAmount, value: value.toJSON() };
+        case ContractAddress.instanceOf(value):
+            return {
+                '@type': types.ContractAddress,
+                value: ContractAddress.toSerializable(value),
+            };
+        case ContractName.instanceOf(value):
+            return { '@type': types.ContractName, value: value.toJSON() };
+        case CredentialRegistrationId.instanceOf(value):
+            return {
+                '@type': types.CredentialRegistrationId,
+                value: value.toJSON(),
+            };
+        case value instanceof DataBlob:
+            return { '@type': types.DataBlob, value: value.toJSON() };
+        case Duration.instanceOf(value):
+            return {
+                '@type': types.Duration,
+                value: Duration.toSerializable(value),
+            };
+        case Energy.instanceOf(value):
+            return {
+                '@type': types.Energy,
+                value: Energy.toSerializable(value),
+            };
+        case EntrypointName.instanceOf(value):
+            return { '@type': types.EntrypointName, value: value.toJSON() };
+        case InitName.instanceOf(value):
+            return { '@type': types.InitName, value: value.toJSON() };
+        case ModuleReference.instanceOf(value):
+            return { '@type': types.ModuleReference, value: value.toJSON() };
+        case Parameter.instanceOf(value):
+            return { '@type': types.Parameter, value: value.toJSON() };
+        case ReceiveName.instanceOf(value):
+            return { '@type': types.ReceiveName, value: value.toJSON() };
+        case ReturnValue.instanceOf(value):
+            return { '@type': types.ReturnValue, value: value.toJSON() };
+        case SequenceNumber.instanceOf(value):
+            return { '@type': types.SequenceNumber, value: value.toJSON() };
+        case Timestamp.instanceOf(value):
+            return {
+                '@type': types.Timestamp,
+                value: Timestamp.toSerializable(value),
+            };
+        case TransactionExpiry.instanceOf(value):
+            return {
+                '@type': types.TransactionExpiry,
+                value: TransactionExpiry.toSerializable(value),
+            };
+        case TransactionHash.instanceOf(value):
+            return { '@type': types.TransactionHash, value: value.toJSON() };
+    }
+    return value;
 }
 
 export function stringify(input: any) {
@@ -30,6 +134,45 @@ export function parse(input: string | undefined) {
                     return BigInt(v.value);
                 case types.Date:
                     return new Date(v.value);
+                // concordium domain types
+                case types.AccountAddress:
+                    return AccountAddress.fromJSON(v.value);
+                case types.BlockHash:
+                    return BlockHash.fromJSON(v.value);
+                case types.CcdAmount:
+                    return CcdAmount.fromJSON(v.value);
+                case types.ContractAddress:
+                    return ContractAddress.fromSerializable(v.value);
+                case types.ContractName:
+                    return ContractName.fromJSON(v.value);
+                case types.CredentialRegistrationId:
+                    return CredentialRegistrationId.fromJSON(v.value);
+                case types.DataBlob:
+                    return DataBlob.fromJSON(v.value);
+                case types.Duration:
+                    return Duration.fromSerializable(v.value);
+                case types.Energy:
+                    return Energy.fromSerializable(v.value);
+                case types.EntrypointName:
+                    return EntrypointName.fromJSON(v.value);
+                case types.InitName:
+                    return InitName.fromJSON(v.value);
+                case types.ModuleReference:
+                    return ModuleReference.fromJSON(v.value);
+                case types.Parameter:
+                    return Parameter.fromJSON(v.value);
+                case types.ReceiveName:
+                    return ReceiveName.fromJSON(v.value);
+                case types.ReturnValue:
+                    return ReturnValue.fromJSON(v.value);
+                case types.SequenceNumber:
+                    return SequenceNumber.fromJSON(v.value);
+                case types.Timestamp:
+                    return Timestamp.fromSerializable(v.value);
+                case types.TransactionExpiry:
+                    return TransactionExpiry.fromSerializable(v.value);
+                case types.TransactionHash:
+                    return TransactionHash.fromJSON(v.value);
                 default:
                     return v;
             }

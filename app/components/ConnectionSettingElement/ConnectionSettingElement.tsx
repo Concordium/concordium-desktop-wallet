@@ -15,6 +15,7 @@ import { displayTargetNet, getTargetNet, Net } from '~/utils/ConfigHelper';
 import genesisBlocks from '~/constants/genesis.json';
 
 import styles from './ConnectionSettingElement.module.scss';
+import { nodeConsensusAndGlobal } from '~/node/nodeRequests';
 
 interface Props {
     displayText: string;
@@ -50,11 +51,7 @@ async function getConsensusAndGlobalFromNode(
     port: string,
     useSsl: boolean
 ) {
-    const result = await window.grpc.nodeConsensusAndGlobal(
-        address,
-        port,
-        useSsl
-    );
+    const result = await nodeConsensusAndGlobal(address, port, useSsl);
     if (!result.successful) {
         throw new Error(
             'The node consensus status and cryptographic parameters could not be retrieved'

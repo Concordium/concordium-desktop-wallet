@@ -48,6 +48,7 @@ import { getKeyExportType } from '~/utils/identityHelpers';
 import { FinalPageLocationState } from '~/components/Transfers/FinalPage';
 
 import styles from './SubmitTransaction.module.scss';
+import { TransactionHash } from '@concordium/web-sdk';
 
 export interface SubmitTransactionLocationState<
     ConfirmedState = FinalPageLocationState
@@ -226,9 +227,8 @@ export default function SubmitTransaction({ location }: Props) {
 
         let transactionHash: string;
         try {
-            transactionHash = await sendAccountTransaction(
-                transaction,
-                signatureStructured
+            transactionHash = TransactionHash.toHexString(
+                await sendAccountTransaction(transaction, signatureStructured)
             );
         } catch (e) {
             window.log.error(
