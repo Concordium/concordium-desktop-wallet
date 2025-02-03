@@ -19,6 +19,7 @@ import {
     BakerPoolStatus,
     PassiveDelegationStatus,
     HealthCheckResponse,
+    NextAccountNonce,
 } from '@concordium/web-sdk';
 import type { Buffer } from 'buffer/';
 
@@ -123,7 +124,7 @@ export async function sendUpdateInstruction(
 
 export const getNextAccountNonce = throwIfUndefined(
     parsed<
-        SequenceNumber.Type,
+        NextAccountNonce,
         Parameters<typeof window.grpc.getNextAccountNonce>
     >(window.grpc.getNextAccountNonce),
     (address) => `Unable to fetch next nonce on address: ${address}`

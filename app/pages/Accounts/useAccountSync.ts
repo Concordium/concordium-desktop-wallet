@@ -105,7 +105,7 @@ export default function useAccountSync(onError: (message: string) => void) {
         }
         return () => {};
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [accountInfo?.accountAmount]);
+    }, [accountInfo?.accountAmount.microCcdAmount]);
 
     // Re-load transactions entirely from the wallet proxy if:
     // - the filter is changed

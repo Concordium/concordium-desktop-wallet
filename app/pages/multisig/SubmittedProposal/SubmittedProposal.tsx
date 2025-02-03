@@ -128,7 +128,8 @@ const SubmittedProposalView = withChainData<Props>(
                 }
             } else if (instanceOfAccountTransactionWithSignature(transaction)) {
                 const nextNonce = await getNextAccountNonce(transaction.sender);
-                const difference = nextNonce.value - BigInt(transaction.nonce);
+                const difference =
+                    nextNonce.nonce.value - BigInt(transaction.nonce);
 
                 if (difference === 0n) {
                     submitted = await sendAccountTransaction(

@@ -201,9 +201,9 @@ export default function MultiSigAccountTransactionFlow<
             if (values.account === undefined) {
                 return undefined;
             }
-            const { value: n } = await getNextAccountNonce(
-                values.account?.address
-            );
+            const {
+                nonce: { value: n },
+            } = await getNextAccountNonce(values.account?.address);
             return n;
         },
         () => setShowError(true),
