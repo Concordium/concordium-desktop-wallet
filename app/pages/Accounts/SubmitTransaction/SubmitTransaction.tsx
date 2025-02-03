@@ -4,6 +4,8 @@ import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect } from 'react-router';
 import type { Buffer } from 'buffer/';
+import { TransactionHash } from '@concordium/web-sdk';
+
 import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
 import { parse } from '~/utils/JSONHelper';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
@@ -48,7 +50,6 @@ import { getKeyExportType } from '~/utils/identityHelpers';
 import { FinalPageLocationState } from '~/components/Transfers/FinalPage';
 
 import styles from './SubmitTransaction.module.scss';
-import { TransactionHash } from '@concordium/web-sdk';
 
 export interface SubmitTransactionLocationState<
     ConfirmedState = FinalPageLocationState

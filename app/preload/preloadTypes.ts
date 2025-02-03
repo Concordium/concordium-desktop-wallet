@@ -2,21 +2,25 @@ import type {
     AccountTransactionHeader,
     AccountTransactionSignature,
     BakerId,
-    BakerPoolStatus,
     ConsensusStatus,
     CredentialDeploymentTransaction,
     CryptographicParameters,
+    // Referenced in jsdoc
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    BakerPoolStatus,
     HealthCheckResponse,
     PassiveDelegationStatus,
     RewardStatus,
     UpdateInstruction,
-    /* eslint-disable @typescript-eslint/no-unused-vars */
     NextUpdateSequenceNumbers,
     NextAccountNonce,
     ChainParameters,
     AccountInfo,
     BlockItemStatus,
     TransactionHash,
+    IpInfo,
+    ArInfo,
+    /* eslint-enable @typescript-eslint/no-unused-vars */
 } from '@concordium/web-sdk';
 import {
     OpenDialogOptions,
@@ -50,8 +54,6 @@ import {
     TransactionOrder,
     DecryptedAmount,
     CredentialNumberPrfKey,
-    IpInfo,
-    ArInfo,
     IdentityVersion,
     DecryptedTransferTransaction,
 } from '~/utils/types';

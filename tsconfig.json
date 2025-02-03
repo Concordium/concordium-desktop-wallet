@@ -27,7 +27,6 @@
     },
     "exclude": [
         "scripts",
-        "test",
         "release",
         "app/main.dev.js",
         "app/preload.dev.js",
