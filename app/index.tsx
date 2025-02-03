@@ -1,6 +1,5 @@
 import React from 'react';
 import { render } from 'react-dom';
-import { AppContainer as ReactHotAppContainer } from 'react-hot-loader';
 import { push } from 'connected-react-router';
 import { UpdateInfo } from 'electron-updater';
 
@@ -40,14 +39,10 @@ try {
             triggerUpdateNotification(store.dispatch, info.version, automatic)
     );
 
-    const AppContainer = ReactHotAppContainer;
-
     render(
-        <AppContainer>
-            <ErrorBoundary>
-                <Root store={store} history={history} />
-            </ErrorBoundary>
-        </AppContainer>,
+        <ErrorBoundary>
+            <Root store={store} history={history} />
+        </ErrorBoundary>,
         document.getElementById('root')
     );
 } catch (error) {
