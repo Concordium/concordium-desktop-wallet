@@ -10,6 +10,9 @@ on:
     # Allows us to run the workflow manually from the Actions tab
     workflow_dispatch:
 
+env:
+    NODE_VERSION: 18
+
 jobs:
     dependencies:
         runs-on: ubuntu-20.04
@@ -45,7 +48,7 @@ jobs:
             - uses: actions/setup-node@v2
               if: steps.fetch-dependencies.outputs.cache-hit != 'true'
               with:
-                  node-version: '16.20.2'
+                  node-version: ${{ env.NODE_VERSION }}
 
             - name: Download dependencies
               if: steps.fetch-dependencies.outputs.cache-hit != 'true'
@@ -61,7 +64,7 @@ jobs:
                   submodules: 'recursive'
             - uses: actions/setup-node@v2
               with:
-                  node-version: '16.20.2'
+                  node-version: ${{ env.NODE_VERSION }}
 
             - name: Get cached dependencies
               uses: actions/cache@v2
@@ -95,7 +98,7 @@ jobs:
                   submodules: 'recursive'
             - uses: actions/setup-node@v2
               with:
-                  node-version: '16.20.2'
+                  node-version: ${{ env.NODE_VERSION }}
 
             - name: Get cached dependencies
               uses: actions/cache@v2
@@ -129,7 +132,7 @@ jobs:
                   submodules: 'recursive'
             - uses: actions/setup-node@v2
               with:
-                  node-version: '16.20.2'
+                  node-version: ${{ env.NODE_VERSION }}
 
             - name: Get cached dependencies
               uses: actions/cache@v2
