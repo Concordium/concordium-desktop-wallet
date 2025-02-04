@@ -35,10 +35,13 @@ import {
     TransactionFilter,
     Hex,
     IdentityVersion,
+    AccountExtras,
+    SuspensionStatus,
 } from '../utils/types';
 import { createAccount, isValidAddress } from '../utils/accountHelpers';
 import {
     getAccountInfoOfAddress,
+    getPoolStatusLatest,
     getStatus,
     getlastFinalizedBlockHash,
 } from '../node/nodeHelpers';
@@ -51,6 +54,7 @@ import {
     getAccountInfo,
     getAccountInfoOfCredential,
 } from '~/node/nodeRequests';
+import { AccountInfoType, DelegationTargetType } from '@concordium/web-sdk';
 
 export interface AccountState {
     simpleView: boolean;
@@ -59,6 +63,7 @@ export interface AccountState {
     chosenAccountAddress: string;
     accountChanged: boolean;
     defaultAccount: string | undefined;
+    accountExtras: Record<string, AccountExtras>;
 }
 
 type AccountByIndexTuple = [number, Account];
@@ -110,6 +115,7 @@ const initialState: AccountState = {
     chosenAccountAddress: '',
     accountChanged: true,
     defaultAccount: undefined,
+    accountExtras: {},
 };
 
 const accountsSlice = createSlice({
@@ -146,6 +152,20 @@ const accountsSlice = createSlice({
             if (input.payload) {
                 setChosenAccountAddress(state, input.payload);
             }
+        },
+        setSuspensionStatus(
+            state,
+            input: PayloadAction<{
+                address: string;
+                status: AccountExtras['suspensionStatus'];
+            }>
+        ) {
+            if (state.accountExtras[input.payload.address] === undefined) {
+                state.accountExtras[input.payload.address] = {};
+            }
+
+            state.accountExtras[input.payload.address].suspensionStatus =
+                input.payload.status;
         },
         addToAccountInfos: (
             state,
@@ -234,7 +254,11 @@ export const {
     previousConfirmedAccount,
 } = accountsSlice.actions;
 
-const { updateAccounts, updateAccountFields } = accountsSlice.actions;
+const {
+    updateAccounts,
+    updateAccountFields,
+    setSuspensionStatus,
+} = accountsSlice.actions;
 
 function updateAccountInfoEntry(
     dispatch: Dispatch,
@@ -427,6 +451,28 @@ async function updateAccountFromAccountInfo(
         );
     }
 
+    let validatorId: bigint | undefined;
+    if (accountInfo.type === AccountInfoType.Baker) {
+        validatorId = accountInfo.accountBaker.bakerId;
+    } else if (
+        accountInfo.type === AccountInfoType.Delegator &&
+        accountInfo.accountDelegation.delegationTarget.delegateType ===
+            DelegationTargetType.Baker
+    ) {
+        validatorId = accountInfo.accountDelegation.delegationTarget.bakerId;
+    }
+
+    if (validatorId !== undefined) {
+        const poolStatus = await getPoolStatusLatest(validatorId);
+        let status: SuspensionStatus | undefined;
+        if (poolStatus.isSuspended) {
+            status = 'suspended';
+        } else if (poolStatus.currentPaydayStatus?.isPrimedForSuspension) {
+            status = 'primed';
+        }
+
+        dispatch(setSuspensionStatus({ address: account.address, status }));
+    }
     return updateCredentialsStatus(dispatch, account.address, accountInfo);
 }
 

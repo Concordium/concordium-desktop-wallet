@@ -228,6 +228,11 @@ export interface Account {
     isInitial: boolean;
 }
 
+export type SuspensionStatus = 'primed' | 'suspended';
+export type AccountExtras = {
+    suspensionStatus?: SuspensionStatus;
+};
+
 export interface SimpleTransferPayload {
     amount: string;
     toAddress: string;

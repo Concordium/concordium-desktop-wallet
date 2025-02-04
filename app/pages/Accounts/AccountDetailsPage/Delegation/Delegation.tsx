@@ -1,7 +1,7 @@
 import {
     AccountInfo,
     AccountInfoDelegator,
-    isDelegatorAccount,
+    AccountInfoType,
 } from '@concordium/web-sdk';
 
 import React from 'react';
@@ -46,7 +46,7 @@ interface Props {
 }
 
 export default function Delegation({ account, accountInfo }: Props) {
-    const isDelegating = isDelegatorAccount(accountInfo);
+    const isDelegating = accountInfo.type === AccountInfoType.Delegator;
     const { pathname } = useLocation();
 
     if (!pathname.startsWith(routes.ACCOUNTS_ADD_DELEGATION) && !isDelegating) {

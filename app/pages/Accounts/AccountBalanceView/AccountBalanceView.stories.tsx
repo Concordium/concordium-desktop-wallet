@@ -35,6 +35,7 @@ const Template: Story<{ account: Account; accountInfo: AccountInfo }> = ({
         chosenAccountAddress: account.address,
         accountChanged: true,
         defaultAccount: account.address,
+        accountExtras: {},
     };
 
     return (
