@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+ -  Account validation/delegation overview now shows if the target pool is suspended or primed for suspension
+ -  A notification is shown for accounts validating/delegating to a pool which is suspended
+
 ## 1.7.4
 
 ### Changed
