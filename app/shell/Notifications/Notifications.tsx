@@ -2,8 +2,10 @@ import { AnimatePresence } from 'framer-motion';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Notification from '~/components/Notification';
-import AutoUpdateNotification from '~/components/AutoUpdateNotification';
-import ManualUpdateNotification from '~/components/ManualUpdateNotification';
+import AutoUpdateNotification from '~/components/Notification/AutoUpdateNotification';
+import ManualUpdateNotification from '~/components/Notification/ManualUpdateNotification';
+import ClosingBakerPoolNotification from '~/components/Notification/ClosingBakerPoolNotification';
+import SuspendedValidatorNotification from '~/components/Notification/SuspendedValidatorNotification';
 import Portal from '~/cross-app-components/Portal';
 import {
     NotificationLevel,
@@ -12,7 +14,6 @@ import {
 import { RootState } from '~/store/store';
 
 import styles from './Notifications.module.scss';
-import ClosingBakerPoolNotification from '~/components/ClosingBakerPoolNotification';
 
 export default function Notifications() {
     const { notifications } = useSelector((s: RootState) => s.notification);
@@ -52,6 +53,14 @@ export default function Notifications() {
                                     key={n.id}
                                     onClose={() => handleClose(n.id)}
                                     accountName={n.accountName}
+                                />
+                            );
+                        case NotificationLevel.SuspendedValidatorPool:
+                            return (
+                                <SuspendedValidatorNotification
+                                    key={n.id}
+                                    onClose={() => handleClose(n.id)}
+                                    accountAddress={n.accountAddress}
                                 />
                             );
                         default:

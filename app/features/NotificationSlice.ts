@@ -1,4 +1,10 @@
-import { createSlice, Dispatch, PayloadAction } from '@reduxjs/toolkit';
+import {
+    createSlice,
+    Dispatch,
+    Middleware,
+    PayloadAction,
+} from '@reduxjs/toolkit';
+import type { RootState } from '~/store/store';
 
 export enum NotificationLevel {
     Info = 'info',
@@ -6,6 +12,7 @@ export enum NotificationLevel {
     ManualUpdate = 'manual-update',
     AutoUpdate = 'auto-update',
     ClosingBakerPool = 'closing-baker-pool',
+    SuspendedValidatorPool = 'suspended-validator-pool',
 }
 
 let nextId = 0;
@@ -24,12 +31,18 @@ export interface ClosingBakerNotification extends NotificationBase {
     accountName: string;
 }
 
+export interface SuspendedValidatorNotification extends NotificationBase {
+    level: NotificationLevel.SuspendedValidatorPool;
+    accountAddress: string;
+}
+
 export interface Notification extends NotificationBase {
     level: Exclude<
         NotificationLevel,
         | NotificationLevel.ManualUpdate
         | NotificationLevel.AutoUpdate
         | NotificationLevel.ClosingBakerPool
+        | NotificationLevel.SuspendedValidatorPool
     >;
     message: string;
 }
@@ -39,6 +52,7 @@ interface NotificationSliceState {
         | UpdateNotification
         | Notification
         | ClosingBakerNotification
+        | SuspendedValidatorNotification
     )[];
 }
 
@@ -51,7 +65,10 @@ const { actions, reducer } = createSlice({
         pushNotification(
             state,
             action: PayloadAction<
-                Notification | UpdateNotification | ClosingBakerNotification
+                | Notification
+                | UpdateNotification
+                | ClosingBakerNotification
+                | SuspendedValidatorNotification
             >
         ) {
             state.notifications.push({ ...action.payload });
@@ -100,6 +117,20 @@ export function triggerClosingBakerPoolNotification(
     nextId += 1;
 }
 
+export function triggerSuspendedValidatorPoolNotification(
+    dispatch: Dispatch,
+    accountAddress: string
+) {
+    dispatch(
+        actions.pushNotification({
+            level: NotificationLevel.SuspendedValidatorPool,
+            id: nextId,
+            accountAddress,
+        })
+    );
+    nextId += 1;
+}
+
 /**
  * Display notifications of different types.
  *
@@ -127,3 +158,23 @@ export function pushNotification(
 
     return close;
 }
+
+export const notificationsMiddleware: Middleware = (store) => (next) => (
+    action
+) => {
+    const prevState: RootState = store.getState();
+    const result = next(action);
+    const nextState: RootState = store.getState();
+
+    Object.entries(nextState.accounts.accountExtras)
+        .filter(
+            ([address, value]) =>
+                value !== prevState.accounts.accountExtras[address] &&
+                value.suspensionStatus === 'suspended'
+        )
+        .forEach(([address]) => {
+            triggerSuspendedValidatorPoolNotification(store.dispatch, address);
+        });
+
+    return result;
+};

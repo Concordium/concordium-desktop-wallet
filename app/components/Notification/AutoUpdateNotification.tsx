@@ -17,7 +17,7 @@ import { NotificationLevel } from '~/features/NotificationSlice';
 import Loading from '~/cross-app-components/Loading';
 
 import Notification from './Notification';
-import Countdown from './Countdown';
+import Countdown from '../Countdown';
 
 enum UpdateStatus {
     Available,

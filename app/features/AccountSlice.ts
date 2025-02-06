@@ -1,5 +1,18 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { LOCATION_CHANGE } from 'connected-react-router';
+import { AccountInfoType, DelegationTargetType } from '@concordium/web-sdk';
+
+import { getCredentialsOfAccount } from '~/database/CredentialDao';
+import { hasPendingTransactions } from '~/database/TransactionDao';
+import { accountSimpleView, defaultAccount } from '~/database/PreferencesDao';
+import { stringify, parse } from '~/utils/JSONHelper';
+import { getCredId } from '~/utils/credentialHelper';
+import { throwLoggedError, mapRecordValues } from '~/utils/basicHelpers';
+import {
+    getAccountInfo,
+    getAccountInfoOfCredential,
+} from '~/node/nodeRequests';
+
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
 // eslint-disable-next-line import/no-cycle
@@ -18,7 +31,6 @@ import {
     removeAccount as removeAccountFromDatabase,
     findAccounts,
 } from '../database/AccountDao';
-import { getCredentialsOfAccount } from '~/database/CredentialDao';
 import {
     decryptAmounts,
     getAddressFromCredentialId,
@@ -36,7 +48,6 @@ import {
     Hex,
     IdentityVersion,
     AccountExtras,
-    SuspensionStatus,
 } from '../utils/types';
 import { createAccount, isValidAddress } from '../utils/accountHelpers';
 import {
@@ -45,16 +56,6 @@ import {
     getStatus,
     getlastFinalizedBlockHash,
 } from '../node/nodeHelpers';
-import { hasPendingTransactions } from '~/database/TransactionDao';
-import { accountSimpleView, defaultAccount } from '~/database/PreferencesDao';
-import { stringify, parse } from '~/utils/JSONHelper';
-import { getCredId } from '~/utils/credentialHelper';
-import { throwLoggedError, mapRecordValues } from '~/utils/basicHelpers';
-import {
-    getAccountInfo,
-    getAccountInfoOfCredential,
-} from '~/node/nodeRequests';
-import { AccountInfoType, DelegationTargetType } from '@concordium/web-sdk';
 
 export interface AccountState {
     simpleView: boolean;
@@ -222,7 +223,10 @@ export const initialAccountNameSelector = (identityId: number) => (
     )?.name;
 
 export const accountsInfoSelector = (state: RootState) =>
-    mapRecordValues(state.accounts.accountsInfo, parse);
+    mapRecordValues<string, string, AccountInfo>(
+        state.accounts.accountsInfo,
+        parse
+    );
 
 export const chosenAccountSelector = (state: RootState) =>
     state.accounts.accounts.find(
@@ -464,14 +468,21 @@ async function updateAccountFromAccountInfo(
 
     if (validatorId !== undefined) {
         const poolStatus = await getPoolStatusLatest(validatorId);
-        let status: SuspensionStatus | undefined;
         if (poolStatus.isSuspended) {
-            status = 'suspended';
+            dispatch(
+                setSuspensionStatus({
+                    address: account.address,
+                    status: 'suspended',
+                })
+            );
         } else if (poolStatus.currentPaydayStatus?.isPrimedForSuspension) {
-            status = 'primed';
+            dispatch(
+                setSuspensionStatus({
+                    address: account.address,
+                    status: 'primed',
+                })
+            );
         }
-
-        dispatch(setSuspensionStatus({ address: account.address, status }));
     }
     return updateCredentialsStatus(dispatch, account.address, accountInfo);
 }

@@ -8,6 +8,7 @@ import { Provider } from 'react-redux';
 
 /* eslint-disable import/no-cycle */
 import createRootReducer from './rootReducer';
+import { notificationsMiddleware } from '~/features/NotificationSlice';
 /* eslint-enable import/no-cycle */
 
 export const history = createBrowserHistory({
@@ -17,7 +18,7 @@ const rootReducer = createRootReducer(history);
 export type RootState = ReturnType<typeof rootReducer>;
 
 const router = routerMiddleware(history);
-const middleware = [...getDefaultMiddleware(), router];
+const middleware = [...getDefaultMiddleware(), router, notificationsMiddleware];
 
 const excludeLoggerEnvs = ['test', 'production'];
 const shouldIncludeLogger = !excludeLoggerEnvs.includes(

@@ -178,3 +178,8 @@ export function getPublicAccountAmounts(
 export function getAmountAtDisposal(accountInfo: AccountInfo): bigint {
     return getPublicAccountAmounts(accountInfo).atDisposal;
 }
+
+/** Format an account address for display by showing the 4 first and last characters in the base58check representation. */
+export function displaySplitAddress(address: string) {
+    return `${address.slice(0, 4)}...${address.slice(-4)}`;
+}
