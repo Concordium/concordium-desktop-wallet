@@ -1,7 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 
-import { AccountAddress, isAlias } from '@concordium/web-sdk';
+import { AccountAddress } from '@concordium/web-sdk';
 
 import { AddressBookEntry } from '~/utils/types';
 import AddressBookEntryButton from '~/components/AddressBookEntryButton';
@@ -28,9 +28,12 @@ export default function PickRecipient({
 }: Props) {
     let filter;
     if (senderAddress) {
-        const senderAccountAddress = new AccountAddress(senderAddress);
+        const senderAccountAddress = AccountAddress.fromBase58(senderAddress);
         filter = (entry: AddressBookEntry) =>
-            !isAlias(senderAccountAddress, new AccountAddress(entry.address));
+            !AccountAddress.isAlias(
+                senderAccountAddress,
+                AccountAddress.fromBase58(entry.address)
+            );
     }
 
     return (

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React from 'react';
 import { NextUpdateSequenceNumbers } from '@concordium/web-sdk';
 import TimeoutParametersView from '~/pages/multisig/updates/TimeoutParameters/TimeoutParametersView';
@@ -50,12 +51,12 @@ export default class TimeoutParametersHandler
         const payload = {
             timeoutBase: fields.timeoutBase,
             timeoutIncrease: getReducedFraction({
-                numerator: BigInt(fields.timeoutIncrease.numerator),
-                denominator: BigInt(fields.timeoutIncrease.denominator),
+                numerator: BigInt(fields.timeoutIncrease.numerator!),
+                denominator: BigInt(fields.timeoutIncrease.denominator!),
             }),
             timeoutDecrease: getReducedFraction({
-                numerator: BigInt(fields.timeoutDecrease.numerator),
-                denominator: BigInt(fields.timeoutDecrease.denominator),
+                numerator: BigInt(fields.timeoutDecrease.numerator!),
+                denominator: BigInt(fields.timeoutDecrease.denominator!),
             }),
         };
 

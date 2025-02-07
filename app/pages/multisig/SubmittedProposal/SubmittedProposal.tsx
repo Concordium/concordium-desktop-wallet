@@ -129,7 +129,7 @@ const SubmittedProposalView = withChainData<Props>(
             } else if (instanceOfAccountTransactionWithSignature(transaction)) {
                 const nextNonce = await getNextAccountNonce(transaction.sender);
                 const difference =
-                    BigInt(nextNonce.nonce) - BigInt(transaction.nonce);
+                    nextNonce.nonce.value - BigInt(transaction.nonce);
 
                 if (difference === 0n) {
                     submitted = await sendAccountTransaction(
@@ -156,7 +156,9 @@ const SubmittedProposalView = withChainData<Props>(
                     setShowError({
                         show: true,
                         header: 'Incorrect nonce',
-                        content: `Transaction has nonce ${transaction.nonce}, but the next expected nonce is ${nextNonce.nonce}.`,
+                        content: `Transaction has nonce ${
+                            transaction.nonce
+                        }, but the next expected nonce is ${nextNonce.toString()}.`,
                     });
                     return;
                 }

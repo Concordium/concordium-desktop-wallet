@@ -11,7 +11,7 @@ const fs = require('fs');
 const webpack = require('webpack');
 const chalk = require('chalk');
 const { merge } = require('webpack-merge');
-const { spawn, execSync } = require('child_process');
+const { execSync } = require('child_process');
 const { baseConfig, assetsConfig, stylesConfig } = require('./partials');
 const CheckNodeEnv = require('../internals/scripts/CheckNodeEnv');
 const { fromRoot } = require('./helpers/pathHelpers');
@@ -52,7 +52,6 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(false), {
     entry: [
         'core-js',
         'regenerator-runtime/runtime',
-        'webpack/hot/only-dev-server',
         require.resolve('../app/index.tsx'),
     ],
 
@@ -69,9 +68,6 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(false), {
     },
 
     resolve: {
-        alias: {
-            'react-dom': '@hot-loader/react-dom',
-        },
         fallback: {
             crypto: require.resolve('crypto-browserify'),
             stream: require.resolve('stream-browserify'),
@@ -110,7 +106,7 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(false), {
     devServer: {
         port,
         compress: true,
-        hot: true,
+        hot: false,
         headers: { 'Access-Control-Allow-Origin': '*' },
         static: {
             publicPath,
@@ -118,18 +114,6 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(false), {
         historyApiFallback: {
             verbose: true,
             disableDotRule: false,
-        },
-        onBeforeSetupMiddleware() {
-            if (process.env.START_HOT) {
-                console.log('Starting Main Process...');
-                spawn('npm', ['run', 'start:dev'], {
-                    shell: true,
-                    env: process.env,
-                    stdio: 'inherit',
-                })
-                    .on('close', (code) => process.exit(code))
-                    .on('error', (spawnError) => console.error(spawnError));
-            }
         },
     },
 });

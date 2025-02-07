@@ -1,23 +1,14 @@
 import {
     AccountInfo,
     AccountInfoBaker,
-    isBakerAccount,
+    AccountInfoType,
 } from '@concordium/web-sdk';
 
 import React from 'react';
 import { Redirect, Route, Switch, useLocation } from 'react-router';
-import { LocationDescriptorObject } from 'history';
 import { Account } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import ButtonNavLink from '~/components/ButtonNavLink';
-import { StakeSettings } from '~/utils/transactionFlows/configureBaker';
-import { useProtocolVersion } from '~/utils/dataHooks';
-import { hasDelegationProtocol } from '~/utils/protocolVersion';
-import OldAddBaker from './OldBakerFlows/AddBaker';
-import OldRemoveBaker from './OldBakerFlows/RemoveBaker';
-import OldUpdateBakerKeys from './OldBakerFlows/UpdateBakerKeys';
-import OldUpdateBakerStake from './OldBakerFlows/UpdateBakerStake';
-import OldUpdateBakerRestake from './OldBakerFlows/UpdateBakerRestake';
 import AddBaker from './AddBaker';
 import RemoveBaker from './RemoveBaker';
 import UpdateBakerStake from './UpdateBakerStake';
@@ -25,11 +16,7 @@ import UpdateBakerPool from './UpdateBakerPool';
 import UpdateBakerKeys from './UpdateBakerKeys';
 import StakingDetails from '../StakingDetails';
 
-interface ActionsProps {
-    isDelegationPV: boolean;
-}
-
-function Actions({ isDelegationPV }: ActionsProps) {
+function Actions() {
     return (
         <>
             <ButtonNavLink
@@ -38,21 +25,12 @@ function Actions({ isDelegationPV }: ActionsProps) {
             >
                 Update validator stake
             </ButtonNavLink>
-            {isDelegationPV ? (
-                <ButtonNavLink
-                    className="mB20 flex width100"
-                    to={routes.ACCOUNTS_UPDATE_BAKER_POOL}
-                >
-                    Update staking pool
-                </ButtonNavLink>
-            ) : (
-                <ButtonNavLink
-                    className="mB20 flex width100"
-                    to={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}
-                >
-                    Update validator restake earnings
-                </ButtonNavLink>
-            )}
+            <ButtonNavLink
+                className="mB20 flex width100"
+                to={routes.ACCOUNTS_UPDATE_BAKER_POOL}
+            >
+                Update staking pool
+            </ButtonNavLink>
             <ButtonNavLink
                 className="mB20 flex width100"
                 to={routes.ACCOUNTS_UPDATE_BAKER_KEYS}
@@ -76,10 +54,8 @@ interface Props {
 }
 
 export default function Baking({ account, accountInfo }: Props) {
-    const pv = useProtocolVersion(true);
     const { pathname } = useLocation();
-    const isDelegationPV = pv !== undefined && hasDelegationProtocol(pv);
-    const isBaker = isBakerAccount(accountInfo);
+    const isBaker = accountInfo.type === AccountInfoType.Baker;
 
     if (!pathname.startsWith(routes.ACCOUNTS_ADD_BAKER) && !isBaker) {
         return <Redirect to={routes.ACCOUNTS} />;
@@ -89,67 +65,31 @@ export default function Baking({ account, accountInfo }: Props) {
         <Switch>
             <Route
                 path={routes.ACCOUNTS_ADD_BAKER}
-                render={({ location }) => {
+                render={() => {
                     if (isBaker) {
                         return <Redirect to={routes.ACCOUNTS_BAKING} />;
                     }
 
-                    if (isDelegationPV) {
-                        return (
-                            <AddBaker
-                                account={account}
-                                accountInfo={accountInfo}
-                            />
-                        );
-                    }
                     return (
-                        <OldAddBaker
-                            location={
-                                location as LocationDescriptorObject<StakeSettings>
-                            }
-                            account={account}
-                        />
+                        <AddBaker account={account} accountInfo={accountInfo} />
                     );
                 }}
             />
             <Route path={routes.ACCOUNTS_REMOVE_BAKER}>
-                {isBaker && isDelegationPV && (
+                {isBaker && (
                     <RemoveBaker account={account} accountInfo={accountInfo} />
-                )}
-                {isBaker && !isDelegationPV && (
-                    <OldRemoveBaker
-                        account={account}
-                        accountInfo={accountInfo}
-                    />
                 )}
             </Route>
             <Route path={routes.ACCOUNTS_UPDATE_BAKER_KEYS}>
-                {isBaker && isDelegationPV && (
-                    <UpdateBakerKeys account={account} />
-                )}
-                {isBaker && !isDelegationPV && (
-                    <OldUpdateBakerKeys account={account} />
-                )}
+                {isBaker && <UpdateBakerKeys account={account} />}
             </Route>
             <Route path={routes.ACCOUNTS_UPDATE_BAKER_STAKE}>
-                {isBaker && isDelegationPV && (
+                {isBaker && (
                     <UpdateBakerStake
                         account={account}
                         accountInfo={accountInfo}
                     />
                 )}
-                {isBaker && !isDelegationPV && (
-                    <OldUpdateBakerStake
-                        account={account}
-                        accountInfo={accountInfo}
-                    />
-                )}
-            </Route>
-            <Route path={routes.ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS}>
-                <OldUpdateBakerRestake
-                    account={account}
-                    accountInfo={accountInfo as AccountInfoBaker}
-                />
             </Route>
             <Route path={routes.ACCOUNTS_UPDATE_BAKER_POOL}>
                 <UpdateBakerPool account={account} accountInfo={accountInfo} />
@@ -158,7 +98,7 @@ export default function Baking({ account, accountInfo }: Props) {
                 <StakingDetails
                     details={(accountInfo as AccountInfoBaker).accountBaker}
                 />
-                <Actions isDelegationPV={isDelegationPV} />
+                <Actions />
             </Route>
         </Switch>
     );

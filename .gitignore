@@ -26,6 +26,14 @@ build/Release
 # Dependency directory
 # https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git
 node_modules
+.pnp.*
+.yarn/*
+app/.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
 
 # OSX
 .DS_Store
@@ -47,7 +55,7 @@ dll
 out
 storybook-static
 app/1.preload.dev.worker.js
-app/crypto.wasm
+app/*.wasm
 app/preload.dev.worker.js
 
 .idea

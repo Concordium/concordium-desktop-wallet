@@ -4,6 +4,8 @@ import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect } from 'react-router';
 import type { Buffer } from 'buffer/';
+import { TransactionHash } from '@concordium/web-sdk';
+
 import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
 import { parse } from '~/utils/JSONHelper';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
@@ -226,9 +228,8 @@ export default function SubmitTransaction({ location }: Props) {
 
         let transactionHash: string;
         try {
-            transactionHash = await sendAccountTransaction(
-                transaction,
-                signatureStructured
+            transactionHash = TransactionHash.toHexString(
+                await sendAccountTransaction(transaction, signatureStructured)
             );
         } catch (e) {
             window.log.error(

@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import React, { useCallback } from 'react';
 import { useFormContext, Validate } from 'react-hook-form';
-import { isRewardStatusV1, isBakerAccount } from '@concordium/web-sdk';
+import { AccountInfoType } from '@concordium/web-sdk';
 
 import { collapseFraction, noOp } from '~/utils/basicHelpers';
 import {
@@ -65,22 +65,24 @@ function useCapitalBoundCheck(
         !capitalBound ||
         !isValidCcdString(stake) ||
         !rewardStatus ||
-        !isRewardStatusV1(rewardStatus)
+        rewardStatus.version !== 1
     ) {
         return { showWarning: false };
     }
     const newStake = ccdToMicroCcd(stake);
     const currentStake =
-        accountInfo && isBakerAccount(accountInfo)
-            ? accountInfo.accountBaker.stakedAmount
+        accountInfo && accountInfo.type === AccountInfoType.Baker
+            ? accountInfo.accountBaker.stakedAmount.microCcdAmount
             : 0n;
     const newTotalStake =
-        rewardStatus.totalStakedCapital - currentStake + newStake;
+        rewardStatus.totalStakedCapital.microCcdAmount -
+        currentStake +
+        newStake;
     const limitAfterUpdate =
         (newTotalStake *
             BigInt(capitalBound * updateConstants.rewardFractionResolution)) /
             BigInt(updateConstants.rewardFractionResolution) -
-        (poolStatus?.delegatedCapital || 0n);
+        (poolStatus?.delegatedCapital?.microCcdAmount || 0n);
     if (limitAfterUpdate < newStake) {
         return { showWarning: true, limitAfterUpdate };
     }

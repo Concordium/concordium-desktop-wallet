@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React from 'react';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
@@ -50,8 +51,8 @@ export default class EuroPerEnergyHandler
         const { threshold } = chainParameters.level2Keys.euroPerEnergy;
 
         const reduced = getReducedExchangeRate({
-            denominator: BigInt(euroPerEnergyRate.denominator),
-            numerator: BigInt(euroPerEnergyRate.numerator),
+            denominator: BigInt(euroPerEnergyRate.denominator!),
+            numerator: BigInt(euroPerEnergyRate.numerator!),
         });
 
         return createUpdateMultiSignatureTransaction(

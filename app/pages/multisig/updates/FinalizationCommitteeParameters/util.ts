@@ -1,4 +1,4 @@
-import { ChainParametersV2 } from '@concordium/common-sdk';
+import { ChainParametersV2, ChainParametersV3 } from '@concordium/web-sdk';
 import updateConstants from '~/constants/updateConstants.json';
 
 export interface FinalizationCommitteeParametersFields {
@@ -14,7 +14,7 @@ export const fieldDisplays = {
 };
 
 export function getCurrentFinalizationCommitteeParameters(
-    chainParameters: ChainParametersV2
+    chainParameters: ChainParametersV2 | ChainParametersV3
 ): FinalizationCommitteeParametersFields {
     return {
         relativeStakeThresholdFraction:

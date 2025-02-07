@@ -1,5 +1,5 @@
 import '../mockWindow';
-import { AccountInfo } from '@concordium/web-sdk';
+import { AccountInfo, AccountInfoType, CcdAmount } from '@concordium/web-sdk';
 import {
     createRegularIntervalSchedule,
     validateBakerStake,
@@ -50,9 +50,10 @@ test('createRegularIntervalSchedule should increase timestamps by interval', () 
 });
 
 test('validateBakerStake allows amount below threshold (if equal to currentStake)', () => {
-    const stakedAmount = 1000000n; // microCCD (1 CCD)
-    const accountAmount = 1000000000n; // microCCD (1000 CCD)
+    const stakedAmount = CcdAmount.fromCcd(1); // microCCD (1 CCD)
+    const accountAmount = CcdAmount.fromCcd(1000); // microCCD (1000 CCD)
     const accountInfo = {
+        type: AccountInfoType.Baker,
         accountAmount,
         accountBaker: { stakedAmount },
     } as AccountInfo;
@@ -64,9 +65,10 @@ test('validateBakerStake allows amount below threshold (if equal to currentStake
 });
 
 test('validateBakerStake does not allow amount below threshold (if not equal to currentStake)', () => {
-    const stakedAmount = 1000000n; // microCCD (1 CCD)
-    const accountAmount = 1000000000n; // microCCD (1000 CCD)
+    const stakedAmount = CcdAmount.fromCcd(1); // microCCD (1 CCD)
+    const accountAmount = CcdAmount.fromCcd(1000); // microCCD (1000 CCD)
     const accountInfo = {
+        type: AccountInfoType.Baker,
         accountAmount,
         accountBaker: { stakedAmount },
     } as AccountInfo;
@@ -78,9 +80,10 @@ test('validateBakerStake does not allow amount below threshold (if not equal to 
 });
 
 test('validateBakerStake allows amount equal threshold', () => {
-    const stakedAmount = 1000000n; // microCCD (1 CCD)
-    const accountAmount = 1000000000n; // microCCD (1000 CCD)
+    const stakedAmount = CcdAmount.fromCcd(1); // microCCD (1 CCD)
+    const accountAmount = CcdAmount.fromCcd(1000); // microCCD (1000 CCD)
     const accountInfo = {
+        type: AccountInfoType.Baker,
         accountAmount,
         accountBaker: { stakedAmount },
     } as AccountInfo;

@@ -77,7 +77,7 @@ function sendTransferAmountAggIndexProofSize(
         throw new Error('Unexpected missing proof');
     }
 
-    if (!payload.transferAmount) {
+    if (!payload.transferAmount || !payload.index) {
         throw new Error('Unexpected missing payload data');
     }
 

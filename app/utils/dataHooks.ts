@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-    isChainParametersV0,
-    isRewardStatusV1,
-    isBakerAccount,
+    AccountInfoType,
     ChainParameters,
     ChainParametersV0,
 } from '@concordium/web-sdk';
@@ -149,10 +147,13 @@ export function useAnonymityRevokers() {
 /** Hook for fetching staked amount for a given account address, Returns undefined while loading and 0 if account is not a baker */
 export function useStakedAmount(accountAddress: string): Amount | undefined {
     const accountInfo = useAccountInfo(accountAddress);
-    if (accountInfo === undefined || !isBakerAccount(accountInfo)) {
+    if (
+        accountInfo === undefined ||
+        accountInfo.type !== AccountInfoType.Baker
+    ) {
         return undefined;
     }
-    return BigInt(accountInfo.accountBaker.stakedAmount);
+    return BigInt(accountInfo.accountBaker.stakedAmount.microCcdAmount);
 }
 
 /**
@@ -161,7 +162,7 @@ export function useStakedAmount(accountAddress: string): Amount | undefined {
  */
 export function useCapitalBound() {
     const chainParameters = useBlockChainParameters();
-    if (!chainParameters || isChainParametersV0(chainParameters)) {
+    if (!chainParameters || chainParameters.version === 0) {
         return undefined;
     }
     return chainParameters.capitalBound;
@@ -193,14 +194,14 @@ function getV0Cooldown(
     const genesisTime = new Date(cs.currentEraGenesisTime);
     const currentEpochIndex = getEpochIndexAt(
         now,
-        cs.epochDuration,
+        cs.epochDuration.value,
         genesisTime
     );
     const nextEpochIndex = currentEpochIndex + 1;
 
     return epochDate(
         nextEpochIndex + cooldownEpochs,
-        cs.epochDuration,
+        cs.epochDuration.value,
         genesisTime
     );
 }
@@ -213,7 +214,8 @@ function getV1Cooldown(
     now: Date
 ): Date {
     const genesisTime = new Date(cs.currentEraGenesisTime);
-    const ei = (t: Date) => getEpochIndexAt(t, cs.epochDuration, genesisTime);
+    const ei = (t: Date) =>
+        getEpochIndexAt(t, cs.epochDuration.value, genesisTime);
 
     const { rewardPeriodLength } = chainParameters;
     const nRewardPeriodLength = Number(rewardPeriodLength);
@@ -236,7 +238,7 @@ function getV1Cooldown(
             remainingRewardPeriods * nRewardPeriodLength;
     }
 
-    return epochDate(cooldownEnd, cs.epochDuration, genesisTime);
+    return epochDate(cooldownEnd, cs.epochDuration.value, genesisTime);
 }
 
 /** Helper to get reward status, block summary and consensus status */
@@ -263,13 +265,13 @@ export function useCalcDelegatorCooldownUntil() {
 
     const { parameters, cs, rs } = status;
 
-    if (isChainParametersV0(parameters)) {
+    if (parameters.version === 0) {
         throwLoggedError(
             'Delegation cooldown not available for current protocol version.'
         );
     }
 
-    if (!isRewardStatusV1(rs)) {
+    if (rs.version !== 1) {
         // Should not happen, as this indicates rs and bs were queried for with different blocks.
         throwLoggedError('Block summary and reward status do not match.');
     }
@@ -294,11 +296,11 @@ export function useCalcBakerStakeCooldownUntil() {
 
     const { parameters, cs, rs } = status;
 
-    if (isChainParametersV0(parameters)) {
+    if (parameters.version === 0) {
         return getV0Cooldown(Number(parameters.bakerCooldownEpochs), cs, now);
     }
 
-    if (!isRewardStatusV1(rs)) {
+    if (rs.version !== 1) {
         // Should not happen, as this indicates rs and bs were queried for with different blocks.
         throwLoggedError('Block summary and reward status do not match.');
     }
@@ -326,12 +328,12 @@ export function useStakeIncreaseUntil() {
 
     const { parameters, cs, rs } = status;
 
-    if (isChainParametersV0(parameters)) {
+    if (parameters.version === 0) {
         // In V0, stake increase takes effect after 2 epochs
         return getV0Cooldown(2, cs, now);
     }
 
-    if (!isRewardStatusV1(rs)) {
+    if (rs.version !== 1) {
         // Should not happen, as this indicates rs and bs were queried for with different blocks.
         throwLoggedError('Block summary and reward status do not match.');
     }

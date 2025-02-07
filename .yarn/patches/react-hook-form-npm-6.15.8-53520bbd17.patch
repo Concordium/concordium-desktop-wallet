@@ -1,0 +1,17 @@
+diff --git a/package.json b/package.json
+index edfef9bf10ac54ba0b39f80e73eb1100a44cee68..cf15f1516d060024e425686c4dd80ef99f5908bf 100644
+--- a/package.json
++++ b/package.json
+@@ -18,10 +18,12 @@
+     "./package.json": "./package.json",
+     ".": {
+       "import": "./dist/index.esm.js",
++      "types": "./dist/index.d.ts",
+       "require": "./dist/index.js"
+     },
+     "./dist/index.ie11": {
+       "import": "./dist/index.ie11.js",
++      "types": "./dist/index.d.ts",
+       "require": "./dist/index.ie11.js"
+     }
+   },

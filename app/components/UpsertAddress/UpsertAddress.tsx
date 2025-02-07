@@ -8,7 +8,7 @@ import React, {
 import { SubmitHandler, Validate } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { isAlias, AccountAddress } from '@concordium/web-sdk';
+import { AccountAddress } from '@concordium/web-sdk';
 
 import {
     AddressBookEntry,
@@ -94,9 +94,14 @@ export default function UpsertAddress<
     const addressNotAlias: Validate = useCallback(
         (address: string) => {
             if (!allowAlias && account) {
-                const accountAddress = new AccountAddress(account.address);
+                const accountAddress = AccountAddress.fromBase58(
+                    account.address
+                );
                 return (
-                    !isAlias(accountAddress, new AccountAddress(address)) ||
+                    !AccountAddress.isAlias(
+                        accountAddress,
+                        AccountAddress.fromBase58(address)
+                    ) ||
                     'The recipient should not be an alias of the sending account.'
                 );
             }

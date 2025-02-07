@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
-import { Buffer as BrowserBuffer } from 'buffer/';
+import { Buffer } from 'buffer/';
 import ClosedWhileSendingError from './ClosedWhileSendingError';
 import { Transport } from './Transport';
 import TransportStatusError from './TransportStatusError';
@@ -29,7 +29,7 @@ export default class EmulatorTransport implements Transport {
         ins: number,
         p1: number,
         p2: number,
-        data?: BrowserBuffer
+        data?: Buffer
     ) {
         this.closed = false;
         try {
@@ -78,7 +78,7 @@ export default class EmulatorTransport implements Transport {
             if (this.closed) {
                 throw new ClosedWhileSendingError();
             } else {
-                return BrowserBuffer.from(response);
+                return Buffer.from(response);
             }
         } catch (e) {
             if (this.closed) {

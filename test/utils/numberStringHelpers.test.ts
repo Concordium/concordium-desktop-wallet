@@ -81,7 +81,7 @@ describe('Valid resolution common check', () => {
     });
 });
 
-describe(toFraction, () => {
+describe('toFraction', () => {
     test('Correctly formats numbers to fractions', () => {
         expect(toFraction(BigInt(100))(BigInt(10))).toBe('0.1');
         expect(toFraction(BigInt(100))('12')).toBe('0.12');
@@ -100,7 +100,7 @@ describe(toFraction, () => {
     });
 });
 
-describe(toResolution, () => {
+describe('toResolution', () => {
     test('Correctly formats fractions to resolution', () => {
         expect(toResolution(BigInt(100))('0.1')).toBe(BigInt(10));
         expect(toResolution(BigInt(1))('3')).toBe(BigInt(3));
@@ -117,7 +117,7 @@ describe(toResolution, () => {
     });
 });
 
-describe(round, () => {
+describe('round', () => {
     test('Rounds number strings to correct cipher', () => {
         expect(round(3)('1.2345')).toBe('1.235');
         expect(round(3)('-1.2345')).toBe('-1.235');
@@ -132,7 +132,7 @@ describe(round, () => {
     });
 });
 
-describe(toFixed, () => {
+describe('toFixed', () => {
     test('Adds missing zeros to number', () => {
         expect(toFixed(4)('1')).toBe('1.0000');
         expect(toFixed(4)('-1')).toBe('-1.0000');
@@ -149,7 +149,7 @@ describe(toFixed, () => {
     });
 });
 
-describe(formatNumberStringWithDigits, () => {
+describe('formatNumberStringWithDigits', () => {
     test('Formats numbers according to min/max digits', () => {
         expect(formatNumberStringWithDigits(0)('10')).toBe('10');
         expect(formatNumberStringWithDigits(3)('0')).toBe('0.000');
@@ -206,7 +206,7 @@ describe(formatNumberStringWithDigits, () => {
     });
 });
 
-describe(trimLeadingZeros, () => {
+describe('trimLeadingZeros', () => {
     test('Trims leading zeros from number string', () => {
         expect(trimLeadingZeros('0')).toBe('0');
         expect(trimLeadingZeros('0.00')).toBe('0.00');
@@ -227,7 +227,7 @@ describe(trimLeadingZeros, () => {
     });
 });
 
-describe(addThousandSeparators, () => {
+describe('addThousandSeparators', () => {
     test('Adds thousand separators correctly', () => {
         expect(addThousandSeparators('0')).toBe('0');
         expect(addThousandSeparators('10')).toBe('10');

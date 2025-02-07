@@ -1,6 +1,5 @@
 import React from 'react';
 import { render } from 'react-dom';
-import { AppContainer as ReactHotAppContainer } from 'react-hot-loader';
 import { push } from 'connected-react-router';
 import { UpdateInfo } from 'electron-updater';
 
@@ -40,17 +39,11 @@ try {
             triggerUpdateNotification(store.dispatch, info.version, automatic)
     );
 
-    const AppContainer = ReactHotAppContainer;
-
-    document.addEventListener('DOMContentLoaded', () =>
-        render(
-            <AppContainer>
-                <ErrorBoundary>
-                    <Root store={store} history={history} />
-                </ErrorBoundary>
-            </AppContainer>,
-            document.getElementById('root')
-        )
+    render(
+        <ErrorBoundary>
+            <Root store={store} history={history} />
+        </ErrorBoundary>,
+        document.getElementById('root')
     );
 } catch (error) {
     window.log.error(error, 'Error thrown in index.tsx');

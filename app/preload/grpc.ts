@@ -8,12 +8,20 @@ import {
     CredentialRegistrationId,
     AccountAddress,
     streamToList,
+    Energy,
+    serializeCredentialDeploymentPayload,
+    TransactionExpiry,
+    BlockHash,
+    TransactionHash,
 } from '@concordium/web-sdk';
+import {
+    ConcordiumGRPCNodeClient,
+    credentials,
+} from '@concordium/web-sdk/nodejs';
 import type { Buffer } from 'buffer/';
-import { credentials } from '@grpc/grpc-js';
-import { GrpcTransport } from '@protobuf-ts/grpc-transport';
 
 import { GRPC, ConsensusAndGlobalResult } from '~/preload/preloadTypes';
+import { stringify } from '~/utils/JSONHelper';
 
 const defaultDeadlineMs = 15000;
 let client: ConcordiumGRPCClient;
@@ -24,14 +32,12 @@ function createConcordiumClient(
     useSsl: boolean,
     timeout: number
 ) {
-    const grpcTransport = new GrpcTransport({
-        host: `${address}:${port}`,
-        channelCredentials: useSsl
-            ? credentials.createSsl()
-            : credentials.createInsecure(),
-        timeout,
-    });
-    return new ConcordiumGRPCClient(grpcTransport);
+    return new ConcordiumGRPCNodeClient(
+        address,
+        port,
+        useSsl ? credentials.createSsl() : credentials.createInsecure(),
+        { timeout }
+    );
 }
 
 export function setClientLocation(
@@ -94,45 +100,79 @@ const exposedMethods: GRPC = {
         payload: Buffer,
         signature: AccountTransactionSignature
     ) =>
-        client.sendRawAccountTransaction(
-            header,
-            energyCost,
-            payload,
-            signature
-        ),
+        client
+            .sendRawAccountTransaction(
+                header,
+                Energy.create(energyCost),
+                payload,
+                signature
+            )
+            .then(stringify),
     sendUpdateInstruction: (
         updateInstructionTransaction: UpdateInstruction,
         signatures: Record<number, string>
-    ) => client.sendUpdateInstruction(updateInstructionTransaction, signatures),
+    ) =>
+        client
+            .sendUpdateInstruction(updateInstructionTransaction, signatures)
+            .then(stringify),
     sendCredentialDeploymentTransaction: (
         transaction: CredentialDeploymentTransaction,
         signatures: string[]
-    ) => client.sendCredentialDeploymentTransaction(transaction, signatures),
+    ) =>
+        client
+            .sendCredentialDeploymentTransaction(
+                serializeCredentialDeploymentPayload(signatures, transaction),
+                TransactionExpiry.futureMinutes(5)
+            )
+            .then(stringify),
     getCryptographicParameters: (blockHash: string) =>
-        client.getCryptographicParameters(blockHash),
-    getConsensusStatus: () => client.getConsensusStatus(),
-    getTransactionStatus: (transactionId: string) =>
-        client.getBlockItemStatus(transactionId),
+        client
+            .getCryptographicParameters(BlockHash.fromHexString(blockHash))
+            .then(stringify),
+    getConsensusStatus: () => client.getConsensusStatus().then(stringify),
+    getTransactionStatus: (transactionHash: string) =>
+        client
+            .getBlockItemStatus(TransactionHash.fromHexString(transactionHash))
+            .then(stringify),
     getNextAccountNonce: (address: string) =>
-        client.getNextAccountNonce(new AccountAddress(address)),
+        client
+            .getNextAccountNonce(AccountAddress.fromBase58(address))
+            .then(stringify),
     getBlockChainParameters: (blockHash?: string) =>
-        client.getBlockChainParameters(blockHash),
+        client
+            .getBlockChainParameters(
+                blockHash ? BlockHash.fromHexString(blockHash) : undefined
+            )
+            .then(stringify),
     getNextUpdateSequenceNumbers: (blockHash?: string) =>
-        client.getNextUpdateSequenceNumbers(blockHash),
-    getAccountInfo: (address: string, blockHash?: string) => {
-        return client.getAccountInfo(new AccountAddress(address), blockHash);
-    },
-    getAccountInfoOfCredential: (credId: string, blockHash?: string) => {
-        return client.getAccountInfo(
-            new CredentialRegistrationId(credId),
-            blockHash
-        );
-    },
+        client
+            .getNextUpdateSequenceNumbers(
+                blockHash ? BlockHash.fromHexString(blockHash) : undefined
+            )
+            .then(stringify),
+    getAccountInfo: (address: string, blockHash?: string) =>
+        client
+            .getAccountInfo(
+                AccountAddress.fromBase58(address),
+                blockHash ? BlockHash.fromHexString(blockHash) : undefined
+            )
+            .then(stringify),
+    getAccountInfoOfCredential: (credId: string, blockHash?: string) =>
+        client
+            .getAccountInfo(
+                CredentialRegistrationId.fromHexString(credId),
+                blockHash ? BlockHash.fromHexString(blockHash) : undefined
+            )
+            .then(stringify),
     getIdentityProviders: (blockHash: string) =>
-        streamToList(client.getIdentityProviders(blockHash)),
+        streamToList(
+            client.getIdentityProviders(BlockHash.fromHexString(blockHash))
+        ).then(stringify),
     getAnonymityRevokers: (blockHash: string) =>
-        streamToList(client.getAnonymityRevokers(blockHash)),
-    healthCheck: async () => client.healthCheck(),
+        streamToList(
+            client.getAnonymityRevokers(BlockHash.fromHexString(blockHash))
+        ).then(stringify),
+    healthCheck: async () => client.healthCheck().then(stringify),
     // Creates a standalone GRPC client for testing the connection
     // to a node. This is used to verify that when changing connection
     // that the new node is on the same blockchain as the wallet was previously connected to.
@@ -140,19 +180,31 @@ const exposedMethods: GRPC = {
         address: string,
         port: string,
         useSsl: boolean
-    ) => {
-        return getConsensusStatusAndCryptographicParameters(
+    ) =>
+        getConsensusStatusAndCryptographicParameters(
             address,
             port,
             useSsl
-        );
-    },
+        ).then(stringify),
     getRewardStatus: (blockHash?: string) =>
-        client.getTokenomicsInfo(blockHash),
+        client
+            .getTokenomicsInfo(
+                blockHash ? BlockHash.fromHexString(blockHash) : undefined
+            )
+            .then(stringify),
     getPoolInfo: (bakerId: BakerId, blockHash?: string) =>
-        client.getPoolInfo(bakerId, blockHash),
+        client
+            .getPoolInfo(
+                bakerId,
+                blockHash ? BlockHash.fromHexString(blockHash) : undefined
+            )
+            .then(stringify),
     getPassiveDelegationInfo: (blockHash?: string) =>
-        client.getPassiveDelegationInfo(blockHash),
+        client
+            .getPassiveDelegationInfo(
+                blockHash ? BlockHash.fromHexString(blockHash) : undefined
+            )
+            .then(stringify),
 };
 
 export default exposedMethods;

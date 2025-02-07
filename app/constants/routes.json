@@ -27,7 +27,6 @@
     "ACCOUNTS_EXPORT_BAKER_KEYS": "/accounts/baking/:bakerTransferType/export-keys",
     "ACCOUNTS_REMOVE_BAKER": "/accounts/baking/remove",
     "ACCOUNTS_UPDATE_BAKER_STAKE": "/accounts/baking/update-stake",
-    "ACCOUNTS_UPDATE_BAKER_RESTAKE_EARNINGS": "/accounts/baking/update-restake-earnings",
     "ACCOUNTS_UPDATE_BAKER_POOL": "/accounts/baking/update-pool",
     "ACCOUNTS_DELEGATION": "/accounts/delegation",
     "ACCOUNTS_ADD_DELEGATION": "/accounts/delegation/add",

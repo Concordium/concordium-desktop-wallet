@@ -1,10 +1,10 @@
 import type { AccountInfo } from '@concordium/web-sdk';
 import {
-    isBakerAccountV1,
     ChainParameters,
     ChainParametersV0,
     OpenStatus,
     OpenStatusText,
+    AccountInfoType,
 } from '@concordium/web-sdk';
 
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
@@ -126,14 +126,20 @@ const openStatusEnumFromText = (text: OpenStatusText): OpenStatus => {
 export const getExistingBakerValues = (
     ai: AccountInfo | undefined
 ): Omit<ConfigureBakerFlowState, 'keys'> | undefined => {
-    if (ai === undefined || !isBakerAccountV1(ai)) {
+    if (
+        ai === undefined ||
+        ai.type !== AccountInfoType.Baker ||
+        ai.accountBaker.version === 0
+    ) {
         return undefined;
     }
     const { accountBaker } = ai;
 
     return {
         stake: {
-            stake: microCcdToCcd(accountBaker.stakedAmount) ?? '1000.00',
+            stake:
+                microCcdToCcd(accountBaker.stakedAmount.microCcdAmount) ??
+                '1000.00',
             restake: accountBaker.restakeEarnings,
         },
         openForDelegation: openStatusEnumFromText(

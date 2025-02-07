@@ -1,7 +1,6 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'connected-react-router';
-import { hot } from 'react-hot-loader/root';
 import { History } from 'history';
 
 import BgImage from '@resources/images/background.jpeg';
@@ -37,4 +36,4 @@ const Root = ({ store, history }: Props) => (
     </Provider>
 );
 
-export default hot(Root);
+export default Root;

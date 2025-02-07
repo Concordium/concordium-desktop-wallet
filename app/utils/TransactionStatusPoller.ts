@@ -165,7 +165,12 @@ export async function monitorTransactionStatus(
                 // TODO throw error on this weird case?
                 break;
             }
-            confirmTransaction(dispatch, transactionHash, blockHash, event);
+            confirmTransaction(
+                dispatch,
+                transactionHash,
+                blockHash.toString(),
+                event
+            );
             if (isSuccessfulTransaction(event)) {
                 if (isShieldedBalanceTransaction(transaction)) {
                     await ShieldedTransferConsequence(dispatch, transaction);

@@ -2,7 +2,6 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
-import { mapRecord } from '@concordium/common-sdk/lib/util';
 import {
     getAccountAddress,
     getCredentialDeploymentTransactionHash,
@@ -41,7 +40,7 @@ import errorMessages from '~/constants/errorMessages.json';
 import { AccountCardView } from '~/components/AccountCard/AccountCard';
 import SimpleLedgerWithCreationKeys from '~/components/ledger/SimpleLedgerWithCreationKeys';
 import pairWallet from '~/utils/WalletPairing';
-import { throwLoggedError } from '~/utils/basicHelpers';
+import { mapRecord, throwLoggedError } from '~/utils/basicHelpers';
 import { getKeyExportType } from '~/utils/identityHelpers';
 
 import generalStyles from '../AccountCreation.module.scss';
@@ -189,7 +188,7 @@ export default function AccountCreationGenerate({
                             attributesRand: mapRecord(
                                 transaction.randomness.attributesRand,
                                 (x) => x,
-                                (key) => AttributeKey[key]
+                                (key) => AttributeKey[key as AttributeKeyName]
                             ),
                         }
                     );

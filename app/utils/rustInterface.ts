@@ -5,7 +5,7 @@ import {
     createCredentialDeploymentTransaction,
     CredentialDeploymentTransaction,
     TransactionExpiry,
-} from '@concordium/web-sdk/';
+} from '@concordium/web-sdk';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error : has no default export.
 import RustWorker, { BakerKeyVariants } from './rust.worker';

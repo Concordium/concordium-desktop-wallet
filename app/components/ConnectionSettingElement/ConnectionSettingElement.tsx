@@ -15,6 +15,7 @@ import { displayTargetNet, getTargetNet, Net } from '~/utils/ConfigHelper';
 import genesisBlocks from '~/constants/genesis.json';
 
 import styles from './ConnectionSettingElement.module.scss';
+import { nodeConsensusAndGlobal } from '~/node/nodeRequests';
 
 interface Props {
     displayText: string;
@@ -50,11 +51,7 @@ async function getConsensusAndGlobalFromNode(
     port: string,
     useSsl: boolean
 ) {
-    const result = await window.grpc.nodeConsensusAndGlobal(
-        address,
-        port,
-        useSsl
-    );
+    const result = await nodeConsensusAndGlobal(address, port, useSsl);
     if (!result.successful) {
         throw new Error(
             'The node consensus status and cryptographic parameters could not be retrieved'
@@ -109,7 +106,10 @@ export default function ConnectionSetting({
             } = await getConsensusAndGlobalFromNode(address, port, useSsl);
             const genesis = await getGenesis();
             if (genesis) {
-                if (consensusStatus.genesisBlock !== genesis.genesisBlock) {
+                if (
+                    consensusStatus.genesisBlock.toString() !==
+                    genesis.genesisBlock
+                ) {
                     setFailedMessage(
                         'Connecting to a node running on a separate blockchain is not allowed'
                     );
@@ -122,7 +122,10 @@ export default function ConnectionSetting({
 
             const targetNet = getTargetNet();
             if (
-                !isMatchingGenesisBlock(consensusStatus.genesisBlock, targetNet)
+                !isMatchingGenesisBlock(
+                    consensusStatus.genesisBlock.toString(),
+                    targetNet
+                )
             ) {
                 setFailedMessage(
                     `The node is not part of ${displayTargetNet(
@@ -137,7 +140,7 @@ export default function ConnectionSetting({
 
             if (!global && !genesis) {
                 await window.database.genesisAndGlobal.setValue(
-                    consensusStatus.genesisBlock,
+                    consensusStatus.genesisBlock.toString(),
                     nodeGlobal
                 );
             }

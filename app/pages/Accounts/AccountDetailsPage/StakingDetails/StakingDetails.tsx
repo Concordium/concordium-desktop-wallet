@@ -4,7 +4,7 @@ import {
     AccountDelegationDetails,
     BakerPoolPendingChangeType,
     DelegationTargetType,
-    isReduceStakePendingChange,
+    StakePendingChangeType,
 } from '@concordium/web-sdk';
 
 import React, { PropsWithChildren } from 'react';
@@ -170,7 +170,7 @@ export default function StakingDetails({ details }: Props) {
     const rs = useAsyncMemo(
         async () =>
             cs !== undefined
-                ? getRewardStatus(cs.lastFinalizedBlock)
+                ? getRewardStatus(cs.lastFinalizedBlock.toString())
                 : undefined,
         noOp,
         [cs]
@@ -186,7 +186,7 @@ export default function StakingDetails({ details }: Props) {
             ) {
                 const status = await getPoolInfo(
                     details.delegationTarget.bakerId,
-                    cs.lastFinalizedBlock
+                    cs.lastFinalizedBlock.toString()
                 );
                 return status;
             }
@@ -247,7 +247,8 @@ export default function StakingDetails({ details }: Props) {
                             <br />
                             {getFormattedDateString(pendingChangeDate)}
                         </div>
-                        {isReduceStakePendingChange(details.pendingChange) ? (
+                        {details.pendingChange.change ===
+                        StakePendingChangeType.ReduceStake ? (
                             <Value
                                 title={text.pendingReduce}
                                 value={displayAsCcd(

@@ -1,3 +1,5 @@
+import { SequenceNumber } from '@concordium/web-sdk';
+
 import '../mockWindow';
 import {
     getScheduledTransferPayloadSize,
@@ -23,7 +25,9 @@ import {
 function getMockedScheduledTransfer(scheduleLength: number) {
     const address = '3UbdTrP5kcEioJRCyiCacAdpAYfyezPSVfrys8QDsHJUiVXjKf';
     const spy = jest.spyOn(NodeRequests, 'getNextAccountNonce');
-    spy.mockReturnValue(Promise.resolve({ allFinal: true, nonce: 0n }));
+    spy.mockReturnValue(
+        Promise.resolve({ allFinal: true, nonce: SequenceNumber.create(1) })
+    );
     return createScheduledTransferTransaction(
         address,
         address,

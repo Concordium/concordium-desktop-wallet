@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React from 'react';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
@@ -50,8 +51,8 @@ export default class MicroGtuPerEuroHandler
         const { threshold } = chainParameters.level2Keys.microGTUPerEuro;
 
         const reduced = getReducedExchangeRate({
-            denominator: BigInt(microGtuPerEuroRate.denominator),
-            numerator: BigInt(microGtuPerEuroRate.numerator),
+            denominator: BigInt(microGtuPerEuroRate.denominator!),
+            numerator: BigInt(microGtuPerEuroRate.numerator!),
         });
 
         return createUpdateMultiSignatureTransaction(

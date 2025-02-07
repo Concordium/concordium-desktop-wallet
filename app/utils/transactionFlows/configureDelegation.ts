@@ -1,6 +1,6 @@
 import {
     AccountInfo,
-    isDelegatorAccount,
+    AccountInfoType,
     DelegationTarget,
     DelegationTargetBaker,
     DelegationTargetType,
@@ -41,7 +41,7 @@ export const configureDelegationTitle = 'Configure delegation';
 export const getExistingDelegationValues = (
     accountInfo: AccountInfo
 ): NotOptional<ConfigureDelegationFlowState> | undefined => {
-    if (!isDelegatorAccount(accountInfo)) {
+    if (accountInfo.type !== AccountInfoType.Delegator) {
         return undefined;
     }
 
@@ -53,7 +53,7 @@ export const getExistingDelegationValues = (
 
     return {
         delegate: {
-            amount: microCcdToCcd(stakedAmount) ?? '0.00',
+            amount: microCcdToCcd(stakedAmount.microCcdAmount) ?? '0.00',
             redelegate: restakeEarnings,
         },
         target:

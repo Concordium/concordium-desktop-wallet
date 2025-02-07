@@ -5,9 +5,6 @@ import {
     ConsensusStatus,
     RewardStatus,
     StakePendingChange,
-    isStakePendingChangeV0,
-    isChainParametersV0,
-    isRewardStatusV1,
 } from '@concordium/web-sdk';
 import { ensureNumberLength } from './basicHelpers';
 import { TimeStampUnit, YearMonth, YearMonthDate } from './types';
@@ -310,13 +307,13 @@ function dateFromPendingChangeEffectiveTime(
         return undefined;
     }
 
-    if (!isRewardStatusV1(rs) || isChainParametersV0(cp)) {
+    if (rs.version !== 1 || cp.version === 0) {
         throw new Error(
             'Not possible to calculate date due to mismatch between reward status, chain parameters, and pending change versions.'
         );
     }
 
-    const rewardPeriodLengthMS = cs.epochDuration * cp.rewardPeriodLength;
+    const rewardPeriodLengthMS = cs.epochDuration.value * cp.rewardPeriodLength;
 
     return getSucceedingPayday(
         effectiveTime,
@@ -361,14 +358,6 @@ export function dateFromStakePendingChange(
 ): Date | undefined {
     if (cs === undefined) {
         return undefined;
-    }
-
-    if (isStakePendingChangeV0(spc)) {
-        return epochDate(
-            Number(spc.epoch),
-            cs.epochDuration,
-            new Date(cs.currentEraGenesisTime)
-        );
     }
 
     return dateFromPendingChangeEffectiveTime(spc.effectiveTime, cs, rs, cp);

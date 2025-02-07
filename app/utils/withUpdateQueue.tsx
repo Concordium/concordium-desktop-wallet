@@ -2,7 +2,8 @@
 import { push } from 'connected-react-router';
 import React, { ComponentType, useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { NextUpdateSequenceNumbers } from '@concordium/common-sdk';
+import { NextUpdateSequenceNumbers } from '@concordium/web-sdk';
+
 import { getNextUpdateSequenceNumbers } from '~/node/nodeRequests';
 import routes from '~/constants/routes.json';
 import Execute from '~/components/Execute';

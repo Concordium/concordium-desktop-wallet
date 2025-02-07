@@ -13,11 +13,12 @@
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
         /* Module Resolution Options */
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "allowSyntheticDefaultImports": true,
         "resolveJsonModule": true,
         "allowJs": true,
         "skipLibCheck": true,
+        "useUnknownInCatchVariables": false,
         "paths": {
             "@resources/*": ["./resources/*"],
             "@pkg/*": ["./pkg/*"],
@@ -26,7 +27,6 @@
     },
     "exclude": [
         "scripts",
-        "test",
         "release",
         "app/main.dev.js",
         "app/preload.dev.js",
