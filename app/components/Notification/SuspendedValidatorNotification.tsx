@@ -10,10 +10,10 @@ import routes from '~/constants/routes.json';
 import Notification from './Notification';
 import { displaySplitAddress } from '~/utils/accountHelpers';
 
-interface Props {
+type Props = {
     onClose(): void;
     accountAddress: string;
-}
+};
 
 /**
  * A notification to be shown when an account is delegating to a staking pool

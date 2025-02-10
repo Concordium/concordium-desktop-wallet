@@ -158,15 +158,15 @@ const accountsSlice = createSlice({
             state,
             input: PayloadAction<{
                 address: string;
-                status: AccountExtras['suspensionStatus'];
+                isSuspended: boolean;
             }>
         ) {
             if (state.accountExtras[input.payload.address] === undefined) {
                 state.accountExtras[input.payload.address] = {};
             }
 
-            state.accountExtras[input.payload.address].suspensionStatus =
-                input.payload.status;
+            state.accountExtras[input.payload.address].isSuspended =
+                input.payload.isSuspended;
         },
         addToAccountInfos: (
             state,
@@ -472,18 +472,12 @@ async function updateAccountFromAccountInfo(
             dispatch(
                 setSuspensionStatus({
                     address: account.address,
-                    status: 'suspended',
-                })
-            );
-        } else if (poolStatus.currentPaydayStatus?.isPrimedForSuspension) {
-            dispatch(
-                setSuspensionStatus({
-                    address: account.address,
-                    status: 'primed',
+                    isSuspended: true,
                 })
             );
         }
     }
+
     return updateCredentialsStatus(dispatch, account.address, accountInfo);
 }
 

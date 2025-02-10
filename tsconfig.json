@@ -25,15 +25,13 @@
             "~/*": ["./app/*"]
         }
     },
+    "include": ["app", "test"],
     "exclude": [
-        "scripts",
-        "release",
         "app/main.dev.js",
         "app/preload.dev.js",
         "app/preload.prod.js",
         "app/main.prod.js",
         "app/renderer.prod.js",
         "app/dist",
-        "dll"
     ]
 }

@@ -169,8 +169,9 @@ export const notificationsMiddleware: Middleware = (store) => (next) => (
     Object.entries(nextState.accounts.accountExtras)
         .filter(
             ([address, value]) =>
-                value !== prevState.accounts.accountExtras[address] &&
-                value.suspensionStatus === 'suspended'
+                value.isSuspended !==
+                    prevState.accounts.accountExtras[address]?.isSuspended &&
+                value.isSuspended
         )
         .forEach(([address]) => {
             triggerSuspendedValidatorPoolNotification(store.dispatch, address);
