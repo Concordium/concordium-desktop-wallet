@@ -66,7 +66,7 @@ function throwIfUndefined<T extends any[], V>(
 function parsed<V, T extends any[]>(
     func: (...inputs: T) => Promise<string>
 ): (...inputs: T) => Promise<V> {
-    return async (...inputs) => func(...inputs).then(parse);
+    return (...inputs) => func(...inputs).then(parse);
 }
 
 export async function sendAccountTransaction(

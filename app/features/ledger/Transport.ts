@@ -51,7 +51,7 @@ export class TransportImpl implements Transport {
             if (this.closed) {
                 throw new ClosedWhileSendingError();
             } else {
-                return BrowserBuffer.from(response.toString('hex'), 'hex');
+                return BrowserBuffer.from(new Uint8Array(response));
             }
         } catch (e) {
             if (this.closed) {
