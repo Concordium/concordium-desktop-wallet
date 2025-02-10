@@ -228,6 +228,10 @@ export interface Account {
     isInitial: boolean;
 }
 
+export type AccountExtras = {
+    isSuspended?: boolean;
+};
+
 export interface SimpleTransferPayload {
     amount: string;
     toAddress: string;

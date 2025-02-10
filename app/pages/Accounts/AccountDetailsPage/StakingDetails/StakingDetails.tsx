@@ -3,12 +3,14 @@ import {
     AccountBakerDetailsV1,
     AccountDelegationDetails,
     BakerPoolPendingChangeType,
+    BakerPoolStatus,
     DelegationTargetType,
     StakePendingChangeType,
 } from '@concordium/web-sdk';
 
-import React, { PropsWithChildren } from 'react';
+import React, { PropsWithChildren, useMemo } from 'react';
 import RegisteredIcon from '@resources/svg/logo-checkmark.svg';
+import ErrorIcon from '@resources/svg/logo-error.svg';
 import Label from '~/components/Label';
 import Card from '~/cross-app-components/Card';
 import { displayAsCcd } from '~/utils/ccd';
@@ -57,10 +59,15 @@ const formatCommission = (value: number) =>
     `${toFixed(3)((value * 100).toString())}%`;
 
 interface BakerValuesProps extends ValuesProps<AccountBakerDetails> {
+    poolStatus: BakerPoolStatus;
     isDelegationProtocol: boolean;
 }
 
-function BakerValues({ details, isDelegationProtocol }: BakerValuesProps) {
+function BakerValues({
+    details,
+    poolStatus,
+    isDelegationProtocol,
+}: BakerValuesProps) {
     return (
         <>
             <Value
@@ -104,13 +111,29 @@ function BakerValues({ details, isDelegationProtocol }: BakerValuesProps) {
                             />
                         </>
                     )}
+                    {(poolStatus.isSuspended ||
+                        poolStatus.currentPaydayStatus
+                            ?.isPrimedForSuspension) && (
+                        <Value
+                            title="Suspension status"
+                            value={
+                                poolStatus.isSuspended
+                                    ? 'Suspended'
+                                    : 'Primed for suspension'
+                            }
+                        />
+                    )}
                 </>
             )}
         </>
     );
 }
 
-function DelegatorValues({ details }: ValuesProps<AccountDelegationDetails>) {
+interface DelegatorValuesProps extends ValuesProps<AccountDelegationDetails> {
+    poolStatus: BakerPoolStatus | undefined;
+}
+
+function DelegatorValues({ details, poolStatus }: DelegatorValuesProps) {
     return (
         <>
             <Value
@@ -125,6 +148,17 @@ function DelegatorValues({ details }: ValuesProps<AccountDelegationDetails>) {
                 title="Redelegate earnings"
                 value={displayRedelegate(details.restakeEarnings)}
             />
+            {(poolStatus?.isSuspended ||
+                poolStatus?.currentPaydayStatus?.isPrimedForSuspension) && (
+                <Value
+                    title="Target validator status"
+                    value={
+                        poolStatus.isSuspended
+                            ? 'Suspended'
+                            : 'Primed for suspension'
+                    }
+                />
+            )}
         </>
     );
 }
@@ -175,25 +209,31 @@ export default function StakingDetails({ details }: Props) {
         noOp,
         [cs]
     );
+    const validatorId = useMemo(() => {
+        if (cs === undefined) return undefined;
+        if (
+            isDelegationDetails(details) &&
+            details.delegationTarget.delegateType === DelegationTargetType.Baker
+        ) {
+            return details.delegationTarget.bakerId;
+        }
+        if (isBakerDetails(details)) {
+            return details.bakerId;
+        }
+        return undefined;
+    }, [details, cs]);
 
     const poolStatus = useAsyncMemo(
         async () => {
-            if (
-                cs !== undefined &&
-                isDelegationDetails(details) &&
-                details.delegationTarget.delegateType ===
-                    DelegationTargetType.Baker
-            ) {
-                const status = await getPoolInfo(
-                    details.delegationTarget.bakerId,
-                    cs.lastFinalizedBlock.toString()
-                );
-                return status;
-            }
-            return undefined;
+            if (validatorId === undefined || cs === undefined) return undefined;
+            const status = await getPoolInfo(
+                validatorId,
+                cs.lastFinalizedBlock.toString()
+            );
+            return status;
         },
         noOp,
-        [cs]
+        [validatorId, cs]
     );
 
     const text = isBakerDetails(details) ? bakerText : delegatorText;
@@ -223,12 +263,14 @@ export default function StakingDetails({ details }: Props) {
     return (
         <Card className={styles.root} dark>
             <header className={styles.header}>
-                <RegisteredIcon width={30} />
+                {poolStatus?.isSuspended && <ErrorIcon width={30} />}
+                {!poolStatus?.isSuspended && <RegisteredIcon width={30} />}
                 <h2 className="mV0 mL10">{text.title}</h2>
             </header>
             <section className="flexColumn justifyCenter mB20">
-                {isBakerDetails(details) && (
+                {isBakerDetails(details) && poolStatus !== undefined && (
                     <BakerValues
+                        poolStatus={poolStatus}
                         isDelegationProtocol={hasDelegationProtocol(
                             cs?.protocolVersion ?? 1n
                         )}
@@ -236,7 +278,10 @@ export default function StakingDetails({ details }: Props) {
                     />
                 )}
                 {isDelegationDetails(details) && (
-                    <DelegatorValues details={details} />
+                    <DelegatorValues
+                        details={details}
+                        poolStatus={poolStatus}
+                    />
                 )}
             </section>
             {details.pendingChange !== undefined &&

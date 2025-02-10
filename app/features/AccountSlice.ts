@@ -1,5 +1,18 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { LOCATION_CHANGE } from 'connected-react-router';
+import { AccountInfoType, DelegationTargetType } from '@concordium/web-sdk';
+
+import { getCredentialsOfAccount } from '~/database/CredentialDao';
+import { hasPendingTransactions } from '~/database/TransactionDao';
+import { accountSimpleView, defaultAccount } from '~/database/PreferencesDao';
+import { stringify, parse } from '~/utils/JSONHelper';
+import { getCredId } from '~/utils/credentialHelper';
+import { throwLoggedError, mapRecordValues } from '~/utils/basicHelpers';
+import {
+    getAccountInfo,
+    getAccountInfoOfCredential,
+} from '~/node/nodeRequests';
+
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
 // eslint-disable-next-line import/no-cycle
@@ -18,7 +31,6 @@ import {
     removeAccount as removeAccountFromDatabase,
     findAccounts,
 } from '../database/AccountDao';
-import { getCredentialsOfAccount } from '~/database/CredentialDao';
 import {
     decryptAmounts,
     getAddressFromCredentialId,
@@ -35,22 +47,15 @@ import {
     TransactionFilter,
     Hex,
     IdentityVersion,
+    AccountExtras,
 } from '../utils/types';
 import { createAccount, isValidAddress } from '../utils/accountHelpers';
 import {
     getAccountInfoOfAddress,
+    getPoolStatusLatest,
     getStatus,
     getlastFinalizedBlockHash,
 } from '../node/nodeHelpers';
-import { hasPendingTransactions } from '~/database/TransactionDao';
-import { accountSimpleView, defaultAccount } from '~/database/PreferencesDao';
-import { stringify, parse } from '~/utils/JSONHelper';
-import { getCredId } from '~/utils/credentialHelper';
-import { throwLoggedError, mapRecordValues } from '~/utils/basicHelpers';
-import {
-    getAccountInfo,
-    getAccountInfoOfCredential,
-} from '~/node/nodeRequests';
 
 export interface AccountState {
     simpleView: boolean;
@@ -59,6 +64,7 @@ export interface AccountState {
     chosenAccountAddress: string;
     accountChanged: boolean;
     defaultAccount: string | undefined;
+    accountExtras: Record<string, AccountExtras>;
 }
 
 type AccountByIndexTuple = [number, Account];
@@ -110,6 +116,7 @@ const initialState: AccountState = {
     chosenAccountAddress: '',
     accountChanged: true,
     defaultAccount: undefined,
+    accountExtras: {},
 };
 
 const accountsSlice = createSlice({
@@ -146,6 +153,20 @@ const accountsSlice = createSlice({
             if (input.payload) {
                 setChosenAccountAddress(state, input.payload);
             }
+        },
+        setSuspensionStatus(
+            state,
+            input: PayloadAction<{
+                address: string;
+                isSuspended: boolean;
+            }>
+        ) {
+            if (state.accountExtras[input.payload.address] === undefined) {
+                state.accountExtras[input.payload.address] = {};
+            }
+
+            state.accountExtras[input.payload.address].isSuspended =
+                input.payload.isSuspended;
         },
         addToAccountInfos: (
             state,
@@ -202,7 +223,10 @@ export const initialAccountNameSelector = (identityId: number) => (
     )?.name;
 
 export const accountsInfoSelector = (state: RootState) =>
-    mapRecordValues(state.accounts.accountsInfo, parse);
+    mapRecordValues<string, string, AccountInfo>(
+        state.accounts.accountsInfo,
+        parse
+    );
 
 export const chosenAccountSelector = (state: RootState) =>
     state.accounts.accounts.find(
@@ -234,7 +258,11 @@ export const {
     previousConfirmedAccount,
 } = accountsSlice.actions;
 
-const { updateAccounts, updateAccountFields } = accountsSlice.actions;
+const {
+    updateAccounts,
+    updateAccountFields,
+    setSuspensionStatus,
+} = accountsSlice.actions;
 
 function updateAccountInfoEntry(
     dispatch: Dispatch,
@@ -425,6 +453,29 @@ async function updateAccountFromAccountInfo(
                 updatedFields: accountUpdate,
             })
         );
+    }
+
+    let validatorId: bigint | undefined;
+    if (accountInfo.type === AccountInfoType.Baker) {
+        validatorId = accountInfo.accountBaker.bakerId;
+    } else if (
+        accountInfo.type === AccountInfoType.Delegator &&
+        accountInfo.accountDelegation.delegationTarget.delegateType ===
+            DelegationTargetType.Baker
+    ) {
+        validatorId = accountInfo.accountDelegation.delegationTarget.bakerId;
+    }
+
+    if (validatorId !== undefined) {
+        const poolStatus = await getPoolStatusLatest(validatorId);
+        if (poolStatus.isSuspended) {
+            dispatch(
+                setSuspensionStatus({
+                    address: account.address,
+                    isSuspended: true,
+                })
+            );
+        }
     }
 
     return updateCredentialsStatus(dispatch, account.address, accountInfo);
