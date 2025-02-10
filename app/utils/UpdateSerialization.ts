@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer/';
+import { ValidatorScoreParameters } from '@concordium/web-sdk';
 import {
     encodeWord32,
     encodeWord64,
@@ -243,6 +244,16 @@ export function serializeFinalizationCommitteeParameters(
             finalizationCommitteeParameters.relativeStakeThresholdFraction
         ),
     ]);
+}
+
+/**
+ * Serializes a ValidatorScore update to the byte format expected
+ * by the chain.
+ */
+export function serializeValidatorScoreParameters(
+    parameters: ValidatorScoreParameters
+) {
+    encodeWord64(parameters.maxMissedRounds);
 }
 
 /**

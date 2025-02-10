@@ -1,3 +1,4 @@
+import { ValidatorScoreParameters } from '@concordium/web-sdk';
 import { Buffer } from 'buffer/';
 import {
     PrivateKeys,
@@ -113,6 +114,7 @@ type LedgerCommands = {
     signPoolParameters: SignUpdate<PoolParameters>;
     signBlockEnergyLimit: SignUpdate<BlockEnergyLimit>;
     signFinalizationCommitteeParameters: SignUpdate<FinalizationCommitteeParameters>;
+    signValidatorScoreParameters: SignUpdate<ValidatorScoreParameters>;
     signMinBlockTime: SignUpdate<MinBlockTime>;
     signTimeoutParameters: SignUpdate<TimeoutParameters>;
     signHigherLevelKeysUpdate: SignKeyUpdate<HigherLevelKeyUpdate>;

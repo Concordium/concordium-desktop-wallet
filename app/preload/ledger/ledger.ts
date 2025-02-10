@@ -1,3 +1,4 @@
+import { ValidatorScoreParameters } from '@concordium/web-sdk';
 import { Buffer } from 'buffer/';
 import EventEmitter from 'events';
 import {
@@ -298,6 +299,17 @@ export default function exposedMethods(
             keypath: number[]
         ) => {
             return getLedgerClient().signFinalizationCommitteeParameters(
+                transaction,
+                serializedPayload,
+                keypath
+            );
+        },
+        signValidatorScoreParameters: (
+            transaction: UpdateInstruction<ValidatorScoreParameters>,
+            serializedPayload: Buffer,
+            keypath: number[]
+        ) => {
+            return getLedgerClient().signValidatorScoreParameters(
                 transaction,
                 serializedPayload,
                 keypath

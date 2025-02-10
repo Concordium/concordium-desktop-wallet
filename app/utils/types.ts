@@ -7,6 +7,7 @@ import {
     BakerId,
     OpenStatus,
     TransactionKindString,
+    ValidatorScoreParameters,
 } from '@concordium/web-sdk';
 import { RejectReason } from './node/RejectReasonHelper';
 import type { ExternalCredential, Genesis } from '~/database/types';
@@ -772,7 +773,8 @@ export type UpdateInstructionPayload =
     | TimeoutParameters
     | MinBlockTime
     | BlockEnergyLimit
-    | FinalizationCommitteeParameters;
+    | FinalizationCommitteeParameters
+    | ValidatorScoreParameters;
 
 // An actual signature, which goes into an account transaction.
 export type Signature = Hex;
