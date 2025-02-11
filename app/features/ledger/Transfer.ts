@@ -50,7 +50,6 @@ import {
     serializeConfigureDelegation,
     serializeConfigureBakerPayload,
     getSerializedMetadataUrlWithLength,
-    getSerializedConfigureBakerBitmap,
 } from '~/utils/transactionSerialization';
 import pathAsBuffer from './Path';
 import {
@@ -522,7 +521,10 @@ async function signConfigureBaker(
         transaction.expiry
     );
 
-    const bitmap = getSerializedConfigureBakerBitmap(transaction.payload);
+    const bitmap = serializeConfigureBakerPayload(transaction.payload).slice(
+        0,
+        2
+    ); // first 2 bytes are the bitmap
 
     const meta = Buffer.concat([
         pathAsBuffer(path),
@@ -539,6 +541,7 @@ async function signConfigureBaker(
         restakeEarnings,
         openForDelegation,
         keys,
+        suspended,
         ...commissions
     } = transaction.payload;
 
@@ -550,15 +553,15 @@ async function signConfigureBaker(
 
     if (Object.values(dataPayload).some(isDefined) || keys !== undefined) {
         p1 = 0x01;
-        let data = serializeConfigureBakerPayload(dataPayload);
+        let data = serializeConfigureBakerPayload(dataPayload).slice(2); // first 2 bytes are the bitmap
 
         if (keys !== undefined) {
             data = Buffer.concat([
                 data,
                 putHexString(keys.electionVerifyKey),
-                putHexString(keys.electionKeyProof),
+                putHexString(keys.proofElection),
                 putHexString(keys.signatureVerifyKey),
-                putHexString(keys.signatureKeyProof),
+                putHexString(keys.proofSig),
             ]);
         }
 
@@ -569,7 +572,7 @@ async function signConfigureBaker(
         p1 = 0x02;
         const aggKey = Buffer.concat([
             putHexString(keys.aggregationVerifyKey),
-            putHexString(keys.aggregationKeyProof),
+            putHexString(keys.proofAggregation),
         ]);
         response = await send(aggKey);
     }
@@ -593,8 +596,13 @@ async function signConfigureBaker(
 
     if (Object.values(commissions).some(isDefined)) {
         p1 = 0x05;
-        const comms = serializeConfigureBakerPayload(commissions);
+        const comms = serializeConfigureBakerPayload(commissions).slice(2);
         response = await send(comms);
+    }
+
+    if (suspended !== undefined) {
+        p1 = 0x06;
+        response = await send(Buffer.from([Number(suspended)]));
     }
 
     return response.slice(0, 64);

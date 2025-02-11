@@ -5,6 +5,7 @@ import {
     OpenStatus,
     OpenStatusText,
     AccountInfoType,
+    CcdAmount,
 } from '@concordium/web-sdk';
 
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
@@ -96,14 +97,15 @@ export const toConfigureBakerPayload = ({
         keys !== undefined
             ? {
                   electionVerifyKey: keys.electionPublic,
-                  electionKeyProof: keys.proofElection,
+                  proofElection: keys.proofElection,
                   signatureVerifyKey: keys.signaturePublic,
-                  signatureKeyProof: keys.proofSignature,
+                  proofSig: keys.proofSignature,
                   aggregationVerifyKey: keys.aggregationPublic,
-                  aggregationKeyProof: keys.proofAggregation,
+                  proofAggregation: keys.proofAggregation,
               }
             : undefined,
-    stake: stake?.stake !== undefined ? ccdToMicroCcd(stake.stake) : undefined,
+    stake:
+        stake?.stake !== undefined ? CcdAmount.fromCcd(stake.stake) : undefined,
     restakeEarnings: stake?.restake,
     openForDelegation,
     metadataUrl,
