@@ -5,6 +5,10 @@ import type { HTMLAttributes } from 'react';
 import type { RegisterOptions } from 'react-hook-form';
 import {
     BakerId,
+    ChainParameters,
+    ChainParametersV0,
+    ChainParametersV1,
+    ChainParametersV2,
     OpenStatus,
     TransactionKindString,
     ValidatorScoreParameters,
@@ -832,6 +836,7 @@ export enum UpdateType {
     BlockEnergyLimit,
     FinalizationCommitteeParameters,
     UpdateGASRewardsV1,
+    UpdateValidatorScoreParameters,
 }
 
 export enum RootKeysUpdateTypes {
@@ -1668,3 +1673,12 @@ export declare type DeepPartial<T> = T extends Array<infer U>
           [K in keyof T]?: DeepPartial<T[K]>;
       }
     : T;
+
+export function isMinChainParametersV3(
+    chainParameters: ChainParameters
+): chainParameters is Exclude<
+    ChainParameters,
+    ChainParametersV0 | ChainParametersV1 | ChainParametersV2
+> {
+    return chainParameters.version >= 3;
+}

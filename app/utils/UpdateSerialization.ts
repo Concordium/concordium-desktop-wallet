@@ -253,7 +253,7 @@ export function serializeFinalizationCommitteeParameters(
 export function serializeValidatorScoreParameters(
     parameters: ValidatorScoreParameters
 ) {
-    encodeWord64(parameters.maxMissedRounds);
+    return encodeWord64(parameters.maxMissedRounds);
 }
 
 /**
