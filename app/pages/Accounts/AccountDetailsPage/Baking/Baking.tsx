@@ -6,7 +6,7 @@ import {
 
 import React from 'react';
 import { Redirect, Route, Switch, useLocation } from 'react-router';
-import { Account } from '~/utils/types';
+import { Account, AccountExtras } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import AddBaker from './AddBaker';
@@ -16,7 +16,11 @@ import UpdateBakerPool from './UpdateBakerPool';
 import UpdateBakerKeys from './UpdateBakerKeys';
 import StakingDetails from '../StakingDetails';
 
-function Actions() {
+type ActionsProps = {
+    isSuspended: boolean | undefined;
+};
+
+function Actions({ isSuspended = false }: ActionsProps) {
     return (
         <>
             <ButtonNavLink
@@ -38,6 +42,12 @@ function Actions() {
                 Update validator keys
             </ButtonNavLink>
             <ButtonNavLink
+                className="mB20 flex width100"
+                to={routes.ACCOUNTS_UPDATE_SUSPENSION}
+            >
+                {isSuspended ? 'Resume validation' : 'Suspend validation'}
+            </ButtonNavLink>
+            <ButtonNavLink
                 className="flex width100"
                 to={routes.ACCOUNTS_REMOVE_BAKER}
                 negative
@@ -48,12 +58,13 @@ function Actions() {
     );
 }
 
-interface Props {
+type Props = {
     account: Account;
     accountInfo: AccountInfo;
-}
+    accountExtras: AccountExtras | undefined;
+};
 
-export default function Baking({ account, accountInfo }: Props) {
+export default function Baking({ account, accountInfo, accountExtras }: Props) {
     const { pathname } = useLocation();
     const isBaker = accountInfo.type === AccountInfoType.Baker;
 
@@ -98,7 +109,7 @@ export default function Baking({ account, accountInfo }: Props) {
                 <StakingDetails
                     details={(accountInfo as AccountInfoBaker).accountBaker}
                 />
-                <Actions />
+                <Actions isSuspended={accountExtras?.isSuspended} />
             </Route>
         </Switch>
     );

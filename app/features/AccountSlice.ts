@@ -242,6 +242,11 @@ export const chosenAccountInfoSelector = (
         ]
     );
 
+export const chosenAccountExtrasSelector = (
+    state: RootState
+): AccountExtras | undefined =>
+    state.accounts.accountExtras?.[chosenAccountSelector(state)?.address ?? ''];
+
 export const accountInfoSelector = (account?: Account) => (
     state: RootState
 ): AccountInfo | undefined =>
