@@ -6,6 +6,7 @@
 
  -  Account validation/delegation overview now shows if the target pool is suspended or primed for suspension
  -  A notification is shown for accounts validating/delegating to a pool which is suspended
+ -  Support for updating validator score parameters on chains running protocol version 8 or above.
 
 ## 1.7.4
 
