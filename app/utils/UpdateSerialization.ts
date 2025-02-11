@@ -72,6 +72,7 @@ export enum OnChainUpdateType {
     UpdateBlockEnergyLimit = 20,
     UpdateGASRewardsV1 = 21,
     UpdateFinalizationCommitteeParameters = 22,
+    UpdateValidatorScoreParameters = 23,
 }
 
 /**
@@ -663,6 +664,8 @@ function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
             return OnChainUpdateType.UpdateTimeoutParameters;
         case UpdateType.UpdateGASRewardsV1:
             return OnChainUpdateType.UpdateGASRewardsV1;
+        case UpdateType.UpdateValidatorScoreParameters:
+            return OnChainUpdateType.UpdateValidatorScoreParameters;
         default:
             throw new Error(`An invalid update type was given: ${type}`);
     }
