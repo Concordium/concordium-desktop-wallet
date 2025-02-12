@@ -20,7 +20,7 @@ import {
 } from '~/utils/types';
 import styles from './TransactionList.module.scss';
 
-const microGtuDropAmount = '2000000000';
+const microGtuDropAmount = '20000000000';
 
 /**
  * Sends a CCD drop request to the wallet proxy. If successful a pending
