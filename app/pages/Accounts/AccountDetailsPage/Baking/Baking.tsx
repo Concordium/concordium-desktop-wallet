@@ -16,12 +16,14 @@ import UpdateBakerPool from './UpdateBakerPool';
 import UpdateBakerKeys from './UpdateBakerKeys';
 import StakingDetails from '../StakingDetails';
 import BakerSuspension from './BakerSuspension';
+import { useProtocolVersion } from '~/utils/dataHooks';
 
 type ActionsProps = {
     isSuspended: boolean | undefined;
 };
 
 function Actions({ isSuspended = false }: ActionsProps) {
+    const pv = useProtocolVersion(true);
     return (
         <>
             <ButtonNavLink
@@ -42,12 +44,14 @@ function Actions({ isSuspended = false }: ActionsProps) {
             >
                 Update validator keys
             </ButtonNavLink>
-            <ButtonNavLink
-                className="mB20 flex width100"
-                to={routes.ACCOUNTS_UPDATE_SUSPENSION}
-            >
-                {isSuspended ? 'Resume validation' : 'Suspend validation'}
-            </ButtonNavLink>
+            {pv !== undefined && pv >= 8n && (
+                <ButtonNavLink
+                    className="mB20 flex width100"
+                    to={routes.ACCOUNTS_UPDATE_SUSPENSION}
+                >
+                    {isSuspended ? 'Resume validation' : 'Suspend validation'}
+                </ButtonNavLink>
+            )}
             <ButtonNavLink
                 className="flex width100"
                 to={routes.ACCOUNTS_REMOVE_BAKER}

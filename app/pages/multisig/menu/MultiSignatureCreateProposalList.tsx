@@ -225,7 +225,7 @@ const accountTransactionTypes: TypeTuple[] = [
     ],
 ];
 
-const configureBakerLinks = (
+const configureBakerLinks = (pv: bigint) => (
     <>
         <ButtonNavLink
             className={styles.link}
@@ -251,12 +251,14 @@ const configureBakerLinks = (
         >
             Update validator keys
         </ButtonNavLink>
-        <ButtonNavLink
-            className={styles.link}
-            to={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_SUSPENSION}
-        >
-            Update validator suspension
-        </ButtonNavLink>
+        {pv >= 8n && (
+            <ButtonNavLink
+                className={styles.link}
+                to={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_SUSPENSION}
+            >
+                Update validator suspension
+            </ButtonNavLink>
+        )}
         <ButtonNavLink
             className={styles.link}
             to={routes.MULTISIGTRANSACTIONS_REMOVE_BAKER}
@@ -334,7 +336,7 @@ export default function MultiSignatureCreateProposalView() {
             {accountTransactionTypes.map(toLink(pv))}
             {pv !== undefined && hasDelegationProtocol(pv) && (
                 <>
-                    {configureBakerLinks}
+                    {configureBakerLinks(pv)}
                     {configureDelegationLinks}
                 </>
             )}
