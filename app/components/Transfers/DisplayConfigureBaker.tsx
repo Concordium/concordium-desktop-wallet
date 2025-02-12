@@ -11,6 +11,7 @@ import DisplayPublicKey from './DisplayPublicKey';
 import {
     displayPoolOpen,
     displayRestakeEarnings,
+    displaySuspension,
 } from '~/utils/transactionFlows/configureBaker';
 import DisplayBakerCommission from './DisplayBakerCommission';
 import DisplayMetadataUrl from './DisplayMetadataUrl';
@@ -37,7 +38,7 @@ export default function DisplayConfigureBaker({ transaction }: Props) {
             />
             <DisplayFee className={styles.fee} transaction={transaction} />
             {payload.stake !== undefined &&
-                (payload.stake === 0n ? (
+                (payload.stake.microCcdAmount === 0n ? (
                     <>
                         <h5 className={styles.title}>Stop Validation</h5>
                         <h5 className={styles.subtitle}>(Stop baking)</h5>
@@ -63,6 +64,14 @@ export default function DisplayConfigureBaker({ transaction }: Props) {
                     <h5 className={styles.title}>Pool status:</h5>
                     <p className={styles.amount}>
                         {displayPoolOpen(payload.openForDelegation)}
+                    </p>
+                </>
+            )}
+            {payload.suspended !== undefined && (
+                <>
+                    <h5 className={styles.title}>Suspension status:</h5>
+                    <p className={styles.amount}>
+                        {displaySuspension(payload.suspended)}
                     </p>
                 </>
             )}

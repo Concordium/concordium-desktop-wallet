@@ -15,6 +15,7 @@ import UpdateBakerStake from './UpdateBakerStake';
 import UpdateBakerPool from './UpdateBakerPool';
 import UpdateBakerKeys from './UpdateBakerKeys';
 import StakingDetails from '../StakingDetails';
+import BakerSuspension from './BakerSuspension';
 
 type ActionsProps = {
     isSuspended: boolean | undefined;
@@ -89,6 +90,15 @@ export default function Baking({ account, accountInfo, accountExtras }: Props) {
             <Route path={routes.ACCOUNTS_REMOVE_BAKER}>
                 {isBaker && (
                     <RemoveBaker account={account} accountInfo={accountInfo} />
+                )}
+            </Route>
+            <Route path={routes.ACCOUNTS_UPDATE_SUSPENSION}>
+                {isBaker && (
+                    <BakerSuspension
+                        account={account}
+                        accountInfo={accountInfo}
+                        isSuspended={accountExtras?.isSuspended}
+                    />
                 )}
             </Route>
             <Route path={routes.ACCOUNTS_UPDATE_BAKER_KEYS}>

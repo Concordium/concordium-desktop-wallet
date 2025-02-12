@@ -15,18 +15,20 @@ import routes from '~/constants/routes.json';
 import {
     BakerSuspensionDependencies,
     BakerSuspensionFlowState,
+    bakerSuspensionTitle,
     convertToBakerSuspensionTransaction,
 } from '~/utils/transactionFlows/bakerSuspension';
+import BakerSuspensionPage from '~/components/Transfers/configureBaker/BakerSuspensionPage';
 
 import AccountTransactionFlow, {
     AccountTransactionFlowLoading,
 } from '../../AccountTransactionFlow';
 
-interface Props
-    extends BakerSuspensionDependencies,
-        NotOptional<AccountAndNonce> {
-    accountInfo: AccountInfo;
-}
+type Props = BakerSuspensionDependencies &
+    NotOptional<AccountAndNonce> & {
+        accountInfo: AccountInfo;
+        isSuspended?: boolean;
+    };
 
 type UnsafeProps = MakeRequired<Partial<Props>, 'account' | 'accountInfo'>;
 
@@ -40,19 +42,29 @@ const withDeps = (component: ComponentType<Props>) =>
             ensureProps(
                 component,
                 hasNecessaryProps,
-                <AccountTransactionFlowLoading title={removeBakerTitle} />
+                <AccountTransactionFlowLoading title="Change suspension status" />
             )
         )
     );
 
 export default withDeps(function BakerSuspension(props: Props) {
-    const { nonce, account, exchangeRate, accountInfo } = props;
+    const {
+        nonce,
+        account,
+        exchangeRate,
+        accountInfo,
+        isSuspended = false,
+    } = props;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const convert = useCallback(
         () =>
-            convertToBakerSuspensionTransaction(account, nonce, exchangeRate)(),
-        [account, nonce, exchangeRate]
+            convertToBakerSuspensionTransaction(
+                account,
+                nonce,
+                exchangeRate
+            )(!isSuspended),
+        [account, nonce, exchangeRate, isSuspended]
     );
 
     return (
@@ -60,17 +72,18 @@ export default withDeps(function BakerSuspension(props: Props) {
             BakerSuspensionFlowState,
             ConfigureBakerTransaction
         >
-            title={removeBakerTitle}
+            title={bakerSuspensionTitle(isSuspended)}
             convert={convert}
             multisigRoute={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_SUSPENSION}
             firstPageBack
         >
             {{
-                confirm: {
+                suspended: {
                     render: (_, onNext) => (
                         <BakerSuspensionPage
                             onNext={onNext}
                             accountInfo={accountInfo}
+                            isSuspended={isSuspended}
                         />
                     ),
                 },

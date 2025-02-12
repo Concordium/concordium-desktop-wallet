@@ -52,6 +52,7 @@ export interface ConfigureBakerFlowState {
     commissions?: Commissions;
     metadataUrl?: MetadataUrl;
     keys?: BakerKeys;
+    suspended?: boolean;
 }
 
 export const getDefaultCommissions = (
@@ -91,6 +92,7 @@ export const toConfigureBakerPayload = ({
     openForDelegation,
     metadataUrl,
     commissions,
+    suspended,
 }: DeepPartial<Omit<ConfigureBakerFlowState, 'keys'>> &
     Pick<ConfigureBakerFlowState, 'keys'>): ConfigureBakerPayload => ({
     keys:
@@ -109,6 +111,7 @@ export const toConfigureBakerPayload = ({
     restakeEarnings: stake?.restake,
     openForDelegation,
     metadataUrl,
+    suspended,
     ...convertCommissionsToRewardFractions(commissions),
 });
 
@@ -158,6 +161,7 @@ export const getExistingBakerValues = (
                 accountBaker.bakerPoolInfo?.commissionRates
                     .finalizationCommission,
         },
+        suspended: accountBaker.isSuspended,
     };
 };
 
@@ -244,6 +248,10 @@ export function getBakerFlowChanges(
 
     if (newValues.keys !== undefined) {
         changes.keys = { ...newValues.keys };
+    }
+
+    if (newValues.suspended !== existingValues.suspended) {
+        changes.suspended = newValues.suspended;
     }
 
     return changes;
@@ -343,3 +351,6 @@ export const displayPoolOpen = (status: OpenStatus | OpenStatusText) => {
 
 export const displayRestakeEarnings = (value: boolean) =>
     value ? 'Yes' : 'No';
+
+export const displaySuspension = (suspend: boolean) =>
+    suspend ? 'Suspend validation' : 'Resume validation';

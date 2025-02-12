@@ -253,6 +253,12 @@ const configureBakerLinks = (
         </ButtonNavLink>
         <ButtonNavLink
             className={styles.link}
+            to={routes.MULTISIGTRANSACTIONS_UPDATE_BAKER_SUSPENSION}
+        >
+            Update validator suspension
+        </ButtonNavLink>
+        <ButtonNavLink
+            className={styles.link}
             to={routes.MULTISIGTRANSACTIONS_REMOVE_BAKER}
         >
             Stop validation

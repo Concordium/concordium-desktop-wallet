@@ -3,12 +3,15 @@ import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { multiplyFraction } from '../basicHelpers';
 import { createConfigureBakerTransaction } from '../transactionHelpers';
 import { Fraction, NotOptional, Account, ConfigureBaker } from '../types';
+import { ConfigureBakerFlowState } from './configureBaker';
 
-export type BakerSuspensionDependencies = NotOptional<ExchangeRate>;
+export type BakerSuspensionDependencies = NotOptional<ExchangeRate> & {
+    isSuspended?: boolean;
+};
 
-export interface BakerSuspensionFlowState {
-    confirm: undefined;
-}
+export type BakerSuspensionFlowState = NotOptional<
+    Pick<ConfigureBakerFlowState, 'suspended'>
+>;
 
 export type BakerSuspensionPayload = NotOptional<
     Pick<ConfigureBakerPayload, 'suspended'>
