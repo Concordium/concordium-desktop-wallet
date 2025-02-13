@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import { foundationTransactionsEnabledSelector } from '~/features/SettingsSlice';
@@ -6,7 +6,6 @@ import {
     TransactionTypes,
     UpdateType,
     TransactionKindId as TransactionKind,
-    TransactionKindId,
 } from '~/utils/types';
 import { createProposalRoute } from '~/utils/routerHelper';
 import { proposalsSelector } from '~/features/MultiSignatureSlice';
@@ -155,6 +154,12 @@ const updateInstructionTypes: TypeTuple[] = [
         'Update timeout parameters',
         hasConsensusUpdateProtocol,
     ],
+    [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.UpdateValidatorScoreParameters,
+        'Update validator score parameters',
+        (pv) => pv >= 8n,
+    ],
 ];
 
 /**
@@ -210,18 +215,6 @@ const accountTransactionTypes: TypeTuple[] = [
         TransactionKind.Update_baker_restake_earnings,
         'Update validator restake earnings',
         not(hasDelegationProtocol),
-    ],
-    [
-        TransactionTypes.AccountTransaction,
-        TransactionKind.Configure_baker,
-        'Configure validator',
-        hasDelegationProtocol,
-    ],
-    [
-        TransactionTypes.AccountTransaction,
-        TransactionKind.Configure_delegation,
-        'Configure delegation',
-        hasDelegationProtocol,
     ],
 ];
 
@@ -300,19 +293,13 @@ const toLink = (pv: bigint | undefined) => ([
 ]: TypeTuple) =>
     pv !== undefined &&
     filter(pv) && (
-        <Fragment key={`${transactionType}${specificType}`}>
-            {[
-                TransactionKindId.Configure_baker,
-                TransactionKindId.Configure_delegation,
-            ].every((k) => k !== specificType) && (
-                <ButtonNavLink
-                    className={styles.link}
-                    to={createProposalRoute(transactionType, specificType)}
-                >
-                    {label}
-                </ButtonNavLink>
-            )}
-        </Fragment>
+        <ButtonNavLink
+            key={`${transactionType}${specificType}`}
+            className={styles.link}
+            to={createProposalRoute(transactionType, specificType)}
+        >
+            {label}
+        </ButtonNavLink>
     );
 /**
  * Component that displays a menu containing the available multi signature

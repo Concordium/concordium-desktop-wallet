@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer/';
+import { ValidatorScoreParameters } from '@concordium/web-sdk';
 import {
     encodeWord32,
     encodeWord64,
@@ -71,6 +72,7 @@ export enum OnChainUpdateType {
     UpdateBlockEnergyLimit = 20,
     UpdateGASRewardsV1 = 21,
     UpdateFinalizationCommitteeParameters = 22,
+    UpdateValidatorScoreParameters = 23,
 }
 
 /**
@@ -243,6 +245,16 @@ export function serializeFinalizationCommitteeParameters(
             finalizationCommitteeParameters.relativeStakeThresholdFraction
         ),
     ]);
+}
+
+/**
+ * Serializes a ValidatorScore update to the byte format expected
+ * by the chain.
+ */
+export function serializeValidatorScoreParameters(
+    parameters: ValidatorScoreParameters
+) {
+    return encodeWord64(parameters.maxMissedRounds);
 }
 
 /**
@@ -652,6 +664,8 @@ function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
             return OnChainUpdateType.UpdateTimeoutParameters;
         case UpdateType.UpdateGASRewardsV1:
             return OnChainUpdateType.UpdateGASRewardsV1;
+        case UpdateType.UpdateValidatorScoreParameters:
+            return OnChainUpdateType.UpdateValidatorScoreParameters;
         default:
             throw new Error(`An invalid update type was given: ${type}`);
     }

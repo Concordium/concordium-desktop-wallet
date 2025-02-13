@@ -5,9 +5,14 @@ import type { HTMLAttributes } from 'react';
 import type { RegisterOptions } from 'react-hook-form';
 import {
     BakerId,
+    ChainParameters,
+    ChainParametersV0,
+    ChainParametersV1,
+    ChainParametersV2,
     ConfigureBakerPayload,
     OpenStatus,
     TransactionKindString,
+    ValidatorScoreParameters,
 } from '@concordium/web-sdk';
 import { RejectReason } from './node/RejectReasonHelper';
 import type { ExternalCredential, Genesis } from '~/database/types';
@@ -762,7 +767,8 @@ export type UpdateInstructionPayload =
     | TimeoutParameters
     | MinBlockTime
     | BlockEnergyLimit
-    | FinalizationCommitteeParameters;
+    | FinalizationCommitteeParameters
+    | ValidatorScoreParameters;
 
 // An actual signature, which goes into an account transaction.
 export type Signature = Hex;
@@ -820,6 +826,7 @@ export enum UpdateType {
     BlockEnergyLimit,
     FinalizationCommitteeParameters,
     UpdateGASRewardsV1,
+    UpdateValidatorScoreParameters,
 }
 
 export enum RootKeysUpdateTypes {
@@ -1656,3 +1663,12 @@ export declare type DeepPartial<T> = T extends Array<infer U>
           [K in keyof T]?: DeepPartial<T[K]>;
       }
     : T;
+
+export function isMinChainParametersV3(
+    chainParameters: ChainParameters
+): chainParameters is Exclude<
+    ChainParameters,
+    ChainParametersV0 | ChainParametersV1 | ChainParametersV2
+> {
+    return chainParameters.version >= 3;
+}

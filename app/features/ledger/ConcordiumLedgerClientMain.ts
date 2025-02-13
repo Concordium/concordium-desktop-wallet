@@ -1,7 +1,9 @@
+import { ValidatorScoreParameters } from '@concordium/web-sdk';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type HwTransport from '@ledgerhq/hw-transport';
 import { Buffer } from 'buffer/';
 import EventEmitter from 'events';
+
 import { Transport, TransportImpl } from './Transport';
 import {
     getPublicKey,
@@ -426,6 +428,20 @@ export default class ConcordiumLedgerClientMain {
         return signUpdateTransaction(
             this.transport,
             0x46,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signValidatorScoreParameters(
+        transaction: UpdateInstruction<ValidatorScoreParameters>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
+            this.transport,
+            0x47,
             path,
             transaction,
             serializedPayload
