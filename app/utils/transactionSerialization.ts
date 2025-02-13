@@ -1,5 +1,10 @@
 import { Buffer } from 'buffer/';
 import {
+    AccountTransactionType,
+    ConfigureBakerHandler,
+    serializeAccountTransactionPayload,
+} from '@concordium/web-sdk';
+import {
     AccountTransaction,
     TransactionKindId as TransactionKind,
     BlockItemKind,
@@ -28,7 +33,6 @@ import {
     ConfigureDelegationPayload,
     DelegationTarget,
     NotOptional,
-    BakerKeysWithProofs,
 } from './types';
 import {
     encodeWord32,
@@ -392,56 +396,18 @@ const serializeFromSpec = <T>(spec: SerializationSpec<T>) => (payload: T) => {
     return Buffer.concat(buffers);
 };
 
-const serializeVerifyKeys = serializeFromSpec<BakerKeysWithProofs>({
-    electionVerifyKey: putHexString,
-    electionKeyProof: putHexString,
-    signatureVerifyKey: putHexString,
-    signatureKeyProof: putHexString,
-    aggregationVerifyKey: putHexString,
-    aggregationKeyProof: putHexString,
-});
-
 export const getSerializedMetadataUrlWithLength = (url: string) =>
     getSerializedTextWithLength(url, encodeWord16);
 
-const serializeUrl = (url: string) => {
-    const { data, length } = getSerializedMetadataUrlWithLength(url);
-    return Buffer.concat([length, data]);
-};
-
-const configureBakerSerializationSpec: SerializationSpec<ConfigureBakerPayload> = {
-    stake: orUndefined(encodeWord64),
-    restakeEarnings: orUndefined(serializeBoolean),
-    openForDelegation: orUndefined(putInt8),
-    keys: orUndefined(serializeVerifyKeys),
-    metadataUrl: orUndefined(serializeUrl),
-    transactionFeeCommission: orUndefined(encodeWord32),
-    bakingRewardCommission: orUndefined(encodeWord32),
-    finalizationRewardCommission: orUndefined(encodeWord32),
-};
-
-export const getSerializedConfigureBakerBitmap = (
-    payload: ConfigureBakerPayload
-) =>
-    encodeWord16(
-        getPayloadBitmap(
-            payload,
-            Object.keys(configureBakerSerializationSpec) as Array<
-                keyof ConfigureBakerPayload
-            >
-        )
-    );
-
-export const serializeConfigureBakerPayload = serializeFromSpec<ConfigureBakerPayload>(
-    configureBakerSerializationSpec
-);
+export function serializeConfigureBakerPayload(payload: ConfigureBakerPayload) {
+    return new ConfigureBakerHandler().serialize(payload);
+}
 
 export function serializeConfigureBaker(payload: ConfigureBakerPayload) {
-    const type = putInt8(TransactionKind.Configure_baker);
-    const bitmap = getSerializedConfigureBakerBitmap(payload);
-    const sPayload = serializeConfigureBakerPayload(payload);
-
-    return Buffer.concat([type, bitmap, sPayload]);
+    return serializeAccountTransactionPayload({
+        payload,
+        type: AccountTransactionType.ConfigureBaker,
+    });
 }
 
 const serializeDelegationTarget = (t: DelegationTarget) =>

@@ -4,7 +4,11 @@ import { Redirect, useRouteMatch } from 'react-router';
 import { useSelector } from 'react-redux';
 import { AccountInfoType } from '@concordium/web-sdk';
 
-import { AccountInfo, ConfigureBaker, Fraction } from '~/utils/types';
+import {
+    AccountInfo,
+    ConfigureDelegation as ConfigureDelegationTransaction,
+    Fraction,
+} from '~/utils/types';
 import MultiSigAccountTransactionFlow, {
     MultiSigAccountTransactionFlowLoading,
     RequiredValues,
@@ -182,7 +186,7 @@ export default withDeps(function ConfigureDelegation({
             />
             <MultiSigAccountTransactionFlow<
                 ConfigureDelegationFlowState,
-                ConfigureBaker
+                ConfigureDelegationTransaction
             >
                 title={getTitle(isUpdate)}
                 convert={convert}
