@@ -52,7 +52,7 @@ export default class ValidatorScoreParametersHandler
         }
 
         if (!isMinChainParametersV3(chainParameters)) {
-            throw new Error('Update incompatible with chain protocol version');
+            throw new Error('Connected node uses outdated protocol version. Expect protocol version that supports chain parameters V3.');
         }
 
         const sequenceNumber =
