@@ -232,7 +232,7 @@ export default function DelegationAmountPage({
                         Enter your new desired amount to stake. If you increase
                         the stake it will take effect at the next pay day, and
                         if you decrease the stake it will take effect at the
-                        first pay day after a cool-down period.
+                        first pay day after a cooldown period.
                     </p>
                 )}
                 {pendingChange !== undefined && (

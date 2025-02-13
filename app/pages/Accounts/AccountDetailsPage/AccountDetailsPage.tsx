@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import { isBakerAccount, isDelegatorAccount } from '@concordium/web-sdk';
+import { AccountInfoType } from '@concordium/web-sdk';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, Route } from 'react-router';
@@ -7,6 +7,7 @@ import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
 import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
+    chosenAccountExtrasSelector,
 } from '~/features/AccountSlice';
 import routes from '~/constants/routes.json';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
@@ -35,6 +36,7 @@ const ToCreateScheduled = () => (
 export default withAccountSync(function DetailsPage() {
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
+    const accountExtras = useSelector(chosenAccountExtrasSelector);
     const accountChanged = useSelector(
         (s: RootState) => s.accounts.accountChanged
     );
@@ -43,9 +45,11 @@ export default withAccountSync(function DetailsPage() {
         account ? accountHasDeployedCredentialsSelector(account) : () => false
     );
 
-    const isBaker = accountInfo !== undefined && isBakerAccount(accountInfo);
+    const isBaker =
+        accountInfo !== undefined && accountInfo.type === AccountInfoType.Baker;
     const isDelegating =
-        accountInfo !== undefined && isDelegatorAccount(accountInfo);
+        accountInfo !== undefined &&
+        accountInfo.type === AccountInfoType.Delegator;
     const isDelegationPV = pv !== undefined && hasDelegationProtocol(pv);
 
     if (!account) {
@@ -91,6 +95,7 @@ export default withAccountSync(function DetailsPage() {
                             <Baking
                                 account={account}
                                 accountInfo={accountInfo}
+                                accountExtras={accountExtras}
                             />
                         ) : (
                             <ToAccounts />

@@ -1,3 +1,5 @@
+import { CcdAmount } from '@concordium/web-sdk';
+
 import { ExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { multiplyFraction } from '../basicHelpers';
 import { createConfigureBakerTransaction } from '../transactionHelpers';
@@ -27,7 +29,7 @@ export const convertToRemoveBakerTransaction = (
     exchangeRate: Fraction
 ) => (expiry?: Date): ConfigureBaker => {
     const payload: RemoveBakerPayload = {
-        stake: BigInt(0),
+        stake: CcdAmount.zero(),
     };
 
     const transaction = createConfigureBakerTransaction(

@@ -21,12 +21,12 @@ const RemoveBakerPage = withPendingBakerChangeGuard(
             <>
                 <p className="flexChildFill">
                     This will return the staked amount to the public balance of
-                    the account at the first pay day after a cool-down period.
+                    the account at the first pay day after a cooldown period.
                     {cooldownUntil && (
                         <>
                             <br />
                             <br />
-                            The cool-down period ends at
+                            The cooldown period ends at
                             <span className="block bodyEmphasized mV10">
                                 {getFormattedDateString(cooldownUntil)}.
                             </span>

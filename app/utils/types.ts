@@ -5,6 +5,7 @@ import type { HTMLAttributes } from 'react';
 import type { RegisterOptions } from 'react-hook-form';
 import {
     BakerId,
+    ConfigureBakerPayload,
     OpenStatus,
     TransactionKindString,
 } from '@concordium/web-sdk';
@@ -16,7 +17,7 @@ export type {
     AccountEncryptedAmount,
     BakerId,
 } from '@concordium/web-sdk';
-export { OpenStatus, TransactionKindString };
+export { OpenStatus, TransactionKindString, ConfigureBakerPayload };
 
 export type Dispatch = GenericDispatch<AnyAction>;
 
@@ -325,17 +326,6 @@ export interface BakerKeysWithProofs {
     electionKeyProof: Hex;
     aggregationVerifyKey: Hex;
     aggregationKeyProof: Hex;
-}
-
-export interface ConfigureBakerPayload {
-    stake?: Amount;
-    restakeEarnings?: boolean;
-    openForDelegation?: OpenStatus;
-    keys?: BakerKeysWithProofs;
-    metadataUrl?: string;
-    transactionFeeCommission?: RewardFraction;
-    bakingRewardCommission?: RewardFraction;
-    finalizationRewardCommission?: RewardFraction;
 }
 
 export type DelegationTarget = null | BakerId;

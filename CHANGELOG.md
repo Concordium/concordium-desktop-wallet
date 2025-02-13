@@ -6,6 +6,7 @@
 
  -  Account validation/delegation overview now shows if the target pool is suspended or primed for suspension
  -  A notification is shown for accounts validating/delegating to a pool which is suspended
+ -  Support changing the suspension status of validators. This requires the corresponding version of the concordium ledger app which also adds support for this feature.
 
 ## 1.7.4
 

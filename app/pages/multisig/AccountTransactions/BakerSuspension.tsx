@@ -3,38 +3,42 @@ import React, { ComponentType, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, useRouteMatch } from 'react-router';
 import { AccountInfoType } from '@concordium/web-sdk';
-
-import { ConfigureDelegation, Fraction } from '~/utils/types';
-import withExchangeRate from '~/components/Transfers/withExchangeRate';
-import { ensureProps } from '~/utils/componentHelpers';
-import { isDefined } from '~/utils/basicHelpers';
-import { accountsInfoSelector } from '~/features/AccountSlice';
-import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
-import {
-    convertToRemoveDelegationTransaction,
-    RemoveDelegationDependencies,
-    RemoveDelegationFlowState,
-    removeDelegationTitle,
-} from '~/utils/transactionFlows/removeDelegation';
-import { getEstimatedConfigureDelegationFee } from '~/utils/transactionFlows/configureDelegation';
-import RemoveDelegationPage from '~/components/Transfers/configureDelegation/RemoveDelegationPage';
-import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
-
+import { ConfigureBaker, Fraction } from '~/utils/types';
 import MultiSigAccountTransactionFlow, {
     MultiSigAccountTransactionFlowLoading,
     RequiredValues,
 } from './MultiSigAccountTransactionFlow';
 import { TitleDetail } from './proposal-details/shared';
+import withExchangeRate from '~/components/Transfers/withExchangeRate';
+import { ensureProps } from '~/utils/componentHelpers';
+import { isDefined } from '~/utils/basicHelpers';
+import { accountsInfoSelector } from '~/features/AccountSlice';
+import {
+    bakerSuspensionTitle,
+    convertToBakerSuspensionTransaction,
+    BakerSuspensionDependencies,
+    BakerSuspensionFlowState,
+} from '~/utils/transactionFlows/bakerSuspension';
+import BakerSuspensionPage from '~/components/Transfers/configureBaker/BakerSuspensionPage';
+import { getEstimatedConfigureBakerFee } from '~/utils/transactionFlows/configureBaker';
+import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
-interface DisplayProps
-    extends Partial<RequiredValues & RemoveDelegationFlowState> {
+import displayTransferStyles from '~/components/Transfers/transferDetails.module.scss';
+
+type DisplayProps = Partial<RequiredValues & BakerSuspensionFlowState> & {
     exchangeRate: Fraction;
-}
-const DisplayValues = ({ account, exchangeRate }: DisplayProps) => {
+    isSuspended: boolean;
+};
+
+const DisplayValues = ({
+    account,
+    exchangeRate,
+    isSuspended,
+}: DisplayProps) => {
     const estimatedFee =
         account !== undefined
-            ? getEstimatedConfigureDelegationFee(
-                  { delegate: { amount: '0' } },
+            ? getEstimatedConfigureBakerFee(
+                  { suspended: !isSuspended },
                   exchangeRate,
                   account.signatureThreshold
               )
@@ -46,12 +50,12 @@ const DisplayValues = ({ account, exchangeRate }: DisplayProps) => {
                 className={displayTransferStyles.fee}
                 estimatedFee={estimatedFee}
             />
-            <TitleDetail title="Stop delegation" />
+            <TitleDetail title={bakerSuspensionTitle(isSuspended)} />
         </>
     );
 };
 
-type Props = RemoveDelegationDependencies;
+type Props = BakerSuspensionDependencies;
 type UnsafeProps = Partial<Props>;
 
 const hasNecessaryProps = (props: UnsafeProps): props is Props =>
@@ -62,51 +66,57 @@ const withDeps = (component: ComponentType<Props>) =>
         ensureProps(
             component,
             hasNecessaryProps,
-            <MultiSigAccountTransactionFlowLoading
-                title={removeDelegationTitle}
-            />
+            <MultiSigAccountTransactionFlowLoading title="Change suspension status" />
         )
     );
 
-export default withDeps(function RemoveDelegation({ exchangeRate }: Props) {
+export default withDeps(function BakerSuspension({
+    exchangeRate,
+    isSuspended = false,
+}: Props) {
     const accountsInfo = useSelector(accountsInfoSelector);
     const { path: matchedPath } = useRouteMatch();
 
     const convert = useCallback(
         (
-            { account, expiry }: RequiredValues & RemoveDelegationFlowState,
+            { account, expiry }: RequiredValues & BakerSuspensionFlowState,
             nonce: bigint
         ) =>
-            convertToRemoveDelegationTransaction(
+            convertToBakerSuspensionTransaction(
                 account,
                 nonce,
                 exchangeRate
-            )(expiry),
-        [exchangeRate]
+            )(isSuspended, expiry),
+        [exchangeRate, isSuspended]
     );
 
     return (
         <MultiSigAccountTransactionFlow<
-            RemoveDelegationFlowState,
-            ConfigureDelegation
+            BakerSuspensionFlowState,
+            ConfigureBaker
         >
-            title={removeDelegationTitle}
+            title={bakerSuspensionTitle(isSuspended)}
             convert={convert}
             accountFilter={(_, i) =>
-                isDefined(i) && i.type === AccountInfoType.Delegator
+                isDefined(i) && i.type === AccountInfoType.Baker
             }
             preview={(p) => (
-                <DisplayValues {...p} exchangeRate={exchangeRate} />
+                <DisplayValues
+                    {...p}
+                    exchangeRate={exchangeRate}
+                    isSuspended={isSuspended}
+                />
             )}
         >
             {({ account }) => ({
-                confirm: {
-                    title: 'Cooldown period',
+                suspended: {
+                    title: 'Change suspension status',
                     render: (_, onNext) =>
                         isDefined(account) ? (
-                            <RemoveDelegationPage
+                            <BakerSuspensionPage
                                 onNext={onNext}
                                 accountInfo={accountsInfo[account.address]}
+                                isSuspended={isSuspended}
                             />
                         ) : (
                             <Redirect to={matchedPath} />

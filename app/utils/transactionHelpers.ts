@@ -6,6 +6,7 @@ import {
     TransactionKindString,
     AccountInfoType,
     CcdAmount,
+    ConfigureBakerPayload,
 } from '@concordium/web-sdk';
 import { Validate } from 'react-hook-form';
 import {
@@ -45,10 +46,9 @@ import {
     SimpleTransferWithMemo,
     TransactionStatus,
     SchedulePoint,
-    ConfigureBakerPayload,
-    ConfigureBaker,
     ConfigureDelegationPayload,
     ConfigureDelegation,
+    ConfigureBaker,
 } from './types';
 import {
     getTransactionEnergyCost,
