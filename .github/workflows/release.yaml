@@ -71,6 +71,7 @@ jobs:
         env:
           TAG: ${{ github.ref_name}}
         run: |
+          set +e
           # Extract version number
           VERSION=$(jq '.version' -r app/package.json)
 
