@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.8.0
+
 ### Added
 
  -  Account validation/delegation overview now shows if the target pool is suspended or primed for suspension
