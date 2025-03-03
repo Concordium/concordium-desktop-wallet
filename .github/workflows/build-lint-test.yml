@@ -12,6 +12,7 @@ on:
 
 env:
     NODE_VERSION: 18
+    COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
 
 jobs:
     dependencies:
@@ -52,7 +53,9 @@ jobs:
 
             - name: Download dependencies
               if: steps.fetch-dependencies.outputs.cache-hit != 'true'
-              run: yarn
+              run: |
+                corepack enable
+                yarn
 
     build:
         runs-on: ubuntu-20.04
@@ -77,7 +80,9 @@ jobs:
                   key: ${{ runner.os }}-v3-${{ hashFiles('**/yarn.lock', '**/rust-src/') }}
 
             - name: Build
-              run: yarn build-ci
+              run: |
+                corepack enable
+                yarn build-ci
 
             - name: Save build artifacts in cache
               uses: actions/cache@v2
@@ -120,7 +125,9 @@ jobs:
                   key: ${{ runner.os }}-v3-${{ hashFiles('**/app/proto/', '**/app/main.prod.js', '**/app/dist/') }}
 
             - name: Lint
-              run: yarn lint
+              run: |
+                corepack enable
+                yarn lint
 
     test:
         runs-on: ubuntu-20.04
@@ -154,4 +161,6 @@ jobs:
                   key: ${{ runner.os }}-v3-${{ hashFiles('**/app/proto/', '**/app/main.prod.js', '**/app/dist/') }}
 
             - name: Test
-              run: yarn test
+              run: |
+                corepack enable
+                yarn test

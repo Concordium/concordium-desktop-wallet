@@ -15,6 +15,7 @@ env:
   ECR_REPO: "192549843005.dkr.ecr.eu-west-1.amazonaws.com/concordium/desktop-wallet-ci"
   WASM-PACK_VERSION: "v0.9.1"
   NODE_VERSION: "14.16.0"
+  COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
 
 permissions:
   id-token: write
@@ -166,6 +167,7 @@ jobs:
         run: |
           set +e
 
+          corepack enable
           yarn
           yarn package
 
@@ -184,7 +186,7 @@ jobs:
           aws-region: "eu-west-1"
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
           role-session-name: ReleaseDesktopWalletSession
-          
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -225,7 +227,7 @@ jobs:
             echo "::error:: $EC"
             exit 1
           fi
-          
+
       - name: Output dependency versions
         shell: bash
         run: |
@@ -235,10 +237,11 @@ jobs:
           echo "::notice::python version: $(python --version)"
           echo "::notice::rustup version: $(rustup show)"
           echo "::notice::wasm-pack version: $(wasm-pack --version)"
-          
+
       - name: Build and push desktop wallet
         shell: bash
         run: |
+          corepack enable
           yarn --network-timeout 1000000
           yarn package-win-no-sign
 
