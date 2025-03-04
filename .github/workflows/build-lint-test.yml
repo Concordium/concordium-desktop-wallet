@@ -12,6 +12,7 @@ on:
 
 env:
     NODE_VERSION: 18
+    COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
 
 jobs:
     dependencies:
@@ -24,7 +25,7 @@ jobs:
 
             - name: Cache dependencies
               id: fetch-dependencies
-              uses: actions/cache@v2
+              uses: actions/cache@v4
               with:
                   path: |
                       **/node_modules
@@ -52,7 +53,9 @@ jobs:
 
             - name: Download dependencies
               if: steps.fetch-dependencies.outputs.cache-hit != 'true'
-              run: yarn
+              run: |
+                corepack enable
+                yarn
 
     build:
         runs-on: ubuntu-20.04
@@ -67,7 +70,7 @@ jobs:
                   node-version: ${{ env.NODE_VERSION }}
 
             - name: Get cached dependencies
-              uses: actions/cache@v2
+              uses: actions/cache@v4
               with:
                   path: |
                       **/node_modules
@@ -77,10 +80,12 @@ jobs:
                   key: ${{ runner.os }}-v3-${{ hashFiles('**/yarn.lock', '**/rust-src/') }}
 
             - name: Build
-              run: yarn build-ci
+              run: |
+                corepack enable
+                yarn build-ci
 
             - name: Save build artifacts in cache
-              uses: actions/cache@v2
+              uses: actions/cache@v4
               with:
                   path: |
                       **/app/proto
@@ -101,7 +106,7 @@ jobs:
                   node-version: ${{ env.NODE_VERSION }}
 
             - name: Get cached dependencies
-              uses: actions/cache@v2
+              uses: actions/cache@v4
               with:
                   path: |
                       **/node_modules
@@ -111,7 +116,7 @@ jobs:
                   key: ${{ runner.os }}-v3-${{ hashFiles('**/yarn.lock', '**/rust-src/') }}
 
             - name: Get build cache
-              uses: actions/cache@v2
+              uses: actions/cache@v4
               with:
                   path: |
                       **/app/proto
@@ -120,7 +125,9 @@ jobs:
                   key: ${{ runner.os }}-v3-${{ hashFiles('**/app/proto/', '**/app/main.prod.js', '**/app/dist/') }}
 
             - name: Lint
-              run: yarn lint
+              run: |
+                corepack enable
+                yarn lint
 
     test:
         runs-on: ubuntu-20.04
@@ -135,7 +142,7 @@ jobs:
                   node-version: ${{ env.NODE_VERSION }}
 
             - name: Get cached dependencies
-              uses: actions/cache@v2
+              uses: actions/cache@v4
               with:
                   path: |
                       **/node_modules
@@ -145,7 +152,7 @@ jobs:
                   key: ${{ runner.os }}-v3-${{ hashFiles('**/yarn.lock', '**/rust-src/') }}
 
             - name: Get build cache
-              uses: actions/cache@v2
+              uses: actions/cache@v4
               with:
                   path: |
                       **/app/proto
@@ -154,4 +161,6 @@ jobs:
                   key: ${{ runner.os }}-v3-${{ hashFiles('**/app/proto/', '**/app/main.prod.js', '**/app/dist/') }}
 
             - name: Test
-              run: yarn test
+              run: |
+                corepack enable
+                yarn test
