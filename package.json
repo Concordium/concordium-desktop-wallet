@@ -284,7 +284,7 @@
         "use-react-screenshot": "^1.0.2",
         "winston": "^3.3.3"
     },
-    "devEngines": {
+    "engines": {
         "node": ">=22.x",
         "npm": ">=10.x",
         "yarn": ">=4.x"

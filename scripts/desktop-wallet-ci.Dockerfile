@@ -20,7 +20,6 @@ RUN curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 ARG NODE_VERSION
 RUN . $NVM_DIR/nvm.sh \
     && nvm install ${NODE_VERSION} \
-    && npm install --global yarn \
     && nvm use ${NODE_VERSION}
 
 ENV PATH=$NVM_DIR/versions/node/v${NODE_VERSION}/bin:${PATH}
