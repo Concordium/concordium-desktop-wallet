@@ -13,14 +13,15 @@ RUN apt-get update && apt-get install -y \
     libusb-1.0-0-dev \
     rpm \
     awscli
-    
+
 RUN curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
 # Default value is set in Github Actions
 ARG NODE_VERSION
 RUN . $NVM_DIR/nvm.sh \
     && nvm install ${NODE_VERSION} \
-    && npm install --global yarn \
+    # no need to install yarn globally if we're using corepack
+    #&& npm install --global yarn \
     && nvm use ${NODE_VERSION}
 
 ENV PATH=$NVM_DIR/versions/node/v${NODE_VERSION}/bin:${PATH}
