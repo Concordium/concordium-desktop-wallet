@@ -4,10 +4,9 @@ This is the repository for the desktop wallet.
 
 You need the following to build and run the project:
 
--   Nodejs 16.20.2 (use NVM to target specific node version easily)
--   NPM 6.14.11 (comes automatically with node version above)
--   Yarn 1.x (https://classic.yarnpkg.com/en/docs/install)
--   Python 2.x (https://www.python.org/downloads/)
+-   Nodejs 18.20.7 (use NVM to target specific node version easily)
+-   Yarn 4.x (https://classic.yarnpkg.com/en/docs/install)
+-   Python 3.x (https://www.python.org/downloads/)
 -   Rust (https://www.rust-lang.org/tools/install)
 -   Wasm-pack (https://rustwasm.github.io/wasm-pack/installer/)
 
@@ -37,7 +36,7 @@ git submodule update --init
 Then install dependencies:
 
 ```bash
-PYTHON=python2.7 yarn
+yarn
 ```
 
 ### Windows

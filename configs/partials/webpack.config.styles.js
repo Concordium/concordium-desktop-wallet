@@ -64,7 +64,7 @@ module.exports = (isProd) => ({
                         options: {
                             sourceMap: true,
                             sassOptions: {
-                                includePaths: ['node_modules', 'app/styles'],
+                                loadPaths: ['node_modules', 'app/styles'],
                             },
                         },
                     },
@@ -91,7 +91,7 @@ module.exports = (isProd) => ({
                         options: {
                             sourceMap: true,
                             sassOptions: {
-                                includePaths: ['node_modules', 'app/styles'],
+                                loadPaths: ['node_modules', 'app/styles'],
                             },
                         },
                     },

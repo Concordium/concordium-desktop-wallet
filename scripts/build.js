@@ -32,9 +32,13 @@ builder.build({
         },
         appId,
         win: {
-            certificateSubjectName: skipSigning
-                ? undefined
-                : 'Concordium Software ApS',
+            // certificateSha1: skipSigning
+            //     ? undefined
+            //     : 'FD73F493EEF2A643CD5608E0B6F5098B04231C84',
+            // certificateSubjectName: skipSigning
+            //     ? undefined
+            //     : 'Concordium Software ApS',
+            publisherName: 'f6adae39-c0ab-48af-b31b-651390931c20'
         },
     },
     publish: 'never',
