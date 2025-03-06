@@ -20,7 +20,7 @@
         "@types/ledgerhq__hw-transport-node-hid": "^4.22.2",
         "knex": "0.95.5",
         "node-abi": "^2.30.0",
-        "sqlite3": "5.0.0",
+        "sqlite3": "5.1.7",
         "usb": "2.9.0"
     },
     "resolutions": {
