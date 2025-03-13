@@ -37,9 +37,6 @@ builder.build({
         },
         appId,
         win: {
-            artifactName: name + '-${version}.${ext}',
-            target: ['nsis'],
-            sign: __dirname + '/customSign.js',
             ...(skipSigning
                 ? undefined
                 : {

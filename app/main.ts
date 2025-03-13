@@ -137,9 +137,9 @@ const createWindow = async () => {
                 case 'testnet':
                 case 'stagenet':
                     initAutoUpdate(mainWindow, process.env.TARGET_NET);
+                default:
             }
         }
-
         mainWindow.webContents.send(ipcRendererCommands.didFinishLoad);
     });
 

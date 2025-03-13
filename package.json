@@ -76,7 +76,8 @@
             "artifactName": "${name}-${version}.${ext}",
             "target": [
                 "nsis"
-            ]
+            ],
+            "sign": "scripts/customSign.js"
         },
         "nsis": {
             "oneClick": false,

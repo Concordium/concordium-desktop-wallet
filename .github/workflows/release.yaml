@@ -81,9 +81,10 @@ jobs:
           submodules: recursive
           ref: ${{ github.ref_name }}
 
-      - name: Install native packages (Ubuntu only)
-        if: matrix.platform.id == 'linux'
-        run: sudo apt-get install -y libusb-1.0 libudev-dev rpm
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -93,37 +94,15 @@ jobs:
           # Should be removed again once the warnings are resolved.
           rustflags: ""
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        env:
-          # Prevent corepack from prompting for permission to download.
-          COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
-        run: |
-           corepack enable
-           echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
-
-      - uses: actions/cache@v4
-        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
       - name: Setup wasm-pack
         uses: jetli/wasm-pack-action@v0.4.0
         with:
           version: ${{ env.WASM-PACK_VERSION }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: List dependency versions
         run: |
@@ -134,8 +113,17 @@ jobs:
           echo "::notice::rustup version: $(rustup show)"
           echo "::notice::wasm-pack version: $(wasm-pack --version)"
 
+      - name: Install native packages (Ubuntu only)
+        if: matrix.platform.id == 'linux'
+        run: sudo apt-get install -y libusb-1.0 libudev-dev rpm
+
       - name: Install Node packages
-        run: yarn
+        env:
+          # Prevent corepack from prompting for permission to download.
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+        run: |
+          corepack enable
+          yarn
 
       - name: Install DigiCert Client tools (Windows only)
         if: matrix.platform.id == 'windows'
@@ -224,38 +212,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # - name: Setup Python
-      #   uses: actions/setup-python@v5
-      #   with:
-      #     python-version: ${{ env.PYTHON_VERSION }}
-
-      # - name: Install native packages
-      #   run: sudo apt-get install -y libusb-1.0 libudev-dev rpm
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install native packages
+        run: sudo apt-get install -y libusb-1.0 libudev-dev rpm
+
+      - name: Install Node packages
         env:
           # Prevent corepack from prompting for permission to download.
           COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
         run: |
-           corepack enable
-           echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
-
-      - uses: actions/cache@v4
-        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
-      # - name: Install Node packages
-      #   run: yarn
+          corepack enable
+          yarn
 
       - uses: actions/download-artifact@v4
       - run: |
