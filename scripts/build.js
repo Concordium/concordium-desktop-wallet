@@ -17,15 +17,20 @@ let {
     productName,
     build: { appId },
 } = packageJson;
+let publishChannel;
 
 if (targetNet && targetNet !== 'mainnet') {
     name = `${name}-${targetNet}`;
     productName = `${productName} ${targetNet}`;
     appId = `${appId}-${targetNet}`;
+    publishChannel = targetNet;
 }
 
 builder.build({
     config: {
+        publish: {
+            channel: publishChannel,
+        },
         extraMetadata: {
             name,
             productName,

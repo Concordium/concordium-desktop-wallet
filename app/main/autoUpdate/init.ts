@@ -64,11 +64,23 @@ export function removeAutoUpdateHandlersAndListeners() {
  * If adding a new handler to this method, then ensure that 'removeAutoUpdateHandlersAndListeners'
  * above is updated to keep in sync with this method.
  */
-export function initAutoUpdate(mainWindow: BrowserWindow) {
+export function initAutoUpdate(
+    mainWindow: BrowserWindow,
+    network: 'mainnet' | 'testnet' | 'stagenet'
+) {
     const canAutoUpdate =
         process.platform === 'win32' ||
         process.platform === 'darwin' ||
         process.env.APPIMAGE;
+
+    // For mainnet we use the default channel
+    const channel = network === 'mainnet' ? undefined : network;
+    autoUpdater.setFeedURL({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...(build.publish as any),
+        url: updateFeed,
+        channel,
+    });
 
     autoUpdater.on('update-available', (info) =>
         mainWindow.webContents.send(updateAvailable, info, canAutoUpdate)

@@ -81,10 +81,9 @@ jobs:
           submodules: recursive
           ref: ${{ github.ref_name }}
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
+      - name: Install native packages (Ubuntu only)
+        if: matrix.platform.id == 'linux'
+        run: sudo apt-get install -y libusb-1.0 libudev-dev rpm
 
       - name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -94,15 +93,37 @@ jobs:
           # Should be removed again once the warnings are resolved.
           rustflags: ""
 
-      - name: Setup wasm-pack
-        uses: jetli/wasm-pack-action@v0.4.0
-        with:
-          version: ${{ env.WASM-PACK_VERSION }}
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        env:
+          # Prevent corepack from prompting for permission to download.
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+        run: |
+           corepack enable
+           echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v4
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Setup wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          version: ${{ env.WASM-PACK_VERSION }}
 
       - name: List dependency versions
         run: |
@@ -113,17 +134,8 @@ jobs:
           echo "::notice::rustup version: $(rustup show)"
           echo "::notice::wasm-pack version: $(wasm-pack --version)"
 
-      - name: Install native packages (Ubuntu only)
-        if: matrix.platform.id == 'linux'
-        run: sudo apt-get install -y libusb-1.0 libudev-dev rpm
-
       - name: Install Node packages
-        env:
-          # Prevent corepack from prompting for permission to download.
-          COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
-        run: |
-          corepack enable
-          yarn
+        run: yarn
 
       - name: Install DigiCert Client tools (Windows only)
         if: matrix.platform.id == 'windows'
@@ -176,7 +188,7 @@ jobs:
       - name: Build
         env:
           # Set the target Concordium network for the build.
-          TARGET_NET: ${{ needs.metadata.outputs.TARGET_NET}}
+          TARGET_NET: ${{ needs.metadata.outputs.TARGET_NET }}
           # Apple code sign variables:
           APPLEIDPASS: ${{ secrets.APPLEIDPASS }}
           APPLEID: ${{ secrets.APPLEID }}
@@ -198,7 +210,9 @@ jobs:
           if-no-files-found: error
           path: |
             release/concordium-desktop-wallet-*
-            release/*.yml
+            release/latest*.yml
+            release/testnet*.yml
+            release/stagenet*.yml
 
   release:
     name: Attach to Github release (Auto update prompts will appear for supported platforms).
@@ -210,26 +224,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # - name: Setup Python
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: ${{ env.PYTHON_VERSION }}
+
+      # - name: Install native packages
+      #   run: sudo apt-get install -y libusb-1.0 libudev-dev rpm
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install native packages
-        run: sudo apt-get install -y libusb-1.0 libudev-dev rpm
-
-      - name: Install Node packages
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
         env:
           # Prevent corepack from prompting for permission to download.
           COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
         run: |
-          corepack enable
-          yarn
+           corepack enable
+           echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v4
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      # - name: Install Node packages
+      #   run: yarn
 
       - uses: actions/download-artifact@v4
       - run: |
@@ -241,10 +267,11 @@ jobs:
       - name: Retrieve sign key and generate verification assets
         env:
           FILE_DIGEST_SIGN_KEY_BASE64: ${{ secrets.FILE_DIGEST_SIGN_KEY_BASE64 }}
+          TARGET_NET: ${{ needs.metadata.outputs.TARGET_NET }}
         run: |
           SIGN_KEY_PATH=$RUNNER_TEMP/private-sign-key.pem
           echo $FILE_DIGEST_SIGN_KEY_BASE64 | base64 --decode > $SIGN_KEY_PATH
-          yarn generate-verification-assets --win --mac --linux --pkey $SIGN_KEY_PATH --dir uploads
+          yarn generate-verification-assets --pkey $SIGN_KEY_PATH --dir ./uploads
 
       # - name: Attach binaries to an existing release.
       #   env:

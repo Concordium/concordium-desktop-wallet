@@ -68,6 +68,11 @@ const { argv } = yargs
         description: '(Optional) Include Linux targets as digest input',
         type: 'boolean',
     })
+    .option('network', {
+        description:
+            '(Optional) Network target to use for finding files (attempts to read TARGET_NET environment variable)',
+        default: process.env.TARGET_NET ?? 'mainnet',
+    })
     .help()
     .alias('help', 'h');
 
@@ -81,6 +86,7 @@ const {
     linux,
     dir,
     appVersion,
+    network,
 } = argv;
 
 function loadFileIntoCrypto(cryptoObj, file) {
@@ -222,7 +228,13 @@ if (mac || win || linux) {
 const filesToDigest = inputFile
     ? [inputFile]
     : extensions
-          .map((e) => path.resolve(dir, `${app.name}-${appVersion}.${e}`))
+          .map((e) => {
+              const networkSuffix = network === 'mainnet' ? '' : `-${network}`;
+              return path.resolve(
+                  dir,
+                  `${app.name}${networkSuffix}-${appVersion}.${e}`
+              );
+          })
           .filter(fs.existsSync);
 
 (async () => {
