@@ -185,8 +185,8 @@ The script has a number of optional runtime arguments, which are documented in t
 
 The wallet is released for each Concordium network and to release version `x.y.z` for `network`, where network is either `mainnet`, `testnet` or `stagenet`:
 
-#. Make pull request updating the version `x.y.z` in `app/package.json` and updating `CHANGELOG.md`.
-#. Once reviewed and merged into `main` branch, create and push a git tag of the form `desktop-wallet/{x.y.z}-{network}` on the commit to start the release pipeline.
+1. Make pull request updating the version `x.y.z` in `app/package.json` and updating `CHANGELOG.md`.
+2. Once reviewed and merged into `main` branch, create and push a git tag of the form `desktop-wallet/{x.y.z}-{network}` on the commit to start the release pipeline.
 
    E.g release of `1.8.0` to Concordium Mainnet:
 
@@ -197,7 +197,7 @@ The wallet is released for each Concordium network and to release version `x.y.z
    git push --tag origin desktop-wallet/1.8.0-mainnet
    ```
 
-#. Create a Github release draft (don't make it public yet) for the tag, summarize the changes in the description.
-#. The release pipeline needs access to secrets for code signing, so it require approval before it can run.
-#. Once the build step is complete the build artifacts can be [downloaded and tested from the run.](https://github.com/Concordium/concordium-desktop-wallet/actions/workflows/release.yaml) before the last approval will generate the verification assets and upload everything to the Github release associated with the tag.
-#. Verify the content and publish the Github release.
+3. Create a Github release draft (don't make it public yet) for the tag, summarize the changes in the description.
+4. The release pipeline needs access to secrets for code signing, so it require approval before it can run.
+5. Once the build step is complete the build artifacts can be [downloaded and tested from the run.](https://github.com/Concordium/concordium-desktop-wallet/actions/workflows/release.yaml) before the last approval will generate the verification assets and upload everything to the Github release associated with the tag.
+6. Verify the content and publish the Github release.
