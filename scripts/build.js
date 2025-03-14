@@ -5,36 +5,44 @@ const chalk = require('chalk');
 const fs = require('fs');
 
 const builder = require('electron-builder');
+const packageJson = require('../package.json');
 
 const targetNet = process.env.TARGET_NET;
 const skipSigning = process.env.SIGNING
     ? process.env.SIGNING.trim() === 'skip'
     : false;
 
-let name;
-let productName;
-let appId;
-if (!targetNet || targetNet === 'mainnet') {
-    name = process.env.npm_package_name;
-    productName = process.env.npm_package_productName;
-    appId = process.env.npm_package_build_appId;
-} else {
-    name = `${process.env.npm_package_name}-${targetNet}`;
-    productName = `${process.env.npm_package_productName} ${targetNet}`;
-    appId = `${process.env.npm_package_build_appId}-${targetNet}`;
+let {
+    name,
+    productName,
+    build: { appId },
+} = packageJson;
+let publishChannel;
+
+if (targetNet && targetNet !== 'mainnet') {
+    name = `${name}-${targetNet}`;
+    productName = `${productName} ${targetNet}`;
+    appId = `${appId}-${targetNet}`;
+    publishChannel = targetNet;
 }
 
 builder.build({
     config: {
+        publish: {
+            channel: publishChannel,
+        },
         extraMetadata: {
             name,
             productName,
         },
         appId,
         win: {
-            certificateSubjectName: skipSigning
+            ...(skipSigning
                 ? undefined
-                : 'Concordium Software ApS',
+                : {
+                      forceCodeSigning: true,
+                      certificateSubjectName: 'Concordium Software ApS',
+                  }),
         },
     },
     publish: 'never',

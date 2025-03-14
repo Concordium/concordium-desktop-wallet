@@ -1,5 +1,4 @@
-name: Concordium desktop wallet release
-
+name: Concordium Desktop Wallet release
 on:
   push:
     tags:
@@ -8,71 +7,37 @@ on:
       - 'desktop-wallet/*.*.*-mainnet'
 
 env:
-  BASE_IMAGE_VERSION: "rust-1.74.1_ghc-9.6.4"
-  STATIC_NODE_BINARY_IMAGE_NAME: 'static-node-binaries'
-  AWS_ROLE_TO_ASSUME: "arn:aws:iam::192549843005:role/github_concordium-desktop-wallet"
-  S3_BUCKET: "s3://desktopwallet.concordium.com"
-  ECR_REPO: "192549843005.dkr.ecr.eu-west-1.amazonaws.com/concordium/desktop-wallet-ci"
-  WASM-PACK_VERSION: "v0.9.1"
+  WASM-PACK_VERSION: "v0.13.1"
   NODE_VERSION: "18.20.7"
-  COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
-
-permissions:
-  id-token: write
-  contents: read
+  RUST_VERSION: "1.74.1"
+  PYTHON_VERSION: "3.13.1"
 
 jobs:
-  build-ci-image:
+  metadata:
+    name: Check version and prepare metadata
     runs-on: ubuntu-latest
     outputs:
-      access_key: ${{ steps.login-ecr.outputs.docker_username_192549843005_dkr_ecr_eu_west_1_amazonaws_com }}
-      secret_key: ${{ steps.login-ecr.outputs.docker_password_192549843005_dkr_ecr_eu_west_1_amazonaws_com }}
-      CONTAINER_TAG: ${{ steps.version_check.outputs.CONTAINER_TAG }}
-      VERSION: ${{ steps.version_check.outputs.VERSION }}
       TARGET_NET: ${{ steps.target_net.outputs.TARGET_NET }}
-    environment: release
     steps:
-      - name: Assume role
-        uses: aws-actions/configure-aws-credentials@v4
-        id: creds
-        with:
-          aws-region: "eu-west-1"
-          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
-          role-session-name: ReleaseDesktopWalletSession
-          mask-aws-account-id: false
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          mask-password: false
-
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
           ref: ${{ github.ref_name }}
 
-      - name: Set target net if correctly formatted
+      - name: Extract target network from tag
         id: target_net
         env:
           TAG: ${{ github.ref_name }}
         run: |
           TARGET_NET=${TAG##desktop-wallet/*-}
-          echo "$TARGET_NET"
-          if [[ $TARGET_NET != "stagenet" ]] && [[ $TARGET_NET != "testnet" ]] && [[ $TARGET_NET != "mainnet" ]]; then
-            echo "::error:: Tag does not contain target net"
-            exit 1
-          fi
           echo "TARGET_NET=$TARGET_NET" >> $GITHUB_OUTPUT
 
-
-      - name: Verify version
+      - name: Verify tag version against project version
         id: version_check
         env:
           TAG: ${{ github.ref_name}}
         run: |
-          set +e #Github actions as default runs: 'set -e' before every shell run, so setting this to not fail when a return code is not 0.
           # Extract version number
           VERSION=$(jq '.version' -r app/package.json)
 
@@ -82,39 +47,33 @@ jobs:
             echo "::error:: Tag version is not correct. Tag version: $TAG_VERSION version from package.json: $VERSION"
             exit 1
           fi
-          aws ecr describe-images --registry-id "192549843005" --repository-name "concordium/desktop-wallet-ci" --region eu-west-1  --image-ids=imageTag=$VERSION
-          EC=$?
-          echo "EXIT_CODE=$EC" >> $GITHUB_ENV
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-          echo "CONTAINER_TAG=${{ env.ECR_REPO }}:$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: build ci image
-        if: ${{ env.EXIT_CODE == 254 }}
-        uses: docker/build-push-action@v6
-        with:
-          push: true
-          tags: "${{ steps.version_check.outputs.CONTAINER_TAG }}"
-          context: '.'
-          file: 'scripts/desktop-wallet-ci.Dockerfile'
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: |
-            BASE_VERSION=${{ env.BASE_IMAGE_VERSION }}
-            NODE_VERSION=${{ env.NODE_VERSION }}
-
-  release-desktop-wallet-linux:
-    environment: release
-    needs: build-ci-image
-    runs-on: ubuntu-latest
-    container:
-      image: "${{needs.build-ci-image.outputs.CONTAINER_TAG}}"
-      credentials:
-        username: ${{needs.build-ci-image.outputs.access_key}}
-        password: ${{needs.build-ci-image.outputs.secret_key}}
-      options: -u root
+  build:
+    name: Build on ${{ matrix.platform.runner }}
+    needs: metadata
+    environment: code-sign-build
+    strategy:
+      matrix:
+        # For each platform provide the runner image, the shell to use and some unique id.
+        platform:
+          - id: linux
+            runner: ubuntu-latest
+            shell: bash
+          - id: windows
+            runner: windows-2019
+            # Since electron-builder does not support pwsh, we use powershell instead.
+            shell: powershell
+          - id: macos-intel
+            runner: macos-13
+            shell: bash
+          # Try enable mac ARM64 build target once node dependencies are updated.
+          # - id: macos-arm64
+          #   runner: macos-14
+    runs-on: ${{ matrix.platform.runner }}
+    defaults:
+      run:
+        shell: ${{ matrix.platform.shell }} {0}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -122,114 +81,30 @@ jobs:
           submodules: recursive
           ref: ${{ github.ref_name }}
 
-      - name: Login to Amazon ECR
-        uses: aws-actions/configure-aws-credentials@v4
-        id: creds
-        with:
-          aws-region: "eu-west-1"
-          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
-          role-session-name: ReleaseDesktopWalletSession
-          mask-aws-account-id: false
-
-      - name: Generate output folder
-        run: |
-          set +e
-          TARGET_NET=${{ needs.build-ci-image.outputs.TARGET_NET}}
-          VERSION=${{ needs.build-ci-image.outputs.VERSION }}
-
-          OUT_FOLDER_PATH="${{ env.S3_BUCKET }}/${VERSION}/${TARGET_NET}"
-          echo "OUT_FOLDER_PATH=$OUT_FOLDER_PATH" >> $GITHUB_ENV
-
-      - name: Check if Executable exist
-        run: |
-          set +e
-          aws s3 ls "${{ env.OUT_FOLDER_PATH }}/latest-linux.yml"
-          EC=$?
-          if [ $EC -eq 0 ]; then
-            echo "::error:: file file already exist"
-            exit 1
-          elif [ $EC -ne 1 ]; then
-            echo "::error:: $EC"
-            exit 1
-          fi
-
-      - name: Output dependency versions
-        run: |
-          rustup default stable
-          echo "::notice::node version: $(node --version)"
-          echo "::notice::npm version: $(npm --version)"
-          echo "::notice::yarn version: $(yarn --version)"
-          echo "::notice::python version: $(python --version)"
-          echo "::notice::rustup version: $(rustup show)"
-          echo "::notice::wasm-pack version: $(wasm-pack --version)"
-
-      - name: Build and publish
-        run: |
-          set +e
-
-          corepack enable
-          yarn
-          yarn package
-
-          aws s3 cp --recursive release/ ${{ env.OUT_FOLDER_PATH }} --exclude linux-unpacked/* --exclude builder-debug.yml --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-
-  #using windows-2019 to be able to use visual studio 2019, newer versions do not support older versions of node.js
-  release-desktop-wallet-windows:
-    runs-on: windows-2019
-    environment: release
-    needs: build-ci-image
-    steps:
-      - name: aws creds
-        uses: aws-actions/configure-aws-credentials@v4
-        id: creds
-        with:
-          aws-region: "eu-west-1"
-          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
-          role-session-name: ReleaseDesktopWalletSession
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          ref: ${{ github.ref_name }}
-
-      - name: Install dependencies
-        uses: jetli/wasm-pack-action@v0.4.0
-        with:
-          version: ${{ env.WASM-PACK_VERSION }}
-
-      - name: install node
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Generate output folder
-        shell: bash
-        run: |
-          set +e
-          TARGET_NET=${{ needs.build-ci-image.outputs.TARGET_NET}}
-          VERSION=${{ needs.build-ci-image.outputs.VERSION }}
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          # Disable the default behavior of treating warnings as errors.
+          # Should be removed again once the warnings are resolved.
+          rustflags: ""
 
-          OUT_FOLDER_PATH="${{ env.S3_BUCKET }}/${VERSION}/${TARGET_NET}"
-          echo "OUT_FOLDER_PATH=$OUT_FOLDER_PATH" >> $GITHUB_ENV
+      - name: Setup wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          version: ${{ env.WASM-PACK_VERSION }}
 
-      - name: Check if executable exist
-        shell: bash
-        run: |
-          set +e
-          aws s3 ls "${{ env.OUT_FOLDER_PATH }}/latest.yml"
-          EC=$?
-          echo $EC
-          if [ $EC -eq 0 ]; then
-            echo "::error:: file already exist"
-            exit 1
-          elif [ $EC -ne 1 ]; then
-            echo "::error:: $EC"
-            exit 1
-          fi
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Output dependency versions
-        shell: bash
+      - name: List dependency versions
         run: |
           echo "::notice::node version: $(node --version)"
           echo "::notice::npm version: $(npm --version)"
@@ -238,11 +113,143 @@ jobs:
           echo "::notice::rustup version: $(rustup show)"
           echo "::notice::wasm-pack version: $(wasm-pack --version)"
 
-      - name: Build and push desktop wallet
-        shell: bash
+      - name: Install native packages (Ubuntu only)
+        if: matrix.platform.id == 'linux'
+        run: sudo apt-get install -y libusb-1.0 libudev-dev rpm
+
+      - name: Install Node packages
+        env:
+          # Prevent corepack from prompting for permission to download.
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
         run: |
           corepack enable
-          yarn --network-timeout 1000000
-          yarn package-win-no-sign
+          yarn
 
-          aws s3 cp --recursive release/ ${{ env.OUT_FOLDER_PATH }} --exclude win-unpacked/* --exclude builder-debug.yml --exclude *.blockmap --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+      - name: Install DigiCert Client tools (Windows only)
+        if: matrix.platform.id == 'windows'
+        id: digicert_client
+        uses: digicert/ssm-code-signing@v1.0.0
+
+      - name: Import Windows certificate (Windows only)
+        id: windows_certificate
+        if: matrix.platform.id == 'windows'
+        env:
+          # Base64 encoding of the pfx/p12 certificate for Windows code signing.
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_BUILD_CERTIFICATE_BASE64 }}
+        run: |
+          $CERTIFICATE_PATH_BASE64="$env:RUNNER_TEMP\windows_build_certificate.txt"
+          $CERTIFICATE_PATH="$env:RUNNER_TEMP\windows_build_certificate.pfx"
+
+          Set-Content -Path $CERTIFICATE_PATH_BASE64 -Value $env:BUILD_CERTIFICATE_BASE64
+          certutil -decode $CERTIFICATE_PATH_BASE64 $CERTIFICATE_PATH
+          echo "CERTIFICATE_PATH=$CERTIFICATE_PATH" >> $env:GITHUB_OUTPUT
+
+      - name: Import Apple certificate and provisioning profile (MacOS only)
+        if: matrix.platform.id == 'macos-intel'
+        env:
+          # Base64 encoding of the p12 certificate for Apple code signing.
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.APPLE_BUILD_CERTIFICATE_BASE64 }}
+          # Password for the p12 certificate for Apple code signing.
+          BUILD_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_BUILD_CERTIFICATE_PASSWORD }}
+          # Random string to use as the keychain password.
+          KEYCHAIN_PASSWORD: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
+        run: |
+          # create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/apple_build_certificate.p12
+          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # import certificate and provisioning profile from secrets
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+
+          # create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$BUILD_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+      - name: Build
+        env:
+          # Set the target Concordium network for the build.
+          TARGET_NET: ${{ needs.metadata.outputs.TARGET_NET }}
+          # Apple code sign variables:
+          APPLEIDPASS: ${{ secrets.APPLEIDPASS }}
+          APPLEID: ${{ secrets.APPLEID }}
+          TEAMID: ${{ secrets.TEAMID }}
+          # Windows code sign variables:
+          WINDOWS_PKCS11_CONFIG: ${{ steps.digicert_client.outputs.PKCS11_CONFIG }}
+          WINDOWS_SM_KEYPAIR_ALIAS: ${{ secrets.WINDOWS_SM_KEYPAIR_ALIAS }}
+          SM_HOST: ${{ secrets.WINDOWS_SM_HOST }}
+          SM_API_KEY: ${{ secrets.WINDOWS_SM_API_KEY }}
+          SM_CLIENT_CERT_FILE: ${{ steps.windows_certificate.outputs.CERTIFICATE_PATH }}
+          SM_CLIENT_CERT_PASSWORD: ${{ secrets.WINDOWS_BUILD_CERTIFICATE_PASSWORD }}
+        run: yarn package
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform.id }}
+          if-no-files-found: error
+          path: |
+            release/concordium-desktop-wallet-*
+            release/latest*.yml
+            release/testnet*.yml
+            release/stagenet*.yml
+
+  release:
+    name: Attach to Github release (Auto update prompts will appear for supported platforms).
+    needs: [metadata, build]
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install native packages
+        run: sudo apt-get install -y libusb-1.0 libudev-dev rpm
+
+      - name: Install Node packages
+        env:
+          # Prevent corepack from prompting for permission to download.
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+        run: |
+          corepack enable
+          yarn
+
+      - uses: actions/download-artifact@v4
+      - run: |
+          mkdir uploads
+          mv linux/* uploads/
+          mv windows/* uploads/
+          mv macos-intel/* uploads/
+
+      - name: Retrieve sign key and generate verification assets
+        env:
+          FILE_DIGEST_SIGN_KEY_BASE64: ${{ secrets.FILE_DIGEST_SIGN_KEY_BASE64 }}
+          TARGET_NET: ${{ needs.metadata.outputs.TARGET_NET }}
+        run: |
+          SIGN_KEY_PATH=$RUNNER_TEMP/private-sign-key.pem
+          echo $FILE_DIGEST_SIGN_KEY_BASE64 | base64 --decode > $SIGN_KEY_PATH
+          yarn generate-verification-assets --pkey $SIGN_KEY_PATH --dir ./uploads
+
+      - name: Attach binaries to an existing release.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ github.ref_name }} uploads/*

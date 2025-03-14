@@ -133,11 +133,12 @@ const createWindow = async () => {
 
         if (
             process.env.NODE_ENV === 'production' &&
-            process.env.TARGET_NET === 'mainnet'
+            (process.env.TARGET_NET === 'mainnet' ||
+                process.env.TARGET_NET === 'testnet' ||
+                process.env.TARGET_NET === 'stagenet')
         ) {
-            initAutoUpdate(mainWindow);
+            initAutoUpdate(mainWindow, process.env.TARGET_NET);
         }
-
         mainWindow.webContents.send(ipcRendererCommands.didFinishLoad);
     });
 
