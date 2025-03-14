@@ -182,7 +182,6 @@ jobs:
           APPLEID: ${{ secrets.APPLEID }}
           TEAMID: ${{ secrets.TEAMID }}
           # Windows code sign variables:
-          WINDOWS_SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.WINDOWS_SM_CODE_SIGNING_CERT_SHA1_HASH }}
           WINDOWS_PKCS11_CONFIG: ${{ steps.digicert_client.outputs.PKCS11_CONFIG }}
           WINDOWS_SM_KEYPAIR_ALIAS: ${{ secrets.WINDOWS_SM_KEYPAIR_ALIAS }}
           SM_HOST: ${{ secrets.WINDOWS_SM_HOST }}
@@ -249,8 +248,8 @@ jobs:
           echo $FILE_DIGEST_SIGN_KEY_BASE64 | base64 --decode > $SIGN_KEY_PATH
           yarn generate-verification-assets --pkey $SIGN_KEY_PATH --dir ./uploads
 
-      # - name: Attach binaries to an existing release.
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: |
-      #     gh release upload ${{ github.ref_name }} uploads/*
+      - name: Attach binaries to an existing release.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ github.ref_name }} uploads/*

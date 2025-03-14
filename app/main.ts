@@ -131,14 +131,13 @@ const createWindow = async () => {
             mainWindow.focus();
         }
 
-        if (process.env.NODE_ENV === 'production') {
-            switch (process.env.TARGET_NET) {
-                case 'mainnet':
-                case 'testnet':
-                case 'stagenet':
-                    initAutoUpdate(mainWindow, process.env.TARGET_NET);
-                default:
-            }
+        if (
+            process.env.NODE_ENV === 'production' &&
+            (process.env.TARGET_NET === 'mainnet' ||
+                process.env.TARGET_NET === 'testnet' ||
+                process.env.TARGET_NET === 'stagenet')
+        ) {
+            initAutoUpdate(mainWindow, process.env.TARGET_NET);
         }
         mainWindow.webContents.send(ipcRendererCommands.didFinishLoad);
     });
