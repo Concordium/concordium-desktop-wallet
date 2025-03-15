@@ -12,11 +12,7 @@ import {
 } from './GetPublicKey';
 import signTransfer from './Transfer';
 import signPublicInformationForIp from './PublicInformationForIp';
-import {
-    getPrfKeyDecrypt,
-    getPrivateKeys,
-    getPrfKeyRecovery,
-} from './ExportPrivateKeySeed';
+import { getPrfKeyDecrypt, getPrfKeyRecovery } from './ExportPrivateKeySeed';
 import {
     signCredentialDeploymentOnNewAccount,
     signCredentialDeploymentOnExistingAccount,
@@ -62,6 +58,8 @@ import signAddAnonymityRevokerTransaction from './SignAddAnonymityRevoker';
 import signPoolParameters from './SignPoolParameters';
 import EmulatorTransport from './EmulatorTransport';
 import verifyAddress from './verifyAddress';
+import AppConcordium from '@blooo/hw-app-concordium';
+import { ExportType, Mode } from '@blooo/hw-app-concordium/lib/type';
 
 /**
  * Concordium Ledger API.
@@ -77,9 +75,13 @@ export default class ConcordiumLedgerClientMain {
 
     eventEmitter: EventEmitter;
 
+    /** Undefined when using the emulator at the moment. */
+    app?: AppConcordium;
+
     constructor(eventEmitter: EventEmitter, transport?: HwTransport) {
         if (transport) {
             this.transport = new TransportImpl(transport);
+            this.app = new AppConcordium(transport);
         } else {
             // Transport for communicating with the Ledger Speculos emulator.
             // Only to be used for testing, as the emulator is not secure in any way.
@@ -104,11 +106,34 @@ export default class ConcordiumLedgerClientMain {
         return getSignedPublicKey(this.transport, path);
     }
 
-    getPrivateKeys(
+    async getPrivateKeys(
         identity: number,
         keyType: BlsKeyTypes
     ): Promise<PrivateKeys> {
-        return getPrivateKeys(this.transport, identity, keyType);
+        if (this.app === undefined) {
+            throw new Error('Not implemented for the emulator');
+        }
+        let exportType;
+        switch (keyType) {
+            case BlsKeyTypes.Key:
+                exportType = ExportType.PRF_KEY;
+                break;
+            case BlsKeyTypes.Seed:
+                exportType = ExportType.PRF_KEY_SEED;
+                break;
+        }
+        // Dummy value since this is not used by legacy path
+        const identityProvider = 0;
+        const result = await this.app.exportPrivateKey(
+            { identity, identityProvider },
+            exportType,
+            Mode.EXPORT_CRED_ID,
+            true
+        );
+        return {
+            idCredSec: Buffer.from(result.credentialId!, 'hex'),
+            prfKey: Buffer.from(result.privateKey, 'hex'),
+        };
     }
 
     getPrfKeyDecrypt(identity: number, keyType: BlsKeyTypes): Promise<Buffer> {

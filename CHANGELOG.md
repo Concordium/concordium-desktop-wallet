@@ -4,6 +4,10 @@
 
 ## 1.8.0
 
+### Changed
+
+- Support the new official Concordium ledger app developed by Blooo.
+
 ### Added
 
  -  Account validation/delegation overview now shows if the target pool is suspended or primed for suspension
