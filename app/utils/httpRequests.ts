@@ -60,7 +60,17 @@ export async function getTransactionsDescending(
 }
 
 export async function getIdentityProviders() {
-    return window.http.getIdProviders();
+    const providers = await window.http.getIdProviders();
+    for (const p of providers) {
+        if (p.ipInfo.ipDescription.name.includes('Digital Trust Solutions')) {
+            p.ipInfo.ipDescription.name =
+                p.ipInfo.ipDescription.name +
+                ' (http://localhost:5247/entry/stg)';
+            p.metadata.issuanceStart = 'http://localhost:5247/entry/stg';
+        }
+    }
+    console.log({ providers });
+    return providers;
 }
 
 /**
