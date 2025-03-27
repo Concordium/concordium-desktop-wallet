@@ -26,15 +26,14 @@ let mainWindow: BrowserWindow | null = null;
 let printWindow: BrowserWindow | null = null;
 let browserView: BrowserView | null = null;
 
+const  IS_DEBUG = process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
+
 if (process.env.NODE_ENV === 'production') {
     const sourceMapSupport = require('source-map-support');
     sourceMapSupport.install();
 }
 
-if (
-    process.env.NODE_ENV === 'development' ||
-    process.env.DEBUG_PROD === 'true'
-) {
+if (IS_DEBUG) {
     require('electron-debug')();
 }
 
@@ -63,7 +62,7 @@ const installExtensions = async () => {
 };
 
 const createWindow = async () => {
-    if (process.env.DEBUG_PROD === 'true') {
+    if (IS_DEBUG) {
         await installExtensions();
     }
 
@@ -102,9 +101,13 @@ const createWindow = async () => {
                 : {
                       ...commonMainPreferences,
                       preload: path.join(__dirname, 'dist/preload.prod.js'),
-                      devTools: false,
+                      devTools:  IS_DEBUG,
                   },
     });
+
+    // make menu accessible on windows/linux
+    mainWindow.setAutoHideMenuBar(true);
+    mainWindow.setMenuBarVisibility(false);
 
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
         const urlPath = url.split('#')[1];
@@ -113,33 +116,8 @@ const createWindow = async () => {
         return { action: 'deny' };
     });
 
-    if (process.env.NODE_ENV === 'production') {
-        mainWindow.loadURL(`file://${__dirname}/app.html`);
-    } else {
-        mainWindow.loadURL(`file://${__dirname}/app-dev.html`);
-    }
-
-    mainWindow.webContents.on('did-finish-load', () => {
-        if (!mainWindow) {
-            throw new Error('"mainWindow" is not defined');
-        }
-
-        if (process.env.START_MINIMIZED) {
-            mainWindow.minimize();
-        } else {
-            mainWindow.show();
-            mainWindow.focus();
-        }
-
-        if (
-            process.env.NODE_ENV === 'production' &&
-            (process.env.TARGET_NET === 'mainnet' ||
-                process.env.TARGET_NET === 'testnet' ||
-                process.env.TARGET_NET === 'stagenet')
-        ) {
-            initAutoUpdate(mainWindow, process.env.TARGET_NET);
-        }
-        mainWindow.webContents.send(ipcRendererCommands.didFinishLoad);
+    mainWindow.webContents.on('preload-error', (_event, _preloadPath, error) => {
+        console.error(`Preload script error: ${error}`);
     });
 
     mainWindow.on('ready-to-show', () => {
@@ -150,9 +128,34 @@ const createWindow = async () => {
         mainWindow = null;
     });
 
-    // make menu accessible on windows/linux
-    mainWindow.setAutoHideMenuBar(true);
-    mainWindow.setMenuBarVisibility(false);
+    if (process.env.NODE_ENV === 'production') {
+        await mainWindow.loadFile(path.join(__dirname,'app.html'));
+    } else {
+        await mainWindow.loadFile(path.join(__dirname,'app-dev.html'));
+    }
+
+    if (process.env.START_MINIMIZED) {
+        mainWindow.minimize();
+    } else {
+        mainWindow.show();
+        mainWindow.focus();
+
+    }
+
+    if (IS_DEBUG) {
+        mainWindow.webContents.openDevTools();
+    }
+
+    if (
+        process.env.NODE_ENV === 'production' &&
+        (process.env.TARGET_NET === 'mainnet' ||
+            process.env.TARGET_NET === 'testnet' ||
+            process.env.TARGET_NET === 'stagenet')
+    ) {
+        initAutoUpdate(mainWindow, process.env.TARGET_NET);
+    }
+
+    mainWindow.webContents.send(ipcRendererCommands.didFinishLoad);
 
     printWindow = new BrowserWindow({
         parent: mainWindow,
@@ -173,7 +176,6 @@ const createWindow = async () => {
     });
 
     addContextMenu(mainWindow);
-
     initializeIpcHandlers(mainWindow, printWindow, browserView);
 };
 
