@@ -6,7 +6,16 @@
 const PKCS11_CONFIG_ENV_NAME = 'WINDOWS_PKCS11_CONFIG';
 const KEYPAIR_ALIAS_ENV_NAME = 'WINDOWS_SM_KEYPAIR_ALIAS';
 
+const skipSigning = process.env.SIGNING
+    ? process.env.SIGNING.trim() === 'skip'
+    : false;
+
 exports.default = async function (configuration) {
+    if (skipSigning) {
+        console.log('Skipping signing');
+        return;
+    }
+
     if (configuration.path) {
         const config = process.env[PKCS11_CONFIG_ENV_NAME];
         if (!config) {
