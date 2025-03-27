@@ -10,8 +10,6 @@ export async function getAll(): Promise<MultiSignatureTransaction[]> {
     );
 }
 
-export const {
-    insert,
-    update: updateEntry,
-    getMaxOpenNonceOnAccount,
-} = window.database.multiSignatureTransaction;
+export const insert: typeof window.database.multiSignatureTransaction.insert = (...args) => window.database.multiSignatureTransaction.insert(...args);
+export const updateEntry: typeof window.database.multiSignatureTransaction.update = (...args) => window.database.multiSignatureTransaction.update(...args);
+export const getMaxOpenNonceOnAccount: typeof window.database.multiSignatureTransaction.getMaxOpenNonceOnAccount = (...args) => window.database.multiSignatureTransaction.getMaxOpenNonceOnAccount(...args);

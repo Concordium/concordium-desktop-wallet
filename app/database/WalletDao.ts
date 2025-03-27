@@ -9,4 +9,5 @@ export async function getAllWallets(): Promise<WalletEntry[]> {
     return window.database.general.selectAll(databaseNames.walletTable);
 }
 
-export const { getWalletId, insertWallet } = window.database.wallet;
+export const getWalletId: typeof window.database.wallet.getWalletId = (...args) => window.database.wallet.getWalletId(...args);
+export const insertWallet: typeof window.database.wallet.insertWallet = (...args) => window.database.wallet.insertWallet(...args);
