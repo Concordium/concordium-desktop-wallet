@@ -1,0 +1,116 @@
+name: Concordium Desktop Wallet debug build
+on:
+  # Allows us to run the workflow manually from the Actions tab
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'Target network (mainnet, testnet, stagenet)'
+        required: true
+        default: 'mainnet'
+        type: choice
+        options:
+          - mainnet
+          - testnet
+          - stagenet
+      platforms:
+        description: 'Platforms to build for'
+        required: true
+        type: choice
+        options:
+          - all
+          - windows
+          - linux
+          - macos-intel
+
+env:
+  WASM-PACK_VERSION: "v0.13.1"
+  NODE_VERSION: "18.20.7"
+  RUST_VERSION: "1.74.1"
+  PYTHON_VERSION: "3.13.1"
+
+jobs:
+  build:
+    name: Build on ${{ matrix.platform.runner }}
+    strategy:
+      matrix:
+        platform:
+          - id: linux
+            runner: ubuntu-latest
+            shell: bash
+          - id: windows
+            runner: windows-2019
+            shell: powershell
+          - id: macos-intel
+            runner: macos-13
+            shell: bash
+    if: |
+      github.event.inputs.platforms == 'all' ||
+      github.event.inputs.platforms == matrix.platform.id
+    runs-on: ${{ matrix.platform.runner }}
+    defaults:
+      run:
+        shell: ${{ matrix.platform.shell }} {0}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          ref: ${{ github.ref_name }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          rustflags: ""
+
+      - name: Setup wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          version: ${{ env.WASM-PACK_VERSION }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: List dependency versions
+        run: |
+          echo "::notice::node version: $(node --version)"
+          echo "::notice::npm version: $(npm --version)"
+          echo "::notice::yarn version: $(yarn --version)"
+          echo "::notice::python version: $(python --version)"
+          echo "::notice::rustup version: $(rustup show)"
+          echo "::notice::wasm-pack version: $(wasm-pack --version)"
+          echo "::notice::target network: ${{ github.event.inputs.network }}"
+
+      - name: Install native packages (Ubuntu only)
+        if: matrix.platform.id == 'linux'
+        run: sudo apt-get install -y libusb-1.0 libudev-dev rpm
+
+      - name: Install Node packages
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+        run: |
+          corepack enable
+          yarn
+
+      - name: Build
+        env:
+          DEBUG_PROD: true
+          TARGET_NET: ${{ github.event.inputs.network }}
+          SIGNING: skip
+          NOTARIZE: skip
+        run: yarn package
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform.id }}-${{ github.event.inputs.network }}
+          if-no-files-found: error
+          path: |
+            release/concordium-desktop-wallet-*
