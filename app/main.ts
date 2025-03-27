@@ -26,7 +26,8 @@ let mainWindow: BrowserWindow | null = null;
 let printWindow: BrowserWindow | null = null;
 let browserView: BrowserView | null = null;
 
-const  IS_DEBUG = process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
+const IS_DEBUG =
+    process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
 if (process.env.NODE_ENV === 'production') {
     const sourceMapSupport = require('source-map-support');
@@ -101,7 +102,7 @@ const createWindow = async () => {
                 : {
                       ...commonMainPreferences,
                       preload: path.join(__dirname, 'dist/preload.prod.js'),
-                      devTools:  IS_DEBUG,
+                      devTools: IS_DEBUG,
                   },
     });
 
@@ -116,9 +117,12 @@ const createWindow = async () => {
         return { action: 'deny' };
     });
 
-    mainWindow.webContents.on('preload-error', (_event, _preloadPath, error) => {
-        console.error(`Preload script error: ${error}`);
-    });
+    mainWindow.webContents.on(
+        'preload-error',
+        (_event, _preloadPath, error) => {
+            console.error(`Preload script error: ${error}`);
+        }
+    );
 
     mainWindow.on('ready-to-show', () => {
         mainWindow?.webContents.send(ipcRendererCommands.readyToShow);
@@ -129,9 +133,9 @@ const createWindow = async () => {
     });
 
     if (process.env.NODE_ENV === 'production') {
-        await mainWindow.loadFile(path.join(__dirname,'app.html'));
+        await mainWindow.loadFile(path.join(__dirname, 'app.html'));
     } else {
-        await mainWindow.loadFile(path.join(__dirname,'app-dev.html'));
+        await mainWindow.loadFile(path.join(__dirname, 'app-dev.html'));
     }
 
     if (process.env.START_MINIMIZED) {
@@ -139,7 +143,6 @@ const createWindow = async () => {
     } else {
         mainWindow.show();
         mainWindow.focus();
-
     }
 
     if (IS_DEBUG) {
