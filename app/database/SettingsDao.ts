@@ -36,4 +36,4 @@ export async function loadAllSettings(): Promise<Settings[]> {
     return settings;
 }
 
-export const updateEntry: typeof window.database.settings.update = (...args) => window.database.settings.update(...args);
+export const { update: updateEntry } = window.database.settings;

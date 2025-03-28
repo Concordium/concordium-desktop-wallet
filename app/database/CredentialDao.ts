@@ -1,11 +1,13 @@
-export const insertCredential: typeof window.database.credentials.insert = (...args) => window.database.credentials.insert(...args);
-export const removeCredential: typeof window.database.credentials.delete = (...args) => window.database.credentials.delete(...args);
-export const removeCredentialsOfAccount: typeof window.database.credentials.deleteForAccount = (...args) => window.database.credentials.deleteForAccount(...args);
-export const getCredentials: typeof window.database.credentials.getAll = (...args) => window.database.credentials.getAll(...args);
-export const getCredentialsForIdentity: typeof window.database.credentials.getForIdentity = (...args) => window.database.credentials.getForIdentity(...args);
-export const getCredentialsOfAccount: typeof window.database.credentials.getForAccount = (...args) => window.database.credentials.getForAccount(...args);
-export const getNextCredentialNumber: typeof window.database.credentials.getNextNumber = (...args) => window.database.credentials.getNextNumber(...args);
-export const updateCredentialIndex: typeof window.database.credentials.updateIndex = (...args) => window.database.credentials.updateIndex(...args);
-export const updateCredential: typeof window.database.credentials.update = (...args) => window.database.credentials.update(...args);
-export const hasDuplicateWalletId: typeof window.database.credentials.hasDuplicateWalletId = (...args) => window.database.credentials.hasDuplicateWalletId(...args);
-export const hasExistingCredential: typeof window.database.credentials.hasExistingCredential = (...args) => window.database.credentials.hasExistingCredential(...args);
+export const {
+    insert: insertCredential,
+    delete: removeCredential,
+    deleteForAccount: removeCredentialsOfAccount,
+    getAll: getCredentials,
+    getForIdentity: getCredentialsForIdentity,
+    getForAccount: getCredentialsOfAccount,
+    getNextNumber: getNextCredentialNumber,
+    updateIndex: updateCredentialIndex,
+    update: updateCredential,
+    hasDuplicateWalletId,
+    hasExistingCredential,
+} = window.database.credentials;
