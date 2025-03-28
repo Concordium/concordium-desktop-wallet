@@ -8,29 +8,10 @@
                 transition: opacity ease-out 0.2s;
             }
         </style>
-        <script>
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = './dist/style.css';
-            // HACK: Writing the script path should be done with webpack
-            document.getElementsByTagName('head')[0].appendChild(link);
-        </script>
+        <link rel="stylesheet" href="./dist/style.css">
     </head>
     <body>
         <div id="root"></div>
-        <script>
-            const scripts = [];
-            scripts.push('./dist/renderer.prod.js');
-            if (scripts.length) {
-                document.write(
-                    scripts
-                        .map(
-                            (script) =>
-                                `<script defer src="${script}"><\/script>`
-                        )
-                        .join('')
-                );
-            }
-        </script>
+        <script src="./dist/renderer.prod.js"></script>
     </body>
 </html>

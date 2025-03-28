@@ -129,6 +129,22 @@ chrome://inspect/#devices
 
 -   The electron app is now running in your chrome browser and you can use the `devTools`.
 
+## Debugging production builds
+
+It's possible to debug production builds by running the application from a terminal with the `--remote-debugging-port=9229` flag. This will allow you to debug the application in your chrome browser, by executing the following steps:
+
+1. Open the inspector URL in your chrome browser, as follows:
+
+```bash
+chrome://inspect/#devices
+```
+
+2. Click the `Configure` button and configure your `listenAddress + port` as outputted by the previous command.
+
+3. Click on `inspect`.
+
+4. The electron app is now running in your chrome browser and you can use the `devTools`.
+
 ## Packaging for Production
 
 To package apps for the local platform:
