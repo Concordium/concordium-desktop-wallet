@@ -1,3 +1,7 @@
+import waitForPreloadReady from "../utils/preloadReady";
+
+await waitForPreloadReady();
+
 export const {
     defaultAccount,
     accountSimpleView,

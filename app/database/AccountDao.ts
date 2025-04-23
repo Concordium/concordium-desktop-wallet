@@ -1,4 +1,7 @@
 import { Account } from '../utils/types';
+import waitForPreloadReady from "../utils/preloadReady";
+
+await waitForPreloadReady();
 
 export const {
     getAll: getAllAccounts,
