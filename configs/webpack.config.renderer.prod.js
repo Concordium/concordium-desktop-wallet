@@ -56,6 +56,7 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
     },
 
     experiments: {
+        topLevelAwait: true,
         asyncWebAssembly: true,
     },
 
