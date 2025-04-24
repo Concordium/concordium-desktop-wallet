@@ -14,7 +14,7 @@ export default async function waitForPreloadReady(
     timeout = 5000,
     interval = 50
 ): Promise<void> {
-    if (window.database) return;
+    if (window.database) return Promise.resolve();
 
     return new Promise<void>((resolve, reject) => {
         const start = Date.now();
