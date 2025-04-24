@@ -1,5 +1,5 @@
 import { Account } from '../utils/types';
-import waitForPreloadReady from "../utils/preloadReady";
+import waitForPreloadReady from '../utils/preloadReady';
 
 await waitForPreloadReady();
 

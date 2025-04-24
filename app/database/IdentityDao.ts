@@ -1,7 +1,7 @@
 import { Identity } from '../utils/types';
 import databaseNames from '../constants/databaseNames.json';
 
-import waitForPreloadReady from "../utils/preloadReady";
+import waitForPreloadReady from '../utils/preloadReady';
 
 export async function getAllIdentities(): Promise<Identity[]> {
     return window.database.general.selectAll(databaseNames.identitiesTable);

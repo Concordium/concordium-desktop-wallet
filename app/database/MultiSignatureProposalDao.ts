@@ -1,6 +1,6 @@
 import { MultiSignatureTransaction } from '../utils/types';
 import databaseNames from '../constants/databaseNames.json';
-import waitForPreloadReady from "../utils/preloadReady";
+import waitForPreloadReady from '../utils/preloadReady';
 /**
  * Function for reading all items in the multi signature transaction proposal table.
  */

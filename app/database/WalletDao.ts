@@ -1,6 +1,6 @@
 import { WalletEntry } from '../utils/types';
 import databaseNames from '../constants/databaseNames.json';
-import waitForPreloadReady from "../utils/preloadReady";
+import waitForPreloadReady from '../utils/preloadReady';
 
 /**
  * Extracts all wallet entries from the database
