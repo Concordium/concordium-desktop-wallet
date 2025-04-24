@@ -1,3 +1,4 @@
+/* eslint-disable import/no-mutable-exports */
 import waitForPreloadReady from '../utils/preloadReady';
 
 let insertCredential: typeof window.database.credentials.insert;
