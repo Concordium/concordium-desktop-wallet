@@ -26,7 +26,7 @@ let hasExistingCredential: typeof window.database.credentials.hasExistingCredent
         updateIndex: updateCredentialIndex,
         update: updateCredential,
         hasDuplicateWalletId,
-        hasExistingCredential
+        hasExistingCredential,
     } = window.database.credentials);
 })();
 
@@ -41,5 +41,5 @@ export {
     updateCredentialIndex,
     updateCredential,
     hasDuplicateWalletId,
-    hasExistingCredential
+    hasExistingCredential,
 };
