@@ -1,3 +1,4 @@
+jest.mock('../../app/node/nodeRequests');
 import { SequenceNumber } from '@concordium/web-sdk';
 
 import '../mockWindow';

@@ -1,6 +1,6 @@
-import { JestConfigWithTsJest, createJsWithTsPreset } from 'ts-jest';
+import { JestConfigWithTsJest, createJsWithTsEsmPreset } from 'ts-jest';
 
-const presetConfig = createJsWithTsPreset();
+const presetConfig = createJsWithTsEsmPreset();
 
 const jestConfig: JestConfigWithTsJest = {
     ...presetConfig,
