@@ -12,7 +12,7 @@ let getAllExternalCredentials: typeof window.database.externalCredential.getAllE
         upsertExternalCredential,
         upsertMultipleExternalCredentials,
         deleteExternalCredentials,
-        getAllExternalCredentials
+        getAllExternalCredentials,
     } = window.database.externalCredential);
 })();
 
@@ -20,5 +20,5 @@ export {
     upsertExternalCredential,
     upsertMultipleExternalCredentials,
     deleteExternalCredentials,
-    getAllExternalCredentials
+    getAllExternalCredentials,
 };

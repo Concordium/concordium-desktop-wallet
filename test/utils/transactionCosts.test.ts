@@ -1,4 +1,3 @@
-jest.mock('../../app/node/nodeRequests');
 import { SequenceNumber } from '@concordium/web-sdk';
 
 import '../mockWindow';
@@ -22,6 +21,8 @@ import {
     serializeTransactionHeader,
     serializeTransferPayload,
 } from '../../app/utils/transactionSerialization';
+
+jest.mock('../../app/node/nodeRequests');
 
 function getMockedScheduledTransfer(scheduleLength: number) {
     const address = '3UbdTrP5kcEioJRCyiCacAdpAYfyezPSVfrys8QDsHJUiVXjKf';

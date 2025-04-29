@@ -18,10 +18,4 @@ let findEntries: typeof window.database.addressBook.findEntries;
     } = window.database.addressBook);
 })();
 
-export {
-    getAddressBook,
-    insertEntry,
-    updateEntry,
-    removeEntry,
-    findEntries,
-};
+export { getAddressBook, insertEntry, updateEntry, removeEntry, findEntries };

@@ -27,7 +27,7 @@ let confirmIdentity: typeof window.database.identity.confirmIdentity;
         insertPendingIdentityAndInitialAccount,
         rejectIdentityAndInitialAccount,
         removeIdentityAndInitialAccount,
-        confirmIdentity
+        confirmIdentity,
     } = window.database.identity);
 })();
 
@@ -39,5 +39,5 @@ export {
     insertPendingIdentityAndInitialAccount,
     rejectIdentityAndInitialAccount,
     removeIdentityAndInitialAccount,
-    confirmIdentity
+    confirmIdentity,
 };
