@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 1.8.1
+
+### Fixed
+
+- Fixed Blank Screen Issue in DW 1.8.0
+- Fixed Shows error in terminal when failing to find latest release
+- Fixed Build Errors in GitHub repo Test Scripts
+
 ## 1.8.0
 
 ### Added
