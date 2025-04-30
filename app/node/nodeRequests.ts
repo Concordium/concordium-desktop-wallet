@@ -34,6 +34,8 @@ import {
 } from '~/utils/types';
 import { serializeUpdateType } from '~/utils/UpdateSerialization';
 
+import waitForPreloadReady from '~/utils/preloadReady';
+
 /**
  * Updates the location of the node endpoint;
  */
@@ -121,6 +123,8 @@ export async function sendUpdateInstruction(
     );
     return parse(input);
 }
+
+await waitForPreloadReady();
 
 export const getNextAccountNonce = throwIfUndefined(
     parsed<

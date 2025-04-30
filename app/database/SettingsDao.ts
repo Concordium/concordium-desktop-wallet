@@ -1,5 +1,6 @@
 import { Setting, SettingGroup, Settings } from '../utils/types';
 import databaseNames from '../constants/databaseNames.json';
+import waitForPreloadReady from '../utils/preloadReady';
 
 /**
  * A select all from the setting table.
@@ -36,4 +37,5 @@ export async function loadAllSettings(): Promise<Settings[]> {
     return settings;
 }
 
+await waitForPreloadReady();
 export const { update: updateEntry } = window.database.settings;

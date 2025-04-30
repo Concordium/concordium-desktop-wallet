@@ -115,7 +115,8 @@
         "publish": {
             "provider": "github",
             "owner": "Concordium",
-            "repo": "concordium-desktop-wallet"
+            "repo": "concordium-desktop-wallet",
+            "vPrefixedTagName": false
         }
     },
     "repository": {
@@ -226,7 +227,7 @@
         "tsconfig-paths-webpack-plugin": "^3.3.0",
         "typescript": "^5.7.3",
         "url-loader": "^4.1.1",
-        "webpack": "^5.64.4",
+        "webpack": "^5.99.5",
         "webpack-bundle-analyzer": "^3.8.0",
         "webpack-cli": "^4.9.1",
         "webpack-dev-server": "4.6.0",

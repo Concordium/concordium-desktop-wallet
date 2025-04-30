@@ -17,6 +17,7 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
         fromRoot('./app/preload/preload.ts'),
     ],
     experiments: {
+        topLevelAwait: true,
         asyncWebAssembly: true,
     },
     output: {
