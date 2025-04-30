@@ -17,7 +17,7 @@
  * this error still appears when running tests
  *
  * To avoid changing the whole app setup or Jest environment, we use this workaround:
- * 
+ *
  * 1. Declare the variables (`let ...`)
  * 2. Wait for preload inside an async IIFE, then assign the values
  * 3. Export the variables so other parts of the app can use them
