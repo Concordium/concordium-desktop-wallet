@@ -63,7 +63,7 @@ jobs:
             runner: ubuntu-20.04
             shell: bash
           - id: windows
-            runner: windows-2019
+            runner: windows-2022
             # Since electron-builder does not support pwsh, we use powershell instead.
             shell: powershell
           - id: macos-intel
