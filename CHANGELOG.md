@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 1.8.2
+
+### Fixed
+
+- Desktop Wallet installation on Linux
+- Desktop Wallet is unable to detect that the Concordium app is open
+- User is unable to see suspend validation after resuming validation
+- Incorrect expiry time with multisig transactions
+- Compatibility with Linux Versions
+
+### Added
+- Build support for Windows 2022
+
 ## 1.8.1
 
 ### Fixed
