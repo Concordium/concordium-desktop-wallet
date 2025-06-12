@@ -473,16 +473,6 @@ async function updateAccountFromAccountInfo(
 
     if (validatorId !== undefined) {
         const poolStatus = await getPoolStatusLatest(validatorId);
-        /* if (poolStatus.isSuspended) {
-            dispatch(
-                setSuspensionStatus({
-                    address: account.address,
-                    isSuspended: true,
-                })
-            );
-        }
-            */
-
         dispatch(
             setSuspensionStatus({
                 address: account.address,
