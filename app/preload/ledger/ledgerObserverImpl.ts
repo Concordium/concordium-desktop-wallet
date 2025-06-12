@@ -66,26 +66,28 @@ export default class LedgerObserverImpl implements LedgerObserver {
                 );
                 const appAndVersion = await this.concordiumClient.getAppAndVersion();
 
-                if (isConcordiumApp(appAndVersion)) {
-                    if (this.pollingInterval !== null) {
-                        clearInterval(this.pollingInterval);
-                        this.pollingInterval = null;
-                    }
-
-                    let action;
-                    if (isOutdated(appAndVersion)) {
-                        action = LedgerSubscriptionAction.OUTDATED;
-                    } else {
-                        action =
-                            LedgerSubscriptionAction.CONNECTED_SUBSCRIPTION;
-                    }
-
-                    mainWindow.emit(
-                        ledgerIpcCommands.listenChannel,
-                        action,
-                        deviceName
-                    );
+                if (!isConcordiumApp(appAndVersion)) {
+                    return;
                 }
+                
+                if (this.pollingInterval !== null) {
+                    clearInterval(this.pollingInterval);
+                    this.pollingInterval = null;
+                }
+
+                let action;
+                if (isOutdated(appAndVersion)) {
+                    action = LedgerSubscriptionAction.OUTDATED;
+                } else {
+                    action =
+                        LedgerSubscriptionAction.CONNECTED_SUBSCRIPTION;
+                }
+
+                mainWindow.emit(
+                    ledgerIpcCommands.listenChannel,
+                    action,
+                    deviceName
+                );
             } catch {
                 // Ignore transient errors (e.g. transport not available)
             }
