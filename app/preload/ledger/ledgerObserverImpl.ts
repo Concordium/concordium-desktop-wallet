@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid-singleton';
@@ -34,6 +35,61 @@ export default class LedgerObserverImpl implements LedgerObserver {
             throw new Error('A connection to the Ledger is not available.');
         }
         return this.concordiumClient;
+    }
+
+    private pollingInterval: NodeJS.Timeout | null = null;
+
+    /**
+     * Polls the Ledger device every 2 seconds to check if the Concordium app is open.
+     * If the app is found, it emits an action to the main window indicating whether
+     * the app is outdated or connected. It stops polling once the app is detected.
+     *
+     * @param mainWindow - The main window's EventEmitter to emit actions to the window.
+     * @param deviceName - An optional name of the device to include in the emitted action.
+     *
+     * The polling interval is cleared when the Concordium app is detected or if any transient errors occur.
+     */
+
+    private pollForConcordiumApp(
+        mainWindow: EventEmitter,
+        deviceName?: string
+    ) {
+        if (this.pollingInterval) {
+            clearInterval(this.pollingInterval);
+        }
+
+        this.pollingInterval = (setInterval(async () => {
+            try {
+                const transport = await openTransport();
+                this.concordiumClient = new ConcordiumLedgerClientMain(
+                    mainWindow,
+                    transport
+                );
+                const appAndVersion = await this.concordiumClient.getAppAndVersion();
+
+                if (!isConcordiumApp(appAndVersion)) {
+                    return;
+                }
+                
+                if (this.pollingInterval !== null) {
+                    clearInterval(this.pollingInterval);
+                    this.pollingInterval = null;
+                }
+                let action;
+                if (isOutdated(appAndVersion)) {
+                    action = LedgerSubscriptionAction.OUTDATED;
+                } else {
+                    action = LedgerSubscriptionAction.CONNECTED_SUBSCRIPTION;
+                }
+                mainWindow.emit(
+                    ledgerIpcCommands.listenChannel,
+                    action,
+                    deviceName
+                );
+            } catch {
+                // Ignore transient errors (e.g. transport not available)
+            }
+        }, 2000) as unknown) as NodeJS.Timeout; // Poll every 2 seconds
     }
 
     private handleIfLedgerIsStillConnected(
@@ -127,6 +183,14 @@ export default class LedgerObserverImpl implements LedgerObserver {
                 LedgerSubscriptionAction.RESET,
                 deviceName
             );
+            return;
+        }
+
+        if (
+            appAndVersion &&
+            !isConcordiumApp(appAndVersion) // If ANY non-Concordium app is open
+        ) {
+            this.pollForConcordiumApp(mainWindow, deviceName);
             return;
         }
 

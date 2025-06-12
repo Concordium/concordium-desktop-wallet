@@ -84,7 +84,12 @@ export default withDeps(function UpdateBakerKeys({ exchangeRate }: Props) {
         (
             { account, ...values }: RequiredValues & UpdateBakerKeysFlowState,
             nonce: bigint
-        ) => convertToBakerTransaction(account, nonce, exchangeRate)(values),
+        ) =>
+            convertToBakerTransaction(
+                account,
+                nonce,
+                exchangeRate
+            )(values, values.expiry),
         [exchangeRate]
     );
 

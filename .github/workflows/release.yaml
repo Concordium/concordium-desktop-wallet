@@ -15,7 +15,8 @@ env:
 jobs:
   metadata:
     name: Check version and prepare metadata
-    runs-on: ubuntu-latest
+    # runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       TARGET_NET: ${{ steps.target_net.outputs.TARGET_NET }}
     steps:
@@ -58,10 +59,11 @@ jobs:
         # For each platform provide the runner image, the shell to use and some unique id.
         platform:
           - id: linux
-            runner: ubuntu-latest
+            # runner: ubuntu-latest
+            runner: ubuntu-20.04
             shell: bash
           - id: windows
-            runner: windows-2019
+            runner: windows-2022
             # Since electron-builder does not support pwsh, we use powershell instead.
             shell: powershell
           - id: macos-intel
@@ -112,10 +114,29 @@ jobs:
           echo "::notice::python version: $(python --version)"
           echo "::notice::rustup version: $(rustup show)"
           echo "::notice::wasm-pack version: $(wasm-pack --version)"
+          echo "::notice::OpenSSL version:" $(openssl version)
 
-      - name: Install native packages (Ubuntu only)
+      - name: Install native packages and OpenSSL 1.1 (Ubuntu only)
         if: matrix.platform.id == 'linux'
-        run: sudo apt-get install -y libusb-1.0 libudev-dev rpm
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libusb-1.0 libudev-dev rpm wget patchelf build-essential
+
+          # Install libssl1.1 manually on Ubuntu 22.04 and 24.04 if missing
+          if ! dpkg -s libssl1.1 >/dev/null 2>&1; then
+            echo "::group::Installing OpenSSL 1.1 manually"
+            wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl1.1/libssl1.1_1.1.1f-1ubuntu2.19_amd64.deb
+            sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2.19_amd64.deb
+            echo "::endgroup::"
+          fi
+
+          # Install OpenSSL development files (static libs)
+          sudo apt-get install -y libssl-dev
+
+          # Download linuxdeploy for AppImage creation
+          wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          chmod +x linuxdeploy-x86_64.AppImage
+          ./linuxdeploy-x86_64.AppImage --version
 
       - name: Install Node packages
         env:
@@ -188,7 +209,20 @@ jobs:
           SM_API_KEY: ${{ secrets.WINDOWS_SM_API_KEY }}
           SM_CLIENT_CERT_FILE: ${{ steps.windows_certificate.outputs.CERTIFICATE_PATH }}
           SM_CLIENT_CERT_PASSWORD: ${{ secrets.WINDOWS_BUILD_CERTIFICATE_PASSWORD }}
+
+          # New environment variables for static OpenSSL
+          OPENSSL_STATIC: "1"
+          OPENSSL_DIR: "/usr/lib/ssl" 
+          PKG_CONFIG_ALLOW_CROSS: "1"
         run: yarn package
+
+      # --- New step to create AppImage for Linux only ---
+      - name: Create AppImage with linuxdeploy
+        if: matrix.platform.id == 'linux'
+        run: |
+          ./linuxdeploy-x86_64.AppImage --appdir=release/concordium-desktop-wallet.AppDir \
+            --output appimage \
+            --executable=release/concordium-desktop-wallet.AppDir/usr/bin/concordium-desktop-wallet
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
