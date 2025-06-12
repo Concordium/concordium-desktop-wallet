@@ -133,11 +133,6 @@ jobs:
           # Install OpenSSL development files (static libs)
           sudo apt-get install -y libssl-dev
 
-          # Download linuxdeploy for AppImage creation
-          wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
-          chmod +x linuxdeploy-x86_64.AppImage
-          ./linuxdeploy-x86_64.AppImage --version
-
       - name: Install Node packages
         env:
           # Prevent corepack from prompting for permission to download.
@@ -215,14 +210,6 @@ jobs:
           OPENSSL_DIR: "/usr/lib/ssl" 
           PKG_CONFIG_ALLOW_CROSS: "1"
         run: yarn package
-
-      # --- New step to create AppImage for Linux only ---
-      - name: Create AppImage with linuxdeploy
-        if: matrix.platform.id == 'linux'
-        run: |
-          ./linuxdeploy-x86_64.AppImage --appdir=release/concordium-desktop-wallet.AppDir \
-            --output appimage \
-            --executable=release/concordium-desktop-wallet.AppDir/usr/bin/concordium-desktop-wallet
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
