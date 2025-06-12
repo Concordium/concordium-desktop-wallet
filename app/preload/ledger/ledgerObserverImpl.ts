@@ -70,7 +70,7 @@ export default class LedgerObserverImpl implements LedgerObserver {
                 if (!isConcordiumApp(appAndVersion)) {
                     return;
                 }
-
+                
                 if (this.pollingInterval !== null) {
                     clearInterval(this.pollingInterval);
                     this.pollingInterval = null;
@@ -79,8 +79,10 @@ export default class LedgerObserverImpl implements LedgerObserver {
                 if (isOutdated(appAndVersion)) {
                     action = LedgerSubscriptionAction.OUTDATED;
                 } else {
-                    action = LedgerSubscriptionAction.CONNECTED_SUBSCRIPTION;
+                    action =
+                        LedgerSubscriptionAction.CONNECTED_SUBSCRIPTION;
                 }
+
                 mainWindow.emit(
                     ledgerIpcCommands.listenChannel,
                     action,
