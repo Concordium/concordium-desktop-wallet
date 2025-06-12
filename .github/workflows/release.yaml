@@ -16,7 +16,7 @@ jobs:
   metadata:
     name: Check version and prepare metadata
     # runs-on: ubuntu-latest
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       TARGET_NET: ${{ steps.target_net.outputs.TARGET_NET }}
     steps:
