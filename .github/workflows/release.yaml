@@ -60,7 +60,7 @@ jobs:
         platform:
           - id: linux
             # runner: ubuntu-latest
-            runner: ubuntu-20.04
+            runner: ubuntu-22.04
             shell: bash
           - id: windows
             runner: windows-2022
@@ -149,7 +149,7 @@ jobs:
       - name: Install DigiCert Client tools (Windows only)
         if: matrix.platform.id == 'windows'
         id: digicert_client
-        uses: digicert/ssm-code-signing@v1.0.0
+        uses: digicert/ssm-code-signing@v1.0.1
 
       - name: Import Windows certificate (Windows only)
         id: windows_certificate
