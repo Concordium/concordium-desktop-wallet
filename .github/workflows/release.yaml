@@ -125,12 +125,15 @@ jobs:
           # Install libssl1.1 manually on Ubuntu 22.04 and 24.04 if missing
           if ! dpkg -s libssl1.1 >/dev/null 2>&1; then
             echo "::group::Installing OpenSSL 1.1 manually"
-            wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl1.1/libssl1.1_1.1.1f-1ubuntu2.19_amd64.deb
-            sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2.19_amd64.deb
+            wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
+            wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl-dev_1.1.1f-1ubuntu2.24_amd64.deb
+            sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
+            sudo dpkg -i libssl-dev_1.1.1f-1ubuntu2.24_amd64.deb
             echo "::endgroup::"
           fi
 
           # Install OpenSSL development files (static libs)
+          sudo apt-get update
           sudo apt-get install -y libssl-dev
 
       - name: Install Node packages
@@ -243,7 +246,9 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install native packages
-        run: sudo apt-get install -y libusb-1.0 libudev-dev rpm
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libusb-1.0 libudev-dev rpm
 
       - name: Install Node packages
         env:
