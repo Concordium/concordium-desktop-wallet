@@ -330,8 +330,8 @@ export function MultiSignatureCreateAccountProposalView() {
 
 /**
  * Component that displays a menu containing the available governance
- * transaction types. 
-*/
+ * transaction types.
+ */
 export function MultiSignatureCreateGovernanceProposalView() {
     const proposals = useSelector(proposalsSelector);
     const pv = useProtocolVersion(true);
@@ -339,11 +339,11 @@ export function MultiSignatureCreateGovernanceProposalView() {
         foundationTransactionsEnabledSelector
     );
     const dispatch = useDispatch();
-    
+
     useEffect(() => {
         return expireProposals(proposals, dispatch);
     }, [dispatch, proposals]);
-    
+
     return (
         <>
             {foundationTransactionsEnabled &&

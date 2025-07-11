@@ -157,7 +157,10 @@ function MultiSignatureCreateProposal({
 
 function LoadingComponent() {
     return (
-        <MultiSignatureLayout pageTitle="Create multisignature proposal" closeRoute={CLOSE_ROUTE}>
+        <MultiSignatureLayout
+            pageTitle="Create multisignature proposal"
+            closeRoute={CLOSE_ROUTE}
+        >
             <Loading text="Fetching information from the node" />
         </MultiSignatureLayout>
     );

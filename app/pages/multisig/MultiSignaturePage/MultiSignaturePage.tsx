@@ -12,7 +12,10 @@ import ImportProposal from '../menu/ImportProposal';
 import ProposalList from '../menu/ProposalList';
 
 import styles from './MultiSignaturePage.module.scss';
-import { MultiSignatureCreateAccountProposalView, MultiSignatureCreateGovernanceProposalView } from '../menu/MultiSignatureCreateProposalList';
+import {
+    MultiSignatureCreateAccountProposalView,
+    MultiSignatureCreateGovernanceProposalView,
+} from '../menu/MultiSignatureCreateProposalList';
 
 const { Header, Master, Detail } = MasterDetailPageLayout;
 
@@ -35,12 +38,12 @@ export default function MultiSignaturePage() {
                     Make new proposal
                 </ButtonNavLink>
                 {foundationTransactionsEnabled && (
-                <ButtonNavLink
-                    to={routes.MULTISIGTRANSACTIONS_GOV}
-                    className={styles.link}
-                >
-                    Make new governance proposal
-                </ButtonNavLink>
+                    <ButtonNavLink
+                        to={routes.MULTISIGTRANSACTIONS_GOV}
+                        className={styles.link}
+                    >
+                        Make new governance proposal
+                    </ButtonNavLink>
                 )}
                 <ButtonNavLink
                     to={routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING}
