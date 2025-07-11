@@ -8,11 +8,14 @@ import routes from '~/constants/routes.json';
 
 import BrowseTransactionFile from '../menu/BrowseTransactionFile';
 import ExportKeyList from '../menu/ExportKeyList';
-import MultiSignatureCreateProposalList from '../menu/MultiSignatureCreateProposalList';
 import ImportProposal from '../menu/ImportProposal';
 import ProposalList from '../menu/ProposalList';
 
 import styles from './MultiSignaturePage.module.scss';
+import {
+    MultiSignatureCreateAccountProposalView,
+    MultiSignatureCreateGovernanceProposalView,
+} from '../menu/MultiSignatureCreateProposalList';
 
 const { Header, Master, Detail } = MasterDetailPageLayout;
 
@@ -34,6 +37,14 @@ export default function MultiSignaturePage() {
                 >
                     Make new proposal
                 </ButtonNavLink>
+                {foundationTransactionsEnabled && (
+                    <ButtonNavLink
+                        to={routes.MULTISIGTRANSACTIONS_GOV}
+                        className={styles.link}
+                    >
+                        Make new governance proposal
+                    </ButtonNavLink>
+                )}
                 <ButtonNavLink
                     to={routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING}
                     className={styles.link}
@@ -65,8 +76,12 @@ export default function MultiSignaturePage() {
                 <Switch>
                     <Route
                         path={routes.MULTISIGTRANSACTIONS}
-                        component={MultiSignatureCreateProposalList}
+                        component={MultiSignatureCreateAccountProposalView}
                         exact
+                    />
+                    <Route
+                        path={routes.MULTISIGTRANSACTIONS_GOV}
+                        component={MultiSignatureCreateGovernanceProposalView}
                     />
                     <Route
                         path={routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING}

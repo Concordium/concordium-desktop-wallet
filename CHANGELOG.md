@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add a separate menu for governance transactions in multi sig panel
+
 ## 1.8.2
 
 ### Fixed

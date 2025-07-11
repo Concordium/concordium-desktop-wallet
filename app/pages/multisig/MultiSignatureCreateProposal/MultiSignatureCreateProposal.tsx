@@ -27,6 +27,8 @@ import { createProposalRoute } from '~/utils/routerHelper';
 import Loading from '~/cross-app-components/Loading';
 import { ensureUpdateQueue, WithUpdateQueues } from '~/utils/withUpdateQueue';
 
+const CLOSE_ROUTE = routes.MULTISIGTRANSACTIONS_GOV;
+
 export interface MultiSignatureCreateProposalForm {
     effectiveTime: Date;
     expiryTime: Date;
@@ -111,7 +113,7 @@ function MultiSignatureCreateProposal({
             <Modal
                 open={restrictionModalOpen}
                 onOpen={() => {}}
-                onClose={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
+                onClose={() => dispatch(push(CLOSE_ROUTE))}
             >
                 An unsubmitted update of this type already exists, and must be
                 submitted or cancelled, before a new update of the same kind can
@@ -133,6 +135,7 @@ function MultiSignatureCreateProposal({
                         <MultiSignatureLayout
                             pageTitle={handler.title}
                             delegateScroll={isKeyUpdate}
+                            closeRoute={CLOSE_ROUTE}
                         >
                             <BuildComponent
                                 type={type}
@@ -154,7 +157,10 @@ function MultiSignatureCreateProposal({
 
 function LoadingComponent() {
     return (
-        <MultiSignatureLayout pageTitle="Create multisignature proposal">
+        <MultiSignatureLayout
+            pageTitle="Create multisignature proposal"
+            closeRoute={CLOSE_ROUTE}
+        >
             <Loading text="Fetching information from the node" />
         </MultiSignatureLayout>
     );
