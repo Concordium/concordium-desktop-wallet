@@ -39,7 +39,7 @@ function getSha256Sum(path: string): Promise<string> {
     });
 }
 
-const releasesFeed = `https://github.com/${build.publish.owner}/${build.publish.repo}/releases/download`;
+const releasesFeed = `https://github.com/${build.publish.owner}/${build.publish.repo}/releases/download/desktop-wallet`;
 
 // eslint-disable-next-line import/prefer-default-export
 export function getVerificationFunctions({
@@ -47,7 +47,13 @@ export function getVerificationFunctions({
     releaseName,
     path: fileName,
 }: RealUpdateInfo) {
-    const releaseFileUrl = `${releasesFeed}/${releaseName}/${fileName}`;
+    let adjustedReleaseName = releaseName;
+    if (process.env.TARGET_NET === 'mainnet') {
+        adjustedReleaseName += '-mainnet';
+    } else if (process.env.TARGET_NET === 'testnet') {
+        adjustedReleaseName += '-testnet';
+    }
+    const releaseFileUrl = `${releasesFeed}/${adjustedReleaseName}/${fileName}`;
 
     return {
         async verifyChecksum() {
