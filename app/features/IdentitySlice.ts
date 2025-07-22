@@ -6,7 +6,7 @@ import { loadAccounts } from './AccountSlice';
 import {
     getAllIdentities,
     updateIdentity,
-    removeIdentityAndInitialAccount as removeIdentityAndInitialAccountInDatabase,
+    removeIdentity as removeIdentityInDatabase,
 } from '../database/IdentityDao';
 import { Identity, Dispatch } from '../utils/types';
 import { isConfirmedIdentity } from '~/utils/identityHelpers';
@@ -56,11 +56,8 @@ export async function loadIdentities(dispatch: Dispatch) {
     dispatch(updateIdentities(identities));
 }
 
-export async function removeIdentityAndInitialAccount(
-    dispatch: Dispatch,
-    identityId: number
-) {
-    await removeIdentityAndInitialAccountInDatabase(identityId);
+export async function removeIdentity(dispatch: Dispatch, identityId: number) {
+    await removeIdentityInDatabase(identityId);
     return Promise.all([loadAccounts(dispatch), loadIdentities(dispatch)]);
 }
 

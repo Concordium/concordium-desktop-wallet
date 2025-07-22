@@ -36,9 +36,9 @@ let getNextIdentityNumber: typeof window.database.identity.getNextIdentityNumber
 let insertIdentity: typeof window.database.identity.insert;
 let updateIdentity: typeof window.database.identity.update;
 let getIdentitiesForWallet: typeof window.database.identity.getIdentitiesForWallet;
-let insertPendingIdentityAndInitialAccount: typeof window.database.identity.insertPendingIdentityAndInitialAccount;
-let rejectIdentityAndInitialAccount: typeof window.database.identity.rejectIdentityAndInitialAccount;
-let removeIdentityAndInitialAccount: typeof window.database.identity.removeIdentityAndInitialAccount;
+let insertPendingIdentity: typeof window.database.identity.insertPendingIdentity;
+let rejectIdentity: typeof window.database.identity.rejectIdentity;
+let removeIdentity: typeof window.database.identity.removeIdentity;
 let confirmIdentity: typeof window.database.identity.confirmIdentity;
 
 (async () => {
@@ -48,9 +48,9 @@ let confirmIdentity: typeof window.database.identity.confirmIdentity;
         insert: insertIdentity,
         update: updateIdentity,
         getIdentitiesForWallet,
-        insertPendingIdentityAndInitialAccount,
-        rejectIdentityAndInitialAccount,
-        removeIdentityAndInitialAccount,
+        insertPendingIdentity,
+        rejectIdentity,
+        removeIdentity,
         confirmIdentity,
     } = window.database.identity);
 })();
@@ -60,8 +60,8 @@ export {
     insertIdentity,
     updateIdentity,
     getIdentitiesForWallet,
-    insertPendingIdentityAndInitialAccount,
-    rejectIdentityAndInitialAccount,
-    removeIdentityAndInitialAccount,
+    insertPendingIdentity,
+    rejectIdentity,
+    removeIdentity,
     confirmIdentity,
 };

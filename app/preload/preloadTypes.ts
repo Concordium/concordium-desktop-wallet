@@ -110,6 +110,7 @@ export type GRPC = {
         port: string,
         useSsl: boolean
     ) => Promise<string>;
+
     /**
      * @returns stringified {@linkcode TransactionHash.Type}
      */
@@ -340,22 +341,13 @@ export type IdentityMethods = {
     insert: (identity: Partial<Identity> | Identity[]) => Promise<number[]>;
     update: (id: number, updatedValues: Partial<Identity>) => Promise<number>;
     getIdentitiesForWallet: (walletId: number) => Promise<Identity[]>;
-    rejectIdentityAndInitialAccount: (
-        identityId: number,
-        detail: string
-    ) => Promise<void>;
-    removeIdentityAndInitialAccount: (identityId: number) => Promise<void>;
+    rejectIdentity: (identityId: number, detail: string) => Promise<void>;
+    removeIdentity: (identityId: number) => Promise<void>;
     confirmIdentity: (
         identityId: number,
-        identityObjectJson: string,
-        accountAddress: string,
-        credential: Credential,
-        addressBookEntry: AddressBookEntry
+        identityObjectJson: string
     ) => Promise<void>;
-    insertPendingIdentityAndInitialAccount: (
-        identity: Omit<Identity, 'id'>,
-        initialAccount: Omit<Account, 'identityId'>
-    ) => Promise<number>;
+    insertPendingIdentity: (identity: Omit<Identity, 'id'>) => Promise<number>;
 };
 
 export type GenesisAndGlobalMethods = {

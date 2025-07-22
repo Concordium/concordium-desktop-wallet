@@ -22,7 +22,7 @@ function getSubtitle(location: string) {
         case routes.IDENTITYISSUANCE_EXTERNAL:
             return 'Issuance flow';
         case routes.IDENTITYISSUANCE_FINAL:
-            return 'Your identity and initial account';
+            return 'Your identity';
         default:
             return 'Choose your names';
     }
@@ -30,7 +30,6 @@ function getSubtitle(location: string) {
 
 interface LocationState {
     identityName?: string;
-    initialAccountName?: string;
 }
 
 /**
@@ -43,9 +42,6 @@ export default function IdentityIssuancePage(): JSX.Element {
     const { path } = useRouteMatch();
 
     const [provider, setProvider] = useState<IdentityProvider | undefined>();
-    const [initialAccountName, setInitialAccountName] = useState<string>(
-        state?.initialAccountName || ''
-    );
     const [identityName, setIdentityName] = useState<string>(
         state?.identityName || ''
     );
@@ -64,7 +60,6 @@ export default function IdentityIssuancePage(): JSX.Element {
             return (
                 <ExternalIssuance
                     identityName={identityName}
-                    accountName={initialAccountName}
                     provider={provider}
                     onError={activateModal}
                 />
@@ -134,8 +129,6 @@ export default function IdentityIssuancePage(): JSX.Element {
                         render={() => (
                             <PickName
                                 setIdentityName={setIdentityName}
-                                setAccountName={setInitialAccountName}
-                                account={initialAccountName}
                                 identity={identityName}
                             />
                         )}

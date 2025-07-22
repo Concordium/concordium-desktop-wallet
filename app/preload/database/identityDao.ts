@@ -2,16 +2,7 @@
 import type { Knex } from 'knex';
 import { knex } from '~/database/knex';
 import databaseNames from '~/constants/databaseNames.json';
-import { removeInitialAccount, serializeAccountFields } from './accountDao';
-import {
-    Account,
-    Credential,
-    AccountStatus,
-    AddressBookEntry,
-    Identity,
-    IdentityStatus,
-    IdentityVersion,
-} from '~/utils/types';
+import { Identity, IdentityStatus, IdentityVersion } from '~/utils/types';
 import { IdentityMethods } from '~/preload/preloadTypes';
 
 /**
@@ -63,7 +54,7 @@ async function getIdentitiesForWallet(walletId: number): Promise<Identity[]> {
         .where({ walletId });
 }
 
-async function removeIdentity(id: number, trx: Knex.Transaction) {
+async function removePendingIdentity(id: number, trx: Knex.Transaction) {
     const table = (await knex())(databaseNames.identitiesTable).transacting(
         trx
     );
@@ -75,17 +66,11 @@ async function removeIdentity(id: number, trx: Knex.Transaction) {
  * initial account.
  * @param identityId the identity to reject
  */
-async function rejectIdentityAndInitialAccount(
-    identityId: number,
-    detail: string
-) {
+async function rejectIdentity(identityId: number, detail: string) {
     (await knex()).transaction(async (trx) => {
         await trx(databaseNames.identitiesTable)
             .where({ id: identityId })
             .update({ status: IdentityStatus.Rejected, detail });
-        await trx(databaseNames.accountsTable)
-            .where({ identityId, isInitial: 1 })
-            .update({ status: AccountStatus.Rejected });
     });
 }
 
@@ -93,21 +78,11 @@ async function rejectIdentityAndInitialAccount(
  * Transactionally inserts an identity and its initial account.
  * @returns the identityId of the inserted identity
  */
-async function insertPendingIdentityAndInitialAccount(
-    identity: Partial<Identity>,
-    initialAccount: Omit<Account, 'identityId'>
-) {
+async function insertPendingIdentity(identity: Partial<Identity>) {
     return (await knex()).transaction(async (trx) => {
         const identityId = (
             await trx.table(databaseNames.identitiesTable).insert(identity)
         )[0];
-        const initialAccountWithIdentityId = {
-            ...initialAccount,
-            identityId,
-        };
-        await trx
-            .table(databaseNames.accountsTable)
-            .insert(serializeAccountFields(initialAccountWithIdentityId));
         return identityId;
     });
 }
@@ -121,13 +96,7 @@ async function insertPendingIdentityAndInitialAccount(
  * - Adds the initial account as an entry in the address book.
  * All of this happens transactionally.
  */
-async function confirmIdentity(
-    identityId: number,
-    identityObjectJson: string,
-    accountAddress: string,
-    credential: Credential,
-    addressBookEntry: AddressBookEntry
-) {
+async function confirmIdentity(identityId: number, identityObjectJson: string) {
     (await knex()).transaction(async (trx) => {
         await trx(databaseNames.identitiesTable)
             .where({ id: identityId })
@@ -135,25 +104,13 @@ async function confirmIdentity(
                 status: IdentityStatus.Confirmed,
                 identityObject: identityObjectJson,
             });
-        await trx(databaseNames.accountsTable)
-            .where({ identityId, isInitial: 1 })
-            .first()
-            .update({
-                status: AccountStatus.Confirmed,
-                address: accountAddress,
-            });
-        await trx(databaseNames.credentialsTable).insert(credential);
-        await trx(databaseNames.addressBookTable).insert(addressBookEntry);
     });
 }
 
-async function removeIdentityAndInitialAccount(identityId: number) {
+async function removeIdentity(identityId: number) {
     const db = await knex();
     await db.transaction((trx) => {
-        removeInitialAccount(identityId, trx)
-            .then(() => {
-                return removeIdentity(identityId, trx);
-            })
+        return removePendingIdentity(identityId, trx)
             .then(trx.commit)
             .catch(trx.rollback);
     });
@@ -175,10 +132,10 @@ const exposedMethods: IdentityMethods = {
     insert: insertIdentity,
     update: updateIdentity,
     getIdentitiesForWallet,
-    rejectIdentityAndInitialAccount,
-    removeIdentityAndInitialAccount,
+    rejectIdentity,
+    removeIdentity,
     confirmIdentity,
-    insertPendingIdentityAndInitialAccount,
+    insertPendingIdentity,
 };
 
 export default exposedMethods;

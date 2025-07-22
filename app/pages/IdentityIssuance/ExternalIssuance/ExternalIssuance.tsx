@@ -13,18 +13,14 @@ import {
     IdObjectRequest,
     Versioned,
     IdentityStatus,
-    AccountStatus,
-    Account,
 } from '~/utils/types';
 import { confirmIdentityAndInitialAccount } from '~/utils/IdentityStatusPoller';
 import { performIdObjectRequest } from '~/utils/httpRequests';
 
-import { getAddressFromCredentialId } from '~/utils/rustInterface';
 import generalStyles from '../IdentityIssuance.module.scss';
 import styles from './ExternalIssuance.module.scss';
-import { createInitialAccount } from '~/utils/accountHelpers';
 import { currentIdentityVersion } from '~/utils/identityHelpers';
-import { insertPendingIdentityAndInitialAccount } from '~/database/IdentityDao';
+import { insertPendingIdentity } from '~/database/IdentityDao';
 import { getElementRectangle } from '~/utils/htmlHelpers';
 import { ViewResponseStatus } from '~/preload/preloadTypes';
 
@@ -71,7 +67,6 @@ async function generateIdentity(
     identityNumber: number,
     dispatch: Dispatch,
     provider: IdentityProvider,
-    accountName: string,
     identityName: string,
     walletId: number,
     onError: (message: string) => void,
@@ -128,23 +123,7 @@ async function generateIdentity(
             version: currentIdentityVersion,
         };
 
-        const accountAddress = await getAddressFromCredentialId(
-            idObjectRequest.value.pubInfoForIp.regId
-        );
-
-        const initialAccount: Omit<
-            Account,
-            'identityId'
-        > = createInitialAccount(
-            accountAddress,
-            AccountStatus.Pending,
-            accountName
-        );
-
-        identityId = await insertPendingIdentityAndInitialAccount(
-            identity,
-            initialAccount
-        );
+        identityId = await insertPendingIdentity(identity);
 
         window.log.info('Saved identity object.');
 
@@ -158,9 +137,7 @@ async function generateIdentity(
     }
     confirmIdentityAndInitialAccount(
         dispatch,
-        identityName,
         identityId,
-        accountName,
         identityObjectLocation
     ).catch((e) => {
         window.log.error(e, 'Confirmation of Identity failed');
@@ -176,14 +153,12 @@ export interface ExternalIssuanceLocationState extends SignedIdRequest {
 
 interface Props {
     identityName: string;
-    accountName: string;
     provider: IdentityProvider;
     onError(message: string): void;
 }
 
 export default function ExternalIssuance({
     identityName,
-    accountName,
     provider,
     onError,
 }: Props): JSX.Element {
@@ -234,7 +209,6 @@ export default function ExternalIssuance({
             identityNumber,
             dispatch,
             provider,
-            accountName,
             identityName,
             walletId,
             onError,

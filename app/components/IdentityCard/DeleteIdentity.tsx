@@ -5,7 +5,7 @@ import { Identity } from '~/utils/types';
 import Button from '~/cross-app-components/Button';
 import IconButton from '~/cross-app-components/IconButton';
 import Modal from '~/cross-app-components/Modal';
-import { removeIdentityAndInitialAccount } from '~/features/IdentitySlice';
+import { removeIdentity } from '~/features/IdentitySlice';
 
 interface DeleteAddressProps {
     identity: Identity;
@@ -17,7 +17,7 @@ export default function DeleteIdentity({ identity }: DeleteAddressProps) {
 
     function remove(): void {
         window.log.info(`Removing failed identity ${identity.id}`);
-        removeIdentityAndInitialAccount(dispatch, identity.id);
+        removeIdentity(dispatch, identity.id);
         setOpen(false);
     }
 
