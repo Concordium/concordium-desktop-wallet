@@ -122,6 +122,7 @@ function shieldedOnlyFilter(filter: TransactionFilter): TransactionFilter {
         configureDelegation: false,
         paydayAccountReward: false,
         failed: false,
+        tokenUpdate: false
     };
 
     return {

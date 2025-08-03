@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer/';
-import { ValidatorScoreParameters } from '@concordium/web-sdk';
+import { CreatePLTPayload, ValidatorScoreParameters } from '@concordium/web-sdk';
 import {
     encodeWord32,
     encodeWord64,
@@ -73,6 +73,7 @@ export enum OnChainUpdateType {
     UpdateGASRewardsV1 = 21,
     UpdateFinalizationCommitteeParameters = 22,
     UpdateValidatorScoreParameters = 23,
+    UpdateCreatePltParameters = 24,
 }
 
 /**
@@ -255,6 +256,27 @@ export function serializeValidatorScoreParameters(
     parameters: ValidatorScoreParameters
 ) {
     return encodeWord64(parameters.maxMissedRounds);
+}
+
+/**
+ * Serializes a Create PLT update paramter to the byte format expected
+ * by the chain.
+ */
+export function serializeCreatePltParameters(
+    parameters: CreatePLTPayload
+) {
+    return Buffer.concat([
+        // TODO: fix serialization
+
+        // encodeWord32(parameters.tokenId.value),
+        // encodeWord32(parameters.moduleRef),
+        encodeWord32(
+            parameters.decimals
+        ),
+        // encodeWord32(
+        //     parameters.initializationParameters
+        // ),
+    ]);
 }
 
 /**
@@ -666,6 +688,8 @@ function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
             return OnChainUpdateType.UpdateGASRewardsV1;
         case UpdateType.UpdateValidatorScoreParameters:
             return OnChainUpdateType.UpdateValidatorScoreParameters;
+        case UpdateType.UpdateCreatePltParameters:
+            return OnChainUpdateType.UpdateCreatePltParameters;
         default:
             throw new Error(`An invalid update type was given: ${type}`);
     }

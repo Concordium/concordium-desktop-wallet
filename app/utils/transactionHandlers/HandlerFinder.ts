@@ -60,6 +60,7 @@ import FinalizationCommitteeParametersHandler from './FinalizationCommitteeParam
 import MinBlockTimeHandler from './MinBlockTimeHandler';
 import TimeoutParametersHandler from './TimeoutParametersHandler';
 import ValidatorScoreParametersHandler from './ValidatorScoreParametersHandler';
+import CreatePltParametersHandler from './CreatePltParametersHandler';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -262,6 +263,10 @@ export function findUpdateInstructionHandler(
         case UpdateType.UpdateValidatorScoreParameters:
             return new UpdateInstructionHandlerTypeMiddleware(
                 new ValidatorScoreParametersHandler()
+            );
+        case UpdateType.UpdateCreatePltParameters:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new CreatePltParametersHandler()
             );
         default:
             return throwLoggedError(`Unsupported transaction type: ${type}`);

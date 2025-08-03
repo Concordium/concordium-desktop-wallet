@@ -236,7 +236,8 @@
         "yargs": "^17.1.1"
     },
     "dependencies": {
-        "@concordium/web-sdk": "^9.0.0",
+        "@concordium/web-sdk": "link:../../nodeSDK/concordium-node-sdk-js/packages/sdk",
+        "@grpc/grpc-js": "^1.13.4",
         "@hot-loader/react-dom": "^16.13.0",
         "@ledgerhq/devices": "^8.2.1",
         "@protobuf-ts/grpc-transport": "2.8.2",

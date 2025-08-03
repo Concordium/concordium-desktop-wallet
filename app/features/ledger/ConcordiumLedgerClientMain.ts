@@ -1,4 +1,4 @@
-import { ValidatorScoreParameters } from '@concordium/web-sdk';
+import { CreatePLTPayload, ValidatorScoreParameters } from '@concordium/web-sdk';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type HwTransport from '@ledgerhq/hw-transport';
 import { Buffer } from 'buffer/';
@@ -442,6 +442,21 @@ export default class ConcordiumLedgerClientMain {
         return signUpdateTransaction(
             this.transport,
             0x47,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signCreatePltParameters(
+        transaction: UpdateInstruction<CreatePLTPayload>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
+            this.transport,
+            // TODO: check if correct
+            0x48,
             path,
             transaction,
             serializedPayload

@@ -1,4 +1,4 @@
-import { ValidatorScoreParameters } from '@concordium/web-sdk';
+import { CreatePLTPayload, ValidatorScoreParameters } from '@concordium/web-sdk';
 import { Buffer } from 'buffer/';
 import EventEmitter from 'events';
 import {
@@ -310,6 +310,17 @@ export default function exposedMethods(
             keypath: number[]
         ) => {
             return getLedgerClient().signValidatorScoreParameters(
+                transaction,
+                serializedPayload,
+                keypath
+            );
+        },
+        signCreatePltParameters: (
+            transaction: UpdateInstruction<CreatePLTPayload>,
+            serializedPayload: Buffer,
+            keypath: number[]
+        ) => {
+            return getLedgerClient().signCreatePltParameters(
                 transaction,
                 serializedPayload,
                 keypath
