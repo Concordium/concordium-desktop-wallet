@@ -301,6 +301,57 @@ const toLink = (pv: bigint | undefined) => ([
             {label}
         </ButtonNavLink>
     );
+
+/**
+ * Component that displays a menu containing the available multi signature
+ * transaction types. Does not display governance proposal types.
+ */
+export function MultiSignatureCreateAccountProposalView() {
+    const proposals = useSelector(proposalsSelector);
+    const pv = useProtocolVersion(true);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        return expireProposals(proposals, dispatch);
+    }, [dispatch, proposals]);
+
+    return (
+        <>
+            {accountTransactionTypes.map(toLink(pv))}
+            {pv !== undefined && hasDelegationProtocol(pv) && (
+                <>
+                    {configureBakerLinks(pv)}
+                    {configureDelegationLinks}
+                </>
+            )}
+        </>
+    );
+}
+
+/**
+ * Component that displays a menu containing the available governance
+ * transaction types.
+ */
+export function MultiSignatureCreateGovernanceProposalView() {
+    const proposals = useSelector(proposalsSelector);
+    const pv = useProtocolVersion(true);
+    const foundationTransactionsEnabled: boolean = useSelector(
+        foundationTransactionsEnabledSelector
+    );
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        return expireProposals(proposals, dispatch);
+    }, [dispatch, proposals]);
+
+    return (
+        <>
+            {foundationTransactionsEnabled &&
+                updateInstructionTypes.map(toLink(pv))}
+        </>
+    );
+}
+
 /**
  * Component that displays a menu containing the available multi signature
  * transaction types. If foundation transactions area enabled in settings,
