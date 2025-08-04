@@ -1,4 +1,5 @@
-import { CreatePLTPayload, ValidatorScoreParameters } from '@concordium/web-sdk';
+import { ValidatorScoreParameters } from '@concordium/web-sdk';
+import { CreatePLTPayload } from '@concordium/web-sdk/plt';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type HwTransport from '@ledgerhq/hw-transport';
 import { Buffer } from 'buffer/';

@@ -13,8 +13,8 @@ import {
     OpenStatus,
     TransactionKindString,
     ValidatorScoreParameters,
-    CreatePLTPayload,
 } from '@concordium/web-sdk';
+import { CreatePLTPayload } from '@concordium/web-sdk/plt';
 import { RejectReason } from './node/RejectReasonHelper';
 import type { ExternalCredential, Genesis } from '~/database/types';
 
@@ -1660,11 +1660,11 @@ export declare type DeepPartial<T> = T extends Array<infer U>
     : T extends ReadonlyArray<infer U>
     ? ReadonlyArray<DeepPartial<U>>
     : T extends {
-          [key in keyof T]: T[key];
-      }
+        [key in keyof T]: T[key];
+    }
     ? {
-          [K in keyof T]?: DeepPartial<T[K]>;
-      }
+        [K in keyof T]?: DeepPartial<T[K]>;
+    }
     : T;
 
 export function isMinChainParametersV3(

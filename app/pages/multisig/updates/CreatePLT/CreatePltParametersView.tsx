@@ -1,5 +1,5 @@
 import React from 'react';
-import { CreatePLTPayload} from '@concordium/web-sdk';
+import { CreatePLTPayload } from '@concordium/web-sdk/plt';
 
 import Loading from '~/cross-app-components/Loading';
 import withChainData, { ChainData } from '~/utils/withChainData';

@@ -1,12 +1,14 @@
 import React from 'react';
-import { ChainParameters , CreatePLTPayload} from '@concordium/web-sdk';
+import { ChainParameters } from '@concordium/web-sdk';
+import { AccountAddress } from '@concordium/web-sdk/types';
+import { TokenHolder, TokenId, TokenInitializationParameters, CreatePLTPayload, TokenModuleReference, createPltPayload, TokenMetadataUrl } from '@concordium/web-sdk/plt';
+
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
 import UpdateCreatePltParameters, {
     UpdateCreatePltParametersFields,
 } from '~/pages/multisig/updates/CreatePLT/CreatePltParameters';
 import CreatePltParametersView from '~/pages/multisig/updates/CreatePLT/CreatePltParametersView';
-
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import {
     Authorizations,
@@ -21,7 +23,6 @@ import {
 } from '../types';
 import { serializeCreatePltParameters } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
-import { Cbor, TokenId, TokenModuleReference } from '@concordium/web-sdk/plt';
 
 const TYPE = 'Update create PLT parameters';
 
@@ -57,20 +58,25 @@ export default class CreatePltParametersHandler
             );
         }
 
-        // TODO: node-sdk needs to be updated to expose `next sequence number` for creation of protocol level token
         const sequenceNumber =
-            nextUpdateSequenceNumbers.validatorScoreParameters;
+            nextUpdateSequenceNumbers.protocolLevelTokens;
         const { threshold } = chainParameters.level2Keys.poolParameters;
 
-        const params: CreatePLTPayload = {
-            // TODO fill real values
-            tokenId:TokenId.fromString("ETJ"),
-            moduleRef:TokenModuleReference.fromHexString("7f64dfb3555d6f24afce8f157e6dce0c0823226f1775a26360b9294e54f7ec9f"),
-            // TODO generate the cbor encoding of the initializationParameters
-            initializationParameters: Cbor.fromHexString("0x"),
-
-            decimals: Number(decimals)
-        };
+        // TODO fill real values
+        const tokenMetadataUrl: TokenMetadataUrl.Type = TokenMetadataUrl.fromString("https://")
+        // TODO fill real values
+        const holderAccount: TokenHolder.Type = TokenHolder.fromAccountAddress(AccountAddress.fromBase58("4FmiTW2L2AccyR9VjzsnpWFSAcohXWf7Vf797i36y526mqiEcp"))
+        // TODO fill real values
+        const tokenInitializationParameters: TokenInitializationParameters = {
+            name: "blabla", metadata: tokenMetadataUrl, governanceAccount: holderAccount, mintable: false, burnable: false, allowList: false, denyList: false
+        }
+        const params: CreatePLTPayload =
+            createPltPayload({
+                // TODO fill real values
+                tokenId: TokenId.fromString("ETJ"),
+                moduleRef: TokenModuleReference.fromHexString("5c5c2645db84a7026d78f2501740f60a8ccb8fae5c166dc2428077fd9a699a4a"),
+                decimals: Number(decimals)
+            }, tokenInitializationParameters)
 
         return createUpdateMultiSignatureTransaction(
             params,

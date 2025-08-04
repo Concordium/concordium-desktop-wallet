@@ -6,7 +6,7 @@ import { mustBeAnInteger, requiredMessage, enterHere } from '../common/util';
 
 export interface UpdateCreatePltParametersFields {
     decimals: bigint,
-    initialSupply: 'initialSupply',
+    initialSupply: bigint,
 }
 
 const fieldNames: EqualRecord<UpdateCreatePltParametersFields> = {

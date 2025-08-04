@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer/';
-import { CreatePLTPayload, ValidatorScoreParameters } from '@concordium/web-sdk';
+import { ValidatorScoreParameters } from '@concordium/web-sdk';
+import { CreatePLTPayload } from '@concordium/web-sdk/plt';
 import {
     AccountTransaction,
     BakerStakeThreshold,
