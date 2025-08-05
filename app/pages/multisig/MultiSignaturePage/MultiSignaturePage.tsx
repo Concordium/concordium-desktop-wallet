@@ -10,7 +10,7 @@ import BrowseTransactionFile from '../menu/BrowseTransactionFile';
 import ExportKeyList from '../menu/ExportKeyList';
 import ImportProposal from '../menu/ImportProposal';
 import ProposalList from '../menu/ProposalList';
-
+import ExportProposal from '../menu/ExportProposal';
 import styles from './MultiSignaturePage.module.scss';
 import {
     MultiSignatureCreateAccountProposalView,
@@ -78,6 +78,10 @@ export default function MultiSignaturePage() {
                         path={routes.MULTISIGTRANSACTIONS}
                         component={MultiSignatureCreateAccountProposalView}
                         exact
+                    />
+                    <Route
+                        path={routes.MULTISIGTRANSACTIONS_EXPORT_PROPOSAL}
+                        component={ExportProposal}
                     />
                     <Route
                         path={routes.MULTISIGTRANSACTIONS_GOV}

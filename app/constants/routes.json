@@ -45,6 +45,7 @@
     "RECOVERY_MAIN": "/settings/recovery/main",
     "RECOVERY_COMPLETED": "/settings/recovery/completed",
     "MULTISIGTRANSACTIONS": "/multi-signature-transaction",
+    "MULTISIGTRANSACTIONS_EXPORT_PROPOSAL": "/multi-signature-transaction/generate-plt",
     "MULTISIGTRANSACTIONS_GOV": "/multi-signature-transaction/governance",
     "MULTISIGTRANSACTIONS_PROPOSAL": "/multi-signature-transaction/create/:updateType",
     "MULTISIGTRANSACTIONS_PROPOSAL_KEY_SET_SIZE": "/multi-signature-transaction/create/:updateType/keysetsize",

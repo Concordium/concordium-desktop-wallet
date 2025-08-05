@@ -284,6 +284,18 @@ const configureDelegationLinks = (
     </>
 );
 
+const configurePLTLinks = (
+    <>
+        <ButtonNavLink
+            to={routes.MULTISIGTRANSACTIONS_EXPORT_PROPOSAL}
+            className={styles.link}
+            exact
+        >
+            Create Protocol Level Token Proposal
+        </ButtonNavLink>
+    </>
+);
+
 // eslint-disable-next-line react/display-name
 const toLink = (pv: bigint | undefined) => ([
     transactionType,
@@ -348,6 +360,7 @@ export function MultiSignatureCreateGovernanceProposalView() {
         <>
             {foundationTransactionsEnabled &&
                 updateInstructionTypes.map(toLink(pv))}
+            {configurePLTLinks}
         </>
     );
 }

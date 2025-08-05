@@ -1,0 +1,27 @@
+@import 'config/bundle';
+
+.top {
+    text-align: center;
+    padding: 30px 60px;
+}
+
+.input {
+    font-size: $font-size-body2;
+    margin-bottom: 25px;
+}
+
+.submit {
+    margin-top: 50px;
+}
+
+.error {
+    font-size: $font-size-body2;
+    margin-top: 10px;
+    color: $color-danger;
+}
+
+.success {
+    font-size: $font-size-body2;
+    margin-top: 10px;
+    color: $color-success;
+}
