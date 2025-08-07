@@ -3326,7 +3326,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@grpc/grpc-js@npm:^1.13.4, @grpc/grpc-js@npm:^1.9.4":
+"@grpc/grpc-js@npm:^1.9.4":
   version: 1.13.4
   resolution: "@grpc/grpc-js@npm:1.13.4"
   dependencies:
@@ -10253,7 +10253,6 @@ __metadata:
     "@concordium/web-sdk": "npm:10.0.0-alpha.14"
     "@electron/notarize": "npm:^2.2.0"
     "@electron/rebuild": "npm:3.7.1"
-    "@grpc/grpc-js": "npm:^1.13.4"
     "@hot-loader/react-dom": "npm:^16.13.0"
     "@journeyapps/sqlcipher": "npm:^5.2.0"
     "@ledgerhq/devices": "npm:^8.2.1"

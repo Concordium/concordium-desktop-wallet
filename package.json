@@ -237,7 +237,6 @@
     },
     "dependencies": {
         "@concordium/web-sdk": "10.0.0-alpha.14",
-        "@grpc/grpc-js": "^1.13.4",
         "@hot-loader/react-dom": "^16.13.0",
         "@ledgerhq/devices": "^8.2.1",
         "@protobuf-ts/grpc-transport": "2.8.2",
