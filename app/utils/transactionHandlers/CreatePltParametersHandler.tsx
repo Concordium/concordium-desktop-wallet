@@ -10,6 +10,7 @@ import UpdateCreatePltParameters, {
 } from '~/pages/multisig/updates/CreatePLT/CreatePltParameters';
 import CreatePltParametersView from '~/pages/multisig/updates/CreatePLT/CreatePltParametersView';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
+import { hexStringToUint8Array } from '~/utils/numberStringHelpers';
 import {
     Authorizations,
     NextUpdateSequenceNumbers,
@@ -44,7 +45,19 @@ export default class CreatePltParametersHandler
     async createTransaction(
         chainParameters: ChainParameters,
         nextUpdateSequenceNumbers: NextUpdateSequenceNumbers,
-        { decimals }: UpdateCreatePltParametersFields,
+        {
+            tokenId,
+            name,
+            moduleRef,
+            metadataUrl,
+            metadataHash,
+            governanceAccount,
+            decimals,
+            initialSupply,
+            allowList,
+            denyList,
+            mintable,
+            burnable, }: UpdateCreatePltParametersFields,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
@@ -62,19 +75,18 @@ export default class CreatePltParametersHandler
             nextUpdateSequenceNumbers.protocolLevelTokens;
         const { threshold } = chainParameters.level2Keys.poolParameters;
 
-        // TODO fill real values
-        const tokenMetadataUrl: TokenMetadataUrl.Type = TokenMetadataUrl.fromString("https://")
-        // TODO fill real values
-        const holderAccount: TokenHolder.Type = TokenHolder.fromAccountAddress(AccountAddress.fromBase58("4FmiTW2L2AccyR9VjzsnpWFSAcohXWf7Vf797i36y526mqiEcp"))
-        // TODO fill real values
+        const tokenMetadataUrl = metadataHash
+            ? TokenMetadataUrl.create(metadataUrl, hexStringToUint8Array(metadataHash))
+            : TokenMetadataUrl.fromString(metadataUrl);
+
+        const holderAccount: TokenHolder.Type = TokenHolder.fromAccountAddress(AccountAddress.fromBase58(governanceAccount))
         const tokenInitializationParameters: TokenInitializationParameters = {
-            name: "blabla", initialSupply: TokenAmount.fromDecimal(5n, Number(decimals)), metadata: tokenMetadataUrl, governanceAccount: holderAccount, mintable: false, burnable: false, allowList: false, denyList: false
+            name, initialSupply: TokenAmount.fromDecimal(initialSupply, Number(decimals)), metadata: tokenMetadataUrl, governanceAccount: holderAccount, mintable, burnable, allowList, denyList
         }
         const params: CreatePLTPayload =
             createPltPayload({
-                // TODO fill real values
-                tokenId: TokenId.fromString("ETJ"),
-                moduleRef: TokenModuleReference.fromHexString("5c5c2645db84a7026d78f2501740f60a8ccb8fae5c166dc2428077fd9a699a4a"),
+                tokenId: TokenId.fromString(tokenId),
+                moduleRef: TokenModuleReference.fromHexString(moduleRef),
                 decimals
             }, tokenInitializationParameters)
 

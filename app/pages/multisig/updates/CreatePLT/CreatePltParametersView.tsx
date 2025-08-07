@@ -1,5 +1,6 @@
 import React from 'react';
-import { Cbor, CreatePLTPayload, TokenInitializationParameters } from '@concordium/web-sdk/plt';
+// import { Cbor, CreatePLTPayload, TokenInitializationParameters } from '@concordium/web-sdk/plt';
+import { CreatePLTPayload } from '@concordium/web-sdk/plt';
 
 import Loading from '~/cross-app-components/Loading';
 import withChainData, { ChainData } from '~/utils/withChainData';
@@ -14,7 +15,7 @@ interface Props extends ChainData {
  * Displays an overview of an update create PLT transaction transaction payload.
  */
 export default withChainData(function CreatePltParametersView({
-    createPltParameters: { decimals, tokenId, moduleRef, initializationParameters },
+    createPltParameters: { decimals, tokenId, moduleRef, }, // initializationParameters
     consensusStatus,
 }: Props) {
     if (!consensusStatus) {
@@ -22,8 +23,8 @@ export default withChainData(function CreatePltParametersView({
     }
 
     // TODO: decoding problem as `hasOwn` function not available
-    let test: TokenInitializationParameters = Cbor.decode(initializationParameters, 'TokenInitializationParameters');
-    console.log(test)
+    // let test: TokenInitializationParameters = Cbor.decode(initializationParameters, 'TokenInitializationParameters');
+    // console.log(test)
     return (
         <>
             <div>
