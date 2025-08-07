@@ -8,6 +8,7 @@ import {
     serializeVerifyKey,
     serializeIpInfo,
     serializeArInfo,
+    encodeWord8,
 } from './serializationHelpers';
 import {
     BakerStakeThreshold,
@@ -266,16 +267,28 @@ export function serializeValidatorScoreParameters(
 export function serializeCreatePltParameters(
     parameters: CreatePLTPayload
 ) {
+    let tokenId = parameters.tokenId.value
+    const tokenIdBytes = Buffer.from(new TextEncoder().encode(tokenId));
+    if (tokenIdBytes.length > 128) {
+        throw new Error(`The token id length was greater than 128 bytes. Current length: ${tokenIdBytes.length}`);
+    }
+
     return Buffer.concat([
-        // TODO: fix serialization
-        // encodeWord32(parameters.tokenId.value),
-        // encodeWord32(parameters.moduleRef),
-        encodeWord32(
-            parameters.decimals
-        ),
-        // encodeWord32(
-        //     parameters.initializationParameters
-        // ),
+        // Token Id (`String`): UTF-8 encoded string, maximum 128 characters
+        // (we allow only simple characters that are encoded as 1 byte in utf-8)
+        // Serialized as: `[length: uint32][data: bytes]`
+        encodeWord32(tokenIdBytes.length),
+        tokenIdBytes,
+        // Token Module (`Hash`): 32-byte hash identifying the token module
+        // Serialized as: `[32 bytes]`
+        parameters.moduleRef.bytes,
+        // Decimals (`uint8`): Number of decimal places for the token
+        // Serialized as: `[1 byte]`
+        encodeWord8(parameters.decimals),
+        // Initialization Parameters (`ByteArray`): Variable-length initialization data
+        // Serialized as: `[length: uint32][data: bytes]`
+        encodeWord32(parameters.initializationParameters.bytes.length),
+        parameters.initializationParameters.bytes,
     ]);
 }
 
