@@ -21,6 +21,7 @@ import {
     TransactionExpiry,
     TransactionHash,
 } from '@concordium/web-sdk';
+import { Cbor, TokenId, TokenModuleReference } from '@concordium/web-sdk/plt';
 
 const types = {
     BigInt: 'bigint',
@@ -44,6 +45,9 @@ const types = {
     Timestamp: 'timestamp',
     TransactionExpiry: 'transactionExpiry',
     TransactionHash: 'transactionHash',
+    TokenModuleReference: 'tokenModuleReference',
+    TokenId: 'tokenId',
+    TokenInitializationParameters: 'tokenInitializationParameters',
 };
 
 function replacer(this: any, key: string) {
@@ -115,6 +119,13 @@ function replacer(this: any, key: string) {
             };
         case TransactionHash.instanceOf(value):
             return { '@type': types.TransactionHash, value: value.toJSON() };
+        case TokenId.instanceOf(value):
+            return { '@type': types.TokenId, value: value.toJSON() };
+        case TokenModuleReference.instanceOf(value):
+            return { '@type': types.TokenModuleReference, value: value.toJSON() };
+        // This works for now but what if the DW has to support more than one cbor encoded custom Concordium type?
+        case Cbor.instanceOf(value):
+            return { '@type': types.TokenInitializationParameters, value: value.toJSON() };
     }
     return value;
 }
@@ -173,6 +184,12 @@ export function parse(input: string | undefined) {
                     return TransactionExpiry.fromSerializable(v.value);
                 case types.TransactionHash:
                     return TransactionHash.fromJSON(v.value);
+                case types.TokenId:
+                    return TokenId.fromJSON(v.value);
+                case types.TokenModuleReference:
+                    return TokenModuleReference.fromJSON(v.value);
+                case types.TokenInitializationParameters:
+                    return Cbor.fromJSON(v.value);
                 default:
                     return v;
             }

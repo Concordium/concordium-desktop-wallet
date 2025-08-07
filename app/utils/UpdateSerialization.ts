@@ -281,14 +281,14 @@ export function serializeCreatePltParameters(
         tokenIdBytes,
         // Token Module (`Hash`): 32-byte hash identifying the token module
         // Serialized as: `[32 bytes]`
-        parameters.moduleRef.bytes,
+        Buffer.from(new Uint8Array(parameters.moduleRef.bytes)),
         // Decimals (`uint8`): Number of decimal places for the token
         // Serialized as: `[1 byte]`
         encodeWord8(parameters.decimals),
         // Initialization Parameters (`ByteArray`): Variable-length initialization data
         // Serialized as: `[length: uint32][data: bytes]`
         encodeWord32(parameters.initializationParameters.bytes.length),
-        parameters.initializationParameters.bytes,
+        Buffer.from(new Uint8Array(parameters.initializationParameters.bytes))
     ]);
 }
 
