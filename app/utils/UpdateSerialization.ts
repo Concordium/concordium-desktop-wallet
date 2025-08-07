@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer/';
 import { ValidatorScoreParameters } from '@concordium/web-sdk';
+import { CreatePLTPayload } from '@concordium/web-sdk/plt';
 import {
     encodeWord32,
     encodeWord64,
@@ -7,6 +8,7 @@ import {
     serializeVerifyKey,
     serializeIpInfo,
     serializeArInfo,
+    encodeWord8,
 } from './serializationHelpers';
 import {
     BakerStakeThreshold,
@@ -73,6 +75,7 @@ export enum OnChainUpdateType {
     UpdateGASRewardsV1 = 21,
     UpdateFinalizationCommitteeParameters = 22,
     UpdateValidatorScoreParameters = 23,
+    UpdateCreatePltParameters = 24,
 }
 
 /**
@@ -255,6 +258,38 @@ export function serializeValidatorScoreParameters(
     parameters: ValidatorScoreParameters
 ) {
     return encodeWord64(parameters.maxMissedRounds);
+}
+
+/**
+ * Serializes a Create PLT update parameter to the byte format expected
+ * by the chain.
+ */
+export function serializeCreatePltParameters(parameters: CreatePLTPayload) {
+    let tokenId = parameters.tokenId.value;
+    const tokenIdBytes = Buffer.from(new TextEncoder().encode(tokenId));
+    if (tokenIdBytes.length > 128) {
+        throw new Error(
+            `The token id length was greater than 128 bytes. Current length: ${tokenIdBytes.length}`
+        );
+    }
+
+    return Buffer.concat([
+        // Token Id (`String`): UTF-8 encoded string, maximum 128 characters
+        // (we allow only simple characters that are encoded as 1 byte in utf-8)
+        // Serialized as: `[length: uint32][data: bytes]`
+        encodeWord32(tokenIdBytes.length),
+        tokenIdBytes,
+        // Token Module (`Hash`): 32-byte hash identifying the token module
+        // Serialized as: `[32 bytes]`
+        Buffer.from(new Uint8Array(parameters.moduleRef.bytes)),
+        // Decimals (`uint8`): Number of decimal places for the token
+        // Serialized as: `[1 byte]`
+        encodeWord8(parameters.decimals),
+        // Initialization Parameters (`ByteArray`): Variable-length initialization data
+        // Serialized as: `[length: uint32][data: bytes]`
+        encodeWord32(parameters.initializationParameters.bytes.length),
+        Buffer.from(new Uint8Array(parameters.initializationParameters.bytes)),
+    ]);
 }
 
 /**
@@ -666,6 +701,8 @@ function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
             return OnChainUpdateType.UpdateGASRewardsV1;
         case UpdateType.UpdateValidatorScoreParameters:
             return OnChainUpdateType.UpdateValidatorScoreParameters;
+        case UpdateType.UpdateCreatePltParameters:
+            return OnChainUpdateType.UpdateCreatePltParameters;
         default:
             throw new Error(`An invalid update type was given: ${type}`);
     }

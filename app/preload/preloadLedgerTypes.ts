@@ -1,4 +1,6 @@
 import { ValidatorScoreParameters } from '@concordium/web-sdk';
+import { CreatePLTPayload } from '@concordium/web-sdk/plt';
+
 import { Buffer } from 'buffer/';
 import {
     PrivateKeys,
@@ -115,6 +117,7 @@ type LedgerCommands = {
     signBlockEnergyLimit: SignUpdate<BlockEnergyLimit>;
     signFinalizationCommitteeParameters: SignUpdate<FinalizationCommitteeParameters>;
     signValidatorScoreParameters: SignUpdate<ValidatorScoreParameters>;
+    signCreatePltParameters: SignUpdate<CreatePLTPayload>;
     signMinBlockTime: SignUpdate<MinBlockTime>;
     signTimeoutParameters: SignUpdate<TimeoutParameters>;
     signHigherLevelKeysUpdate: SignKeyUpdate<HigherLevelKeyUpdate>;

@@ -32,6 +32,6 @@
         "app/preload.prod.js",
         "app/main.prod.js",
         "app/renderer.prod.js",
-        "app/dist",
+        "app/dist"
     ]
 }
