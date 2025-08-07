@@ -15,7 +15,7 @@ interface Props extends ChainData {
  * Displays an overview of an update create PLT transaction transaction payload.
  */
 export default withChainData(function CreatePltParametersView({
-    createPltParameters: { decimals, tokenId, moduleRef, }, // initializationParameters
+    createPltParameters: { decimals, tokenId, moduleRef }, // initializationParameters
     consensusStatus,
 }: Props) {
     if (!consensusStatus) {
@@ -28,9 +28,7 @@ export default withChainData(function CreatePltParametersView({
     return (
         <>
             <div>
-                <Label className="mB5">
-                    {fieldDisplays.tokenId}:
-                </Label>
+                <Label className="mB5">{fieldDisplays.tokenId}:</Label>
                 <div className="body3 mono mB20">{tokenId.toString()}</div>
             </div>
             {/* <div>
@@ -40,9 +38,7 @@ export default withChainData(function CreatePltParametersView({
                 <div className="body3 mono mB20">{name}</div>
             </div> */}
             <div>
-                <Label className="mB5">
-                    {fieldDisplays.moduleRef}:
-                </Label>
+                <Label className="mB5">{fieldDisplays.moduleRef}:</Label>
                 <div className="body3 mono mB20">{moduleRef.toString()}</div>
             </div>
             {/* <div>
@@ -64,9 +60,7 @@ export default withChainData(function CreatePltParametersView({
                 <div className="body3 mono mB20">{governanceAccount}</div>
             </div> */}
             <div>
-                <Label className="mB5">
-                    {fieldDisplays.decimals}:
-                </Label>
+                <Label className="mB5">{fieldDisplays.decimals}:</Label>
                 <div className="body3 mono mB20">{decimals.toString()}</div>
             </div>
             {/* <div>

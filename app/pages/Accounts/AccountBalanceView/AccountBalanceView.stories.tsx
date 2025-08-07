@@ -76,7 +76,7 @@ const accountInfo: AccountInfo = {
     accountEncryptedAmount: {} as any,
     accountCooldowns: [],
     accountAvailableBalance: CcdAmount.fromCcd(1000),
-    accountTokens:[],
+    accountTokens: [],
 } as AccountInfo;
 
 export const SingleSig = Template.bind({});

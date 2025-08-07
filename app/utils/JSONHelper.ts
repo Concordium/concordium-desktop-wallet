@@ -122,10 +122,16 @@ function replacer(this: any, key: string) {
         case TokenId.instanceOf(value):
             return { '@type': types.TokenId, value: value.toJSON() };
         case TokenModuleReference.instanceOf(value):
-            return { '@type': types.TokenModuleReference, value: value.toJSON() };
+            return {
+                '@type': types.TokenModuleReference,
+                value: value.toJSON(),
+            };
         // This works for now but what if the DW has to support more than one cbor encoded custom Concordium type?
         case Cbor.instanceOf(value):
-            return { '@type': types.TokenInitializationParameters, value: value.toJSON() };
+            return {
+                '@type': types.TokenInitializationParameters,
+                value: value.toJSON(),
+            };
     }
     return value;
 }

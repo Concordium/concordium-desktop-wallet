@@ -264,13 +264,13 @@ export function serializeValidatorScoreParameters(
  * Serializes a Create PLT update parameter to the byte format expected
  * by the chain.
  */
-export function serializeCreatePltParameters(
-    parameters: CreatePLTPayload
-) {
-    let tokenId = parameters.tokenId.value
+export function serializeCreatePltParameters(parameters: CreatePLTPayload) {
+    let tokenId = parameters.tokenId.value;
     const tokenIdBytes = Buffer.from(new TextEncoder().encode(tokenId));
     if (tokenIdBytes.length > 128) {
-        throw new Error(`The token id length was greater than 128 bytes. Current length: ${tokenIdBytes.length}`);
+        throw new Error(
+            `The token id length was greater than 128 bytes. Current length: ${tokenIdBytes.length}`
+        );
     }
 
     return Buffer.concat([
@@ -288,7 +288,7 @@ export function serializeCreatePltParameters(
         // Initialization Parameters (`ByteArray`): Variable-length initialization data
         // Serialized as: `[length: uint32][data: bytes]`
         encodeWord32(parameters.initializationParameters.bytes.length),
-        Buffer.from(new Uint8Array(parameters.initializationParameters.bytes))
+        Buffer.from(new Uint8Array(parameters.initializationParameters.bytes)),
     ]);
 }
 

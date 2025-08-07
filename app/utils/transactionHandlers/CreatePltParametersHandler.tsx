@@ -1,7 +1,16 @@
 import React from 'react';
 import { ChainParameters } from '@concordium/web-sdk';
 import { AccountAddress } from '@concordium/web-sdk/types';
-import { TokenHolder, TokenId, TokenInitializationParameters, CreatePLTPayload, TokenModuleReference, createPltPayload, TokenMetadataUrl, TokenAmount } from '@concordium/web-sdk/plt';
+import {
+    TokenHolder,
+    TokenId,
+    TokenInitializationParameters,
+    CreatePLTPayload,
+    TokenModuleReference,
+    createPltPayload,
+    TokenMetadataUrl,
+    TokenAmount,
+} from '@concordium/web-sdk/plt';
 
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
@@ -32,7 +41,7 @@ type TransactionType = UpdateInstruction<CreatePLTPayload>;
 export default class CreatePltParametersHandler
     extends UpdateHandlerBase<TransactionType>
     implements
-    UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     constructor() {
         super(
             TYPE,
@@ -57,7 +66,8 @@ export default class CreatePltParametersHandler
             allowList,
             denyList,
             mintable,
-            burnable, }: UpdateCreatePltParametersFields,
+            burnable,
+        }: UpdateCreatePltParametersFields,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Omit<MultiSignatureTransaction, 'id'> | undefined> {
@@ -71,24 +81,40 @@ export default class CreatePltParametersHandler
             );
         }
 
-        const sequenceNumber =
-            nextUpdateSequenceNumbers.protocolLevelTokens;
+        const sequenceNumber = nextUpdateSequenceNumbers.protocolLevelTokens;
         const { threshold } = chainParameters.level2Keys.poolParameters;
 
         const tokenMetadataUrl = metadataHash
-            ? TokenMetadataUrl.create(metadataUrl, hexStringToUint8Array(metadataHash))
+            ? TokenMetadataUrl.create(
+                  metadataUrl,
+                  hexStringToUint8Array(metadataHash)
+              )
             : TokenMetadataUrl.fromString(metadataUrl);
 
-        const holderAccount: TokenHolder.Type = TokenHolder.fromAccountAddress(AccountAddress.fromBase58(governanceAccount))
+        const holderAccount: TokenHolder.Type = TokenHolder.fromAccountAddress(
+            AccountAddress.fromBase58(governanceAccount)
+        );
         const tokenInitializationParameters: TokenInitializationParameters = {
-            name, initialSupply: TokenAmount.fromDecimal(initialSupply, Number(decimals)), metadata: tokenMetadataUrl, governanceAccount: holderAccount, mintable, burnable, allowList, denyList
-        }
-        const params: CreatePLTPayload =
-            createPltPayload({
+            name,
+            initialSupply: TokenAmount.fromDecimal(
+                initialSupply,
+                Number(decimals)
+            ),
+            metadata: tokenMetadataUrl,
+            governanceAccount: holderAccount,
+            mintable,
+            burnable,
+            allowList,
+            denyList,
+        };
+        const params: CreatePLTPayload = createPltPayload(
+            {
                 tokenId: TokenId.fromString(tokenId),
                 moduleRef: TokenModuleReference.fromHexString(moduleRef),
-                decimals
-            }, tokenInitializationParameters)
+                decimals,
+            },
+            tokenInitializationParameters
+        );
 
         return createUpdateMultiSignatureTransaction(
             params,

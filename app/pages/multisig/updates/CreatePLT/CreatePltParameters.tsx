@@ -7,12 +7,12 @@ import { mustBeAnInteger, requiredMessage } from '../common/util';
 export interface UpdateCreatePltParametersFields {
     tokenId: string;
     name: string;
-    moduleRef: string,
+    moduleRef: string;
     metadataUrl: string;
     metadataHash: string | undefined;
-    governanceAccount: string,
-    decimals: number,
-    initialSupply: bigint,
+    governanceAccount: string;
+    decimals: number;
+    initialSupply: bigint;
     allowList: boolean;
     denyList: boolean;
     mintable: boolean;
@@ -31,7 +31,7 @@ const fieldNames: EqualRecord<UpdateCreatePltParametersFields> = {
     allowList: 'allowList',
     denyList: 'denyList',
     mintable: 'mintable',
-    burnable: 'burnable'
+    burnable: 'burnable',
 };
 
 export const fieldDisplays = {
@@ -52,8 +52,7 @@ export const fieldDisplays = {
 /**
  * Component for creating an update create PLT transaction.
  */
-export default function CreatePltParameters({
-}: UpdateProps): JSX.Element | null {
+export default function CreatePltParameters({}: UpdateProps): JSX.Element | null {
     return (
         <div>
             <Form.Input
@@ -67,18 +66,20 @@ export default function CreatePltParameters({
                     required: requiredMessage(fieldDisplays.tokenId),
                     validate: (value: string) => {
                         const cleaned = value.replace(/[^a-zA-Z0-9.%-]/g, '');
-                        if (cleaned.length > 128) return "Must be 128 characters or less.";
-                        if (value !== cleaned) return "Only letters, numbers, '.', '%', and '-' are allowed.";
+                        if (cleaned.length > 128)
+                            return 'Must be 128 characters or less.';
+                        if (value !== cleaned)
+                            return "Only letters, numbers, '.', '%', and '-' are allowed.";
                         return true;
-                    }
+                    },
                 }}
             />
-            < Form.Input
+            <Form.Input
                 className="body2 mB20"
                 name="name"
                 label="Name"
                 placeholder="Token Name"
-                rules={{ required: requiredMessage(fieldDisplays.name), }}
+                rules={{ required: requiredMessage(fieldDisplays.name) }}
             />
             <Form.Input
                 className="body2 mB20"
@@ -91,7 +92,7 @@ export default function CreatePltParameters({
                 name="metadataUrl"
                 label="Metadata URL"
                 placeholder="https://tokenWebsite.com"
-                rules={{ required: requiredMessage(fieldDisplays.metadataUrl), }}
+                rules={{ required: requiredMessage(fieldDisplays.metadataUrl) }}
             />
             <Form.Input
                 className="body2 mB20"
@@ -104,7 +105,9 @@ export default function CreatePltParameters({
                 name="governanceAccount"
                 label="Governance Account"
                 placeholder="4BTFaHx8CioLi8Xe7YiimpAK1oQMkbx5Wj6B8N7d7NXgmLvEZs"
-                rules={{ required: requiredMessage(fieldDisplays.governanceAccount) }}
+                rules={{
+                    required: requiredMessage(fieldDisplays.governanceAccount),
+                }}
             />
             <Form.Input
                 className="body2 mB20"
@@ -138,10 +141,10 @@ export default function CreatePltParameters({
                     },
                 }}
             />
-            <Form.Checkbox name="allowList" className="body2 mB20" >
+            <Form.Checkbox name="allowList" className="body2 mB20">
                 Has allow list
             </Form.Checkbox>
-            <Form.Checkbox name="denyList" className="body2 mB20" >
+            <Form.Checkbox name="denyList" className="body2 mB20">
                 Has deny list
             </Form.Checkbox>
             <Form.Checkbox name="mintable" className="body2 mB20">
