@@ -260,7 +260,7 @@ export function serializeValidatorScoreParameters(
 }
 
 /**
- * Serializes a Create PLT update paramter to the byte format expected
+ * Serializes a Create PLT update parameter to the byte format expected
  * by the chain.
  */
 export function serializeCreatePltParameters(
@@ -268,7 +268,6 @@ export function serializeCreatePltParameters(
 ) {
     return Buffer.concat([
         // TODO: fix serialization
-
         // encodeWord32(parameters.tokenId.value),
         // encodeWord32(parameters.moduleRef),
         encodeWord32(

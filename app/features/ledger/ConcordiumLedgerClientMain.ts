@@ -456,7 +456,6 @@ export default class ConcordiumLedgerClientMain {
     ): Promise<Buffer> {
         return signUpdateTransaction(
             this.transport,
-            // TODO: check if correct
             0x48,
             path,
             transaction,

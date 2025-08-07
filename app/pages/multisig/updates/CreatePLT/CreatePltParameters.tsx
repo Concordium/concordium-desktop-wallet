@@ -5,7 +5,7 @@ import Form from '~/components/Form/';
 import { mustBeAnInteger, requiredMessage, enterHere } from '../common/util';
 
 export interface UpdateCreatePltParametersFields {
-    decimals: bigint,
+    decimals: number,
     initialSupply: bigint,
 }
 

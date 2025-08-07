@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChainParameters } from '@concordium/web-sdk';
 import { AccountAddress } from '@concordium/web-sdk/types';
-import { TokenHolder, TokenId, TokenInitializationParameters, CreatePLTPayload, TokenModuleReference, createPltPayload, TokenMetadataUrl } from '@concordium/web-sdk/plt';
+import { TokenHolder, TokenId, TokenInitializationParameters, CreatePLTPayload, TokenModuleReference, createPltPayload, TokenMetadataUrl, TokenAmount } from '@concordium/web-sdk/plt';
 
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
@@ -31,7 +31,7 @@ type TransactionType = UpdateInstruction<CreatePLTPayload>;
 export default class CreatePltParametersHandler
     extends UpdateHandlerBase<TransactionType>
     implements
-        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
+    UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     constructor() {
         super(
             TYPE,
@@ -68,14 +68,14 @@ export default class CreatePltParametersHandler
         const holderAccount: TokenHolder.Type = TokenHolder.fromAccountAddress(AccountAddress.fromBase58("4FmiTW2L2AccyR9VjzsnpWFSAcohXWf7Vf797i36y526mqiEcp"))
         // TODO fill real values
         const tokenInitializationParameters: TokenInitializationParameters = {
-            name: "blabla", metadata: tokenMetadataUrl, governanceAccount: holderAccount, mintable: false, burnable: false, allowList: false, denyList: false
+            name: "blabla", initialSupply: TokenAmount.fromDecimal(5n, Number(decimals)), metadata: tokenMetadataUrl, governanceAccount: holderAccount, mintable: false, burnable: false, allowList: false, denyList: false
         }
         const params: CreatePLTPayload =
             createPltPayload({
                 // TODO fill real values
                 tokenId: TokenId.fromString("ETJ"),
                 moduleRef: TokenModuleReference.fromHexString("5c5c2645db84a7026d78f2501740f60a8ccb8fae5c166dc2428077fd9a699a4a"),
-                decimals: Number(decimals)
+                decimals
             }, tokenInitializationParameters)
 
         return createUpdateMultiSignatureTransaction(
