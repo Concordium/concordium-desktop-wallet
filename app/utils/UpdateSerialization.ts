@@ -1,6 +1,5 @@
 import { Buffer } from 'buffer/';
 import { ValidatorScoreParameters } from '@concordium/web-sdk';
-import { CreatePLTPayload } from '@concordium/web-sdk/plt';
 import {
     encodeWord32,
     encodeWord64,
@@ -41,7 +40,13 @@ import {
     FinalizationCommitteeParameters,
     MinBlockTime,
     TimeoutParameters,
+    CreatePLTPayload,
 } from './types';
+import {
+    createPltPayload,
+    CreatePLTPayload as CreatePLTPayloadEncoded,
+    TokenId,
+} from '@concordium/web-sdk/plt';
 
 /**
  * Update type enumeration. The numbering/order is important as it corresponds
@@ -273,6 +278,26 @@ export function serializeCreatePltParameters(parameters: CreatePLTPayload) {
         );
     }
 
+    const tokenInitializationParameters = {
+        name: parameters.initializationParameters.name,
+        initialSupply: parameters.initializationParameters.initialSupply,
+        metadata: parameters.initializationParameters.metadata,
+        governanceAccount:
+            parameters.initializationParameters.governanceAccount,
+        mintable: parameters.initializationParameters.mintable,
+        burnable: parameters.initializationParameters.burnable,
+        allowList: parameters.initializationParameters.allowList,
+        denyList: parameters.initializationParameters.denyList,
+    };
+    const params: CreatePLTPayloadEncoded = createPltPayload(
+        {
+            tokenId: TokenId.fromString(tokenId),
+            moduleRef: parameters.moduleRef,
+            decimals: parameters.decimals,
+        },
+        tokenInitializationParameters
+    );
+
     return Buffer.concat([
         // Token Id (`String`): UTF-8 encoded string, maximum 128 characters
         // (we allow only simple characters that are encoded as 1 byte in utf-8)
@@ -287,8 +312,8 @@ export function serializeCreatePltParameters(parameters: CreatePLTPayload) {
         encodeWord8(parameters.decimals),
         // Initialization Parameters (`ByteArray`): Variable-length initialization data
         // Serialized as: `[length: uint32][data: bytes]`
-        encodeWord32(parameters.initializationParameters.bytes.length),
-        Buffer.from(new Uint8Array(parameters.initializationParameters.bytes)),
+        encodeWord32(params.initializationParameters.bytes.length),
+        Buffer.from(new Uint8Array(params.initializationParameters.bytes)),
     ]);
 }
 

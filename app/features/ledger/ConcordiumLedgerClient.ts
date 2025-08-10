@@ -1,6 +1,5 @@
 import { Buffer } from 'buffer/';
 import { ValidatorScoreParameters } from '@concordium/web-sdk';
-import { CreatePLTPayload } from '@concordium/web-sdk/plt';
 import {
     AccountTransaction,
     BakerStakeThreshold,
@@ -28,6 +27,7 @@ import {
     FinalizationCommitteeParameters,
     MinBlockTime,
     TimeoutParameters,
+    CreatePLTPayload,
 } from '~/utils/types';
 import { pipe } from '~/utils/basicHelpers';
 
@@ -391,11 +391,7 @@ export default class ConcordiumLedgerClient {
         path: number[]
     ): Promise<Buffer> {
         return toBuffer(
-            window.ledger.signCreatePltParameters(
-                transaction,
-                serializedPayload,
-                path
-            )
+            window.ledger.signCreatePlt(transaction, serializedPayload, path)
         );
     }
 

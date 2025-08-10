@@ -15,6 +15,15 @@ import { getStatusText } from '~/pages/multisig/ProposalStatus/util';
 import { parseTime, getNow } from '~/utils/timeHelpers';
 import { useAccount } from './dataHooks';
 
+export function uint8ArrayToHex(array: ArrayBufferLike | undefined): string {
+    if (array == undefined) {
+        return '';
+    }
+    return Array.from(new Uint8Array(array))
+        .map((byte) => byte.toString(16).padStart(2, '0'))
+        .join('');
+}
+
 const account = (title: string, address: string, name?: string) => (
     <>
         {name && (

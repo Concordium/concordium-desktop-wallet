@@ -21,9 +21,15 @@ import {
     TransactionExpiry,
     TransactionHash,
 } from '@concordium/web-sdk';
-import { Cbor, TokenId, TokenModuleReference } from '@concordium/web-sdk/plt';
+import {
+    TokenAmount,
+    TokenHolder,
+    TokenId,
+    TokenMetadataUrl,
+    TokenModuleReference,
+} from '@concordium/web-sdk/plt';
 
-const types = {
+const types: Record<any, string> = {
     BigInt: 'bigint',
     Date: 'date',
     AccountAddress: 'accountAddress',
@@ -47,7 +53,9 @@ const types = {
     TransactionHash: 'transactionHash',
     TokenModuleReference: 'tokenModuleReference',
     TokenId: 'tokenId',
-    TokenInitializationParameters: 'tokenInitializationParameters',
+    TokenMetadataUrl: 'tokenMetadataUrl',
+    TokenHolder: 'tokenHolder',
+    TokenAmount: 'tokenAmount',
 };
 
 function replacer(this: any, key: string) {
@@ -126,10 +134,19 @@ function replacer(this: any, key: string) {
                 '@type': types.TokenModuleReference,
                 value: value.toJSON(),
             };
-        // This works for now but what if the DW has to support more than one cbor encoded custom Concordium type?
-        case Cbor.instanceOf(value):
+        case TokenMetadataUrl.instanceOf(value):
             return {
-                '@type': types.TokenInitializationParameters,
+                '@type': types.TokenMetadataUrl,
+                value: value.toJSON(),
+            };
+        case TokenHolder.instanceOf(value):
+            return {
+                '@type': types.TokenHolder,
+                value: value.toJSON(),
+            };
+        case TokenAmount.instanceOf(value):
+            return {
+                '@type': types.TokenAmount,
                 value: value.toJSON(),
             };
     }
@@ -194,8 +211,12 @@ export function parse(input: string | undefined) {
                     return TokenId.fromJSON(v.value);
                 case types.TokenModuleReference:
                     return TokenModuleReference.fromJSON(v.value);
-                case types.TokenInitializationParameters:
-                    return Cbor.fromJSON(v.value);
+                case types.TokenMetadataUrl:
+                    return TokenMetadataUrl.fromJSON(v.value);
+                case types.TokenHolder:
+                    return TokenHolder.fromJSON(v.value);
+                case types.TokenAmount:
+                    return TokenAmount.fromJSON(v.value);
                 default:
                     return v;
             }

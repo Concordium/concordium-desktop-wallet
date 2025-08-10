@@ -5,9 +5,7 @@ import {
     TokenHolder,
     TokenId,
     TokenInitializationParameters,
-    CreatePLTPayload,
     TokenModuleReference,
-    createPltPayload,
     TokenMetadataUrl,
     TokenAmount,
 } from '@concordium/web-sdk/plt';
@@ -30,6 +28,7 @@ import {
     MultiSignatureTransaction,
     UpdateType,
     isMinChainParametersV3,
+    CreatePLTPayload,
 } from '../types';
 import { serializeCreatePltParameters } from '../UpdateSerialization';
 import UpdateHandlerBase from './UpdateHandlerBase';
@@ -107,14 +106,12 @@ export default class CreatePltParametersHandler
             allowList,
             denyList,
         };
-        const params: CreatePLTPayload = createPltPayload(
-            {
-                tokenId: TokenId.fromString(tokenId),
-                moduleRef: TokenModuleReference.fromHexString(moduleRef),
-                decimals,
-            },
-            tokenInitializationParameters
-        );
+        const params: CreatePLTPayload = {
+            tokenId: TokenId.fromString(tokenId),
+            moduleRef: TokenModuleReference.fromHexString(moduleRef),
+            decimals,
+            initializationParameters: tokenInitializationParameters,
+        };
 
         return createUpdateMultiSignatureTransaction(
             params,

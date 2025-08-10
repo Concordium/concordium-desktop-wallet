@@ -1,5 +1,4 @@
 import { ValidatorScoreParameters } from '@concordium/web-sdk';
-import { CreatePLTPayload } from '@concordium/web-sdk/plt';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type HwTransport from '@ledgerhq/hw-transport';
 import { Buffer } from 'buffer/';
@@ -63,6 +62,7 @@ import signAddAnonymityRevokerTransaction from './SignAddAnonymityRevoker';
 import signPoolParameters from './SignPoolParameters';
 import EmulatorTransport from './EmulatorTransport';
 import verifyAddress from './verifyAddress';
+import { CreatePLTPayload } from '../../utils/types';
 
 /**
  * Concordium Ledger API.
@@ -449,7 +449,7 @@ export default class ConcordiumLedgerClientMain {
         );
     }
 
-    signCreatePltParameters(
+    signCreatePlt(
         transaction: UpdateInstruction<CreatePLTPayload>,
         serializedPayload: Buffer,
         path: number[]

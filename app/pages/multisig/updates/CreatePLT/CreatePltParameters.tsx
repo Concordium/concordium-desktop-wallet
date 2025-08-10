@@ -3,6 +3,8 @@ import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import Form from '~/components/Form/';
 import { mustBeAnInteger, requiredMessage } from '../common/util';
+import { TokenHolder } from '@concordium/web-sdk/plt';
+import { AccountAddress } from '@concordium/web-sdk';
 
 export interface UpdateCreatePltParametersFields {
     tokenId: string;
@@ -66,10 +68,12 @@ export default function CreatePltParameters({}: UpdateProps): JSX.Element | null
                     required: requiredMessage(fieldDisplays.tokenId),
                     validate: (value: string) => {
                         const cleaned = value.replace(/[^a-zA-Z0-9.%-]/g, '');
-                        if (cleaned.length > 128)
+                        if (cleaned.length > 128) {
                             return 'Must be 128 characters or less.';
-                        if (value !== cleaned)
+                        }
+                        if (value !== cleaned) {
                             return "Only letters, numbers, '.', '%', and '-' are allowed.";
+                        }
                         return true;
                     },
                 }}
@@ -86,6 +90,18 @@ export default function CreatePltParameters({}: UpdateProps): JSX.Element | null
                 name="moduleRef"
                 label="Token Module Reference"
                 defaultValue="5c5c2645db84a7026d78f2501740f60a8ccb8fae5c166dc2428077fd9a699a4a"
+                rules={{
+                    required: requiredMessage(fieldDisplays.moduleRef),
+                    validate: (value: string) => {
+                        if (
+                            value !=
+                            '5c5c2645db84a7026d78f2501740f60a8ccb8fae5c166dc2428077fd9a699a4a'
+                        ) {
+                            return 'Protocol 9 only supports token module hash `5c5c2645db84a7026d78f2501740f60a8ccb8fae5c166dc2428077fd9a699a4a`.';
+                        }
+                        return true;
+                    },
+                }}
             />
             <Form.Input
                 className="body2 mB20"
@@ -99,6 +115,14 @@ export default function CreatePltParameters({}: UpdateProps): JSX.Element | null
                 name="metadataHash"
                 label="Metadata Hash"
                 placeholder="b27a46456f5d3c089f7ad76bbbc3525ef277532b131ffadfc2565094c4b5133a"
+                rules={
+                    {
+                        // TODO: check that valid HASH
+                        // validate: (value: string) => {
+                        //
+                        // },
+                    }
+                }
             />
             <Form.Input
                 className="body2 mB20"
@@ -107,6 +131,17 @@ export default function CreatePltParameters({}: UpdateProps): JSX.Element | null
                 placeholder="4BTFaHx8CioLi8Xe7YiimpAK1oQMkbx5Wj6B8N7d7NXgmLvEZs"
                 rules={{
                     required: requiredMessage(fieldDisplays.governanceAccount),
+                    validate: (governanceAccount: string) => {
+                        // TODO: check that governance account exists on-chain
+                        try {
+                            TokenHolder.fromAccountAddress(
+                                AccountAddress.fromBase58(governanceAccount)
+                            );
+                            return true;
+                        } catch (e) {
+                            return 'Not valid governance account: ' + e;
+                        }
+                    },
                 }}
             />
             <Form.Input
@@ -119,6 +154,10 @@ export default function CreatePltParameters({}: UpdateProps): JSX.Element | null
                     min: {
                         value: 0,
                         message: 'Value must be non-negative',
+                    },
+                    max: {
+                        value: 255,
+                        message: 'Value must be not greater than 255',
                     },
                     validate: {
                         mustBeAnInteger,
@@ -135,6 +174,11 @@ export default function CreatePltParameters({}: UpdateProps): JSX.Element | null
                     min: {
                         value: 0,
                         message: 'Value must be non-negative',
+                    },
+                    max: {
+                        value: '18446744073709551615',
+                        message:
+                            'Value must be not greater than 18446744073709551615 (u64::MAX)',
                     },
                     validate: {
                         mustBeAnInteger,
