@@ -35,9 +35,9 @@ import {
     FinalizationCommitteeParameters,
     MinBlockTime,
     TimeoutParameters,
+    CreatePLTPayload,
 } from '~/utils/types';
 import { LedgerCommands } from '~/preload/preloadTypes';
-import { CreatePLTPayload } from '../../utils/types';
 
 export default function exposedMethods(
     eventEmitter: EventEmitter

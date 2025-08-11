@@ -16,7 +16,7 @@ import { parseTime, getNow } from '~/utils/timeHelpers';
 import { useAccount } from './dataHooks';
 
 export function uint8ArrayToHex(array: ArrayBufferLike | undefined): string {
-    if (array == undefined) {
+    if (array === undefined) {
         return '';
     }
     return Array.from(new Uint8Array(array))

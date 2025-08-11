@@ -1,5 +1,12 @@
 import { Buffer } from 'buffer/';
+
 import { ValidatorScoreParameters } from '@concordium/web-sdk';
+import {
+    createPltPayload,
+    CreatePLTPayload as CreatePLTPayloadEncoded,
+    TokenId,
+} from '@concordium/web-sdk/plt';
+
 import {
     encodeWord32,
     encodeWord64,
@@ -42,11 +49,6 @@ import {
     TimeoutParameters,
     CreatePLTPayload,
 } from './types';
-import {
-    createPltPayload,
-    CreatePLTPayload as CreatePLTPayloadEncoded,
-    TokenId,
-} from '@concordium/web-sdk/plt';
 
 /**
  * Update type enumeration. The numbering/order is important as it corresponds
@@ -270,7 +272,7 @@ export function serializeValidatorScoreParameters(
  * by the chain.
  */
 export function serializeCreatePltParameters(parameters: CreatePLTPayload) {
-    let tokenId = parameters.tokenId.value;
+    const tokenId = parameters.tokenId.value;
     const tokenIdBytes = Buffer.from(new TextEncoder().encode(tokenId));
     if (tokenIdBytes.length > 128) {
         throw new Error(

@@ -500,13 +500,16 @@ export const addThousandSeparators = handleNegativeNumbers(
 );
 
 export function hexStringToUint8Array(hex: string): Uint8Array {
-    if (hex.startsWith('0x')) {
-        hex = hex.slice(2);
-    }
     if (hex.length % 2 !== 0) {
         throw new Error('Invalid hex string: length must be even');
     }
-    const array = new Uint8Array(hex.length / 2);
+
+    let truncatedHex = hex;
+    if (truncatedHex.startsWith('0x')) {
+        truncatedHex = hex.slice(2);
+    }
+
+    const array = new Uint8Array(truncatedHex.length / 2);
     for (let i = 0; i < hex.length; i += 2) {
         array[i / 2] = parseInt(hex.substr(i, 2), 16);
     }

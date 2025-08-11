@@ -49,6 +49,7 @@ import {
     FinalizationCommitteeParameters,
     MinBlockTime,
     TimeoutParameters,
+    CreatePLTPayload,
 } from '~/utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
@@ -62,7 +63,6 @@ import signAddAnonymityRevokerTransaction from './SignAddAnonymityRevoker';
 import signPoolParameters from './SignPoolParameters';
 import EmulatorTransport from './EmulatorTransport';
 import verifyAddress from './verifyAddress';
-import { CreatePLTPayload } from '../../utils/types';
 
 /**
  * Concordium Ledger API.

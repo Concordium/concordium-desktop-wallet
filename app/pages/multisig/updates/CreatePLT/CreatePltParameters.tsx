@@ -1,10 +1,11 @@
 import React from 'react';
-import { EqualRecord } from '~/utils/types';
-import { UpdateProps } from '~/utils/transactionTypes';
-import Form from '~/components/Form/';
-import { mustBeAnInteger, requiredMessage } from '../common/util';
+
 import { TokenHolder } from '@concordium/web-sdk/plt';
 import { AccountAddress } from '@concordium/web-sdk';
+
+import { EqualRecord } from '~/utils/types';
+import Form from '~/components/Form/';
+import { mustBeAnInteger, requiredMessage } from '../common/util';
 
 export interface UpdateCreatePltParametersFields {
     tokenId: string;
@@ -54,7 +55,7 @@ export const fieldDisplays = {
 /**
  * Component for creating an update create PLT transaction.
  */
-export default function CreatePltParameters({}: UpdateProps): JSX.Element | null {
+export default function CreatePltParameters(): JSX.Element | null {
     return (
         <div>
             <Form.Input
@@ -94,7 +95,7 @@ export default function CreatePltParameters({}: UpdateProps): JSX.Element | null
                     required: requiredMessage(fieldDisplays.moduleRef),
                     validate: (value: string) => {
                         if (
-                            value !=
+                            value !==
                             '5c5c2645db84a7026d78f2501740f60a8ccb8fae5c166dc2428077fd9a699a4a'
                         ) {
                             return 'Protocol 9 only supports token module hash `5c5c2645db84a7026d78f2501740f60a8ccb8fae5c166dc2428077fd9a699a4a`.';
@@ -139,7 +140,10 @@ export default function CreatePltParameters({}: UpdateProps): JSX.Element | null
                             );
                             return true;
                         } catch (e) {
-                            return 'Not valid governance account: ' + e;
+                            if (e instanceof Error) {
+                                return `Not valid governance account: ${e.message}`;
+                            }
+                            return `Not valid governance account`;
                         }
                     },
                 }}
