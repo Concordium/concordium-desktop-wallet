@@ -12,17 +12,17 @@ export interface UpdateCreatePltParametersFields {
     name: string;
     moduleRef: string;
     metadataUrl: string;
-    metadataHash: string | undefined;
+    metadataHash?: string;
     governanceAccount: string;
     decimals: number;
-    initialSupply: bigint;
-    allowList: boolean;
-    denyList: boolean;
-    mintable: boolean;
-    burnable: boolean;
+    initialSupply?: bigint;
+    allowList?: boolean;
+    denyList?: boolean;
+    mintable?: boolean;
+    burnable?: boolean;
 }
 
-const fieldNames: EqualRecord<UpdateCreatePltParametersFields> = {
+const fieldNames: EqualRecord<Required<UpdateCreatePltParametersFields>> = {
     tokenId: 'tokenId',
     name: 'name',
     moduleRef: 'moduleRef',
@@ -38,16 +38,16 @@ const fieldNames: EqualRecord<UpdateCreatePltParametersFields> = {
 };
 
 export const fieldDisplays = {
-    tokenId: 'TokenId',
+    tokenId: 'Token ID',
     name: 'Name',
-    moduleRef: 'ModuleRef',
-    metadataUrl: 'MetadataUrl',
-    metadataHash: 'MetadataHash',
-    governanceAccount: 'GovernanceAccount',
+    moduleRef: 'Module Reference',
+    metadataUrl: 'Metadata Url',
+    metadataHash: 'Metadata Hash',
+    governanceAccount: 'Governance Account',
     decimals: 'Decimals',
-    initialSupply: 'InitialSupply',
-    allowList: 'AllowList',
-    denyList: 'DenyList',
+    initialSupply: 'Initial Supply',
+    allowList: 'Allow List',
+    denyList: 'Deny List',
     mintable: 'Mintable',
     burnable: 'Burnable',
 };
@@ -60,11 +60,11 @@ export default function CreatePltParameters(): JSX.Element | null {
         <div>
             <Form.Input
                 className="body2 mB20"
-                name="tokenId"
-                label="Token ID"
+                name={fieldNames.tokenId}
+                label={`${fieldDisplays.tokenId}`}
+                placeholder="Alphanumeric and . % - (max 128 chars)"
                 maxLength={128}
                 pattern="^[a-zA-Z0-9.%-]{1,128}$"
-                placeholder="Alphanumeric and . % - (max 128 chars)"
                 rules={{
                     required: requiredMessage(fieldDisplays.tokenId),
                     validate: (value: string) => {
@@ -81,15 +81,15 @@ export default function CreatePltParameters(): JSX.Element | null {
             />
             <Form.Input
                 className="body2 mB20"
-                name="name"
-                label="Name"
+                name={fieldNames.name}
+                label={`${fieldDisplays.name}`}
                 placeholder="Token Name"
                 rules={{ required: requiredMessage(fieldDisplays.name) }}
             />
             <Form.Input
                 className="body2 mB20"
-                name="moduleRef"
-                label="Token Module Reference"
+                name={fieldNames.moduleRef}
+                label={`${fieldDisplays.moduleRef}`}
                 defaultValue="5c5c2645db84a7026d78f2501740f60a8ccb8fae5c166dc2428077fd9a699a4a"
                 rules={{
                     required: requiredMessage(fieldDisplays.moduleRef),
@@ -106,15 +106,15 @@ export default function CreatePltParameters(): JSX.Element | null {
             />
             <Form.Input
                 className="body2 mB20"
-                name="metadataUrl"
-                label="Metadata URL"
+                name={fieldNames.metadataUrl}
+                label={`${fieldDisplays.metadataUrl}`}
                 placeholder="https://tokenWebsite.com"
                 rules={{ required: requiredMessage(fieldDisplays.metadataUrl) }}
             />
             <Form.Input
                 className="body2 mB20"
-                name="metadataHash"
-                label="Metadata Hash"
+                name={fieldNames.metadataHash}
+                label={`${fieldDisplays.metadataHash} (Optional)`}
                 placeholder="b27a46456f5d3c089f7ad76bbbc3525ef277532b131ffadfc2565094c4b5133a"
                 rules={{
                     validate: (hash?: string) => {
@@ -132,8 +132,8 @@ export default function CreatePltParameters(): JSX.Element | null {
             />
             <Form.Input
                 className="body2 mB20"
-                name="governanceAccount"
-                label="Governance Account"
+                name={fieldNames.governanceAccount}
+                label={`${fieldDisplays.governanceAccount}`}
                 placeholder="4BTFaHx8CioLi8Xe7YiimpAK1oQMkbx5Wj6B8N7d7NXgmLvEZs"
                 rules={{
                     required: requiredMessage(fieldDisplays.governanceAccount),
@@ -155,6 +155,7 @@ export default function CreatePltParameters(): JSX.Element | null {
             />
             <Form.Input
                 className="body2 mB20"
+                type="number"
                 name={fieldNames.decimals}
                 label={`${fieldDisplays.decimals}`}
                 placeholder="0"
@@ -168,6 +169,7 @@ export default function CreatePltParameters(): JSX.Element | null {
                         value: 255,
                         message: 'Value must be not greater than 255',
                     },
+                    valueAsNumber: true,
                     validate: {
                         mustBeAnInteger,
                     },
@@ -176,10 +178,9 @@ export default function CreatePltParameters(): JSX.Element | null {
             <Form.Input
                 className="body2 mB20"
                 name={fieldNames.initialSupply}
+                label={`${fieldDisplays.initialSupply} (Optional)`}
                 placeholder="0"
-                label={`${fieldDisplays.initialSupply}`}
                 rules={{
-                    required: requiredMessage(fieldDisplays.initialSupply),
                     min: {
                         value: 0,
                         message: 'Value must be non-negative',
@@ -189,21 +190,25 @@ export default function CreatePltParameters(): JSX.Element | null {
                         message:
                             'Value must be not greater than 18446744073709551615 (u64::MAX)',
                     },
-                    validate: {
-                        mustBeAnInteger,
+                    validate: (value?: number) => {
+                        if (!value) {
+                            // Allow undefined (no initialSupply)
+                            return true;
+                        }
+                        return mustBeAnInteger(value);
                     },
                 }}
             />
-            <Form.Checkbox name="allowList" className="body2 mB20">
+            <Form.Checkbox name={fieldNames.allowList} className="body2 mB20">
                 Has allow list
             </Form.Checkbox>
-            <Form.Checkbox name="denyList" className="body2 mB20">
+            <Form.Checkbox name={fieldNames.denyList} className="body2 mB20">
                 Has deny list
             </Form.Checkbox>
-            <Form.Checkbox name="mintable" className="body2 mB20">
+            <Form.Checkbox name={fieldNames.mintable} className="body2 mB20">
                 Mintable
             </Form.Checkbox>
-            <Form.Checkbox name="burnable" className="body2 mB20">
+            <Form.Checkbox name={fieldNames.burnable} className="body2 mB20">
                 Burnable
             </Form.Checkbox>
         </div>

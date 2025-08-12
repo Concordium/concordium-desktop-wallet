@@ -4,7 +4,6 @@ import { ValidatorScoreParameters } from '@concordium/web-sdk';
 import {
     createPltPayload,
     CreatePLTPayload as CreatePLTPayloadEncoded,
-    TokenId,
 } from '@concordium/web-sdk/plt';
 
 import {
@@ -268,54 +267,51 @@ export function serializeValidatorScoreParameters(
 }
 
 /**
- * Serializes a Create PLT update parameter to the byte format expected
+ * Serializes a Create PLT parameter to the byte format expected
  * by the chain.
  */
 export function serializeCreatePltParameters(parameters: CreatePLTPayload) {
-    const tokenId = parameters.tokenId.value;
-    const tokenIdBytes = Buffer.from(new TextEncoder().encode(tokenId));
+    const {
+        initializationParameters,
+        tokenId,
+        moduleRef,
+        decimals,
+    } = parameters;
+
+    const params: CreatePLTPayloadEncoded = createPltPayload(
+        { tokenId, moduleRef, decimals },
+        { ...initializationParameters }
+    );
+
+    const tokenIdBytes = new TextEncoder().encode(tokenId.value);
+    // We only allow simple (one byte characters) for the tokenId.
     if (tokenIdBytes.length > 128) {
         throw new Error(
-            `The token id length was greater than 128 bytes. Current length: ${tokenIdBytes.length}`
+            `The token id length should not be greater than 128 bytes. Current length: ${tokenIdBytes.length}`
         );
     }
-
-    const tokenInitializationParameters = {
-        name: parameters.initializationParameters.name,
-        initialSupply: parameters.initializationParameters.initialSupply,
-        metadata: parameters.initializationParameters.metadata,
-        governanceAccount:
-            parameters.initializationParameters.governanceAccount,
-        mintable: parameters.initializationParameters.mintable,
-        burnable: parameters.initializationParameters.burnable,
-        allowList: parameters.initializationParameters.allowList,
-        denyList: parameters.initializationParameters.denyList,
-    };
-    const params: CreatePLTPayloadEncoded = createPltPayload(
-        {
-            tokenId: TokenId.fromString(tokenId),
-            moduleRef: parameters.moduleRef,
-            decimals: parameters.decimals,
-        },
-        tokenInitializationParameters
-    );
+    if (decimals > 255) {
+        throw new Error(
+            `The decimals value of the token should not be greater than 255: Current decimals value: ${decimals}`
+        );
+    }
 
     return Buffer.concat([
         // Token Id (`String`): UTF-8 encoded string, maximum 128 characters
         // (we allow only simple characters that are encoded as 1 byte in utf-8)
         // Serialized as: `[length: uint32][data: bytes]`
         encodeWord32(tokenIdBytes.length),
-        tokenIdBytes,
+        Buffer.from(tokenIdBytes),
         // Token Module (`Hash`): 32-byte hash identifying the token module
         // Serialized as: `[32 bytes]`
-        Buffer.from(new Uint8Array(parameters.moduleRef.bytes)),
+        Buffer.from(parameters.moduleRef.bytes),
         // Decimals (`uint8`): Number of decimal places for the token
         // Serialized as: `[1 byte]`
         encodeWord8(parameters.decimals),
         // Initialization Parameters (`ByteArray`): Variable-length initialization data
         // Serialized as: `[length: uint32][data: bytes]`
         encodeWord32(params.initializationParameters.bytes.length),
-        Buffer.from(new Uint8Array(params.initializationParameters.bytes)),
+        Buffer.from(params.initializationParameters.bytes),
     ]);
 }
 

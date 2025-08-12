@@ -1,6 +1,5 @@
 import React from 'react';
 
-import Loading from '~/cross-app-components/Loading';
 import withChainData, { ChainData } from '~/utils/withChainData';
 import Label from '~/components/Label';
 import { fieldDisplays } from './CreatePltParameters';
@@ -21,12 +20,7 @@ export default withChainData(function CreatePltParametersView({
         moduleRef,
         initializationParameters,
     },
-    consensusStatus,
 }: Props) {
-    if (!consensusStatus) {
-        return <Loading inline />;
-    }
-
     return (
         <>
             <div>

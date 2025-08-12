@@ -71,16 +71,16 @@ export default class CreatePltParametersHandler
             return undefined;
         }
 
+        const sequenceNumber = nextUpdateSequenceNumbers.protocolLevelTokens;
+
         if (!isMinChainParametersV3(chainParameters)) {
             throw new Error(
                 'Connected node uses outdated protocol version. Expect protocol version that supports chain parameters V3.'
             );
         }
-
-        const sequenceNumber = nextUpdateSequenceNumbers.protocolLevelTokens;
         if (!chainParameters.level2Keys?.createPlt) {
             throw new Error(
-                '`createPlt` is undefined in `chainParameters.level2Keys` which cannot happen if node is on protocol level 9'
+                '`createPlt` field is missing in `chainParameters.level2Keys`. This indicates that the connected node is not on protocol level 9 or above.'
             );
         }
         const { threshold } = chainParameters.level2Keys.createPlt;
@@ -91,22 +91,22 @@ export default class CreatePltParametersHandler
                   hexStringToUint8Array(metadataHash)
               )
             : TokenMetadataUrl.fromString(metadataUrl);
+        const initSupply = initialSupply
+            ? TokenAmount.fromDecimal(initialSupply, decimals)
+            : undefined;
 
         const holderAccount: TokenHolder.Type = TokenHolder.fromAccountAddress(
             AccountAddress.fromBase58(governanceAccount)
         );
         const tokenInitializationParameters: TokenInitializationParameters = {
             name,
-            initialSupply: TokenAmount.fromDecimal(
-                initialSupply,
-                Number(decimals)
-            ),
             metadata: tokenMetadataUrl,
             governanceAccount: holderAccount,
-            mintable,
-            burnable,
-            allowList,
-            denyList,
+            ...(initSupply !== undefined && { initialSupply: initSupply }),
+            ...(allowList !== undefined && { allowList }),
+            ...(denyList !== undefined && { denyList }),
+            ...(mintable !== undefined && { mintable }),
+            ...(burnable !== undefined && { burnable }),
         };
         const params: CreatePLTPayload = {
             tokenId: TokenId.fromString(tokenId),
