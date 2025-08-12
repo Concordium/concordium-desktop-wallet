@@ -19,7 +19,6 @@ const jestConfig: JestConfigWithTsJest = {
     moduleNameMapper: {
         '^@concordium/web-sdk/plt/(.*)$':
             '<rootDir>/node_modules/@concordium/web-sdk/lib/esm/plt/$1',
-
         '^@concordium/web-sdk$':
             '<rootDir>/node_modules/@concordium/web-sdk/lib/min/concordium.web.min.js',
         '^~/(.*)$': '<rootDir>/app/$1',
@@ -36,7 +35,7 @@ const jestConfig: JestConfigWithTsJest = {
         ],
     },
 
-    // Skips all transformattion in `node_modules` folder except the ESM modules from the list
+    // Skips all transformation in `node_modules` folder except the ESM modules from the list
     transformIgnorePatterns: [`node_modules/(?!${esModules})`],
 
     moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json'],

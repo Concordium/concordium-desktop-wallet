@@ -116,14 +116,14 @@ export default function CreatePltParameters(): JSX.Element | null {
                 name="metadataHash"
                 label="Metadata Hash"
                 placeholder="b27a46456f5d3c089f7ad76bbbc3525ef277532b131ffadfc2565094c4b5133a"
-                rules={
-                    {
-                        // TODO: check that valid HASH
-                        // validate: (value: string) => {
-                        //
-                        // },
-                    }
-                }
+                rules={{
+                    validate: (hash: string) => {
+                        if (!/^[a-f0-9]{64}$/.test(hash)) {
+                            return 'Hash must be a 64-character hexadecimal string';
+                        }
+                        return true;
+                    },
+                }}
             />
             <Form.Input
                 className="body2 mB20"

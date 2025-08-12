@@ -147,9 +147,8 @@ export default class CreatePltParametersHandler
         );
     }
 
-    // TODO: check authorization; we might need the a new version
     getAuthorization(authorizations: Authorizations) {
-        if (authorizations.version === 0) {
+        if (authorizations.version === 1) {
             throw new Error('Connected node used outdated blockSummary format');
         }
         return authorizations.poolParameters;

@@ -164,8 +164,7 @@ const updateInstructionTypes: TypeTuple[] = [
         TransactionTypes.UpdateInstruction,
         UpdateType.UpdateCreatePltParameters,
         'Create PLT (protocol level token)',
-        // TODO: change this to protocol version 9
-        (pv) => pv >= 8n,
+        (pv) => pv >= 9n,
     ],
 ];
 
