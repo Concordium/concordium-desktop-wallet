@@ -18,10 +18,7 @@ import UpdateCreatePltParameters, {
 import CreatePltParametersView from '~/pages/multisig/updates/CreatePLT/CreatePltParametersView';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { hexStringToUint8Array } from '~/utils/numberStringHelpers';
-import {
-    Authorizations,
-    NextUpdateSequenceNumbers,
-} from '../../node/NodeApiTypes';
+import { NextUpdateSequenceNumbers } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     UpdateInstruction,
@@ -81,7 +78,12 @@ export default class CreatePltParametersHandler
         }
 
         const sequenceNumber = nextUpdateSequenceNumbers.protocolLevelTokens;
-        const { threshold } = chainParameters.level2Keys.poolParameters;
+        if (!chainParameters.level2Keys?.createPlt) {
+            throw new Error(
+                '`createPlt` is undefined in `chainParameters.level2Keys` which cannot happen if node is on protocol level 9'
+            );
+        }
+        const { threshold } = chainParameters.level2Keys.createPlt;
 
         const tokenMetadataUrl = metadataHash
             ? TokenMetadataUrl.create(
@@ -145,13 +147,6 @@ export default class CreatePltParametersHandler
                 createPltParameters={transaction.payload}
             />
         );
-    }
-
-    getAuthorization(authorizations: Authorizations) {
-        if (authorizations.version === 1) {
-            throw new Error('Connected node used outdated blockSummary format');
-        }
-        return authorizations.poolParameters;
     }
 
     update = UpdateCreatePltParameters;

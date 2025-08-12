@@ -117,7 +117,12 @@ export default function CreatePltParameters(): JSX.Element | null {
                 label="Metadata Hash"
                 placeholder="b27a46456f5d3c089f7ad76bbbc3525ef277532b131ffadfc2565094c4b5133a"
                 rules={{
-                    validate: (hash: string) => {
+                    validate: (hash?: string) => {
+                        if (!hash) {
+                            // Allow undefined (no checksum hash)
+                            return true;
+                        }
+                        // Check if hash is set that it is a valid hash.
                         if (!/^[a-f0-9]{64}$/.test(hash)) {
                             return 'Hash must be a 64-character hexadecimal string';
                         }
