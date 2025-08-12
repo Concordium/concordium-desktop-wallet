@@ -2,6 +2,14 @@ import { JestConfigWithTsJest, createJsWithTsEsmPreset } from 'ts-jest';
 
 const presetConfig = createJsWithTsEsmPreset();
 
+const esModules = [
+    '@concordium/web-sdk/plt',
+    '@concordium/web-sdk',
+    '@concordium/rust-bindings',
+    '@noble/ed25519',
+    'cbor2',
+].join('|');
+
 const jestConfig: JestConfigWithTsJest = {
     ...presetConfig,
     testEnvironment: 'jsdom',
@@ -9,13 +17,28 @@ const jestConfig: JestConfigWithTsJest = {
         url: 'http://localhost/',
     },
     moduleNameMapper: {
-        '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
-            '<rootDir>/internals/mocks/fileMock.js',
-        '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
-        '^~/(.*)$': '<rootDir>/app/$1',
-        '@concordium/web-sdk':
+        '^@concordium/web-sdk/plt/(.*)$':
+            '<rootDir>/node_modules/@concordium/web-sdk/lib/esm/plt/$1',
+
+        '^@concordium/web-sdk$':
             '<rootDir>/node_modules/@concordium/web-sdk/lib/min/concordium.web.min.js',
+        '^~/(.*)$': '<rootDir>/app/$1',
     },
+
+    transform: {
+        // For the listed ESM modules in `node_modules` folder, process them with `babel-jest`
+        [`^.+/node_modules/(?:${esModules})/.+\\.js$`]: 'babel-jest',
+
+        // For .ts and .tsx files in the desktop wallet repo code, process them with `ts-jest`
+        '^.+\\.(ts|tsx)$': [
+            'ts-jest',
+            { tsconfig: 'tsconfig.json', useESM: true },
+        ],
+    },
+
+    // Skips all transformattion in `node_modules` folder except the ESM modules from the list
+    transformIgnorePatterns: [`node_modules/(?!${esModules})`],
+
     moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json'],
     moduleDirectories: ['node_modules', 'app/node_modules'],
     setupFiles: [
