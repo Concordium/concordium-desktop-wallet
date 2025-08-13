@@ -60,6 +60,7 @@ import signUpdateCredentialTransaction from './SignUpdateCredentials';
 import signAuthorizationKeysUpdate from './SignAuthorizationKeysUpdate';
 import signAddIdentityProviderTransaction from './SignAddIdentityProvider';
 import signAddAnonymityRevokerTransaction from './SignAddAnonymityRevoker';
+import signUpdateCreatePltTransaction from './SignCreatePltUpdate';
 import signPoolParameters from './SignPoolParameters';
 import EmulatorTransport from './EmulatorTransport';
 import verifyAddress from './verifyAddress';
@@ -454,9 +455,8 @@ export default class ConcordiumLedgerClientMain {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return signUpdateTransaction(
+        return signUpdateCreatePltTransaction(
             this.transport,
-            0x48,
             path,
             transaction,
             serializedPayload

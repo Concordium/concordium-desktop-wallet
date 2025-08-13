@@ -267,10 +267,23 @@ export function serializeValidatorScoreParameters(
 }
 
 /**
+ * Interface for the serialization of a create PLT chain update split into its
+ * different parts required to correctly stream it in parts to the Ledger.
+ */
+export interface SerializedCreatePltUpdate {
+    serialization: Buffer;
+    payloadLength: Buffer;
+    part1Buf: Buffer;
+    initParamBuf: Buffer;
+}
+
+/**
  * Serializes a Create PLT parameter to the byte format expected
  * by the chain.
  */
-export function serializeCreatePltParameters(parameters: CreatePLTPayload) {
+export function serializeCreatePltParameters(
+    parameters: CreatePLTPayload
+): SerializedCreatePltUpdate {
     const {
         initializationParameters,
         tokenId,
@@ -296,7 +309,7 @@ export function serializeCreatePltParameters(parameters: CreatePLTPayload) {
         );
     }
 
-    return Buffer.concat([
+    const part1Buf = Buffer.concat([
         // Token Id (`String`): UTF-8 encoded string, maximum 128 characters
         // (we allow only simple characters that are encoded as 1 byte in utf-8)
         // Serialized as: `[length: uint32][data: bytes]`
@@ -311,8 +324,18 @@ export function serializeCreatePltParameters(parameters: CreatePLTPayload) {
         // Initialization Parameters (`ByteArray`): Variable-length initialization data
         // Serialized as: `[length: uint32][data: bytes]`
         encodeWord32(params.initializationParameters.bytes.length),
-        Buffer.from(params.initializationParameters.bytes),
     ]);
+
+    const initParamBuf = Buffer.from(params.initializationParameters.bytes);
+
+    const serialization = Buffer.concat([part1Buf, initParamBuf]);
+
+    return {
+        serialization,
+        payloadLength: encodeWord64(BigInt(serialization.byteLength)),
+        part1Buf,
+        initParamBuf,
+    };
 }
 
 /**

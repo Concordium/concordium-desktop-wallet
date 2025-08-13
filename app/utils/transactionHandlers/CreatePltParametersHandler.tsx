@@ -126,7 +126,7 @@ export default class CreatePltParametersHandler
     }
 
     serializePayload(transaction: TransactionType) {
-        return serializeCreatePltParameters(transaction.payload);
+        return serializeCreatePltParameters(transaction.payload).serialization;
     }
 
     signTransaction(
