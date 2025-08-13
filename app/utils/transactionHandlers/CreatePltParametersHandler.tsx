@@ -158,7 +158,7 @@ export default class CreatePltParametersHandler
 
         if (!authorizations.createPlt) {
             throw new Error(
-                'createPlt` field is missing in `version`. This indicates that the connected node is not on protocol version 9 or above.'
+                '`createPlt` field is missing in `authorizations`. This indicates that the connected node is not on protocol version 9 or above.'
             );
         }
 

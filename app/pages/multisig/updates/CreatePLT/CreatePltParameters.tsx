@@ -69,11 +69,11 @@ export default function CreatePltParameters(): JSX.Element | null {
                     required: requiredMessage(fieldDisplays.tokenId),
                     validate: (value: string) => {
                         const cleaned = value.replace(/[^a-zA-Z0-9.%-]/g, '');
-                        if (cleaned.length > 128) {
-                            return 'Must be 128 characters or less.';
-                        }
                         if (value !== cleaned) {
                             return "Only letters, numbers, '.', '%', and '-' are allowed.";
+                        }
+                        if (value.length > 128) {
+                            return 'Must be 128 characters or less.';
                         }
                         return true;
                     },
