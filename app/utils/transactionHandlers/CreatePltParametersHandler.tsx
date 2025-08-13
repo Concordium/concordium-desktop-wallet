@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChainParameters } from '@concordium/web-sdk';
-import { AccountAddress } from '@concordium/web-sdk/types';
+import { AccountAddress, Authorizations } from '@concordium/web-sdk/types';
 import {
     TokenHolder,
     TokenId,
@@ -80,7 +80,7 @@ export default class CreatePltParametersHandler
         }
         if (!chainParameters.level2Keys?.createPlt) {
             throw new Error(
-                '`createPlt` field is missing in `chainParameters.level2Keys`. This indicates that the connected node is not on protocol level 9 or above.'
+                '`createPlt` field is missing in `chainParameters.level2Keys`. This indicates that the connected node is not on protocol version 9 or above.'
             );
         }
         const { threshold } = chainParameters.level2Keys.createPlt;
@@ -147,6 +147,22 @@ export default class CreatePltParametersHandler
                 createPltParameters={transaction.payload}
             />
         );
+    }
+
+    getAuthorization(authorizations: Authorizations) {
+        if (authorizations.version === 0) {
+            throw new Error(
+                '`authorizations` is of version 0. PLT creation needs a connected node that is on protocol version 9 or above. Protocol version 9 should already use `authorizations` version 1'
+            );
+        }
+
+        if (!authorizations.createPlt) {
+            throw new Error(
+                'createPlt` field is missing in `version`. This indicates that the connected node is not on protocol version 9 or above.'
+            );
+        }
+
+        return authorizations.createPlt;
     }
 
     update = UpdateCreatePltParameters;

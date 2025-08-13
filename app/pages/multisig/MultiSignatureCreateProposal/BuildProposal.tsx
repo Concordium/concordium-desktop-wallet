@@ -15,7 +15,7 @@ import { futureDate, maxDate } from '~/components/Form/util/validation';
 import styles from './MultiSignatureCreateProposal.module.scss';
 
 export interface MultiSignatureCreateProposalForm {
-    effectiveTime: Date;
+    effectiveTime?: Date;
     expiryTime: Date;
 }
 
@@ -27,6 +27,8 @@ interface Props extends Required<ChainData> {
         proposal: Omit<MultiSignatureTransaction, 'id'> | undefined,
         defaults: FieldValues
     ) => void;
+    // Whether the chain update tx is enqueued and hence has an effective time.
+    hasEffectiveTime: boolean;
 }
 
 export default function BuildProposal({
@@ -36,6 +38,7 @@ export default function BuildProposal({
     consensusStatus,
     onFinish,
     defaults,
+    hasEffectiveTime,
 }: Props) {
     const defaultEffective =
         defaults.effectiveTime ||
@@ -58,16 +61,16 @@ export default function BuildProposal({
         fields: FieldValues & MultiSignatureCreateProposalForm
     ): Promise<void> {
         const { effectiveTime, expiryTime, ...dynamicFields } = fields;
-        const effectiveTimeInSeconds = BigInt(
-            secondsSinceUnixEpoch(effectiveTime)
-        );
         const expiryTimeInSeconds = BigInt(secondsSinceUnixEpoch(expiryTime));
 
         const newProposal = await handler.createTransaction(
             chainParameters,
             nextUpdateSequenceNumbers,
             dynamicFields,
-            effectiveTimeInSeconds,
+            // If the chain update tx takes effect immediately
+            // (no effective time exists as the chain update tx is NOT enqueued),
+            // the default value 0 is used in that case.
+            effectiveTime ? BigInt(secondsSinceUnixEpoch(effectiveTime)) : 0n,
             expiryTimeInSeconds
         );
 
@@ -94,19 +97,21 @@ export default function BuildProposal({
                             chainParameters={chainParameters}
                             consensusStatus={consensusStatus}
                         />
-                        <Form.DatePicker
-                            className="body2 mV40"
-                            name="effectiveTime"
-                            label="Effective time"
-                            defaultValue={defaultEffective}
-                            rules={{
-                                required: 'Effective time is required',
-                                validate: futureDate(
-                                    'Effective time must be in the future'
-                                ),
-                            }}
-                            minDate={new Date()}
-                        />
+                        {hasEffectiveTime && (
+                            <Form.DatePicker
+                                className="body2 mV40"
+                                name="effectiveTime"
+                                label="Effective time"
+                                defaultValue={defaultEffective}
+                                rules={{
+                                    required: 'Effective time is required',
+                                    validate: futureDate(
+                                        'Effective time must be in the future'
+                                    ),
+                                }}
+                                minDate={new Date()}
+                            />
+                        )}
                         <Form.DatePicker
                             className="body2 mV40"
                             name="expiryTime"

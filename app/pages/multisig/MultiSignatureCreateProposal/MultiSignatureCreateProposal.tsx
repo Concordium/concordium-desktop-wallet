@@ -106,6 +106,10 @@ function MultiSignatureCreateProposal({
         UpdateType.UpdateLevel2KeysUsingLevel1Keys,
     ].includes(type);
 
+    const hasNoEffectiveTime = [UpdateType.UpdateCreatePltParameters].includes(
+        type
+    );
+
     const BuildComponent = isKeyUpdate ? BuildKeyProposal : BuildProposal;
 
     return (
@@ -146,6 +150,7 @@ function MultiSignatureCreateProposal({
                                 }
                                 consensusStatus={consensusStatus}
                                 defaults={defaults}
+                                hasEffectiveTime={!hasNoEffectiveTime}
                             />
                         </MultiSignatureLayout>
                     )}
