@@ -272,7 +272,6 @@ export function serializeValidatorScoreParameters(
  */
 export interface SerializedCreatePltUpdate {
     serialization: Buffer;
-    payloadLength: Buffer;
     part1Buf: Buffer;
     initParamBuf: Buffer;
 }
@@ -313,7 +312,7 @@ export function serializeCreatePltParameters(
         // Token Id (`String`): UTF-8 encoded string, maximum 128 characters
         // (we allow only simple characters that are encoded as 1 byte in utf-8)
         // Serialized as: `[length: uint32][data: bytes]`
-        encodeWord32(tokenIdBytes.length),
+        encodeWord8(tokenIdBytes.length),
         Buffer.from(tokenIdBytes),
         // Token Module (`Hash`): 32-byte hash identifying the token module
         // Serialized as: `[32 bytes]`
@@ -327,12 +326,10 @@ export function serializeCreatePltParameters(
     ]);
 
     const initParamBuf = Buffer.from(params.initializationParameters.bytes);
-
     const serialization = Buffer.concat([part1Buf, initParamBuf]);
 
     return {
         serialization,
-        payloadLength: encodeWord64(BigInt(serialization.byteLength)),
         part1Buf,
         initParamBuf,
     };

@@ -39,7 +39,6 @@ export default async function signUpdateCreatePltTransaction(
         pathAsBuffer(path),
         serializedHeader,
         serializedUpdateType,
-        serializedCreatePltUpdate.payloadLength,
     ]);
     await transport.send(0xe0, INS_PROTOCOL_UPDATE, p1, p2, initialData);
 
