@@ -1,6 +1,7 @@
 import React from 'react';
+import { useFormContext } from 'react-hook-form';
 
-import { TokenHolder } from '@concordium/web-sdk/plt';
+import { TokenHolder, TokenAmount } from '@concordium/web-sdk/plt';
 import { AccountAddress } from '@concordium/web-sdk';
 
 import { EqualRecord } from '~/utils/types';
@@ -56,6 +57,8 @@ export const fieldDisplays = {
  * Component for creating an update create PLT transaction.
  */
 export default function CreatePltParameters(): JSX.Element | null {
+    const { getValues } = useFormContext();
+
     return (
         <div>
             <Form.Input
@@ -181,21 +184,24 @@ export default function CreatePltParameters(): JSX.Element | null {
                 label={`${fieldDisplays.initialSupply} (Optional)`}
                 placeholder="0"
                 rules={{
-                    min: {
-                        value: 0,
-                        message: 'Value must be non-negative',
-                    },
-                    max: {
-                        value: '18446744073709551615',
-                        message:
-                            'Value must be not greater than 18446744073709551615 (u64::MAX)',
-                    },
-                    validate: (value?: number) => {
-                        if (!value) {
-                            // Allow undefined (no initialSupply)
+                    validate: (initialSupply: string) => {
+                        try {
+                            const decimals = getValues(fieldNames.decimals);
+
+                            // wait for validation until decimal field is filled
+                            if (!decimals) return true;
+                            // allow `initialSupply` to be an optional field and don't validate in that case
+                            if (!initialSupply) return true;
+
+                            const initialSupplyBigInt = BigInt(initialSupply);
+                            TokenAmount.create(initialSupplyBigInt, decimals);
                             return true;
+                        } catch (e) {
+                            if (e instanceof Error) {
+                                return `Not valid token amount: ${e.message}`;
+                            }
+                            return `Not valid token amount`;
                         }
-                        return mustBeAnInteger(value);
                     },
                 }}
             />

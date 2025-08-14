@@ -92,7 +92,7 @@ export default class CreatePltParametersHandler
               )
             : TokenMetadataUrl.fromString(metadataUrl);
         const initSupply = initialSupply
-            ? TokenAmount.fromDecimal(initialSupply, decimals)
+            ? TokenAmount.create(initialSupply, decimals)
             : undefined;
 
         const holderAccount: TokenHolder.Type = TokenHolder.fromAccountAddress(

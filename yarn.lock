@@ -3198,9 +3198,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@concordium/web-sdk@npm:10.0.0-alpha.14":
-  version: 10.0.0-alpha.14
-  resolution: "@concordium/web-sdk@npm:10.0.0-alpha.14"
+"@concordium/web-sdk@npm:10.0.0-alpha.15":
+  version: 10.0.0-alpha.15
+  resolution: "@concordium/web-sdk@npm:10.0.0-alpha.15"
   dependencies:
     "@concordium/rust-bindings": "npm:^3.3.0"
     "@grpc/grpc-js": "npm:^1.9.4"
@@ -3222,7 +3222,7 @@ __metadata:
   peerDependencies:
     "@protobuf-ts/runtime-rpc": ^2.8.2
     cbor2: ^1.12.0
-  checksum: 10c0/a10a71fc7c210bb0f8d0c15b6618356ec0b15380db507231965d121211b3e6b314d95e101802822ace283b07eec7c3dbd83565444fa7294bbab11c08d74d93fb
+  checksum: 10c0/d268b4502bc20c4e840eaa3c2acb1596f49f3e6e6a3028831b507c5d0ed59021b9bbdc2885bfda579f455cd6e2b928db25316b1b7de78010df661c65fa980bd1
   languageName: node
   linkType: hard
 
@@ -10652,7 +10652,7 @@ __metadata:
     "@babel/core": "npm:^7.28.0"
     "@babel/plugin-proposal-nullish-coalescing-operator": "npm:^7.12.13"
     "@babel/plugin-proposal-optional-chaining": "npm:^7.12.16"
-    "@concordium/web-sdk": "npm:10.0.0-alpha.14"
+    "@concordium/web-sdk": "npm:10.0.0-alpha.15"
     "@electron/notarize": "npm:^2.2.0"
     "@electron/rebuild": "npm:3.7.1"
     "@hot-loader/react-dom": "npm:^16.13.0"

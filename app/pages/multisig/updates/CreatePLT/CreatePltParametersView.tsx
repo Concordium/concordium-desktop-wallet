@@ -69,8 +69,7 @@ export default withChainData(function CreatePltParametersView({
             <div>
                 <Label className="mB5">{fieldDisplays.initialSupply}:</Label>
                 <div className="body3 mono mB20">
-                    {initializationParameters.initialSupply?.value?.toString() ??
-                        '0'}
+                    {initializationParameters.initialSupply?.toString() ?? '0'}
                 </div>
             </div>
             <div>
