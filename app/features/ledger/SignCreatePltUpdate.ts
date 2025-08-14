@@ -34,7 +34,7 @@ export default async function signUpdateCreatePltTransaction(
 
     // Send initial packet of data containing derivation path and transaction header.
     // Update type must be 24.
-    // 0x48	0x00 0x00 path_length path[uint32]x[5] update_instruction_header[28 bytes] update_type[uint8] payload_length[uint64]
+    // 0x48	0x00 0x00 path_length path[uint32]x[5] update_instruction_header[28 bytes] update_type[uint8]
     const initialData = Buffer.concat([
         pathAsBuffer(path),
         serializedHeader,
@@ -43,7 +43,7 @@ export default async function signUpdateCreatePltTransaction(
     await transport.send(0xe0, INS_PROTOCOL_UPDATE, p1, p2, initialData);
 
     // Send part1 packet of data containing token details and initialization parameters length.
-    // 0x48	0x01 0x00 token_symbol_length[uint32] [token_symbol[token_symbol_length bytes]] [token_module[32 bytes]] [decimals[uint8]] [initialization_params_length[uint32]]
+    // 0x48	0x01 0x00 token_symbol_length[uint8] [token_symbol[token_symbol_length bytes]] [token_module[32 bytes]] [decimals[uint8]] [initialization_params_length[uint32]]
     p1 = 0x01;
     await transport.send(
         0xe0,

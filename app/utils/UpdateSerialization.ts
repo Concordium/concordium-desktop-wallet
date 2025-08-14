@@ -311,7 +311,7 @@ export function serializeCreatePltParameters(
     const part1Buf = Buffer.concat([
         // Token Id (`String`): UTF-8 encoded string, maximum 128 characters
         // (we allow only simple characters that are encoded as 1 byte in utf-8)
-        // Serialized as: `[length: uint32][data: bytes]`
+        // Serialized as: `[length: uint8][data: bytes]`
         encodeWord8(tokenIdBytes.length),
         Buffer.from(tokenIdBytes),
         // Token Module (`Hash`): 32-byte hash identifying the token module
