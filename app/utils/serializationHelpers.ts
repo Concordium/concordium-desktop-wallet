@@ -38,6 +38,13 @@ export function put(array: Indexable, start: number, input: Indexable) {
     }
 }
 
+export function encodeWord8(value: number): Buffer {
+    const arr = new ArrayBuffer(1); // an Int8 takes 1 byte
+    const view = new DataView(arr);
+    view.setUint8(0, value); // byteOffset = 0;
+    return Buffer.from(new Uint8Array(arr));
+}
+
 export function encodeWord16(value: number): Buffer {
     const arr = new ArrayBuffer(2); // an Int16 takes 2 bytes
     const view = new DataView(arr);

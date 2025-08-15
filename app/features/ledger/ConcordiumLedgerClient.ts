@@ -27,6 +27,7 @@ import {
     FinalizationCommitteeParameters,
     MinBlockTime,
     TimeoutParameters,
+    CreatePLTPayload,
 } from '~/utils/types';
 import { pipe } from '~/utils/basicHelpers';
 
@@ -381,6 +382,16 @@ export default class ConcordiumLedgerClient {
                 serializedPayload,
                 path
             )
+        );
+    }
+
+    signCreatePltParameters(
+        transaction: UpdateInstruction<CreatePLTPayload>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return toBuffer(
+            window.ledger.signCreatePlt(transaction, serializedPayload, path)
         );
     }
 

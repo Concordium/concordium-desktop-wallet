@@ -62,15 +62,16 @@ async function loadTransactionFile(
     if (instanceOfUpdateInstruction(transactionObject)) {
         return {
             show: true,
-            header: 'Update instruction not supported',
-            content: `The transaction within "${fileName}" is an update instruction, which is not supported for import.`,
+            header: 'Wrong place to import a chain update transaction',
+            content: `The transaction within "${fileName}" is a chain update transaction. Only account transactions can be imported here.
+            Use the "Sign a transaction" button to import and sign chain update transactions instead.`,
         };
     }
     if (!instanceOfAccountTransaction(transactionObject)) {
         return {
             show: true,
             header: 'Invalid file',
-            content: `The transaction within "${fileName}" was neither an account transaction nor an update instruction, and is therefore invalid.`,
+            content: `The transaction within "${fileName}" was neither an account transaction nor a chain update transaction, and is therefore invalid.`,
         };
     }
 

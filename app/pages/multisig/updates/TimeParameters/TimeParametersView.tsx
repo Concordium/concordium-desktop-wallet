@@ -13,7 +13,7 @@ interface Props extends ChainData {
 }
 
 /**
- * Displays an overview of a mint distribution transaction payload.
+ * Displays an overview of an update time parameters transaction payload.
  */
 export default withChainData(function TimeParametersView({
     timeParameters,

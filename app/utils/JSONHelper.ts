@@ -21,8 +21,15 @@ import {
     TransactionExpiry,
     TransactionHash,
 } from '@concordium/web-sdk';
+import {
+    TokenAmount,
+    TokenHolder,
+    TokenId,
+    TokenMetadataUrl,
+    TokenModuleReference,
+} from '@concordium/web-sdk/plt';
 
-const types = {
+const types: Record<any, string> = {
     BigInt: 'bigint',
     Date: 'date',
     AccountAddress: 'accountAddress',
@@ -44,6 +51,11 @@ const types = {
     Timestamp: 'timestamp',
     TransactionExpiry: 'transactionExpiry',
     TransactionHash: 'transactionHash',
+    TokenModuleReference: 'tokenModuleReference',
+    TokenId: 'tokenId',
+    TokenMetadataUrl: 'tokenMetadataUrl',
+    TokenHolder: 'tokenHolder',
+    TokenAmount: 'tokenAmount',
 };
 
 function replacer(this: any, key: string) {
@@ -115,6 +127,28 @@ function replacer(this: any, key: string) {
             };
         case TransactionHash.instanceOf(value):
             return { '@type': types.TransactionHash, value: value.toJSON() };
+        case TokenId.instanceOf(value):
+            return { '@type': types.TokenId, value: value.toJSON() };
+        case TokenModuleReference.instanceOf(value):
+            return {
+                '@type': types.TokenModuleReference,
+                value: value.toJSON(),
+            };
+        case TokenMetadataUrl.instanceOf(value):
+            return {
+                '@type': types.TokenMetadataUrl,
+                value: value.toJSON(),
+            };
+        case TokenHolder.instanceOf(value):
+            return {
+                '@type': types.TokenHolder,
+                value: value.toJSON(),
+            };
+        case TokenAmount.instanceOf(value):
+            return {
+                '@type': types.TokenAmount,
+                value: value.toJSON(),
+            };
     }
     return value;
 }
@@ -173,6 +207,16 @@ export function parse(input: string | undefined) {
                     return TransactionExpiry.fromSerializable(v.value);
                 case types.TransactionHash:
                     return TransactionHash.fromJSON(v.value);
+                case types.TokenId:
+                    return TokenId.fromJSON(v.value);
+                case types.TokenModuleReference:
+                    return TokenModuleReference.fromJSON(v.value);
+                case types.TokenMetadataUrl:
+                    return TokenMetadataUrl.fromJSON(v.value);
+                case types.TokenHolder:
+                    return TokenHolder.fromJSON(v.value);
+                case types.TokenAmount:
+                    return TokenAmount.fromJSON(v.value);
                 default:
                     return v;
             }

@@ -30,15 +30,24 @@ export default function UpdateInstructionDetails({
     const handler = findUpdateInstructionHandler(transaction.type);
     const effective = dateFromTimeStamp(transaction.header.effectiveTime);
     const expiry = dateFromTimeStamp(transaction.header.timeout);
-    const isExpired = effective.valueOf() < getNow(TimeStampUnit.milliSeconds);
+
+    // An effective time of 0 means that the tx is executed immediatly (not enqueued).
+    const noEffectiveTime = effective.valueOf() === 0;
+    const isExpired =
+        effective.valueOf() !== 0 &&
+        effective.valueOf() < getNow(TimeStampUnit.milliSeconds);
 
     return (
         <div className={styles.root}>
             {handler.view(transaction)}
             <div>
                 <PlainDetail
-                    title="Effective time"
-                    value={getFormattedDateString(effective)}
+                    title="Effective Time"
+                    value={
+                        noEffectiveTime
+                            ? 'An effective time of 0 (Unix timestamp) because the transaction is executed immediately.'
+                            : getFormattedDateString(effective)
+                    }
                     format={(d) => (
                         <span
                             className={clsx(

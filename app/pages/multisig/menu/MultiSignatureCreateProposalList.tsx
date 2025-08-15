@@ -160,6 +160,12 @@ const updateInstructionTypes: TypeTuple[] = [
         'Update validator score parameters',
         (pv) => pv >= 8n,
     ],
+    [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.UpdateCreatePltParameters,
+        'Create PLT (protocol level token)',
+        (pv) => pv >= 9n,
+    ],
 ];
 
 /**

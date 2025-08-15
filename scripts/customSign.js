@@ -30,9 +30,9 @@ exports.default = async function (configuration) {
             );
         }
         const command = `smctl sign --keypair-alias ${keypair} --config-file ${config} --input "${String(
-                configuration.path
+            configuration.path
         )}" --verbose --exit-non-zero-on-fail --failfast`;
-        console.log(`customSign: execSync: ${command}`)
-        require('child_process').execSync(command, { stdio: "inherit" });
+        console.log(`customSign: execSync: ${command}`);
+        require('child_process').execSync(command, { stdio: 'inherit' });
     }
 };

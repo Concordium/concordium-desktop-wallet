@@ -24,7 +24,7 @@ export default function UpdateFoundationAccount({
         <div>
             <div className="body3 mono mB10">
                 Current address:
-                <div className="body4">{currentFoundationAccount}</div>
+                <div className="body4">{currentFoundationAccount.address}</div>
             </div>
             <Form.TextArea
                 className={styles.field}

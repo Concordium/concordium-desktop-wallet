@@ -24,5 +24,6 @@
     "configureBaker": "Configure validator",
     "configureDelegation": "Configure delegation",
     "paydayAccountReward": "Reward payout",
-    "failed": "Failed Transaction"
+    "failed": "Failed Transaction",
+    "tokenUpdate": "Token update"
 }

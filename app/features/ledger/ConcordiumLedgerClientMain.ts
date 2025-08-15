@@ -49,6 +49,7 @@ import {
     FinalizationCommitteeParameters,
     MinBlockTime,
     TimeoutParameters,
+    CreatePLTPayload,
 } from '~/utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
@@ -59,6 +60,7 @@ import signUpdateCredentialTransaction from './SignUpdateCredentials';
 import signAuthorizationKeysUpdate from './SignAuthorizationKeysUpdate';
 import signAddIdentityProviderTransaction from './SignAddIdentityProvider';
 import signAddAnonymityRevokerTransaction from './SignAddAnonymityRevoker';
+import signUpdateCreatePltTransaction from './SignCreatePltUpdate';
 import signPoolParameters from './SignPoolParameters';
 import EmulatorTransport from './EmulatorTransport';
 import verifyAddress from './verifyAddress';
@@ -442,6 +444,19 @@ export default class ConcordiumLedgerClientMain {
         return signUpdateTransaction(
             this.transport,
             0x47,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signCreatePlt(
+        transaction: UpdateInstruction<CreatePLTPayload>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateCreatePltTransaction(
+            this.transport,
             path,
             transaction,
             serializedPayload

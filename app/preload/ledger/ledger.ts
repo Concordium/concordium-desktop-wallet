@@ -1,4 +1,5 @@
 import { ValidatorScoreParameters } from '@concordium/web-sdk';
+
 import { Buffer } from 'buffer/';
 import EventEmitter from 'events';
 import {
@@ -34,6 +35,7 @@ import {
     FinalizationCommitteeParameters,
     MinBlockTime,
     TimeoutParameters,
+    CreatePLTPayload,
 } from '~/utils/types';
 import { LedgerCommands } from '~/preload/preloadTypes';
 
@@ -310,6 +312,17 @@ export default function exposedMethods(
             keypath: number[]
         ) => {
             return getLedgerClient().signValidatorScoreParameters(
+                transaction,
+                serializedPayload,
+                keypath
+            );
+        },
+        signCreatePlt: (
+            transaction: UpdateInstruction<CreatePLTPayload>,
+            serializedPayload: Buffer,
+            keypath: number[]
+        ) => {
+            return getLedgerClient().signCreatePlt(
                 transaction,
                 serializedPayload,
                 keypath
