@@ -317,7 +317,7 @@ export default function exposedMethods(
             );
         },
         signCreatePlt: (
-            transaction: string, // UpdateInstruction<CreatePLTPayload>
+            transaction: string,
             serializedPayload: Buffer,
             keypath: number[]
         ) => {

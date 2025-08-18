@@ -451,7 +451,7 @@ export default class ConcordiumLedgerClientMain {
     }
 
     signCreatePlt(
-        transaction: string, // UpdateInstruction<CreatePLTPayload>
+        transaction: string,
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {

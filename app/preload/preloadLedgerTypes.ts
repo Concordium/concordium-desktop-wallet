@@ -117,7 +117,7 @@ type LedgerCommands = {
     signFinalizationCommitteeParameters: SignUpdate<FinalizationCommitteeParameters>;
     signValidatorScoreParameters: SignUpdate<ValidatorScoreParameters>;
     signCreatePlt: (
-        transaction: string, // UpdateInstruction<PayloadType>, we need to convert it to the stringified version we can recover from in the main process
+        transaction: string, // We need to convert it to the stringified version we can recover from in the main process.
         serializedPayload: Buffer,
         keypath: number[]
     ) => ReturnBuffer;

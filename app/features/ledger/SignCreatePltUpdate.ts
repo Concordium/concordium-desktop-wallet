@@ -20,7 +20,7 @@ export default async function signUpdateCreatePltTransaction(
 ): Promise<Buffer> {
     const updateHeaderWithPayloadSize = {
         ...transaction.header,
-        payloadSize: serializedPayload.length + 1,
+        payloadSize: serializedPayload.length + 1, // +1 byte for the instruction type
     };
 
     const serializedHeader = serializeUpdateHeader(updateHeaderWithPayloadSize);
@@ -68,7 +68,7 @@ export default async function signUpdateCreatePltTransaction(
             INS_CREATE_PLT,
             p1,
             p2,
-            Buffer.from(initParamChunks[i])
+            initParamChunks[i]
         );
 
         // Return signature
