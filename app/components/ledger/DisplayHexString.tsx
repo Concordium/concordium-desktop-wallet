@@ -16,8 +16,13 @@ export default function DisplayHexString({
 }: Props) {
     return (
         <div className={clsx('textCenter mono', className)}>
-            {chunkString(value, lineLength).map((text) => (
-                <div className="m0" key={text}>
+            {chunkString(value, lineLength).map((text, i) => (
+                <div
+                    className={clsx(
+                        (i + 1) % 3 === 0 ? 'm0 mB5' : 'm0' // matches display on ledger nanos+
+                    )}
+                    key={text}
+                >
                     {text}
                 </div>
             ))}

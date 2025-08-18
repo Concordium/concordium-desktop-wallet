@@ -10,6 +10,7 @@ import Label from '~/components/Label';
 import { fieldDisplays } from './CreatePltParameters';
 import { CreatePLTPayload } from '~/utils/types';
 import { uint8ArrayToHex } from '~/utils/printUtility';
+import DisplayHexString from '~/components/ledger/DisplayHexString';
 
 interface Props extends ChainData {
     createPltParameters: CreatePLTPayload;
@@ -45,7 +46,9 @@ export default withChainData(function CreatePltParametersView({
             </div>
             <div>
                 <Label className="mB5">{fieldDisplays.moduleRef}:</Label>
-                <div className="body3 mono mB20">{moduleRef.toString()}</div>
+                <div className="body3 mono mB20">
+                    <DisplayHexString value={moduleRef.toString()} />
+                </div>
             </div>
             <div>
                 <Label className="mB5">{fieldDisplays.metadataUrl}:</Label>
@@ -57,10 +60,12 @@ export default withChainData(function CreatePltParametersView({
                 <div>
                     <Label className="mB5">{fieldDisplays.metadataHash}:</Label>
                     <div className="body3 mono mB20">
-                        {uint8ArrayToHex(
-                            initializationParameters.metadata.checksumSha256
-                                ?.buffer
-                        )}
+                        <DisplayHexString
+                            value={uint8ArrayToHex(
+                                initializationParameters.metadata.checksumSha256
+                                    ?.buffer
+                            )}
+                        />
                     </div>
                 </div>
             )}
@@ -109,7 +114,9 @@ export default withChainData(function CreatePltParametersView({
             <div>
                 <Label className="mB5">InitParams (CBOR encoded):</Label>
                 <div className="body3 mono mB20">
-                    {paramsEncoded.initializationParameters.toString()}
+                    <DisplayHexString
+                        value={paramsEncoded.initializationParameters.toString()}
+                    />
                 </div>
             </div>
         </>
