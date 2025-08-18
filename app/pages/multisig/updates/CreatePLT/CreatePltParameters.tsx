@@ -1,12 +1,14 @@
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 
-import { TokenHolder, TokenAmount } from '@concordium/web-sdk/plt';
+import { TokenHolder, TokenAmount, TokenId } from '@concordium/web-sdk/plt';
 import { AccountAddress } from '@concordium/web-sdk';
 
 import { EqualRecord } from '~/utils/types';
 import Form from '~/components/Form/';
 import { mustBeAnInteger, requiredMessage } from '../common/util';
+import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
+import { getTokenInfo } from '~/node/nodeRequests';
 
 export interface UpdateCreatePltParametersFields {
     tokenId: string;
@@ -57,7 +59,8 @@ export const fieldDisplays = {
  * Component for creating an update create PLT transaction.
  */
 export default function CreatePltParameters(): JSX.Element | null {
-    const { getValues } = useFormContext();
+    const { watch } = useFormContext();
+    const decimals = watch(fieldNames.decimals);
 
     return (
         <div>
@@ -70,13 +73,37 @@ export default function CreatePltParameters(): JSX.Element | null {
                 pattern="^[a-zA-Z0-9.%-]{1,128}$"
                 rules={{
                     required: requiredMessage(fieldDisplays.tokenId),
-                    validate: (value: string) => {
-                        const cleaned = value.replace(/[^a-zA-Z0-9.%-]/g, '');
-                        if (value !== cleaned) {
+                    validate: async (tokenId: string) => {
+                        const cleaned = tokenId.replace(/[^a-zA-Z0-9.%-]/g, '');
+                        if (tokenId !== cleaned) {
                             return "Only letters, numbers, '.', '%', and '-' are allowed.";
                         }
-                        if (value.length > 128) {
+                        if (tokenId.length > 128) {
                             return 'Must be 128 characters or less.';
+                        }
+                        // Check if token id already exists on-chain
+                        let tokenInfo;
+                        try {
+                            tokenInfo = await getTokenInfo(
+                                TokenId.fromString(tokenId)
+                            );
+                        } catch (e) {
+                            if (e instanceof Error) {
+                                if (
+                                    (e as Error).message ===
+                                    `tokenId or block not found.`
+                                ) {
+                                    // Treat the given error message as
+                                    // that the token doesn't exist on-chain.
+                                    // Meaning the validation passes.
+                                    return true;
+                                }
+                                return `Cannot fetch tokenId: ${e.message}`;
+                            }
+                            return `Cannot fetch tokenId`;
+                        }
+                        if (tokenInfo) {
+                            return 'Token Id already exists on-chain.';
                         }
                         return true;
                     },
@@ -140,12 +167,13 @@ export default function CreatePltParameters(): JSX.Element | null {
                 placeholder="4BTFaHx8CioLi8Xe7YiimpAK1oQMkbx5Wj6B8N7d7NXgmLvEZs"
                 rules={{
                     required: requiredMessage(fieldDisplays.governanceAccount),
-                    validate: (governanceAccount: string) => {
-                        // TODO: check that governance account exists on-chain
+                    validate: async (governanceAccount: string) => {
                         try {
                             TokenHolder.fromAccountAddress(
                                 AccountAddress.fromBase58(governanceAccount)
                             );
+                            // Check if account exists on-chain.
+                            await getAccountInfoOfAddress(governanceAccount);
                             return true;
                         } catch (e) {
                             if (e instanceof Error) {
@@ -186,8 +214,6 @@ export default function CreatePltParameters(): JSX.Element | null {
                 rules={{
                     validate: (initialSupply: string) => {
                         try {
-                            const decimals = getValues(fieldNames.decimals);
-
                             // wait for validation until decimal field is filled
                             if (!decimals) return true;
                             // allow `initialSupply` to be an optional field and don't validate in that case

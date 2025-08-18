@@ -40,15 +40,11 @@ export default async function signUpdateCreatePltTransaction(
         serializedHeader,
         serializedUpdateType,
     ]);
-    console.log("DEBUGGING createPLT serialization send to ledger initial part (buffer): " + initialData)
-    console.log("DEBUGGING createPLT serialization send to ledger initial part (hex): " + initialData.toString("hex"))
     await transport.send(0xe0, INS_CREATE_PLT, p1, p2, initialData);
 
     // Send part1 packet of data containing token details and initialization parameters length.
     // 0x48	0x01 0x00 token_symbol_length[uint8] [token_symbol[token_symbol_length bytes]] [token_module[32 bytes]] [decimals[uint8]] [initialization_params_length[uint32]]
     p1 = 0x01;
-    console.log("DEBUGGING createPLT serialization send to ledger part 1 (buffer): " + serializedCreatePltUpdate.part1Buf)
-    console.log("DEBUGGING createPLT serialization send to ledger part 1 (hex): " + serializedCreatePltUpdate.part1Buf.toString("hex"))
     await transport.send(
         0xe0,
         INS_CREATE_PLT,
@@ -67,8 +63,6 @@ export default async function signUpdateCreatePltTransaction(
     );
     for (let i = 0; i < initParamChunks.length; i += 1) {
         // This command is repeated until all initialization parameter data has been sent.
-        console.log("DEBUGGING createPLT serialization send to ledger initParamChunks (buffer): " + Buffer.from(initParamChunks[i]))
-        console.log("DEBUGGING createPLT serialization send to ledger initParamChunks (hex): " + Buffer.from(initParamChunks[i]).toString("hex"))
         const result = await transport.send(
             0xe0,
             INS_CREATE_PLT,

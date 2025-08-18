@@ -23,6 +23,12 @@ import type {
     /* eslint-enable @typescript-eslint/no-unused-vars */
 } from '@concordium/web-sdk';
 import {
+    TokenId,
+    // Referenced in jsdoc
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    TokenInfo,
+} from '@concordium/web-sdk/plt';
+import {
     OpenDialogOptions,
     OpenDialogReturnValue,
     Rectangle,
@@ -99,7 +105,7 @@ export type ConsensusAndGlobalResult =
 
 type GetAccountInfo = (address: string, blockHash?: string) => Promise<string>;
 
-// TODO: ensure that messsages sent through exposed fuunctions are properly serialized
+// TODO: ensure that messsages sent through exposed functions are properly serialized
 export type GRPC = {
     setLocation: (address: string, port: string, useSsl: boolean) => void;
     /**
@@ -173,6 +179,10 @@ export type GRPC = {
      * @returns stringified {@linkcode ArInfo[]}
      */
     getAnonymityRevokers: (blockHash: string) => Promise<string>;
+    /**
+     * @returns stringified {@linkcode TokenInfo[]}
+     */
+    getTokenInfo: (tokenId: TokenId.Type) => Promise<string>;
     /**
      * @returns stringified {@linkcode HealthCheckResponse}
      */

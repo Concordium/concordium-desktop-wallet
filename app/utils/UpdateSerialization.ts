@@ -328,19 +328,11 @@ export function serializeCreatePltParameters(
     const initParamBuf = Buffer.from(params.initializationParameters.bytes);
     const serialization = Buffer.concat([part1Buf, initParamBuf]);
 
-    const returnValue = {
+    return {
         serialization,
         part1Buf,
         initParamBuf,
     };
-    console.log("DEBUGGING createPLT serialization (buffer): " + JSON.stringify(returnValue))
-    console.log("DEBUGGING createPLT serialization (hex): ")
-    console.log({
-        serialization: returnValue.serialization.toString("hex"),
-        part1Buf: returnValue.part1Buf.toString("hex"),
-        initParamBuf: returnValue.initParamBuf.toString("hex"),
-    });
-    return returnValue
 }
 
 /**

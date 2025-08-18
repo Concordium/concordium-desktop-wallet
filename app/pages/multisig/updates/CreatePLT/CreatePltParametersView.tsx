@@ -1,11 +1,15 @@
 import React from 'react';
 
+import {
+    createPltPayload,
+    CreatePLTPayload as CreatePLTPayloadEncoded,
+} from '@concordium/web-sdk/plt';
+
 import withChainData, { ChainData } from '~/utils/withChainData';
 import Label from '~/components/Label';
 import { fieldDisplays } from './CreatePltParameters';
 import { CreatePLTPayload } from '~/utils/types';
 import { uint8ArrayToHex } from '~/utils/printUtility';
-import { createPltPayload, CreatePLTPayload as CreatePLTPayloadEncoded } from '@concordium/web-sdk/plt';
 
 interface Props extends ChainData {
     createPltParameters: CreatePLTPayload;

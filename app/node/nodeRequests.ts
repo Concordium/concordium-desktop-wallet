@@ -21,6 +21,7 @@ import {
     HealthCheckResponse,
     NextAccountNonce,
 } from '@concordium/web-sdk';
+import { TokenInfo } from '@concordium/web-sdk/plt';
 import type { Buffer } from 'buffer/';
 
 import type { ConsensusAndGlobalResult } from '~/preload/preloadTypes';
@@ -148,6 +149,11 @@ export const getAnonymityRevokers = throwIfUndefined(
     (blockHash) =>
         `Unable to load identity disclosure authorities, on block: ${blockHash}`
 );
+export const getTokenInfo = parsed<
+    TokenInfo,
+    Parameters<typeof window.grpc.getTokenInfo>
+>(window.grpc.getTokenInfo);
+
 export const getIdentityProviders = throwIfUndefined(
     parsed<IpInfo[], Parameters<typeof window.grpc.getIdentityProviders>>(
         window.grpc.getIdentityProviders

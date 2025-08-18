@@ -14,6 +14,7 @@ import {
     BlockHash,
     TransactionHash,
 } from '@concordium/web-sdk';
+import { TokenId } from '@concordium/web-sdk/plt';
 import {
     ConcordiumGRPCNodeClient,
     credentials,
@@ -157,6 +158,8 @@ const exposedMethods: GRPC = {
                 blockHash ? BlockHash.fromHexString(blockHash) : undefined
             )
             .then(stringify),
+    getTokenInfo: (tokenId: TokenId.Type) =>
+        client.getTokenInfo(tokenId).then(stringify),
     getAccountInfoOfCredential: (credId: string, blockHash?: string) =>
         client
             .getAccountInfo(
