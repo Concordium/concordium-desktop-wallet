@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 import { TokenHolder, TokenAmount, TokenId } from '@concordium/web-sdk/plt';
@@ -62,6 +62,8 @@ export default function CreatePltParameters(): JSX.Element | null {
     const { watch } = useFormContext();
     const decimals = watch(fieldNames.decimals);
 
+    const [tokenIdWarning, setTokenIdWarning] = useState<string>('');
+
     return (
         <div>
             <Form.Input
@@ -74,14 +76,30 @@ export default function CreatePltParameters(): JSX.Element | null {
                 rules={{
                     required: requiredMessage(fieldDisplays.tokenId),
                     validate: async (tokenId: string) => {
-                        const cleaned = tokenId.replace(/[^a-zA-Z0-9.%-]/g, '');
-                        if (tokenId !== cleaned) {
+                        // Check restrictions enforced by the node.
+                        if (
+                            tokenId !== tokenId.replace(/[^a-zA-Z0-9.%-]/g, '')
+                        ) {
                             return "Only letters, numbers, '.', '%', and '-' are allowed.";
                         }
                         if (tokenId.length > 128) {
                             return 'Must be 128 characters or less.';
                         }
-                        // Check if token id already exists on-chain
+
+                        // Check Concordium's soft guidelines (internal agreement, not strictly enforced by the node).
+                        let warning = '';
+
+                        if (tokenId !== tokenId.replace(/[^a-zA-Z0-9]/g, '')) {
+                            warning +=
+                                '⚠️ Concordium internal guidelines recommend using only alphanumeric characters for tokenIds. ';
+                        }
+                        if (tokenId.length > 6) {
+                            warning +=
+                                '⚠️ Concordium internal guidelines recommend tokenIds of at most 6 characters. Wallets may not display longer Ids correctly.';
+                        }
+                        setTokenIdWarning(warning);
+
+                        // Check that token id does not already exist on-chain.
                         let tokenInfo;
                         try {
                             tokenInfo = await getTokenInfo(
@@ -109,6 +127,9 @@ export default function CreatePltParameters(): JSX.Element | null {
                     },
                 }}
             />
+            {tokenIdWarning !== '' && (
+                <p style={{ color: 'orange' }}>{tokenIdWarning}</p>
+            )}
             <Form.Input
                 className="body2 mB20"
                 name={fieldNames.name}
