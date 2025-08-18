@@ -198,9 +198,9 @@ export default function CreatePltParameters(): JSX.Element | null {
                             return true;
                         } catch (e) {
                             if (e instanceof Error) {
-                                return `Not valid governance account: ${e.message}`;
+                                return `Governance account does not exist on-chain. Couldn't fetch governance account info from the connected chain: ${e.message}`;
                             }
-                            return `Not valid governance account`;
+                            return `Governance account does not exist on-chain. Couldn't fetch governance account info from the connected chain.`;
                         }
                     },
                 }}

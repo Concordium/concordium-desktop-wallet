@@ -12,6 +12,7 @@ import {
     findUpdateInstructionHandler,
 } from '~/utils/transactionHandlers/HandlerFinder';
 import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
+import { isSignatureValid } from '../ProposalView/util';
 
 export async function signUpdateInstruction(
     instruction: UpdateInstruction,
@@ -23,12 +24,20 @@ export async function signUpdateInstruction(
         instruction,
         ledger
     );
-    return [
-        {
-            signature: signatureBytes.toString('hex'),
-            authorizationPublicKey: publicKey,
-        },
-    ];
+
+    const signature = {
+        signature: signatureBytes.toString('hex'),
+        authorizationPublicKey: publicKey,
+    };
+
+    const validSignature = await isSignatureValid(instruction, signature);
+    if (!validSignature) {
+        throw new Error(
+            'Signature is invalid. The ledger has signed a different transaction hash digest.'
+        );
+    }
+
+    return [signature];
 }
 
 export async function signAccountTransaction(

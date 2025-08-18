@@ -32,6 +32,7 @@ import SignTransaction from './SignTransaction';
 import styles from './SignTransactionProposal.module.scss';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 import { parse, stringify } from '~/utils/JSONHelper';
+import { isSignatureValid } from '../ProposalView/util';
 
 interface Props {
     proposal: Omit<MultiSignatureTransaction, 'id'>;
@@ -93,6 +94,15 @@ function SignTransactionProposalView({ proposal, chainParameters }: Props) {
                 signature: signatureBytes.toString('hex'),
                 authorizationPublicKey: publicKey,
             };
+            const validSignature = await isSignatureValid(
+                updateInstruction,
+                signature
+            );
+            if (!validSignature) {
+                throw new Error(
+                    'Signature is invalid. The ledger has signed a different transaction hash digest.'
+                );
+            }
             signatures.push(signature);
         }
 
