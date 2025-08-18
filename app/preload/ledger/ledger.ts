@@ -35,7 +35,6 @@ import {
     FinalizationCommitteeParameters,
     MinBlockTime,
     TimeoutParameters,
-    CreatePLTPayload,
 } from '~/utils/types';
 import { LedgerCommands } from '~/preload/preloadTypes';
 
@@ -318,7 +317,7 @@ export default function exposedMethods(
             );
         },
         signCreatePlt: (
-            transaction: UpdateInstruction<CreatePLTPayload>,
+            transaction: string, // UpdateInstruction<CreatePLTPayload>
             serializedPayload: Buffer,
             keypath: number[]
         ) => {

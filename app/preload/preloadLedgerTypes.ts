@@ -30,7 +30,6 @@ import {
     FinalizationCommitteeParameters,
     MinBlockTime,
     TimeoutParameters,
-    CreatePLTPayload,
 } from '~/utils/types';
 import { AppAndVersion } from '../features/ledger/GetAppAndVersion';
 import { AccountPathInput } from '../features/ledger/Path';
@@ -117,7 +116,11 @@ type LedgerCommands = {
     signBlockEnergyLimit: SignUpdate<BlockEnergyLimit>;
     signFinalizationCommitteeParameters: SignUpdate<FinalizationCommitteeParameters>;
     signValidatorScoreParameters: SignUpdate<ValidatorScoreParameters>;
-    signCreatePlt: SignUpdate<CreatePLTPayload>;
+    signCreatePlt: (
+        transaction: string, // UpdateInstruction<PayloadType>, we need to convert it to the stringified version we can recover from in the main process
+        serializedPayload: Buffer,
+        keypath: number[]
+    ) => ReturnBuffer;
     signMinBlockTime: SignUpdate<MinBlockTime>;
     signTimeoutParameters: SignUpdate<TimeoutParameters>;
     signHigherLevelKeysUpdate: SignKeyUpdate<HigherLevelKeyUpdate>;

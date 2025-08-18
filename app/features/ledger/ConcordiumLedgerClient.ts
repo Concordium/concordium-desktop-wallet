@@ -30,6 +30,7 @@ import {
     CreatePLTPayload,
 } from '~/utils/types';
 import { pipe } from '~/utils/basicHelpers';
+import { stringify } from '~/utils/JSONHelper';
 
 async function toBuffer(promisedBuffer: Promise<Buffer>): Promise<Buffer> {
     return Buffer.from(await promisedBuffer);
@@ -391,7 +392,11 @@ export default class ConcordiumLedgerClient {
         path: number[]
     ): Promise<Buffer> {
         return toBuffer(
-            window.ledger.signCreatePlt(transaction, serializedPayload, path)
+            window.ledger.signCreatePlt(
+                stringify(transaction),
+                serializedPayload,
+                path
+            )
         );
     }
 

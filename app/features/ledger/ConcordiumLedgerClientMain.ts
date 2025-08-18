@@ -49,7 +49,6 @@ import {
     FinalizationCommitteeParameters,
     MinBlockTime,
     TimeoutParameters,
-    CreatePLTPayload,
 } from '~/utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
@@ -64,6 +63,7 @@ import signUpdateCreatePltTransaction from './SignCreatePltUpdate';
 import signPoolParameters from './SignPoolParameters';
 import EmulatorTransport from './EmulatorTransport';
 import verifyAddress from './verifyAddress';
+import { parse } from '~/utils/JSONHelper';
 
 /**
  * Concordium Ledger API.
@@ -451,14 +451,14 @@ export default class ConcordiumLedgerClientMain {
     }
 
     signCreatePlt(
-        transaction: UpdateInstruction<CreatePLTPayload>,
+        transaction: string, // UpdateInstruction<CreatePLTPayload>
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
         return signUpdateCreatePltTransaction(
             this.transport,
             path,
-            transaction,
+            parse(transaction),
             serializedPayload
         );
     }
