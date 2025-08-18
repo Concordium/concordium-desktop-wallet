@@ -5,6 +5,7 @@ import Label from '~/components/Label';
 import { fieldDisplays } from './CreatePltParameters';
 import { CreatePLTPayload } from '~/utils/types';
 import { uint8ArrayToHex } from '~/utils/printUtility';
+import { createPltPayload, CreatePLTPayload as CreatePLTPayloadEncoded } from '@concordium/web-sdk/plt';
 
 interface Props extends ChainData {
     createPltParameters: CreatePLTPayload;
@@ -21,6 +22,11 @@ export default withChainData(function CreatePltParametersView({
         initializationParameters,
     },
 }: Props) {
+    const paramsEncoded: CreatePLTPayloadEncoded = createPltPayload(
+        { tokenId, moduleRef, decimals },
+        { ...initializationParameters }
+    );
+
     return (
         <>
             <div>
@@ -94,6 +100,12 @@ export default withChainData(function CreatePltParametersView({
                 <Label className="mB5">{fieldDisplays.burnable}:</Label>
                 <div className="body3 mono mB20">
                     {initializationParameters.burnable?.toString() ?? 'False'}
+                </div>
+            </div>
+            <div>
+                <Label className="mB5">InitParams (CBOR encoded):</Label>
+                <div className="body3 mono mB20">
+                    {paramsEncoded.initializationParameters.toString()}
                 </div>
             </div>
         </>
