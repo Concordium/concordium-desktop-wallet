@@ -2,7 +2,7 @@
     "name": "concordium-desktop-wallet",
     "productName": "concordium-desktop-wallet",
     "description": "concordium-desktop-wallet",
-    "version": "1.8.2",
+    "version": "1.9.0",
     "main": "./main.prod.js",
     "author": {
         "name": "Concordium Software",

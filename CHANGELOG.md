@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.9.0
+
 - Fix crash in `UpdateFoundationAccount` proposal flow
 - Add create PLT (protocol level token) governance transaction
 - Add a separate menu for governance transactions in multi sig panel
