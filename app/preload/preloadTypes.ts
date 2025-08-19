@@ -155,7 +155,10 @@ export type GRPC = {
     /**
      * @returns stringified {@linkcode BlockItemSummaryInBlock}
      */
-    waitForTransactionFinalization: (transactionId: string) => Promise<string>;
+    waitForTransactionFinalization: (
+        transactionId: string,
+        timeoutms?: number
+    ) => Promise<string>;
     /**
      * @returns stringified {@linkcode NextAccountNonce}
      */
