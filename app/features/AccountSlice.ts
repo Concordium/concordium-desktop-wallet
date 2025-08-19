@@ -1,6 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { LOCATION_CHANGE } from 'connected-react-router';
-import { AccountInfoType, DelegationTargetType } from '@concordium/web-sdk';
+import {
+    AccountInfoType,
+    BlockItemSummaryInBlock,
+    DelegationTargetType,
+} from '@concordium/web-sdk';
 
 import { getCredentialsOfAccount } from '~/database/CredentialDao';
 import { hasPendingTransactions } from '~/database/TransactionDao';
@@ -11,6 +15,7 @@ import { throwLoggedError, mapRecordValues } from '~/utils/basicHelpers';
 import {
     getAccountInfo,
     getAccountInfoOfCredential,
+    waitForTransactionFinalization,
 } from '~/node/nodeRequests';
 
 // eslint-disable-next-line import/no-cycle
@@ -37,7 +42,6 @@ import {
 } from '../utils/rustInterface';
 import {
     AccountStatus,
-    TransactionStatus,
     AccountEncryptedAmount,
     Account,
     AccountInfo,
@@ -53,7 +57,6 @@ import { createAccount, isValidAddress } from '../utils/accountHelpers';
 import {
     getAccountInfoOfAddress,
     getPoolStatusLatest,
-    getStatus,
     getlastFinalizedBlockHash,
 } from '../node/nodeHelpers';
 
@@ -622,16 +625,21 @@ export async function confirmAccount(
     accountAddress: string,
     transactionId: string
 ) {
-    const response = await getStatus(transactionId);
+    let response: BlockItemSummaryInBlock | undefined;
+    try {
+        response = await waitForTransactionFinalization(transactionId);
+    } catch {
+        response = undefined;
+    }
 
-    switch (response.status) {
-        case TransactionStatus.Rejected:
+    switch (true) {
+        case response === undefined:
             window.log.warn('account creation was rejected.');
             await updateAccount(accountAddress, {
                 status: AccountStatus.Rejected,
             });
             break;
-        case TransactionStatus.Finalized:
+        default:
             await updateAccount(accountAddress, {
                 status: AccountStatus.Confirmed,
             });
@@ -645,10 +653,6 @@ export async function confirmAccount(
                 readOnly: true,
             });
             break;
-        default:
-            throwLoggedError(
-                `Unexpected status was returned by the poller: ${response}`
-            );
     }
     return loadAccounts(dispatch);
 }

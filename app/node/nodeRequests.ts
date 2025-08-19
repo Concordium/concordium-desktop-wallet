@@ -20,6 +20,7 @@ import {
     PassiveDelegationStatus,
     HealthCheckResponse,
     NextAccountNonce,
+    BlockItemSummaryInBlock,
 } from '@concordium/web-sdk';
 import { TokenInfo } from '@concordium/web-sdk/plt';
 import type { Buffer } from 'buffer/';
@@ -160,6 +161,10 @@ export const getIdentityProviders = throwIfUndefined(
     ),
     (blockHash) => `Unable to load identity providers, on block: ${blockHash}`
 );
+export const waitForTransactionFinalization = parsed<
+    BlockItemSummaryInBlock,
+    Parameters<typeof window.grpc.waitForTransactionFinalization>
+>(window.grpc.waitForTransactionFinalization);
 export const getTransactionStatus = parsed<
     BlockItemStatus,
     Parameters<typeof window.grpc.getTransactionStatus>

@@ -1,11 +1,13 @@
-import { TransactionSummaryType } from '@concordium/web-sdk';
+import {
+    BlockItemSummaryInBlock,
+    TransactionSummaryType,
+} from '@concordium/web-sdk';
 import { parse, stringify } from './JSONHelper';
 import { getAll, updateEntry } from '~/database/MultiSignatureProposalDao';
 import { loadProposals } from '~/features/MultiSignatureSlice';
 import {
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
-    TransactionStatus,
     Dispatch,
     instanceOfAccountTransaction,
     instanceOfUpdateAccountCredentials,
@@ -22,7 +24,6 @@ import {
     isSuccessfulTransaction,
     isShieldedBalanceTransaction,
 } from './transactionHelpers';
-import { getStatus } from '~/node/nodeHelpers';
 import { getTransactionHash } from './transactionHash';
 import {
     updateAccountInfoOfAddress,
@@ -34,6 +35,7 @@ import {
     removeExternalCredentials,
 } from '~/features/CredentialSlice';
 import { throwLoggedError } from './basicHelpers';
+import { waitForTransactionFinalization } from '~/node/nodeRequests';
 
 /**
  * Given an UpdateAccountCredentials transaction, update the local state
@@ -51,7 +53,6 @@ export function updateAccountCredentialsPerformConsequence(
         transaction.sender,
         transaction.payload.threshold
     );
-
     insertExternalCredentials(
         dispatch,
         transaction.sender,
@@ -91,51 +92,47 @@ export async function getMultiSignatureTransactionStatus(
     dispatch: Dispatch
 ) {
     const transaction: Transaction = parse(proposal.transaction);
-
     const transactionHash = await getTransactionHash(transaction);
 
-    const response = await getStatus(transactionHash);
+    let response: BlockItemSummaryInBlock | undefined;
+    try {
+        response = await waitForTransactionFinalization(transactionHash);
+    } catch (e) {
+        response = undefined;
+    }
 
-    const updatedProposal = {
-        ...proposal,
-    };
-
-    switch (response.status) {
-        case TransactionStatus.Rejected:
+    const updatedProposal = { ...proposal };
+    switch (true) {
+        case response === undefined:
             updatedProposal.status = MultiSignatureTransactionStatus.Rejected;
             break;
-        case TransactionStatus.Finalized: {
-            const { outcome } = response;
-            if (isSuccessfulTransaction(outcome.summary)) {
-                if (
-                    instanceOfAccountTransaction(transaction) &&
-                    instanceOfUpdateAccountCredentials(transaction)
-                ) {
-                    updateAccountCredentialsPerformConsequence(
-                        dispatch,
-                        transaction
-                    );
-                }
-                updatedProposal.status =
-                    MultiSignatureTransactionStatus.Finalized;
-            } else {
-                updatedProposal.status = MultiSignatureTransactionStatus.Failed;
-            }
+        case response !== undefined &&
+            !isSuccessfulTransaction(response.summary):
+            updatedProposal.status = MultiSignatureTransactionStatus.Failed;
+            break;
+        default: {
             if (
-                outcome.summary.type ===
+                instanceOfAccountTransaction(transaction) &&
+                instanceOfUpdateAccountCredentials(transaction)
+            ) {
+                updateAccountCredentialsPerformConsequence(
+                    dispatch,
+                    transaction
+                );
+            }
+            updatedProposal.status = MultiSignatureTransactionStatus.Finalized;
+
+            if (
+                response.summary.type ===
                 TransactionSummaryType.AccountTransaction
             ) {
                 updatedProposal.transaction = stringify({
                     ...transaction,
-                    cost: outcome.summary.cost,
+                    cost: response.summary.cost,
                 });
             }
             break;
         }
-        default:
-            throwLoggedError(
-                `Unexpected status was returned by the poller! Status: ${response}`
-            );
     }
 
     // Update the proposal and reload state from the database.
@@ -151,17 +148,23 @@ export async function monitorTransactionStatus(
     transaction: TransferTransaction
 ) {
     const { transactionHash, fromAddress } = transaction;
-    const response = await getStatus(transactionHash);
-    switch (response.status) {
-        case TransactionStatus.Rejected:
+
+    let response;
+    try {
+        response = await waitForTransactionFinalization(transactionHash);
+    } catch {
+        response = undefined;
+    }
+
+    switch (true) {
+        case response === undefined:
             rejectTransaction(dispatch, transactionHash);
             break;
-        case TransactionStatus.Finalized: {
+        default: {
             // A finalized transaction will always result in exactly one outcome,
             // which we can extract directly here.
-            const { blockHash } = response.outcome;
-            const event = response.outcome.summary;
-            if (event.type !== TransactionSummaryType.AccountTransaction) {
+            const { blockHash, summary } = response;
+            if (summary.type !== TransactionSummaryType.AccountTransaction) {
                 // TODO throw error on this weird case?
                 break;
             }
@@ -169,19 +172,13 @@ export async function monitorTransactionStatus(
                 dispatch,
                 transactionHash,
                 blockHash.toString(),
-                event
+                summary
             );
-            if (isSuccessfulTransaction(event)) {
-                if (isShieldedBalanceTransaction(transaction)) {
-                    await ShieldedTransferConsequence(dispatch, transaction);
-                }
+            if (isShieldedBalanceTransaction(transaction)) {
+                await ShieldedTransferConsequence(dispatch, transaction);
             }
             break;
         }
-        default:
-            throwLoggedError(
-                `Unexpected status was returned by the poller! Status: ${response}`
-            );
     }
     updateAccountInfoOfAddress(fromAddress, dispatch);
 }

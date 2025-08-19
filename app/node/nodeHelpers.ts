@@ -1,24 +1,14 @@
 import {
-    BlockItemSummaryInBlock,
-    TransactionStatusEnum,
-} from '@concordium/web-sdk';
-import {
     getConsensusStatus,
     getAccountInfo,
     getCryptographicParameters,
     getBlockChainParameters,
     getIdentityProviders,
     getAnonymityRevokers,
-    getTransactionStatus,
     getPoolInfo,
     getRewardStatus,
 } from './nodeRequests';
-import {
-    AccountInfo,
-    Global,
-    Fraction,
-    TransactionStatus,
-} from '../utils/types';
+import { AccountInfo, Global, Fraction } from '../utils/types';
 
 export async function getlastFinalizedBlockHash(): Promise<string> {
     const consensusStatus = await getConsensusStatus();
@@ -100,55 +90,4 @@ export async function getEnergyToMicroGtuRate(): Promise<Fraction> {
 export async function nodeSupportsMemo() {
     const consensusStatus = await getConsensusStatus();
     return consensusStatus.protocolVersion >= 2;
-}
-
-export type StatusResponse =
-    | {
-          status: TransactionStatus.Rejected;
-          outcome: undefined;
-      }
-    | {
-          status: TransactionStatus.Finalized;
-          outcome: BlockItemSummaryInBlock;
-      };
-
-/**
- * Queries the node for the status of the transaction with the provided transaction hash.
- * The polling will continue until the transaction becomes absent or finalized.
- * @param transactionHash the hash of the transaction to get the status for
- * @param pollingIntervalM, optional, interval between polling in milliSeconds, defaults to every 20 seconds.
- */
-export async function getStatus(
-    transactionHash: string,
-    pollingIntervalMs = 20000
-): Promise<StatusResponse> {
-    return new Promise((resolve) => {
-        const interval = setInterval(async () => {
-            let response;
-            try {
-                response = await getTransactionStatus(transactionHash);
-            } catch (err) {
-                // This happens if the node cannot be reached. Just wait for the next
-                // interval and try again.
-                return;
-            }
-            // if there is no response, the transaction is absent.
-            if (!response) {
-                clearInterval(interval);
-                resolve({
-                    status: TransactionStatus.Rejected,
-                    outcome: undefined,
-                });
-                return;
-            }
-
-            if (response.status === TransactionStatusEnum.Finalized) {
-                clearInterval(interval);
-                resolve({
-                    status: TransactionStatus.Finalized,
-                    outcome: response.outcome,
-                });
-            }
-        }, pollingIntervalMs);
-    });
 }

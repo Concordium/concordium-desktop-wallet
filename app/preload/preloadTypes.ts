@@ -17,6 +17,7 @@ import type {
     ChainParameters,
     AccountInfo,
     BlockItemStatus,
+    BlockItemSummaryInBlock,
     TransactionHash,
     IpInfo,
     ArInfo,
@@ -151,6 +152,13 @@ export type GRPC = {
      * @returns stringified {@linkcode BlockItemStatus}
      */
     getTransactionStatus: (transactionId: string) => Promise<string>;
+    /**
+     * @returns stringified {@linkcode BlockItemSummaryInBlock}
+     */
+    waitForTransactionFinalization: (
+        transactionId: string,
+        timeoutms?: number
+    ) => Promise<string>;
     /**
      * @returns stringified {@linkcode NextAccountNonce}
      */

@@ -135,6 +135,16 @@ const exposedMethods: GRPC = {
         client
             .getBlockItemStatus(TransactionHash.fromHexString(transactionHash))
             .then(stringify),
+    waitForTransactionFinalization: (
+        transactionHash: string,
+        timeoutms?: number
+    ) =>
+        client
+            .waitForTransactionFinalization(
+                TransactionHash.fromHexString(transactionHash),
+                timeoutms
+            )
+            .then(stringify),
     getNextAccountNonce: (address: string) =>
         client
             .getNextAccountNonce(AccountAddress.fromBase58(address))
