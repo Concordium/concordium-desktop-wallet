@@ -100,7 +100,7 @@ async function HandleAccountTransactionSignatureFile(
  * the verification key in the signature can verify the signature successfully on the hash
  * of the serialized transaction.
  */
-async function isSignatureValid(
+export async function isSignatureValid(
     proposal: UpdateInstruction,
     signature: UpdateInstructionSignature
 ): Promise<boolean> {

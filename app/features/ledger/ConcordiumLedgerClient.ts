@@ -27,8 +27,10 @@ import {
     FinalizationCommitteeParameters,
     MinBlockTime,
     TimeoutParameters,
+    CreatePLTPayload,
 } from '~/utils/types';
 import { pipe } from '~/utils/basicHelpers';
+import { stringify } from '~/utils/JSONHelper';
 
 async function toBuffer(promisedBuffer: Promise<Buffer>): Promise<Buffer> {
     return Buffer.from(await promisedBuffer);
@@ -378,6 +380,20 @@ export default class ConcordiumLedgerClient {
         return toBuffer(
             window.ledger.signValidatorScoreParameters(
                 transaction,
+                serializedPayload,
+                path
+            )
+        );
+    }
+
+    signCreatePltParameters(
+        transaction: UpdateInstruction<CreatePLTPayload>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return toBuffer(
+            window.ledger.signCreatePlt(
+                stringify(transaction),
                 serializedPayload,
                 path
             )

@@ -14,6 +14,10 @@ import {
     TransactionKindString,
     ValidatorScoreParameters,
 } from '@concordium/web-sdk';
+import {
+    CreatePLTPayload as CreatePLTPayloadEncoded,
+    TokenInitializationParameters,
+} from '@concordium/web-sdk/plt';
 import { RejectReason } from './node/RejectReasonHelper';
 import type { ExternalCredential, Genesis } from '~/database/types';
 
@@ -768,7 +772,15 @@ export type UpdateInstructionPayload =
     | MinBlockTime
     | BlockEnergyLimit
     | FinalizationCommitteeParameters
-    | ValidatorScoreParameters;
+    | ValidatorScoreParameters
+    | CreatePLTPayload;
+
+export type CreatePLTPayload = Omit<
+    CreatePLTPayloadEncoded,
+    'initializationParameters'
+> & {
+    initializationParameters: TokenInitializationParameters;
+};
 
 // An actual signature, which goes into an account transaction.
 export type Signature = Hex;
@@ -827,6 +839,7 @@ export enum UpdateType {
     FinalizationCommitteeParameters,
     UpdateGASRewardsV1,
     UpdateValidatorScoreParameters,
+    UpdateCreatePltParameters,
 }
 
 export enum RootKeysUpdateTypes {

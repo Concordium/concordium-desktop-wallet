@@ -59,9 +59,11 @@ import signUpdateCredentialTransaction from './SignUpdateCredentials';
 import signAuthorizationKeysUpdate from './SignAuthorizationKeysUpdate';
 import signAddIdentityProviderTransaction from './SignAddIdentityProvider';
 import signAddAnonymityRevokerTransaction from './SignAddAnonymityRevoker';
+import signUpdateCreatePltTransaction from './SignCreatePltUpdate';
 import signPoolParameters from './SignPoolParameters';
 import EmulatorTransport from './EmulatorTransport';
 import verifyAddress from './verifyAddress';
+import { parse } from '~/utils/JSONHelper';
 
 /**
  * Concordium Ledger API.
@@ -444,6 +446,19 @@ export default class ConcordiumLedgerClientMain {
             0x47,
             path,
             transaction,
+            serializedPayload
+        );
+    }
+
+    signCreatePlt(
+        transaction: string,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateCreatePltTransaction(
+            this.transport,
+            path,
+            parse(transaction),
             serializedPayload
         );
     }

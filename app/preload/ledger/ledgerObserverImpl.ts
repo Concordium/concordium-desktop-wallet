@@ -70,7 +70,7 @@ export default class LedgerObserverImpl implements LedgerObserver {
                 if (!isConcordiumApp(appAndVersion)) {
                     return;
                 }
-                
+
                 if (this.pollingInterval !== null) {
                     clearInterval(this.pollingInterval);
                     this.pollingInterval = null;

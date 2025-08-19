@@ -1,4 +1,5 @@
 import { ValidatorScoreParameters } from '@concordium/web-sdk';
+
 import { Buffer } from 'buffer/';
 import {
     PrivateKeys,
@@ -115,6 +116,11 @@ type LedgerCommands = {
     signBlockEnergyLimit: SignUpdate<BlockEnergyLimit>;
     signFinalizationCommitteeParameters: SignUpdate<FinalizationCommitteeParameters>;
     signValidatorScoreParameters: SignUpdate<ValidatorScoreParameters>;
+    signCreatePlt: (
+        transaction: string, // We need to convert it to the stringified version we can recover from in the main process.
+        serializedPayload: Buffer,
+        keypath: number[]
+    ) => ReturnBuffer;
     signMinBlockTime: SignUpdate<MinBlockTime>;
     signTimeoutParameters: SignUpdate<TimeoutParameters>;
     signHigherLevelKeysUpdate: SignKeyUpdate<HigherLevelKeyUpdate>;

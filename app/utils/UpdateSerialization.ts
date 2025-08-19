@@ -1,5 +1,11 @@
 import { Buffer } from 'buffer/';
+
 import { ValidatorScoreParameters } from '@concordium/web-sdk';
+import {
+    createPltPayload,
+    CreatePLTPayload as CreatePLTPayloadEncoded,
+} from '@concordium/web-sdk/plt';
+
 import {
     encodeWord32,
     encodeWord64,
@@ -7,6 +13,7 @@ import {
     serializeVerifyKey,
     serializeIpInfo,
     serializeArInfo,
+    encodeWord8,
 } from './serializationHelpers';
 import {
     BakerStakeThreshold,
@@ -39,6 +46,7 @@ import {
     FinalizationCommitteeParameters,
     MinBlockTime,
     TimeoutParameters,
+    CreatePLTPayload,
 } from './types';
 
 /**
@@ -73,6 +81,7 @@ export enum OnChainUpdateType {
     UpdateGASRewardsV1 = 21,
     UpdateFinalizationCommitteeParameters = 22,
     UpdateValidatorScoreParameters = 23,
+    UpdateCreatePltParameters = 24,
 }
 
 /**
@@ -255,6 +264,75 @@ export function serializeValidatorScoreParameters(
     parameters: ValidatorScoreParameters
 ) {
     return encodeWord64(parameters.maxMissedRounds);
+}
+
+/**
+ * Interface for the serialization of a create PLT chain update split into its
+ * different parts required to correctly stream it in parts to the Ledger.
+ */
+export interface SerializedCreatePltUpdate {
+    serialization: Buffer;
+    part1Buf: Buffer;
+    initParamBuf: Buffer;
+}
+
+/**
+ * Serializes a Create PLT parameter to the byte format expected
+ * by the chain.
+ */
+export function serializeCreatePltParameters(
+    parameters: CreatePLTPayload
+): SerializedCreatePltUpdate {
+    const {
+        initializationParameters,
+        tokenId,
+        moduleRef,
+        decimals,
+    } = parameters;
+
+    const params: CreatePLTPayloadEncoded = createPltPayload(
+        { tokenId, moduleRef, decimals },
+        { ...initializationParameters }
+    );
+
+    const tokenIdBytes = new TextEncoder().encode(tokenId.value);
+    // We only allow simple (one byte characters) for the tokenId.
+    if (tokenIdBytes.length > 128) {
+        throw new Error(
+            `The token id length should not be greater than 128 bytes. Current length: ${tokenIdBytes.length}`
+        );
+    }
+    if (decimals > 255) {
+        throw new Error(
+            `The decimals value of the token should not be greater than 255: Current decimals value: ${decimals}`
+        );
+    }
+
+    const part1Buf = Buffer.concat([
+        // Token Id (`String`): UTF-8 encoded string, maximum 128 characters
+        // (we allow only simple characters that are encoded as 1 byte in utf-8)
+        // Serialized as: `[length: uint8][data: bytes]`
+        encodeWord8(tokenIdBytes.length),
+        Buffer.from(tokenIdBytes),
+        // Token Module (`Hash`): 32-byte hash identifying the token module
+        // Serialized as: `[32 bytes]`
+        Buffer.from(parameters.moduleRef.bytes),
+        // Decimals (`uint8`): Number of decimal places for the token
+        // Serialized as: `[1 byte]`
+        encodeWord8(parameters.decimals),
+        // Initialization Parameters (`ByteArray`): Variable-length initialization data
+        // Serialized as: `[length: uint32][data: bytes]`
+        encodeWord32(params.initializationParameters.bytes.length),
+    ]);
+
+    const initParamBuf = Buffer.from(params.initializationParameters.bytes);
+    const serialization = Buffer.concat([part1Buf, initParamBuf]);
+
+    return {
+        serialization,
+        part1Buf,
+        initParamBuf,
+    };
 }
 
 /**
@@ -666,6 +744,8 @@ function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
             return OnChainUpdateType.UpdateGASRewardsV1;
         case UpdateType.UpdateValidatorScoreParameters:
             return OnChainUpdateType.UpdateValidatorScoreParameters;
+        case UpdateType.UpdateCreatePltParameters:
+            return OnChainUpdateType.UpdateCreatePltParameters;
         default:
             throw new Error(`An invalid update type was given: ${type}`);
     }
