@@ -4,9 +4,17 @@
 
 ## 1.9.0
 
+### Added
+
 - Fix crash in `UpdateFoundationAccount` proposal flow
 - Add create PLT (protocol level token) governance transaction
 - Add a separate menu for governance transactions in multi sig panel
+
+### Fixed
+
+- Unable to add a 2nd account in a DW
+- Update wallet proxy integration to v2 accTransactions
+- Auto update not working for Desktop wallet
 
 ## 1.8.2
 
