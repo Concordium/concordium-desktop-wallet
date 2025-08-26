@@ -1,11 +1,12 @@
 import PromiseWorker from 'promise-worker';
+import { AccountEncryptedAmount, TransactionExpiry } from '@concordium/web-sdk';
+
 import {
-    AccountEncryptedAmount,
-    AttributeKey,
     createCredentialDeploymentTransaction,
     CredentialDeploymentTransaction,
-    TransactionExpiry,
-} from '@concordium/web-sdk';
+    AttributeKey,
+} from '@concordium/web-sdk-v6';
+
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error : has no default export.
 import RustWorker, { BakerKeyVariants } from './rust.worker';

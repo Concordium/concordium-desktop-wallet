@@ -237,6 +237,7 @@
     },
     "dependencies": {
         "@concordium/web-sdk": "^9.0.0",
+        "@concordium/web-sdk-v6": "npm:@concordium/web-sdk@^6.4.0",
         "@hot-loader/react-dom": "^16.13.0",
         "@ledgerhq/devices": "^8.2.1",
         "@protobuf-ts/grpc-transport": "2.8.2",

@@ -3,7 +3,6 @@ import type {
     AccountTransactionSignature,
     BakerId,
     ConsensusStatus,
-    CredentialDeploymentTransaction,
     CryptographicParameters,
     // Referenced in jsdoc
     /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -22,6 +21,8 @@ import type {
     ArInfo,
     /* eslint-enable @typescript-eslint/no-unused-vars */
 } from '@concordium/web-sdk';
+import { CredentialDeploymentTransaction } from '@concordium/web-sdk-v6';
+
 import {
     OpenDialogOptions,
     OpenDialogReturnValue,
@@ -134,6 +135,12 @@ export type GRPC = {
         transaction: CredentialDeploymentTransaction,
         signatures: string[]
     ) => Promise<string>;
+
+    /* sendCredentialDeploymentTransactionV6: (
+        transaction: CredentialDeploymentTransactionv6,
+        signatures: string[]
+    ) => Promise<string>; */
+
     /**
      * @returns stringified {@linkcode CryptographicParameters}
      */

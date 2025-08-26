@@ -2,11 +2,11 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
+import { getAccountAddress } from '@concordium/web-sdk';
 import {
-    getAccountAddress,
-    getCredentialDeploymentTransactionHash,
     CredentialDeploymentTransaction,
-} from '@concordium/web-sdk';
+    getCredentialDeploymentTransactionHash,
+} from '@concordium/web-sdk-v6';
 import routes from '~/constants/routes.json';
 
 import { createCredentialDetails } from '~/utils/rustInterface';
