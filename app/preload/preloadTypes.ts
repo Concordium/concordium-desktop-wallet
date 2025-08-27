@@ -142,11 +142,6 @@ export type GRPC = {
         signatures: string[]
     ) => Promise<string>;
 
-    /* sendCredentialDeploymentTransactionV6: (
-        transaction: CredentialDeploymentTransactionv6,
-        signatures: string[]
-    ) => Promise<string>; */
-
     /**
      * @returns stringified {@linkcode CryptographicParameters}
      */
