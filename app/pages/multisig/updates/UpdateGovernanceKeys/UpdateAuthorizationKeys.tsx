@@ -54,7 +54,7 @@ function getKeyUpdateType(protocolVersion: bigint, type: UpdateType) {
         }
         return AuthorizationKeysUpdateType.Level1V0;
     }
-    throw new Error('Invalid key update type.');
+    throw new Error(`Invalid key update type: ${type}`);
 }
 
 interface Props {
