@@ -16,7 +16,6 @@
 ### Fixed
 
 - Unable to add a 2nd account in a DW
-- Update wallet proxy integration to v2 accTransactions
 - Auto update not working for Desktop wallet
 
 ## 1.8.2
