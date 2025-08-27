@@ -1,4 +1,4 @@
-This is the repository for the desktop wallet.
+This is the repository for the desktop wallet intended for use alongside the [ledger apps](https://github.com/Concordium/concordium-ledger-app).
 
 ## Dependencies
 

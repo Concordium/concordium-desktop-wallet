@@ -1,4 +1,3 @@
-import { isAuthorizationsV1 } from '@concordium/web-sdk';
 import { Authorization, Authorizations } from '../../../../node/NodeApiTypes';
 import {
     AccessStructure,
@@ -61,7 +60,7 @@ export function getCurrentThresholds(
         AccessStructureEnum.addIdentityProvider,
         authorizations.addIdentityProvider.threshold
     );
-    if (isAuthorizationsV1(authorizations)) {
+    if (authorizations.version === 1) {
         currentThresholds.set(
             AccessStructureEnum.cooldownParameters,
             authorizations.cooldownParameters.threshold
@@ -70,6 +69,13 @@ export function getCurrentThresholds(
             AccessStructureEnum.timeParameters,
             authorizations.timeParameters.threshold
         );
+        // `createPlt` is available from protocol version 9.
+        if (authorizations.createPlt) {
+            currentThresholds.set(
+                AccessStructureEnum.createPlt,
+                authorizations.createPlt.threshold
+            );
+        }
     }
     return currentThresholds;
 }
@@ -214,6 +220,8 @@ export function getAccessStructureTitle(
             return 'Cooldown parameters';
         case AccessStructureEnum.timeParameters:
             return 'Time parameters';
+        case AccessStructureEnum.createPlt:
+            return 'Create PLT (protocol level token)';
         default:
             throw new Error(
                 `Unknown access structure type: ${accessStructureType}`
@@ -298,7 +306,7 @@ export function mapCurrentAuthorizationsToUpdate(
         ),
     ];
 
-    if (isAuthorizationsV1(authorizations)) {
+    if (authorizations.version === 1) {
         accessStructures.push(
             mapAuthorizationToAccessStructure(
                 authorizations.cooldownParameters,
@@ -311,6 +319,15 @@ export function mapCurrentAuthorizationsToUpdate(
                 AccessStructureEnum.timeParameters
             )
         );
+        // `createPlt` is available from protocol version 9.
+        if (authorizations.createPlt) {
+            accessStructures.push(
+                mapAuthorizationToAccessStructure(
+                    authorizations.createPlt,
+                    AccessStructureEnum.createPlt
+                )
+            );
+        }
     }
 
     const update: AuthorizationKeysUpdate = {

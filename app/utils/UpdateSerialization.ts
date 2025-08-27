@@ -140,10 +140,14 @@ export function convertAuthorizationKeyUpdateType(
             return 1;
         case AuthorizationKeysUpdateType.Level1V1:
             return 2;
+        case AuthorizationKeysUpdateType.Level1V2:
+            return 3;
         case AuthorizationKeysUpdateType.RootV0:
             return 2;
         case AuthorizationKeysUpdateType.RootV1:
             return 3;
+        case AuthorizationKeysUpdateType.RootV2:
+            return 4;
         default:
             throw new Error('Unknown authorization key update type');
     }
