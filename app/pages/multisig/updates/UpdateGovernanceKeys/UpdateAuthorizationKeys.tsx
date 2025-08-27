@@ -36,13 +36,25 @@ import localStyles from './UpdateAuthorizationKeys.module.scss';
 
 function getKeyUpdateType(protocolVersion: bigint, type: UpdateType) {
     if (type === UpdateType.UpdateLevel2KeysUsingRootKeys) {
-        return protocolVersion > 3
-            ? AuthorizationKeysUpdateType.RootV1
-            : AuthorizationKeysUpdateType.RootV0;
+        if (protocolVersion >= 9) {
+            return AuthorizationKeysUpdateType.RootV2;
+        }
+        if (protocolVersion >= 4) {
+            return AuthorizationKeysUpdateType.RootV1;
+        }
+        return AuthorizationKeysUpdateType.RootV0;
     }
-    return protocolVersion > 3
-        ? AuthorizationKeysUpdateType.Level1V1
-        : AuthorizationKeysUpdateType.Level1V0;
+
+    if (type === UpdateType.UpdateLevel2KeysUsingLevel1Keys) {
+        if (protocolVersion >= 9) {
+            return AuthorizationKeysUpdateType.Level1V2;
+        }
+        if (protocolVersion >= 4) {
+            return AuthorizationKeysUpdateType.Level1V1;
+        }
+        return AuthorizationKeysUpdateType.Level1V0;
+    }
+    throw new Error(`Invalid key update type: ${type}`);
 }
 
 interface Props {
@@ -346,7 +358,9 @@ export default function UpdateAuthorizationKeys({
                         </div>
                         <div className="mono">
                             New size of level 2 key set:{' '}
-                            <b>{newLevel2Keys.keys.length}</b>
+                            <b>
+                                {removeRemovedKeys(newLevel2Keys).keys.length}
+                            </b>
                         </div>
                         <ul>
                             {removeRemovedKeys(newLevel2Keys).keys.map(

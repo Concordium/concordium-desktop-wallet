@@ -1365,6 +1365,7 @@ export enum AccessStructureEnum {
     addIdentityProvider,
     cooldownParameters,
     timeParameters,
+    createPlt,
 }
 
 export interface AccessStructure {
@@ -1381,8 +1382,10 @@ export interface AccessStructure {
 export enum AuthorizationKeysUpdateType {
     Level1V0, // serialized as 1
     Level1V1, // serialized as 2
+    Level1V2, // serialized as 3
     RootV0, // serialized as 2
     RootV1, // serialized as 3
+    RootV2, // serialized as 4
 }
 
 export function getAuthorizationKeysUpdateVersion(
@@ -1395,6 +1398,9 @@ export function getAuthorizationKeysUpdateVersion(
         case AuthorizationKeysUpdateType.RootV1:
         case AuthorizationKeysUpdateType.Level1V1:
             return 1;
+        case AuthorizationKeysUpdateType.RootV2:
+        case AuthorizationKeysUpdateType.Level1V2:
+            return 2;
         default:
             throw new Error('Unknown authorization key update type');
     }

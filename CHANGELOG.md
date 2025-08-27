@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Fix display of `new size of level 2 key set` which now accounts for removed keys correctly
+- Update the flow for signing authorizations updates with support for v2 authorizations
+
 ## 1.9.0
 
 - Fix crash in `UpdateFoundationAccount` proposal flow
