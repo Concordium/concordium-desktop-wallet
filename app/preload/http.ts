@@ -108,7 +108,7 @@ async function getTransactions(
         filters += `&blockTimeTo=${timestamp}`;
     }
 
-    let proxyPath = `/v2/accTransactions/${address}?limit=${limitResults}&includeRawRejectReason${filters}&order=${order.toString()}`;
+    let proxyPath = `/v1/accTransactions/${address}?limit=${limitResults}&includeRawRejectReason${filters}&order=${order.toString()}`;
     if (id) {
         proxyPath += `&from=${id}`;
     }
