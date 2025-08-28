@@ -3191,10 +3191,52 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@concordium/common-sdk@npm:9.5.1":
+  version: 9.5.1
+  resolution: "@concordium/common-sdk@npm:9.5.1"
+  dependencies:
+    "@concordium/rust-bindings": "npm:1.2.0"
+    "@grpc/grpc-js": "npm:^1.3.4"
+    "@noble/ed25519": "npm:^1.7.1"
+    "@protobuf-ts/runtime-rpc": "npm:^2.8.2"
+    "@scure/bip39": "npm:^1.1.0"
+    big.js: "npm:^6.2.0"
+    bs58check: "npm:^2.1.2"
+    buffer: "npm:^6.0.3"
+    cross-fetch: "npm:3.1.5"
+    hash.js: "npm:^1.1.7"
+    iso-3166-1: "npm:^2.1.1"
+    json-bigint: "npm:^1.0.0"
+    uuid: "npm:^8.3.2"
+  checksum: 10c0/773efca9524ad69a55fdc1dc8340e5dfda7efb554bcdf6017cfb522748394059f21f6d53ec1f1942a3ef32fbfb2c5e801261ab8085d6b6dfdcaa8f3914b09540
+  languageName: node
+  linkType: hard
+
+"@concordium/rust-bindings@npm:1.2.0":
+  version: 1.2.0
+  resolution: "@concordium/rust-bindings@npm:1.2.0"
+  checksum: 10c0/366d97d781b57f0360fbb1e04d54951ec345b456940f5645ec026761fd4162733ee574c8a10feffdee0b9632397f6cd989a9d671700c1167364ce38262a44a7f
+  languageName: node
+  linkType: hard
+
 "@concordium/rust-bindings@npm:^3.3.0":
   version: 3.3.0
   resolution: "@concordium/rust-bindings@npm:3.3.0"
   checksum: 10c0/79d1d6af5aef6ae42f3f323330da057d010d9ef7fec5fd9a8628fa13a40d87ff38fafedd7990bbfc08005ca10dcb08e89c6cab501f90a0eb73b23a5beb1eaa09
+  languageName: node
+  linkType: hard
+
+"@concordium/web-sdk-v6@npm:@concordium/web-sdk@^6.4.0":
+  version: 6.5.1
+  resolution: "@concordium/web-sdk@npm:6.5.1"
+  dependencies:
+    "@concordium/common-sdk": "npm:9.5.1"
+    "@concordium/rust-bindings": "npm:1.2.0"
+    "@grpc/grpc-js": "npm:^1.3.4"
+    "@protobuf-ts/grpcweb-transport": "npm:^2.8.2"
+    buffer: "npm:^6.0.3"
+    process: "npm:^0.11.10"
+  checksum: 10c0/b19b6cd06d2b2cdd38264e4fcd78dc9497374bfb27818a5cbc5b8fc5312fa230360d1666e3cade4d411846099715616692a8f250ce28f9bc63af3d038db37101
   languageName: node
   linkType: hard
 
@@ -3519,7 +3561,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@grpc/grpc-js@npm:^1.9.4":
+"@grpc/grpc-js@npm:^1.3.4, @grpc/grpc-js@npm:^1.9.4":
   version: 1.13.4
   resolution: "@grpc/grpc-js@npm:1.13.4"
   dependencies:
@@ -4177,6 +4219,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@noble/ed25519@npm:^1.7.1":
+  version: 1.7.5
+  resolution: "@noble/ed25519@npm:1.7.5"
+  checksum: 10c0/9ebcdf47e1cc986f270a82725ed4fdad1922fd63cca77f6bc0ba9575685db9cd73d45e66325fb62cc1d8a398010e953331b904961c1e9f18d170eebae783d5cb
+  languageName: node
+  linkType: hard
+
 "@noble/ed25519@npm:^2.0.0":
   version: 2.3.0
   resolution: "@noble/ed25519@npm:2.3.0"
@@ -4523,7 +4572,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@protobuf-ts/grpcweb-transport@npm:^2.9.1":
+"@protobuf-ts/grpcweb-transport@npm:^2.8.2, @protobuf-ts/grpcweb-transport@npm:^2.9.1":
   version: 2.11.1
   resolution: "@protobuf-ts/grpcweb-transport@npm:2.11.1"
   dependencies:
@@ -4679,7 +4728,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@scure/bip39@npm:^1.2.1":
+"@scure/bip39@npm:^1.1.0, @scure/bip39@npm:^1.2.1":
   version: 1.6.0
   resolution: "@scure/bip39@npm:1.6.0"
   dependencies:
@@ -8863,6 +8912,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"base-x@npm:^3.0.2":
+  version: 3.0.11
+  resolution: "base-x@npm:3.0.11"
+  dependencies:
+    safe-buffer: "npm:^5.0.1"
+  checksum: 10c0/4c5b8cd9cef285973b0460934be4fc890eedfd22a8aca527fac3527f041c5d1c912f7b9a6816f19e43e69dc7c29a5deabfa326bd3d6a57ee46af0ad46e3991d5
+  languageName: node
+  linkType: hard
+
 "base-x@npm:^4.0.0":
   version: 4.0.0
   resolution: "base-x@npm:4.0.0"
@@ -9337,12 +9395,32 @@ __metadata:
   languageName: node
   linkType: hard
 
+"bs58@npm:^4.0.0":
+  version: 4.0.1
+  resolution: "bs58@npm:4.0.1"
+  dependencies:
+    base-x: "npm:^3.0.2"
+  checksum: 10c0/613a1b1441e754279a0e3f44d1faeb8c8e838feef81e550efe174ff021dd2e08a4c9ae5805b52dfdde79f97b5c0918c78dd24a0eb726c4a94365f0984a0ffc65
+  languageName: node
+  linkType: hard
+
 "bs58@npm:^5.0.0":
   version: 5.0.0
   resolution: "bs58@npm:5.0.0"
   dependencies:
     base-x: "npm:^4.0.0"
   checksum: 10c0/0d1b05630b11db48039421b5975cb2636ae0a42c62f770eec257b2e5c7d94cb5f015f440785f3ec50870a6e9b1132b35bd0a17c7223655b22229f24b2a3491d1
+  languageName: node
+  linkType: hard
+
+"bs58check@npm:^2.1.2":
+  version: 2.1.2
+  resolution: "bs58check@npm:2.1.2"
+  dependencies:
+    bs58: "npm:^4.0.0"
+    create-hash: "npm:^1.1.0"
+    safe-buffer: "npm:^5.1.2"
+  checksum: 10c0/5d33f319f0d7abbe1db786f13f4256c62a076bc8d184965444cb62ca4206b2c92bee58c93bce57150ffbbbe00c48838ac02e6f384e0da8215cac219c0556baa9
   languageName: node
   linkType: hard
 
@@ -10653,6 +10731,7 @@ __metadata:
     "@babel/plugin-proposal-nullish-coalescing-operator": "npm:^7.12.13"
     "@babel/plugin-proposal-optional-chaining": "npm:^7.12.16"
     "@concordium/web-sdk": "npm:10.0.1"
+    "@concordium/web-sdk-v6": "npm:@concordium/web-sdk@^6.4.0"
     "@electron/notarize": "npm:^2.2.0"
     "@electron/rebuild": "npm:3.7.1"
     "@hot-loader/react-dom": "npm:^16.13.0"
@@ -11205,6 +11284,15 @@ __metadata:
     cross-env: src/bin/cross-env.js
     cross-env-shell: src/bin/cross-env-shell.js
   checksum: 10c0/f3765c25746c69fcca369655c442c6c886e54ccf3ab8c16847d5ad0e91e2f337d36eedc6599c1227904bf2a228d721e690324446876115bc8e7b32a866735ecf
+  languageName: node
+  linkType: hard
+
+"cross-fetch@npm:3.1.5":
+  version: 3.1.5
+  resolution: "cross-fetch@npm:3.1.5"
+  dependencies:
+    node-fetch: "npm:2.6.7"
+  checksum: 10c0/29b457f8df11b46b8388a53c947de80bfe04e6466a59c1628c9870b48505b90ec1d28a05b543a0247416a99f1cfe147d1efe373afdeb46a192334ba5fe91b871
   languageName: node
   linkType: hard
 
@@ -19866,6 +19954,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"node-fetch@npm:2.6.7":
+  version: 2.6.7
+  resolution: "node-fetch@npm:2.6.7"
+  dependencies:
+    whatwg-url: "npm:^5.0.0"
+  peerDependencies:
+    encoding: ^0.1.0
+  peerDependenciesMeta:
+    encoding:
+      optional: true
+  checksum: 10c0/fcae80f5ac52fbf5012f5e19df2bd3915e67d3b3ad51cb5942943df2238d32ba15890fecabd0e166876a9f98a581ab50f3f10eb942b09405c49ef8da36b826c7
+  languageName: node
+  linkType: hard
+
 "node-fetch@npm:^2.6.1":
   version: 2.6.1
   resolution: "node-fetch@npm:2.6.1"
@@ -26371,6 +26473,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tr46@npm:~0.0.3":
+  version: 0.0.3
+  resolution: "tr46@npm:0.0.3"
+  checksum: 10c0/047cb209a6b60c742f05c9d3ace8fa510bff609995c129a37ace03476a9b12db4dbf975e74600830ef0796e18882b2381fb5fb1f6b4f96b832c374de3ab91a11
+  languageName: node
+  linkType: hard
+
 "tree-kill@npm:^1.2.2":
   version: 1.2.2
   resolution: "tree-kill@npm:1.2.2"
@@ -27491,6 +27600,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"webidl-conversions@npm:^3.0.0":
+  version: 3.0.1
+  resolution: "webidl-conversions@npm:3.0.1"
+  checksum: 10c0/5612d5f3e54760a797052eb4927f0ddc01383550f542ccd33d5238cfd65aeed392a45ad38364970d0a0f4fea32e1f4d231b3d8dac4a3bdd385e5cf802ae097db
+  languageName: node
+  linkType: hard
+
 "webidl-conversions@npm:^7.0.0":
   version: 7.0.0
   resolution: "webidl-conversions@npm:7.0.0"
@@ -27816,6 +27932,16 @@ __metadata:
     tr46: "npm:^3.0.0"
     webidl-conversions: "npm:^7.0.0"
   checksum: 10c0/f7ec264976d7c725e0696fcaf9ebe056e14422eacbf92fdbb4462034609cba7d0c85ffa1aab05e9309d42969bcf04632ba5ed3f3882c516d7b093053315bf4c1
+  languageName: node
+  linkType: hard
+
+"whatwg-url@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "whatwg-url@npm:5.0.0"
+  dependencies:
+    tr46: "npm:~0.0.3"
+    webidl-conversions: "npm:^3.0.0"
+  checksum: 10c0/1588bed84d10b72d5eec1d0faa0722ba1962f1821e7539c535558fb5398d223b0c50d8acab950b8c488b4ba69043fd833cc2697056b167d8ad46fac3995a55d5
   languageName: node
   linkType: hard
 

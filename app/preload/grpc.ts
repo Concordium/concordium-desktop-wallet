@@ -3,29 +3,35 @@ import {
     AccountTransactionHeader,
     AccountTransactionSignature,
     BakerId,
-    CredentialDeploymentTransaction,
     UpdateInstruction,
     CredentialRegistrationId,
     AccountAddress,
     streamToList,
     Energy,
-    serializeCredentialDeploymentPayload,
-    TransactionExpiry,
     BlockHash,
     TransactionHash,
 } from '@concordium/web-sdk';
 import { TokenId } from '@concordium/web-sdk/plt';
+
+import {
+    ConcordiumGRPCClient as ConcordiumGRPCNodeClientv6,
+    CredentialDeploymentTransaction,
+} from '@concordium/web-sdk-v6';
+
+import { credentials as credentialsv6 } from '@grpc/grpc-js';
+
 import {
     ConcordiumGRPCNodeClient,
     credentials,
 } from '@concordium/web-sdk/nodejs';
 import type { Buffer } from 'buffer/';
-
+import { GrpcTransport } from '@protobuf-ts/grpc-transport';
 import { GRPC, ConsensusAndGlobalResult } from '~/preload/preloadTypes';
 import { stringify } from '~/utils/JSONHelper';
 
 const defaultDeadlineMs = 15000;
 let client: ConcordiumGRPCClient;
+let clientv6: ConcordiumGRPCNodeClientv6;
 
 function createConcordiumClient(
     address: string,
@@ -40,6 +46,21 @@ function createConcordiumClient(
         { timeout }
     );
 }
+function createConcordiumClientV6(
+    address: string,
+    port: number,
+    useSsl: boolean,
+    timeout: number
+) {
+    const grpcTransport = new GrpcTransport({
+        host: `${address}:${port}`,
+        channelCredentials: useSsl
+            ? credentialsv6.createSsl()
+            : credentialsv6.createInsecure(),
+        timeout,
+    });
+    return new ConcordiumGRPCNodeClientv6(grpcTransport);
+}
 
 export function setClientLocation(
     address: string,
@@ -47,6 +68,12 @@ export function setClientLocation(
     useSsl: boolean
 ) {
     client = createConcordiumClient(
+        address,
+        Number.parseInt(port, 10),
+        useSsl,
+        defaultDeadlineMs
+    );
+    clientv6 = createConcordiumClientV6(
         address,
         Number.parseInt(port, 10),
         useSsl,
@@ -120,11 +147,8 @@ const exposedMethods: GRPC = {
         transaction: CredentialDeploymentTransaction,
         signatures: string[]
     ) =>
-        client
-            .sendCredentialDeploymentTransaction(
-                serializeCredentialDeploymentPayload(signatures, transaction),
-                TransactionExpiry.futureMinutes(5)
-            )
+        clientv6
+            .sendCredentialDeploymentTransaction(transaction, signatures)
             .then(stringify),
     getCryptographicParameters: (blockHash: string) =>
         client
