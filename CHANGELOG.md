@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.9.1
+
+### Fixed
+
+- Unable to add a 2nd account in a DW
+- Auto update not working for Desktop wallet
 - Fix display of `new size of level 2 key set` which now accounts for removed keys correctly
 - Update the flow for signing authorizations updates with support for v2 authorizations
 
