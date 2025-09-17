@@ -11,34 +11,14 @@ import EventEmitter from 'events';
 import { usb } from 'usb';
 import { identifyUSBProductId, ledgerUSBVendorId } from '@ledgerhq/devices';
 import { Mutex } from 'async-mutex';
-import fs from 'fs';
-import path from 'path';
+import logger from '../logging';
 import ConcordiumLedgerClientMain from '../../features/ledger/ConcordiumLedgerClientMain';
 import { isConcordiumApp, isOutdated } from '../../components/ledger/util';
 import { LedgerSubscriptionAction } from '../../components/ledger/useLedger';
 import ledgerIpcCommands from '~/constants/ledgerIpcCommands.json';
 import { LedgerObserver } from './ledgerObserver';
 
-function logError(message: string, ...args: unknown[]) {
-    const logPath = path.join(__dirname, 'crash.log');
-    const timestamp = new Date().toISOString();
-    const details = args.map(a => {
-        if (a instanceof Error) {
-            return `${a.name}: ${a.message}\n${a.stack}`;
-        }
-        try {
-            return JSON.stringify(a);
-        } catch {
-            return String(a);
-        }
-    }).join(' ');
-    const fullMsg = `[${timestamp}] ERROR: ${message} ${details}\n`;
-    try {
-        fs.appendFileSync(logPath, fullMsg);
-    // eslint-disable-next-line no-empty
-    } catch (e) {}
 
-}
 
 function isDeviceLockedError(err: unknown): boolean {
     if (!err) return false;
@@ -52,18 +32,21 @@ function isDeviceLockedError(err: unknown): boolean {
     }
     return false;
 }
+
+let currentTransport: TransportNodeHid | null = null;
+
 /**
  * A convenience method for opening a transport by providing
  * an empty descriptor (as the descriptor is unused downstream).
  * @returns a promise with a {@link TransportNodeHid}
  */
-let currentTransport: TransportNodeHid | null = null;
+
 async function openTransport(): Promise<TransportNodeHid> {
     if (currentTransport) {
         try {
             await currentTransport.close();
         } catch (err) {
-            logError('openTransport: Error closing previous transport', err);
+            logger.error(err, 'openTransport: Error closing previous transport');
         }
         currentTransport = null;
     }
@@ -71,7 +54,7 @@ async function openTransport(): Promise<TransportNodeHid> {
         currentTransport = await TransportNodeHid.open('');
         return currentTransport;
     } catch (err) {
-        logError('openTransport: Error opening transport', err);
+    logger.error(err, 'openTransport: Error opening transport');
         throw err;
     }
 }
@@ -100,6 +83,17 @@ export default class LedgerObserverImpl implements LedgerObserver {
         return this.concordiumClient;
     }
 
+     /**
+     * Polls the Ledger device every 5 seconds to check if the Concordium app is open.
+     * If the app is found, it emits an action to the main window indicating whether
+     * the app is outdated or connected. It stops polling once the app is detected.
+     *
+     * @param mainWindow - The main window's EventEmitter to emit actions to the window.
+     * @param deviceName - An optional name of the device to include in the emitted action.
+     *
+     * The polling interval is cleared when the Concordium app is detected or if any transient errors occur.
+     */
+
     private pollForConcordiumApp(mainWindow: EventEmitter, deviceName?: string) {
         if (this.pollingInterval) {
             clearInterval(this.pollingInterval);
@@ -113,7 +107,7 @@ export default class LedgerObserverImpl implements LedgerObserver {
                         appAndVersion = await client.getAppAndVersion();
                     } catch (err) {
                         if (isDeviceLockedError(err)) {
-                            logError('pollForConcordiumApp: Device is locked or app not open.', err);
+                            logger.error(err, 'pollForConcordiumApp: Device is locked or app not open.');
                             return;
                         }
                         throw err;
@@ -133,7 +127,7 @@ export default class LedgerObserverImpl implements LedgerObserver {
                     }
                     mainWindow.emit(ledgerIpcCommands.listenChannel, action, deviceName);
                 } catch (err) {
-                    logError('pollForConcordiumApp: Error during polling for Concordium app on Ledger.', err);
+                        logger.error(err, 'pollForConcordiumApp: Error during polling for Concordium app on Ledger.');
                 }
             });
         }, 5000);
@@ -148,19 +142,19 @@ export default class LedgerObserverImpl implements LedgerObserver {
                 await openTransport();
                 await this.concordiumClient?.getAppAndVersion().catch((err) => {
                     if (isDeviceLockedError(err)) {
-                        logError('handleIfLedgerIsStillConnected: Device is locked or app not open.', err);
+                        logger.error(err, 'handleIfLedgerIsStillConnected: Device is locked or app not open.');
                         return;
                     }
-                    logError('handleIfLedgerIsStillConnected: getAppAndVersion failed', err);
+                    logger.error(err, 'handleIfLedgerIsStillConnected: getAppAndVersion failed');
                 });
                 const deviceModel = identifyUSBProductId(device.deviceDescriptor.idProduct);
                 this.updateLedgerState(mainWindow, deviceModel?.productName);
             } catch (err) {
                 if (isDeviceLockedError(err)) {
-                    logError('handleIfLedgerIsStillConnected: Device is locked or app not open.', err);
+                    logger.error(err, 'handleIfLedgerIsStillConnected: Device is locked or app not open.');
                     return;
                 }
-                logError('handleIfLedgerIsStillConnected: Error while checking if Ledger is still connected.', err);
+                logger.error(err, 'handleIfLedgerIsStillConnected: Error while checking if Ledger is still connected.');
             }
         });
     }
@@ -168,7 +162,12 @@ export default class LedgerObserverImpl implements LedgerObserver {
     async subscribeLedger(mainWindow: EventEmitter): Promise<void> {
         if (!this.ledgerSubscription) {
             this.ledgerSubscription = TransportNodeHid.listen(this.createLedgerObserver(mainWindow));
-
+            
+            // The TransportNodeHid.listen() does not always catch all the relevant
+            // USB events on Windows. This is specifically a problem when opening or
+            // closing the Concordium app on the Ledger as it fires an attach and a
+            // detach event at the same time. Therefore we add a raw USB listener as a backup
+            // that will ensure that we maintain an intact connection state.
             usb.on('detach', (event) => this.handleIfLedgerIsStillConnected(event, mainWindow));
         }
     }
@@ -183,13 +182,13 @@ export default class LedgerObserverImpl implements LedgerObserver {
                     await this.concordiumClient.getAppAndVersion();
                 } catch (err) {
                     if (isDeviceLockedError(err)) {
-                        logError('resetTransport: Device is locked or app not open.', err);
+                        logger.error(err, 'resetTransport: Device is locked or app not open.');
                         return;
                     }
-                    logError('resetTransport: Error while getting app and version.', err);
+                    logger.error(err, 'resetTransport: Error while getting app and version.');
                 }
             } catch (err) {
-                logError('resetTransport: Error while resetting transport.', err);
+                logger.error(err, 'resetTransport: Error while resetting transport.');
             }
         });
     }
@@ -202,7 +201,7 @@ export default class LedgerObserverImpl implements LedgerObserver {
                     this.concordiumClient = undefined;
                 }
             } catch (err) {
-                logError('closeTransport: Error closing concordiumClient transport', err);
+                logger.error(err, 'closeTransport: Error closing concordiumClient transport');
             }
         });
     }
@@ -217,10 +216,10 @@ export default class LedgerObserverImpl implements LedgerObserver {
                     appAndVersion = await this.concordiumClient.getAppAndVersion();
                 } catch (err) {
                     if (isDeviceLockedError(err)) {
-                        logError('updateLedgerState: Device is locked or app not open.', err);
+                        logger.error(err, 'updateLedgerState: Device is locked or app not open.');
                         return;
                     }
-                    logError('updateLedgerState: Error while getting app and version.', err);
+                    logger.error(err, 'updateLedgerState: Error while getting app and version.');
                     mainWindow.emit(
                         ledgerIpcCommands.listenChannel,
                         LedgerSubscriptionAction.RESET,
@@ -229,7 +228,7 @@ export default class LedgerObserverImpl implements LedgerObserver {
                     return;
                 }
             } catch (err) {
-                logError('updateLedgerState: Error while opening transport.', err);
+                logger.error(err, 'updateLedgerState: Error while opening transport.');
                 mainWindow.emit(
                     ledgerIpcCommands.listenChannel,
                     LedgerSubscriptionAction.RESET,
@@ -269,7 +268,7 @@ export default class LedgerObserverImpl implements LedgerObserver {
         const ledgerObserver: Observer<DescriptorEvent<string>> = {
             complete: () => {},
             error: (err?: unknown) => {
-                logError('createLedgerObserver: error called', err);
+                logger.error(err instanceof Error ? err : new Error(String(err)), 'createLedgerObserver: error called');
                 mainWindow.emit(
                     ledgerIpcCommands.listenChannel,
                     LedgerSubscriptionAction.ERROR_SUBSCRIPTION
@@ -283,7 +282,7 @@ export default class LedgerObserverImpl implements LedgerObserver {
                         await this.onRemove(mainWindow);
                     }
                 } catch (err) {
-                    logError('createLedgerObserver: Error in next handler', err);
+                    logger.error(err instanceof Error ? err : new Error(String(err)), 'createLedgerObserver: Error in next handler');
                 }
             },
         };
