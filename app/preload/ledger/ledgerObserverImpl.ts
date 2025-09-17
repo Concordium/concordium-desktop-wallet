@@ -35,10 +35,9 @@ function logError(message: string, ...args: unknown[]) {
     const fullMsg = `[${timestamp}] ERROR: ${message} ${details}\n`;
     try {
         fs.appendFileSync(logPath, fullMsg);
-    } catch (e) {
-        console.error(`[${timestamp}] Failed to write to crash.log`, e);
-    }
-    console.error(fullMsg);
+    // eslint-disable-next-line no-empty
+    } catch (e) {}
+
 }
 
 function isDeviceLockedError(err: unknown): boolean {
