@@ -122,19 +122,23 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libusb-1.0 libudev-dev rpm wget patchelf build-essential
 
-          # Install libssl1.1 manually on Ubuntu 22.04 and 24.04 if missing
-          if ! dpkg -s libssl1.1 >/dev/null 2>&1; then
-            echo "::group::Installing OpenSSL 1.1 manually"
-            wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
-            wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl-dev_1.1.1f-1ubuntu2.24_amd64.deb
-            sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
-            sudo dpkg -i libssl-dev_1.1.1f-1ubuntu2.24_amd64.deb
-            echo "::endgroup::"
-          fi
+          # Build and install OpenSSL 1.1.1w from source
+          OPENSSL_VERSION=1.1.1w
+          cd /tmp
+          wget https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1w/openssl-$OPENSSL_VERSION.tar.gz
+          tar -xzf openssl-$OPENSSL_VERSION.tar.gz
+          cd openssl-$OPENSSL_VERSION
+          ./config --prefix=/opt/openssl-1.1 --openssldir=/opt/openssl-1.1 shared
+          make -j$(nproc)
+          sudo make install_sw
 
-          # Install OpenSSL development files (static libs)
-          sudo apt-get update
-          sudo apt-get install -y libssl-dev
+          # Configure runtime and build paths
+          echo "/opt/openssl-1.1/lib" | sudo tee /etc/ld.so.conf.d/openssl-1.1.conf
+          sudo ldconfig
+
+          echo "OPENSSL_DIR=/opt/openssl-1.1" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=/opt/openssl-1.1/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=/opt/openssl-1.1/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
 
       - name: Install Node packages
         env:
@@ -210,7 +214,7 @@ jobs:
 
           # New environment variables for static OpenSSL
           OPENSSL_STATIC: "1"
-          OPENSSL_DIR: "/usr/lib/ssl" 
+          OPENSSL_DIR: "/opt/openssl-1.1"
           PKG_CONFIG_ALLOW_CROSS: "1"
         run: yarn package
 
