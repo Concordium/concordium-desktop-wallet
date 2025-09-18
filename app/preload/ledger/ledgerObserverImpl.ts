@@ -18,8 +18,6 @@ import { LedgerSubscriptionAction } from '../../components/ledger/useLedger';
 import ledgerIpcCommands from '~/constants/ledgerIpcCommands.json';
 import { LedgerObserver } from './ledgerObserver';
 
-
-
 function isDeviceLockedError(err: unknown): boolean {
     if (!err) return false;
     if (err instanceof Error) {
@@ -40,7 +38,6 @@ let currentTransport: TransportNodeHid | null = null;
  * an empty descriptor (as the descriptor is unused downstream).
  * @returns a promise with a {@link TransportNodeHid}
  */
-
 async function openTransport(): Promise<TransportNodeHid> {
     if (currentTransport) {
         try {
