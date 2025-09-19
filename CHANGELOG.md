@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.9.2
+
+### Fixed
+
+- Resolve setup issue in Desktop Wallet v1.7.3 on Ubuntu
+- Application screen gets blank when we connect with Ledger
+
 ## 1.9.1
 
 ### Fixed
