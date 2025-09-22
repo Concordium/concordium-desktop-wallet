@@ -92,7 +92,9 @@
                 "AppImage"
             ],
             "category": "Development",
-            "executableArgs": ["--no-sandbox"]
+            "executableArgs": [
+                "--no-sandbox"
+            ]
         },
         "mac": {
             "artifactName": "${name}-${version}.${ext}",
@@ -168,7 +170,6 @@
         "@typescript-eslint/eslint-plugin": "^3.6.1",
         "@typescript-eslint/parser": "^3.6.1",
         "@wasm-tool/wasm-pack-plugin": "^1.3.1",
-        "babel-jest": "^30.0.5",
         "browserslist-config-erb": "^0.0.1",
         "buffer": "^6.0.3",
         "chalk": "^4.1.0",
@@ -238,7 +239,7 @@
         "yargs": "^17.1.1"
     },
     "dependencies": {
-        "@concordium/web-sdk": "10.0.1",
+        "@concordium/web-sdk": "10.0.2",
         "@concordium/web-sdk-v6": "npm:@concordium/web-sdk@^6.4.0",
         "@hot-loader/react-dom": "^16.13.0",
         "@ledgerhq/devices": "^8.2.1",
