@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- Simplify PLT functionality tests as the functionality is added to the UMD release
+
 ## 1.9.2
 
 ### Fixed

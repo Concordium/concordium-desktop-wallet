@@ -18,16 +18,14 @@ import {
     ReturnValue,
     SequenceNumber,
     Timestamp,
-    TransactionExpiry,
-    TransactionHash,
-} from '@concordium/web-sdk';
-import {
     TokenAmount,
     TokenHolder,
     TokenId,
     TokenMetadataUrl,
     TokenModuleReference,
-} from '@concordium/web-sdk/plt';
+    TransactionExpiry,
+    TransactionHash,
+} from '@concordium/web-sdk';
 
 const types: Record<any, string> = {
     BigInt: 'bigint',
