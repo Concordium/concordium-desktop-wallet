@@ -2,11 +2,17 @@
 
 ## Unreleased
 
-### Changed
+## 1.9.3
 
-- Simplify PLT functionality tests as the functionality is added to the UMD release
+### Fixed
+
+- Fix Desktop wallet losses connection after doing single transaction
 
 ## 1.9.2
+
+### Added
+
+- Simplify PLT functionality tests as the functionality is added to the UMD release
 
 ### Fixed
 
