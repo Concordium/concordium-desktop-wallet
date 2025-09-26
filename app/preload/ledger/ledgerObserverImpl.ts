@@ -195,7 +195,6 @@ export default class LedgerObserverImpl implements LedgerObserver {
             try {
                 if (this.concordiumClient) {
                     this.concordiumClient.closeTransport();
-                    this.concordiumClient = undefined;
                 }
             } catch (err) {
                 logger.error(err, 'closeTransport: Error closing concordiumClient transport');
