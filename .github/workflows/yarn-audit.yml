@@ -34,6 +34,11 @@ jobs:
           cache: yarn
           cache-dependency-path: ${{ github.workspace }}/yarn.lock
 
+      - name: Install Linux USB dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libusb-1.0-0-dev libudev-dev
+
       - name: Install Dependencies
         run: yarn install --immutable
 
