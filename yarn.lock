@@ -2992,6 +2992,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.9.2":
+  version: 7.28.6
+  resolution: "@babel/runtime@npm:7.28.6"
+  checksum: 10c0/358cf2429992ac1c466df1a21c1601d595c46930a13c1d4662fde908d44ee78ec3c183aaff513ecb01ef8c55c3624afe0309eeeb34715672dbfadb7feedb2c0d
+  languageName: node
+  linkType: hard
+
 "@babel/template@npm:^7.12.13, @babel/template@npm:^7.12.7, @babel/template@npm:^7.3.3":
   version: 7.12.13
   resolution: "@babel/template@npm:7.12.13"
@@ -4611,14 +4618,22 @@ __metadata:
   linkType: hard
 
 "@reduxjs/toolkit@npm:^1.4.0":
-  version: 1.5.0
-  resolution: "@reduxjs/toolkit@npm:1.5.0"
+  version: 1.9.7
+  resolution: "@reduxjs/toolkit@npm:1.9.7"
   dependencies:
-    immer: "npm:^8.0.0"
-    redux: "npm:^4.0.0"
-    redux-thunk: "npm:^2.3.0"
-    reselect: "npm:^4.0.0"
-  checksum: 10c0/fbfe8ac73f8850dc2ff688387d879d65c5e9a05de8f263901676516ef975d7d9fcc020f13761c367ec031827f7e902082d17c31cf869b65b0ccaa89b976cd87b
+    immer: "npm:^9.0.21"
+    redux: "npm:^4.2.1"
+    redux-thunk: "npm:^2.4.2"
+    reselect: "npm:^4.1.8"
+  peerDependencies:
+    react: ^16.9.0 || ^17.0.0 || ^18
+    react-redux: ^7.2.1 || ^8.0.2
+  peerDependenciesMeta:
+    react:
+      optional: true
+    react-redux:
+      optional: true
+  checksum: 10c0/fa0aa4b7c6973ac87ce0ac7e45faa02c73b66c4ee0bc950d178494539a42a1bb908d109297102458b7ea14d5e7dae356e7a7ce9a1b9849b0e8451e6dd70fca9c
   languageName: node
   linkType: hard
 
@@ -5863,17 +5878,17 @@ __metadata:
   linkType: hard
 
 "@teamsupercell/typings-for-css-modules-loader@npm:^2.4.0":
-  version: 2.4.0
-  resolution: "@teamsupercell/typings-for-css-modules-loader@npm:2.4.0"
+  version: 2.5.2
+  resolution: "@teamsupercell/typings-for-css-modules-loader@npm:2.5.2"
   dependencies:
     camelcase: "npm:^5.3.1"
-    loader-utils: "npm:1.2.3"
+    loader-utils: "npm:^1.4.2"
     prettier: "npm:*"
     schema-utils: "npm:^2.0.1"
   dependenciesMeta:
     prettier:
       optional: true
-  checksum: 10c0/b6355101e6aaf538c036fd1f822f7e5cfad80d6d2bea95908ef59db4e548c777807f2a978d0db0714d832e79eb5a064e6e5bb73fed43e93573039c35bc72dae8
+  checksum: 10c0/c99763448172b4100b8f4e872d9eeb18e17fc5c33a1fe89707119759425e6e77d4b0bff38abff74a38919bbce0e8517af2d3e7d722c8673212d78c31cfffcb15
   languageName: node
   linkType: hard
 
@@ -12674,13 +12689,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"emojis-list@npm:^2.0.0":
-  version: 2.1.0
-  resolution: "emojis-list@npm:2.1.0"
-  checksum: 10c0/bbb941223bfb3e38054cb52ed1b3098a8dac0a90fdd2699eb8a3af3b2172cdc4af0932e05c3edd52e814997c8f45cf1d7f5e86e9ecdcd4e2390a0f27e6914db5
-  languageName: node
-  linkType: hard
-
 "emojis-list@npm:^3.0.0":
   version: 3.0.0
   resolution: "emojis-list@npm:3.0.0"
@@ -16057,10 +16065,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immer@npm:^8.0.0":
-  version: 8.0.4
-  resolution: "immer@npm:8.0.4"
-  checksum: 10c0/c02e9bf6cff1db8c51578663878403beaf2eafaf5ad02fac344dd82336578de948ecf609fd67665d6fe8bf115745866fb8b66f7d6348273cf8b9cc134ac71bb6
+"immer@npm:^9.0.21":
+  version: 9.0.21
+  resolution: "immer@npm:9.0.21"
+  checksum: 10c0/03ea3ed5d4d72e8bd428df4a38ad7e483ea8308e9a113d3b42e0ea2cc0cc38340eb0a6aca69592abbbf047c685dbda04e3d34bf2ff438ab57339ed0a34cc0a05
   languageName: node
   linkType: hard
 
@@ -18361,17 +18369,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loader-utils@npm:1.2.3":
-  version: 1.2.3
-  resolution: "loader-utils@npm:1.2.3"
-  dependencies:
-    big.js: "npm:^5.2.2"
-    emojis-list: "npm:^2.0.0"
-    json5: "npm:^1.0.1"
-  checksum: 10c0/b4242988adf5d50e7a3dd7b2f0c7b6534ea580a27ae4f8ba226aea3219d8a72ffb6d1a9b200fc8e0435e38a22bce740b094f57be8d0142a3f1a75e610159235b
-  languageName: node
-  linkType: hard
-
 "loader-utils@npm:2.0.0":
   version: 2.0.0
   resolution: "loader-utils@npm:2.0.0"
@@ -18383,7 +18380,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loader-utils@npm:^1.1.0, loader-utils@npm:^1.2.3, loader-utils@npm:^1.4.0":
+"loader-utils@npm:2.0.3":
+  version: 2.0.3
+  resolution: "loader-utils@npm:2.0.3"
+  dependencies:
+    big.js: "npm:^5.2.2"
+    emojis-list: "npm:^3.0.0"
+    json5: "npm:^2.1.2"
+  checksum: 10c0/6a674996d134ebc267b0bf4b846e99b4b0d53cebc15ecc971ef2ac5977570aae3e6b7d61f4809e135dca76f5e0b29084856e8723b1599762bffd4301e4a28b95
+  languageName: node
+  linkType: hard
+
+"loader-utils@npm:^1.1.0, loader-utils@npm:^1.2.3, loader-utils@npm:^1.4.0, loader-utils@npm:^1.4.2":
   version: 1.4.2
   resolution: "loader-utils@npm:1.4.2"
   dependencies:
@@ -23231,6 +23239,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"redux-thunk@npm:^2.4.2":
+  version: 2.4.2
+  resolution: "redux-thunk@npm:2.4.2"
+  peerDependencies:
+    redux: ^4
+  checksum: 10c0/e202d6ef7dfa7df08ed24cb221aa89d6c84dbaa7d65fe90dbd8e826d0c10d801f48388f9a7598a4fd970ecbc93d335014570a61ca7bc8bf569eab5de77b31a3c
+  languageName: node
+  linkType: hard
+
 "redux@npm:^4.0.0, redux@npm:^4.0.5":
   version: 4.0.5
   resolution: "redux@npm:4.0.5"
@@ -23238,6 +23255,15 @@ __metadata:
     loose-envify: "npm:^1.4.0"
     symbol-observable: "npm:^1.2.0"
   checksum: 10c0/4978859bf790a74d8e7ee9ba528a171b3d8e565df28c6cfa8c659540bb40f392164d43bfd3c0000761a65b68248c00dfb24f9f810fcd2b5389d65e89959cc416
+  languageName: node
+  linkType: hard
+
+"redux@npm:^4.2.1":
+  version: 4.2.1
+  resolution: "redux@npm:4.2.1"
+  dependencies:
+    "@babel/runtime": "npm:^7.9.2"
+  checksum: 10c0/136d98b3d5dbed1cd6279c8c18a6a74c416db98b8a432a46836bdd668475de6279a2d4fd9d1363f63904e00f0678a8a3e7fa532c897163340baf1e71bb42c742
   languageName: node
   linkType: hard
 
@@ -23557,6 +23583,13 @@ __metadata:
   version: 4.0.0
   resolution: "reselect@npm:4.0.0"
   checksum: 10c0/b5957ad2a8fa1ad0c6510da6bd199511eee8bb0ea9278ca67a6f92d8b968ca632b46955a4332de19cc983325123c5cdc88e5887c8fc5b0d4b5938d1807cc3882
+  languageName: node
+  linkType: hard
+
+"reselect@npm:^4.1.8":
+  version: 4.1.8
+  resolution: "reselect@npm:4.1.8"
+  checksum: 10c0/06a305a504affcbb67dd0561ddc8306b35796199c7e15b38934c80606938a021eadcf68cfd58e7bb5e17786601c37602a3362a4665c7bf0a96c1041ceee9d0b7
   languageName: node
   linkType: hard
 
