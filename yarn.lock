@@ -22542,8 +22542,8 @@ __metadata:
   linkType: hard
 
 "react-dev-utils@npm:^11.0.3":
-  version: 11.0.3
-  resolution: "react-dev-utils@npm:11.0.3"
+  version: 11.0.4
+  resolution: "react-dev-utils@npm:11.0.4"
   dependencies:
     "@babel/code-frame": "npm:7.10.4"
     address: "npm:1.1.2"
@@ -22569,7 +22569,7 @@ __metadata:
     shell-quote: "npm:1.7.2"
     strip-ansi: "npm:6.0.0"
     text-table: "npm:0.2.0"
-  checksum: 10c0/d2b42c0dae864c2cf91d3d1b0bdc7e281c03a242eef33f65f4a9c8626dc748c781a1c361509fa64099415a353dfb05c523504bc1f96627ac4985175cb9bc0328
+  checksum: 10c0/3982f6a35035627b4465c8afd2f6db6a571b9e7b09c7d2f2e517de9cd48bb76778f4c692cdc99a26d2961d7dac371553fd7815ec0d2ec281927feeba60ce8a70
   languageName: node
   linkType: hard
 
@@ -24442,10 +24442,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"shell-quote@npm:1.7.2":
-  version: 1.7.2
-  resolution: "shell-quote@npm:1.7.2"
-  checksum: 10c0/656aefdcdc394560ca091140a58b95e97f43d5e14bb60ff4a92556ca48841e49af6e837441e887c7890c7a86ae8542960c90e460a86799b68c53271784909edb
+"shell-quote@npm:^1.8.1":
+  version: 1.8.3
+  resolution: "shell-quote@npm:1.8.3"
+  checksum: 10c0/bee87c34e1e986cfb4c30846b8e6327d18874f10b535699866f368ade11ea4ee45433d97bf5eada22c4320c27df79c3a6a7eb1bf3ecfc47f2c997d9e5e2672fd
   languageName: node
   linkType: hard
 
