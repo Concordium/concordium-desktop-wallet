@@ -16048,10 +16048,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immer@npm:8.0.1":
-  version: 8.0.1
-  resolution: "immer@npm:8.0.1"
-  checksum: 10c0/5bda1b1e382b08e5c88bf84b710050d20b87455cc52b90b00ae2208932132bea6d780e05ea1cf73757214b7916a3b1f8ce21702e7ef40d90d187c896bcadb43e
+"immer@npm:9.0.6":
+  version: 9.0.6
+  resolution: "immer@npm:9.0.6"
+  checksum: 10c0/63aa88ad13a0ff360bc78aa442d9550a25fe3223c00e8239974509af2d68a8e68b63cbacb3c0772c2e88c62755fddd0039f6c913345d7a7b43cf5bb60376f2a4
   languageName: node
   linkType: hard
 
