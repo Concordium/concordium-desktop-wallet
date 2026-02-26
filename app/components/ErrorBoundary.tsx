@@ -1,5 +1,5 @@
 /* eslint-disable react/destructuring-assignment, react/static-property-placement */
-import { Component, ErrorInfo, PropsWithChildren } from 'react';
+import React, { Component, ErrorInfo, PropsWithChildren } from 'react';
 
 interface ErrorBoundaryState {
     hasError: boolean;
@@ -14,7 +14,35 @@ export default class ErrorBoundary extends Component<
     ErrorBoundaryState
 > {
     static defaultProps: ErrorBoundaryProps = {
-        fallback: null,
+        // Show a recovery UI instead of a blank screen.
+        fallback: (
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '100vh',
+                    fontFamily: 'sans-serif',
+                    color: '#333',
+                }}
+            >
+                <h2>Something went wrong</h2>
+                <p>An unexpected error occurred. Please reload the app.</p>
+                <button
+                    type="button"
+                    onClick={() => window.location.reload()}
+                    style={{
+                        marginTop: '16px',
+                        padding: '8px 24px',
+                        fontSize: '14px',
+                        cursor: 'pointer',
+                    }}
+                >
+                    Reload
+                </button>
+            </div>
+        ),
     };
 
     constructor(props: ErrorBoundaryProps) {
