@@ -80,7 +80,15 @@ export default class LedgerObserverImpl implements LedgerObserver {
         return this.concordiumClient;
     }
 
-     /**
+    /** Stop any in-progress polling. Safe to call even if no poll is running. */
+    stopPolling() {
+        if (this.pollingInterval !== null) {
+            clearInterval(this.pollingInterval);
+            this.pollingInterval = null;
+        }
+    }
+
+    /**
      * Polls the Ledger device every 5 seconds to check if the Concordium app is open.
      * If the app is found, it emits an action to the main window indicating whether
      * the app is outdated or connected. It stops polling once the app is detected.
@@ -88,13 +96,12 @@ export default class LedgerObserverImpl implements LedgerObserver {
      * @param mainWindow - The main window's EventEmitter to emit actions to the window.
      * @param deviceName - An optional name of the device to include in the emitted action.
      *
-     * The polling interval is cleared when the Concordium app is detected or if any transient errors occur.
+     * The polling interval is cleared when the Concordium app is detected or on any error.
      */
-
     private pollForConcordiumApp(mainWindow: EventEmitter, deviceName?: string) {
-        if (this.pollingInterval) {
-            clearInterval(this.pollingInterval);
-        }
+        // Always clear any previous interval before starting a new one so we
+        // never accumulate multiple concurrent polling loops.
+        this.stopPolling();
         this.pollingInterval = setInterval(async () => {
             await LedgerObserverImpl.transportMutex.runExclusive(async () => {
                 try {
@@ -134,26 +141,14 @@ export default class LedgerObserverImpl implements LedgerObserver {
         if (device.deviceDescriptor.idVendor !== ledgerUSBVendorId) {
             return;
         }
-        LedgerObserverImpl.transportMutex.runExclusive(async () => {
-            try {
-                await openTransport();
-                await this.concordiumClient?.getAppAndVersion().catch((err) => {
-                    if (isDeviceLockedError(err)) {
-                        logger.error(err, 'handleIfLedgerIsStillConnected: Device is locked or app not open.');
-                        return;
-                    }
-                    logger.error(err, 'handleIfLedgerIsStillConnected: getAppAndVersion failed');
-                });
-                const deviceModel = identifyUSBProductId(device.deviceDescriptor.idProduct);
-                this.updateLedgerState(mainWindow, deviceModel?.productName);
-            } catch (err) {
-                if (isDeviceLockedError(err)) {
-                    logger.error(err, 'handleIfLedgerIsStillConnected: Device is locked or app not open.');
-                    return;
-                }
-                logger.error(err, 'handleIfLedgerIsStillConnected: Error while checking if Ledger is still connected.');
-            }
-        });
+        // Do NOT call this.updateLedgerState() here — that method also tries to
+        // acquire transportMutex, which would deadlock since we are already
+        // inside a runExclusive callback. Instead we schedule a state refresh
+        // outside of any mutex hold by deferring to the next event-loop tick.
+        const deviceName = identifyUSBProductId(
+            device.deviceDescriptor.idProduct
+        )?.productName;
+        setImmediate(() => this.updateLedgerState(mainWindow, deviceName));
     }
 
     async subscribeLedger(mainWindow: EventEmitter): Promise<void> {
@@ -191,6 +186,9 @@ export default class LedgerObserverImpl implements LedgerObserver {
     }
 
     async closeTransport(): Promise<void> {
+        // Stop polling before closing so the interval doesn't fire against a
+        // closed transport and produce spurious errors.
+        this.stopPolling();
         await LedgerObserverImpl.transportMutex.runExclusive(async () => {
             try {
                 if (this.concordiumClient) {
@@ -233,15 +231,24 @@ export default class LedgerObserverImpl implements LedgerObserver {
                 return;
             }
             if (appAndVersion && !isConcordiumApp(appAndVersion)) {
+                // A different app is open on the device. Tell the UI to show
+                // "Open the Concordium app" (PENDING), then start polling until
+                // the user switches apps. Previously this branch returned without
+                // emitting anything, so the UI was stuck showing the last status.
+                mainWindow.emit(
+                    ledgerIpcCommands.listenChannel,
+                    LedgerSubscriptionAction.PENDING,
+                    deviceName
+                );
                 this.pollForConcordiumApp(mainWindow, deviceName);
                 return;
             }
             let action;
             if (!appAndVersion) {
                 action = LedgerSubscriptionAction.RESET;
-            } else if (!isConcordiumApp(appAndVersion)) {
-                action = LedgerSubscriptionAction.PENDING;
             } else if (isOutdated(appAndVersion)) {
+                // Note: the !isConcordiumApp branch is fully handled above, so
+                // this else-if is only reached when isConcordiumApp is true.
                 action = LedgerSubscriptionAction.OUTDATED;
             } else {
                 action = LedgerSubscriptionAction.CONNECTED_SUBSCRIPTION;
@@ -256,6 +263,8 @@ export default class LedgerObserverImpl implements LedgerObserver {
     }
 
     private async onRemove(mainWindow: EventEmitter) {
+        // closeTransport already calls stopPolling, so polling is cleaned up
+        // before we emit RESET to the renderer.
         await this.closeTransport();
         mainWindow.emit(ledgerIpcCommands.listenChannel, LedgerSubscriptionAction.RESET);
     }
