@@ -1,0 +1,20 @@
+{
+  "name": "desktop_wallet",
+  "type": "module",
+  "collaborators": [
+    "Concordium AG <contact@concordium.com>"
+  ],
+  "version": "0.1.0",
+  "files": [
+    "desktop_wallet_bg.wasm",
+    "desktop_wallet.js",
+    "desktop_wallet_bg.js",
+    "desktop_wallet.d.ts"
+  ],
+  "main": "desktop_wallet.js",
+  "types": "desktop_wallet.d.ts",
+  "sideEffects": [
+    "./desktop_wallet.js",
+    "./snippets/*"
+  ]
+}
