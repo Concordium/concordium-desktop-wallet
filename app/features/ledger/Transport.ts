@@ -83,17 +83,24 @@ export class TransportImpl implements Transport {
         timeoutMs = LEDGER_SEND_TIMEOUT_MS
     ): Promise<BrowserBuffer> {
         let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+        let timeoutSettled = false;
+        // eslint-disable-next-line
         const timeout = new Promise<never>((_, reject) => {
-            timeoutHandle = setTimeout(
-                () => reject(new LedgerTimeoutError(timeoutMs)),
-                timeoutMs
-            );
+            timeoutHandle = setTimeout(() => {
+                if (!timeoutSettled) {
+                    reject(new LedgerTimeoutError(timeoutMs));
+                }
+            }, timeoutMs);
         });
         try {
             const result = await Promise.race([
                 this.send(cla, ins, p1, p2, data),
                 timeout,
             ]);
+            timeoutSettled = true;
+            if (timeoutHandle !== undefined) {
+                clearTimeout(timeoutHandle);
+            }
             return result;
         } finally {
             if (timeoutHandle !== undefined) {

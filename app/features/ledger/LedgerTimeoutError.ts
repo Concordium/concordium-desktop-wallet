@@ -10,7 +10,9 @@ export default class LedgerTimeoutError extends Error {
 
     constructor(timeoutMs: number) {
         super(
-            `Ledger device did not respond within ${timeoutMs / 1000} seconds. ` +
+            `Ledger device did not respond within ${
+                timeoutMs / 1000
+            } seconds. ` +
                 `Please check that the device is connected and the Concordium app is open.`
         );
     }

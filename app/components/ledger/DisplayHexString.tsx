@@ -21,7 +21,7 @@ export default function DisplayHexString({
                     className={clsx(
                         (i + 1) % 3 === 0 ? 'm0 mB5' : 'm0' // matches display on ledger nanos+
                     )}
-                    key={`${i}-${text}`}
+                    key={text}
                 >
                     {text}
                 </div>
