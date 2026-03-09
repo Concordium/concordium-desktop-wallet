@@ -1,6 +1,10 @@
 import type HWTransport from '@ledgerhq/hw-transport';
 import { Buffer as BrowserBuffer } from 'buffer/';
 import ClosedWhileSendingError from './ClosedWhileSendingError';
+import LedgerTimeoutError from './LedgerTimeoutError';
+
+/** Default time to wait for a single APDU response before giving up. */
+export const LEDGER_SEND_TIMEOUT_MS = 30_000;
 
 export type Transport = {
     close: () => Promise<void>;
@@ -26,6 +30,9 @@ export class TransportImpl implements Transport {
 
     async close() {
         this.closed = true;
+        // Actually release the hardware HID handle so subsequent openTransport()
+        // calls from the observer don't race with a still-open descriptor.
+        await this.transport.close();
     }
 
     async send(
@@ -58,6 +65,46 @@ export class TransportImpl implements Transport {
                 throw new ClosedWhileSendingError();
             } else {
                 throw e;
+            }
+        }
+    }
+
+    /**
+     * Wraps {@link send} with a hard timeout. Throws {@link LedgerTimeoutError}
+     * if the device does not respond within {@link timeoutMs} milliseconds.
+     * This prevents the app from hanging indefinitely on unresponsive devices.
+     */
+    async sendWithTimeout(
+        cla: number,
+        ins: number,
+        p1: number,
+        p2: number,
+        data?: BrowserBuffer,
+        timeoutMs = LEDGER_SEND_TIMEOUT_MS
+    ): Promise<BrowserBuffer> {
+        let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+        let timeoutSettled = false;
+        // eslint-disable-next-line
+        const timeout = new Promise<never>((_, reject) => {
+            timeoutHandle = setTimeout(() => {
+                if (!timeoutSettled) {
+                    reject(new LedgerTimeoutError(timeoutMs));
+                }
+            }, timeoutMs);
+        });
+        try {
+            const result = await Promise.race([
+                this.send(cla, ins, p1, p2, data),
+                timeout,
+            ]);
+            timeoutSettled = true;
+            if (timeoutHandle !== undefined) {
+                clearTimeout(timeoutHandle);
+            }
+            return result;
+        } finally {
+            if (timeoutHandle !== undefined) {
+                clearTimeout(timeoutHandle);
             }
         }
     }

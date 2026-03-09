@@ -28,7 +28,14 @@ export default function CopiableIdenticon({ data, setScreenshot }: Props) {
     // the first time.
     useEffect(() => {
         if (!image) {
-            takeScreenshot(ref.current);
+            Promise.resolve()
+                .then(() => takeScreenshot(ref.current))
+                .catch((err) => {
+                    // html2canvas can fail in Electron dev mode due to missing
+                    // CSS resources — treat as non-fatal so the app doesn't crash.
+                    // eslint-disable-next-line no-console
+                    console.warn('CopiableIdenticon: screenshot failed', err);
+                });
         } else if (setScreenshot) {
             setScreenshot(image);
         }

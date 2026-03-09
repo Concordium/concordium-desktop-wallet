@@ -182,11 +182,21 @@ const ledgerReducer: Reducer<LedgerReducerState, LedgerAction> = (
                 text: a.message || getStatusMessage(LedgerStatusType.ERROR),
             };
         case LedgerActionType.FINISHED:
-            return {
-                ...s,
-                status: LedgerStatusType.CONNECTED,
-                text: getStatusMessage(LedgerStatusType.CONNECTED, deviceName),
-            };
+            // Only restore to CONNECTED when we were actually waiting for user
+            // input on the device. If the prior status was anything else
+            // (DISCONNECTED, ERROR, LOADING) we must not claim the device is
+            // connected — it may not be.
+            if (s.status === LedgerStatusType.AWAITING_USER_INPUT) {
+                return {
+                    ...s,
+                    status: LedgerStatusType.CONNECTED,
+                    text: getStatusMessage(
+                        LedgerStatusType.CONNECTED,
+                        deviceName
+                    ),
+                };
+            }
+            return s;
         case LedgerActionType.OUTDATED:
             return {
                 ...s,
@@ -194,14 +204,13 @@ const ledgerReducer: Reducer<LedgerReducerState, LedgerAction> = (
                 text: getStatusMessage(LedgerStatusType.OUTDATED, deviceName),
             };
         case LedgerActionType.CLEANUP: {
-            const status =
-                s.status === LedgerStatusType.ERROR
-                    ? LedgerStatusType.CONNECTED
-                    : s.status;
+            // Refresh the status text for the current status without changing
+            // the status itself. The previous code silently promoted ERROR →
+            // CONNECTED on unmount, which caused the UI to show "ready" when
+            // no device was connected.
             return {
                 ...s,
-                status,
-                text: getStatusMessage(status, deviceName),
+                text: getStatusMessage(s.status, deviceName),
             };
         }
         default:

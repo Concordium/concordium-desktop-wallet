@@ -3,7 +3,6 @@ import { useEffect, useCallback, useReducer, Dispatch, useState } from 'react';
 import { singletonHook } from 'react-singleton-hook';
 import getErrorDescription from '~/features/ledger/ErrorCodes';
 import ledgerReducer, {
-    cleanupAction,
     connectedAction,
     errorAction,
     finishedAction,
@@ -16,6 +15,7 @@ import ledgerReducer, {
 } from './ledgerReducer';
 import { LedgerStatusType, LedgerSubmitHandler, LedgerCallback } from './util';
 import { instanceOfClosedWhileSendingError } from '~/features/ledger/ClosedWhileSendingError';
+import { instanceOfLedgerTimeoutError } from '~/features/ledger/LedgerTimeoutError';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import ledgerIpcCommands from '~/constants/ledgerIpcCommands.json';
 import { noOp } from '~/utils/basicHelpers';
@@ -25,7 +25,7 @@ import {
     isInvalidChannelError,
 } from '~/features/ledger/TransportError';
 
-const { CONNECTED, ERROR, OPEN_APP, AWAITING_USER_INPUT } = LedgerStatusType;
+const { CONNECTED, OPEN_APP, AWAITING_USER_INPUT } = LedgerStatusType;
 
 export enum LedgerSubscriptionAction {
     CONNECTED_SUBSCRIPTION,
@@ -98,12 +98,22 @@ function useLedger(): {
             window.ledger
                 .subscribe()
                 .then(() => setSubscribed(true))
-                .catch(() => {});
+                .catch((e: unknown) => {
+                    // Surface subscription errors so the user knows why the
+                    // device is not detected (driver issues, permissions, etc.)
+                    dispatch(
+                        errorAction(
+                            `Failed to subscribe to Ledger device: ${e}`
+                        )
+                    );
+                });
         }
     }, [subscribed]);
 
     return {
-        isReady: (status === CONNECTED || status === ERROR) && Boolean(client),
+        // Only CONNECTED (not ERROR) means the device is usable. Allowing
+        // ERROR here was bug #3: the submit handler could fire on a broken transport.
+        isReady: status === CONNECTED && Boolean(client),
         status,
         statusText: text,
         dispatch,
@@ -135,14 +145,10 @@ export default function ExternalHook(
 } {
     const { isReady, status, statusText, client, dispatch } = hook();
 
-    useEffect(() => {
-        return function cleanup() {
-            if (client) {
-                window.ledger.closeTransport();
-                dispatch(cleanupAction());
-            }
-        };
-    }, [client, dispatch]);
+    // No useEffect cleanup here — transport and singleton state are left intact
+    // so the next signing screen finds the device ready immediately.
+    // The main-process subscription observer handles all state transitions via
+    // USB events and polling; no manual cleanup is needed from the renderer.
 
     const submitHandler: LedgerSubmitHandler = useCallback(async () => {
         dispatch(pendingAction(AWAITING_USER_INPUT));
@@ -156,6 +162,8 @@ export default function ExternalHook(
             dispatch(finishedAction());
         } catch (e) {
             if (instanceOfClosedWhileSendingError(e)) {
+                // Device was unplugged mid-operation — treat as graceful finish;
+                // the observer will emit a RESET/DISCONNECT event separately.
                 dispatch(finishedAction());
             } else if (
                 instanceOfTransportError(e) &&
@@ -165,6 +173,17 @@ export default function ExternalHook(
                 const errorMessage =
                     'Invalid channel. Please close any other application attempting to connect to the Ledger and try again.';
                 dispatch(errorAction(errorMessage));
+            } else if (instanceOfLedgerTimeoutError(e)) {
+                // Device stopped responding — surface the timeout message directly.
+                dispatch(errorAction((e as Error).message));
+            } else if (
+                (e as Error).name === 'DisconnectedDevice' ||
+                (e as Error).name === 'DisconnectedDeviceDuringOperation'
+            ) {
+                // Device was unplugged or the app was exited mid-signing.
+                // Treat gracefully like ClosedWhileSendingError — the subscription
+                // observer will emit RESET/DISCONNECT to update status separately.
+                dispatch(finishedAction());
             } else {
                 let errorMessage;
                 if (instanceOfTransportStatusError(e)) {

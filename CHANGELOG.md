@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.9.4
+
+### Fixed
+
+- Fix several timeout based hangs (white screen)
+
 ## 1.9.3
 
 ### Fixed
