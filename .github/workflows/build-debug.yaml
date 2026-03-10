@@ -21,6 +21,7 @@ on:
           - windows
           - linux
           - macos-intel
+          - macos-arm64
 
 env:
   WASM-PACK_VERSION: "v0.13.1"
@@ -41,7 +42,10 @@ jobs:
             runner: windows-2022
             shell: powershell
           - id: macos-intel
-            runner: macos-13
+            runner: macos-14
+            shell: bash
+          - id: macos-arm64
+            runner: macos-14-arm64
             shell: bash
     runs-on: ${{ matrix.platform.runner }}
     defaults:
