@@ -70,9 +70,9 @@ jobs:
             runner: macos-14
             shell: bash
           # Try enable mac ARM64 build target once node dependencies are updated.
-          - id: macos-arm64
-            runner: macos-14
-            shell: bash
+          # - id: macos-arm64
+          #   runner: macos-14
+          #   shell: bash
     runs-on: ${{ matrix.platform.runner }}
     defaults:
       run:
