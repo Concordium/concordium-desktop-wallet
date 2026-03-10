@@ -41,7 +41,7 @@ jobs:
             runner: windows-2022
             shell: powershell
           - id: macos-intel
-            runner: macos-14
+            runner: macos-15-intel
             shell: bash
           # currently disabled due to dependency issues
           # - id: macos-arm64
