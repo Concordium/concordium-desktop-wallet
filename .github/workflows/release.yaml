@@ -67,7 +67,7 @@ jobs:
             # Since electron-builder does not support pwsh, we use powershell instead.
             shell: powershell
           - id: macos-intel
-            runner: macos-14
+            runner: macos-15-intel
             shell: bash
           # Try enable mac ARM64 build target once node dependencies are updated.
           # - id: macos-arm64
