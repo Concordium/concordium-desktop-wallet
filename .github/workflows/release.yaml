@@ -10,7 +10,6 @@ env:
   WASM-PACK_VERSION: "v0.13.1"
   NODE_VERSION: "18.20.7"
   RUST_VERSION: "1.74.1"
-  PYTHON_VERSION: "3.13.1"
 
 jobs:
   metadata:
@@ -69,10 +68,9 @@ jobs:
           - id: macos-intel
             runner: macos-15-intel
             shell: bash
-          # Try enable mac ARM64 build target once node dependencies are updated.
-          # - id: macos-arm64
-          #   runner: macos-14
-          #   shell: bash
+          - id: macos-arm64
+            runner: macos-15
+            shell: bash
     runs-on: ${{ matrix.platform.runner }}
     defaults:
       run:
@@ -105,7 +103,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version-file: '.python-version'
 
       - name: List dependency versions
         run: |
@@ -169,7 +167,7 @@ jobs:
           echo "CERTIFICATE_PATH=$CERTIFICATE_PATH" >> $env:GITHUB_OUTPUT
 
       - name: Import Apple certificate and provisioning profile (MacOS only)
-        if: matrix.platform.id == 'macos-intel'
+        if: matrix.platform.id == 'macos-intel' || matrix.platform.id == 'macos-arm64'
         env:
           # Base64 encoding of the p12 certificate for Apple code signing.
           BUILD_CERTIFICATE_BASE64: ${{ secrets.APPLE_BUILD_CERTIFICATE_BASE64 }}
@@ -248,7 +246,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version-file: '.python-version'
 
       - name: Install native packages
         run: |
@@ -269,6 +267,7 @@ jobs:
           mv linux/* uploads/
           mv windows/* uploads/
           mv macos-intel/* uploads/
+          mv macos-arm64/* uploads/
 
       - name: Retrieve sign key and generate verification assets
         env:
