@@ -46,8 +46,7 @@ you must add `sh` to your PATH for the proto build to run. You can get `sh` bund
 
 ### MacOS ARM
 
-You'll likely see a lot of errors in the console when installing native dependencies. Ignore these and try to
-build and run the application in the next steps to see if the installation was successful.
+This app should now be buildable for MacOS ARM64.
 
 ## Starting Development
 

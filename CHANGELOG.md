@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 1.9.5
+
+### Fixed
+- Fix inability to build/run on native mac arm64
+
 ## 1.9.4
 
 ### Fixed
