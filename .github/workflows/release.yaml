@@ -166,7 +166,7 @@ jobs:
           certutil -decode $CERTIFICATE_PATH_BASE64 $CERTIFICATE_PATH
           echo "CERTIFICATE_PATH=$CERTIFICATE_PATH" >> $env:GITHUB_OUTPUT
 
-      - name: Import Apple certificate and provisioning profile (MacOS only)
+      - name: Import Apple certificate (MacOS only)
         if: matrix.platform.id == 'macos-intel' || matrix.platform.id == 'macos-arm64'
         env:
           # Base64 encoding of the p12 certificate for Apple code signing.
@@ -176,14 +176,14 @@ jobs:
           # Random string to use as the keychain password.
           KEYCHAIN_PASSWORD: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
         run: |
+          set -euo pipefail
+
           # create variables
           CERTIFICATE_PATH=$RUNNER_TEMP/apple_build_certificate.p12
-          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
-          # import certificate and provisioning profile from secrets
+          # import certificate from secrets
           echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
-          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
 
           # create temporary keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
@@ -194,6 +194,15 @@ jobs:
           security import $CERTIFICATE_PATH -P "$BUILD_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
+
+          # fail fast with a clear error instead of silently proceeding to build
+          # an unsigned/partially-signed app if the import above didn't actually
+          # produce a usable signing identity
+          if ! security find-identity -v -p codesigning $KEYCHAIN_PATH | grep -q "1)"; then
+            echo "::error::No valid code signing identity found in keychain after import. Check the APPLE_BUILD_CERTIFICATE_BASE64 / APPLE_BUILD_CERTIFICATE_PASSWORD secrets."
+            security find-identity -v -p codesigning $KEYCHAIN_PATH
+            exit 1
+          fi
 
       - name: Build
         env:
