@@ -97,7 +97,7 @@
             ]
         },
         "mac": {
-            "artifactName": "${name}-${version}.${ext}",
+            "artifactName": "${name}-${version}-${arch}.${ext}",
             "hardenedRuntime": true,
             "gatekeeperAssess": false,
             "entitlements": "build/entitlements.mac.plist",

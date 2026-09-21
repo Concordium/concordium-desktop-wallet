@@ -164,7 +164,41 @@ jobs:
 
           Set-Content -Path $CERTIFICATE_PATH_BASE64 -Value $env:BUILD_CERTIFICATE_BASE64
           certutil -decode $CERTIFICATE_PATH_BASE64 $CERTIFICATE_PATH
+
+          # fail fast instead of silently proceeding with a missing/empty
+          # certificate file if the decode above didn't actually work
+          if ($LASTEXITCODE -ne 0 -or -not (Test-Path $CERTIFICATE_PATH) -or (Get-Item $CERTIFICATE_PATH).Length -eq 0) {
+            Write-Error "Failed to decode WINDOWS_BUILD_CERTIFICATE_BASE64 into a certificate file."
+            exit 1
+          }
+
           echo "CERTIFICATE_PATH=$CERTIFICATE_PATH" >> $env:GITHUB_OUTPUT
+
+      - name: Verify Windows signing credentials (Windows only)
+        if: matrix.platform.id == 'windows'
+        env:
+          SM_HOST: ${{ secrets.WINDOWS_SM_HOST }}
+          SM_API_KEY: ${{ secrets.WINDOWS_SM_API_KEY }}
+          SM_CLIENT_CERT_FILE: ${{ steps.windows_certificate.outputs.CERTIFICATE_PATH }}
+          SM_CLIENT_CERT_PASSWORD: ${{ secrets.WINDOWS_BUILD_CERTIFICATE_PASSWORD }}
+          WINDOWS_SM_KEYPAIR_ALIAS: ${{ secrets.WINDOWS_SM_KEYPAIR_ALIAS }}
+        run: |
+          # verify DigiCert KeyLocker credentials/connectivity before running
+          # the full build, instead of only finding out when smctl sign fails
+          # deep into `yarn package`
+          smctl healthcheck --user
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "smctl healthcheck failed. Check the WINDOWS_SM_HOST / WINDOWS_SM_API_KEY / WINDOWS_BUILD_CERTIFICATE_BASE64 / WINDOWS_BUILD_CERTIFICATE_PASSWORD secrets."
+            exit 1
+          }
+
+          # verify the configured keypair alias actually exists in KeyLocker
+          $keypair = smctl keypair ls --filter "alias=$env:WINDOWS_SM_KEYPAIR_ALIAS"
+          Write-Output $keypair
+          if ($LASTEXITCODE -ne 0 -or -not ($keypair -match [Regex]::Escape($env:WINDOWS_SM_KEYPAIR_ALIAS))) {
+            Write-Error "Keypair alias '$env:WINDOWS_SM_KEYPAIR_ALIAS' (WINDOWS_SM_KEYPAIR_ALIAS) was not found in DigiCert KeyLocker."
+            exit 1
+          }
 
       - name: Import Apple certificate (MacOS only)
         if: matrix.platform.id == 'macos-intel' || matrix.platform.id == 'macos-arm64'
@@ -203,6 +237,15 @@ jobs:
             security find-identity -v -p codesigning $KEYCHAIN_PATH
             exit 1
           fi
+
+      - name: Disable Spotlight indexing (MacOS only)
+        if: matrix.platform.id == 'macos-intel' || matrix.platform.id == 'macos-arm64'
+        # electron-builder's DMG step attaches the built DMG as a volume, copies
+        # files onto it, then detaches it. Spotlight (mdworker) indexing that
+        # freshly-mounted volume can hold it open just long enough to make
+        # `hdiutil detach` fail with "Resource busy", which electron-builder only
+        # retries once. Disabling indexing avoids that race.
+        run: sudo mdutil -a -i off
 
       - name: Build
         env:
@@ -271,8 +314,16 @@ jobs:
           yarn
 
       - uses: actions/download-artifact@v4
+
+      - name: Merge macOS auto-update manifests (x64 + arm64 builds)
+        # The macos-intel and macos-arm64 jobs each produce a same-named
+        # <channel>-mac.yml with only their own architecture's entry; merge
+        # them into one manifest (in uploads/) so electron-updater can pick
+        # the right build for whichever architecture is running.
+        run: node scripts/merge-mac-update-manifests.js uploads macos-intel macos-arm64
+
       - run: |
-          mkdir uploads
+          mkdir -p uploads
           mv linux/* uploads/
           mv windows/* uploads/
           mv macos-intel/* uploads/
