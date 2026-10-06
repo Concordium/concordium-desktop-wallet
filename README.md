@@ -39,6 +39,16 @@ Then install dependencies:
 yarn
 ```
 
+### Ubuntu 24.04+ builds with system OpenSSL 3
+
+The upstream Linux SQLCipher binary needs OpenSSL 1.1. For local testing, replace
+it with a source-built N-API 6 addon linked to the system `libcrypto.so.3`:
+
+```bash
+yarn build-sqlcipher-linux
+yarn test-sqlcipher-linux
+```
+
 ### Windows
 
 On Windows you can run the above through e.g. Git bash, or if you want to run it from the Command Prompt, then

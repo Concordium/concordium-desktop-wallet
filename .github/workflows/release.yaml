@@ -58,8 +58,8 @@ jobs:
         # For each platform provide the runner image, the shell to use and some unique id.
         platform:
           - id: linux
-            # runner: ubuntu-latest
-            runner: ubuntu-22.04
+            # Build on the oldest supported Ubuntu to keep the glibc baseline stable.
+            runner: ubuntu-24.04
             shell: bash
           - id: windows
             runner: windows-2022
@@ -115,29 +115,11 @@ jobs:
           echo "::notice::wasm-pack version: $(wasm-pack --version)"
           echo "::notice::OpenSSL version:" $(openssl version)
 
-      - name: Install native packages and OpenSSL 1.1 (Ubuntu only)
+      - name: Install native packages (Ubuntu only)
         if: matrix.platform.id == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libusb-1.0 libudev-dev rpm wget patchelf build-essential
-
-          # Build and install OpenSSL 1.1.1w from source
-          OPENSSL_VERSION=1.1.1w
-          cd /tmp
-          wget https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1w/openssl-$OPENSSL_VERSION.tar.gz
-          tar -xzf openssl-$OPENSSL_VERSION.tar.gz
-          cd openssl-$OPENSSL_VERSION
-          ./config --prefix=/opt/openssl-1.1 --openssldir=/opt/openssl-1.1 shared
-          make -j$(nproc)
-          sudo make install_sw
-
-          # Configure runtime and build paths
-          echo "/opt/openssl-1.1/lib" | sudo tee /etc/ld.so.conf.d/openssl-1.1.conf
-          sudo ldconfig
-
-          echo "OPENSSL_DIR=/opt/openssl-1.1" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=/opt/openssl-1.1/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
-          echo "PKG_CONFIG_PATH=/opt/openssl-1.1/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
+          sudo apt-get install -y libusb-1.0-0 libudev-dev rpm patchelf build-essential pkg-config libssl-dev binutils
 
       - name: Install Node packages
         env:
@@ -146,6 +128,13 @@ jobs:
         run: |
           corepack enable
           yarn
+
+      - name: Build and test SQLCipher against system OpenSSL 3
+        if: matrix.platform.id == 'linux'
+        run: |
+          set -euo pipefail
+          yarn build-sqlcipher-linux
+          yarn test-sqlcipher-linux
 
       - name: Install DigiCert Client tools (Windows only)
         if: matrix.platform.id == 'windows'
@@ -262,12 +251,20 @@ jobs:
           SM_API_KEY: ${{ secrets.WINDOWS_SM_API_KEY }}
           SM_CLIENT_CERT_FILE: ${{ steps.windows_certificate.outputs.CERTIFICATE_PATH }}
           SM_CLIENT_CERT_PASSWORD: ${{ secrets.WINDOWS_BUILD_CERTIFICATE_PASSWORD }}
-
-          # New environment variables for static OpenSSL
-          OPENSSL_STATIC: "1"
-          OPENSSL_DIR: "/opt/openssl-1.1"
-          PKG_CONFIG_ALLOW_CROSS: "1"
         run: yarn package
+
+      - name: Test packaged SQLCipher addon
+        if: matrix.platform.id == 'linux'
+        run: |
+          set -euo pipefail
+          addon=$(find release/linux-unpacked/resources/app.asar.unpacked/node_modules/@journeyapps/sqlcipher/lib/binding/napi-v6-linux-x64 -name '*.node' -print -quit)
+          test -n "$addon"
+          readelf -d "$addon" | grep -F '[libcrypto.so.3]'
+          if readelf -d "$addon" | grep -F '[libcrypto.so.1.1]'; then
+            echo "::error::Packaged SQLCipher still requires OpenSSL 1.1"
+            exit 1
+          fi
+          yarn test-sqlcipher-linux release/linux-unpacked/resources/app.asar/node_modules/@journeyapps/sqlcipher
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

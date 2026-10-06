@@ -16,7 +16,7 @@ env:
 
 jobs:
     dependencies:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-24.04
 
         steps:
             - uses: actions/checkout@v2
@@ -32,7 +32,7 @@ jobs:
                       **/dll
                       **/pkg
                       **/target
-                  key: ${{ runner.os }}-v3-${{ hashFiles('**/yarn.lock', '**/rust-src/') }}
+                  key: ${{ runner.os }}-ubuntu24-openssl3-v4-${{ hashFiles('**/yarn.lock', '**/rust-src/', 'scripts/build-sqlcipher-linux.js') }}
 
             - name: Install rust
               if: steps.fetch-dependencies.outputs.cache-hit != 'true'
@@ -43,7 +43,7 @@ jobs:
               if: steps.fetch-dependencies.outputs.cache-hit != 'true'
               run: |
                   sudo apt-get update
-                  sudo apt-get install -y libudev-dev libusb-1.0-0-dev rpm
+                  sudo apt-get install -y libudev-dev libusb-1.0-0-dev rpm build-essential pkg-config libssl-dev binutils
                   curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
             - uses: actions/setup-node@v2
@@ -56,9 +56,11 @@ jobs:
               run: |
                   corepack enable
                   yarn
+                  yarn build-sqlcipher-linux
+                  yarn test-sqlcipher-linux
 
     build:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-24.04
         needs: [dependencies]
 
         steps:
@@ -77,7 +79,7 @@ jobs:
                       **/dll
                       **/pkg
                       **/target
-                  key: ${{ runner.os }}-v3-${{ hashFiles('**/yarn.lock', '**/rust-src/') }}
+                  key: ${{ runner.os }}-ubuntu24-openssl3-v4-${{ hashFiles('**/yarn.lock', '**/rust-src/', 'scripts/build-sqlcipher-linux.js') }}
 
             - name: Build
               run: |
@@ -94,7 +96,7 @@ jobs:
                   key: ${{ runner.os }}-v3-${{ hashFiles('**/app/proto/', '**/app/main.prod.js', '**/app/dist/') }}
 
     lint:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-24.04
         needs: [build]
 
         steps:
@@ -113,7 +115,7 @@ jobs:
                       **/dll
                       **/pkg
                       **/target
-                  key: ${{ runner.os }}-v3-${{ hashFiles('**/yarn.lock', '**/rust-src/') }}
+                  key: ${{ runner.os }}-ubuntu24-openssl3-v4-${{ hashFiles('**/yarn.lock', '**/rust-src/', 'scripts/build-sqlcipher-linux.js') }}
 
             - name: Get build cache
               uses: actions/cache@v4
@@ -130,7 +132,7 @@ jobs:
                   yarn lint
 
     test:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-24.04
         needs: [build]
 
         steps:
@@ -149,7 +151,7 @@ jobs:
                       **/dll
                       **/pkg
                       **/target
-                  key: ${{ runner.os }}-v3-${{ hashFiles('**/yarn.lock', '**/rust-src/') }}
+                  key: ${{ runner.os }}-ubuntu24-openssl3-v4-${{ hashFiles('**/yarn.lock', '**/rust-src/', 'scripts/build-sqlcipher-linux.js') }}
 
             - name: Get build cache
               uses: actions/cache@v4
@@ -159,6 +161,11 @@ jobs:
                       **/app/main.prod.js
                       **/app/dist
                   key: ${{ runner.os }}-v3-${{ hashFiles('**/app/proto/', '**/app/main.prod.js', '**/app/dist/') }}
+
+            - name: Test SQLCipher under Electron
+              run: |
+                  corepack enable
+                  yarn test-sqlcipher-linux
 
             - name: Test
               run: |

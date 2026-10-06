@@ -35,7 +35,7 @@ jobs:
       matrix:
         platform:
           - id: linux
-            runner: ubuntu-latest
+            runner: ubuntu-24.04
             shell: bash
           - id: windows
             runner: windows-2022
@@ -96,7 +96,9 @@ jobs:
 
       - name: Install native packages (Ubuntu only)
         if:  ${{ (github.event.inputs.platforms == 'all' || github.event.inputs.platforms == matrix.platform.id) && matrix.platform.id == 'linux' }}
-        run: sudo apt-get install -y libusb-1.0 libudev-dev rpm
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libusb-1.0-0 libudev-dev rpm patchelf build-essential pkg-config libssl-dev binutils
 
       - name: Install Node packages
         if:  ${{ github.event.inputs.platforms == 'all' || github.event.inputs.platforms == matrix.platform.id }}
@@ -106,6 +108,13 @@ jobs:
           corepack enable
           yarn
 
+      - name: Build and test SQLCipher against system OpenSSL 3
+        if: ${{ (github.event.inputs.platforms == 'all' || github.event.inputs.platforms == matrix.platform.id) && matrix.platform.id == 'linux' }}
+        run: |
+          set -euo pipefail
+          yarn build-sqlcipher-linux
+          yarn test-sqlcipher-linux
+
       - name: Build
         if:  ${{ github.event.inputs.platforms == 'all' || github.event.inputs.platforms == matrix.platform.id }}
         env:
@@ -114,6 +123,19 @@ jobs:
           SIGNING: skip
           NOTARIZE: skip
         run: yarn package
+
+      - name: Test packaged SQLCipher addon
+        if: ${{ (github.event.inputs.platforms == 'all' || github.event.inputs.platforms == matrix.platform.id) && matrix.platform.id == 'linux' }}
+        run: |
+          set -euo pipefail
+          addon=$(find release/linux-unpacked/resources/app.asar.unpacked/node_modules/@journeyapps/sqlcipher/lib/binding/napi-v6-linux-x64 -name '*.node' -print -quit)
+          test -n "$addon"
+          readelf -d "$addon" | grep -F '[libcrypto.so.3]'
+          if readelf -d "$addon" | grep -F '[libcrypto.so.1.1]'; then
+            echo "::error::Packaged SQLCipher still requires OpenSSL 1.1"
+            exit 1
+          fi
+          yarn test-sqlcipher-linux release/linux-unpacked/resources/app.asar/node_modules/@journeyapps/sqlcipher
 
       - name: Upload artifact
         if:  ${{ github.event.inputs.platforms == 'all' || github.event.inputs.platforms == matrix.platform.id }}
