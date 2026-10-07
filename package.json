@@ -8,6 +8,8 @@
         "build-ci": "yarn build-main && concurrently \"yarn build-renderer\" \"yarn build-preload\"",
         "build-dll": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.renderer.dev.dll.js --color",
         "build-e2e": "cross-env E2E_BUILD=true yarn build",
+        "build-sqlcipher-linux": "node ./scripts/build-sqlcipher-linux.js",
+        "test-sqlcipher-linux": "cross-env ELECTRON_RUN_AS_NODE=1 electron ./scripts/test-sqlcipher-linux.js",
         "build-main": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.main.prod.js --color",
         "build-main-dev": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.main.dev.js --color --progress && yarn build-preload-dev",
         "build-preload-dev": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.preload.dev.js --color --progress",
@@ -94,6 +96,18 @@
             "category": "Development",
             "executableArgs": [
                 "--no-sandbox"
+            ]
+        },
+        "deb": {
+            "fpm": [
+                "--depends",
+                "libssl3t64"
+            ]
+        },
+        "rpm": {
+            "fpm": [
+                "--depends",
+                "libcrypto.so.3()(64bit)"
             ]
         },
         "mac": {
