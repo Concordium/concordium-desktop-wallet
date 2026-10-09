@@ -87,6 +87,9 @@
             "allowToChangeInstallationDirectory": true
         },
         "linux": {
+            "asarUnpack": [
+                "**/*.node"
+            ],
             "artifactName": "${name}-${version}.${ext}",
             "target": [
                 "deb",
