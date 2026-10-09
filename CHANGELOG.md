@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.9.6
+
+### Fixed
+
+- Fix Linux startup on Ubuntu 24.04+ by relying on system OpenSSL 3 instead of requiring OpenSSL 1.1. Added as a runtime dependency in Linux packages.
+
 ## 1.9.5
 
 ### Fixed
